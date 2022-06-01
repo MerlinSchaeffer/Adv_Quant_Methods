@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Recap: Correlation &amp; OLS Regression</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Merlin Schaeffer  Department of Sociology" />
+    <meta name="date" content="2022-06-01" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
+    <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
+    <script src="libs/tile-view/tile-view.js"></script>
+    <link href="libs/tachyons/tachyons.min.css" rel="stylesheet" />
+    <link href="libs/panelset/panelset.css" rel="stylesheet" />
+    <script src="libs/panelset/panelset.js"></script>
+    <link rel="stylesheet" href="libs/Merlin169.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Recap: Correlation &amp; OLS Regression
+## Same same but different …
+### Merlin Schaeffer<br> Department of Sociology
+### 2022-06-01
+
+---
+
+
+# Remember? .font70[Citizenship across the world]
+
+.right-column[
+[Freedom House World Map 2021](https://freedomhouse.org/explore-the-map?type=fiw&amp;year=2020)
+
+&lt;img src="img/FreedomHouse.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
+
+--
+
+.left-column[
+- When we looked at the low levels of freedom in terms of citizenship rights in socialist countries, some of you criticized:&lt;br&gt;&lt;br&gt; *But aren't socialist countries are good in providing work and equality?*
+]
+
+---
+class: inverse
+# Research question of the day
+
+.center[.font110[
+**Is there a freedom-equality trade-off?**
+
+In other words:&lt;br&gt;
+**Are socialist countries good at reducing poverty**,&lt;br&gt; potentially at the cost of offering less freedom?
+]]
+
+&lt;br&gt;
+.push-left[
+&lt;img src="https://miro.medium.com/max/1280/1*8Y_EPw2a67TRRos3b24YlA.jpeg" width="90%" style="display: block; margin: auto;" /&gt;
+]
+
+.push-right[
+&lt;img src="https://almayasabdam.com/wp-content/uploads/2020/09/1496441134_communists.png" width="96%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+# Preparations
+
+.panelset[
+.panel[.panel-name[Packages for today's session]
+
+```r
+pacman::p_load(
+  tidyverse, # Data manipulation,
+  ggplot2, # beautiful figures,
+  democracyData, # Download democracy datasets used in the scholarly literature.
+  wbstats, # Download data from Worldbank. Tremendous source of global socio-economic data.
+  texreg) # Regression tables with nice layout.
+```
+]]
+
+---
+class: clear
+# Freedom House Data .font70[on (civic and political) citizenship rights]
+
+.panelset[
+.panel[.panel-name[The data]
+
+.push-left[
+- "Since 1972 (1978 in book form), Freedom House publishes an annual report, Freedom in the World, on the degree of democratic freedoms in nations and significant disputed territories around the world, by which it seeks to assess the current state of civil and political rights on a scale from 1 (most free) to 7 (least free)" [(Wikipedia)](https://en.wikipedia.org/wiki/Freedom_House). For more background, check out my [lecture on citizenship rights](https://merlin-guest-lectures.netlify.app/2022/05/05/gep-citizenship-rights-for-immigrants/).
+
+- We add civil and political rights together and reverse the scale so higher values mean more citizenship rights.
+]
+
+.push-right[
+&lt;iframe src='https://en.wikipedia.org/wiki/Freedom_House' width='1200' height='670' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+]]
+.panel[.panel-name[Get the data]
+
+```r
+(Dat_citi_rights &lt;- download_fh(verbose = FALSE) %&gt;% # Download Freedom House data for all countries since 1972,
+   rename(country = fh_country, # rename country ID,
+          citizen_rights = fh_total_reversed, # rename Citizenship rights indicator,
+          date = year) %&gt;% # rename year,
+   select(country, date, citizen_rights)) # Keep only these 3 variables.
+# # A tibble: 8,655 × 3
+#    country      date citizen_rights
+#    &lt;chr&gt;       &lt;dbl&gt;          &lt;dbl&gt;
+#  1 Afghanistan  1972              5
+#  2 Afghanistan  1973              1
+#  3 Afghanistan  1974              1
+#  4 Afghanistan  1975              1
+#  5 Afghanistan  1976              1
+#  6 Afghanistan  1977              2
+#  7 Afghanistan  1978              0
+#  8 Afghanistan  1979              0
+#  9 Afghanistan  1980              0
+# 10 Afghanistan  1982              0
+# # … with 8,645 more rows
+```
+]
+
+.panel[.panel-name[Plot code] 
+
+```r
+ggplot(data = Dat_citi_rights %&gt;% filter(date == 2020), # Make coord system for data from 2020,
+       aes(y = citizen_rights, # Y- and X-axis of plot,
+           x = reorder(country, citizen_rights))) +
+  geom_bar(stat = "identity") + # plot data as is in a bar chart,
+  labs(y = "Citizenship rights", x = "") + # Axis labels,
+  theme_minimal() + # Simple background layout,
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) # Write country names in a 60 degree angle.
+```
+]
+.panel[.panel-name[Plot of citizenship rights across the world]
+&lt;img src="1-Regression-Correlation_files/figure-html/unnamed-chunk-6-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]]
+
+---
+class: clear
+# Worldbank Data .font70[On poverty across the World]
+
+.panelset[
+.panel[.panel-name[Searching Wb archive]
+- With `wbstats::wb_search()`, you can search through the Wb archive for any keyword, here I use "poverty":
+
+```r
+(wb_poverty_archive &lt;- wb_search("poverty"))
+# # A tibble: 702 × 3
+#    indicator_id         indicator                               indicator_desc                                     
+#    &lt;chr&gt;                &lt;chr&gt;                                   &lt;chr&gt;                                              
+#  1 1.0.HCount.1.90usd   Poverty Headcount ($1.90 a day)         The poverty headcount index measures the proportio…
+#  2 1.0.HCount.2.5usd    Poverty Headcount ($2.50 a day)         The poverty headcount index measures the proportio…
+#  3 1.0.HCount.Mid10to50 Middle Class ($10-50 a day) Headcount   The poverty headcount index measures the proportio…
+#  4 1.0.HCount.Ofcl      Official Moderate Poverty Rate-National The poverty headcount index measures the proportio…
+#  5 1.0.HCount.Poor4uds  Poverty Headcount ($4 a day)            The poverty headcount index measures the proportio…
+#  6 1.0.HCount.Vul4to10  Vulnerable ($4-10 a day) Headcount      The poverty headcount index measures the proportio…
+#  7 1.0.PGap.1.90usd     Poverty Gap ($1.90 a day)               The poverty gap captures the mean aggregate income…
+#  8 1.0.PGap.2.5usd      Poverty Gap ($2.50 a day)               The poverty gap captures the mean aggregate income…
+#  9 1.0.PGap.Poor4uds    Poverty Gap ($4 a day)                  The poverty gap captures the mean aggregate income…
+# 10 1.0.PSev.1.90usd     Poverty Severity ($1.90 a day)          The poverty severity index combines information on…
+# # … with 692 more rows
+```
+]
+.panel[.panel-name[Get Wb data]
+
+```r
+(Dat_poverty &lt;- wb_data("SI.POV.UMIC", # Download poverty data: &lt;5.50$ per day,
+                        start_date = 2011, end_date = 2022) %&gt;%
+   rename(poverty = SI.POV.UMIC) %&gt;% # rename poverty variable,
+   select(country, date, poverty) %&gt;% # Keep only 3 variables
+   drop_na(poverty) %&gt;% # Drop cases with missing data,
+   group_by(country) %&gt;% # Group by country,
+   filter(date == max(date)) %&gt;% # Keep the most recent data per country.
+   ungroup())
+# # A tibble: 153 × 3
+#    country     date poverty
+#    &lt;chr&gt;      &lt;dbl&gt;   &lt;dbl&gt;
+#  1 Albania     2019    10  
+#  2 Algeria     2011    28.6
+#  3 Angola      2018    88.5
+#  4 Argentina   2020    18.2
+#  5 Armenia     2020    44.7
+#  6 Australia   2018     0.7
+#  7 Austria     2019     0.8
+#  8 Bangladesh  2016    84.2
+#  9 Belarus     2020     0.1
+# 10 Belgium     2019     0.2
+# # … with 143 more rows
+```
+]
+.panel[.panel-name[Plot code] 
+
+```r
+ggplot(data = Dat_poverty, # Make coord system for data,
+       aes(y = poverty, # Y- and X-axis of plot,
+           x = reorder(country, poverty))) +
+  geom_bar(stat = "identity") + # plot data as is in a bar chart,
+  labs(y = "% population with less than 5.50$ a day", x = "") + # Axis labels,
+  theme_minimal() + # Simple background layout,
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) # Write country names in a 60 degree angle.
+```
+]
+.panel[.panel-name[Plot poverty across the world]
+&lt;img src="1-Regression-Correlation_files/figure-html/unnamed-chunk-9-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]]
+
+---
+# Join data .font70[Poverty and citizenship rights]
+
+.panelset[
+.panel[.panel-name[Join poverty &amp; citizenship rights data]
+
+```r
+(Dat &lt;- left_join(Dat_poverty, Dat_citi_rights, by = c("country", "date")))
+# # A tibble: 153 × 4
+#    country     date poverty citizen_rights
+#    &lt;chr&gt;      &lt;dbl&gt;   &lt;dbl&gt;          &lt;dbl&gt;
+#  1 Albania     2019    10                8
+#  2 Algeria     2011    28.6              3
+#  3 Angola      2018    88.5              3
+#  4 Argentina   2020    18.2             10
+#  5 Armenia     2020    44.7              6
+#  6 Australia   2018     0.7             12
+#  7 Austria     2019     0.8             12
+#  8 Bangladesh  2016    84.2              6
+#  9 Belarus     2020     0.1              1
+# 10 Belgium     2019     0.2             12
+# # … with 143 more rows
+```
+]
+
+.panel[.panel-name[Scatterplot]
+.left-column[
+.content-box-blue[
+.center[Remember, 4 questions for scatter plots:]
+1. What is the direction of the 
+relationship?
+2. What form does the relation 
+have?
+3. How much spread is in the 
+data?
+4. Are there any outliers?
+]]
+.right-column[
+&lt;img src="1-Regression-Correlation_files/figure-html/poverty-corr1-1.png" width="95%" style="display: block; margin: auto;" /&gt;
+]]]
+
+---
+# Socialism .font70[We need to make our own index ...]
+
+.panelset[
+.panel[.panel-name[Socialist countries]
+.left-column[
+- Wikipedia has tables on self-declared socialist countries.
+- I suggest a simple index:
+  + Years socialist minus years since.
+  + Min. 5 years given socialist history.
+]
+
+.right-column[
+&lt;iframe src='https://en.wikipedia.org/wiki/List_of_socialist_states' width='1200' height='670' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+]]
+.panel[.panel-name[Coding the index]
+.font70[
+
+```r
+Dat &lt;- Dat %&gt;% mutate(socialist = case_when( # Years socialist minus years since,
+  country == "China" ~ date - 1949,
+  country == "Vietnam" ~ date - 1945,
+  country == "Albania" ~ (1992 - 1944) - (date - 1992),
+  grepl(country,"Belarus|Bulgaria") ~ (1990 - 1946) - (date - 1990),
+  grepl(country, "Benin|Mozambique") ~ (1990 - 1975) - (date - 1990),
+  country == "Congo, Rep." ~ (1992 - 1970) - (date - 1992),
+  country == "Czech Republic" ~ (1990 - 1948) - (date - 1990),
+  country == "Ethiopia" ~ (1991 - 1974) - (date - 1991),
+  country == "Hungary" ~ (1989 - 1949) - (date - 1989),
+  country == "Mongolia" ~ (1992 - 1924) - (date - 1992),
+  country == "Poland" ~ (1989 - 1945) - (date - 1989),
+  country == "Romania" ~ (1989 - 1947) - (date - 1989),
+  country == "Russian Federation" ~ (1991 - 1922) - (date - 1991),
+  country == "Somalia" ~ (1991 - 1969) - (date - 1991),
+  country == "Ukraine" ~ (1991 - 1919) - (date - 1991),
+  country == "Yemen, Rep." ~ (1991 - 1967) - (date - 1991),
+  grepl(country,"Slovenia|Croatia|Serbia|Montenegro|Bosnia and Herzegovina|North Macedonia|Kosovo") ~ (1992 - 1943) - (date - 1992),
+  grepl(country, "Cabo Verde|Madagascar|Angola") ~ (1992 - 1975) - (date - 1992),
+  country == "Egypt, Arab Rep." ~ (2007 - 1953) - (date - 2007),
+  country == "Iraq" ~ (2005 - 1958) - (date - 2005),
+  country == "Mali" ~ (1991 - 1960) - (date - 1991),
+  country == "Seychelles" ~ (1991 - 1977) - (date - 1991),
+  country == "Sierra Leone" ~ (1991 - 1978) - (date - 1991),
+  country == "Syria" ~ (2012 - 1963) - (date - 2012),
+  country == "Tunisia" ~ (1988 - 1964) - (date - 1988),
+  country == "Zambia" ~ (1991 - 1973) - (date - 1991),
+  TRUE ~ 0),
+  socialist = case_when( # Min. 5 years given socialist history,
+    (socialist &lt; 5 &amp; socialist &gt; 0) | socialist &lt; 0 ~ 5,
+    TRUE ~ socialist)) %&gt;%
+  drop_na() # Drop countries with missing values.
+```
+]]
+.panel[.panel-name[Plot code] 
+
+```r
+ggplot(data = Dat, # Make coord system for data,
+       aes(y = socialist, # Y- and X-axis of plot,
+           x = reorder(country, socialist))) +
+  geom_bar(stat = "identity") + # plot data as is in a bar chart,
+  labs(y = "Our Socialism index", x = "") + # Axis labels,
+  theme_minimal() + # Simple background layout,
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) # Write country names in a 60 degree angle.
+```
+]
+.panel[.panel-name[Plot socialism years across the world]
+&lt;img src="1-Regression-Correlation_files/figure-html/unnamed-chunk-12-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]]
+
+---
+# Visual inspection
+
+&lt;img src="1-Regression-Correlation_files/figure-html/socialism-corr1-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+---
+# Z-standardization
+
+.panelset[
+.panel[.panel-name[What is it?]
+
+.push-left[
+`$$z(x) = \frac{x - \bar{x}}{\text{SD}(x)}$$`
+- **We subtract the mean:** Values above 0 are above average, values below 0 are below average.
+- **We divide by the standard deviation:** Our variable now has standard deviations as unit.&lt;br&gt;&lt;br&gt; `\(\rightarrow\)` Intuitive understanding how common vis-á-vis extreme cases are.
+]
+
+.push-right[
+&lt;img src="https://www.native-instruments.com/fileadmin/userlib/images/7727639_4467.normal-light.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
+]
+.panel[.panel-name[R Code]
+
+```r
+(Dat &lt;- Dat %&gt;%
+   mutate( # Z-Standardize variables.
+     z_socialist = scale(socialist) %&gt;% as.numeric(),
+     z_poverty = scale(poverty) %&gt;% as.numeric()))
+# # A tibble: 139 × 7
+#    country     date poverty citizen_rights socialist z_socialist z_poverty
+#    &lt;chr&gt;      &lt;dbl&gt;   &lt;dbl&gt;          &lt;dbl&gt;     &lt;dbl&gt;       &lt;dbl&gt;     &lt;dbl&gt;
+#  1 Albania     2019    10                8        21       1.72     -0.784
+#  2 Algeria     2011    28.6              3         0      -0.252    -0.250
+#  3 Angola      2018    88.5              3         0      -0.252     1.47 
+#  4 Argentina   2020    18.2             10         0      -0.252    -0.548
+#  5 Armenia     2020    44.7              6         0      -0.252     0.213
+#  6 Australia   2018     0.7             12         0      -0.252    -1.05 
+#  7 Austria     2019     0.8             12         0      -0.252    -1.05 
+#  8 Bangladesh  2016    84.2              6         0      -0.252     1.35 
+#  9 Belarus     2020     0.1              1         0      -0.252    -1.07 
+# 10 Belgium     2019     0.2             12         0      -0.252    -1.07 
+# # … with 129 more rows
+```
+]
+.panel[.panel-name[Illustration]
+&lt;img src="img/Correlation.png" width="40%" style="display: block; margin: auto;" /&gt;
+.backgrnote[.center[
+*Source*: Veaux, Velleman, and Bock (2021, p.199)
+]]]
+.panel[.panel-name[Figure]
+&lt;img src="1-Regression-Correlation_files/figure-html/socialism-corr2-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+]]
+
+---
+# Correlation
+
+.panelset[
+.panel[.panel-name[What is it?]
+.push-left[
+&lt;img src="img/Correlation.png" width="80%" style="display: block; margin: auto;" /&gt;
+.backgrnote[.center[
+*Source*: Veaux, Velleman, and Bock (2021, p.199)
+]]]
+
+.push-right[
+.content-box-blue[
+.center[**From visual intuition into a precise statistic:**]
+1. `\(z_y*z_x\)`: positive for a green points, 0
+for blue ones, and negative for red ones. Larger products contribute more to the relationship.
+2. `\(\sum^{n}_{i=1}z_y*z_x\)`: indicates whether the relationship is positive or negative.
+3. `\(r = \frac{\sum^{n}_{i=1}z_y*z_x}{n-1}\)`: because the sum keeps growing as we consider more points, we divide the sum by `\(n - 1\)`. The resulting corrleation coefficient varies between -1 and 1.
+]]]
+.panel[.panel-name[Poverty &amp; Socialism]
+.left-column[
+.content-box-green[
+How do we interpret this result?
+]]
+.right-column[
+
+```r
+Dat %&gt;% # Use our data,
+  select(poverty, socialist) %&gt;% # Select vars for analysis,
+  drop_na() %&gt;% # Drop countries with missing values,
+  cor() # Estimate correlation,
+#           poverty socialist
+# poverty     1.000    -0.101
+# socialist  -0.101     1.000
+```
+]]]
+
+---
+class: inverse
+# Exercise .font70[15 minutes]
+
+.push-left[
+1. Make a folder for this course and set up an RStudio project.
+
+2. Start a new R-Script and copy the lines code from my slides that generate `Dat`.
+  + i.e., download Freedom House and WB data, join them, and construct our socialism index.
+  
+3. **Answer the question:** How much do poverty and citizenship rights correlate? And what does the correlation suggest about whether there is a freedom-equality trade off?
+]
+
+.push-right[
+&lt;img src="https://www.tatacommunications.com/blog/wp-content/uploads/2019/03/CfakepathWilkes-at-LINC_EDIIMA20160905_0230_19.jpg" width="80%" style="display: block; margin: auto;" /&gt;
+]
+---
+# Correlation = linear trend
+
+.right-column[
+&lt;img src="1-Regression-Correlation_files/figure-html/socialism-ols-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
+
+--
+
+.left-column[
+- **How can we directly calculate that trend line?** &lt;br&gt;&lt;br&gt; Then we could project poverty in Vietnam given another 10 years of socialism.
+]
+
+---
+# Models
+
+.left-column[
+- **A model**: an attempt to give a reduced and simplified representation of reality. Our models should capture the general answer to our research question.
+
+- Models should not be driven by few singular cases, like in this example.
+]
+
+.right-column[
+&lt;img src="1-Regression-Correlation_files/figure-html/unnamed-chunk-19-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+# Linear models
+
+.left-column[
+.content-box-blue[
+- Linear models are defined by two parameters:
+
+  + `\(\color{orange}{\alpha}\)`, the constant or intercept: The point where the line intercepts the Y-axis `\((\hat{Y}|X=0)\)`.
+  
+  + `\(\color{orange}{\beta}\)`, the slope: Indicates how `\(\hat{Y}\)` changes if `\(X\)` increases by one unit.
+]]
+
+.right-column[
+&lt;img src="img/LinearModel.png" width="80%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+# Regressing linear models from data
+
+.panelset[
+.panel[.panel-name[How it works]
+
+
+.left-column[
+- **The _best_ fitting line**:
+`$$\begin{align*}
+      \min \text{RSS} &amp;= \min \sum_{i=1}^{n} e_{i}^{2} \\
+      &amp;= \min \sum_{i=1}^{n} y_{i} - \hat{y_{i}} \\
+      &amp;= \min \sum_{i=1}^{n} (y_{i} - (\color{orange}{\alpha} + \color{orange}{\beta} x_{i})^{2}
+    \end{align*}$$`
+
+
+- **Residuals**, `\(e_{i}\)`: the differences between what our model predicts and the actual data, `\(e_{i}=y_{i} - \hat{y}\)`.
+
+- `\(e_{\text{Denmark}} = 0.4 - 38.2=-37.8\)`.
+]
+
+.right-column[
+&lt;img src="1-Regression-Correlation_files/figure-html/residuals-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]]
+.panel[.panel-name[... 2]
+.left-column[
+- **The _best_ fitting line**:
+`$$\begin{align*}
+      \min \text{RSS} &amp;= \min \sum_{i=1}^{n} e_{i}^{2} \\
+      &amp;= \min \sum_{i=1}^{n} y_{i} - \hat{y_{i}} \\
+      &amp;= \min \sum_{i=1}^{n} (y_{i} - (\color{orange}{\alpha} + \color{orange}{\beta} x_{i})^{2}
+    \end{align*}$$`
+
+
+- **Residuals**, `\(e_{i}\)`: the differences between what our model predicts and the actual data, `\(e_{i}=y_{i} - \hat{y}\)`.
+
+- `\(e_{\text{Denmark}} = 0.4 - 38.2=-37.8\)`.
+]
+
+.right-column[
+&lt;img src="https://mlfromscratch.com/content/images/size/w2000/2020/06/linear_regression_gif.gif" width="50%" style="display: block; margin: auto;" /&gt;
+.backgrnote[.center[
+*Source*: [Machine Learning From Scratch](https://mlfromscratch.com/linear-regression-from-scratch/#/)
+]]]]
+.panel[.panel-name[... 3]
+.left-column[
+- **The _best_ fitting line**:
+`$$\begin{align*}
+      \min \text{RSS} &amp;= \min \sum_{i=1}^{n} e_{i}^{2} \\
+      &amp;= \min \sum_{i=1}^{n} y_{i} - \hat{y_{i}} \\
+      &amp;= \min \sum_{i=1}^{n} (y_{i} - (\color{orange}{\alpha} + \color{orange}{\beta} x_{i})^{2}
+    \end{align*}$$`
+
+
+- **Residuals**, `\(e_{i}\)`: the differences between what our model predicts and the actual data, `\(e_{i}=y_{i} - \hat{y}\)`.
+
+- `\(e_{\text{Denmark}} = 0.4 - 38.2=-37.8\)`.
+]
+
+.right-column[
+&lt;iframe src='https://seeing-theory.brown.edu/regression-analysis/index.html#section1' width='1200' height='670' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+]]
+.panel[.panel-name[R2 model fit]
+.left-column[
+- How much smaller are the residuals from our model compared simply using the mean as best guess?
+`$$\text{TSS}=\sum_{i=1}^{n}(y_i-\bar{y})^2$$`
+`$$\text{RSS}=\sum_{i=1}^{n}(y_i-\hat{y}_i)^2$$`
+`\(R^2=\frac{\text{TSS} - \text{RSS}}{\text{TSS}}\)`
+]
+.right-column[
+&lt;img src="1-Regression-Correlation_files/figure-html/R2-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]]
+
+.panel[.panel-name[Regression using R]
+.push-left[
+
+```r
+ols &lt;- lm(data = Dat, formula = poverty ~ socialist)
+zols &lt;- lm(data = Dat, formula = z_poverty ~ z_socialist)
+
+htmlreg(list(ols, zols), 
+        custom.model.names = c("OLS", "Z-OLS"))
+```
+
+&lt;img src="1-Regression-Correlation_files/figure-html/unnamed-chunk-23-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+]
+
+.push-right[
+&lt;table class="texreg" style="margin: 10px auto;border-collapse: collapse;border-spacing: 0px;caption-side: bottom;color: #000000;border-top: 2px solid #000000;"&gt;
+&lt;caption&gt;Statistical models&lt;/caption&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/th&gt;
+&lt;th style="padding-left: 5px;padding-right: 5px;"&gt;OLS&lt;/th&gt;
+&lt;th style="padding-left: 5px;padding-right: 5px;"&gt;Z-OLS&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr style="border-top: 1px solid #000000;"&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(Intercept)&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;38.17&lt;sup&gt;***&lt;/sup&gt;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.00&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(3.04)&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.08)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;socialist&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;-0.33&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.28)&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;z_socialist&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;-0.10&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.09)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr style="border-top: 1px solid #000000;"&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;R&lt;sup&gt;2&lt;/sup&gt;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.01&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.01&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Adj. R&lt;sup&gt;2&lt;/sup&gt;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.00&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.00&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr style="border-bottom: 2px solid #000000;"&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Num. obs.&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;139&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;139&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;tfoot&gt;
+&lt;tr&gt;
+&lt;td style="font-size: 0.8em;" colspan="3"&gt;&lt;sup&gt;***&lt;/sup&gt;p &amp;lt; 0.001; &lt;sup&gt;**&lt;/sup&gt;p &amp;lt; 0.01; &lt;sup&gt;*&lt;/sup&gt;p &amp;lt; 0.05&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tfoot&gt;
+&lt;/table&gt;
+]]]
+
+---
+class: inverse
+# Exercise .font70[15 minutes]
+
+.push-left[
+1. Regress poverty and citizenship rights.
+2. Regress citizenship rights on socialism.
+3. **Discuss with your neighbor:** What do the result suggest about whether there is a freedom-equality trade off?
+]
+
+.push-right[
+&lt;img src="https://149351115.v2.pressablecdn.com/wp-content/uploads/2019/09/iStock-1081869336-1013x675.jpg" width="80%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+class: inverse
+# Today's general lessons
+
+1. Again: everything in R is an object and you can always further process it. For instance, regression results are also just data, which you can visualize, table, join to other data, etc.
+
+---
+class: inverse
+# Today's (important) functions
+
+1. `lm()`: Estimate linear OLS regression. `estimatr::lm_robust()` estimates OLS regression with heteroscedasticity-robust standard errors (or cluster-robust standard errors if you wish).
+2. `broom::tidy()`: Return tibble of model results.
+3. `textreg::texreg()`, `textreg::htmlreg()`, and `textreg::screenreg()`: Create nicely-formatted (html, Word, ASCII, or Latex) tables of (one or several) regression models.
+4. `dplyr::bind_rows()`: Add the rows of a data frames to another data frame that has equal columns/variables.
+5. `dplyr::bind_cols()`: Add rows of another data frame to a data frame that has an equal number of rows. In contrast to a join/merge, no identifying key is specified. This can be helpful, but is also a bit dangerous!
+6. `scale()` z-standardizes variables. But sometimes it returns a matrix rather than a vector. Therefore it makes sense to always code `scale(x) %&gt;% as.numeric()` to ensure you get an numeric vector out of it.
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="libs/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightLanguage": "r",
+"highlightStyle": "zenburn",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"ratio": "16:9"
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
