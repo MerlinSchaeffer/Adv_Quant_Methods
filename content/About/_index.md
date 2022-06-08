@@ -6,13 +6,7 @@ title: About
 view: 2
 ---
 
-R is free to use for everyone and powerful. It has become one of the most widely-used programming languages for statistical analyses in the social sciences and is, for this reason, a highly-sought skill among employers. R is probably more versatile than you imagine. In fact, I programmed this website and all my lecture slides in R --- and so can you!
-
-This course will teach you how to do (social) data science with R. You will learn how to get your data into shape, transform and manipulate it, visualize it, and how to statistically model it. The course will also briefly introduce you to logistic regression and multilevel modelling. Apart from these skills that are necessary for conducting classical statistics, you will also learn how to do reproducible research and report your results using R Markdown. Beware that this class presumes that you have a solid background in basic statistics (i.e., descriptive statistics and multiple OLS regression).
-
-This course is based on the fantastic and openly accessible book [Introduction to R for Data Science](http://r4ds.had.co.nz/) by Garrett Grolemund and Hadley Wickham.
-
-Find further infos about the class in the [course catalogue](https://kurser.ku.dk/course/asok15630u/2020-2021) and about time and place [here](https://skema.ku.dk/tt/tt.asp?SDB=ku2021&language=EN&folder=Reporting&style=textspreadsheet&type=student+set&idtype=id&id=157733&weeks=1-53&days=1-7&periods=1-68&width=0&height=0&template=SWSCUST+student+set+textspreadsheet)
+The course introduces you to advanced regression analysis and its application in sociological research with a special focus on causal analysis.
 
 # Before the first session
 
@@ -20,7 +14,7 @@ Before the first session, I would like you to please [download R](https://mirror
 
 # Course structure
 
-We meet once a week, every Friday with two sessions and a lunch break in between. Every session consists of a 45 minutes lecture, a 15 minutes break, and finally a 45 minutes lab session during which you work on that day's exercise in small groups. In just seven weeks you will be able to read complex code and conduct sophisticated analyses.
+We meet once a week, every Wednesday at 10am. Every session lasts three hours and consists of lectures, two 15 minutes breaks, and some exercises. In addition you have a tutoring session every week where you can work in a smaller setting, ask questions, and properly work with R on stats problems.
 
 | Session     | Topic                             | Session    | Topic                             |
 |-------------|-----------------------------------|------------|-----------------------------------|
