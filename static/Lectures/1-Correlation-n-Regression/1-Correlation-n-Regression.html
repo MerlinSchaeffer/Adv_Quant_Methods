@@ -4,7 +4,7 @@
     <title>Recap: Correlation &amp; OLS Regression</title>
     <meta charset="utf-8" />
     <meta name="author" content="Merlin Schaeffer  Department of Sociology" />
-    <meta name="date" content="2022-06-08" />
+    <meta name="date" content="2022-06-24" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
     <script src="libs/tile-view/tile-view.js"></script>
@@ -27,7 +27,7 @@ class: center, middle, inverse, title-slide
 ### Merlin Schaeffer<br> Department of Sociology
 ]
 .date[
-### 2022-06-08
+### 2022-06-24
 ]
 
 ---
@@ -48,7 +48,7 @@ class: center, middle, inverse, title-slide
 --
 
 .left-column[
-- Some of you criticized:&lt;br&gt;&lt;br&gt; *But aren't socialist countries are good in providing work and equality?*
+- Some of you criticized:&lt;br&gt;&lt;br&gt; *But aren't socialist countries good at providing work and equality?*
 ]
 
 ---
@@ -144,7 +144,7 @@ ggplot(data = Dat_citi_rights %&gt;% filter(date == 2020), # Make coord system f
   theme(axis.text.x = element_text(angle = 60, hjust = 1)) # Write country names in a 60 degree angle.
 ```
 ]
-.panel[.panel-name[Plot of citizenship rights across the world]
+.panel[.panel-name[Citizenship rights in 2020 across the world]
 &lt;img src="1-Correlation-n-Regression_files/figure-html/unnamed-chunk-6-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]]
 
@@ -178,14 +178,14 @@ class: clear
 
 ```r
 *(Dat_poverty &lt;- wb_data("SI.POV.UMIC", # Download poverty data: &lt;5.50$ per day,
-*                       start_date = 2011, end_date = 2022) %&gt;%
+*                       start_date = 2002, end_date = 2022) %&gt;%
    rename(poverty = SI.POV.UMIC) %&gt;% # rename poverty variable,
    select(country, date, poverty) %&gt;% # Keep only 3 variables
    drop_na(poverty) %&gt;% # Drop cases with missing data,
    group_by(country) %&gt;% # Group by country,
    filter(date == max(date)) %&gt;% # Keep the most recent data per country.
    ungroup())
-# # A tibble: 153 × 3
+# # A tibble: 163 × 3
 #    country     date poverty
 #    &lt;chr&gt;      &lt;dbl&gt;   &lt;dbl&gt;
 #  1 Albania     2019    10  
@@ -195,10 +195,10 @@ class: clear
 #  5 Armenia     2020    44.7
 #  6 Australia   2018     0.7
 #  7 Austria     2019     0.8
-#  8 Bangladesh  2016    84.2
-#  9 Belarus     2020     0.1
-# 10 Belgium     2019     0.2
-# # … with 143 more rows
+#  8 Azerbaijan  2005     7  
+#  9 Bangladesh  2016    84.2
+# 10 Belarus     2020     0.1
+# # … with 153 more rows
 ```
 ]
 .panel[.panel-name[Poverty across the world]
@@ -214,13 +214,11 @@ class: inverse
 &lt;br&gt;
 &lt;br&gt;
 &lt;br&gt;
-OK great, now I have two tibbles. But how can I combine them into one tibble?
+OK great, now I have two tibbles. But how can I combine them into one single tibble?
 ]
 
 .push-right[
 &lt;img src="https://powietrze.malopolska.pl/wp-content/uploads/2020/10/q.jpg" width="96%" style="display: block; margin: auto;" /&gt;
-
-
 ]
 
 ---
@@ -264,7 +262,7 @@ Dat_citi_rights
 
 ```r
 Dat_poverty
-# # A tibble: 153 × 3
+# # A tibble: 163 × 3
 #    country     date poverty
 #    &lt;chr&gt;      &lt;dbl&gt;   &lt;dbl&gt;
 #  1 Albania     2019    10  
@@ -274,10 +272,10 @@ Dat_poverty
 #  5 Armenia     2020    44.7
 #  6 Australia   2018     0.7
 #  7 Austria     2019     0.8
-#  8 Bangladesh  2016    84.2
-#  9 Belarus     2020     0.1
-# 10 Belgium     2019     0.2
-# # … with 143 more rows
+#  8 Azerbaijan  2005     7  
+#  9 Bangladesh  2016    84.2
+# 10 Belarus     2020     0.1
+# # … with 153 more rows
 ```
 ]
 
@@ -317,7 +315,7 @@ Dat_poverty
 
 ```r
 *(Dat &lt;- inner_join(Dat_poverty, Dat_citi_rights, by = c("country", "date")))
-# # A tibble: 139 × 4
+# # A tibble: 147 × 4
 #    country     date poverty citizen_rights
 #    &lt;chr&gt;      &lt;dbl&gt;   &lt;dbl&gt;          &lt;dbl&gt;
 #  1 Albania     2019    10                8
@@ -327,10 +325,10 @@ Dat_poverty
 #  5 Armenia     2020    44.7              6
 #  6 Australia   2018     0.7             12
 #  7 Austria     2019     0.8             12
-#  8 Bangladesh  2016    84.2              6
-#  9 Belarus     2020     0.1              1
-# 10 Belgium     2019     0.2             12
-# # … with 129 more rows
+#  8 Azerbaijan  2005     7                3
+#  9 Bangladesh  2016    84.2              6
+# 10 Belarus     2020     0.1              1
+# # … with 137 more rows
 ```
 
 ---
@@ -348,62 +346,63 @@ Dat_poverty
 .right-column[
 &lt;iframe src='https://en.wikipedia.org/wiki/List_of_socialist_states' width='1200' height='670' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
 ]]
+
 .panel[.panel-name[Coding the index]
-.font70[
+.font60[
 
 ```r
 Dat &lt;- Dat %&gt;% mutate(socialist = case_when( # Years socialist minus years since,
   country == "China" ~ date - 1949,
   country == "Vietnam" ~ date - 1945,
+  country == "Algeria" ~ date - 1962,
+  grepl(country,"Portugal|Bangladesh") ~ date - 1972,
+  country == "Guinea-Bissau" ~ date - 1973,
+  country == "India" ~ date - 1976,
+  country == "Nicaragua" ~ date - 1979,
+  country == "Sri Lanka" ~ date - 1978,
+  country == "Tanzania" ~ date - 1964,
   country == "Albania" ~ (1992 - 1944) - (date - 1992),
+  grepl(country, "Angola|Cabo Verde|Madagascar") ~ (1992 - 1975) - (date - 1992),
   grepl(country,"Belarus|Bulgaria") ~ (1990 - 1946) - (date - 1990),
   grepl(country, "Benin|Mozambique") ~ (1990 - 1975) - (date - 1990),
-  country == "Congo, Rep." ~ (1992 - 1970) - (date - 1992),
-  country == "Czech Republic" ~ (1990 - 1948) - (date - 1990),
-  country == "Ethiopia" ~ (1991 - 1974) - (date - 1991),
-  country == "Hungary" ~ (1989 - 1949) - (date - 1989),
-  country == "Mongolia" ~ (1992 - 1924) - (date - 1992),
-  country == "Poland" ~ (1989 - 1945) - (date - 1989),
-  country == "Romania" ~ (1989 - 1947) - (date - 1989),
-  country == "Russian Federation" ~ (1991 - 1922) - (date - 1991),
-  country == "Somalia" ~ (1991 - 1969) - (date - 1991),
-  country == "Ukraine" ~ (1991 - 1919) - (date - 1991),
-  country == "Yemen, Rep." ~ (1991 - 1967) - (date - 1991),
+  country == "Chad" ~ (1975 - 1962) - (date - 1975), country == "Congo, Rep." ~ (1992 - 1970) - (date - 1992),
+  country == "Czech Republic" ~ (1990 - 1948) - (date - 1990), country == "Djibouti" ~ (1992 - 1981) - (date - 1992),
+  country == "Ethiopia" ~ (1991 - 1974) - (date - 1991), country == "Ghana" ~ (1966 - 1960) - (date - 1966),
+  country == "Guinea" ~ (1984 - 1958) - (date - 1984), country == "Hungary" ~ (1989 - 1949) - (date - 1989),
+  country == "Iraq" ~ (2005 - 1958) - (date - 2005), country == "Mali" ~ (1991 - 1960) - (date - 1991),
+  country == "Mauritania" ~ (1978 - 1961) - (date - 1978), country == "Mongolia" ~ (1992 - 1924) - (date - 1992),
+  country == "Myanmar" ~ (1988 - 1962) - (date - 1988), country == "Poland" ~ (1989 - 1945) - (date - 1989),
+  country == "Romania" ~ (1989 - 1947) - (date - 1989), country == "Russian Federation" ~ (1991 - 1922) - (date - 1991),
+  country == "Seychelles" ~ (1991 - 1977) - (date - 1991), country == "Senegal" ~ (1981 - 1960) - (date - 1981),
+  country == "Sierra Leone" ~ (1991 - 1978) - (date - 1991), country == "Somalia" ~ (1991 - 1969) - (date - 1991),
+  country == "Sudan" ~ (1985 - 1969) - (date - 1985), country == "Syria" ~ (2012 - 1963) - (date - 2012),
+  country == "Tunisia" ~ (1988 - 1964) - (date - 1988), country == "Ukraine" ~ (1991 - 1919) - (date - 1991),
+  country == "Yemen, Rep." ~ (1991 - 1967) - (date - 1991), country == "Zambia" ~ (1991 - 1973) - (date - 1991),
   grepl(country,"Slovenia|Croatia|Serbia|Montenegro|Bosnia and Herzegovina|North Macedonia|Kosovo") ~ (1992 - 1943) - (date - 1992),
-  grepl(country, "Cabo Verde|Madagascar|Angola") ~ (1992 - 1975) - (date - 1992),
-  country == "Egypt, Arab Rep." ~ (2007 - 1953) - (date - 2007),
-  country == "Iraq" ~ (2005 - 1958) - (date - 2005),
-  country == "Mali" ~ (1991 - 1960) - (date - 1991),
-  country == "Seychelles" ~ (1991 - 1977) - (date - 1991),
-  country == "Sierra Leone" ~ (1991 - 1978) - (date - 1991),
-  country == "Syria" ~ (2012 - 1963) - (date - 2012),
-  country == "Tunisia" ~ (1988 - 1964) - (date - 1988),
-  country == "Zambia" ~ (1991 - 1973) - (date - 1991),
   TRUE ~ 0),
   socialist = case_when( # Min. 5 years given socialist history,
     (socialist &lt; 5 &amp; socialist &gt; 0) | socialist &lt; 0 ~ 5,
-    TRUE ~ socialist)) %&gt;%
-  drop_na() # Drop countries with missing values.
+    TRUE ~ socialist)) %&gt;% drop_na() # Drop countries with missing values.
 ```
 ]]
 .panel[.panel-name[Resulting data] 
 
 ```r
 Dat
-# # A tibble: 139 × 5
+# # A tibble: 147 × 5
 #    country     date poverty citizen_rights socialist
 #    &lt;chr&gt;      &lt;dbl&gt;   &lt;dbl&gt;          &lt;dbl&gt;     &lt;dbl&gt;
 #  1 Albania     2019    10                8        21
-#  2 Algeria     2011    28.6              3         0
+#  2 Algeria     2011    28.6              3        49
 #  3 Angola      2018    88.5              3         0
 #  4 Argentina   2020    18.2             10         0
 #  5 Armenia     2020    44.7              6         0
 #  6 Australia   2018     0.7             12         0
 #  7 Austria     2019     0.8             12         0
-#  8 Bangladesh  2016    84.2              6         0
-#  9 Belarus     2020     0.1              1         0
-# 10 Belgium     2019     0.2             12         0
-# # … with 129 more rows
+#  8 Azerbaijan  2005     7                3         0
+#  9 Bangladesh  2016    84.2              6         0
+# 10 Belarus     2020     0.1              1         0
+# # … with 137 more rows
 ```
 ]
 .panel[.panel-name[Plot socialism years across the world]
@@ -429,7 +428,8 @@ data?
 ]
 
 ---
-# Z-standardization
+class: clear
+# Z-standardization .font60[Giving two variables a comparable same unit]
 
 .panelset[
 .panel[.panel-name[What is it?]
@@ -451,20 +451,20 @@ data?
    mutate( # Z-Standardize variables.
 *    z_socialist = scale(socialist) %&gt;% as.numeric(),
 *    z_poverty = scale(poverty) %&gt;% as.numeric()))
-# # A tibble: 139 × 7
+# # A tibble: 147 × 7
 #    country     date poverty citizen_rights socialist z_socialist z_poverty
 #    &lt;chr&gt;      &lt;dbl&gt;   &lt;dbl&gt;          &lt;dbl&gt;     &lt;dbl&gt;       &lt;dbl&gt;     &lt;dbl&gt;
-#  1 Albania     2019    10                8        21       1.72     -0.784
-#  2 Algeria     2011    28.6              3         0      -0.252    -0.250
-#  3 Angola      2018    88.5              3         0      -0.252     1.47 
-#  4 Argentina   2020    18.2             10         0      -0.252    -0.548
-#  5 Armenia     2020    44.7              6         0      -0.252     0.213
-#  6 Australia   2018     0.7             12         0      -0.252    -1.05 
-#  7 Austria     2019     0.8             12         0      -0.252    -1.05 
-#  8 Bangladesh  2016    84.2              6         0      -0.252     1.35 
-#  9 Belarus     2020     0.1              1         0      -0.252    -1.07 
-# 10 Belgium     2019     0.2             12         0      -0.252    -1.07 
-# # … with 129 more rows
+#  1 Albania     2019    10                8        21       1.25     -0.809
+#  2 Algeria     2011    28.6              3        49       3.39     -0.279
+#  3 Angola      2018    88.5              3         0      -0.348     1.43 
+#  4 Argentina   2020    18.2             10         0      -0.348    -0.575
+#  5 Armenia     2020    44.7              6         0      -0.348     0.180
+#  6 Australia   2018     0.7             12         0      -0.348    -1.07 
+#  7 Austria     2019     0.8             12         0      -0.348    -1.07 
+#  8 Azerbaijan  2005     7                3         0      -0.348    -0.895
+#  9 Bangladesh  2016    84.2              6         0      -0.348     1.31 
+# 10 Belarus     2020     0.1              1         0      -0.348    -1.09 
+# # … with 137 more rows
 ```
 ]
 .panel[.panel-name[Illustration]
@@ -481,11 +481,15 @@ class: inverse
 # 
 
 .push-left[
-OK but this remains rather approximate. I mean eye-balling is hardly enough to count as scientific evidence, is it?
+&lt;img src="https://thumbs.dreamstime.com/b/charakter-d-der-eine-lupe-h%C3%A4lt-und-ein-questio-kontrolliert-99243756.jpg" width="70%" style="display: block; margin: auto;" /&gt;
 ]
 
 .push-right[
-&lt;img src="https://img.favpng.com/2/1/2/question-mark-stock-photography-clip-art-png-favpng-xX0CH6YBvYeU89gtDZMqYQQJE.jpg" width="40%" style="display: block; margin: auto;" /&gt;
+&lt;br&gt;
+&lt;br&gt;
+&lt;br&gt;
+&lt;br&gt;
+OK but this remains rather approximate. I mean eye-balling is hardly enough to count as scientific evidence, is it?
 ]
 
 ---
@@ -522,13 +526,13 @@ Dat %&gt;% # Use our data,
   select(poverty, socialist) %&gt;% # Select vars for analysis,
 * cor() # Estimate correlation.
 #           poverty socialist
-# poverty     1.000    -0.101
-# socialist  -0.101     1.000
+# poverty    1.0000    0.0299
+# socialist  0.0299    1.0000
 ```
 ]]]
 
 ---
-class: middle
+class: middle clear
 
 .left-column[
 &lt;img src="https://www.laserfiche.com/wp-content/uploads/2014/10/femalecoder.jpg" width="80%" style="display: block; margin: auto;" /&gt;
@@ -588,7 +592,7 @@ Models should not be driven by few singular cases, like in this example.]
 - **Residuals**, `\(e_{i} =y_{i} - \hat{y}\)`
   + the differences between what our model predicts and the actual data.
 
-`\(e_{\text{Denmark}} = 0.4\% - 38.2\%=-37.8\%\)`
+`\(e_{\text{Denmark}} = 0.4\% - 38\%=-37.6\%\)`
 ]
 .right-column[
 &lt;img src="1-Correlation-n-Regression_files/figure-html/residuals-1.png" width="100%" style="display: block; margin: auto;" /&gt;
@@ -678,48 +682,48 @@ htmlreg(list(ols, zols), # Nicely-formatted table.
 &lt;tbody&gt;
 &lt;tr style="border-top: 1px solid #000000;"&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(Intercept)&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;38.17&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;38.02&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.00&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(3.04)&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(3.07)&lt;/td&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.08)&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;socialist&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;-0.33&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.08&lt;/td&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.28)&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.22)&lt;/td&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;z_socialist&lt;/td&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;-0.10&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.03&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.09)&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.08)&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr style="border-top: 1px solid #000000;"&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;R&lt;sup&gt;2&lt;/sup&gt;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.01&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.01&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.00&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.00&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Adj. R&lt;sup&gt;2&lt;/sup&gt;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.00&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.00&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;-0.01&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;-0.01&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr style="border-bottom: 2px solid #000000;"&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Num. obs.&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;139&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;139&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;147&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;147&lt;/td&gt;
 &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;tfoot&gt;
@@ -737,16 +741,16 @@ htmlreg(list(ols, zols), # Nicely-formatted table.
 
 .push-right[
 $$
-\operatorname{\widehat{poverty}} = 38.17 - 0.33(\operatorname{socialist})
+\operatorname{\widehat{poverty}} = 38.02 + 0.08(\operatorname{socialist})
 $$
  `\(\rightarrow\)` the best-fitting line that `\(\min \sum_{i=1}^{n} e_{i}^{2}\)`.
 
-- Among countries without a socialist past, poverty is on average 38.17%.
-  + `\((\hat{y}|\text{Socialism = 0}) = 38.17\%\)`.
+- Among countries without a socialist past, poverty is on average 38.02%.
+  + `\((\hat{y}|\text{Socialism = 0}) = 38.02\%\)`.
   
-- With every year of socialism, the average level of poverty -0.33% lower.
+- With every year of socialism, the average level of poverty 0.08% lower.
 
-- This model accounts for 1.01% more of the variation of poverty across the world, than simply using the mean as best guess `\(\bar{y} = 37.29\%\)`.
+- This model accounts for 0.09% more of the variation of poverty across the world, than simply using the mean as best guess `\(\bar{y} = 38.39\%\)`.
 ]]]
 
 ---
@@ -755,7 +759,7 @@ $$
 .left-column[
 .center[**1. Causal**]
 
-With every additional year of socialism, poverty is expected to decline by -0.33%. Thus, if China and Vietnam stay socialist, poverty will further decline.
+With every additional year of socialism, poverty is expected to decline by 0.08%. Thus, if China and Vietnam stay socialist, poverty will further decline.
 
 .alert[Beware, this interpretation only holds under some conditions. Fortunately, I will teach you how to estimate regressions that have a causal interpretation later this semester!]
 ]
@@ -767,13 +771,13 @@ With every additional year of socialism, poverty is expected to decline by -0.33
 **2. Descriptive: conditional means `\(\bar{y}|x\)`**
 ]
 
-With every year of socialism, the average level of poverty -0.33% lower.
+With every year of socialism, the average level of poverty 0.08% lower.
 
 Here regression is a (linear) model that describes the average of the outcome for different values of the predictor.
 ]
 
 ---
-class: middle
+class: middle clear
 
 .left-column[
 &lt;img src="https://cdn.dribbble.com/users/10549/screenshots/9916149/media/a9dbfea8e23e5b8e23db142528c3bc9f.png?compress=1&amp;resize=1200x900&amp;vertical=top" width="100%" style="display: block; margin: auto;" /&gt;
@@ -801,20 +805,20 @@ class: middle
        origin = "country.name", # What info does the original variable contain?
        destination = "continent") %&gt;% # What do you want as output?
        factor() %&gt;% fct_relevel("Europe"))) # Turn into factor and make "Europe" the reference.
-# # A tibble: 139 × 8
+# # A tibble: 147 × 8
 #    country     date poverty citizen_rights socialist z_socialist z_poverty continent
 #    &lt;chr&gt;      &lt;dbl&gt;   &lt;dbl&gt;          &lt;dbl&gt;     &lt;dbl&gt;       &lt;dbl&gt;     &lt;dbl&gt; &lt;fct&gt;    
-#  1 Albania     2019    10                8        21       1.72     -0.784 Europe   
-#  2 Algeria     2011    28.6              3         0      -0.252    -0.250 Africa   
-#  3 Angola      2018    88.5              3         0      -0.252     1.47  Africa   
-#  4 Argentina   2020    18.2             10         0      -0.252    -0.548 Americas 
-#  5 Armenia     2020    44.7              6         0      -0.252     0.213 Asia     
-#  6 Australia   2018     0.7             12         0      -0.252    -1.05  Oceania  
-#  7 Austria     2019     0.8             12         0      -0.252    -1.05  Europe   
-#  8 Bangladesh  2016    84.2              6         0      -0.252     1.35  Asia     
-#  9 Belarus     2020     0.1              1         0      -0.252    -1.07  Europe   
-# 10 Belgium     2019     0.2             12         0      -0.252    -1.07  Europe   
-# # … with 129 more rows
+#  1 Albania     2019    10                8        21       1.25     -0.809 Europe   
+#  2 Algeria     2011    28.6              3        49       3.39     -0.279 Africa   
+#  3 Angola      2018    88.5              3         0      -0.348     1.43  Africa   
+#  4 Argentina   2020    18.2             10         0      -0.348    -0.575 Americas 
+#  5 Armenia     2020    44.7              6         0      -0.348     0.180 Asia     
+#  6 Australia   2018     0.7             12         0      -0.348    -1.07  Oceania  
+#  7 Austria     2019     0.8             12         0      -0.348    -1.07  Europe   
+#  8 Azerbaijan  2005     7                3         0      -0.348    -0.895 Asia     
+#  9 Bangladesh  2016    84.2              6         0      -0.348     1.31  Asia     
+# 10 Belarus     2020     0.1              1         0      -0.348    -1.09  Europe   
+# # … with 137 more rows
 ```
 ]
 .panel[.panel-name[Scatter plot]
@@ -884,51 +888,51 @@ htmlreg(ols_2, # Nicely-formatted table.
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(3.56)&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(3.71)&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Africa&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;69.36&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;69.79&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(4.79)&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(4.96)&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Americas&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;21.17&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;21.40&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(5.92)&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(6.08)&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Asia&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;29.46&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;32.00&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(5.61)&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(5.60)&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Oceania&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;40.03&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;44.33&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(8.06)&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(7.76)&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr style="border-top: 1px solid #000000;"&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;R&lt;sup&gt;2&lt;/sup&gt;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.63&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.60&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Adj. R&lt;sup&gt;2&lt;/sup&gt;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.61&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.59&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr style="border-bottom: 2px solid #000000;"&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Num. obs.&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;138&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;146&lt;/td&gt;
 &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;tfoot&gt;
@@ -956,51 +960,51 @@ htmlreg(ols_2, # Nicely-formatted table.
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(3.56)&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(3.71)&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Africa&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;69.36&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;69.79&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(4.79)&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(4.96)&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Americas&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;21.17&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;21.40&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(5.92)&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(6.08)&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Asia&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;29.46&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;32.00&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(5.61)&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(5.60)&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Oceania&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;40.03&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;44.33&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(8.06)&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(7.76)&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr style="border-top: 1px solid #000000;"&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;R&lt;sup&gt;2&lt;/sup&gt;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.63&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.60&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Adj. R&lt;sup&gt;2&lt;/sup&gt;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.61&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.59&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr style="border-bottom: 2px solid #000000;"&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Num. obs.&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;138&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;146&lt;/td&gt;
 &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;tfoot&gt;
@@ -1014,17 +1018,17 @@ htmlreg(ols_2, # Nicely-formatted table.
 
 $$
 `\begin{aligned}
-\operatorname{\widehat{poverty}} &amp;= 3.09 + 69.36(\operatorname{continent}_{\operatorname{Africa}})\ + \\
-&amp;\quad 21.17(\operatorname{continent}_{\operatorname{Americas}}) + 29.46(\operatorname{continent}_{\operatorname{Asia}})\ + \\
-&amp;\quad 40.03(\operatorname{continent}_{\operatorname{Oceania}})
+\operatorname{\widehat{poverty}} &amp;= 3.09 + 69.79(\operatorname{continent}_{\operatorname{Africa}})\ + \\
+&amp;\quad 21.4(\operatorname{continent}_{\operatorname{Americas}}) + 32(\operatorname{continent}_{\operatorname{Asia}})\ + \\
+&amp;\quad 44.33(\operatorname{continent}_{\operatorname{Oceania}})
 \end{aligned}`
 $$
 
 
 - When Africa = 0, and Asia = 0, and America == 0, and Oceania = 0, then poverty is on average 3.09%.&lt;br&gt; `\(\rightarrow\)` The average poverty across countries in the reference group (Europe) is 3.09%.
 
-- Across African countries, poverty is on average 69.36% higher than across European ones.
-  + Across African countries, poverty is thus: `\(3.09\% + 69.36\% = 72.45\%\)`.
+- Across African countries, poverty is on average 69.79% higher than across European ones.
+  + Across African countries, poverty is thus: `\(3.09\% + 69.79\% = 72.88\%\)`.
 
 ]
 
@@ -1032,6 +1036,7 @@ $$
 
 
 ---
+class: clear
 # Assumptions
 
 .left-column[
@@ -1091,7 +1096,7 @@ plot(ols, which = 1) # The best outlier plot.
 ]
 
 ---
-class: middle
+class: middle clear
 
 .left-column[
 &lt;img src="https://cdn.dribbble.com/users/10549/screenshots/9890798/media/f38f0e4d71d9763c7533641d2418b35b.png?compress=1&amp;resize=1200x900&amp;vertical=top" width="100%" style="display: block; margin: auto;" /&gt;
@@ -1104,36 +1109,29 @@ class: middle
 ]
 
 ---
-# Interpreting regression tables
-
-.push-left[
-
-]
-
-.push-right[
-
-]
----
 # Learning goal achieved!
 
 .push-left[
-- There is no freedom-equality trade-off. 
-
-- In fact, the z-standardized results tell us that granting more rights to citizens is associated with a stronger decline in poverty than socialism.
-]
-
-.push-right[
+- No, there is no freedom-equality trade-off!
+  + Socialist countries don't seem to be better or worse at fighting poverty.
+  + Instead our z-standardized results tell us that granting more rights to citizens is much more strongly associated with lower levels of poverty than is socialism.
+  
 
 
 
 ```r
-zols &lt;- lm(z_poverty ~ z_socialist, Dat) # Regression models.
+# Regression models.
+zols &lt;- lm(z_poverty ~ z_socialist, Dat) 
 zols_2 &lt;- lm(z_poverty ~ z_citizen_rights, Dat)
-htmlreg(list(zols, zols_2), # Nicely-formatted table.
+
+# Nicely-formatted table.
+htmlreg(list(zols, zols_2), 
         custom.coef.names = c("Intercept", "Socialism", 
                               "Citizenhip rights"))
 ```
+]
 
+.push-right[
 &lt;table class="texreg" style="margin: 10px auto;border-collapse: collapse;border-spacing: 0px;caption-side: bottom;color: #000000;border-top: 2px solid #000000;"&gt;
 &lt;caption&gt;Statistical models&lt;/caption&gt;
 &lt;thead&gt;
@@ -1156,18 +1154,18 @@ htmlreg(list(zols, zols_2), # Nicely-formatted table.
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Socialism&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;-0.10&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.03&lt;/td&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.09)&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.08)&lt;/td&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Citizenhip rights&lt;/td&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;-0.52&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;-0.51&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
@@ -1176,18 +1174,18 @@ htmlreg(list(zols, zols_2), # Nicely-formatted table.
 &lt;/tr&gt;
 &lt;tr style="border-top: 1px solid #000000;"&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;R&lt;sup&gt;2&lt;/sup&gt;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.01&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.27&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.00&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.26&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Adj. R&lt;sup&gt;2&lt;/sup&gt;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.00&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.27&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;-0.01&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.25&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr style="border-bottom: 2px solid #000000;"&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Num. obs.&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;139&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;139&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;147&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;147&lt;/td&gt;
 &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;tfoot&gt;

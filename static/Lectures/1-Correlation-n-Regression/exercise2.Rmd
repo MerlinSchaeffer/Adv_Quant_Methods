@@ -30,7 +30,7 @@ Dat_citi_rights <- download_fh(verbose = FALSE) %>%
 
 # 2. Download poverty data: <5.50$ per day
 Dat_poverty <- wb_data("SI.POV.UMIC", 
-                        start_date = 2011, end_date = 2022) %>% #<<
+                        start_date = 2002, end_date = 2022) %>% #<<
    rename(poverty = SI.POV.UMIC) %>% # rename poverty variable,
    select(country, date, poverty) %>% # Keep only 3 variables
    drop_na(poverty) %>% # Drop cases with missing data,
@@ -45,35 +45,35 @@ Dat <- inner_join(Dat_poverty, Dat_citi_rights, by = c("country", "date"))
 Dat <- Dat %>% mutate(socialist = case_when( # Years socialist minus years since,
   country == "China" ~ date - 1949,
   country == "Vietnam" ~ date - 1945,
+  country == "Algeria" ~ date - 1962,
+  grepl(country,"Portugal|Bangladesh") ~ date - 1972,
+  country == "Guinea-Bissau" ~ date - 1973,
+  country == "India" ~ date - 1976,
+  country == "Nicaragua" ~ date - 1979,
+  country == "Sri Lanka" ~ date - 1978,
+  country == "Tanzania" ~ date - 1964,
   country == "Albania" ~ (1992 - 1944) - (date - 1992),
+  grepl(country, "Angola|Cabo Verde|Madagascar") ~ (1992 - 1975) - (date - 1992),
   grepl(country,"Belarus|Bulgaria") ~ (1990 - 1946) - (date - 1990),
   grepl(country, "Benin|Mozambique") ~ (1990 - 1975) - (date - 1990),
-  country == "Congo, Rep." ~ (1992 - 1970) - (date - 1992),
-  country == "Czech Republic" ~ (1990 - 1948) - (date - 1990),
-  country == "Ethiopia" ~ (1991 - 1974) - (date - 1991),
-  country == "Hungary" ~ (1989 - 1949) - (date - 1989),
-  country == "Mongolia" ~ (1992 - 1924) - (date - 1992),
-  country == "Poland" ~ (1989 - 1945) - (date - 1989),
-  country == "Romania" ~ (1989 - 1947) - (date - 1989),
-  country == "Russian Federation" ~ (1991 - 1922) - (date - 1991),
-  country == "Somalia" ~ (1991 - 1969) - (date - 1991),
-  country == "Ukraine" ~ (1991 - 1919) - (date - 1991),
-  country == "Yemen, Rep." ~ (1991 - 1967) - (date - 1991),
+  country == "Chad" ~ (1975 - 1962) - (date - 1975), country == "Congo, Rep." ~ (1992 - 1970) - (date - 1992),
+  country == "Czech Republic" ~ (1990 - 1948) - (date - 1990), country == "Djibouti" ~ (1992 - 1981) - (date - 1992),
+  country == "Ethiopia" ~ (1991 - 1974) - (date - 1991), country == "Ghana" ~ (1966 - 1960) - (date - 1966),
+  country == "Guinea" ~ (1984 - 1958) - (date - 1984), country == "Hungary" ~ (1989 - 1949) - (date - 1989),
+  country == "Iraq" ~ (2005 - 1958) - (date - 2005), country == "Mali" ~ (1991 - 1960) - (date - 1991),
+  country == "Mauritania" ~ (1978 - 1961) - (date - 1978), country == "Mongolia" ~ (1992 - 1924) - (date - 1992),
+  country == "Myanmar" ~ (1988 - 1962) - (date - 1988), country == "Poland" ~ (1989 - 1945) - (date - 1989),
+  country == "Romania" ~ (1989 - 1947) - (date - 1989), country == "Russian Federation" ~ (1991 - 1922) - (date - 1991),
+  country == "Seychelles" ~ (1991 - 1977) - (date - 1991), country == "Senegal" ~ (1981 - 1960) - (date - 1981),
+  country == "Sierra Leone" ~ (1991 - 1978) - (date - 1991), country == "Somalia" ~ (1991 - 1969) - (date - 1991),
+  country == "Sudan" ~ (1985 - 1969) - (date - 1985), country == "Syria" ~ (2012 - 1963) - (date - 2012),
+  country == "Tunisia" ~ (1988 - 1964) - (date - 1988), country == "Ukraine" ~ (1991 - 1919) - (date - 1991),
+  country == "Yemen, Rep." ~ (1991 - 1967) - (date - 1991), country == "Zambia" ~ (1991 - 1973) - (date - 1991),
   grepl(country,"Slovenia|Croatia|Serbia|Montenegro|Bosnia and Herzegovina|North Macedonia|Kosovo") ~ (1992 - 1943) - (date - 1992),
-  grepl(country, "Cabo Verde|Madagascar|Angola") ~ (1992 - 1975) - (date - 1992),
-  country == "Egypt, Arab Rep." ~ (2007 - 1953) - (date - 2007),
-  country == "Iraq" ~ (2005 - 1958) - (date - 2005),
-  country == "Mali" ~ (1991 - 1960) - (date - 1991),
-  country == "Seychelles" ~ (1991 - 1977) - (date - 1991),
-  country == "Sierra Leone" ~ (1991 - 1978) - (date - 1991),
-  country == "Syria" ~ (2012 - 1963) - (date - 2012),
-  country == "Tunisia" ~ (1988 - 1964) - (date - 1988),
-  country == "Zambia" ~ (1991 - 1973) - (date - 1991),
   TRUE ~ 0),
   socialist = case_when( # Min. 5 years given socialist history,
     (socialist < 5 & socialist > 0) | socialist < 0 ~ 5,
-    TRUE ~ socialist)) %>%
-  drop_na() # Drop countries with missing values.
+    TRUE ~ socialist)) %>% drop_na() # Drop countries with missing values.
 ```
 
 ```{r echo = FALSE}
