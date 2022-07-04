@@ -1,5 +1,5 @@
 ---
-title: "1 Randomness!"
+title: "2 Randomness!"
 subtitle: "& its increadible importance for social science research"
 author: "Merlin Schaeffer<br> Department of Sociology"
 date: "`r Sys.Date()`"
@@ -19,11 +19,14 @@ output:
 ```{r setup, include = FALSE}
 library(RefManageR)
 library(knitr)
+library(httr)
+
+httr::set_config(config(ssl_verifypeer = 0L))
 
 options(htmltools.dir.version = FALSE, servr.interval = 0.5, width = 115, digits = 3)
 knitr::opts_chunk$set(
   collapse = TRUE, message = FALSE, fig.retina = 3, error = TRUE,
-  warning = FALSE, cache = FALSE, fig.align = 'center',
+  warning = FALSE, cache = TRUE, fig.align = 'center',
   comment = "#", strip.white = TRUE, tidy = FALSE)
 
 BibOptions(check.entries = FALSE, 
@@ -36,27 +39,80 @@ BibOptions(check.entries = FALSE,
 xaringanExtra::use_xaringan_extra(c("tile_view", "tachyons"))
 xaringanExtra::use_panelset()
 ```
-# The goal of social science research
+# Preparations
 
-.font140[.center[.alert[Use data to discover patterns ("social facts" in Durkheim's terms), <br> and the social mechanisms that bring them about.]]]
-
-```{r, echo = FALSE, out.width='70%', fig.align='center'}
-knitr::include_graphics('https://liu.se/-/media/istock-501261958.jpg?mw=1120&mh=1120&hash=DA8977CCE6A6E600AE80A40CFEE771C9')
+.panelset[
+.panel[.panel-name[Packages for today's session]
+```{r libraries}
+pacman::p_load(
+  tidyverse, # Data manipulation,
+  haven, # Handle labelled data.
+  ggplot2, # beautiful figures,
+  estimatr, # Regression for weighted data,
+  modelr, # Turn results of lm() into a tibble,
+  texreg) # regression tables with nice layout.
 ```
+]
+.panel[.panel-name[Get the ESS data]
+.push-left[
+<iframe src='https://ess-search.nsd.no/en/study/bdc7c350-1029-4cb3-9d5e-53f668b8fa74' width='1200' height='670' frameborder='0' scrolling='yes'></iframe>
+]
+.push-right[
+```{r ESS}
+# Read the ESS round 9 data
+ESS <- read_spss("../../../assets/ESS9e03_1.sav") %>%
+  filter(cntry == "DK") %>% # Keep only the Danish data,
+  # Keep only a minimum set of variables we need today,
+  select(idno, pspwght, gndr, eduyrs, agea, 
+         psppsgva, trstplt, trstplc) %>%
+  drop_na() # Delete cases with missing values.
+```
+]]]
+
+---
+class: inverse
+# Research question of the day
+
+.push-left[
+<iframe src='https://en.wikipedia.org/wiki/Political_efficacy' width='1200' height='670' frameborder='0' scrolling='yes'></iframe>
+]
+
+--
+
+.push-right[
+.center[**Is there a _general pattern_ that better educated people tend to have a stronger belief that the political system is democratic and that the government actually listens to the people?**
+
+```{r, echo = FALSE, out.width='90%'}
+knitr::include_graphics('https://media.istockphoto.com/vectors/politician-and-masks-vector-id1285284677?k=20&m=1285284677&s=612x612&w=0&h=pE_RkXIK8XaJBtuuHIsEbUo7pvtfu3yHEAQR5h8G-Jw=')
+```
+.center[.backgrnote[*Source*: [istockphoto.com](https://www.istockphoto.com/de)]]
+]]
+
+---
+# General patterns
+
+.push-left[
+We need to treat our data at hand as a sample and generalize from it.
+
+Ideally, we generalize from .alert[random samples]!
+]
+
+.push-right[
+```{r, echo = FALSE, out.width='50%'}
+knitr::include_graphics('https://upload.wikimedia.org/wikipedia/commons/thumb/f/fd/Generalization_process_using_trees.svg/1280px-Generalization_process_using_trees.svg.png')
+```
+.center[.backgrnote[*Source*: [Wikipedia](https://en.wikipedia.org/wiki/Generalization)]]
+]
 
 ---
 # Why randomness?
 
 .push-left[.content-box-red[
-.center[**We rely on randomness to<br> draw unbiased conclusions from data**]
+.center[**We rely on randomness to<br> draw _unbiased_ conclusions**]
 
-- *Specifically*, two types of conclusions:
-  1. Random sample $\rightarrow$ general population.
+- Two types of conclusions:
+  1. Random sample $\rightarrow$ Population.
   2. Random $x \rightarrow$ causal effect of $x$ on $y$.
-
-
-- More *fundamentally*:
-  + Which social mechanisms generate the population and its patterns? <br> (aka the 'Data Generating Process')
 ]]
 
 
@@ -68,7 +124,7 @@ knitr::include_graphics('https://liu.se/-/media/istock-501261958.jpg?mw=1120&mh=
 knitr::include_graphics('https://m.media-amazon.com/images/I/71jm22A7m9L._AC_SL1200_.jpg')
 ```
 .center[.backgrnote[
-Similar to some mirrors that give us a biased reflection,<br> many data sources we use to draw insights about how societies work also lead to biased insights.]]
+Similar to certain mirrors,<br> many data sources also lead to biased insights.]]
 ]
 
 ---
@@ -81,7 +137,7 @@ class: inverse middle center
 <br>
 Excuse me?!
 
-**How can randomness lead to unbiased insights about the fundamental ways in which society works?**
+**How can _randomness_ of all things lead to unbiased insights about the fundamental ways in which society works?**
 ]
 
 .push-right[
@@ -112,7 +168,7 @@ knitr::include_graphics('https://lotterylab.s3.amazonaws.com/summernoteimages/60
 
 1. Thrill: No one knows the outcome.
 
-2. .font120[.alert[Fairness!]] Known and similar probabilities for everyone, *regardless of who they are*.
+2. .font120[.alert[Fairness!]] Known and similar probabilities for all players, *regardless of who they are*.
 
 ]
 
@@ -130,28 +186,25 @@ knitr::include_graphics('https://lotterylab.s3.amazonaws.com/summernoteimages/60
 knitr::include_graphics('https://www.kuechengoetter.de/uploads/media/630x630/02/28602-suppentopf-mit-nudeln-und-haehnchen.jpg?v=1-0')
 ```
 .center[.backgrnote[
-Our sample is basically a tasting of what's cooking <br>(i.e., what's really going on).]]
+Our sample is basically a tasting of what's cooking.]]
 
 ]
 
 --
 
 .push-right[
-2) Even if we have (e.g., register) data on everyone, .font120[.alert[we are interested in social mechanisms]].
-For example, we *generally* want to know, whether:
-  - Urbanization results in a blasé outlook (Simmel).
-  - Anomie makes people suicidal (Durkheim).
-  - Capitalism alienates people from their creative talents (Marx).
+2) Even if we have (e.g., register) data on everyone, we are interested in .font120[.alert[general patterns and social mechanisms]]:
+  - There is less poverty in socialist countries?
+  - Do better educated have more political efficacy?
+  - Does anomie make people suicidal?
     
     
-  $\rightarrow$ We generally want to know these things, not only for the current population of Denmark. We thus treat any data as a sample of an unobservable "super population".
-]
-
---
-
-.left-column[
-
-]
+  $\rightarrow$ We generally want to know these things. .backgrnote[
+  (i.e. not only for the current population of Denmark, or for the currently existing countries in the world.)]
+  
+  .content-box-red[
+  $\rightarrow$ We thus treat any data as a sample of an unobservable "super population".
+]]
 
 ---
 # Convenience samples
@@ -181,7 +234,8 @@ knitr::include_graphics('https://lotterylab.s3.amazonaws.com/summernoteimages/60
 
 <br>
 <br>
-Random samples are "fair": Everyone in the (unobservable super) population has the same probability to be part of the sample, .alert[regardless of who they are]!
+Random samples are "fair": <br>
+Everyone in the (unobservable super) population has the same probability to be part of the sample, .alert[regardless of who they are]!
 
 $\rightarrow$ No group can be forgotten.
 ]
@@ -195,7 +249,7 @@ $\rightarrow$ No group can be forgotten.
 knitr::include_graphics('https://www.kuechengoetter.de/uploads/media/630x630/02/28602-suppentopf-mit-nudeln-und-haehnchen.jpg?v=1-0')
 ```
 .center[.backgrnote[
-Random sampling is basically the equivalent of giving the soup a proper stir before we taste it ;).]]
+Random sampling is the equivalent of giving the soup a proper stir before we taste it ;).]]
 ]
 
 ---
@@ -229,8 +283,9 @@ knitr::include_graphics('https://www.business2community.com/wp-content/uploads/2
 # Weights
 
 .push-left[
-- A *weight* tells you the probability that an observation should be in the sample. For a true random sample, each case of the population has an equal probability to be sampled. Thus the weight would be 1 for every observation of a sample.
--  Yet, for various reasons, some populations tend to be under-sampled. Post-stratification weights try to counterbalance this.
+- A *weight* tells you the probability that an observation should be in the sample. .backgrnote[
+For a true random sample, each case of the population has an equal probability to be sampled. Thus the weight would be 1 for every observation of a sample.]
+-  Some populations tend to be over\under-sampled. Post-stratification weights try to counterbalance this.
 <br>
 
 .content-box-green[.center[
@@ -240,26 +295,11 @@ Why would survey researchers assign lower weights to older people?
 .push-right[
 .panelset[
 .panel[.panel-name[Plot]
-```{r echo = FALSE}
-YOUR_EMAIL <- "merlin.schaeffer@uni-koeln.de"
-```
 ```{r weights_fig, out.width='100%', fig.height = 4, fig.width = 5, results = FALSE, echo = FALSE, cache = TRUE}
-library(tidyverse) # Data manipulation.
-library(haven) #<< Handle labelled data.
-library(essurvey) # Read ESS data from API.
-
-# Import the ESS round 9 data via the API
-ESS <- import_country(
-  country = "Denmark", rounds = 9,
-  ess_email = YOUR_EMAIL, format = "spss") %>%
-  # Keep only a minimum set of variables I need today
-  select(idno, pspwght, agea, eduyrs, agea) %>%
-  drop_na() # Delete cases with missing values
-
 ggplot(data = ESS, 
        mapping = aes(y = pspwght, x = agea)) +
-  geom_point(alpha = 0.3) +
-  geom_smooth(method = "lm", SE = FALSE) + # OLS regression line.
+  geom_point(alpha = 1/3) +
+  geom_smooth(method = "lm", se = FALSE) + # OLS regression line.
   labs(y = "Post-stratification weight", x = "Age in years",
        caption = "Danish European Social Survey 2018") +
   theme_minimal()
@@ -276,7 +316,7 @@ ggplot(data = ESS,
 - Statistically, we use weights by multiplication. 
 
 .push-left[
-- Imagine a patriarchal society, where men's votes count twice as much. Here we have a ballot on whether women should be allowed to drive:
+- Imagine a patriarchal society, where men's votes count twice. Here we have a ballot on whether women should be allowed to drive:
 
 ```{r results = 'asis', echo = FALSE}
 library(knitr)
@@ -310,17 +350,17 @@ What is the patriarchy-weighted percent <br> of "Yes"-votes?
 ]
 .panel[.panel-name[2.]
 ```{r}
-(sum(`Voted yes` * weight) / sum(weight)) * 100 # 2
+(sum(`Voted yes` * Weight) / sum(Weight)) * 100 # 2
 ```
 ]
 .panel[.panel-name[3.]
 ```{r}
-weighted.mean(x = `Voted yes`, w = weight) * 100 # 3
+weighted.mean(x = `Voted yes`, w = Weight) * 100 # 3
 ```
 ]]]
 
 ---
-# Weights really work!
+# Weights can be amazing!
 
 .push-left[
 ```{r, echo = FALSE, out.width='100%', fig.align='center'}
@@ -351,9 +391,6 @@ Using weights results in heteroscedastic residuals, which violates an assumption
 .right-column[
 .panelset[
 ```{r weighted_reg, results= FALSE, echo = FALSE}
-library(estimatr) # Weighted OLS regression with robust inference.
-library(texreg) # Nicely-formatted regression tables.
-
 # Prepare the data
 ESS <- ESS %>% mutate(
     psppsgva = zap_labels(psppsgva), # Make numeric
@@ -364,11 +401,10 @@ ESS <- ESS %>% mutate(
     gndr = as_factor(gndr)) # Make factor
 
 # Estimate the models
-mod1 <- lm(psppsgva ~ eduyrs, # Unweighted
-           data = ESS)
-mod2 <- lm_robust(psppsgva ~ eduyrs, # Weighted
-                  weights = pspwght, 
-                  data = ESS)
+mod1 <- lm(psppsgva ~ eduyrs, data = ESS) # Unweighted
+
+mod2 <- lm_robust(psppsgva ~ eduyrs, data = ESS, # Weighted
+                  weights = pspwght) #<<
 
 # Make a nice table
 htmlreg(list(mod1, mod2), 
@@ -379,8 +415,8 @@ htmlreg(list(mod1, mod2),
 .panel[.panel-name[Example]
 ```{r ols_fig, out.width='90%', fig.height = 4, fig.width = 6, results = FALSE, echo = FALSE}
 ggplot(data = ESS, aes(y = psppsgva, x = eduyrs)) +
-  geom_point(aes(size = pspwght), alpha = 0.5) +
-  geom_smooth(aes(weight = pspwght), method = "lm") +
+  geom_jitter(aes(size = pspwght), alpha = 1/3, width = 0.1, height = 0.1) +
+  geom_smooth(aes(weight = pspwght), method = "lm", se = FALSE) +
   theme_minimal() +
   labs(y = "The political system allows people \n to have a say in what government does",
        x = "Years of education")
@@ -396,179 +432,17 @@ ggplot(data = ESS, aes(y = psppsgva, x = eduyrs)) +
 ]]]
 
 ---
-class: inverse middle center
+class: middle clear
 
-.push-left[
-<br>
-<br>
-<br>
-<br>
-<br>
-```{r, echo = FALSE, out.width='60%', fig.align='center'}
-knitr::include_graphics('https://www.business2community.com/wp-content/uploads/2013/03/Question1.jpg')
+.left-column[
+```{r, echo = FALSE, out.width='100%'}
+knitr::include_graphics('https://cdn.dribbble.com/users/10549/screenshots/9916149/media/a9dbfea8e23e5b8e23db142528c3bc9f.png?compress=1&resize=1200x900&vertical=top')
 ```
 ]
 
-.push-left[
-<br>
-OK, great: Randomness prohibits systematic biases and thus enables us to draw unbiased representative samples. If randomization has partly failed, we use post-stratification weights to counterbalance.
-
-**But doesn't all this mean that I have randomness (e.g., just by chance too many vegetarians or so) and thus also bias in my data?**
+.right-column[
+<iframe src='exercise1.html' width='1000' height='600' frameborder='0' scrolling='yes'></iframe>
 ]
-
----
-# Sampling error $\sigma$ .font60[(aka sampling variability)]
-
-.push-left[
-- **Lets assume, the Danish ESS with it's `r nrow(ESS)` respondents was our (unobservable super) population of interest.** 
-  + Thus, I don't use weights in this example ;)
-
-
-- That would mean, we know the true OLS regression line (in blue): $\beta = `r coef(lm(psppsgva ~ eduyrs, data = ESS))["eduyrs"]`$
-]
-
-.push-right[
-```{r true_ols, out.width='90%', fig.height = 4, fig.width = 6, results = FALSE, echo = FALSE}
-ggplot(data = ESS, aes(y = psppsgva, x = eduyrs)) +
-  geom_point(alpha = 0.5) +
-  geom_smooth(method = "lm", se = FALSE) +
-  theme_minimal() +
-  labs(y = "The political system allows people \n to have a say in what government does",
-       x = "Years of education")
-```
-]
-
----
-# Sampling error $\sigma$ .font60[(aka sampling variability)]
-
-.push-left[
-- **Lets assume, the Danish ESS with it's `r nrow(ESS)` respondents was our (unobservable super) population of interest.** 
-  + Thus, I don't use weights in this example ;)
-
-
-- That would mean, we know the true OLS regression line (in blue): $\beta = `r coef(lm(psppsgva ~ eduyrs, data = ESS))["eduyrs"]`$
-
-- Now I take a random sample of 50 persons.
-
-```{r sample1}
-set.seed(831983) # Random seed, to reproduce result.
-ESS_sample <- ESS %>% sample_n(50) # Draw the sample.
-```
-]
-
-.push-right[
-```{r sample1_ols1, out.width='90%', fig.height = 4, fig.width = 6, results = FALSE, echo = FALSE}
-ggplot(data = ESS_sample, aes(y = psppsgva, x = eduyrs)) +
-  geom_point(alpha = 0.5, color = "#901A1E") +
-  geom_smooth(data = ESS, method = "lm", se = FALSE) +
-#  geom_smooth(method = "lm", se = FALSE, color = "#901A1E") +
-  theme_minimal() +
-  labs(y = "The political system allows people \n to have a say in what government does",
-       x = "Years of education")
-```
-]
-
----
-# Sampling error $\sigma$ .font60[(aka sampling variability)]
-
-.push-left[
-- **Lets assume, the Danish ESS with it's `r nrow(ESS)` respondents was our (unobservable super) population of interest.** 
-  + Thus, I don't use weights in this example ;)
-
-
-- That would mean, we know and can *calculate* the true OLS regression line (in blue): $\beta = `r coef(lm(psppsgva ~ eduyrs, data = ESS))["eduyrs"]`$
-
-- Now I take a random sample of 50 persons.
-
-```{r ref.label = "sample1", eval = FALSE}
-```
-
-- ... and *estimate* an OLS regression line based on that 50-person sample (in red): $\hat{\beta} = `r coef(lm(psppsgva ~ eduyrs, data = ESS_sample))["eduyrs"]`$
-]
-
-.push-right[
-```{r sample1_ols2, out.width='90%', fig.height = 4, fig.width = 6, results = FALSE, echo = FALSE}
-ggplot(data = ESS_sample, aes(y = psppsgva, x = eduyrs)) +
-  geom_point(alpha = 0.5, color = "#901A1E") +
-  geom_smooth(data = ESS, method = "lm", se = FALSE) +
-  geom_smooth(method = "lm", se = FALSE, color = "#901A1E") +
-  theme_minimal() +
-  labs(y = "The political system allows people \n to have a say in what government does",
-       x = "Years of education")
-```
-]
-
----
-# Sampling error $\sigma$ .font60[(aka sampling variability)]
-
-.push-left[
-- **Lets assume, the Danish ESS with it's `r nrow(ESS)` respondents was our (unobservable super) population of interest.** 
-  + Thus, I don't use weights in this example ;)
-
-
-- That would mean, we know and can *calculate* the true OLS regression line (in blue): $\beta = `r coef(lm(psppsgva ~ eduyrs, data = ESS))["eduyrs"]`$
-
-- .alert[Let's take another random sample of 50 persons.]
-
-```{r sample2}
-ESS_sample_2 <- ESS %>% sample_n(50) # Draw the sample.
-```
-
-- ... and *estimate* an OLS regression line based on that 50-person sample (in red): $\hat{\beta} = `r coef(lm(psppsgva ~ eduyrs, data = ESS_sample_2))["eduyrs"]`$
-]
-
-.push-right[
-```{r sample1_ols3, out.width='90%', fig.height = 4, fig.width = 6, results = FALSE, echo = FALSE}
-ggplot(data = ESS_sample_2, aes(y = psppsgva, x = eduyrs)) +
-  geom_point(alpha = 0.5, color = "#901A1E") +
-  geom_smooth(data = ESS_sample, 
-              method = "lm", se = FALSE, color = "#901A1E", size = 0.3, alpha = 0.1) +
-  geom_smooth(data = ESS, method = "lm", se = FALSE) +
-  geom_smooth(method = "lm", se = FALSE, color = "#901A1E") +
-  theme_minimal() +
-  labs(y = "The political system allows people \n to have a say in what government does",
-       x = "Years of education")
-```
-]
-
----
-# Let's do this a 1000 times more!
-
-.panelset[
-.panel[.panel-name[Code for the Nerds]
-```{r cache = TRUE}
-Samples <- bind_rows(ESS_sample, ESS_sample_2, 
-                     .id = "sample_nr") %>%
-  mutate(sample_nr = as.numeric(sample_nr))
-
-for (draw in 3:103) {
-  Samples <- bind_rows(
-    Samples,
-    ESS %>% sample_n(50) %>% mutate(sample_nr = draw))
-}
-```
-]
-.panel[.panel-name[Animated figure]
-```{r}
-library(gganimate)
-
-ggplot(data = Samples, aes(y = psppsgva, x = eduyrs)) +
-  geom_point(alpha = 0.5, color = "#901A1E") +
-  geom_smooth(method = "lm", se = FALSE, color = "#901A1E", size = 0.7) +
-  geom_smooth(data = ESS, method = "lm", se = FALSE) +
-  theme_minimal() +
-  labs(y = "The political system allows people \n to have a say in what government does",
-       x = "Years of education") +
-  transition_states(factor(sample_nr),
-                    transition_length = 100,
-                    state_length = 500) +
-  shadow_mark(alpha = 0.1, size = 0.1)
-```
-]]
-
----
-
-
 
 ---
 class: inverse middle center
@@ -586,13 +460,13 @@ knitr::include_graphics('https://www.business2community.com/wp-content/uploads/2
 
 .push-left[
 <br>
-Duh! But if I can't sample the whole (unobservable super) population, then I surely also can't draw thousands of 50 person samples or so.
+OK, great: Randomness prohibits systematic biases and thus enables us to draw representative samples. If randomization has partly failed, we use post-stratification weights to counterbalance.
 
-**So is there no applied solution to the sampling error problem?**
+**But doesn't all this mean that I have randomness** <br> (e.g., just by chance too many vegetarians or so) <br> **and thus also bias in my data?**
 ]
 
 ---
-# The standard error $\hat{\sigma}$ .font70[(i.e., estimated sampling error)]
+# Sampling error $\sigma$ .font60[(aka sampling variability)]
 
 .push-left[
 **Goal**: Gain unbiased insights from data.
@@ -613,12 +487,268 @@ $\downarrow$
 $\downarrow$ 
 ]
 
-**Question**: With how much confidence can we *infer* (i.e., generalize) from our random sample?
+**Question**: With how much confidence can we *infer* (i.e., generalize) from our random sample to the unobserved (super) population? Could the patterns in our data just be the result of happenstance (i.e., sampling error)?
 ]
 
---
+.push-right[
+```{r, echo = FALSE, out.width='60%', fig.align='center'}
+knitr::include_graphics('https://ecampusontario.pressbooks.pub/app/uploads/sites/376/2019/02/70-959x1024.png')
+```
+.backgrnote[.center[Random sampling ensures validity (i.e. unbiased), but it results in some unreliability (i.e. sampling error). The question is: How unreliable is the data?]]
+]
+---
+# Sampling error $\sigma$ .font60[(aka sampling variability)]
+
+.push-left[
+- **Lets assume, the Danish ESS with it's `r nrow(ESS)` respondents was our (unobservable super) population of interest.** .backgrnote[I thus don't use weights in this example ;)]
+
+
+- That would mean, we can *calculate* the true OLS regression line (in blue): $\beta = `r coef(lm(psppsgva ~ eduyrs, data = ESS))["eduyrs"]`$.
+]
 
 .push-right[
+```{r true_ols, out.width='90%', fig.height = 4, fig.width = 6, results = FALSE, echo = FALSE}
+ggplot(data = ESS, aes(y = psppsgva, x = eduyrs)) +
+  geom_jitter(alpha = 1/3, width = 0.1, height = 0.1) +
+  geom_smooth(method = "lm", se = FALSE) +
+  theme_minimal() +
+  labs(y = "The political system allows people \n to have a say in what government does",
+       x = "Years of education")
+```
+]
+
+---
+# Sampling error $\sigma$ .font60[(aka sampling variability)]
+
+.push-left[
+- **Lets assume, the Danish ESS with it's `r nrow(ESS)` respondents was our (unobservable super) population of interest.** 
+  + Thus, I don't use weights in this example ;)
+
+
+- That would mean, we can *calculate* the true OLS regression line (in blue): $\beta = `r coef(lm(psppsgva ~ eduyrs, data = ESS))["eduyrs"]`$.
+
+- Now I take a random sample of 50 persons.
+
+```{r sample1}
+set.seed(1261990) # Random seed, to reproduce result.
+ESS_sample <- ESS %>% sample_n(50) # Draw the sample.
+```
+]
+
+.push-right[
+```{r sample1_ols1, out.width='90%', fig.height = 4, fig.width = 6, results = FALSE, echo = FALSE}
+(sample1_ols1 <- ggplot(data = ESS_sample, aes(y = psppsgva, x = eduyrs)) +
+  geom_jitter(color = "#901A1E", alpha = 1/3, width = 0.1, height = 0.1) +
+  geom_smooth(data = ESS, method = "lm", se = FALSE) +
+  theme_minimal() +
+  ylim(1, 5) +
+  labs(y = "The political system allows people \n to have a say in what government does",
+       x = "Years of education"))
+```
+]
+
+---
+# Sampling error $\sigma$ .font60[(aka sampling variability)]
+
+.push-left[
+- **Lets assume, the Danish ESS with it's `r nrow(ESS)` respondents was our (unobservable super) population of interest.** 
+  + Thus, I don't use weights in this example ;)
+
+
+- That would mean, we can *calculate* the true OLS regression line (in blue): $\beta = `r coef(lm(psppsgva ~ eduyrs, data = ESS))["eduyrs"]`$.
+
+- Now I take a random sample of 50 persons.
+
+```{r ref.label = "sample1", eval = FALSE}
+```
+
+- ... and *estimate* an OLS regression line based on that 50-person sample (in red): $\hat{\beta} = `r coef(lm(psppsgva ~ eduyrs, data = ESS_sample))["eduyrs"]`$.
+]
+
+.push-right[
+```{r sample1_ols2, out.width='90%', fig.height = 4, fig.width = 6, results = FALSE, echo = FALSE}
+sample1_ols1 + 
+  geom_smooth(method = "lm", se = FALSE, color = "#901A1E")
+
+```
+]
+
+---
+# Sampling error $\sigma$ .font60[(aka sampling variability)]
+
+.push-left[
+- **Lets assume, the Danish ESS with it's `r nrow(ESS)` respondents was our (unobservable super) population of interest.** 
+  + Thus, I don't use weights in this example ;)
+
+
+- That would mean, we can *calculate* the true OLS regression line (in blue): $\beta = `r coef(lm(psppsgva ~ eduyrs, data = ESS))["eduyrs"]`$
+
+- .alert[Let's take another random sample of 50 persons.]
+
+```{r sample2}
+ESS_sample_2 <- ESS %>% sample_n(50) # Draw the sample.
+```
+
+- ... and *estimate* an OLS regression line based on that 50-person sample (in red): $\hat{\beta} = `r coef(lm(psppsgva ~ eduyrs, data = ESS_sample_2))["eduyrs"]`$.
+]
+
+.push-right[
+```{r sample1_ols3, out.width='90%', fig.height = 4, fig.width = 6, results = FALSE, echo = FALSE}
+ggplot(data = ESS_sample_2, aes(y = psppsgva, x = eduyrs)) +
+  geom_jitter(color = "#901A1E", alpha = 1/3, width = 0.1, height = 0.1) +
+  geom_smooth(data = ESS_sample, 
+              method = "lm", se = FALSE, color = "#901A1E", size = 0.3, alpha = 0.1) +
+  geom_smooth(data = ESS, method = "lm", se = FALSE) +
+  geom_smooth(method = "lm", se = FALSE, color = "#901A1E") +
+  ylim(1, 5) +
+  theme_minimal() +
+  labs(y = "The political system allows people \n to have a say in what government does",
+       x = "Years of education")
+```
+]
+
+---
+# Let's do this a 1000 times!
+
+.panelset[
+.panel[.panel-name[Code for the Nerds]
+```{r}
+Samples <- bind_rows(
+  ESS_sample, ESS_sample_2, 
+  .id = "sample_nr") %>%
+  mutate(sample_nr = as.numeric(sample_nr))
+
+# Add more samples to the first two in a loop.
+for (draw in 3:100) { 
+  Samples <- bind_rows(
+    Samples,
+    ESS %>% 
+      sample_n(50) %>% 
+      mutate(sample_nr = draw))
+}
+```
+]
+.panel[.panel-name[Animated figure]
+```{r sample1000_ols3, out.width='60%', fig.height = 4, fig.width = 6, echo = FALSE}
+library(gganimate)
+
+ggplot(data = Samples, aes(y = psppsgva, x = eduyrs)) +
+  geom_jitter(color = "#901A1E", alpha = 1/3, width = 0.1, height = 0.1) +
+  geom_smooth(method = "lm", se = FALSE, color = "#901A1E", size = 0.7) +
+  geom_smooth(data = ESS, method = "lm", se = FALSE) +
+  theme_minimal() +
+  labs(y = "The political system allows people \n to have a say in what government does",
+       x = "Years of education") +
+  transition_states(factor(sample_nr),
+                    transition_length = 10,
+                    state_length = 1) +
+  shadow_mark(alpha = 0.15, size = 0.1)
+```
+]
+
+.panel[.panel-name[Histogram]
+```{r sample1000_ols4, out.width='60%', fig.height = 4, fig.width = 6, echo = FALSE}
+library(fixest)
+library(ggforce)
+library(essentials)
+Sampled_coefs <- feols(psppsgva ~ eduyrs, data = Samples, split = ~sample_nr) %>%
+  coefficients() %>%
+  data.frame() %>%
+  select(eduyrs) %>%
+  rowid_to_column("index")
+
+bin_width <- 0.003
+
+count_data <- # some minor data transformation
+  Sampled_coefs %>%
+  mutate(x = plyr::round_any(eduyrs, bin_width)) %>%
+  group_by(x) %>%
+  mutate(y = seq_along(x))
+
+true_beta <- coef(lm(psppsgva ~ eduyrs, data = ESS))["eduyrs"] %>%
+  as.scalar() %>%
+  round(3)
+
+SD <- sd(Sampled_coefs$eduyrs)
+beta_hat <- Sampled_coefs$eduyrs
+
+ggplot(count_data) +
+  geom_vline(xintercept = true_beta, color = "#901A1E") +
+  geom_ellipse(aes(color = abs(true_beta - x), fill = abs(true_beta - x),
+                   group = index, x0 = x, y0 = y, a = bin_width/2, b = 0.5, angle = 0)) +
+  coord_equal(bin_width) + # to make the dots look nice and round
+  scale_fill_steps(low = "#901A1E", high = "#425570", breaks = c(round(1.65*SD, 3), round(2*SD, 3)), nice.breaks = FALSE, guide = FALSE) +
+  scale_color_steps(low = "#901A1E", high = "#425570", breaks = c(round(1.65*SD, 3), round(2*SD, 3)), nice.breaks = FALSE, guide = FALSE) +
+  scale_x_continuous(breaks = c(round(true_beta-2*SD, 3), round(true_beta-1.65*SD, 3), round(true_beta, 3), round(true_beta+1.65*SD, 3), round(true_beta+2*SD, 3)), guide = guide_axis(n.dodge = 2)) +
+  theme_minimal() +
+  labs(y = "Count", x = expression(beta)) +
+  transition_reveal(index) 
+```
+]
+.panel[.panel-name[Normal distribution]
+.left-column[
+.center[We know the area under the Normal distribution!]
+
+- 90% of $\hat{\beta}$ are $\pm$ 1.65 sampling errors from $\beta$.
+
+- 95% of $\hat{\beta}$ are $\pm$ 1.96 sampling errors from $\beta$.
+
+```{r}
+# 95% of the estimates of beta 
+# will lie in the interval
+mean(beta_hat) - 1.96*sd(beta_hat)
+mean(beta_hat) + 1.96*sd(beta_hat)
+```
+]
+
+.right-column[
+```{r, echo = FALSE, out.width='80%'}
+knitr::include_graphics('img/68-90-99.png')
+```
+.center[.backgrnote[*Source:* ]]
+]]]
+
+
+---
+class: inverse middle center
+
+.push-left[
+<br>
+<br>
+<br>
+<br>
+<br>
+```{r, echo = FALSE, out.width='60%', fig.align='center'}
+knitr::include_graphics('https://www.business2community.com/wp-content/uploads/2013/03/Question1.jpg')
+```
+]
+
+.push-left[
+<br>
+But if I can't sample the whole (unobservable super) population, then I surely can't draw thousands of 50 person samples.
+]
+
+---
+class: clear
+layout: true
+# The standard error $\hat{\sigma}$ .font70[(i.e., estimated sampling error)]
+
+.left-column[
+True sampling error from our repeated samples:
+
+```{r}
+sd(beta_hat)
+```
+
+```{r ref.label = "sample1000_ols4", out.width='100%', fig.height = 4, fig.width = 6, echo = FALSE}
+```
+]
+
+---
+
+---
+
+.right-column[
 .push-left[
 ```{r, echo = FALSE, out.width='60%', fig.align='center'}
 knitr::include_graphics('https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Carl_Friedrich_Gauss_1840_by_Jensen.jpg/440px-Carl_Friedrich_Gauss_1840_by_Jensen.jpg')
@@ -630,20 +760,102 @@ Thanks to mathematicians, such as Carl Friedrich Gauss, we can *estimate* the sa
 ]]
 
 ---
-# The standard error of OLS $\hat{\sigma}(\beta)$
+
+.right-column[
+.push-left[
+Estimated sampling error each based on our very first 50-person sample using Gauss' formula for the standard error of an OLS regression coefficient, $\hat{\sigma}(\beta)=\sqrt{\frac{1}{n-2}\frac{\text{SD}(e)}{\text{SD}(x)}}$
+]
+.push-right[
+```{r}
+mod <- lm(psppsgva ~ eduyrs, 
+          data = ESS_sample) #<<
+screenreg(mod, digits = 3)
+```
+]]
+
+---
+
+.right-column[
+.push-left[
+Estimated sampling error each based on our very first 50-person sample using Gauss' formula for the standard error of an OLS regression coefficient, $\hat{\sigma}(\beta)=\sqrt{\frac{1}{n-2}\frac{\text{SD}(e)}{\text{SD}(x)}}$
+]
+.push-right[
+```{r}
+mod <- lm(psppsgva ~ eduyrs, 
+          data = ESS_sample_2) #<<
+screenreg(mod, digits = 3)
+```
+]]
+
+---
+layout: false
+# 95% Confidence intervals 
+
+.left-column[
+.content-box-green[
+If we continuously drew random samples and estimated the interval $\hat{\beta} \pm 1.96\hat{\sigma}$, how many of these would contain $\beta$?
+]
+]
+.right-column[
+<iframe src='https://seeing-theory.brown.edu/frequentist-inference/index.html#section2' width='1200' height='550' frameborder='0' scrolling='yes'></iframe>
+]
+
+---
+# Visualizing uncertainty .font70[in scatterplots]
 
 .push-left[
-True sampling error from our repeated samples:
+```{r 95ci, out.width='100%', fig.height = 4, fig.width = 6}
+ggplot(data = ESS_sample, aes(y = psppsgva, x = eduyrs)) +
+  geom_jitter(alpha = 1/3, width = 0.1, height = 0.1) +
+  geom_smooth(method = "lm", # OLS
+              level = 0.95) + # 95% CI
+  theme_minimal()
+```
 ]
 
 .push-right[
-Estimated sampling errors each based on a single sample using Gauss' formula for the standard error of an OLS regression coefficient: $\hat{\sigma}(\beta)=\sqrt{\frac{1}{n-2}\frac{\text{SD}(e)}{\text{SD}(x)}}$.
-
-
 
 ]
 
+--
+# Visualizing uncertainty .font70[Coefficient plots]
 
+.push-right[
+```{r}
+(plotdata <- lm(psppsgva ~ eduyrs, data = ESS_sample) %>%
+   tidy() %>% # Turn results into a tibble
+   mutate(
+     term = case_when( # Identify explanatry and confounding variables
+       term == "eduyrs" ~ "Years of Education",
+       term == "(Intercept)" ~ "Intercept"),
+     conf.low = estimate - 1.96 * std.error,
+     conf.high = estimate + 1.96 * std.error) %>% 
+   select(term, estimate, conf.low, conf.high)) # keep only some of all the info.
+```
+]
+
+--
+
+.push-left[
+```{r}
+ggplot(data = plotdata, aes(y = estimate, x = term)) +
+  geom_pointrange(aes(min = conf.low, max = conf.high)) +
+  coord_flip() +
+  labs(title = "Regression of political effficacy on education", 
+       x = "", y = expression(beta)) +
+  theme_minimal()
+```
+]
+
+---
+# 
+
+---
+
+Exercise
+
+---
+# Hypotheses tests
 
 ---
 class: inverse
