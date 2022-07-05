@@ -28,8 +28,9 @@ ESS <- read_spss("../../../assets/ESS9e03_1.sav") %>%
   filter(cntry == "DK") %>% # Keep only the Danish data,
   # Keep only a minimum set of variables we need today,
   select(idno, pspwght, gndr, eduyrs, agea, 
-         psppsgva, trstplt, trstplc) %>%
+         psppsgva, trstlgl, trstplc) %>%
   mutate(psppsgva = zap_labels(psppsgva), # Make numeric
+         trstlgl = zap_labels(trstlgl), # Make numeric
          trstplc = zap_labels(trstplc), # Make numeric
          pspwght = zap_labels(pspwght), # Make numeric
          eduyrs = case_when( # Censor years of education at 9 & 21 years.
@@ -40,11 +41,11 @@ ESS <- read_spss("../../../assets/ESS9e03_1.sav") %>%
 drop_na() # Delete cases with missing values.
 
 # Run the regression and make a regression table.
-mod1 <- lm(trstplc ~ eduyrs, data = ESS)
+mod1 <- lm_robust(trstplc ~ eduyrs, data = ESS)
 coef <- coef(mod1)["eduyrs"] %>% round(., 3) %>% as.scalar()
 ```
 
-1. Disregarding the weights for a moment: How much is a one-year increase in education associated with an average change in trust in the police? The answer is `r fitb(coef, width = "5")`
+1. Use the ESS with exactly the variables I use for today. Disregarding the weights for a moment: How much is a one-year increase in education associated with an average change in trust in the police? The answer is `r fitb(coef, width = "5")`
   
 `r hide("R solution -> dont' peak to early ;) !")`
 ```{r}
@@ -60,8 +61,9 @@ ESS <- read_spss("../../../assets/ESS9e03_1.sav") %>%
   filter(cntry == "DK") %>% # Keep only the Danish data,
   # Keep only a minimum set of variables we need today,
   select(idno, pspwght, gndr, eduyrs, agea, 
-         psppsgva, trstplt, trstplc) %>%
+         psppsgva, trstlgl, trstplc) %>%
   mutate(psppsgva = zap_labels(psppsgva), # Make numeric
+         trstlgl = zap_labels(trstlgl), # Make numeric
          trstplc = zap_labels(trstplc), # Make numeric
          pspwght = zap_labels(pspwght), # Make numeric
          eduyrs = case_when( # Censor years of education at 9 & 21 years.
@@ -72,8 +74,8 @@ ESS <- read_spss("../../../assets/ESS9e03_1.sav") %>%
 drop_na() # Delete cases with missing values.
 
 # Run the regression and make a regression table.
-mod1 <- lm(trstplc ~ eduyrs, data = ESS)
-screenreg(mod1, digits = 3)
+mod1 <- lm_robust(trstplc ~ eduyrs, data = ESS)
+screenreg(mod1, include.ci = FALSE, digits = 3)
 ```
 `r unhide()`
 
@@ -81,8 +83,8 @@ screenreg(mod1, digits = 3)
 `r hide("R solution -> dont' peak to early ;) !")`
 ```{r}
 # Run the regression and make a regression table.
-mod2 <- lm(trstplc ~ gndr, data = ESS)
-screenreg(mod2, digits = 3)
+mod2 <- lm_robust(trstplc ~ gndr, data = ESS)
+screenreg(mod2, include.ci = FALSE, digits = 3)
 ```
 `r unhide()`
 

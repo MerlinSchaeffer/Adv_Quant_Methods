@@ -34,7 +34,7 @@ BibOptions(check.entries = FALSE,
            style = "markdown",
            hyperlink = FALSE,
            no.print.fields = c("doi", "url", "ISSN", "urldate", "language", "note", "isbn", "volume"))
-# myBib <- ReadBib("Stats_II.bib", check = FALSE)
+myBib <- ReadBib("./../../../Stats_II.bib", check = FALSE)
 
 xaringanExtra::use_xaringan_extra(c("tile_view", "tachyons"))
 xaringanExtra::use_panelset()
@@ -64,7 +64,7 @@ ESS <- read_spss("../../../assets/ESS9e03_1.sav") %>%
   filter(cntry == "DK") %>% # Keep only the Danish data,
   # Keep only a minimum set of variables we need today,
   select(idno, pspwght, gndr, eduyrs, agea, 
-         psppsgva, trstplt, trstplc) %>%
+         psppsgva, trstlgl, trstplc) %>%
   drop_na() # Delete cases with missing values.
 ```
 ]]]
@@ -76,6 +76,7 @@ class: inverse
 .push-left[
 <iframe src='https://en.wikipedia.org/wiki/Political_efficacy' width='1200' height='670' frameborder='0' scrolling='yes'></iframe>
 ]
+
 
 --
 
@@ -383,7 +384,7 @@ knitr::include_graphics('img/Wang2.png')
 .left-column[
 - Most R commands have a weights argument.
 
-- With OLS regression you should use: `estmiatr::lm_robust()`. 
+- With OLS regression you should use: `estimatr::lm_robust()`. 
 .backgrnote[
 Using weights results in heteroscedastic residuals, which violates an assumption of OLS. lm_robust() corrects for that (i.e., is robust to it).]
 ]
@@ -401,7 +402,7 @@ ESS <- ESS %>% mutate(
     gndr = as_factor(gndr)) # Make factor
 
 # Estimate the models
-mod1 <- lm(psppsgva ~ eduyrs, data = ESS) # Unweighted
+mod1 <- lm_robust(psppsgva ~ eduyrs, data = ESS) # Unweighted
 
 mod2 <- lm_robust(psppsgva ~ eduyrs, data = ESS, # Weighted
                   weights = pspwght) #<<
@@ -689,24 +690,55 @@ ggplot(count_data) +
 .left-column[
 .center[We know the area under the Normal distribution!]
 
-- 90% of $\hat{\beta}$ are $\pm$ 1.65 sampling errors from $\beta$.
+- .alert["Critical values"]: 
+  + $\sigma = 1.65$ for 90%
+  + $\sigma = 1.96$ for 95%
 
-- 95% of $\hat{\beta}$ are $\pm$ 1.96 sampling errors from $\beta$.
-
+.font90[
 ```{r}
-# 95% of the estimates of beta 
-# will lie in the interval
-mean(beta_hat) - 1.96*sd(beta_hat)
-mean(beta_hat) + 1.96*sd(beta_hat)
+# If assuming the Normal distribution
+# is correct, then 95% of the 
+# estimates of beta will lie in 
+# the interval:
+mean(beta_hat) - 1.96 * sd(beta_hat)
+mean(beta_hat) + 1.96 * sd(beta_hat)
 ```
-]
+]]
 
 .right-column[
 ```{r, echo = FALSE, out.width='80%'}
 knitr::include_graphics('img/68-90-99.png')
 ```
-.center[.backgrnote[*Source:* ]]
-]]]
+.center[.backgrnote[*Source:* `r Citet(myBib, "veaux_stats_2021")`]]
+]]
+.panel[.panel-name[*t*-distribution]
+.left-column[
+.center[With small samples things are a bit more complex!]
+
+- Critical values depend on the degrees of freedom (df):
+  + Sample size $n$ minus the number of estimated parameters.
+
+.font80[
+```{r}
+# Critical value for 95%,
+# with df = 50 - 5:
+(crit_val <- qt(p = 0.975, df = 48))
+
+# 95% of the estimates of beta 
+# will lie in the interval
+mean(beta_hat) - crit_val * sd(beta_hat)
+mean(beta_hat) + crit_val * sd(beta_hat)
+```
+]]
+
+.right-column[
+```{r, echo = FALSE, out.width='65%'}
+knitr::include_graphics('img/t-dist.png')
+```
+.center[.backgrnote[*Source:* [Wikipedia](https://en.wikipedia.org/wiki/Student%27s_t-distribution)]]
+]]
+
+]
 
 
 ---
@@ -793,7 +825,7 @@ layout: false
 
 .left-column[
 .content-box-green[
-If we continuously drew random samples and estimated the interval $\hat{\beta} \pm 1.96\hat{\sigma}$, how many of these would contain $\beta$?
+If we continuously drew random samples and estimated the interval $\hat{\beta} \pm \text{Critical value} * \hat{\sigma}$, how many of these would contain $\beta$?
 ]
 ]
 .right-column[
@@ -801,70 +833,365 @@ If we continuously drew random samples and estimated the interval $\hat{\beta} \
 ]
 
 ---
-# Visualizing uncertainty .font70[in scatterplots]
+class: clear
+# Visualizing uncertainty .font70[95% CIs in scatterplots]
 
-.push-left[
-```{r 95ci, out.width='100%', fig.height = 4, fig.width = 6}
+.panelset[
+.panel[.panel-name[Code]
+```{r 95ci, fig.show = "hide"}
 ggplot(data = ESS_sample, aes(y = psppsgva, x = eduyrs)) +
   geom_jitter(alpha = 1/3, width = 0.1, height = 0.1) +
   geom_smooth(method = "lm", # OLS
-              level = 0.95) + # 95% CI
+              level = 0.95, # 95% CI
+              color = "#901A1E") + 
+  ylim(1, 5) +
+  labs(y = "The political system allows people \n to have a say in what government does",
+       x = "Years of education") +
   theme_minimal()
 ```
 ]
-
-.push-right[
-
-]
-
---
-# Visualizing uncertainty .font70[Coefficient plots]
-
-.push-right[
-```{r}
-(plotdata <- lm(psppsgva ~ eduyrs, data = ESS_sample) %>%
-   tidy() %>% # Turn results into a tibble
-   mutate(
-     term = case_when( # Identify explanatry and confounding variables
-       term == "eduyrs" ~ "Years of Education",
-       term == "(Intercept)" ~ "Intercept"),
-     conf.low = estimate - 1.96 * std.error,
-     conf.high = estimate + 1.96 * std.error) %>% 
-   select(term, estimate, conf.low, conf.high)) # keep only some of all the info.
+.panel[.panel-name[Plot]
+.push-left[
+```{r ref.label = "95ci", out.width='90%', fig.height = 4, fig.width = 6, echo = FALSE}
 ```
 ]
 
---
+.push-right[
+```{r ref.label = "sample1000_ols3", out.width='90%', fig.height = 4, fig.width = 6, echo = FALSE}
+```
+]]]
+
+---
+class: clear
+# Visualizing uncertainty .font70[95% CIs in coefficient plots]
+
+.panelset[
+.panel[.panel-name[Preparation code]
+```{r}
+(plotdata <- lm_robust(psppsgva ~ eduyrs, data = ESS_sample) %>%
+   tidy() %>% # Turn results into a tibble,
+   mutate( # Rename variables for the plot.
+     term = case_when(
+       term == "eduyrs" ~ "Years of Education",
+       term == "(Intercept)" ~ "Intercept")))
+```
+]
+
+.panel[.panel-name[Plot]
+.push-left[
+```{r Coefplot, fig.show = 'hide'}
+ggplot(data = plotdata, aes(y = estimate, x = term)) +
+  # Point with error-bars,
+  geom_pointrange(aes(min = conf.low, max = conf.high)) +
+  coord_flip() + # Flip Y- & X-Axis,
+  labs(
+    title = "Regression of political efficacy", 
+    x = "",
+    # Write Greek beta into axis title.
+    y = expression("Estimate of"~beta)) + 
+  theme_minimal()
+```
+]
+.push-right[
+```{r ref.label = "Coefplot", out.width='90%', fig.height = 4, fig.width = 6, echo = FALSE}
+```
+]
+]]
+
+---
+class: middle clear
+
+.left-column[
+```{r, echo = FALSE, out.width='100%'}
+knitr::include_graphics('https://cdn.dribbble.com/users/10549/screenshots/9916149/media/a9dbfea8e23e5b8e23db142528c3bc9f.png?compress=1&resize=1200x900&vertical=top')
+```
+]
+
+.right-column[
+<iframe src='exercise2.html' width='1000' height='600' frameborder='0' scrolling='yes'></iframe>
+]
+
+---
+class: inverse middle center
 
 .push-left[
-```{r}
-ggplot(data = plotdata, aes(y = estimate, x = term)) +
-  geom_pointrange(aes(min = conf.low, max = conf.high)) +
-  coord_flip() +
-  labs(title = "Regression of political effficacy on education", 
-       x = "", y = expression(beta)) +
-  theme_minimal()
+<br>
+<br>
+<br>
+<br>
+<br>
+```{r, echo = FALSE, out.width='60%', fig.align='center'}
+knitr::include_graphics('https://www.business2community.com/wp-content/uploads/2013/03/Question1.jpg')
+```
+]
+
+.push-left[
+<br>
+Thanks, that also clarifies quite a bit of the R output we haad ignored until now. But there is two more, we have not discussed yet: 
+
+The $t$-Statistic, the $p$-value, and these funny $*$.
+]
+
+---
+layout: true
+# Hypotheses tests .font60[The Null Hypothesis]
+
+.left-column[
+<br>
+
+```{r, echo = FALSE, out.width='100%', fig.align='center'}
+knitr::include_graphics('https://upload.wikimedia.org/wikipedia/commons/5/59/The_Debate_Of_Socrates_And_Aspasia.jpg')
+```
+.center[.backgrnote[The debate of Socrates and Aspasia]]
+
+- Doing research is basically like having a debate with an opponent who does not believe your argument.
+]
+
+---
+
+---
+
+.right-column[
+<br>
+
+.push-left[
+```{r, echo = FALSE, out.width='60%', fig.align='center'}
+knitr::include_graphics('https://www.convinceandconvert.com/wp-content/uploads/2014/07/bigstock-Portrait-of-a-senior-man-skept-12585803.jpg')
+```
+]
+
+.push-right[
+> More educated people read more news and thus know about all the corruption. 
+
+> Certainly, their believe in political efficacy is no different!
+
+> That you find otherwise in your data is just a chance finding.
+]]
+
+---
+
+.right-column[
+<br>
+
+.push-left[
+```{r, echo = FALSE, out.width='60%', fig.align='center'}
+knitr::include_graphics('https://www.convinceandconvert.com/wp-content/uploads/2014/07/bigstock-Portrait-of-a-senior-man-skept-12585803.jpg')
+```
+]
+
+.push-right[
+> More educated people read more news and thus know about all the corruption. 
+
+> Certainly, their believe in political efficacy is no different!
+
+> That you find otherwise in your data is just a chance finding.
+
+$\rightarrow \underbrace{H_{0}:}_{\text{Aka }H_{\text{0pponent  }} ;)}\beta_{\text{Years of education}} = 0$
+]]
+
+---
+layout: false
+# The weird logic .font60[of hypotheses tests]
+
+.push-left[
+- $H_{0}:$ Today, the sun is shining!
+
+- What is the probability that I randomly observe 5 kids, all of whom go to school with an umbrella, under the assumption: $H_{0} = \text{TRUE}$?
+  + $P(\text{5 Umbrella kids}|\text{Sunshine})$
+
+
+- If $P(\text{5 Umbrella kids}|\text{Sunshine}) < 5\%$,<br> I rather believe the sun is not shining!
+]
+
+.push-right[
+```{r, echo = FALSE, out.width='90%', fig.align='center'}
+knitr::include_graphics('https://i.pinimg.com/originals/20/a6/33/20a633fe23ae51592ee7919e983b41f9.jpg')
 ```
 ]
 
 ---
-# 
+layout: false
+# The weird logic .font60[of hypotheses tests]
+
+.push-left[
+- $H_{0}:$ Today, the sun is shining!
+
+- What is the probability that I randomly observe 5 kids, all of whom go to school with an umbrella, under the assumption: $H_{0} = \text{TRUE}$?
+  + $P(\text{5 Umbrella kids}|\text{Sunshine})$
+
+
+- If $P(\text{5 Umbrella kids}|\text{Sunshine}) < 5\%$,<br> I rather believe the sun is not shining!
+
+.content-box-green[.center[
+Can you come up with another example?
+]]
+]
+
+.push-right[
+```{r, echo = FALSE, out.width='90%', fig.align='center'}
+knitr::include_graphics('https://i.pinimg.com/originals/20/a6/33/20a633fe23ae51592ee7919e983b41f9.jpg')
+```
+]
 
 ---
+# Put into practice
 
-Exercise
+.left-column[
+<br>
+
+```{r, echo = FALSE, out.width='60%', fig.align='center'}
+knitr::include_graphics('https://www.convinceandconvert.com/wp-content/uploads/2014/07/bigstock-Portrait-of-a-senior-man-skept-12585803.jpg')
+```
+
+$\underbrace{H_{0}:}_{\text{Aka }H_{\text{0pponent  }} ;)}\beta_{\text{Years of education}} = 0$
+]
+
+--
+
+.right-column[
+.panelset[
+.panel[.panel-name[Regression model]
+```{r}
+mod <- lm_robust(psppsgva ~ eduyrs, data = ESS_sample)
+summary(mod, include.ci = FALSE, digits = 3)
+```
+]
+
+.panel[.panel-name[Hypothesis test]
+```{r density1, out.width='90%', fig.height = 4, fig.width = 6, echo = FALSE}
+library("car")
+library("highr")
+library("lattice")
+
+coef <- coef(mod)["eduyrs"] %>% round(3) %>% as.scalar()
+se <- vcov(mod) %>% diag() %>% sqrt() %>% round(3)
+se <- se["eduyrs"] %>% as.scalar()
+critval <- qt(0.975, 48)
+
+betas = seq(-4*se, 4*se, length = 1000)
+density = dnorm(betas, sd = se)
+data <- as.data.frame(cbind(betas,density))
+
+#First subst the data and add the coordinates to make it shade to y = 0
+shade <- rbind(c(-critval*se,-critval*se), subset(data, betas > -critval*se & betas < critval*se), c(critval*se, 0))
+
+ggplot(data= data, aes(x = betas, y = density)) +
+  geom_path() +
+  geom_polygon(data = shade, aes(betas, density), fill = "#de2d26") +
+  geom_vline(xintercept = 0, colour = "#045a8d", size = 1) +
+  geom_vline(xintercept = coef, colour = "#045a8d", size = 1, lty = 2) +
+  scale_x_continuous(breaks = c(-critval*se, 0, coef, critval*se), labels = c(expression("0 - Crit.Val.*"~sigma), expression("H0:"~beta~"=0"), expression("Est. of "~beta~"=0.042"), expression("0 + Crit.Val.*"~sigma)), guide = guide_axis(n.dodge = 2)) +
+  labs(y = "", x = "") +
+  theme_minimal() +
+  theme(legend.position = "none")
+```
+]
+.panel[.panel-name[t- and p-value]
+.push-left[
+- $t=\frac{\hat{\beta}}{\sigma}$: How many $\sigma$'s is $\hat{\beta}$ away from $H_{0}:\beta=0$?
+
+
+- $p$-value: The area outside $H_{0}:\beta=0 \pm t$
+  + $P(\hat{\beta}|\beta=0)$: The probability that we observe $\hat{\beta}$, although $\beta=0$ in reality.
+]
+.push-right[
+```{r density2, out.width='90%', fig.height = 4, fig.width = 6, echo = FALSE}
+teh <- mod %>% tidy() %>% filter(term == "eduyrs") %>% select(statistic) %>% pull()
+#First subst the data and add the coordinates to make it shade to y = 0
+shade <- rbind(c(-teh*se,-teh*se), subset(data, betas > -teh*se & betas < teh*se), c(teh*se, 0))
+
+ggplot(data= data, aes(x = betas, y = density)) +
+  geom_path() +
+  geom_polygon(data = shade, aes(betas, density), fill = "#de2d26") +
+  geom_vline(xintercept = 0, colour = "#045a8d", size = 1) +
+  geom_vline(xintercept = coef, colour = "#045a8d", size = 1, lty = 2) +
+  scale_x_continuous(breaks = c(-teh*se, 0, coef), labels = c(expression("0 - t*"~sigma), expression("H0:"~beta~"=0"), expression("Est. of "~beta~"=0.042"))) +
+  labs(y = "", x = "") +
+  theme_minimal() +
+  theme(legend.position = "none")
+```
+]]]
+]
 
 ---
-# Hypotheses tests
+# Learning goal achieved!
+
+.left-column[
+.center[**Is there a _general pattern_ that better educated people tend to have a stronger belief that the political system is democratic and that the government actually listens to the people?**
+
+```{r, echo = FALSE, out.width='90%'}
+knitr::include_graphics('https://media.istockphoto.com/vectors/politician-and-masks-vector-id1285284677?k=20&m=1285284677&s=612x612&w=0&h=pE_RkXIK8XaJBtuuHIsEbUo7pvtfu3yHEAQR5h8G-Jw=')
+```
+.center[.backgrnote[*Source*: [istockphoto.com](https://www.istockphoto.com/de)]]
+]]
+
+.right-column[
+.panelset[
+.panel[.panel-name[Regression table]
+```{r}
+mod <- lm_robust(psppsgva ~ eduyrs, data = ESS)
+summary(mod, include.ci = FALSE, digits = 3)
+```
+]
+.panel[.panel-name[Scatterplot]
+```{r goal, out.width='90%', fig.height = 4, fig.width = 6, echo = FALSE}
+ggplot(data = ESS, aes(y = psppsgva, x = eduyrs)) +
+  geom_jitter(aes(size = pspwght), alpha = 1/3, height = 0.1, width = 0.1) +
+  geom_hline(yintercept = mean(ESS$psppsgva, na.rm = TRUE), color = "orange") +
+  geom_smooth(method = "lm") +
+  labs(y = "The political system allows people \n to have a say in what government does",
+       x = "Years of education") +
+  theme_minimal() +
+  theme(legend.position = "none")
+```
+]
+.panel[.panel-name[Coefficient plot]
+```{r goal2, out.width='90%', fig.height = 4, fig.width = 6, echo = FALSE}
+lm_robust(psppsgva ~ eduyrs, data = ESS) %>%
+  tidy() %>%
+  mutate(
+    term = case_when(
+      term == "eduyrs" ~ "Years of education",
+      term == "(Intercept)" ~ "Intercept")) %>%
+  ggplot(aes(y = estimate, x = term)) +
+  geom_hline(yintercept = 0, color = "orange") +
+  geom_pointrange(aes(ymin = conf.low, ymax = conf.high)) +
+  coord_flip() +
+  labs(x = "", y = expression("Estimate of"~beta)) +
+  theme_minimal()
+```
+]]]
+
+---
+class: middle clear
+
+.left-column[
+```{r, echo = FALSE, out.width='100%'}
+knitr::include_graphics('https://cdn.dribbble.com/users/10549/screenshots/9916149/media/a9dbfea8e23e5b8e23db142528c3bc9f.png?compress=1&resize=1200x900&vertical=top')
+```
+]
+
+.right-column[
+<iframe src='exercise3.html' width='1000' height='600' frameborder='0' scrolling='yes'></iframe>
+]
 
 ---
 class: inverse
 # Today's general lessons
-
+- Randomness prohibits systematic bias!
+  + Random samples are therefore representative.
+- Where random sampling fails, we use post-stratification weights o counterbalance bias.
+- Random sampling results in a loss of reliability, the so-called sampling error.
+- These errors are normally or t-distributed, depending on the size of our sample.
+- We can estimate the sampling error from our data: $\hat{\sigma}$, the standard error.
+- Because we know the Normal and the t-distribution, we can estimate 95% Confidence intervals to express uncertainty and conduct hypotheses tests to see how likely our finding is simply the result of happenstance.
 
 ---
 class: inverse
 # Today's (important) R functions
+- `estimatr::lm_robust()`: OLS with robust standard errors when using weights.
+- `geom_smooth(method = "lm")`: Add OLS lines to scatter plots.
+- `tidy()` and Coefficient plots (see slides above).
 
 ---
 # References

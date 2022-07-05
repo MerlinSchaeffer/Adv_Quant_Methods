@@ -427,10 +427,10 @@ pre code {
 
 
 <ol style="list-style-type: decimal">
-<li>Disregarding the weights for a moment: How much is a one-year
-increase in education associated with an average change in trust in the
-police? The answer is
-<input class="webex-solveme nospaces" size="5" data-answer="[&quot;0.034&quot;,&quot;.034&quot;]"></input></li>
+<li>Use the ESS with exactly the variables I use for today. Disregarding
+the weights for a moment: How much is a one-year increase in education
+associated with an average change in trust in the police? The answer is
+<input class="webex-solveme nospaces" size="5" data-answer="[&quot;0.033&quot;,&quot;.033&quot;]"></input></li>
 </ol>
 <div class="webex-solution">
 <button>
@@ -448,8 +448,9 @@ ESS &lt;- read_spss(&quot;../../../assets/ESS9e03_1.sav&quot;) %&gt;%
   filter(cntry == &quot;DK&quot;) %&gt;% # Keep only the Danish data,
   # Keep only a minimum set of variables we need today,
   select(idno, pspwght, gndr, eduyrs, agea, 
-         psppsgva, trstplt, trstplc) %&gt;%
+         psppsgva, trstlgl, trstplc) %&gt;%
   mutate(psppsgva = zap_labels(psppsgva), # Make numeric
+         trstlgl = zap_labels(trstlgl), # Make numeric
          trstplc = zap_labels(trstplc), # Make numeric
          pspwght = zap_labels(pspwght), # Make numeric
          eduyrs = case_when( # Censor years of education at 9 &amp; 21 years.
@@ -460,20 +461,21 @@ ESS &lt;- read_spss(&quot;../../../assets/ESS9e03_1.sav&quot;) %&gt;%
 drop_na() # Delete cases with missing values.
 
 # Run the regression and make a regression table.
-mod1 &lt;- lm(trstplc ~ eduyrs, data = ESS)
-screenreg(mod1, digits = 3)
+mod1 &lt;- lm_robust(trstplc ~ eduyrs, data = ESS)
+screenreg(mod1, include.ci = FALSE, digits = 3)
 # 
 # =========================
 #              Model 1     
 # -------------------------
-# (Intercept)     7.512 ***
-#                (0.180)   
-# eduyrs          0.034 ** 
-#                (0.012)   
+# (Intercept)     7.530 ***
+#                (0.193)   
+# eduyrs          0.033 ** 
+#                (0.013)   
 # -------------------------
 # R^2             0.005    
 # Adj. R^2        0.004    
-# Num. obs.    1515        
+# Num. obs.    1511        
+# RMSE            1.783    
 # =========================
 # *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05</code></pre>
 </div>
@@ -491,20 +493,21 @@ police</option></select>.</li>
 R solution -&gt; dont&#39; peak to early ;) !
 </button>
 <pre class="r"><code># Run the regression and make a regression table.
-mod2 &lt;- lm(trstplc ~ gndr, data = ESS)
-screenreg(mod2, digits = 3)
+mod2 &lt;- lm_robust(trstplc ~ gndr, data = ESS)
+screenreg(mod2, include.ci = FALSE, digits = 3)
 # 
 # =========================
 #              Model 1     
 # -------------------------
-# (Intercept)     7.927 ***
-#                (0.063)   
-# gndrFemale      0.158    
-#                (0.092)   
+# (Intercept)     7.929 ***
+#                (0.068)   
+# gndrFemale      0.159    
+#                (0.091)   
 # -------------------------
 # R^2             0.002    
 # Adj. R^2        0.001    
-# Num. obs.    1515        
+# Num. obs.    1511        
+# RMSE            1.786    
 # =========================
 # *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05</code></pre>
 </div>
@@ -534,17 +537,17 @@ screenreg(list(mod1, mod2, mod1_weighted, mod2_weighted),
 # ===================================================================
 #              Unweighted    Unweighted    Weighted      Weighted    
 # -------------------------------------------------------------------
-# (Intercept)     7.512 ***     7.927 ***     7.750 ***     7.802 ***
-#                (0.180)       (0.063)       (0.260)       (0.093)   
-# eduyrs          0.034 **                    0.015                  
-#                (0.012)                     (0.017)                 
-# gndrFemale                    0.158                       0.308 ** 
-#                              (0.092)                     (0.118)   
+# (Intercept)     7.530 ***     7.929 ***     7.782 ***     7.801 ***
+#                (0.193)       (0.068)       (0.261)       (0.093)   
+# eduyrs          0.033 **                    0.013                  
+#                (0.013)                     (0.018)                 
+# gndrFemale                    0.159                       0.323 ** 
+#                              (0.091)                     (0.118)   
 # -------------------------------------------------------------------
-# R^2             0.005         0.002         0.001         0.007    
-# Adj. R^2        0.004         0.001         0.000         0.006    
-# Num. obs.    1515          1515          1515          1515        
-# RMSE                                        1.820         1.814    
+# R^2             0.005         0.002         0.001         0.008    
+# Adj. R^2        0.004         0.001         0.000         0.007    
+# Num. obs.    1511          1511          1511          1511        
+# RMSE            1.783         1.786         1.820         1.813    
 # ===================================================================
 # *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05</code></pre>
 </div>

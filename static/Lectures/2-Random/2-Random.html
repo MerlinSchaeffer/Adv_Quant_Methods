@@ -4,7 +4,7 @@
     <title>2 Randomness!</title>
     <meta charset="utf-8" />
     <meta name="author" content="Merlin Schaeffer  Department of Sociology" />
-    <meta name="date" content="2022-07-04" />
+    <meta name="date" content="2022-07-05" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/panelset/panelset.css" rel="stylesheet" />
     <script src="libs/panelset/panelset.js"></script>
@@ -24,7 +24,7 @@ class: center, middle, inverse, title-slide
 ### Merlin Schaeffer<br> Department of Sociology
 ]
 .date[
-### 2022-07-04
+### 2022-07-05
 ]
 
 ---
@@ -57,7 +57,7 @@ ESS &lt;- read_spss("../../../assets/ESS9e03_1.sav") %&gt;%
   filter(cntry == "DK") %&gt;% # Keep only the Danish data,
   # Keep only a minimum set of variables we need today,
   select(idno, pspwght, gndr, eduyrs, agea, 
-         psppsgva, trstplt, trstplc) %&gt;%
+         psppsgva, trstlgl, trstplc) %&gt;%
   drop_na() # Delete cases with missing values.
 ```
 ]]]
@@ -69,6 +69,7 @@ class: inverse
 .push-left[
 &lt;iframe src='https://en.wikipedia.org/wiki/Political_efficacy' width='1200' height='670' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
 ]
+
 
 --
 
@@ -391,7 +392,7 @@ weighted.mean(x = `Voted yes`, w = Weight) * 100 # 3
 .left-column[
 - Most R commands have a weights argument.
 
-- With OLS regression you should use: `estmiatr::lm_robust()`. 
+- With OLS regression you should use: `estimatr::lm_robust()`. 
 .backgrnote[
 Using weights results in heteroscedastic residuals, which violates an assumption of OLS. lm_robust() corrects for that (i.e., is robust to it).]
 ]
@@ -416,18 +417,18 @@ Using weights results in heteroscedastic residuals, which violates an assumption
 &lt;tbody&gt;
 &lt;tr style="border-top: 1px solid #000000;"&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(Intercept)&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;2.204&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;2.377&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;2.199&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;2.378&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.091)&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.113)&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.095)&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.114)&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;eduyrs&lt;/td&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.039&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.024&lt;sup&gt;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.025&lt;sup&gt;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
@@ -436,23 +437,23 @@ Using weights results in heteroscedastic residuals, which violates an assumption
 &lt;/tr&gt;
 &lt;tr style="border-top: 1px solid #000000;"&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;R&lt;sup&gt;2&lt;/sup&gt;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.025&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.026&lt;/td&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.010&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Adj. R&lt;sup&gt;2&lt;/sup&gt;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.024&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.025&lt;/td&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.009&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Num. obs.&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;1515&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;1515&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;1511&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;1511&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr style="border-bottom: 2px solid #000000;"&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;RMSE&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.891&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.900&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.889&lt;/td&gt;
 &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;tfoot&gt;
@@ -475,7 +476,7 @@ ESS &lt;- ESS %&gt;% mutate(
     gndr = as_factor(gndr)) # Make factor
 
 # Estimate the models
-mod1 &lt;- lm(psppsgva ~ eduyrs, data = ESS) # Unweighted
+mod1 &lt;- lm_robust(psppsgva ~ eduyrs, data = ESS) # Unweighted
 
 mod2 &lt;- lm_robust(psppsgva ~ eduyrs, data = ESS, # Weighted
 *                 weights = pspwght)
@@ -550,7 +551,7 @@ OK, great: Randomness prohibits systematic biases and thus enables us to draw re
 # Sampling error `\(\sigma\)` .font60[(aka sampling variability)]
 
 .push-left[
-- **Lets assume, the Danish ESS with it's 1515 respondents was our (unobservable super) population of interest.** .backgrnote[I thus don't use weights in this example ;)]
+- **Lets assume, the Danish ESS with it's 1511 respondents was our (unobservable super) population of interest.** .backgrnote[I thus don't use weights in this example ;)]
 
 
 - That would mean, we can *calculate* the true OLS regression line (in blue): `\(\beta = 0.039\)`.
@@ -564,7 +565,7 @@ OK, great: Randomness prohibits systematic biases and thus enables us to draw re
 # Sampling error `\(\sigma\)` .font60[(aka sampling variability)]
 
 .push-left[
-- **Lets assume, the Danish ESS with it's 1515 respondents was our (unobservable super) population of interest.** 
+- **Lets assume, the Danish ESS with it's 1511 respondents was our (unobservable super) population of interest.** 
   + Thus, I don't use weights in this example ;)
 
 
@@ -587,7 +588,7 @@ ESS_sample &lt;- ESS %&gt;% sample_n(50) # Draw the sample.
 # Sampling error `\(\sigma\)` .font60[(aka sampling variability)]
 
 .push-left[
-- **Lets assume, the Danish ESS with it's 1515 respondents was our (unobservable super) population of interest.** 
+- **Lets assume, the Danish ESS with it's 1511 respondents was our (unobservable super) population of interest.** 
   + Thus, I don't use weights in this example ;)
 
 
@@ -601,7 +602,7 @@ set.seed(1261990) # Random seed, to reproduce result.
 ESS_sample &lt;- ESS %&gt;% sample_n(50) # Draw the sample.
 ```
 
-- ... and *estimate* an OLS regression line based on that 50-person sample (in red): `\(\hat{\beta} = 0.051\)`.
+- ... and *estimate* an OLS regression line based on that 50-person sample (in red): `\(\hat{\beta} = 0.042\)`.
 ]
 
 .push-right[
@@ -612,7 +613,7 @@ ESS_sample &lt;- ESS %&gt;% sample_n(50) # Draw the sample.
 # Sampling error `\(\sigma\)` .font60[(aka sampling variability)]
 
 .push-left[
-- **Lets assume, the Danish ESS with it's 1515 respondents was our (unobservable super) population of interest.** 
+- **Lets assume, the Danish ESS with it's 1511 respondents was our (unobservable super) population of interest.** 
   + Thus, I don't use weights in this example ;)
 
 
@@ -625,7 +626,7 @@ ESS_sample &lt;- ESS %&gt;% sample_n(50) # Draw the sample.
 ESS_sample_2 &lt;- ESS %&gt;% sample_n(50) # Draw the sample.
 ```
 
-- ... and *estimate* an OLS regression line based on that 50-person sample (in red): `\(\hat{\beta} = 0.05\)`.
+- ... and *estimate* an OLS regression line based on that 50-person sample (in red): `\(\hat{\beta} = 0.012\)`.
 ]
 
 .push-right[
@@ -665,25 +666,57 @@ for (draw in 3:100) {
 .left-column[
 .center[We know the area under the Normal distribution!]
 
-- 90% of `\(\hat{\beta}\)` are `\(\pm\)` 1.65 sampling errors from `\(\beta\)`.
+- .alert["Critical values"]: 
+  + `\(\sigma = 1.65\)` for 90%
+  + `\(\sigma = 1.96\)` for 95%
 
-- 95% of `\(\hat{\beta}\)` are `\(\pm\)` 1.96 sampling errors from `\(\beta\)`.
-
+.font90[
 
 ```r
-# 95% of the estimates of beta 
-# will lie in the interval
-mean(beta_hat) - 1.96*sd(beta_hat)
-# [1] -0.0317
-mean(beta_hat) + 1.96*sd(beta_hat)
-# [1] 0.106
+# If assuming the Normal distribution
+# is correct, then 95% of the 
+# estimates of beta will lie in 
+# the interval:
+mean(beta_hat) - 1.96 * sd(beta_hat)
+# [1] -0.0276
+mean(beta_hat) + 1.96 * sd(beta_hat)
+# [1] 0.108
 ```
-]
+]]
 
 .right-column[
 &lt;img src="img/68-90-99.png" width="80%" style="display: block; margin: auto;" /&gt;
-.center[.backgrnote[*Source:* ]]
-]]]
+.center[.backgrnote[*Source:* Veaux, Velleman, and Bock (2021)]]
+]]
+.panel[.panel-name[*t*-distribution]
+.left-column[
+.center[With small samples things are a bit more complex!]
+
+- Critical values depend on the degrees of freedom (df):
+  + Sample size `\(n\)` minus the number of estimated parameters.
+
+.font80[
+
+```r
+# Critical value for 95%,
+# with df = 50 - 5:
+(crit_val &lt;- qt(p = 0.975, df = 48))
+# [1] 2.01
+# 95% of the estimates of beta 
+# will lie in the interval
+mean(beta_hat) - crit_val * sd(beta_hat)
+# [1] -0.0294
+mean(beta_hat) + crit_val * sd(beta_hat)
+# [1] 0.11
+```
+]]
+
+.right-column[
+&lt;img src="img/t-dist.png" width="65%" style="display: block; margin: auto;" /&gt;
+.center[.backgrnote[*Source:* [Wikipedia](https://en.wikipedia.org/wiki/Student%27s_t-distribution)]]
+]]
+
+]
 
 
 ---
@@ -714,10 +747,10 @@ True sampling error from our repeated samples:
 
 ```r
 sd(beta_hat)
-# [1] 0.0351
+# [1] 0.0347
 ```
 
-&lt;img src="2-Random_files/figure-html/unnamed-chunk-35-1.gif" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="2-Random_files/figure-html/unnamed-chunk-33-1.gif" width="100%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -749,13 +782,13 @@ screenreg(mod, digits = 3)
 # =======================
 #              Model 1   
 # -----------------------
-# (Intercept)   2.022 ***
-#              (0.451)   
-# eduyrs        0.051    
-#              (0.030)   
+# (Intercept)   1.965 ***
+#              (0.530)   
+# eduyrs        0.042    
+#              (0.036)   
 # -----------------------
-# R^2           0.056    
-# Adj. R^2      0.036    
+# R^2           0.027    
+# Adj. R^2      0.007    
 # Num. obs.    50        
 # =======================
 # *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
@@ -775,18 +808,18 @@ mod &lt;- lm(psppsgva ~ eduyrs,
 *         data = ESS_sample_2)
 screenreg(mod, digits = 3)
 # 
-# ======================
-#              Model 1  
-# ----------------------
-# (Intercept)   1.825 **
-#              (0.583)  
-# eduyrs        0.050   
-#              (0.040)  
-# ----------------------
-# R^2           0.032   
-# Adj. R^2      0.012   
-# Num. obs.    50       
-# ======================
+# =======================
+#              Model 1   
+# -----------------------
+# (Intercept)   2.624 ***
+#              (0.634)   
+# eduyrs        0.012    
+#              (0.042)   
+# -----------------------
+# R^2           0.002    
+# Adj. R^2     -0.019    
+# Num. obs.    50        
+# =======================
 # *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
 ```
 ]]
@@ -797,7 +830,7 @@ layout: false
 
 .left-column[
 .content-box-green[
-If we continuously drew random samples and estimated the interval `\(\hat{\beta} \pm 1.96\hat{\sigma}\)`, how many of these would contain `\(\beta\)`?
+If we continuously drew random samples and estimated the interval `\(\hat{\beta} \pm \text{Critical value} * \hat{\sigma}\)`, how many of these would contain `\(\beta\)`?
 ]
 ]
 .right-column[
@@ -805,82 +838,314 @@ If we continuously drew random samples and estimated the interval `\(\hat{\beta}
 ]
 
 ---
-# Visualizing uncertainty .font70[in scatterplots]
+class: clear
+# Visualizing uncertainty .font70[95% CIs in scatterplots]
 
-.push-left[
+.panelset[
+.panel[.panel-name[Code]
 
 ```r
 ggplot(data = ESS_sample, aes(y = psppsgva, x = eduyrs)) +
   geom_jitter(alpha = 1/3, width = 0.1, height = 0.1) +
   geom_smooth(method = "lm", # OLS
-              level = 0.95) + # 95% CI
+              level = 0.95, # 95% CI
+              color = "#901A1E") + 
+  ylim(1, 5) +
+  labs(y = "The political system allows people \n to have a say in what government does",
+       x = "Years of education") +
   theme_minimal()
 ```
-
-&lt;img src="2-Random_files/figure-html/95ci-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
+.panel[.panel-name[Plot]
+.push-left[
+&lt;img src="2-Random_files/figure-html/unnamed-chunk-37-1.png" width="90%" style="display: block; margin: auto;" /&gt;
 ]
 
 .push-right[
+&lt;img src="2-Random_files/figure-html/unnamed-chunk-38-1.gif" width="90%" style="display: block; margin: auto;" /&gt;
+]]]
 
-]
+---
+class: clear
+# Visualizing uncertainty .font70[95% CIs in coefficient plots]
 
---
-# Visualizing uncertainty .font70[Coefficient plots]
-
-.push-right[
+.panelset[
+.panel[.panel-name[Preparation code]
 
 ```r
-(plotdata &lt;- lm(psppsgva ~ eduyrs, data = ESS_sample) %&gt;%
-   tidy() %&gt;% # Turn results into a tibble
-   mutate(
-     term = case_when( # Identify explanatry and confounding variables
+(plotdata &lt;- lm_robust(psppsgva ~ eduyrs, data = ESS_sample) %&gt;%
+   tidy() %&gt;% # Turn results into a tibble,
+   mutate( # Rename variables for the plot.
+     term = case_when(
        term == "eduyrs" ~ "Years of Education",
-       term == "(Intercept)" ~ "Intercept"),
-     conf.low = estimate - 1.96 * std.error,
-     conf.high = estimate + 1.96 * std.error) %&gt;% 
-   select(term, estimate, conf.low, conf.high)) # keep only some of all the info.
-# # A tibble: 2 × 4
-#   term               estimate conf.low conf.high
-#   &lt;chr&gt;                 &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
-# 1 Intercept            2.02    1.14        2.91 
-# 2 Years of Education   0.0510 -0.00850     0.111
+       term == "(Intercept)" ~ "Intercept")))
+#                 term estimate std.error statistic p.value conf.low conf.high df  outcome
+# 1          Intercept    1.965     0.635     3.096 0.00327   0.6889     3.242 48 psppsgva
+# 2 Years of Education    0.042     0.043     0.976 0.33405  -0.0445     0.128 48 psppsgva
 ```
 ]
 
---
-
+.panel[.panel-name[Plot]
 .push-left[
 
 ```r
 ggplot(data = plotdata, aes(y = estimate, x = term)) +
+  # Point with error-bars,
   geom_pointrange(aes(min = conf.low, max = conf.high)) +
-  coord_flip() +
-  labs(title = "Regression of political effficacy on education", 
-       x = "", y = expression(beta)) +
+  coord_flip() + # Flip Y- &amp; X-Axis,
+  labs(
+    title = "Regression of political efficacy", 
+    x = "",
+    # Write Greek beta into axis title.
+    y = expression("Estimate of"~beta)) + 
   theme_minimal()
 ```
+]
+.push-right[
+&lt;img src="2-Random_files/figure-html/unnamed-chunk-40-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+]
+]]
 
-&lt;img src="2-Random_files/figure-html/unnamed-chunk-40-1.png" width="504" style="display: block; margin: auto;" /&gt;
+---
+class: middle clear
+
+.left-column[
+&lt;img src="https://cdn.dribbble.com/users/10549/screenshots/9916149/media/a9dbfea8e23e5b8e23db142528c3bc9f.png?compress=1&amp;resize=1200x900&amp;vertical=top" width="100%" style="display: block; margin: auto;" /&gt;
+]
+
+.right-column[
+&lt;iframe src='exercise2.html' width='1000' height='600' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
 ]
 
 ---
+class: inverse middle center
+
+.push-left[
+&lt;br&gt;
+&lt;br&gt;
+&lt;br&gt;
+&lt;br&gt;
+&lt;br&gt;
+&lt;img src="https://www.business2community.com/wp-content/uploads/2013/03/Question1.jpg" width="60%" style="display: block; margin: auto;" /&gt;
+]
+
+.push-left[
+&lt;br&gt;
+Thanks, that also clarifies quite a bit of the R output we haad ignored until now. But there is two more, we have not discussed yet: 
+
+The `\(t\)`-Statistic, the `\(p\)`-value, and these funny `\(*\)`.
+]
+
+---
+layout: true
+# Hypotheses tests .font60[The Null Hypothesis]
+
+.left-column[
+&lt;br&gt;
+
+&lt;img src="https://upload.wikimedia.org/wikipedia/commons/5/59/The_Debate_Of_Socrates_And_Aspasia.jpg" width="100%" style="display: block; margin: auto;" /&gt;
+.center[.backgrnote[The debate of Socrates and Aspasia]]
+
+- Doing research is basically like having a debate with an opponent who does not believe your argument.
+]
+
+---
+
+---
+
+.right-column[
+&lt;br&gt;
+
+.push-left[
+&lt;img src="https://www.convinceandconvert.com/wp-content/uploads/2014/07/bigstock-Portrait-of-a-senior-man-skept-12585803.jpg" width="60%" style="display: block; margin: auto;" /&gt;
+]
+
+.push-right[
+&gt; More educated people read more news and thus know about all the corruption. 
+
+&gt; Certainly, their believe in political efficacy is no different!
+
+&gt; That you find otherwise in your data is just a chance finding.
+]]
+
+---
+
+.right-column[
+&lt;br&gt;
+
+.push-left[
+&lt;img src="https://www.convinceandconvert.com/wp-content/uploads/2014/07/bigstock-Portrait-of-a-senior-man-skept-12585803.jpg" width="60%" style="display: block; margin: auto;" /&gt;
+]
+
+.push-right[
+&gt; More educated people read more news and thus know about all the corruption. 
+
+&gt; Certainly, their believe in political efficacy is no different!
+
+&gt; That you find otherwise in your data is just a chance finding.
+
+`\(\rightarrow \underbrace{H_{0}:}_{\text{Aka }H_{\text{0pponent  }} ;)}\beta_{\text{Years of education}} = 0\)`
+]]
+
+---
+layout: false
+# The weird logic .font60[of hypotheses tests]
+
+.push-left[
+- `\(H_{0}:\)` Today, the sun is shining!
+
+- What is the probability that I randomly observe 5 kids, all of whom go to school with an umbrella, under the assumption: `\(H_{0} = \text{TRUE}\)`?
+  + `\(P(\text{5 Umbrella kids}|\text{Sunshine})\)`
+
+
+- If `\(P(\text{5 Umbrella kids}|\text{Sunshine}) &lt; 5\%\)`,&lt;br&gt; I rather believe the sun is not shining!
+]
+
+.push-right[
+&lt;img src="https://i.pinimg.com/originals/20/a6/33/20a633fe23ae51592ee7919e983b41f9.jpg" width="90%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+layout: false
+# The weird logic .font60[of hypotheses tests]
+
+.push-left[
+- `\(H_{0}:\)` Today, the sun is shining!
+
+- What is the probability that I randomly observe 5 kids, all of whom go to school with an umbrella, under the assumption: `\(H_{0} = \text{TRUE}\)`?
+  + `\(P(\text{5 Umbrella kids}|\text{Sunshine})\)`
+
+
+- If `\(P(\text{5 Umbrella kids}|\text{Sunshine}) &lt; 5\%\)`,&lt;br&gt; I rather believe the sun is not shining!
+
+.content-box-green[.center[
+Can you come up with another example?
+]]
+]
+
+.push-right[
+&lt;img src="https://i.pinimg.com/originals/20/a6/33/20a633fe23ae51592ee7919e983b41f9.jpg" width="90%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+# Put into practice
+
+.left-column[
+&lt;br&gt;
+
+&lt;img src="https://www.convinceandconvert.com/wp-content/uploads/2014/07/bigstock-Portrait-of-a-senior-man-skept-12585803.jpg" width="60%" style="display: block; margin: auto;" /&gt;
+
+`\(\underbrace{H_{0}:}_{\text{Aka }H_{\text{0pponent  }} ;)}\beta_{\text{Years of education}} = 0\)`
+]
+
+--
+
+.right-column[
+.panelset[
+.panel[.panel-name[Regression model]
+
+```r
+mod &lt;- lm_robust(psppsgva ~ eduyrs, data = ESS_sample)
+summary(mod, include.ci = FALSE, digits = 3)
 # 
+# Call:
+# lm_robust(formula = psppsgva ~ eduyrs, data = ESS_sample)
+# 
+# Standard error type:  HC2 
+# 
+# Coefficients:
+#             Estimate Std. Error t value Pr(&gt;|t|) CI Lower CI Upper DF
+# (Intercept)    1.965      0.635   3.096  0.00327   0.6889    3.242 48
+# eduyrs         0.042      0.043   0.976  0.33405  -0.0445    0.128 48
+# 
+# Multiple R-squared:  0.0274 ,	Adjusted R-squared:  0.00713 
+# F-statistic: 0.952 on 1 and 48 DF,  p-value: 0.334
+```
+]
+
+.panel[.panel-name[Hypothesis test]
+&lt;img src="2-Random_files/figure-html/density1-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+]
+.panel[.panel-name[t- and p-value]
+.push-left[
+- `\(t=\frac{\hat{\beta}}{\sigma}\)`: How many `\(\sigma\)`'s is `\(\hat{\beta}\)` away from `\(H_{0}:\beta=0\)`?
+
+
+- `\(p\)`-value: The area outside `\(H_{0}:\beta=0 \pm t\)`
+  + `\(P(\hat{\beta}|\beta=0)\)`: The probability that we observe `\(\hat{\beta}\)`, although `\(\beta=0\)` in reality.
+]
+.push-right[
+&lt;img src="2-Random_files/figure-html/density2-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+]]]
+]
 
 ---
+# Learning goal achieved!
 
-Exercise
+.left-column[
+.center[**Is there a _general pattern_ that better educated people tend to have a stronger belief that the political system is democratic and that the government actually listens to the people?**
+
+&lt;img src="https://media.istockphoto.com/vectors/politician-and-masks-vector-id1285284677?k=20&amp;m=1285284677&amp;s=612x612&amp;w=0&amp;h=pE_RkXIK8XaJBtuuHIsEbUo7pvtfu3yHEAQR5h8G-Jw=" width="90%" style="display: block; margin: auto;" /&gt;
+.center[.backgrnote[*Source*: [istockphoto.com](https://www.istockphoto.com/de)]]
+]]
+
+.right-column[
+.panelset[
+.panel[.panel-name[Regression table]
+
+```r
+mod &lt;- lm_robust(psppsgva ~ eduyrs, data = ESS)
+summary(mod, include.ci = FALSE, digits = 3)
+# 
+# Call:
+# lm_robust(formula = psppsgva ~ eduyrs, data = ESS)
+# 
+# Standard error type:  HC2 
+# 
+# Coefficients:
+#             Estimate Std. Error t value  Pr(&gt;|t|) CI Lower CI Upper   DF
+# (Intercept)   2.1994    0.09466   23.24 2.41e-102   2.0137   2.3850 1509
+# eduyrs        0.0391    0.00645    6.06  1.74e-09   0.0264   0.0517 1509
+# 
+# Multiple R-squared:  0.0256 ,	Adjusted R-squared:  0.0249 
+# F-statistic: 36.7 on 1 and 1509 DF,  p-value: 1.74e-09
+```
+]
+.panel[.panel-name[Scatterplot]
+&lt;img src="2-Random_files/figure-html/goal-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+]
+.panel[.panel-name[Coefficient plot]
+&lt;img src="2-Random_files/figure-html/goal2-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+]]]
 
 ---
-# Hypotheses tests
+class: middle clear
+
+.left-column[
+&lt;img src="https://cdn.dribbble.com/users/10549/screenshots/9916149/media/a9dbfea8e23e5b8e23db142528c3bc9f.png?compress=1&amp;resize=1200x900&amp;vertical=top" width="100%" style="display: block; margin: auto;" /&gt;
+]
+
+.right-column[
+&lt;iframe src='exercise3.html' width='1000' height='600' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+]
 
 ---
 class: inverse
 # Today's general lessons
-
+- Randomness prohibits systematic bias!
+  + Random samples are therefore representative.
+- Where random sampling fails, we use post-stratification weights o counterbalance bias.
+- Random sampling results in a loss of reliability, the so-called sampling error.
+- These errors are normally or t-distributed, depending on the size of our sample.
+- We can estimate the sampling error from our data: `\(\hat{\sigma}\)`, the standard error.
+- Because we know the Normal and the t-distribution, we can estimate 95% Confidence intervals to express uncertainty and conduct hypotheses tests to see how likely our finding is simply the result of happenstance.
 
 ---
 class: inverse
 # Today's (important) R functions
+- `estimatr::lm_robust()`: OLS with robust standard errors when using weights.
+- `geom_smooth(method = "lm")`: Add OLS lines to scatter plots.
+- `tidy()` and Coefficient plots (see slides above).
 
 ---
 # References
