@@ -1098,11 +1098,12 @@ ggplot(data= data, aes(x = betas, y = density)) +
 ```{r density2, out.width='90%', fig.height = 4, fig.width = 6, echo = FALSE}
 teh <- mod %>% tidy() %>% filter(term == "eduyrs") %>% select(statistic) %>% pull()
 #First subst the data and add the coordinates to make it shade to y = 0
-shade <- rbind(c(-teh*se,-teh*se), subset(data, betas > -teh*se & betas < teh*se), c(teh*se, 0))
+shade2 <- rbind(c(-teh*se,-teh*se), subset(data, betas > -teh*se & betas < teh*se), c(teh*se, 0))
 
 ggplot(data= data, aes(x = betas, y = density)) +
   geom_path() +
   geom_polygon(data = shade, aes(betas, density), fill = "#de2d26") +
+  geom_polygon(data = shade2, aes(betas, density), fill = "orange") +
   geom_vline(xintercept = 0, colour = "#045a8d", size = 1) +
   geom_vline(xintercept = coef, colour = "#045a8d", size = 1, lty = 2) +
   scale_x_continuous(breaks = c(-teh*se, 0, coef), labels = c(expression("0 - t*"~sigma), expression("H0:"~beta~"=0"), expression("Est. of "~beta~"=0.042"))) +
