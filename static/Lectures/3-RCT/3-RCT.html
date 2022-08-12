@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="" xml:lang="">
   <head>
-    <title>Randomized Controlled Trials</title>
+    <title>Randomized Controlled Trials (RCT)</title>
     <meta charset="utf-8" />
     <meta name="author" content="Merlin Schaeffer  Department of Sociology" />
-    <meta name="date" content="2022-07-07" />
+    <meta name="date" content="2022-08-12" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
     <script src="libs/tile-view/tile-view.js"></script>
@@ -20,7 +20,7 @@
 class: center, middle, inverse, title-slide
 
 .title[
-# Randomized Controlled Trials
+# Randomized Controlled Trials (RCT)
 ]
 .subtitle[
 ## The Gold Standard of Causal Inference
@@ -29,13 +29,18 @@ class: center, middle, inverse, title-slide
 ### Merlin Schaeffer<br> Department of Sociology
 ]
 .date[
-### 2022-07-07
+### 2022-08-12
 ]
 
 ---
 
 
+class: clear
 
+&lt;img src="https://pbs.twimg.com/media/EouSsOKUUAM0P_y.jpg" width="60%" style="display: block; margin: auto;" /&gt;
+.backgrnote[.center[*Source:* Polack, Thomas, Kitchin, Absalon, Gurtman, Lockhart, Perez, Pérez Marc, Moreira, Zerbini, Bailey, Swanson, Roychoudhury, Koury, Li, Kalina, Cooper, Frenck, Hammitt, Türeci, Nell, Schaefer, Ünal, Tresnan, Mather, Dormitzer, Şahin, Jansen, and Gruber (2020)]]
+
+---
 # The goal of social science research
 
 .font140[.center[.alert[Use data to discover patterns ("social facts" in Durkheim's terms), &lt;br&gt; and the social mechanisms that **bring them about**.]]]
@@ -49,12 +54,12 @@ class: inverse
 &lt;br&gt;
 .font200[**The Integration Paradox**]
 
-Immigrant minorities who have better established themselves among the (native) mainstream report more discrimination on average.
+The better immigrant minorities establish themselves among the (native) mainstream the *more* discrimination do they report.
 ]
+
 .push-right[
 &lt;img src="img/Meta.png" width="83%" style="display: block; margin: auto;" /&gt;
-.backgrnote[.center[*Source:*]]
-]
+.font70[.center[*Source:* Schaeffer and Kas (2021)]]]
 
 ---
 class: inverse
@@ -66,13 +71,13 @@ class: inverse
 &lt;img src="img/Steinmann1.png" width="100%" style="display: block; margin: auto;" /&gt;&lt;img src="img/Steinmann2.png" width="100%" style="display: block; margin: auto;" /&gt;
 
 &lt;img src="img/Steinmann3.png" width="100%" style="display: block; margin: auto;" /&gt;
-.backgrnote[.center[*Source:*]]
+.font70[.center[*Source:* Steinmann (2019)]]
 ]
 
 --
 
 .left-column[.center[.font110[
-**Does news media consumption** &lt;br&gt;&lt;br&gt; _**causally increase**_ &lt;br&gt;&lt;br&gt; **immigrant minorities' perceptions that they are being discriminated?**
+**Does news media consumption** &lt;br&gt;&lt;br&gt; _**increase**_ &lt;br&gt;&lt;br&gt; **immigrant minorities' perceptions that they are being discriminated?**
 ]]]
 
 ---
@@ -96,22 +101,31 @@ Why might this be problematic?
 
 
 - But they are .alert[not credible scientific evidence.]
-  + People often weird ideas of how things affect them.
-  + Their insights are not based on scientific methods.
+  + Many people have wrong ideas of how things affect them.
 
-&lt;img src="https://images.prismic.io/sketchplanations/7bceee66-1da8-4c63-ad1c-580283f1f16c_155448043121.jpg?auto=compress,format" width="50%" style="display: block; margin: auto;" /&gt;
+.left-column[
+&lt;img src="https://feeds.abplive.com/onecms/images/uploaded-images/2021/07/02/498323a6432ea9753e6f84c1e92e5858_original.jpg" width="100%" style="display: block; margin: auto;" /&gt;
+]
+.right-column[
+&lt;iframe src='https://academic.oup.com/esr/article/27/5/669/598636' width='450' height='330' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+]
 
 ]
 
 ---
 class: clear
-# Hypothesis `\(\rightarrow\)` comparison
+# Instead: Hypothesis `\(\rightarrow\)` comparison
+
+.alert[Causal claims imply a counter factual: Things would have been different, had] `\(X\)` .alert[not happened.]
 
 - `\(H_{1}:\)` Media consumption increases immigrant minorities' perceptions that they are being discriminated!
   + .backgrnote[ 
-  `\(H_{0}:\)` Media consumption *does not affect* ...
+  `\(H_{0}:\)` Media consumption *has no effect* on immigrant minorities' perceptions of discrimination.
   ]
 
+--
+
+`$$\downarrow$$`
 
 - `\(0 &lt; Avg_{n}[\text{Discrimination}|\text{Read news} = 1] - Avg_{n}[\text{Discrimination}|\text{Read news} = 0]\)`
  + .backgrnote[ 
@@ -122,7 +136,7 @@ class: clear
 
 
 .content-box-green[
-.center[**What are the comparisons implied in the following?**]
+.center[**What are the comparisons implied in the following examples?**]
 
 - **Marx**: Capitalist labor alienates people from engaging with their many creative talents and reduces psychological wellbeing.
 
@@ -143,16 +157,15 @@ pacman::p_load(
   estimatr, # Regression for weighted data,
   modelr, # Turn results of lm() into a tibble,
   modelsummary, # for balance tables,
-  ggdag, # Draw DAGs,
   texreg) # regression tables with nice layout.
 ```
 ]
 .panel[.panel-name[The APAX survey]
 .left-column[
 - PI: Merlin Schaeffer;&lt;br&gt; Postdoc: Judith Kas.
-- XYZ Immigrants and children of immigrants.
+- 1093 Immigrants and children of immigrants.
 - Berlin, Hamburg, Munich, Frankfurt, and Cologne.
-- Interviewed in august 2021
+- Interviewed in August 2021
 - Financed by [German Research Council](https://gepris.dfg.de/gepris/projekt/428878477?language=en)
 ]
 
@@ -175,40 +188,45 @@ Discrimination means that a person is treated worse than others including specif
 .left-column[.font80[
 
 ```r
-load("APAX.RData") # Read APAX data
+load("APAX.RData") # Read APAX data,
 APAX &lt;- APAX %&gt;% mutate(
-  # News in minutes
+  # News in minutes,
   news = news_hrs*60 + news_mins, 
-  news_yn = case_when( # News Yes/No
-    news &lt; 10 ~ 0, # Less than 15  minutes
-    news &gt; 14 ~ 1, # More than 15  minutes
+  news_yn = case_when( # News Yes/No,
+    news &lt; 10 ~ 0, # Less than 15  minutes,
+    news &gt; 14 ~ 1, # More than 15  minutes,
     TRUE ~ as.numeric(NA)),
-  # Average discrimination across domains.
+  # Average discrimination index across domains,
 * dis_index = rowmeans(
-    dis_trainee, dis_job, dis_school, 
-    dis_house, dis_gov, dis_public, 
-    na.rm = TRUE))
+*   dis_trainee, dis_job, dis_school,
+*   dis_house, dis_gov, dis_public,
+*   na.rm = TRUE),
+  # Z-standardized discrimination index.
+  z_dis_index = scale(dis_index) %&gt;% 
+    as.numeric())
 ```
 ]]
 
 .right-column[
 
 ```
-# # A tibble: 1,102 × 18
-#    news_hrs news_mins dis_trainee dis_job dis_school dis_house dis_gov dis_public gewFAKT gender   age imor  german
-#       &lt;dbl&gt;     &lt;dbl&gt;       &lt;dbl&gt;   &lt;dbl&gt;      &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt;      &lt;dbl&gt;   &lt;dbl&gt; &lt;fct&gt;  &lt;dbl&gt; &lt;fct&gt; &lt;fct&gt; 
-#  1        1         0           3       3          4         5       2          2   0.105 Männl…    35 Immi… Ja    
-#  2        1         1           5      NA          1         1       1          1   0.103 Männl…    30 Immi… Nein  
-#  3        0        30           1       2          1         3       3          2   0.802 Männl…    35 Immi… Nein  
-#  4        0        10           3       3          2         5       1          3   0.104 Männl…    28 Immi… Nein  
-#  5        0        30           2       3         NA         5       3          3   0.639 Weibl…    37 Immi… Nein  
-#  6        2         0          NA       2         NA         4       3          2   0.2   Männl…    51 Immi… Ja    
-#  7        3        58           1       1          1         1       1          1   2.42  Männl…    40 Immi… Ja    
-#  8        5         0           3       1          1         3       1          1   0.102 Männl…    31 Chil… Ja    
-#  9        1        15           4       4          4         4       4          4   6.19  Männl…    76 Immi… Nein  
-# 10        0        30           1       2          1         1       1          2   2.08  Männl…    32 Immi… Nein  
-# # … with 1,092 more rows, and 5 more variables: nbh_exposed &lt;dbl&gt;, appearance &lt;fct&gt;, news &lt;dbl&gt;, news_yn &lt;dbl&gt;,
-# #   dis_index &lt;dbl&gt;
+# # A tibble: 1,093 × 21
+#    antidiscr_law dis_i…¹ news_…² news_…³ dis_t…⁴ dis_job dis_s…⁵ dis_h…⁶ dis_gov dis_p…⁷ gewFAKT gender   age imor 
+#            &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt; &lt;fct&gt;  &lt;dbl&gt; &lt;fct&gt;
+#  1             5    3.17       1       0       3       3       4       5       2       2   0.105 Männl…    35 Immi…
+#  2             4    1.8        1       1       5      NA       1       1       1       1   0.103 Männl…    30 Immi…
+#  3             3    2          0      30       1       2       1       3       3       2   0.802 Männl…    35 Immi…
+#  4             5    2.83       0      10       3       3       2       5       1       3   0.104 Männl…    28 Immi…
+#  5             4    3.2        0      30       2       3      NA       5       3       3   0.639 Weibl…    37 Immi…
+#  6             5    2.75       2       0      NA       2      NA       4       3       2   0.2   Männl…    51 Immi…
+#  7             2    1          3      58       1       1       1       1       1       1   2.42  Männl…    40 Immi…
+#  8             4    1.67       5       0       3       1       1       3       1       1   0.102 Männl…    31 Chil…
+#  9             5    4          1      15       4       4       4       4       4       4   6.19  Männl…    76 Immi…
+# 10             4    1.33       0      30       1       2       1       1       1       2   2.08  Männl…    32 Immi…
+# # … with 1,083 more rows, 7 more variables: german &lt;fct&gt;, nbh_exposed &lt;dbl&gt;, appearance &lt;fct&gt;, article &lt;chr&gt;,
+# #   news &lt;dbl&gt;, news_yn &lt;dbl&gt;, z_dis_index &lt;dbl&gt;, and abbreviated variable names ¹​dis_index, ²​news_hrs,
+# #   ³​news_mins, ⁴​dis_trainee, ⁵​dis_school, ⁶​dis_house, ⁷​dis_public
+# # ℹ Use `print(n = ...)` to see more rows, and `colnames()` to see all variable names
 ```
 ]
 
@@ -225,47 +243,47 @@ APAX &lt;- APAX %&gt;% mutate(
 
 
 ```r
-mod &lt;- lm_robust(dis_index ~ news_yn, 
+ols &lt;- lm_robust(dis_index ~ news_yn, 
                  weight = gewFAKT, data = APAX)
-screenreg(mod, include.ci = FALSE, digits = 3)
+screenreg(ols, include.ci = FALSE, digits = 3)
 # 
 # =========================
 #              Model 1     
 # -------------------------
-# (Intercept)     2.241 ***
-#                (0.134)   
-# news_yn        -0.205    
-#                (0.145)   
+# (Intercept)     2.266 ***
+#                (0.133)   
+# news_yn        -0.172    
+#                (0.144)   
 # -------------------------
-# R^2             0.007    
-# Adj. R^2        0.006    
-# Num. obs.    1034        
+# R^2             0.005    
+# Adj. R^2        0.004    
+# Num. obs.    1025        
 # RMSE            0.745    
 # =========================
 # *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
 ```
 
 ---
-# Small recap .font60[Hypotheses tests, *t*- and *p*-values]
+# Small recap .font60[Hypotheses tests, *t*- and, *p*-values]
 
 .left-column[
 
 ```r
-mod &lt;- lm_robust(dis_index ~ news_yn, 
+ols &lt;- lm_robust(dis_index ~ news_yn, 
                  weight = gewFAKT, data = APAX)
-screenreg(mod, include.ci = FALSE, digits = 3)
+screenreg(ols, include.ci = FALSE, digits = 3)
 # 
 # =========================
 #              Model 1     
 # -------------------------
-# (Intercept)     2.241 ***
-#                (0.134)   
-# news_yn        -0.205    
-#                (0.145)   
+# (Intercept)     2.266 ***
+#                (0.133)   
+# news_yn        -0.172    
+#                (0.144)   
 # -------------------------
-# R^2             0.007    
-# Adj. R^2        0.006    
-# Num. obs.    1034        
+# R^2             0.005    
+# Adj. R^2        0.004    
+# Num. obs.    1025        
 # RMSE            0.745    
 # =========================
 # *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
@@ -273,7 +291,7 @@ screenreg(mod, include.ci = FALSE, digits = 3)
 ]
 
 .right-column[.font80[
-`\(-0.205 = Avg_{n}[\text{Discrimination}|\text{Read news} = 1] - Avg_{n}[\text{Discrimination}|\text{Read news} = 0]\)`
+`\(-0.172 = Avg_{n}[\text{Discrimination}|\text{Read news} = 1] - Avg_{n}[\text{Discrimination}|\text{Read news} = 0]\)`
 ]
 
 .mini-left[
@@ -285,14 +303,21 @@ screenreg(mod, include.ci = FALSE, digits = 3)
 ]]
 
 ---
+class: middle clear
 
-EXERCISE 1: NEWS and anto discr-policies
+.left-column[
+&lt;img src="https://www.laserfiche.com/wp-content/uploads/2014/10/femalecoder.jpg" width="80%" style="display: block; margin: auto;" /&gt;
+]
+
+.right-column[
+&lt;iframe src='exercise1.html' width='1000' height='600' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+]
 
 ---
 # Potential outcomes .font60[Ferda's personal news effect]
 
 .push-left[
-`\(\text{News effect}_{\text{Ferda}} = \underbrace{\text{Discrimination}_{1, \text{Ferda}}}_{\text{Read news} = 1} - \underbrace{\text{Discrimination}_{0, \text{Ferda}}}_{\text{News} = 0}.\)`
+`\(\text{News effect}_{\text{Ferda}} = \underbrace{\text{Discrimination}_{1, \text{Ferda}}}_{\text{Read news} = 1} - \underbrace{\text{Discrimination}_{0, \text{Ferda}}}_{\text{Read news} = 0}.\)`
 
 .font80[
 |                        Ferda|
@@ -339,6 +364,7 @@ Actual news          | 1    | 0
 
 ---
 
+---
 .right-column[
 `$$\begin{equation} \begin{split}
 \text{Anomie effect}_{\text{Ferda}} &amp; \neq \underbrace{\text{Discrimination}_{1, \text{Ferda}}}_{4} - \underbrace{\text{Discrimination}_{0, \text{Tuki}}}_{5} = -1
@@ -353,8 +379,8 @@ Why is it misleading to compare Ferda to Tuki?
 .right-column[.font90[
 
 `$$\begin{equation} \begin{split}
-\text{Anomie effect}_{\text{Ferda}} &amp; \neq \underbrace{\text{Discr.}_{1, \text{Ferda}}}_{4} - \underbrace{\text{Discr.}_{0, \text{Tuki}}}_{5} = -1 \\
-&amp; = \underbrace{\text{Discr.}_{1, \text{Ferda}} \color{gray}{(- \text{Discr.}_{0, \text{Ferda}}}}_{\text{True news effect: 4 - 5 = 1}} \color{gray}{+} \underbrace{\color{gray}{\text{Discr.}_{0, \text{Ferda}})} - \text{Discr.}_{0, \text{Tuki}}}_{\text{"Selection bias": 4 - 5 = -1}}.
+\text{Anomie effect}_{\text{Ferda}} &amp; \neq \underbrace{\text{Discr}_{1, \text{Ferda}}}_{4} - \underbrace{\text{Discr}_{0, \text{Tuki}}}_{5} = -1 \\
+&amp; = \underbrace{\text{Discr}_{1, \text{Ferda}} \color{gray}{(- \text{Discr}_{0, \text{Ferda}}}}_{\text{True news effect: 4 - 2 = +2}} \color{gray}{+} \underbrace{\color{gray}{\text{Discr}_{0, \text{Ferda}})} - \text{Discr}_{0, \text{Tuki}}}_{\text{"Selection bias": 2 - 5 = -3}}.
 \end{split} \end{equation}$$`
 ]]
 
@@ -362,14 +388,14 @@ Why is it misleading to compare Ferda to Tuki?
 
 .right-column[.font90[
 `$$\begin{equation} \begin{split}
-\text{Anomie effect}_{\text{Ferda}} &amp; \neq \underbrace{\text{Discr.}_{1, \text{Ferda}}}_{4} - \underbrace{\text{Discr.}_{0, \text{Tuki}}}_{5} = -1 \\
-&amp; = \underbrace{\text{Discr.}_{1, \text{Ferda}} \color{gray}{(- \text{Discr.}_{0, \text{Ferda}}}}_{\text{True news effect: 4 - 5 = 1}} \color{gray}{+} \underbrace{\color{gray}{\text{Discr.}_{0, \text{Ferda}})} - \text{Discr.}_{0, \text{Tuki}}}_{\text{"Selection bias": 4 - 5 = -1}}.
+\text{Anomie effect}_{\text{Ferda}} &amp; \neq \underbrace{\text{Discr}_{1, \text{Ferda}}}_{4} - \underbrace{\text{Discr}_{0, \text{Tuki}}}_{5} = -1 \\
+&amp; = \underbrace{\text{Discr}_{1, \text{Ferda}} \color{gray}{(- \text{Discr}_{0, \text{Ferda}}}}_{\text{True news effect: 4 - 2 = +2}} \color{gray}{+} \underbrace{\color{gray}{\text{Discr}_{0, \text{Ferda}})} - \text{Discr}_{0, \text{Tuki}}}_{\text{"Selection bias": 2 - 5 = -3}}.
 \end{split} \end{equation}$$`
 ]
 
 .content-box-red[.center[
 **Selection bias**: `\(Y_{0, \text{Ferda}} \neq Y_{0, \text{Tuki}}\)`
-`\(\Rightarrow\)` Tuki's *baseline* (i.e., no news) perceived discrimination &lt;br&gt; is higher than Ferda's!
+`\(\Rightarrow\)` Tuki's *baseline* &lt;br&gt; (i.e., no news) perceived discrimination &lt;br&gt; is higher than Ferda's!
 ]]]
 
 ---
@@ -406,10 +432,10 @@ APAX %&gt;%
   # Select variables for which I want my balance test,
   select(news_yn, dis_index, age, nbh_exposed, imor, german, gewFAKT) %&gt;%
 * rename(weights = gewFAKT) %&gt;% # Rename the weights variable!
-* datasummary_balance(
-*   formula = ~ news_yn, # By Reading news Yes/No
+* datasummary_balance( # Make a balance table,
+*   formula = ~ news_yn, # by Reading news Yes/No
 *   data = . ,
-*   title = "Perceived discrimination and socio-demographic characterisitcs of those who read news and those who don't"
+*   title = "Socio-demographic characterisitcs of those who read news and those who don't"
 * )
 ```
 
@@ -418,7 +444,7 @@ APAX %&gt;%
 ]
 .panel[.panel-name[Balance table]
 &lt;table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;"&gt;
-&lt;caption&gt;Perceived discrimination and socio-demographic characterisitcs of those who read news and those who don't&lt;/caption&gt;
+&lt;caption&gt;Socio-demographic characterisitcs of those who read news and those who don't&lt;/caption&gt;
  &lt;thead&gt;
 &lt;tr&gt;
 &lt;th style="empty-cells: hide;border-bottom:hidden;" colspan="2"&gt;&lt;/th&gt;
@@ -441,9 +467,9 @@ APAX %&gt;%
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; dis_index &lt;/td&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 2.2 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2.3 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 0.9 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 2.0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2.1 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 0.9 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; -0.2 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 0.1 &lt;/td&gt;
@@ -451,19 +477,19 @@ APAX %&gt;%
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; age &lt;/td&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 37.4 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 13.1 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 43.7 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 16.0 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 6.3 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 37.2 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 13.0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 43.8 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 15.4 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 6.6 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 2.7 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;box-shadow: 0px 1px"&gt; nbh_exposed &lt;/td&gt;
    &lt;td style="text-align:left;box-shadow: 0px 1px"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:right;box-shadow: 0px 1px"&gt; 4.3 &lt;/td&gt;
+   &lt;td style="text-align:right;box-shadow: 0px 1px"&gt; 4.2 &lt;/td&gt;
    &lt;td style="text-align:right;box-shadow: 0px 1px"&gt; 0.8 &lt;/td&gt;
-   &lt;td style="text-align:right;box-shadow: 0px 1px"&gt; 4.3 &lt;/td&gt;
+   &lt;td style="text-align:right;box-shadow: 0px 1px"&gt; 4.2 &lt;/td&gt;
    &lt;td style="text-align:right;box-shadow: 0px 1px"&gt; 1.0 &lt;/td&gt;
    &lt;td style="text-align:right;box-shadow: 0px 1px"&gt; 0.0 &lt;/td&gt;
    &lt;td style="text-align:right;box-shadow: 0px 1px"&gt; 0.1 &lt;/td&gt;
@@ -480,41 +506,41 @@ APAX %&gt;%
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; imor &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; Immigrant &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 110 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 70.5 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 503 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 56.9 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Child of immigrant &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 47 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 30.1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 399 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 45.6 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt;  &lt;/td&gt;
    &lt;td style="text-align:right;"&gt;  &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; Child of immigrant &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 46 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 29.5 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 381 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 43.1 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Immigrant &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 109 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 69.9 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 476 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 54.4 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt;  &lt;/td&gt;
    &lt;td style="text-align:right;"&gt;  &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; german &lt;/td&gt;
    &lt;td style="text-align:left;"&gt; Ja &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 62 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 39.7 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 538 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 60.9 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 64 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 41.0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 561 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 64.1 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt;  &lt;/td&gt;
    &lt;td style="text-align:right;"&gt;  &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
    &lt;td style="text-align:left;"&gt; Nein &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 94 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 60.3 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 346 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 39.1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 92 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 59.0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 314 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 35.9 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt;  &lt;/td&gt;
    &lt;td style="text-align:right;"&gt;  &lt;/td&gt;
   &lt;/tr&gt;
@@ -524,37 +550,53 @@ APAX %&gt;%
 
 ---
 layout: true
-# Directed Acyclical Graphs (DAGs)
+# Directed Acyclical Graphs (DAG)
 
 .push-left[
-- Nodes represent variables.
+- **Nodes** represent variables, **Arrows\edges** represent causal effects (Pearl, Glymour, and Jewell, 2016).
+  + there cannot by a cycle: Follow paths until one re-arrives at the origin.
 
-- Arrows\edges represent causal effects.
 
-- DAGs are theoretical models and can contain observed and unobserved variables.
+- DAGs are theoretical models and can contain observed *and unobserved* variables.
 
-- A DAG should capture the underlying social processes and how they came to be represented in the data. LIT
 
-- **Backdoor paths**: all those paths linking `\(X\)` and `\(Y\)` that start with an arrow going into `\(X\)`. LIT
+- A DAG should capture the social processes by which `\(X\)` comes to be associated with `\(Y\)` in your data.
+
+
+- **Backdoor paths**: All paths linking `\(X\)` and `\(Y\)` that start with an arrow into `\(X\)` (Pearl, Glymour, and Jewell, 2016; Breen, 2022).
+
 
 - **Confounder \ Backdoor bias** = Selection bias.
 ]
 
 ---
+
 .push-right[
 &lt;img src="3-RCT_files/figure-html/DAG1-1.png" width="40%" style="display: block; margin: auto;" /&gt;
-]
+.backgrnote[
+The red bi-directed arrow is officially not part of the DAG, but helps you see that the correlation between `\(X\)` and `\(Y\)` is spurious because of `\(C\)`.
+]]
 
 ---
 
 .push-right[
 &lt;img src="3-RCT_files/figure-html/DAG2-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+
+.backgrnote[
+The red bi-directed arrow is officially not part of the DAG, but helps you see that the correlation between read news and perceived discrimination is biased because immigrant minorities who obtained German citizenship read news more often than those who are foreign citizens.]
 ]
 
 ---
 layout: false
+class: middle clear
 
-EXERCISE: DAG &amp; balance
+.left-column[
+&lt;img src="https://www.laserfiche.com/wp-content/uploads/2014/10/femalecoder.jpg" width="80%" style="display: block; margin: auto;" /&gt;
+]
+
+.right-column[
+&lt;iframe src='exercise2.html' width='1000' height='600' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+]
 
 ---
 # Solution: Experiment
@@ -562,7 +604,7 @@ EXERCISE: DAG &amp; balance
 .left-column[
 - We do not observe, we actively intervene.
 
-- Thereby, we control, who gets `\(X\)` and who does not!
+- Thereby *we* control, who gets `\(X\)` and who does not!
 
 &lt;img src="./img/randomization1.png" width="67%" style="display: block; margin: auto;" /&gt;
 ]
@@ -593,10 +635,12 @@ EXERCISE: DAG &amp; balance
 - Randomization is "fair": Everyone has the same probability to be part of the treatment or control group, .alert[regardless of who they are]!
 
 .content-box-green[
-.center[Why does this result in equal (Discr.) baselines?]
-.font90[
-`\(Avg[\text{Discr.}_{i, \text{Read news} = 0}|\text{Read news} = 1] = Avg[\text{Discr.}_{i, \text{Read news} = 0}|\text{Read news} = 0]\)`
-]]]
+.center[Why does this result in equal (Discr) baselines?]
+`$$\begin{equation} \begin{split}
+Avg[\text{Discr}_{i, \text{Read news} = 0}|\text{Read news} = 1] \\
+= Avg[\text{Discr}_{i, \text{Read news} = 0}|\text{Read news} = 0]
+\end{split} \end{equation}$$`
+]]
 
 ---
 # Randomized Controlled Trials (RCT)
@@ -604,8 +648,11 @@ EXERCISE: DAG &amp; balance
 .push-left[
 
 - If we randomly divide subjects into treatment and control groups, they come from the same underlying population. 
+  + `\(\rightarrow\)` they will be the same *in every way*,&lt;br&gt; **including their `\(Y_{0}\)` **!
 
-`\(\rightarrow\)` they will be the same *in every way*,&lt;br&gt; **including their `\(Y_{0}\)` **!
+- Beware, in practice randomization can fail, especially if your sample is small.
+  
+
 ]
 
 ---
@@ -616,19 +663,16 @@ class: clear
 
 .font160[**APAX survey experiment**]
 - We asked APAX subjects to read a news article.
-- We *randomized* which article they saw.
-]
 
----
+&lt;img src="./img/randomization2.png" width="80%" style="display: block; margin: auto;" /&gt;
 
-.push-right[
-&lt;img src="./img/Exp2.png" width="83%" style="display: block; margin: auto;" /&gt;
-]
+- Survey app .alert[randomly] decided, who got: 
+  + Venus `\(\rightarrow\)` *control group*, 
+  + Discrimination `\(\rightarrow\)` *treatment group 1*.
+  + Integration `\(\rightarrow\)` *treatment group 2*.
 
----
 
-.push-right[
-&lt;img src="./img/Exp1.png" width="75%" style="display: block; margin: auto;" /&gt;
+
 ]
 
 ---
@@ -638,37 +682,348 @@ class: clear
 ]
 
 ---
+
+.push-right[
+&lt;img src="./img/Exp2.png" width="89%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
+.push-right[
+&lt;img src="./img/Exp1.png" width="75%" style="display: block; margin: auto;" /&gt;
+]
+
+---
 layout: false
+# Balance test
+
+.panelset[
+.panel[.panel-name[R code]
+
+```r
+APAX %&gt;%
+  # Select variables for which I want my balance test,
+  select(article, news_yn, age, nbh_exposed, imor, german, gewFAKT) %&gt;%
+  rename(weights = gewFAKT) %&gt;% # Rename the weights variable! 
+  datasummary_balance( # Make a balance table,
+*   formula = ~ article, # by treatment/control
+    data = . ,
+    title = "Socio-demographic characterisitcs by treatment and control"
+  )
+```
+]
+
+.panel[.panel-name[Balance table]
+&lt;table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;"&gt;
+&lt;caption&gt;Socio-demographic characterisitcs by treatment and control&lt;/caption&gt;
+ &lt;thead&gt;
+&lt;tr&gt;
+&lt;th style="empty-cells: hide;border-bottom:hidden;" colspan="2"&gt;&lt;/th&gt;
+&lt;th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="2"&gt;&lt;div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; "&gt;Contr (N=358)&lt;/div&gt;&lt;/th&gt;
+&lt;th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="2"&gt;&lt;div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; "&gt;Treat_1 (N=375)&lt;/div&gt;&lt;/th&gt;
+&lt;th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="2"&gt;&lt;div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; "&gt;Treat_2 (N=360)&lt;/div&gt;&lt;/th&gt;
+&lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt;    &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Mean &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Std. Dev. &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Mean &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Std. Dev. &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Mean &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Std. Dev. &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; news_yn &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.8 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.4 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.9 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.3 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.8 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.4 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; age &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 41.8 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 15.7 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 41.2 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 12.4 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 43.8 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 16.9 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;box-shadow: 0px 1px"&gt; nbh_exposed &lt;/td&gt;
+   &lt;td style="text-align:left;box-shadow: 0px 1px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:right;box-shadow: 0px 1px"&gt; 4.2 &lt;/td&gt;
+   &lt;td style="text-align:right;box-shadow: 0px 1px"&gt; 0.9 &lt;/td&gt;
+   &lt;td style="text-align:right;box-shadow: 0px 1px"&gt; 4.2 &lt;/td&gt;
+   &lt;td style="text-align:right;box-shadow: 0px 1px"&gt; 1.1 &lt;/td&gt;
+   &lt;td style="text-align:right;box-shadow: 0px 1px"&gt; 4.2 &lt;/td&gt;
+   &lt;td style="text-align:right;box-shadow: 0px 1px"&gt; 1.0 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; N &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; Pct. &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; N &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; Pct. &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; N &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; Pct. &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; imor &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Child of immigrant &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 156 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 43.6 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 157 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 41.9 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 150 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 41.7 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Immigrant &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 202 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 56.4 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 218 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 58.1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 210 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 58.3 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; german &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Ja &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 215 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 60.1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 222 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 59.2 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 213 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 59.2 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Nein &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 143 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 39.9 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 153 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 40.8 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 147 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 40.8 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+]]
+
+---
+# Causal effect of news articles
+
+.push-left[
+
+```r
+# Run OLS regression to analyze the survey RCT.
+ols &lt;- lm_robust(dis_index ~ article, 
+                 weight = gewFAKT, data = APAX)
+zols &lt;- lm_robust(z_dis_index ~ article, 
+                  weight = gewFAKT, data = APAX)
+
+# Make a nice regression table of results.
+htmlreg(
+  list(ols, zols), include.ci = FALSE, digits = 3,
+  custom.model.names = c("OLS", "Z-OLS"),
+  custom.coef.names = c("Intercept (Venus control)", 
+                        "Article on discrimination", 
+                        "Article on integration"))
+```
+]
+
+.push-right[
+&lt;table class="texreg" style="margin: 10px auto;border-collapse: collapse;border-spacing: 0px;caption-side: bottom;color: #000000;border-top: 2px solid #000000;"&gt;
+&lt;caption&gt;Statistical models&lt;/caption&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/th&gt;
+&lt;th style="padding-left: 5px;padding-right: 5px;"&gt;OLS&lt;/th&gt;
+&lt;th style="padding-left: 5px;padding-right: 5px;"&gt;Z-OLS&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr style="border-top: 1px solid #000000;"&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Intercept (Venus control)&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;1.979&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;-0.171&lt;sup&gt;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.067)&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.074)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Article on discrimination&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.239&lt;sup&gt;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.264&lt;sup&gt;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.107)&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.118)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Article on integration&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.137&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.151&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.118)&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.130)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr style="border-top: 1px solid #000000;"&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;R&lt;sup&gt;2&lt;/sup&gt;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.012&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.012&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Adj. R&lt;sup&gt;2&lt;/sup&gt;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.010&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.010&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Num. obs.&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;1085&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;1085&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr style="border-bottom: 2px solid #000000;"&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;RMSE&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.743&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.818&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;tfoot&gt;
+&lt;tr&gt;
+&lt;td style="font-size: 0.8em;" colspan="3"&gt;&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;p &amp;lt; 0.001; &lt;sup&gt;&amp;#42;&amp;#42;&lt;/sup&gt;p &amp;lt; 0.01; &lt;sup&gt;&amp;#42;&lt;/sup&gt;p &amp;lt; 0.05&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tfoot&gt;
+&lt;/table&gt;
+]
+
+---
+# Visualize
+
+.panelset[
+.panel[.panel-name[Preparation code]
+
+```r
+(plotdata &lt;- zols %&gt;%
+   tidy() %&gt;% # Turn results into a tibble,
+   mutate( # Rename variables for the plot.
+     term = case_when(
+       term == "articleTreat_1" ~ "Discrimination",
+       term == "articleTreat_2" ~ "Integration",
+       term == "(Intercept)" ~ "Intercept")))
+#             term estimate std.error statistic p.value conf.low conf.high   df     outcome
+# 1      Intercept   -0.171    0.0743     -2.30  0.0216  -0.3166   -0.0252 1082 z_dis_index
+# 2 Discrimination    0.264    0.1176      2.24  0.0252   0.0328    0.4944 1082 z_dis_index
+# 3    Integration    0.151    0.1302      1.16  0.2475  -0.1049    0.4062 1082 z_dis_index
+```
+]
+
+.panel[.panel-name[Plot]
+.push-left[
+
+```r
+ggplot(data = plotdata %&gt;% filter(term != "Intercept"),
+       aes(y = estimate, x = term)) +
+  # Point with error-bars,
+  geom_hline(yintercept = 0, color = "orange", 
+             lty = "dashed") +
+  geom_pointrange(aes(min = conf.low, max = conf.high)) +
+  coord_flip() + # Flip Y- &amp; X-Axis,
+  labs(
+    title = "Causal effect of news articles", 
+    x = "Article on",
+    # Write Greek beta into axis title.
+    y = "Comparison to control group (article on Venus) 
+    in standard deviations") + 
+  theme_minimal()
+```
+]
+.push-right[
+&lt;img src="3-RCT_files/figure-html/unnamed-chunk-28-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+]
+]]
+
+---
+# Learning goal achieved!
+
+.left-column[
+News media consumption *increases* immigrant minorities' perceptions that they are being discriminated! .backgrnote[
+(If the news report about discrimination in society.)]
+]
+
+.right-column[
+&lt;img src="3-RCT_files/figure-html/unnamed-chunk-29-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+class: middle clear
+
+.left-column[
+&lt;img src="https://www.laserfiche.com/wp-content/uploads/2014/10/femalecoder.jpg" width="80%" style="display: block; margin: auto;" /&gt;
+]
+
+.right-column[
+&lt;iframe src='exercise3.html' width='1000' height='600' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+]
 
 ---
 class: inverse
 # Today's general lessons
 
-1. R allows you to easily download tons of interesting data.
-2. You can combine (i.e., join/merge) data than contain (at least party) the same observations, if they have some variables in common that uniquely identify them. This allows for a lot of fascinating analyses and great term papers!
-3. Always make a scatter plot of the variables you want to correlate.
-4. Z-standardization helps interpretation and gives a common unit to different variables.
-5. The correlation coefficient is an easy to understand statistic of a (undirected) association between two variables.
-6. As a linear model, regression expresses on outcome variable as a linear function of a predictor. It thus estimates a directed relation. 
-7. `\(\beta\)` the slope, tells us how average levels of `\(\hat{y}\)` chnage with a unit increase in `\(x\)`. 
-8. OLS finds the linear model that best fits the data.
-9. Regression should under normal circumstances not be interpreted in causal terms.
-10. Categorical predictors are (typically) dummy coded and then tel us the average difference in the outcome between a category to the reference group.
-11. We should make sure that the correlations and regressions we estimate actually capture aprrox. linear relationships and that they are not driven by outliers.
+1. Causal claims are counter factual claims. Therefore they imply a comparison.
+2. Potential outcomes: A theoretical framework to think about the comparison implied in causal claims.
+3. Direct comparisons are often fruitless and naïv, because of selection/confounder bias.
+4. Selection bias: The baseline of the outcome is unequal between treated and non-treated subjects, because certain type of people select into/out of the treatment.
+5. Balance test: Attempt to test for selection bias, but can only be applied to variables that are observed in the data at hand.
+6. Directed Acyclic Graphs (DAG): A graphical theoretical framework to think about causality. It consists of nodes and directed edges. It may not contain cycles.
+7. Backdoor paths: All paths linking `\(X\)` and `\(Y\)` that start with an arrow into `\(X\)`. Backdoor paths result in confounder/selection bias.
+8. Confounder bias: = selection bias.
+9. Experiment: An artificial environment controlled by the researcher. Allows researchers to control treatment assignment.
+10. Randomized Controlled Trials (RCT): An experiment with treatment and control group in which researchers assign treatment or control at random.
+11. Randomization: Random assignment of treatment and control ensures a balanced comparison (no selection/confounder bias). Randomization can fail, especially in small samples.
+12. RCTs can be analyzed with a simple OLS regression.
 
 ---
 class: inverse
 # Today's (important) functions
 
-1. `cor()`: Estimate correlation coefficient.
-2. `lm()`: Estimate linear OLS regression.
-3. `plot(model_object)` to test regression assumptions.
-4. `inner_join()`, `left_join()`, `right_join()`, and `full_join()` allow you to join/merge different tibbles together than have common observations and a key that identifies them.
-5. `textreg::texreg()`, `textreg::htmlreg()`, and `textreg::screenreg()`: Create nicely-formatted (html, Word, ASCII, or Latex) tables of (one or several) regression models.
-6. `scale()` z-standardizes variables. But sometimes it returns a matrix rather than a vector. Therefore it makes sense to always code `scale(x) %&gt;% as.numeric()` to ensure you get an numeric vector out of it.
+1. `funiture::rowmeans()`: Combine several variables (that need to have a similar scale) to an additive index.
+2. `modelsummary::datasummary_balance()`: Make a balance table.
 
 ---
 # References
+
+.font80[
+Breen, R. (2022). "Causal inference with observational data". In: _Handbook of Sociological Science:
+Contributions to Rigorous Sociology_. Ed. by K. Gërxhani, N. de Graaf and W. Raub. Edward Elgar
+Publishing, pp. 272-286.
+
+Pearl, J., M. Glymour, and N. P. Jewell (2016). _Causal Inference in Statistics - A Primer_. 1.th ed.
+Chichester, West Sussex: Wiley.
+
+Polack, F. P., S. J. Thomas, N. Kitchin, et al. (2020). "Safety and Efficacy of the BNT162b2 mRNA
+Covid-19 Vaccine". In: _New England Journal of Medicine_, pp. 2603-2615.
+
+Schaeffer, M. and J. Kas (2021). "The Integration Paradox: A Theoretical Synthesis and Meta-Analysis".
+In: _Unpublished manuscript_.
+
+Steinmann, J. (2019). "The paradox of integration: why do higher educated new immigrants perceive more
+discrimination in Germany?" In: _Journal of Ethnic and Migration Studies_, pp. 1377-1400.
+]
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="../template/remark-latest.min.js"></script>

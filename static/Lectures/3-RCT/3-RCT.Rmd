@@ -1,5 +1,5 @@
 ---
-title: "Randomized Controlled Trials"
+title: "Randomized Controlled Trials (RCT)"
 subtitle: "The Gold Standard of Causal Inference"
 author: "Merlin Schaeffer<br> Department of Sociology"
 date: "`r Sys.Date()`"
@@ -42,7 +42,14 @@ myBib <- ReadBib("./../../../Stats_II.bib", check = FALSE)
 xaringanExtra::use_xaringan_extra(c("tile_view", "tachyons"))
 xaringanExtra::use_panelset()
 ```
+class: clear
 
+```{r, echo = FALSE, out.width='60%', fig.align='center'}
+knitr::include_graphics('https://pbs.twimg.com/media/EouSsOKUUAM0P_y.jpg')
+```
+.backgrnote[.center[*Source:* `r Citet(myBib, "polack_safety_2020")`]]
+
+---
 # The goal of social science research
 
 .font140[.center[.alert[Use data to discover patterns ("social facts" in Durkheim's terms), <br> and the social mechanisms that **bring them about**.]]]
@@ -58,14 +65,14 @@ class: inverse
 <br>
 .font200[**The Integration Paradox**]
 
-Immigrant minorities who have better established themselves among the (native) mainstream report more discrimination on average.
+The better immigrant minorities establish themselves among the (native) mainstream the *more* discrimination do they report.
 ]
+
 .push-right[
 ```{r, echo = FALSE, out.width='83%', fig.align='center'}
 knitr::include_graphics('img/Meta.png')
 ```
-.backgrnote[.center[*Source:*]]
-]
+.font70[.center[*Source:* `r Citet(myBib, "schaeffer_integration_2021")`]]]
 
 ---
 class: inverse
@@ -84,13 +91,13 @@ knitr::include_graphics('img/Steinmann2.png')
 ```{r, echo = FALSE, out.width='100%', fig.align='center'}
 knitr::include_graphics('img/Steinmann3.png')
 ```
-.backgrnote[.center[*Source:*]]
+.font70[.center[*Source:* `r Citet(myBib, "steinmann_paradox_2019")`]]
 ]
 
 --
 
 .left-column[.center[.font110[
-**Does news media consumption** <br><br> _**causally increase**_ <br><br> **immigrant minorities' perceptions that they are being discriminated?**
+**Does news media consumption** <br><br> _**increase**_ <br><br> **immigrant minorities' perceptions that they are being discriminated?**
 ]]]
 
 ---
@@ -116,24 +123,33 @@ Why might this be problematic?
 
 
 - But they are .alert[not credible scientific evidence.]
-  + People often weird ideas of how things affect them.
-  + Their insights are not based on scientific methods.
+  + Many people have wrong ideas of how things affect them.
 
-```{r, echo = FALSE, out.width='50%', fig.align='center'}
-knitr::include_graphics('https://images.prismic.io/sketchplanations/7bceee66-1da8-4c63-ad1c-580283f1f16c_155448043121.jpg?auto=compress,format')
+.left-column[
+```{r, echo = FALSE, out.width='100%', fig.align='center'}
+knitr::include_graphics('https://feeds.abplive.com/onecms/images/uploaded-images/2021/07/02/498323a6432ea9753e6f84c1e92e5858_original.jpg')
 ```
+]
+.right-column[
+<iframe src='https://academic.oup.com/esr/article/27/5/669/598636' width='450' height='330' frameborder='0' scrolling='yes'></iframe>
+]
 
 ]
 
 ---
 class: clear
-# Hypothesis $\rightarrow$ comparison
+# Instead: Hypothesis $\rightarrow$ comparison
+
+.alert[Causal claims imply a counter factual: Things would have been different, had] $X$ .alert[not happened.]
 
 - $H_{1}:$ Media consumption increases immigrant minorities' perceptions that they are being discriminated!
   + .backgrnote[ 
-  $H_{0}:$ Media consumption *does not affect* ...
+  $H_{0}:$ Media consumption *has no effect* on immigrant minorities' perceptions of discrimination.
   ]
 
+--
+
+$$\downarrow$$
 
 - $0 < Avg_{n}[\text{Discrimination}|\text{Read news} = 1] - Avg_{n}[\text{Discrimination}|\text{Read news} = 0]$
  + .backgrnote[ 
@@ -144,7 +160,7 @@ class: clear
 
 
 .content-box-green[
-.center[**What are the comparisons implied in the following?**]
+.center[**What are the comparisons implied in the following examples?**]
 
 - **Marx**: Capitalist labor alienates people from engaging with their many creative talents and reduces psychological wellbeing.
 
@@ -164,16 +180,15 @@ pacman::p_load(
   estimatr, # Regression for weighted data,
   modelr, # Turn results of lm() into a tibble,
   modelsummary, # for balance tables,
-  ggdag, # Draw DAGs,
   texreg) # regression tables with nice layout.
 ```
 ]
 .panel[.panel-name[The APAX survey]
 .left-column[
 - PI: Merlin Schaeffer;<br> Postdoc: Judith Kas.
-- XYZ Immigrants and children of immigrants.
+- 1093 Immigrants and children of immigrants.
 - Berlin, Hamburg, Munich, Frankfurt, and Cologne.
-- Interviewed in august 2021
+- Interviewed in August 2021
 - Financed by [German Research Council](https://gepris.dfg.de/gepris/projekt/428878477?language=en)
 ]
 
@@ -195,19 +210,22 @@ Discrimination means that a person is treated worse than others including specif
 .panel[.panel-name[Get the APAX data]
 .left-column[.font80[
 ```{r results = FALSE}
-load("APAX.RData") # Read APAX data
+load("APAX.RData") # Read APAX data,
 APAX <- APAX %>% mutate(
-  # News in minutes
+  # News in minutes,
   news = news_hrs*60 + news_mins, 
-  news_yn = case_when( # News Yes/No
-    news < 10 ~ 0, # Less than 15  minutes
-    news > 14 ~ 1, # More than 15  minutes
+  news_yn = case_when( # News Yes/No,
+    news < 10 ~ 0, # Less than 15  minutes,
+    news > 14 ~ 1, # More than 15  minutes,
     TRUE ~ as.numeric(NA)),
-  # Average discrimination across domains.
+  # Average discrimination index across domains,
   dis_index = rowmeans( #<<
-    dis_trainee, dis_job, dis_school, 
-    dis_house, dis_gov, dis_public, 
-    na.rm = TRUE))
+    dis_trainee, dis_job, dis_school, #<<
+    dis_house, dis_gov, dis_public, #<<
+    na.rm = TRUE), #<<
+  # Z-standardized discrimination index.
+  z_dis_index = scale(dis_index) %>% 
+    as.numeric())
 ```
 ]]
 
@@ -237,13 +255,13 @@ ggplot(data = APAX, aes(y = dis_index, x = news)) +
 --
 
 ```{r naiv_OLS}
-mod <- lm_robust(dis_index ~ news_yn, 
+ols <- lm_robust(dis_index ~ news_yn, 
                  weight = gewFAKT, data = APAX)
-screenreg(mod, include.ci = FALSE, digits = 3)
+screenreg(ols, include.ci = FALSE, digits = 3)
 ```
 
 ---
-# Small recap .font60[Hypotheses tests, *t*- and *p*-values]
+# Small recap .font60[Hypotheses tests, *t*- and, *p*-values]
 
 .left-column[
 ```{r naiv_OLS}
@@ -251,7 +269,7 @@ screenreg(mod, include.ci = FALSE, digits = 3)
 ]
 
 .right-column[.font80[
-$`r coef(mod)["news_yn"]` = Avg_{n}[\text{Discrimination}|\text{Read news} = 1] - Avg_{n}[\text{Discrimination}|\text{Read news} = 0]$
+$`r coef(ols)["news_yn"]` = Avg_{n}[\text{Discrimination}|\text{Read news} = 1] - Avg_{n}[\text{Discrimination}|\text{Read news} = 0]$
 ]
 
 .mini-left[
@@ -266,11 +284,11 @@ library("car")
 library("highr")
 library("lattice")
 
-coef <- coef(mod)["news_yn"] %>% round(3) %>% as.scalar()
-se <- vcov(mod) %>% diag() %>% sqrt() %>% round(3)
+coef <- coef(ols)["news_yn"] %>% round(3) %>% as.scalar()
+se <- vcov(ols) %>% diag() %>% sqrt() %>% round(3)
 se <- se["news_yn"] %>% as.scalar()
 critval <- qt(0.975, 1032)
-teh <- mod %>% tidy() %>% filter(term == "news_yn") %>% select(statistic) %>% pull() %>% abs()
+teh <- ols %>% tidy() %>% filter(term == "news_yn") %>% select(statistic) %>% pull() %>% abs()
 
 
 betas = seq(-4*se, 4*se, length = 1000)
@@ -287,7 +305,7 @@ ggplot(data= data, aes(x = betas, y = density)) +
   geom_polygon(data = shade2, aes(betas, density), fill = "orange") +
   geom_vline(xintercept = 0, colour = "#045a8d", size = 1) +
   geom_vline(xintercept = coef, colour = "#045a8d", size = 1, lty = 2) +
-  scale_x_continuous(breaks = c(-critval*se, coef, 0, critval*se), labels = c(expression("0 - Crit.Val.*"~sigma), expression("Est. of "~beta~"=0.042"), expression("H0:"~beta~"=0"), expression("0 + Crit.Val.*"~sigma)), guide = guide_axis(n.dodge = 2)) +
+  scale_x_continuous(breaks = c(-critval*se, coef, 0, critval*se), labels = c(expression("0 - Crit.Val.*"~sigma), expression("Est. of "~beta~"=-0.172"), expression("H0:"~beta~"=0"), expression("0 + Crit.Val.*"~sigma)), guide = guide_axis(n.dodge = 2)) +
   labs(y = "", x = "") +
   theme_minimal() +
   theme(legend.position = "none")
@@ -295,14 +313,23 @@ ggplot(data= data, aes(x = betas, y = density)) +
 ]]
 
 ---
+class: middle clear
 
-EXERCISE 1: NEWS and anto discr-policies
+.left-column[
+```{r, echo = FALSE, out.width='80%'}
+knitr::include_graphics('https://www.laserfiche.com/wp-content/uploads/2014/10/femalecoder.jpg')
+```
+]
+
+.right-column[
+<iframe src='exercise1.html' width='1000' height='600' frameborder='0' scrolling='yes'></iframe>
+]
 
 ---
 # Potential outcomes .font60[Ferda's personal news effect]
 
 .push-left[
-$\text{News effect}_{\text{Ferda}} = \underbrace{\text{Discrimination}_{1, \text{Ferda}}}_{\text{Read news} = 1} - \underbrace{\text{Discrimination}_{0, \text{Ferda}}}_{\text{News} = 0}.$
+$\text{News effect}_{\text{Ferda}} = \underbrace{\text{Discrimination}_{1, \text{Ferda}}}_{\text{Read news} = 1} - \underbrace{\text{Discrimination}_{0, \text{Ferda}}}_{\text{Read news} = 0}.$
 
 .font80[
 |                        Ferda|
@@ -353,6 +380,7 @@ Actual news          | 1    | 0
 
 ---
 
+---
 .right-column[
 $$\begin{equation} \begin{split}
 \text{Anomie effect}_{\text{Ferda}} & \neq \underbrace{\text{Discrimination}_{1, \text{Ferda}}}_{4} - \underbrace{\text{Discrimination}_{0, \text{Tuki}}}_{5} = -1
@@ -367,8 +395,8 @@ Why is it misleading to compare Ferda to Tuki?
 .right-column[.font90[
 
 $$\begin{equation} \begin{split}
-\text{Anomie effect}_{\text{Ferda}} & \neq \underbrace{\text{Discr.}_{1, \text{Ferda}}}_{4} - \underbrace{\text{Discr.}_{0, \text{Tuki}}}_{5} = -1 \\
-& = \underbrace{\text{Discr.}_{1, \text{Ferda}} \color{gray}{(- \text{Discr.}_{0, \text{Ferda}}}}_{\text{True news effect: 4 - 5 = 1}} \color{gray}{+} \underbrace{\color{gray}{\text{Discr.}_{0, \text{Ferda}})} - \text{Discr.}_{0, \text{Tuki}}}_{\text{"Selection bias": 4 - 5 = -1}}.
+\text{Anomie effect}_{\text{Ferda}} & \neq \underbrace{\text{Discr}_{1, \text{Ferda}}}_{4} - \underbrace{\text{Discr}_{0, \text{Tuki}}}_{5} = -1 \\
+& = \underbrace{\text{Discr}_{1, \text{Ferda}} \color{gray}{(- \text{Discr}_{0, \text{Ferda}}}}_{\text{True news effect: 4 - 2 = +2}} \color{gray}{+} \underbrace{\color{gray}{\text{Discr}_{0, \text{Ferda}})} - \text{Discr}_{0, \text{Tuki}}}_{\text{"Selection bias": 2 - 5 = -3}}.
 \end{split} \end{equation}$$
 ]]
 
@@ -376,14 +404,14 @@ $$\begin{equation} \begin{split}
 
 .right-column[.font90[
 $$\begin{equation} \begin{split}
-\text{Anomie effect}_{\text{Ferda}} & \neq \underbrace{\text{Discr.}_{1, \text{Ferda}}}_{4} - \underbrace{\text{Discr.}_{0, \text{Tuki}}}_{5} = -1 \\
-& = \underbrace{\text{Discr.}_{1, \text{Ferda}} \color{gray}{(- \text{Discr.}_{0, \text{Ferda}}}}_{\text{True news effect: 4 - 5 = 1}} \color{gray}{+} \underbrace{\color{gray}{\text{Discr.}_{0, \text{Ferda}})} - \text{Discr.}_{0, \text{Tuki}}}_{\text{"Selection bias": 4 - 5 = -1}}.
+\text{Anomie effect}_{\text{Ferda}} & \neq \underbrace{\text{Discr}_{1, \text{Ferda}}}_{4} - \underbrace{\text{Discr}_{0, \text{Tuki}}}_{5} = -1 \\
+& = \underbrace{\text{Discr}_{1, \text{Ferda}} \color{gray}{(- \text{Discr}_{0, \text{Ferda}}}}_{\text{True news effect: 4 - 2 = +2}} \color{gray}{+} \underbrace{\color{gray}{\text{Discr}_{0, \text{Ferda}})} - \text{Discr}_{0, \text{Tuki}}}_{\text{"Selection bias": 2 - 5 = -3}}.
 \end{split} \end{equation}$$
 ]
 
 .content-box-red[.center[
 **Selection bias**: $Y_{0, \text{Ferda}} \neq Y_{0, \text{Tuki}}$
-$\Rightarrow$ Tuki's *baseline* (i.e., no news) perceived discrimination <br> is higher than Ferda's!
+$\Rightarrow$ Tuki's *baseline* <br> (i.e., no news) perceived discrimination <br> is higher than Ferda's!
 ]]]
 
 ---
@@ -421,10 +449,10 @@ APAX %>%
   # Select variables for which I want my balance test,
   select(news_yn, dis_index, age, nbh_exposed, imor, german, gewFAKT) %>%
   rename(weights = gewFAKT) %>% # Rename the weights variable! #<<
-  datasummary_balance( #<<
-    formula = ~ news_yn, # By Reading news Yes/No #<< 
+  datasummary_balance( # Make a balance table, #<<
+    formula = ~ news_yn, # by Reading news Yes/No #<< 
     data = . , #<<
-    title = "Perceived discrimination and socio-demographic characterisitcs of those who read news and those who don't" #<<
+    title = "Socio-demographic characterisitcs of those who read news and those who don't" #<<
   ) #<<
 ```
 
@@ -438,23 +466,27 @@ APAX %>%
 
 ---
 layout: true
-# Directed Acyclical Graphs (DAGs)
+# Directed Acyclical Graphs (DAG)
 
 .push-left[
-- Nodes represent variables.
+- **Nodes** represent variables, **Arrows\edges** represent causal effects `r Citep(myBib, "pearl_causal_2016")`.
+  + there cannot by a cycle: Follow paths until one re-arrives at the origin.
 
-- Arrows\edges represent causal effects.
 
-- DAGs are theoretical models and can contain observed and unobserved variables.
+- DAGs are theoretical models and can contain observed *and unobserved* variables.
 
-- A DAG should capture the underlying social processes and how they came to be represented in the data. LIT
 
-- **Backdoor paths**: all those paths linking $X$ and $Y$ that start with an arrow going into $X$. LIT
+- A DAG should capture the social processes by which $X$ comes to be associated with $Y$ in your data.
+
+
+- **Backdoor paths**: All paths linking $X$ and $Y$ that start with an arrow into $X$ `r Citep(myBib, c("pearl_causal_2016", "gerxhani_causal_2022"))`.
+
 
 - **Confounder \ Backdoor bias** = Selection bias.
 ]
 
 ---
+
 .push-right[
 ```{tikz, DAG1,  echo = FALSE, out.width='40%'}
 \usetikzlibrary{shapes,decorations,arrows,calc,arrows.meta,fit,positioning}
@@ -477,7 +509,9 @@ layout: true
     \path (1) edge (3);
 \end{tikzpicture}
 ```
-]
+.backgrnote[
+The red bi-directed arrow is officially not part of the DAG, but helps you see that the correlation between $X$ and $Y$ is spurious because of $C$.
+]]
 
 ---
 
@@ -504,12 +538,24 @@ layout: true
     \path (1) edge (3);
 \end{tikzpicture}
 ```
+
+.backgrnote[
+The red bi-directed arrow is officially not part of the DAG, but helps you see that the correlation between read news and perceived discrimination is biased because immigrant minorities who obtained German citizenship read news more often than those who are foreign citizens.]
 ]
 
 ---
 layout: false
+class: middle clear
 
-EXERCISE: DAG & balance
+.left-column[
+```{r, echo = FALSE, out.width='80%'}
+knitr::include_graphics('https://www.laserfiche.com/wp-content/uploads/2014/10/femalecoder.jpg')
+```
+]
+
+.right-column[
+<iframe src='exercise2.html' width='1000' height='600' frameborder='0' scrolling='yes'></iframe>
+]
 
 ---
 # Solution: Experiment
@@ -517,7 +563,7 @@ EXERCISE: DAG & balance
 .left-column[
 - We do not observe, we actively intervene.
 
-- Thereby, we control, who gets $X$ and who does not!
+- Thereby *we* control, who gets $X$ and who does not!
 
 ```{r, echo = FALSE, out.width='67%', fig.align='center'}
 knitr::include_graphics('./img/randomization1.png')
@@ -573,10 +619,12 @@ knitr::include_graphics('https://lotterylab.s3.amazonaws.com/summernoteimages/60
 - Randomization is "fair": Everyone has the same probability to be part of the treatment or control group, .alert[regardless of who they are]!
 
 .content-box-green[
-.center[Why does this result in equal (Discr.) baselines?]
-.font90[
-$Avg[\text{Discr.}_{i, \text{Read news} = 0}|\text{Read news} = 1] = Avg[\text{Discr.}_{i, \text{Read news} = 0}|\text{Read news} = 0]$
-]]]
+.center[Why does this result in equal (Discr) baselines?]
+$$\begin{equation} \begin{split}
+Avg[\text{Discr}_{i, \text{Read news} = 0}|\text{Read news} = 1] \\
+= Avg[\text{Discr}_{i, \text{Read news} = 0}|\text{Read news} = 0]
+\end{split} \end{equation}$$
+]]
 
 ---
 # Randomized Controlled Trials (RCT)
@@ -584,8 +632,11 @@ $Avg[\text{Discr.}_{i, \text{Read news} = 0}|\text{Read news} = 1] = Avg[\text{D
 .push-left[
 
 - If we randomly divide subjects into treatment and control groups, they come from the same underlying population. 
+  + $\rightarrow$ they will be the same *in every way*,<br> **including their $Y_{0}$ **!
 
-$\rightarrow$ they will be the same *in every way*,<br> **including their $Y_{0}$ **!
+- Beware, in practice randomization can fail, especially if your sample is small.
+  
+
 ]
 
 ---
@@ -596,13 +647,32 @@ class: clear
 
 .font160[**APAX survey experiment**]
 - We asked APAX subjects to read a news article.
-- We *randomized* which article they saw.
+
+```{r, echo = FALSE, out.width='80%', fig.align='center'}
+knitr::include_graphics('./img/randomization2.png')
+```
+
+- Survey app .alert[randomly] decided, who got: 
+  + Venus $\rightarrow$ *control group*, 
+  + Discrimination $\rightarrow$ *treatment group 1*.
+  + Integration $\rightarrow$ *treatment group 2*.
+
+
+
 ]
 
 ---
 
 .push-right[
-```{r, echo = FALSE, out.width='83%', fig.align='center'}
+```{r, echo = FALSE, out.width='100%', fig.align='center'}
+knitr::include_graphics('./img/Contr.png')
+```
+]
+
+---
+
+.push-right[
+```{r, echo = FALSE, out.width='89%', fig.align='center'}
 knitr::include_graphics('./img/Exp2.png')
 ```
 ]
@@ -616,42 +686,151 @@ knitr::include_graphics('./img/Exp1.png')
 ]
 
 ---
+layout: false
+# Balance test
+
+.panelset[
+.panel[.panel-name[R code]
+```{r balance2, results = FALSE}
+APAX %>%
+  # Select variables for which I want my balance test,
+  select(article, news_yn, age, nbh_exposed, imor, german, gewFAKT) %>%
+  rename(weights = gewFAKT) %>% # Rename the weights variable! 
+  datasummary_balance( # Make a balance table,
+    formula = ~ article, # by treatment/control #<< 
+    data = . ,
+    title = "Socio-demographic characterisitcs by treatment and control"
+  )
+```
+]
+
+.panel[.panel-name[Balance table]
+```{r ref.label = "balance2", echo = FALSE}
+```
+]]
+
+---
+# Causal effect of news articles
+
+.push-left[
+```{r OLS_causal, results = 'hide'}
+# Run OLS regression to analyze the survey RCT.
+ols <- lm_robust(dis_index ~ article, 
+                 weight = gewFAKT, data = APAX)
+zols <- lm_robust(z_dis_index ~ article, 
+                  weight = gewFAKT, data = APAX)
+
+# Make a nice regression table of results.
+htmlreg(
+  list(ols, zols), include.ci = FALSE, digits = 3,
+  custom.model.names = c("OLS", "Z-OLS"),
+  custom.coef.names = c("Intercept (Venus control)", 
+                        "Article on discrimination", 
+                        "Article on integration"))
+```
+]
 
 .push-right[
-```{r, echo = FALSE, out.width='100%', fig.align='center'}
-knitr::include_graphics('./img/Contr.png')
+```{r ref.label = "OLS_causal", echo = FALSE, results = 'asis'}
 ```
 ]
 
 ---
-layout: false
+# Visualize
+
+.panelset[
+.panel[.panel-name[Preparation code]
+```{r}
+(plotdata <- zols %>%
+   tidy() %>% # Turn results into a tibble,
+   mutate( # Rename variables for the plot.
+     term = case_when(
+       term == "articleTreat_1" ~ "Discrimination",
+       term == "articleTreat_2" ~ "Integration",
+       term == "(Intercept)" ~ "Intercept")))
+```
+]
+
+.panel[.panel-name[Plot]
+.push-left[
+```{r Coefplot, fig.show = 'hide'}
+ggplot(data = plotdata %>% filter(term != "Intercept"),
+       aes(y = estimate, x = term)) +
+  # Point with error-bars,
+  geom_hline(yintercept = 0, color = "orange", 
+             lty = "dashed") +
+  geom_pointrange(aes(min = conf.low, max = conf.high)) +
+  coord_flip() + # Flip Y- & X-Axis,
+  labs(
+    title = "Causal effect of news articles", 
+    x = "Article on",
+    # Write Greek beta into axis title.
+    y = "Comparison to control group (article on Venus) 
+    in standard deviations") + 
+  theme_minimal()
+```
+]
+.push-right[
+```{r ref.label = "Coefplot", out.width='90%', fig.height = 3, fig.width = 5, echo = FALSE}
+```
+]
+]]
+
+---
+# Learning goal achieved!
+
+.left-column[
+News media consumption *increases* immigrant minorities' perceptions that they are being discriminated! .backgrnote[
+(If the news report about discrimination in society.)]
+]
+
+.right-column[
+```{r ref.label = "Coefplot", out.width='90%', fig.height = 3, fig.width = 5, echo = FALSE}
+```
+]
+
+---
+class: middle clear
+
+.left-column[
+```{r, echo = FALSE, out.width='80%'}
+knitr::include_graphics('https://www.laserfiche.com/wp-content/uploads/2014/10/femalecoder.jpg')
+```
+]
+
+.right-column[
+<iframe src='exercise3.html' width='1000' height='600' frameborder='0' scrolling='yes'></iframe>
+]
 
 ---
 class: inverse
 # Today's general lessons
 
-1. R allows you to easily download tons of interesting data.
-2. You can combine (i.e., join/merge) data than contain (at least party) the same observations, if they have some variables in common that uniquely identify them. This allows for a lot of fascinating analyses and great term papers!
-3. Always make a scatter plot of the variables you want to correlate.
-4. Z-standardization helps interpretation and gives a common unit to different variables.
-5. The correlation coefficient is an easy to understand statistic of a (undirected) association between two variables.
-6. As a linear model, regression expresses on outcome variable as a linear function of a predictor. It thus estimates a directed relation. 
-7. $\beta$ the slope, tells us how average levels of $\hat{y}$ chnage with a unit increase in $x$. 
-8. OLS finds the linear model that best fits the data.
-9. Regression should under normal circumstances not be interpreted in causal terms.
-10. Categorical predictors are (typically) dummy coded and then tel us the average difference in the outcome between a category to the reference group.
-11. We should make sure that the correlations and regressions we estimate actually capture aprrox. linear relationships and that they are not driven by outliers.
+1. Causal claims are counter factual claims. Therefore they imply a comparison.
+2. Potential outcomes: A theoretical framework to think about the comparison implied in causal claims.
+3. Direct comparisons are often fruitless and naïv, because of selection/confounder bias.
+4. Selection bias: The baseline of the outcome is unequal between treated and non-treated subjects, because certain type of people select into/out of the treatment.
+5. Balance test: Attempt to test for selection bias, but can only be applied to variables that are observed in the data at hand.
+6. Directed Acyclic Graphs (DAG): A graphical theoretical framework to think about causality. It consists of nodes and directed edges. It may not contain cycles.
+7. Backdoor paths: All paths linking $X$ and $Y$ that start with an arrow into $X$. Backdoor paths result in confounder/selection bias.
+8. Confounder bias: = selection bias.
+9. Experiment: An artificial environment controlled by the researcher. Allows researchers to control treatment assignment.
+10. Randomized Controlled Trials (RCT): An experiment with treatment and control group in which researchers assign treatment or control at random.
+11. Randomization: Random assignment of treatment and control ensures a balanced comparison (no selection/confounder bias). Randomization can fail, especially in small samples.
+12. RCTs can be analyzed with a simple OLS regression.
 
 ---
 class: inverse
 # Today's (important) functions
 
-1. `cor()`: Estimate correlation coefficient.
-2. `lm()`: Estimate linear OLS regression.
-3. `plot(model_object)` to test regression assumptions.
-4. `inner_join()`, `left_join()`, `right_join()`, and `full_join()` allow you to join/merge different tibbles together than have common observations and a key that identifies them.
-5. `textreg::texreg()`, `textreg::htmlreg()`, and `textreg::screenreg()`: Create nicely-formatted (html, Word, ASCII, or Latex) tables of (one or several) regression models.
-6. `scale()` z-standardizes variables. But sometimes it returns a matrix rather than a vector. Therefore it makes sense to always code `scale(x) %>% as.numeric()` to ensure you get an numeric vector out of it.
+1. `funiture::rowmeans()`: Combine several variables (that need to have a similar scale) to an additive index.
+2. `modelsummary::datasummary_balance()`: Make a balance table.
 
 ---
 # References
+
+.font80[
+```{r ref, results = 'asis', echo = FALSE}
+PrintBibliography(myBib)
+```
+]
