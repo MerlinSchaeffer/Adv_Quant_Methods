@@ -4,8 +4,11 @@
     <title>2 Randomness!</title>
     <meta charset="utf-8" />
     <meta name="author" content="Merlin Schaeffer  Department of Sociology" />
-    <meta name="date" content="2022-07-05" />
+    <meta name="date" content="2022-08-15" />
     <script src="libs/header-attrs/header-attrs.js"></script>
+    <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
+    <script src="libs/tile-view/tile-view.js"></script>
+    <link href="libs/tachyons/tachyons.min.css" rel="stylesheet" />
     <link href="libs/panelset/panelset.css" rel="stylesheet" />
     <script src="libs/panelset/panelset.js"></script>
     <link rel="stylesheet" href="../template/Merlin169.css" type="text/css" />
@@ -24,7 +27,7 @@ class: center, middle, inverse, title-slide
 ### Merlin Schaeffer<br> Department of Sociology
 ]
 .date[
-### 2022-07-05
+### 2022-08-15
 ]
 
 ---
@@ -84,7 +87,7 @@ class: inverse
 # General patterns
 
 .push-left[
-We need to treat our data at hand as a sample and generalize from it.
+Our data at hand is a sample based on which we seek to generalize.
 
 Ideally, we generalize from .alert[random samples]!
 ]
@@ -112,7 +115,7 @@ Ideally, we generalize from .alert[random samples]!
 .push-right[
 &lt;img src="https://m.media-amazon.com/images/I/71jm22A7m9L._AC_SL1200_.jpg" width="80%" style="display: block; margin: auto;" /&gt;
 .center[.backgrnote[
-Similar to certain mirrors,&lt;br&gt; many data sources also lead to biased insights.]]
+Similar to certain mirrors,&lt;br&gt; data often lead to biased insights.]]
 ]
 
 ---
@@ -219,8 +222,6 @@ Everyone in the (unobservable super) population has the same probability to be p
 --
 
 .push-right[
-&lt;br&gt;
-&lt;br&gt;
 &lt;img src="https://www.kuechengoetter.de/uploads/media/630x630/02/28602-suppentopf-mit-nudeln-und-haehnchen.jpg?v=1-0" width="50%" style="display: block; margin: auto;" /&gt;
 .center[.backgrnote[
 Random sampling is the equivalent of giving the soup a proper stir before we taste it ;).]]
@@ -229,8 +230,6 @@ Random sampling is the equivalent of giving the soup a proper stir before we tas
 ---
 class: inverse middle center
 
-.push-right[
-&lt;br&gt;
 Nice talk man.
 
 **But we all know that it's not random who participates in a study**
@@ -238,16 +237,6 @@ Nice talk man.
 &lt;br&gt;
 &lt;img src="https://bloximages.chicago2.vip.townnews.com/buffalonews.com/content/tncms/assets/v3/editorial/1/dc/1dc9a2da-fc52-11eb-9244-2b611ea83ea0/61169b5e36ff5.image.jpg" width="70%" style="display: block; margin: auto;" /&gt;
 
-]
-
-.push-left[
-&lt;br&gt;
-&lt;br&gt;
-&lt;br&gt;
-&lt;br&gt;
-&lt;br&gt;
-&lt;img src="https://www.business2community.com/wp-content/uploads/2013/03/Question1.jpg" width="60%" style="display: block; margin: auto;" /&gt;
-]
 
 ---
 # Weights
@@ -493,6 +482,8 @@ class: middle clear
 
 .left-column[
 &lt;img src="https://cdn.dribbble.com/users/10549/screenshots/9916149/media/a9dbfea8e23e5b8e23db142528c3bc9f.png?compress=1&amp;resize=1200x900&amp;vertical=top" width="100%" style="display: block; margin: auto;" /&gt;
+
+&lt;iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
 ]
 
 .right-column[
@@ -515,7 +506,7 @@ class: inverse middle center
 &lt;br&gt;
 OK, great: Randomness prohibits systematic biases and thus enables us to draw representative samples. If randomization has partly failed, we use post-stratification weights to counterbalance.
 
-**But doesn't all this mean that I have randomness** &lt;br&gt; (e.g., just by chance too many vegetarians or so) &lt;br&gt; **and thus also bias in my data?**
+**But doesn't this mean, I have randomness in my data** &lt;br&gt; (e.g., just by chance too many vegetarians or so) &lt;br&gt; **and thus still biased data?**
 ]
 
 ---
@@ -553,7 +544,6 @@ OK, great: Randomness prohibits systematic biases and thus enables us to draw re
 .push-left[
 - **Lets assume, the Danish ESS with it's 1511 respondents was our (unobservable super) population of interest.** .backgrnote[I thus don't use weights in this example ;)]
 
-
 - That would mean, we can *calculate* the true OLS regression line (in blue): `\(\beta = 0.039\)`.
 ]
 
@@ -565,9 +555,7 @@ OK, great: Randomness prohibits systematic biases and thus enables us to draw re
 # Sampling error `\(\sigma\)` .font60[(aka sampling variability)]
 
 .push-left[
-- **Lets assume, the Danish ESS with it's 1511 respondents was our (unobservable super) population of interest.** 
-  + Thus, I don't use weights in this example ;)
-
+- **Lets assume, the Danish ESS with it's 1511 respondents was our (unobservable super) population of interest.** .backgrnote[I thus don't use weights in this example ;)]
 
 - That would mean, we can *calculate* the true OLS regression line (in blue): `\(\beta = 0.039\)`.
 
@@ -588,9 +576,7 @@ ESS_sample &lt;- ESS %&gt;% sample_n(50) # Draw the sample.
 # Sampling error `\(\sigma\)` .font60[(aka sampling variability)]
 
 .push-left[
-- **Lets assume, the Danish ESS with it's 1511 respondents was our (unobservable super) population of interest.** 
-  + Thus, I don't use weights in this example ;)
-
+- **Lets assume, the Danish ESS with it's 1511 respondents was our (unobservable super) population of interest.** .backgrnote[I thus don't use weights in this example ;)]
 
 - That would mean, we can *calculate* the true OLS regression line (in blue): `\(\beta = 0.039\)`.
 
@@ -613,9 +599,7 @@ ESS_sample &lt;- ESS %&gt;% sample_n(50) # Draw the sample.
 # Sampling error `\(\sigma\)` .font60[(aka sampling variability)]
 
 .push-left[
-- **Lets assume, the Danish ESS with it's 1511 respondents was our (unobservable super) population of interest.** 
-  + Thus, I don't use weights in this example ;)
-
+- **Lets assume, the Danish ESS with it's 1511 respondents was our (unobservable super) population of interest.** .backgrnote[I thus don't use weights in this example ;)]
 
 - That would mean, we can *calculate* the true OLS regression line (in blue): `\(\beta = 0.039\)`
 
@@ -634,7 +618,7 @@ ESS_sample_2 &lt;- ESS %&gt;% sample_n(50) # Draw the sample.
 ]
 
 ---
-# Let's do this a 1000 times!
+# Let's do this 1000 times!
 
 .panelset[
 .panel[.panel-name[Code for the Nerds]
@@ -750,7 +734,7 @@ sd(beta_hat)
 # [1] 0.0347
 ```
 
-&lt;img src="2-Random_files/figure-html/unnamed-chunk-33-1.gif" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="2-Random_files/figure-html/unnamed-chunk-32-1.gif" width="100%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -763,14 +747,14 @@ sd(beta_hat)
 .center[.backgrnote[Carl Friedrich Gauss (1777-1855)]]
 ]
 .push-right[
-Thanks to mathematicians, such as Carl Friedrich Gauss, we can *estimate* the sampling error of most statistics based on a single sample!
+Thanks to mathematicians, such as [Carl Friedrich Gauss](https://en.wikipedia.org/wiki/Carl_Friedrich_Gauss), we can *estimate* the sampling error of most statistics, if we simply have a single sample!
 ]]
 
 ---
 
 .right-column[
 .push-left[
-Estimated sampling error each based on our very first 50-person sample using Gauss' formula for the standard error of an OLS regression coefficient, `\(\hat{\sigma}(\beta)=\sqrt{\frac{1}{n-2}\frac{\text{SD}(e)}{\text{SD}(x)}}\)`
+Estimated sampling error based on our initial 50-person sample using Gauss' formula for the standard error of an OLS regression coefficient, `\(\hat{\sigma}(\beta)=\sqrt{\frac{1}{n-2}\frac{\text{SD}(e)}{\text{SD}(x)}}\)`
 ]
 .push-right[
 
@@ -830,7 +814,11 @@ layout: false
 
 .left-column[
 .content-box-green[
-If we continuously drew random samples and estimated the interval `\(\hat{\beta} \pm \text{Critical value} * \hat{\sigma}\)`, how many of these would contain `\(\beta\)`?
+If we continuously drew random samples and estimated the interval:
+
+`\(\hat{\beta} \pm \text{Critical value} * \hat{\sigma}\)`, 
+
+how many of these would contain `\(\beta\)`?
 ]
 ]
 .right-column[
@@ -858,11 +846,11 @@ ggplot(data = ESS_sample, aes(y = psppsgva, x = eduyrs)) +
 ]
 .panel[.panel-name[Plot]
 .push-left[
-&lt;img src="2-Random_files/figure-html/unnamed-chunk-37-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+&lt;img src="2-Random_files/figure-html/unnamed-chunk-36-1.png" width="90%" style="display: block; margin: auto;" /&gt;
 ]
 
 .push-right[
-&lt;img src="2-Random_files/figure-html/unnamed-chunk-38-1.gif" width="90%" style="display: block; margin: auto;" /&gt;
+&lt;img src="2-Random_files/figure-html/unnamed-chunk-37-1.gif" width="90%" style="display: block; margin: auto;" /&gt;
 ]]]
 
 ---
@@ -902,7 +890,7 @@ ggplot(data = plotdata, aes(y = estimate, x = term)) +
 ```
 ]
 .push-right[
-&lt;img src="2-Random_files/figure-html/unnamed-chunk-40-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+&lt;img src="2-Random_files/figure-html/unnamed-chunk-39-1.png" width="90%" style="display: block; margin: auto;" /&gt;
 ]
 ]]
 
@@ -911,9 +899,12 @@ class: middle clear
 
 .left-column[
 &lt;img src="https://cdn.dribbble.com/users/10549/screenshots/9916149/media/a9dbfea8e23e5b8e23db142528c3bc9f.png?compress=1&amp;resize=1200x900&amp;vertical=top" width="100%" style="display: block; margin: auto;" /&gt;
+
+&lt;iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
 ]
 
 .right-column[
+&lt;br&gt;
 &lt;iframe src='exercise2.html' width='1000' height='600' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
 ]
 
@@ -931,7 +922,7 @@ class: inverse middle center
 
 .push-left[
 &lt;br&gt;
-Thanks, that also clarifies quite a bit of the R output we haad ignored until now. But there is two more, we have not discussed yet: 
+Thanks, that also clarifies quite a bit of the R output we had ignored until now. But there is two more, we have not discussed yet: 
 
 The `\(t\)`-Statistic, the `\(p\)`-value, and these funny `\(*\)`.
 ]
@@ -966,6 +957,7 @@ layout: true
 &gt; Certainly, their believe in political efficacy is no different!
 
 &gt; That you find otherwise in your data is just a chance finding.
+
 ]]
 
 ---
@@ -974,7 +966,7 @@ layout: true
 &lt;br&gt;
 
 .push-left[
-&lt;img src="https://www.convinceandconvert.com/wp-content/uploads/2014/07/bigstock-Portrait-of-a-senior-man-skept-12585803.jpg" width="60%" style="display: block; margin: auto;" /&gt;
+&lt;img src="https://www.convinceandconvert.com/wp-content/uploads/2014/07/bigstock-Portrait-of-a-senior-man-skept-12585803.jpg" width="54%" style="display: block; margin: auto;" /&gt;
 ]
 
 .push-right[
@@ -1071,7 +1063,7 @@ summary(mod, include.ci = FALSE, digits = 3)
 - `\(t=\frac{\hat{\beta}}{\sigma}\)`: How many `\(\sigma\)`'s is `\(\hat{\beta}\)` away from `\(H_{0}:\beta=0\)`?
 
 
-- `\(p\)`-value: The area outside `\(H_{0}:\beta=0 \pm t\)`
+- `\(p\)`-value: The area outside `\(0 \pm t\)`
   + `\(P(\hat{\beta}|\beta=0)\)`: The probability that we observe `\(\hat{\beta}\)`, although `\(\beta=0\)` in reality.
 ]
 .push-right[
@@ -1123,6 +1115,8 @@ class: middle clear
 
 .left-column[
 &lt;img src="https://cdn.dribbble.com/users/10549/screenshots/9916149/media/a9dbfea8e23e5b8e23db142528c3bc9f.png?compress=1&amp;resize=1200x900&amp;vertical=top" width="100%" style="display: block; margin: auto;" /&gt;
+
+&lt;iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
 ]
 
 .right-column[
@@ -1133,12 +1127,16 @@ class: middle clear
 class: inverse
 # Today's general lessons
 - Randomness prohibits systematic bias!
-  + Random samples are therefore representative.
+  + Random samples are therefore representative (unless the sample msize `\(n\)` is very small).
 - Where random sampling fails, we use post-stratification weights o counterbalance bias.
 - Random sampling results in a loss of reliability, the so-called sampling error.
 - These errors are normally or t-distributed, depending on the size of our sample.
 - We can estimate the sampling error from our data: `\(\hat{\sigma}\)`, the standard error.
 - Because we know the Normal and the t-distribution, we can estimate 95% Confidence intervals to express uncertainty and conduct hypotheses tests to see how likely our finding is simply the result of happenstance.
+- Hypothesis tests test the `\(H_{0}\)`, which is usually the opposite of what you try to demonstrate. 
+  + They ask: What is the probability (i.e. the `\(p\)`-value, see below) that I observe these data, although in reality `\(H_{0}\)` is true?
+- `\(t\)`-value: How many standard erros is your estimate (e.g. `\(\beta\)`) away from the `\(H_{0}\)` (i.e. usually 0).
+- `\(p\)`-value: What area under the sampling distribution lies outside of `\(H_{0}\pm t\)`. By convention, the `\(p\)`-value should be `\(&lt;0.05\)`.
 
 ---
 class: inverse
@@ -1149,6 +1147,10 @@ class: inverse
 
 ---
 # References
+
+.font80[
+Veaux, D., Velleman, and Bock (2021). _Stats: Data and Models, Global Edition_. Pearson Higher Ed.
+]
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="../template/remark-latest.min.js"></script>

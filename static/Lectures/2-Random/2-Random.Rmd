@@ -93,7 +93,7 @@ knitr::include_graphics('https://media.istockphoto.com/vectors/politician-and-ma
 # General patterns
 
 .push-left[
-We need to treat our data at hand as a sample and generalize from it.
+Our data at hand is a sample based on which we seek to generalize.
 
 Ideally, we generalize from .alert[random samples]!
 ]
@@ -125,7 +125,7 @@ knitr::include_graphics('https://upload.wikimedia.org/wikipedia/commons/thumb/f/
 knitr::include_graphics('https://m.media-amazon.com/images/I/71jm22A7m9L._AC_SL1200_.jpg')
 ```
 .center[.backgrnote[
-Similar to certain mirrors,<br> many data sources also lead to biased insights.]]
+Similar to certain mirrors,<br> data often lead to biased insights.]]
 ]
 
 ---
@@ -244,8 +244,6 @@ $\rightarrow$ No group can be forgotten.
 --
 
 .push-right[
-<br>
-<br>
 ```{r, echo = FALSE, out.width='50%', fig.align='center'}
 knitr::include_graphics('https://www.kuechengoetter.de/uploads/media/630x630/02/28602-suppentopf-mit-nudeln-und-haehnchen.jpg?v=1-0')
 ```
@@ -256,8 +254,6 @@ Random sampling is the equivalent of giving the soup a proper stir before we tas
 ---
 class: inverse middle center
 
-.push-right[
-<br>
 Nice talk man.
 
 **But we all know that it's not random who participates in a study**
@@ -267,18 +263,6 @@ Nice talk man.
 knitr::include_graphics('https://bloximages.chicago2.vip.townnews.com/buffalonews.com/content/tncms/assets/v3/editorial/1/dc/1dc9a2da-fc52-11eb-9244-2b611ea83ea0/61169b5e36ff5.image.jpg')
 ```
 
-]
-
-.push-left[
-<br>
-<br>
-<br>
-<br>
-<br>
-```{r, echo = FALSE, out.width='60%', fig.align='center'}
-knitr::include_graphics('https://www.business2community.com/wp-content/uploads/2013/03/Question1.jpg')
-```
-]
 
 ---
 # Weights
@@ -439,6 +423,8 @@ class: middle clear
 ```{r, echo = FALSE, out.width='100%'}
 knitr::include_graphics('https://cdn.dribbble.com/users/10549/screenshots/9916149/media/a9dbfea8e23e5b8e23db142528c3bc9f.png?compress=1&resize=1200x900&vertical=top')
 ```
+
+<iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'></iframe>
 ]
 
 .right-column[
@@ -463,7 +449,7 @@ knitr::include_graphics('https://www.business2community.com/wp-content/uploads/2
 <br>
 OK, great: Randomness prohibits systematic biases and thus enables us to draw representative samples. If randomization has partly failed, we use post-stratification weights to counterbalance.
 
-**But doesn't all this mean that I have randomness** <br> (e.g., just by chance too many vegetarians or so) <br> **and thus also bias in my data?**
+**But doesn't this mean, I have randomness in my data** <br> (e.g., just by chance too many vegetarians or so) <br> **and thus still biased data?**
 ]
 
 ---
@@ -503,7 +489,6 @@ knitr::include_graphics('https://ecampusontario.pressbooks.pub/app/uploads/sites
 .push-left[
 - **Lets assume, the Danish ESS with it's `r nrow(ESS)` respondents was our (unobservable super) population of interest.** .backgrnote[I thus don't use weights in this example ;)]
 
-
 - That would mean, we can *calculate* the true OLS regression line (in blue): $\beta = `r coef(lm(psppsgva ~ eduyrs, data = ESS))["eduyrs"]`$.
 ]
 
@@ -522,9 +507,7 @@ ggplot(data = ESS, aes(y = psppsgva, x = eduyrs)) +
 # Sampling error $\sigma$ .font60[(aka sampling variability)]
 
 .push-left[
-- **Lets assume, the Danish ESS with it's `r nrow(ESS)` respondents was our (unobservable super) population of interest.** 
-  + Thus, I don't use weights in this example ;)
-
+- **Lets assume, the Danish ESS with it's `r nrow(ESS)` respondents was our (unobservable super) population of interest.** .backgrnote[I thus don't use weights in this example ;)]
 
 - That would mean, we can *calculate* the true OLS regression line (in blue): $\beta = `r coef(lm(psppsgva ~ eduyrs, data = ESS))["eduyrs"]`$.
 
@@ -552,9 +535,7 @@ ESS_sample <- ESS %>% sample_n(50) # Draw the sample.
 # Sampling error $\sigma$ .font60[(aka sampling variability)]
 
 .push-left[
-- **Lets assume, the Danish ESS with it's `r nrow(ESS)` respondents was our (unobservable super) population of interest.** 
-  + Thus, I don't use weights in this example ;)
-
+- **Lets assume, the Danish ESS with it's `r nrow(ESS)` respondents was our (unobservable super) population of interest.** .backgrnote[I thus don't use weights in this example ;)]
 
 - That would mean, we can *calculate* the true OLS regression line (in blue): $\beta = `r coef(lm(psppsgva ~ eduyrs, data = ESS))["eduyrs"]`$.
 
@@ -570,7 +551,6 @@ ESS_sample <- ESS %>% sample_n(50) # Draw the sample.
 ```{r sample1_ols2, out.width='90%', fig.height = 4, fig.width = 6, results = FALSE, echo = FALSE}
 sample1_ols1 + 
   geom_smooth(method = "lm", se = FALSE, color = "#901A1E")
-
 ```
 ]
 
@@ -578,9 +558,7 @@ sample1_ols1 +
 # Sampling error $\sigma$ .font60[(aka sampling variability)]
 
 .push-left[
-- **Lets assume, the Danish ESS with it's `r nrow(ESS)` respondents was our (unobservable super) population of interest.** 
-  + Thus, I don't use weights in this example ;)
-
+- **Lets assume, the Danish ESS with it's `r nrow(ESS)` respondents was our (unobservable super) population of interest.** .backgrnote[I thus don't use weights in this example ;)]
 
 - That would mean, we can *calculate* the true OLS regression line (in blue): $\beta = `r coef(lm(psppsgva ~ eduyrs, data = ESS))["eduyrs"]`$
 
@@ -609,7 +587,7 @@ ggplot(data = ESS_sample_2, aes(y = psppsgva, x = eduyrs)) +
 ]
 
 ---
-# Let's do this a 1000 times!
+# Let's do this 1000 times!
 
 .panelset[
 .panel[.panel-name[Code for the Nerds]
@@ -788,14 +766,14 @@ knitr::include_graphics('https://upload.wikimedia.org/wikipedia/commons/thumb/e/
 .center[.backgrnote[Carl Friedrich Gauss (1777-1855)]]
 ]
 .push-right[
-Thanks to mathematicians, such as Carl Friedrich Gauss, we can *estimate* the sampling error of most statistics based on a single sample!
+Thanks to mathematicians, such as [Carl Friedrich Gauss](https://en.wikipedia.org/wiki/Carl_Friedrich_Gauss), we can *estimate* the sampling error of most statistics, if we simply have a single sample!
 ]]
 
 ---
 
 .right-column[
 .push-left[
-Estimated sampling error each based on our very first 50-person sample using Gauss' formula for the standard error of an OLS regression coefficient, $\hat{\sigma}(\beta)=\sqrt{\frac{1}{n-2}\frac{\text{SD}(e)}{\text{SD}(x)}}$
+Estimated sampling error based on our initial 50-person sample using Gauss' formula for the standard error of an OLS regression coefficient, $\hat{\sigma}(\beta)=\sqrt{\frac{1}{n-2}\frac{\text{SD}(e)}{\text{SD}(x)}}$
 ]
 .push-right[
 ```{r}
@@ -825,7 +803,11 @@ layout: false
 
 .left-column[
 .content-box-green[
-If we continuously drew random samples and estimated the interval $\hat{\beta} \pm \text{Critical value} * \hat{\sigma}$, how many of these would contain $\beta$?
+If we continuously drew random samples and estimated the interval:
+
+$\hat{\beta} \pm \text{Critical value} * \hat{\sigma}$, 
+
+how many of these would contain $\beta$?
 ]
 ]
 .right-column[
@@ -905,9 +887,12 @@ class: middle clear
 ```{r, echo = FALSE, out.width='100%'}
 knitr::include_graphics('https://cdn.dribbble.com/users/10549/screenshots/9916149/media/a9dbfea8e23e5b8e23db142528c3bc9f.png?compress=1&resize=1200x900&vertical=top')
 ```
+
+<iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'></iframe>
 ]
 
 .right-column[
+<br>
 <iframe src='exercise2.html' width='1000' height='600' frameborder='0' scrolling='yes'></iframe>
 ]
 
@@ -927,7 +912,7 @@ knitr::include_graphics('https://www.business2community.com/wp-content/uploads/2
 
 .push-left[
 <br>
-Thanks, that also clarifies quite a bit of the R output we haad ignored until now. But there is two more, we have not discussed yet: 
+Thanks, that also clarifies quite a bit of the R output we had ignored until now. But there is two more, we have not discussed yet: 
 
 The $t$-Statistic, the $p$-value, and these funny $*$.
 ]
@@ -966,6 +951,7 @@ knitr::include_graphics('https://www.convinceandconvert.com/wp-content/uploads/2
 > Certainly, their believe in political efficacy is no different!
 
 > That you find otherwise in your data is just a chance finding.
+
 ]]
 
 ---
@@ -974,7 +960,7 @@ knitr::include_graphics('https://www.convinceandconvert.com/wp-content/uploads/2
 <br>
 
 .push-left[
-```{r, echo = FALSE, out.width='60%', fig.align='center'}
+```{r, echo = FALSE, out.width='54%', fig.align='center'}
 knitr::include_graphics('https://www.convinceandconvert.com/wp-content/uploads/2014/07/bigstock-Portrait-of-a-senior-man-skept-12585803.jpg')
 ```
 ]
@@ -1091,7 +1077,7 @@ ggplot(data= data, aes(x = betas, y = density)) +
 - $t=\frac{\hat{\beta}}{\sigma}$: How many $\sigma$'s is $\hat{\beta}$ away from $H_{0}:\beta=0$?
 
 
-- $p$-value: The area outside $H_{0}:\beta=0 \pm t$
+- $p$-value: The area outside $0 \pm t$
   + $P(\hat{\beta}|\beta=0)$: The probability that we observe $\hat{\beta}$, although $\beta=0$ in reality.
 ]
 .push-right[
@@ -1170,6 +1156,8 @@ class: middle clear
 ```{r, echo = FALSE, out.width='100%'}
 knitr::include_graphics('https://cdn.dribbble.com/users/10549/screenshots/9916149/media/a9dbfea8e23e5b8e23db142528c3bc9f.png?compress=1&resize=1200x900&vertical=top')
 ```
+
+<iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'></iframe>
 ]
 
 .right-column[
@@ -1180,12 +1168,16 @@ knitr::include_graphics('https://cdn.dribbble.com/users/10549/screenshots/991614
 class: inverse
 # Today's general lessons
 - Randomness prohibits systematic bias!
-  + Random samples are therefore representative.
+  + Random samples are therefore representative (unless the sample msize $n$ is very small).
 - Where random sampling fails, we use post-stratification weights o counterbalance bias.
 - Random sampling results in a loss of reliability, the so-called sampling error.
 - These errors are normally or t-distributed, depending on the size of our sample.
 - We can estimate the sampling error from our data: $\hat{\sigma}$, the standard error.
 - Because we know the Normal and the t-distribution, we can estimate 95% Confidence intervals to express uncertainty and conduct hypotheses tests to see how likely our finding is simply the result of happenstance.
+- Hypothesis tests test the $H_{0}$, which is usually the opposite of what you try to demonstrate. 
+  + They ask: What is the probability (i.e. the $p$-value, see below) that I observe these data, although in reality $H_{0}$ is true?
+- $t$-value: How many standard erros is your estimate (e.g. $\beta$) away from the $H_{0}$ (i.e. usually 0).
+- $p$-value: What area under the sampling distribution lies outside of $H_{0}\pm t$. By convention, the $p$-value should be $<0.05$.
 
 ---
 class: inverse
@@ -1196,3 +1188,9 @@ class: inverse
 
 ---
 # References
+
+.font80[
+```{r ref, results = 'asis', echo = FALSE}
+PrintBibliography(myBib)
+```
+]
