@@ -1,0 +1,65 @@
+---
+title: "Advanced Quantitative Methods"
+subtitle: "Basics of visualizing regression results"
+author: "Merlin Schaeffer<br> Department of Sociology"
+date: "`r Sys.Date()`"
+output: 
+  xaringan::moon_reader:
+    chakra: "../template/remark-latest.min.js"
+    css: ["../template/Merlin169.css"]
+    lib_dir: libs
+    # self_contained: true
+    nature:
+      highlightLanguage: r
+      highlightStyle: zenburn
+      highlightLines: true
+      countIncrementalSlides: false
+      ratio: '16:9'
+---
+```{r setup, include = FALSE}
+library(RefManageR)
+library(knitr)
+library(ggrepel) # Nicely placed labels in figures.
+library(modelr)
+library(webexercises) # Small web-based answer scales.
+library(equatiomatic) # Regression equations from model objects.
+
+options(htmltools.preserve.raw = FALSE,
+        htmltools.dir.version = FALSE, servr.interval = 0.5, width = 115, digits = 3)
+knitr::opts_chunk$set(
+  collapse = TRUE, message = FALSE, fig.retina = 3, error = TRUE,
+  warning = FALSE, cache = FALSE, fig.align = 'center',
+  comment = "#", strip.white = TRUE, tidy = FALSE)
+
+BibOptions(check.entries = FALSE, 
+           bib.style = "authoryear", 
+           style = "markdown",
+           hyperlink = FALSE,
+           no.print.fields = c("doi", "url", "ISSN", "urldate", "language", "note", "isbn", "volume"))
+myBib <- ReadBib("./../../../Stats_II.bib", check = FALSE)
+
+xaringanExtra::use_xaringan_extra(c("tile_view", "tachyons"))
+xaringanExtra::use_panelset()
+```
+
+# 4 Types of research questions
+
+
+---
+class: inverse
+# Today's general lessons
+
+1. R allows you to easily download tons of interesting data.
+2. You can combine (i.e., join/merge) data than contain (at least party) the same observations, if they have some variables in common that uniquely identify them. This allows for a lot of fascinating analyses and great term papers!
+3. Always make a scatter plot of the variables you want to correlate.
+4. Z-standardization helps interpretation and gives a common unit to different variables.
+5. The correlation coefficient is an easy to understand statistic of a (undirected) association between two variables.
+6. As a linear model, regression expresses on outcome variable as a linear function of a predictor. It thus estimates a directed relation. 
+7. $\beta$ the slope, tells us how average levels of $\hat{y}$ chnage with a unit increase in $x$. 
+8. OLS finds the linear model that best fits the data.
+9. Regression should under normal circumstances not be interpreted in causal terms.
+10. Categorical predictors are (typically) dummy coded and then tel us the average difference in the outcome between a category to the reference group.
+11. We should make sure that the correlations and regressions we estimate actually capture aprrox. linear relationships and that they are not driven by outliers.
+
+---
+# References
