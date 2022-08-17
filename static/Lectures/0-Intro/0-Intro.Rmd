@@ -41,7 +41,128 @@ myBib <- ReadBib("./../../../Stats_II.bib", check = FALSE)
 xaringanExtra::use_xaringan_extra(c("tile_view", "tachyons"))
 xaringanExtra::use_panelset()
 ```
+class: middle center
+background-image: url("https://stanfordbloodcenter.org/wp-content/uploads/2021/01/iStock-1208283967.jpg")
+background-position: center
+background-size: cover
 
+.font160[
+**My research agenda**
+]
+.font200[
+**Theory-driven empirical analysis of <br> <br> immigration-based ethnic diversity and stratification, <br> <br>& their contentious political consequences**
+]
+
+---
+class: clear
+```{r, echo = FALSE, out.width='100%', fig.align='center'}
+knitr::include_graphics('./img/Stages.png')
+```
+
+---
+layout: true
+# Some of my current work
+
+---
+.left-column[
+```{r, echo = FALSE, out.width='100%'}
+knitr::include_graphics('https://www.templehealth.org/sites/default/files/styles/without_crop/public/2021-01/man-wearing-mask-coughing-into-shoulder.jpg?itok=Z6mUgWPd')
+```
+]
+
+
+.right-column[
+> In the following you are asked to take a stand on the case of [name] who has lived in Denmark [length of residence]. [Name] has been tested positive for COVID-19 (Corona virus) and later developed severe symptoms such as fever, fatigue, dry coughs, breathing difficulties, and chest pains. He is [age]. The doctor who examined [name], assessed that he needs treatment. However, given the increased pressure the healthcare system is experiencing, [name] might be admitted a hospital bed at the expense of someone else.
+
+> Based on the above scenario, to what degree do you feel this person should be prioritized a hospital bed?
+]
+
+---
+
+
+```{r, echo = FALSE, out.width='80%'}
+knitr::include_graphics('https://www.tandfonline.com/na101/home/literatum/publisher/tandf/journals/content/cjms20/2021/cjms20.v047.i07/1369183x.2020.1860742/20220705/images/large/cjms_a_1860742_f0001_oc.jpeg')
+```
+.center[.backgrnote[*Source*: `r Citet(myBib, "schaeffer_who_2022")`]]
+
+---
+
+```{r, echo = FALSE, out.width='45%'}
+knitr::include_graphics('./img/Krzysz.png')
+```
+.center[.backgrnote[*Source*: `r Citet(myBib, "schaeffer_who_2022")`]]
+
+---
+
+```{r, echo = FALSE, out.width='80%'}
+knitr::include_graphics('./img/Ethnic_Discr2-1.png')
+```
+.center[.backgrnote[*Source*: `r Citet(myBib, "schaeffer_who_2022")`]]
+
+---
+
+
+```{r, echo = FALSE, out.width='60%'}
+knitr::include_graphics('https://www.degruyter.com/document/doi/10.1515/zfsoz-2017-1022/asset/graphic/j_zfsoz-2017-1022_abb_001.jpg')
+```
+.center[.backgrnote[*Source*: `r Citet(myBib, "schaeffer_who_2022")`]]
+
+---
+layout: false
+class: inverse middle center
+
+.push-left[.font200[
+Did you do the
+
+**pre-work setup**?
+]]
+
+
+.push-right[
+<iframe src='https://merlin-advanced-stats.netlify.app/about/' width='1000' height='600' frameborder='0' scrolling='yes'></iframe>
+]
+
+---
+layout: false
+class: inverse middle
+# I assume
+
+- You know how to use R and RStudio.
+
+
+--
+
+
+- You know basic statistics:
+  + Descriptive statistics: $\%$, $\bar{x}$, $\text{SD}(x)$.
+  + Associations: Correlation $r_{y,x}$, OLS regression $y_{i} = \alpha + \beta x_{i} + \epsilon_{i}$.
+  + Inference: Confidence intervals, $t$-values & $p$-values.
+
+--
+
+
+- *You want to do professional analyses and communicate your results with appealing visualizations.*
+
+---
+class: inverse middle
+# Today's schedule
+
+1. Explanatory sociology
+
+
+2. Learning Goals
+  + Advanced OLS regression
+  + Visualization of regression results
+  + Causal Inference
+  
+  
+3. Course Organization
+
+---
+class: inverse middle center
+# Explanatory sociology
+
+---
 # 4 Types of research questions
 
 .push-left[
@@ -79,6 +200,8 @@ xaringanExtra::use_panelset()
 
 .content-box-green[
 .center[
+What type of research question do my three examples try to answer?
+
 What are you interested in?
 ]]
 
@@ -116,7 +239,7 @@ What are you interested in?
 ]]
 
 ---
-# The goal of social science research
+# The goal of empirical social science
 
 .font140[.center[.alert[Use data to discover patterns ("social facts" in Durkheim's terms), <br> and the **social mechanisms that bring them about**.]]]
 
@@ -125,9 +248,35 @@ knitr::include_graphics('https://liu.se/-/media/istock-501261958.jpg?mw=1120&mh=
 ```
 
 ---
-# 4 statistical techniques
+class: inverse middle center
+# Learning goals
+
+---
+# This semester / Learning goals
 
 .push-left[
+- More flexible OLS regression:
+  + Multiple regression,
+  + Interaction effects,
+  + Polynomials.
+- Visualization of regression results.
+
+```{r, echo = FALSE, out.width='80%', fig.align='center'}
+knitr::include_graphics('https://www.journals.uchicago.edu/cms/10.1086/686942/asset/images/medium/fg3.gif')
+```
+.backgrnote[.center[*Source:* `r Citet(myBib, "polack_safety_2020")`]]
+
+]
+
+--
+
+.push-right[
+- .alert[Causal Inference]:
+  1. Randomized Controlled Trials (RCTs),
+  2. Multiple Regression,
+  3. Instrument Variable Regression,
+  4. Regression Discontinuity Design.
+
 ```{tikz, DAG1,  echo = FALSE, out.width='50%'}
 \usetikzlibrary{shapes,decorations,arrows,calc,arrows.meta,fit,positioning}
 \tikzset{
@@ -145,18 +294,9 @@ knitr::include_graphics('https://liu.se/-/media/istock-501261958.jpg?mw=1120&mh=
     \node[state] (3) [right = of 2] {$Y$};
 
     \path (1) edge  (2);
-    % \path[bidirected] (2) edge[red, bend right=50] (3);
+    \path[bidirected] (2) edge[red, bend right=50] (3);
     \path (1) edge (3);
 \end{tikzpicture}
-```
-]
-RCT
-
-IV
-
-.push-right[
-```{r, echo = FALSE, out.width='50%', fig.align='center'}
-knitr::include_graphics('./img/Romarri.png')
 ```
 ]
 
@@ -164,8 +304,10 @@ knitr::include_graphics('./img/Romarri.png')
 # 1 Randomized controlled trials (RCT)
 
 ---
+layout: true
 # 2 Multiple regression
 
+---
 .push-left[
 ```{tikz, ref.label = "DAG1",  echo = FALSE, out.width='40%'}
 ```
@@ -174,7 +316,6 @@ The red bi-directed arrow is officially not part of the DAG, but helps you see t
 ]]
 
 ---
-# 2 Multiple regression
 
 .push-left[
 ```{tikz, DAG2,  echo = FALSE, out.width='100%'}
@@ -213,9 +354,20 @@ knitr::include_graphics('https://wpr-public.s3.amazonaws.com/wprorg/styles/faceb
 
 ]
 
---
+---
 
-.push-right[
+.left-column[
+```{tikz, ref.label = "DAG2",  echo = FALSE, out.width='100%'}
+```
+.backgrnote[
+The red bi-directed arrow is officially not part of the DAG, but helps you see that the correlation between read news and perceived discrimination is biased because immigrant minorities who obtained German citizenship read news more often than those who are foreign citizens.]
+
+```{r, echo = FALSE, out.width='100%', fig.align='center'}
+knitr::include_graphics('https://wpr-public.s3.amazonaws.com/wprorg/styles/facebook/s3/field/image/ap20296067506098.jpg?itok=hZu82HBq')
+```
+]
+
+.right-column[
 ```{r, echo = FALSE, out.width='100%', fig.align='center'}
 knitr::include_graphics('./img/Card_n_Dahl.png')
 ```
@@ -223,6 +375,7 @@ knitr::include_graphics('./img/Card_n_Dahl.png')
 ]
 
 ---
+layout: false
 # 3 Instrument variable regression
 
 
@@ -243,6 +396,99 @@ knitr::include_graphics('./img/Romarri.png')
 ```
 .backgrnote[.center[*Source:* `r Citet(myBib, "polack_safety_2020")`]]
 ]
+
+---
+class: inverse middle center
+# Course organization
+
+---
+# Weekly course elements
+
+```{r, echo = FALSE, out.width='100%', fig.align='center'}
+knitr::include_graphics('./img/Structure.png')
+```  
+
+---
+layout: true
+# Working with data
+
+.left-column[
+```{r, echo = FALSE, out.width='50%', fig.align='center'}
+knitr::include_graphics('https://www.rstudio.com/wp-content/uploads/2018/10/RStudio-Logo-Flat.png')
+```  
+- We presume that you are familiar in using R.
+
+- You will learn to work with various different types of data in this course.
+
+- Become as fluent in working with data as you are in Danish/English ;)
+]
+
+---
+
+.right-column[
+Data collected by the Worldbank
+```{r, echo = FALSE, out.width='90%', fig.align='center'}
+knitr::include_graphics('./../1-Correlation-n-Regression/1-Correlation-n-Regression_files/figure-html/socialism-corr1-1.png')
+```  
+
+]
+
+---
+
+.right-column[
+European Social Survey
+```{r, echo = FALSE, out.width='90%', fig.align='center'}
+knitr::include_graphics('./../2-Random/2-Random_files/figure-html/true_ols-1.png')
+```  
+
+]
+
+---
+
+.right-column[
+APAX survey
+```{r, echo = FALSE, out.width='90%', fig.align='center'}
+knitr::include_graphics('./../4-RCT/4-RCT_files/figure-html/naiv-1.png')
+```  
+
+]
+
+---
+layout: false
+# Textbooks
+
+.push-left[
+```{r, echo = FALSE, out.width='50%', fig.align='center'}
+knitr::include_graphics('https://imgcdn.saxo.com/_9781292362328')
+```
+]
+
+.push-right[
+```{r, echo = FALSE, out.width='50%', fig.align='center'}
+knitr::include_graphics('https://imgcdn.saxo.com/_9780691152844')
+```
+]
+
+---
+# Recommendations
+
+.push-left[
+- Take notes!
+  + I will use the blackboard and not everything I say is on the slides.
+]
+
+.push-right[
+- Activate email notifications on Absalon.
+- Regularly check your KU email or forward it to your personal email.
+]
+
+---
+class: inverse middle center
+# Open questions
+
+```{r, echo = FALSE, out.width='50%', fig.align='center'}
+knitr::include_graphics('https://www.mountpolley.com/wp-content/uploads/2020/08/pexels-pixabay-356079-1200x726.jpg')
+```
 
 ---
 class: inverse
