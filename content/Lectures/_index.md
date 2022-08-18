@@ -5,5 +5,5 @@ header:
   image: ""
 title: Lectures
 subtitle: Assoc. Prof. Dr. **Merlin Schaeffer** <br> Department of Sociology <br> University of Copenhagen
-view: 2
+view: 3
 ---
