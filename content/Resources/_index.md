@@ -6,4 +6,4 @@ title: Resources
 view: 2
 ---
 
-Useful links
+- [The homepage to Angrist and Pischke's book.](https://www.masteringmetrics.com/)
