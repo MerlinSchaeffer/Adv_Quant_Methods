@@ -20,7 +20,7 @@ Before the first session, I would like you to please:
 - [Get a recent version of R (>= 4.0.0)](https://mirrors.dotsrc.org/cran/).
 
 - [Install RStudio](https://rstudio.com/products/rstudio/download/#download).
-  + [See also](https://psyteachr.github.io/msc-data-skills/installingr.html#installing-base-r)). 
+  + Check also [this homepage](https://psyteachr.github.io/msc-data-skills/installingr.html#installing-base-r). 
   
 - Please always make sure to bring your laptop to class.
 
