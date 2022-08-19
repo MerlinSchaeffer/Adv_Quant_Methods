@@ -4,7 +4,7 @@
     <title>Recap: Correlation &amp; OLS Regression</title>
     <meta charset="utf-8" />
     <meta name="author" content="Merlin Schaeffer  Department of Sociology" />
-    <meta name="date" content="2022-06-24" />
+    <meta name="date" content="2022-08-19" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
     <script src="libs/tile-view/tile-view.js"></script>
@@ -27,15 +27,38 @@ class: center, middle, inverse, title-slide
 ### Merlin Schaeffer<br> Department of Sociology
 ]
 .date[
-### 2022-06-24
+### 2022-08-19
 ]
 
 ---
 
 
 
+# The goal of social science research
 
+.font140[.center[.alert[Use data to **discover patterns** ("social facts" in Durkheim's terms), &lt;br&gt; and the social mechanisms that bring them about.]]]
 
+&lt;img src="https://liu.se/-/media/istock-501261958.jpg?mw=1120&amp;mh=1120&amp;hash=DA8977CCE6A6E600AE80A40CFEE771C9" width="70%" style="display: block; margin: auto;" /&gt;
+---
+class: inverse middle
+# Today's schedule
+
+1. **Application**: Socialism, citizenship rights, &amp; poverty
+  + Worldbank API
+  + Freedom house API
+  + Join/merge different data sources
+  
+2. **Scatter plots**
+
+3. **Correlation**
+  + Z-standardization
+  + `\(r_{y,x}\)`
+  
+4. **OLS regression**
+  + Estimation
+  + Interpretation
+  + Causal &amp; descriptive interpretation.
+  
 ---
 # Remember? .font70[Citizenship across the world]
 
@@ -115,7 +138,7 @@ For more background, see [Wikipedia](https://en.wikipedia.org/wiki/Freedom_House
           citizen_rights = fh_total_reversed, # rename Citizenship rights indicator,
           date = year) %&gt;% # rename year,
    select(country, date, citizen_rights)) # Keep only these 3 variables.
-# # A tibble: 8,655 × 3
+# # A tibble: 8,850 × 3
 #    country      date citizen_rights
 #    &lt;chr&gt;       &lt;dbl&gt;          &lt;dbl&gt;
 #  1 Afghanistan  1972              5
@@ -128,7 +151,8 @@ For more background, see [Wikipedia](https://en.wikipedia.org/wiki/Freedom_House
 #  8 Afghanistan  1979              0
 #  9 Afghanistan  1980              0
 # 10 Afghanistan  1982              0
-# # … with 8,645 more rows
+# # … with 8,840 more rows
+# # ℹ Use `print(n = ...)` to see more rows
 ```
 ]
 
@@ -145,7 +169,7 @@ ggplot(data = Dat_citi_rights %&gt;% filter(date == 2020), # Make coord system f
 ```
 ]
 .panel[.panel-name[Citizenship rights in 2020 across the world]
-&lt;img src="1-Correlation-n-Regression_files/figure-html/unnamed-chunk-6-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="1-Correlation-n-Regression_files/figure-html/unnamed-chunk-7-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]]
 
 ---
@@ -172,6 +196,7 @@ class: clear
 #  9 1.0.PGap.Poor4uds    Poverty Gap ($4 a day)                  The poverty gap captures the mean aggregate income…
 # 10 1.0.PSev.1.90usd     Poverty Severity ($1.90 a day)          The poverty severity index combines information on…
 # # … with 692 more rows
+# # ℹ Use `print(n = ...)` to see more rows
 ```
 ]
 .panel[.panel-name[Get Wb data]
@@ -199,6 +224,7 @@ class: clear
 #  9 Bangladesh  2016    84.2
 # 10 Belarus     2020     0.1
 # # … with 153 more rows
+# # ℹ Use `print(n = ...)` to see more rows
 ```
 ]
 .panel[.panel-name[Poverty across the world]
@@ -241,7 +267,7 @@ OK great, now I have two tibbles. But how can I combine them into one single tib
 
 ```r
 Dat_citi_rights
-# # A tibble: 8,655 × 3
+# # A tibble: 8,850 × 3
 #    country      date citizen_rights
 #    &lt;chr&gt;       &lt;dbl&gt;          &lt;dbl&gt;
 #  1 Afghanistan  1972              5
@@ -254,7 +280,8 @@ Dat_citi_rights
 #  8 Afghanistan  1979              0
 #  9 Afghanistan  1980              0
 # 10 Afghanistan  1982              0
-# # … with 8,645 more rows
+# # … with 8,840 more rows
+# # ℹ Use `print(n = ...)` to see more rows
 ```
 ]
 
@@ -276,6 +303,7 @@ Dat_poverty
 #  9 Bangladesh  2016    84.2
 # 10 Belarus     2020     0.1
 # # … with 153 more rows
+# # ℹ Use `print(n = ...)` to see more rows
 ```
 ]
 
@@ -329,6 +357,7 @@ Dat_poverty
 #  9 Bangladesh  2016    84.2              6
 # 10 Belarus     2020     0.1              1
 # # … with 137 more rows
+# # ℹ Use `print(n = ...)` to see more rows
 ```
 
 ---
@@ -403,11 +432,17 @@ Dat
 #  9 Bangladesh  2016    84.2              6         0
 # 10 Belarus     2020     0.1              1         0
 # # … with 137 more rows
+# # ℹ Use `print(n = ...)` to see more rows
 ```
 ]
 .panel[.panel-name[Plot socialism years across the world]
 &lt;img src="1-Correlation-n-Regression_files/figure-html/socialism-world-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]]
+
+---
+class: inverse middle center
+# Scatter plots
+
 
 ---
 # Visual inspection
@@ -426,6 +461,10 @@ data?
 .right-column[
 &lt;img src="1-Correlation-n-Regression_files/figure-html/socialism-corr1-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]
+
+---
+class: inverse middle center
+# Correlation
 
 ---
 class: clear
@@ -454,17 +493,18 @@ class: clear
 # # A tibble: 147 × 7
 #    country     date poverty citizen_rights socialist z_socialist z_poverty
 #    &lt;chr&gt;      &lt;dbl&gt;   &lt;dbl&gt;          &lt;dbl&gt;     &lt;dbl&gt;       &lt;dbl&gt;     &lt;dbl&gt;
-#  1 Albania     2019    10                8        21       1.25     -0.809
-#  2 Algeria     2011    28.6              3        49       3.39     -0.279
-#  3 Angola      2018    88.5              3         0      -0.348     1.43 
-#  4 Argentina   2020    18.2             10         0      -0.348    -0.575
-#  5 Armenia     2020    44.7              6         0      -0.348     0.180
-#  6 Australia   2018     0.7             12         0      -0.348    -1.07 
-#  7 Austria     2019     0.8             12         0      -0.348    -1.07 
-#  8 Azerbaijan  2005     7                3         0      -0.348    -0.895
-#  9 Bangladesh  2016    84.2              6         0      -0.348     1.31 
-# 10 Belarus     2020     0.1              1         0      -0.348    -1.09 
+#  1 Albania     2019    10                8        21       1.25     -0.819
+#  2 Algeria     2011    28.6              3        49       3.39     -0.287
+#  3 Angola      2018    88.5              3         0      -0.348     1.42 
+#  4 Argentina   2020    18.2             10         0      -0.348    -0.584
+#  5 Armenia     2020    44.7              6         0      -0.348     0.173
+#  6 Australia   2018     0.7             12         0      -0.348    -1.08 
+#  7 Austria     2019     0.8             12         0      -0.348    -1.08 
+#  8 Azerbaijan  2005     7                3         0      -0.348    -0.904
+#  9 Bangladesh  2016    84.2              6         0      -0.348     1.30 
+# 10 Belarus     2020     0.1              1         0      -0.348    -1.10 
 # # … with 137 more rows
+# # ℹ Use `print(n = ...)` to see more rows
 ```
 ]
 .panel[.panel-name[Illustration]
@@ -493,7 +533,7 @@ OK but this remains rather approximate. I mean eye-balling is hardly enough to c
 ]
 
 ---
-# The correlation coefficient: `\(r\)`
+# The correlation coefficient: `\(r_{y,x}\)`
 
 .panelset[
 .panel[.panel-name[What is it?]
@@ -526,21 +566,34 @@ Dat %&gt;% # Use our data,
   select(poverty, socialist) %&gt;% # Select vars for analysis,
 * cor() # Estimate correlation.
 #           poverty socialist
-# poverty    1.0000    0.0299
-# socialist  0.0299    1.0000
+# poverty    1.0000    0.0272
+# socialist  0.0272    1.0000
 ```
 ]]]
 
 ---
+class: inverse middle center
+# Break
+
+&lt;iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+
+---
 class: middle clear
+&lt;br&gt;
 
 .left-column[
 &lt;img src="https://www.laserfiche.com/wp-content/uploads/2014/10/femalecoder.jpg" width="80%" style="display: block; margin: auto;" /&gt;
+
+&lt;iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
 ]
 
 .right-column[
 &lt;iframe src='exercise1.html' width='1000' height='600' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
 ]
+
+---
+class: inverse middle center
+# OLS regression
 
 ---
 # Correlation = linear trend
@@ -562,7 +615,7 @@ Models should not be driven by few singular cases, like in this example.]
 ]
 
 .right-column[
-&lt;img src="1-Correlation-n-Regression_files/figure-html/unnamed-chunk-27-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="1-Correlation-n-Regression_files/figure-html/unnamed-chunk-28-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -592,7 +645,7 @@ Models should not be driven by few singular cases, like in this example.]
 - **Residuals**, `\(e_{i} =y_{i} - \hat{y}\)`
   + the differences between what our model predicts and the actual data.
 
-`\(e_{\text{Denmark}} = 0.4\% - 38\%=-37.6\%\)`
+`\(e_{\text{Denmark}} = 0.4\% - 38.3\%=-37.9\%\)`
 ]
 .right-column[
 &lt;img src="1-Correlation-n-Regression_files/figure-html/residuals-1.png" width="100%" style="display: block; margin: auto;" /&gt;
@@ -666,7 +719,7 @@ htmlreg(list(ols, zols), # Nicely-formatted table.
         custom.model.names = c("OLS", "Z-OLS"))
 ```
 
-&lt;img src="1-Correlation-n-Regression_files/figure-html/unnamed-chunk-31-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+&lt;img src="1-Correlation-n-Regression_files/figure-html/unnamed-chunk-32-1.png" width="90%" style="display: block; margin: auto;" /&gt;
 ]
 
 .push-right[
@@ -682,8 +735,8 @@ htmlreg(list(ols, zols), # Nicely-formatted table.
 &lt;tbody&gt;
 &lt;tr style="border-top: 1px solid #000000;"&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(Intercept)&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;38.02&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.00&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;38.33&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;-0.00&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
@@ -692,7 +745,7 @@ htmlreg(list(ols, zols), # Nicely-formatted table.
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;socialist&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.08&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.07&lt;/td&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
@@ -736,21 +789,21 @@ htmlreg(list(ols, zols), # Nicely-formatted table.
 
 .panel[.panel-name[Interpretation]
 .push-left[
-&lt;img src="1-Correlation-n-Regression_files/figure-html/unnamed-chunk-33-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="1-Correlation-n-Regression_files/figure-html/unnamed-chunk-34-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]
 
 .push-right[
 $$
-\operatorname{\widehat{poverty}} = 38.02 + 0.08(\operatorname{socialist})
+\operatorname{\widehat{poverty}} = 38.33 + 0.07(\operatorname{socialist})
 $$
  `\(\rightarrow\)` the best-fitting line that `\(\min \sum_{i=1}^{n} e_{i}^{2}\)`.
 
-- Among countries without a socialist past, poverty is on average 38.02%.
-  + `\((\hat{y}|\text{Socialism = 0}) = 38.02\%\)`.
+- Among countries without a socialist past, poverty is on average 38.33%.
+  + `\((\hat{y}|\text{Socialism = 0}) = 38.33\%\)`.
   
-- With every year of socialism, the average level of poverty 0.08% lower.
+- With every year of socialism, the average level of poverty 0.07% lower.
 
-- This model accounts for 0.09% more of the variation of poverty across the world, than simply using the mean as best guess `\(\bar{y} = 38.39\%\)`.
+- This model accounts for 0.07% more of the variation of poverty across the world, than simply using the mean as best guess `\(\bar{y} = 38.66\%\)`.
 ]]]
 
 ---
@@ -759,7 +812,7 @@ $$
 .left-column[
 .center[**1. Causal**]
 
-With every additional year of socialism, poverty is expected to decline by 0.08%. Thus, if China and Vietnam stay socialist, poverty will further decline.
+With every additional year of socialism, poverty is expected to decline by 0.07%. Thus, if China and Vietnam stay socialist, poverty will further decline.
 
 .alert[Beware, this interpretation only holds under some conditions. Fortunately, I will teach you how to estimate regressions that have a causal interpretation later this semester!]
 ]
@@ -771,10 +824,17 @@ With every additional year of socialism, poverty is expected to decline by 0.08%
 **2. Descriptive: conditional means `\(\bar{y}|x\)`**
 ]
 
-With every year of socialism, the average level of poverty 0.08% lower.
+With every year of socialism, the average level of poverty 0.07% lower.
 
 Here regression is a (linear) model that describes the average of the outcome for different values of the predictor.
 ]
+
+---
+class: inverse middle center
+# Break
+
+&lt;iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+
 
 ---
 class: middle clear
@@ -792,411 +852,6 @@ class: middle clear
 ]
 
 ---
-# Categorical predicators
-
-.panelset[
-.panel[.panel-name[Continent]
-
-```r
-(Dat &lt;- Dat %&gt;%
-   mutate(
-     continent = countrycode( # Nice function from the countrycode package ;)
-       sourcevar = country, # What is the original variable?
-       origin = "country.name", # What info does the original variable contain?
-       destination = "continent") %&gt;% # What do you want as output?
-       factor() %&gt;% fct_relevel("Europe"))) # Turn into factor and make "Europe" the reference.
-# # A tibble: 147 × 8
-#    country     date poverty citizen_rights socialist z_socialist z_poverty continent
-#    &lt;chr&gt;      &lt;dbl&gt;   &lt;dbl&gt;          &lt;dbl&gt;     &lt;dbl&gt;       &lt;dbl&gt;     &lt;dbl&gt; &lt;fct&gt;    
-#  1 Albania     2019    10                8        21       1.25     -0.809 Europe   
-#  2 Algeria     2011    28.6              3        49       3.39     -0.279 Africa   
-#  3 Angola      2018    88.5              3         0      -0.348     1.43  Africa   
-#  4 Argentina   2020    18.2             10         0      -0.348    -0.575 Americas 
-#  5 Armenia     2020    44.7              6         0      -0.348     0.180 Asia     
-#  6 Australia   2018     0.7             12         0      -0.348    -1.07  Oceania  
-#  7 Austria     2019     0.8             12         0      -0.348    -1.07  Europe   
-#  8 Azerbaijan  2005     7                3         0      -0.348    -0.895 Asia     
-#  9 Bangladesh  2016    84.2              6         0      -0.348     1.31  Asia     
-# 10 Belarus     2020     0.1              1         0      -0.348    -1.09  Europe   
-# # … with 137 more rows
-```
-]
-.panel[.panel-name[Scatter plot]
-
-.left-column[
-.content-box-green[
-1. Where does the regression line pass through the cloud of countries without a socialist past?
-2. Where does the regression line pass through the cloud of countries with a socialist past?
-3. What does this sugest about the slope `\(\beta\)`?
-]
-]
-.right-column[
-&lt;img src="1-Correlation-n-Regression_files/figure-html/categorical-1.png" width="100%" style="display: block; margin: auto;" /&gt;
-]]
-.panel[.panel-name[Dummy coding]
-
-.push-left[
-`$$x=
-  \begin{cases}
-    1, &amp; \text{if condition is met} \\
-    0 &amp; \text{otherwise}
-  \end{cases}$$`
-
-Contintent                       | Africa | Asia | ...
----------------------------------|----|----|----
-Burundi                 | 1  | 0  | 0 
-Somalia                 | 1  | 0  | 0
-...                 | 1  | 0  | 0
-China                          | 0  | 1  | 0  
-Japan                          | 0  | 1  | 0
-...                          | 0  | 1  | 0
-Reference &lt;br&gt; .backgrnote[(Europe)] | 0  | 0  | 0
-]
-
-.push-right[
-&lt;img src="1-Correlation-n-Regression_files/figure-html/categorical2-1.png" width="100%" style="display: block; margin: auto;" /&gt;
-]]
-.panel[.panel-name[How it's done in R]
-.push-left[
-
-```r
-# R recognizes categorical variables automatically.
-ols_2 &lt;- lm(data = Dat, formula = poverty ~ continent)
-
-htmlreg(ols_2, # Nicely-formatted table.
-        custom.coef.names = c("Intercept", "Africa", 
-                              "Americas", "Asia", 
-                              "Oceania")) 
-```
-
-&lt;img src="1-Correlation-n-Regression_files/figure-html/unnamed-chunk-36-1.png" width="80%" style="display: block; margin: auto;" /&gt;
-]
-
-.push-right[.font90[
-&lt;table class="texreg" style="margin: 10px auto;border-collapse: collapse;border-spacing: 0px;caption-side: bottom;color: #000000;border-top: 2px solid #000000;"&gt;
-&lt;caption&gt;Statistical models&lt;/caption&gt;
-&lt;thead&gt;
-&lt;tr&gt;
-&lt;th style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/th&gt;
-&lt;th style="padding-left: 5px;padding-right: 5px;"&gt;Model 1&lt;/th&gt;
-&lt;/tr&gt;
-&lt;/thead&gt;
-&lt;tbody&gt;
-&lt;tr style="border-top: 1px solid #000000;"&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Intercept&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;3.09&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(3.71)&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Africa&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;69.79&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(4.96)&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Americas&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;21.40&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(6.08)&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Asia&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;32.00&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(5.60)&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Oceania&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;44.33&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(7.76)&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr style="border-top: 1px solid #000000;"&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;R&lt;sup&gt;2&lt;/sup&gt;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.60&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Adj. R&lt;sup&gt;2&lt;/sup&gt;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.59&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr style="border-bottom: 2px solid #000000;"&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Num. obs.&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;146&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tbody&gt;
-&lt;tfoot&gt;
-&lt;tr&gt;
-&lt;td style="font-size: 0.8em;" colspan="2"&gt;&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;p &amp;lt; 0.001; &lt;sup&gt;&amp;#42;&amp;#42;&lt;/sup&gt;p &amp;lt; 0.01; &lt;sup&gt;&amp;#42;&lt;/sup&gt;p &amp;lt; 0.05&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tfoot&gt;
-&lt;/table&gt;
-]]]
-
-.panel[.panel-name[Interpretation]
-.push-left[.font90[
-&lt;table class="texreg" style="margin: 10px auto;border-collapse: collapse;border-spacing: 0px;caption-side: bottom;color: #000000;border-top: 2px solid #000000;"&gt;
-&lt;caption&gt;Statistical models&lt;/caption&gt;
-&lt;thead&gt;
-&lt;tr&gt;
-&lt;th style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/th&gt;
-&lt;th style="padding-left: 5px;padding-right: 5px;"&gt;Model 1&lt;/th&gt;
-&lt;/tr&gt;
-&lt;/thead&gt;
-&lt;tbody&gt;
-&lt;tr style="border-top: 1px solid #000000;"&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Intercept&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;3.09&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(3.71)&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Africa&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;69.79&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(4.96)&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Americas&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;21.40&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(6.08)&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Asia&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;32.00&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(5.60)&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Oceania&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;44.33&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(7.76)&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr style="border-top: 1px solid #000000;"&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;R&lt;sup&gt;2&lt;/sup&gt;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.60&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Adj. R&lt;sup&gt;2&lt;/sup&gt;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.59&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr style="border-bottom: 2px solid #000000;"&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Num. obs.&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;146&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tbody&gt;
-&lt;tfoot&gt;
-&lt;tr&gt;
-&lt;td style="font-size: 0.8em;" colspan="2"&gt;&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;p &amp;lt; 0.001; &lt;sup&gt;&amp;#42;&amp;#42;&lt;/sup&gt;p &amp;lt; 0.01; &lt;sup&gt;&amp;#42;&lt;/sup&gt;p &amp;lt; 0.05&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tfoot&gt;
-&lt;/table&gt;
-]]
-.push-right[
-
-$$
-`\begin{aligned}
-\operatorname{\widehat{poverty}} &amp;= 3.09 + 69.79(\operatorname{continent}_{\operatorname{Africa}})\ + \\
-&amp;\quad 21.4(\operatorname{continent}_{\operatorname{Americas}}) + 32(\operatorname{continent}_{\operatorname{Asia}})\ + \\
-&amp;\quad 44.33(\operatorname{continent}_{\operatorname{Oceania}})
-\end{aligned}`
-$$
-
-
-- When Africa = 0, and Asia = 0, and America == 0, and Oceania = 0, then poverty is on average 3.09%.&lt;br&gt; `\(\rightarrow\)` The average poverty across countries in the reference group (Europe) is 3.09%.
-
-- Across African countries, poverty is on average 69.79% higher than across European ones.
-  + Across African countries, poverty is thus: `\(3.09\% + 69.79\% = 72.88\%\)`.
-
-]
-
-]]
-
-
----
-class: clear
-# Assumptions
-
-.left-column[
-.content-box-blue[.center[
-**4 requirements for OLS results to predict useful conditional means:**
-]
-1. **No outliers.**
-2. **Linear relationship.**
-3. Homogeneous trends across subpopulations.
-4. No unsupported extrapolation
-
-`\(\rightarrow\)` Scatter plots!
-]]
-
-.right-column[
-&lt;iframe src='https://seeing-theory.brown.edu/regression-analysis/index.html#section1' width='700' height='670' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
-]
-
----
-# Outlier 
-
-.left-column[
-- **Leverage:** a case has a strong influence on the regression line.
-  + China and Vietnam drive our results!
-  
-
-- **Z-standardized residuals:** a case is far from the regression line.
-  + Haiti with poverty of 96.9% is such a case. But so is Denmark with its 0.4% poverty rate.
-]
-
-.right-column[
-
-```r
-plot(ols, which = 5) # The best outlier plot.
-```
-
-&lt;img src="1-Correlation-n-Regression_files/figure-html/outlier-1.png" width="80%" style="display: block; margin: auto;" /&gt;
-]
-
----
-# Linearity
-
-.left-column[
-- The gray dotted line is out regression model.
-
-- The red line should ideally be the same.
-  + .alert[Here the linearity assumption clearly does not hold.]
-]
-
-.right-column[
-
-```r
-plot(ols, which = 1) # The best outlier plot.
-```
-
-&lt;img src="1-Correlation-n-Regression_files/figure-html/linearity-1.png" width="80%" style="display: block; margin: auto;" /&gt;
-]
-
----
-class: middle clear
-
-.left-column[
-&lt;img src="https://cdn.dribbble.com/users/10549/screenshots/9890798/media/f38f0e4d71d9763c7533641d2418b35b.png?compress=1&amp;resize=1200x900&amp;vertical=top" width="100%" style="display: block; margin: auto;" /&gt;
-
-&lt;img src="1-Correlation-n-Regression_files/figure-html/unnamed-chunk-40-1.png" width="90%" style="display: block; margin: auto;" /&gt;
-]
-
-.right-column[
-&lt;iframe src='https://merlin-advanced-stats.netlify.app/lectures/1-correlation-n-regression/exercise3.html' width='1000' height='600' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
-]
-
----
-# Learning goal achieved!
-
-.push-left[
-- No, there is no freedom-equality trade-off!
-  + Socialist countries don't seem to be better or worse at fighting poverty.
-  + Instead our z-standardized results tell us that granting more rights to citizens is much more strongly associated with lower levels of poverty than is socialism.
-  
-
-
-
-```r
-# Regression models.
-zols &lt;- lm(z_poverty ~ z_socialist, Dat) 
-zols_2 &lt;- lm(z_poverty ~ z_citizen_rights, Dat)
-
-# Nicely-formatted table.
-htmlreg(list(zols, zols_2), 
-        custom.coef.names = c("Intercept", "Socialism", 
-                              "Citizenhip rights"))
-```
-]
-
-.push-right[
-&lt;table class="texreg" style="margin: 10px auto;border-collapse: collapse;border-spacing: 0px;caption-side: bottom;color: #000000;border-top: 2px solid #000000;"&gt;
-&lt;caption&gt;Statistical models&lt;/caption&gt;
-&lt;thead&gt;
-&lt;tr&gt;
-&lt;th style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/th&gt;
-&lt;th style="padding-left: 5px;padding-right: 5px;"&gt;Model 1&lt;/th&gt;
-&lt;th style="padding-left: 5px;padding-right: 5px;"&gt;Model 2&lt;/th&gt;
-&lt;/tr&gt;
-&lt;/thead&gt;
-&lt;tbody&gt;
-&lt;tr style="border-top: 1px solid #000000;"&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Intercept&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.00&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.00&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.08)&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.07)&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Socialism&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.03&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.08)&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Citizenhip rights&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;-0.51&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.07)&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr style="border-top: 1px solid #000000;"&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;R&lt;sup&gt;2&lt;/sup&gt;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.00&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.26&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Adj. R&lt;sup&gt;2&lt;/sup&gt;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;-0.01&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.25&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr style="border-bottom: 2px solid #000000;"&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Num. obs.&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;147&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;147&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tbody&gt;
-&lt;tfoot&gt;
-&lt;tr&gt;
-&lt;td style="font-size: 0.8em;" colspan="3"&gt;&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;p &amp;lt; 0.001; &lt;sup&gt;&amp;#42;&amp;#42;&lt;/sup&gt;p &amp;lt; 0.01; &lt;sup&gt;&amp;#42;&lt;/sup&gt;p &amp;lt; 0.05&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tfoot&gt;
-&lt;/table&gt;
-]
-
----
 class: inverse
 # Today's general lessons
 
@@ -1209,8 +864,6 @@ class: inverse
 7. `\(\beta\)` the slope, tells us how average levels of `\(\hat{y}\)` chnage with a unit increase in `\(x\)`. 
 8. OLS finds the linear model that best fits the data.
 9. Regression should under normal circumstances not be interpreted in causal terms.
-10. Categorical predictors are (typically) dummy coded and then tel us the average difference in the outcome between a category to the reference group.
-11. We should make sure that the correlations and regressions we estimate actually capture aprrox. linear relationships and that they are not driven by outliers.
 
 ---
 class: inverse

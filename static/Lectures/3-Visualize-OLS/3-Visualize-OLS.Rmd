@@ -42,24 +42,236 @@ xaringanExtra::use_xaringan_extra(c("tile_view", "tachyons"))
 xaringanExtra::use_panelset()
 ```
 
-# 4 Types of research questions
+---
+# Categorical predicators
 
+.panelset[
+.panel[.panel-name[Continent]
+```{r}
+(Dat <- Dat %>%
+   mutate(
+     continent = countrycode( # Nice function from the countrycode package ;)
+       sourcevar = country, # What is the original variable?
+       origin = "country.name", # What info does the original variable contain?
+       destination = "continent") %>% # What do you want as output?
+       factor() %>% fct_relevel("Europe"))) # Turn into factor and make "Europe" the reference.
+```
+]
+.panel[.panel-name[Scatter plot]
+
+.left-column[
+.content-box-green[
+1. Where does the regression line pass through the cloud of countries without a socialist past?
+2. Where does the regression line pass through the cloud of countries with a socialist past?
+3. What does this sugest about the slope $\beta$?
+]
+]
+.right-column[
+```{r categorical, out.width='100%', fig.height = 4, fig.width = 6.5, results = FALSE, echo = FALSE}
+Dat_bi <- Dat %>%
+   mutate(
+     continent_bi = case_when(
+       continent == "Americas" ~ 1,
+       continent == "Europe" ~ 0,
+       TRUE ~ as.numeric(NA)))
+
+ggplot(data = Dat_bi, aes(y = poverty, x = continent_bi)) +
+  geom_text(aes(label = country)) +
+  geom_smooth(method = "lm", se = FALSE) +
+  scale_x_continuous(breaks = c(0, 1), labels = c("Europe", "Americas")) +
+  labs(y = "% population with less \n than 5.50$ a day", 
+       x = "") +
+  theme_minimal() +
+  guides(color = "none")
+```
+]]
+.panel[.panel-name[Dummy coding]
+
+.push-left[
+$$x=
+  \begin{cases}
+    1, & \text{if condition is met} \\
+    0 & \text{otherwise}
+  \end{cases}$$
+
+Contintent                       | Africa | Asia | ...
+---------------------------------|----|----|----
+Burundi                 | 1  | 0  | 0 
+Somalia                 | 1  | 0  | 0
+...                 | 1  | 0  | 0
+China                          | 0  | 1  | 0  
+Japan                          | 0  | 1  | 0
+...                          | 0  | 1  | 0
+Reference <br> .backgrnote[(Europe)] | 0  | 0  | 0
+]
+
+.push-right[
+```{r categorical2, out.width='100%', fig.height = 4, fig.width = 6.5, results = FALSE, echo = FALSE}
+Dat_bi <- Dat %>%
+   mutate(
+     continent_bi = case_when(
+       continent == "Asia" ~ 1,
+       TRUE ~ 0))
+
+ggplot(data = Dat_bi, aes(y = poverty, x = continent_bi)) +
+  geom_text(aes(label = country)) +
+  geom_smooth(method = "lm", se = FALSE) +
+  scale_x_continuous(breaks = c(0, 1)) +
+  labs(y = "% population with less \n than 5.50$ a day", 
+       x = "Asia") +
+  theme_minimal() +
+  guides(color = "none")
+```
+]]
+.panel[.panel-name[How it's done in R]
+.push-left[
+```{r ols_2, eval = FALSE}
+# R recognizes categorical variables automatically.
+ols_2 <- lm(data = Dat, formula = poverty ~ continent)
+
+htmlreg(ols_2, # Nicely-formatted table.
+        custom.coef.names = c("Intercept", "Africa", 
+                              "Americas", "Asia", 
+                              "Oceania")) 
+```
+
+```{r ref.label = "categorical", out.width='80%', fig.height = 4, fig.width = 6.5, results = FALSE, echo = FALSE}
+```
+]
+
+.push-right[.font90[
+```{r ref.label = "ols_2", results = 'asis', echo = FALSE}
+```
+]]]
+
+.panel[.panel-name[Interpretation]
+.push-left[.font90[
+```{r ref.label = "ols_2", results = 'asis', echo = FALSE}
+```
+]]
+.push-right[
+
+`r extract_eq(ols_2, wrap = TRUE, terms_per_line = 2, use_coefs = TRUE)`
+
+- When Africa = 0, and Asia = 0, and America == 0, and Oceania = 0, then poverty is on average `r round(coef(ols_2)[1], 2)`%.<br> $\rightarrow$ The average poverty across countries in the reference group (Europe) is `r round(coef(ols_2)[1], 2)`%.
+
+- Across African countries, poverty is on average `r round(coef(ols_2)[2], 2)`% higher than across European ones.
+  + Across African countries, poverty is thus: $`r round(coef(ols_2)[1], 2)`\% + `r round(coef(ols_2)[2], 2)`\% = `r round(coef(ols_2)[1], 2) + round(coef(ols_2)[2], 2)`\%$.
+
+]
+
+]]
+
+
+---
+class: clear
+# Assumptions
+
+.left-column[
+.content-box-blue[.center[
+**4 requirements for OLS results to predict useful conditional means:**
+]
+1. **No outliers.**
+2. **Linear relationship.**
+3. Homogeneous trends across subpopulations.
+4. No unsupported extrapolation
+
+$\rightarrow$ Scatter plots!
+]]
+
+.right-column[
+<iframe src='https://seeing-theory.brown.edu/regression-analysis/index.html#section1' width='700' height='670' frameborder='0' scrolling='yes'></iframe>
+]
+
+---
+# Outlier 
+
+.left-column[
+- **Leverage:** a case has a strong influence on the regression line.
+  + China and Vietnam drive our results!
+  
+
+- **Z-standardized residuals:** a case is far from the regression line.
+  + Haiti with poverty of `r Dat$poverty[Dat$country == "Burundi"]`% is such a case. But so is Denmark with its `r Dat$poverty[Dat$country == "Denmark"]`% poverty rate.
+]
+
+.right-column[
+```{r outlier, out.width='80%', fig.height = 4, fig.width = 5, results = FALSE}
+plot(ols, which = 5) # The best outlier plot.
+```
+]
+
+---
+# Linearity
+
+.left-column[
+- The gray dotted line is out regression model.
+
+- The red line should ideally be the same.
+  + .alert[Here the linearity assumption clearly does not hold.]
+]
+
+.right-column[
+```{r linearity, out.width='80%', fig.height = 4, fig.width = 5, results = FALSE}
+plot(ols, which = 1) # The best outlier plot.
+```
+]
+
+---
+class: middle clear
+
+.left-column[
+```{r, echo = FALSE, out.width='100%'}
+knitr::include_graphics('https://cdn.dribbble.com/users/10549/screenshots/9890798/media/f38f0e4d71d9763c7533641d2418b35b.png?compress=1&resize=1200x900&vertical=top')
+```
+
+```{r ref.label = "pov-citiz-corr2", out.width='90%', fig.height = 4, fig.width = 7.5, results = FALSE, echo = FALSE}
+```
+]
+
+.right-column[
+<iframe src='https://merlin-advanced-stats.netlify.app/lectures/1-correlation-n-regression/exercise3.html' width='1000' height='600' frameborder='0' scrolling='yes'></iframe>
+]
+
+---
+# Learning goal achieved!
+
+.push-left[
+- No, there is no freedom-equality trade-off!
+  + Socialist countries don't seem to be better or worse at fighting poverty.
+  + Instead our z-standardized results tell us that granting more rights to citizens is much more strongly associated with lower levels of poverty than is socialism.
+  
+```{r echo = FALSE}
+Dat <- Dat %>%
+  mutate(
+    z_citizen_rights = scale(citizen_rights) %>% as.numeric())
+```
+
+```{r goal, results = FALSE}
+# Regression models.
+zols <- lm(z_poverty ~ z_socialist, Dat) 
+zols_2 <- lm(z_poverty ~ z_citizen_rights, Dat)
+
+# Nicely-formatted table.
+htmlreg(list(zols, zols_2), 
+        custom.coef.names = c("Intercept", "Socialism", 
+                              "Citizenhip rights"))
+```
+]
+
+.push-right[
+```{r ref.label = "goal", echo = FALSE, results = 'asis'}
+```
+]
 
 ---
 class: inverse
 # Today's general lessons
 
-1. R allows you to easily download tons of interesting data.
-2. You can combine (i.e., join/merge) data than contain (at least party) the same observations, if they have some variables in common that uniquely identify them. This allows for a lot of fascinating analyses and great term papers!
-3. Always make a scatter plot of the variables you want to correlate.
-4. Z-standardization helps interpretation and gives a common unit to different variables.
-5. The correlation coefficient is an easy to understand statistic of a (undirected) association between two variables.
-6. As a linear model, regression expresses on outcome variable as a linear function of a predictor. It thus estimates a directed relation. 
-7. $\beta$ the slope, tells us how average levels of $\hat{y}$ chnage with a unit increase in $x$. 
-8. OLS finds the linear model that best fits the data.
-9. Regression should under normal circumstances not be interpreted in causal terms.
-10. Categorical predictors are (typically) dummy coded and then tel us the average difference in the outcome between a category to the reference group.
-11. We should make sure that the correlations and regressions we estimate actually capture aprrox. linear relationships and that they are not driven by outliers.
+1. If you want to use a categorical variable as a predictor in a regression analysis, it is (typically) dummy coded. That means, it's tells us the average difference in the outcome between a category to the reference group.
+2. We should make sure that the correlations and regressions we estimate actually capture aprrox. linear relationships and that they are not driven by outliers.
 
 ---
-# References
+class: inverse
+# Today's (important) functions
+

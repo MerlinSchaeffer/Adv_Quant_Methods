@@ -1,0 +1,61 @@
+---
+title: "Exercise 2 (15 minutes)"
+subtitle: "When you're done, assist some of the others ..."
+output: webexercises::webexercises_default
+---
+
+```{r setup, include = FALSE}
+options(htmltools.dir.version = FALSE, servr.interval = 0.5, width = 115, digits = 2)
+knitr::opts_chunk$set(
+  collapse = TRUE, message = FALSE, 
+  warning = FALSE, cache = FALSE,
+  comment = "#", strip.white = TRUE)
+
+library(webexercises)
+library(tidyverse)
+library(essentials)
+
+pacman::p_load(
+  tidyverse, # Data manipulation,
+  furniture, # For row-means,
+  ggplot2, # beautiful figures,
+  estimatr, # Regression for weighted data,
+  modelr, # Turn results of lm() into a tibble,
+  modelsummary, # for balance tables,
+  texreg) # regression tables with nice layout.
+
+# 1. read the APAX data
+load("../../../assets/APAX.Rdata") # Read APAX data,
+APAX <- APAX %>% mutate(
+  # News in minutes,
+  news = news_hrs*60 + news_mins, 
+  news_yn = case_when( # News Yes/No,
+    news < 10 ~ 0, # Less than 15  minutes,
+    news > 14 ~ 1, # More than 15  minutes,
+    TRUE ~ as.numeric(NA)),
+  # Average discrimination index across domains,
+  dis_index = rowmeans( #<<
+    dis_trainee, dis_job, dis_school, #<<
+    dis_house, dis_gov, dis_public, #<<
+    na.rm = TRUE), #<<
+  # Z-standardized discrimination index.
+  z_dis_index = scale(dis_index) %>% 
+    as.numeric())
+```
+
+1. Together with your neighbor, draw a dag of the effect of news consumption on support for anti-dsicrimination policies. Go through the APAX data and discuss which variables might be a confounder (i.e, a backdoor path). Add them to your DAG.
+
+2. In the APAX survey, we also asked respondents how their physical appearance is typically described in Germany, with answers ranging from White, over Black, to Asian. Test whether the variable on racial appearance is balanced across our binary news reading indicator. That is, are people who appear Asian read the news more often than those who appear white etc.? *What do you conclude from the balance table*?
+`r hide("R solution -> dont' peak to early ;) !")`
+```{r}
+APAX %>%
+  # Select variables for which I want my balance test,
+  select(news_yn, appearance, gewFAKT) %>%
+  rename(weights = gewFAKT) %>% # Rename the weights variable!
+  datasummary_balance( # Make a balance table,
+    formula = ~ news_yn, # by Reading news Yes/No
+    data = . ,
+    title = "Physical appearance of those who read news and those who don't") 
+```
+`r unhide()`
+3. Beyond the variables observed in APAX, consider with your neighbor which unobserved other confounding variables might exist and bias our estimate of the news effect.
