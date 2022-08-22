@@ -4,7 +4,7 @@
     <title>Recap: Correlation &amp; OLS Regression</title>
     <meta charset="utf-8" />
     <meta name="author" content="Merlin Schaeffer  Department of Sociology" />
-    <meta name="date" content="2022-08-19" />
+    <meta name="date" content="2022-08-22" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
     <script src="libs/tile-view/tile-view.js"></script>
@@ -27,7 +27,7 @@ class: center, middle, inverse, title-slide
 ### Merlin Schaeffer<br> Department of Sociology
 ]
 .date[
-### 2022-08-19
+### 2022-08-22
 ]
 
 ---
@@ -169,7 +169,7 @@ ggplot(data = Dat_citi_rights %&gt;% filter(date == 2020), # Make coord system f
 ```
 ]
 .panel[.panel-name[Citizenship rights in 2020 across the world]
-&lt;img src="1-Correlation-n-Regression_files/figure-html/unnamed-chunk-7-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="1-Corr-n-Reg_files/figure-html/unnamed-chunk-7-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]]
 
 ---
@@ -228,7 +228,7 @@ class: clear
 ```
 ]
 .panel[.panel-name[Poverty across the world]
-&lt;img src="1-Correlation-n-Regression_files/figure-html/poverty-world-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="1-Corr-n-Reg_files/figure-html/poverty-world-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]]
 
 ---
@@ -436,7 +436,7 @@ Dat
 ```
 ]
 .panel[.panel-name[Plot socialism years across the world]
-&lt;img src="1-Correlation-n-Regression_files/figure-html/socialism-world-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="1-Corr-n-Reg_files/figure-html/socialism-world-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]]
 
 ---
@@ -459,7 +459,7 @@ data?
 4. Are there any outliers?
 ]]
 .right-column[
-&lt;img src="1-Correlation-n-Regression_files/figure-html/socialism-corr1-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="1-Corr-n-Reg_files/figure-html/socialism-corr1-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -513,7 +513,7 @@ class: clear
 *Source*: Veaux, Velleman, and Bock (2021, p.199)
 ]]]
 .panel[.panel-name[Figure]
-&lt;img src="1-Correlation-n-Regression_files/figure-html/socialism-corr2-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+&lt;img src="1-Corr-n-Reg_files/figure-html/socialism-corr2-1.png" width="70%" style="display: block; margin: auto;" /&gt;
 ]]
 
 ---
@@ -600,7 +600,7 @@ class: inverse middle center
 # Correlation = linear trend
 
 .right-column[
-&lt;img src="1-Correlation-n-Regression_files/figure-html/socialism-ols-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="1-Corr-n-Reg_files/figure-html/socialism-ols-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]
 
 .left-column[
@@ -616,7 +616,7 @@ Models should not be driven by few singular cases, like in this example.]
 ]
 
 .right-column[
-&lt;img src="1-Correlation-n-Regression_files/figure-html/unnamed-chunk-28-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="1-Corr-n-Reg_files/figure-html/unnamed-chunk-28-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -649,7 +649,7 @@ Models should not be driven by few singular cases, like in this example.]
 `\(e_{\text{Denmark}} = 0.4\% - 38.3\%=-37.9\%\)`
 ]
 .right-column[
-&lt;img src="1-Correlation-n-Regression_files/figure-html/residuals-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="1-Corr-n-Reg_files/figure-html/residuals-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]]
 
 .panel[.panel-name[Minimize 1]
@@ -664,7 +664,7 @@ Models should not be driven by few singular cases, like in this example.]
 ]
 
 .right-column[
-&lt;img src="1-Correlation-n-Regression_files/figure-html/min_resid-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="1-Corr-n-Reg_files/figure-html/min_resid-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]]
 
 .panel[.panel-name[... 2]
@@ -705,7 +705,7 @@ Models should not be driven by few singular cases, like in this example.]
 `\(R^2=\frac{\text{TSS} - \text{RSS}}{\text{TSS}}\)`
 ]
 .right-column[
-&lt;img src="1-Correlation-n-Regression_files/figure-html/R2-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="1-Corr-n-Reg_files/figure-html/R2-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]]
 
 .panel[.panel-name[Regression using R]
@@ -720,7 +720,7 @@ htmlreg(list(ols, zols), # Nicely-formatted table.
         custom.model.names = c("OLS", "Z-OLS"))
 ```
 
-&lt;img src="1-Correlation-n-Regression_files/figure-html/unnamed-chunk-32-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+&lt;img src="1-Corr-n-Reg_files/figure-html/unnamed-chunk-32-1.png" width="90%" style="display: block; margin: auto;" /&gt;
 ]
 
 .push-right[
@@ -790,7 +790,7 @@ htmlreg(list(ols, zols), # Nicely-formatted table.
 
 .panel[.panel-name[Interpretation]
 .push-left[
-&lt;img src="1-Correlation-n-Regression_files/figure-html/unnamed-chunk-34-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="1-Corr-n-Reg_files/figure-html/unnamed-chunk-34-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]
 
 .push-right[
@@ -843,9 +843,9 @@ class: middle clear
 .left-column[
 &lt;img src="https://cdn.dribbble.com/users/10549/screenshots/9916149/media/a9dbfea8e23e5b8e23db142528c3bc9f.png?compress=1&amp;resize=1200x900&amp;vertical=top" width="100%" style="display: block; margin: auto;" /&gt;
 
-&lt;img src="1-Correlation-n-Regression_files/figure-html/pov-citiz-corr2-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+&lt;img src="1-Corr-n-Reg_files/figure-html/pov-citiz-corr2-1.png" width="90%" style="display: block; margin: auto;" /&gt;
 
-&lt;img src="1-Correlation-n-Regression_files/figure-html/citiz-sicial-corr-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+&lt;img src="1-Corr-n-Reg_files/figure-html/citiz-sicial-corr-1.png" width="90%" style="display: block; margin: auto;" /&gt;
 ]
 
 .right-column[
