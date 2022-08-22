@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="" xml:lang="">
   <head>
-    <title>Randomized Controlled Trials (RCT)</title>
+    <title>Selection Bias</title>
     <meta charset="utf-8" />
     <meta name="author" content="Merlin Schaeffer  Department of Sociology" />
-    <meta name="date" content="2022-08-16" />
+    <meta name="date" content="2022-08-22" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
     <script src="libs/tile-view/tile-view.js"></script>
@@ -20,32 +20,44 @@
 class: center, middle, inverse, title-slide
 
 .title[
-# Randomized Controlled Trials (RCT)
+# Selection Bias
 ]
 .subtitle[
-## The Gold Standard of Causal Inference
+## or why correlation ≠ causation
 ]
 .author[
 ### Merlin Schaeffer<br> Department of Sociology
 ]
 .date[
-### 2022-08-16
+### 2022-08-22
 ]
 
 ---
 
 
-class: clear
-
-&lt;img src="https://pbs.twimg.com/media/EouSsOKUUAM0P_y.jpg" width="60%" style="display: block; margin: auto;" /&gt;
-.backgrnote[.center[*Source:* Polack, Thomas, Kitchin, Absalon, Gurtman, Lockhart, Perez, Pérez Marc, Moreira, Zerbini, Bailey, Swanson, Roychoudhury, Koury, Li, Kalina, Cooper, Frenck, Hammitt, Türeci, Nell, Schaefer, Ünal, Tresnan, Mather, Dormitzer, Şahin, Jansen, and Gruber (2020)]]
-
----
 # The goal of social science research
 
-.font140[.center[.alert[Use data to discover patterns ("social facts" in Durkheim's terms), &lt;br&gt; and the social mechanisms that **bring them about**.]]]
+.font140[.center[.alert[Use data to discover patterns ("social facts" in Durkheim's terms), &lt;br&gt; and the **social mechanisms that bring them about**.]]]
 
 &lt;img src="https://liu.se/-/media/istock-501261958.jpg?mw=1120&amp;mh=1120&amp;hash=DA8977CCE6A6E600AE80A40CFEE771C9" width="70%" style="display: block; margin: auto;" /&gt;
+
+---
+class: inverse middle
+# Today's schedule
+
+1. **Application**: The Integration (or Discrimination) Paradox
+
+2. **Hypothesis `\(\rightarrow\)` comparison**
+
+3. **Fruitless naïv comparison**
+
+4. **Potential outcomes**
+  + Average causal effect
+  + Selection bias
+
+5. **Directed Acycical Graphs (DAGs)**
+  + Backdoor paths
+  + Confounder bias (= selection bias)
 
 ---
 class: inverse
@@ -81,7 +93,7 @@ class: inverse
 ]]]
 
 ---
-# The fallacy!
+# The direct-question fallacy!
 
 .left-column[
 
@@ -113,10 +125,14 @@ Why might this be problematic?
 ]
 
 ---
+class: inverse middle center
+# Hypothesis `\(\rightarrow\)` comparison
+
+---
 class: clear
 # Instead: Hypothesis `\(\rightarrow\)` comparison
 
-.alert[Causal claims imply a counter factual: Things would have been different, had] `\(X\)` .alert[not happened.]
+.alert[Causal claims imply a counter factual: Things would have been different, had] `\(X\)` .alert[(not) happened.]
 
 - `\(H_{1}:\)` Media consumption increases immigrant minorities' perceptions that they are being discriminated!
   + .backgrnote[ 
@@ -144,7 +160,7 @@ class: clear
 ]
 
 ---
-# Preparations
+# Preparation
 
 .panelset[
 .panel[.panel-name[Packages for today's session]
@@ -226,21 +242,27 @@ APAX &lt;- APAX %&gt;% mutate(
 # # … with 1,083 more rows, 7 more variables: german &lt;fct&gt;, nbh_exposed &lt;dbl&gt;, appearance &lt;fct&gt;, article &lt;chr&gt;,
 # #   news &lt;dbl&gt;, news_yn &lt;dbl&gt;, z_dis_index &lt;dbl&gt;, and abbreviated variable names ¹​dis_index, ²​news_hrs,
 # #   ³​news_mins, ⁴​dis_trainee, ⁵​dis_school, ⁶​dis_house, ⁷​dis_public
-# # ℹ Use `print(n = ...)` to see more rows, and `colnames()` to see all variable names
 ```
 ]
 
 ]]
 
 ---
+class: inverse middle center
+# Fruitless naïv comparison
+
+---
 # Fruitless naïv comparison
 
 .push-left[
-&lt;img src="4-RCT_files/figure-html/naiv-1.png" width="98%" style="display: block; margin: auto;" /&gt;
-]
+&lt;img src="4-Selection-bias_files/figure-html/naiv-1.png" width="98%" style="display: block; margin: auto;" /&gt;
+.content-box-green[
+How does this scatter plot test the comparison stated in `\(H_{1}\)`?
+]]
 
 --
 
+.push-right[
 
 ```r
 ols &lt;- lm_robust(dis_index ~ news_yn, 
@@ -262,6 +284,9 @@ screenreg(ols, include.ci = FALSE, digits = 3)
 # =========================
 # *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
 ```
+.content-box-green[
+What do we learn about `\(H_{1}\)` here?
+]]
 
 ---
 # Small recap .font60[Hypotheses tests, *t*- and, *p*-values]
@@ -292,6 +317,8 @@ screenreg(ols, include.ci = FALSE, digits = 3)
 
 .right-column[.font80[
 `\(-0.172 = Avg_{n}[\text{Discrimination}|\text{Read news} = 1] - Avg_{n}[\text{Discrimination}|\text{Read news} = 0]\)`
+
+`\(-0.172 \ngtr 0\)`
 ]
 
 .mini-left[
@@ -299,19 +326,32 @@ screenreg(ols, include.ci = FALSE, digits = 3)
 ]
 
 .big-right[
-&lt;img src="4-RCT_files/figure-html/Hypo_test-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="4-Selection-bias_files/figure-html/Hypo_test-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]]
+
+---
+class: inverse middle center
+# Break
+
+&lt;iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
 
 ---
 class: middle clear
 
 .left-column[
 &lt;img src="https://www.laserfiche.com/wp-content/uploads/2014/10/femalecoder.jpg" width="80%" style="display: block; margin: auto;" /&gt;
+
+&lt;iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
 ]
 
 .right-column[
+&lt;br&gt;
 &lt;iframe src='exercise1.html' width='1000' height='600' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
 ]
+
+---
+class: inverse middle center
+# Potential outcomes
 
 ---
 # Potential outcomes .font60[Ferda's personal news effect]
@@ -344,6 +384,17 @@ Why can we *never* observe Ferda's news effect?
 .center[
 If a person tells us how something affect(ed) them, it is an interesting  personal interpretation. &lt;br&gt; `\(\Rightarrow\)` *But it is not scientific evidence of an effect on them!*
 ]]
+
+---
+layout: false
+class: center inverse
+# More generally: The average causal effect
+
+`$$\underbrace{Avg_{n}[Y_{1i}-Y_{0i}] = \frac{1}{n} \displaystyle\sum_{i=1}^{n}Y_{1i} - \frac{1}{n} \displaystyle\sum_{i=1}^{n}Y_{0i}}_{\text{Average causal effect!}}.$$`
+
+*The average causal effect is the average of personal causal effects!*
+
+For example, the average causal effect of reading the news: compares discrimination for everyone in the sample in the hypothetical scenario that they all read the news, to the discrimination for everyone in the sample in the hypothetical scenario that they did not read the news. Obviously, this can never be observed!
 
 ---
 layout: true
@@ -400,29 +451,45 @@ Why is it misleading to compare Ferda to Tuki?
 
 ---
 layout: false
-# More generally
+class: inverse center
+# More generally: Differences in group means
+
+.left-column[
+`\(\begin{equation} D_{i}=\begin{cases} 1, &amp; \text{if}\ i = \text{Reads news} \\ 0, &amp; \text{otherwise}\end{cases}\end{equation}\)`
+]
+
+.right-column[
+`\(Avg_{n}[Y_{1i}|D_{i} = 1] - Avg_{n}[Y_{0i}|D_{i} = 0]\)`
+
+Differences in group means are (most of the time) a comparison of apples (i.e. Ferda) to oranges (i.e. Tuki).
+]
+
+
+---
+# Why? Selection bias!
+
+.left-column[
+
+&lt;img src="https://media.istockphoto.com/photos/children-pulling-a-rope-picture-id521182687?k=20&amp;m=521182687&amp;s=612x612&amp;w=0&amp;h=OeGtAQn8dz4bDiasD09E7QFrNvbQCUoaolztX8QKbcI=" width="100%" style="display: block; margin: auto;" /&gt;
+]
 
 .right-column[
 .content-box-red[.center[
-`\(\text{Selection bias} = \underbrace{Avg_{n}[Y_{0} | X = 1]}_{\text{Unobserved!}} - Avg_{n}[Y_{0} |X = 0].\)`
+`\(\text{Selection bias} = \underbrace{Avg_{n}[Y_{0i} | D_{i} = 1]}_{\text{Unobserved!}} - Avg_{n}[Y_{0i} | D_{i} = 0].\)`
 
-`\(\rightarrow\)` The difference in average `\(Y_{0}\)` (the baseline of the outcome) between the groups we compare.
+`\(\rightarrow\)` The difference in average `\(Y_{0i}\)` (the baseline of the outcome) between the groups we compare.
 
-`\(\underbrace{\text{Difference in group means}}_{\text{Fruitless naïv comparison}} = \text{Average causal effect} + \text{Selection bias}\)`.
+`\(\underbrace{\text{Difference in group means}}_{\text{Fruitless naïv comparison}} = \text{Average causal effect} + \text{Selection bias}\)`!
 ]]
 
 .content-box-green[.center[
-Think carefully:&lt;br&gt;Is `\(Avg_{n}[Y_{0}]\)` (the baseline level of the outcome) &lt;br&gt;likely to differ between immigrant minorities who read news regularly and those who do not?
+Think carefully:&lt;br&gt;Is `\(Avg_{n}[Y_{0i}]\)` (the baseline level of the outcome) &lt;br&gt;likely to differ between immigrant minorities who read news regularly and those who do not?
 
 That is, had those who read the news not read them, would they feel as discriminated as those who do not read the news?
 ]]]
 
-.left-column[
-&lt;img src="https://media.istockphoto.com/photos/children-pulling-a-rope-picture-id521182687?k=20&amp;m=521182687&amp;s=612x612&amp;w=0&amp;h=OeGtAQn8dz4bDiasD09E7QFrNvbQCUoaolztX8QKbcI=" width="100%" style="display: block; margin: auto;" /&gt;
-]
-
 ---
-# Imbalance .font60[Why the comparison is fruitless and naïv]
+# (Im-)balance .font70[.alert[of oberserved variables!]]
 
 .panelset[
 .panel[.panel-name[R code]
@@ -549,6 +616,10 @@ APAX %&gt;%
 ]]
 
 ---
+class: inverse middle center
+# Directed Acyclical Graphs (DAGs)
+
+---
 layout: true
 # Directed Acyclical Graphs (DAG)
 
@@ -572,7 +643,7 @@ layout: true
 ---
 
 .push-right[
-&lt;img src="4-RCT_files/figure-html/DAG1-1.png" width="40%" style="display: block; margin: auto;" /&gt;
+&lt;img src="4-Selection-bias_files/figure-html/DAG1-1.png" width="40%" style="display: block; margin: auto;" /&gt;
 .backgrnote[
 The red bi-directed arrow is officially not part of the DAG, but helps you see that the correlation between `\(X\)` and `\(Y\)` is spurious because of `\(C\)`.
 ]]
@@ -580,7 +651,7 @@ The red bi-directed arrow is officially not part of the DAG, but helps you see t
 ---
 
 .push-right[
-&lt;img src="4-RCT_files/figure-html/DAG2-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="4-Selection-bias_files/figure-html/DAG2-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 
 .backgrnote[
 The red bi-directed arrow is officially not part of the DAG, but helps you see that the correlation between read news and perceived discrimination is biased because immigrant minorities who obtained German citizenship read news more often than those who are foreign citizens.]
@@ -588,396 +659,32 @@ The red bi-directed arrow is officially not part of the DAG, but helps you see t
 
 ---
 layout: false
-class: middle clear
-
-.left-column[
-&lt;img src="https://www.laserfiche.com/wp-content/uploads/2014/10/femalecoder.jpg" width="80%" style="display: block; margin: auto;" /&gt;
-]
-
-.right-column[
-&lt;iframe src='exercise2.html' width='1000' height='600' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
-]
-
----
-# Solution: Experiment
-
-.left-column[
-- We do not observe, we actively intervene.
-
-- Thereby *we* control, who gets `\(X\)` and who does not!
-
-&lt;img src="./img/randomization1.png" width="67%" style="display: block; margin: auto;" /&gt;
-]
-
-.push-right[
-&lt;img src="4-RCT_files/figure-html/DAG3-1.png" width="40%" style="display: block; margin: auto;" /&gt;
-]
-
----
-# Randomized Controlled Trials (RCT)
-
+# Learning goal achieved!
 
 .push-left[
-
-&lt;img src="./img/randomization2.png" width="100%" style="display: block; margin: auto;" /&gt;
-
-- We .alert[randomly] decide, who gets: 
-  + `\(\text{Read news = 0} \rightarrow\)` *control group*, 
-  + `\(\text{Read news = 1} \rightarrow\)` *treatment group*.
+&lt;img src="4-Selection-bias_files/figure-html/unnamed-chunk-16-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]
 
---
+.push-right[.center[
+.content-box-red[
+Correlation ≠ causation,
 
-.push-right[
-
-&lt;img src="https://lotterylab.s3.amazonaws.com/summernoteimages/606ffa6b3468c.gif" width="70%" style="display: block; margin: auto;" /&gt;
-
-- Randomization is "fair": Everyone has the same probability to be part of the treatment or control group, .alert[regardless of who they are]!
-
-.content-box-green[
-.center[Why does this result in equal (Discr) baselines?]
-`$$\begin{equation} \begin{split}
-Avg[\text{Discr}_{i, \text{Read news} = 0}|\text{Read news} = 1] \\
-= Avg[\text{Discr}_{i, \text{Read news} = 0}|\text{Read news} = 0]
-\end{split} \end{equation}$$`
-]]
-
----
-# Randomized Controlled Trials (RCT)
-
-.push-left[
-
-- If we randomly divide subjects into treatment and control groups, they come from the same underlying population. 
-  + `\(\rightarrow\)` they will be the same *in every way*,&lt;br&gt; **including their `\(Y_{0}\)` **!
-
-- Beware, in practice randomization can fail, especially if your sample is small.
-  
-
-]
-
----
-layout: true
-class: clear
-.push-left[
-&lt;br&gt;
-
-.font160[**APAX survey experiment**]
-- We asked APAX subjects to read a news article.
-
-&lt;img src="./img/randomization2.png" width="80%" style="display: block; margin: auto;" /&gt;
-
-- Survey app .alert[randomly] decided, who got: 
-  + Venus `\(\rightarrow\)` *control group*, 
-  + Discrimination `\(\rightarrow\)` *treatment group 1*.
-  + Integration `\(\rightarrow\)` *treatment group 2*.
-
-
-
-]
-
----
-
-.push-right[
-&lt;img src="./img/Contr.png" width="100%" style="display: block; margin: auto;" /&gt;
-]
-
----
-
-.push-right[
-&lt;img src="./img/Exp2.png" width="89%" style="display: block; margin: auto;" /&gt;
-]
-
----
-
-.push-right[
-&lt;img src="./img/Exp1.png" width="75%" style="display: block; margin: auto;" /&gt;
-]
+because the baseline of the outcome `\(Y_{0i}\)` likely differs between the groups we compare. This is, because certain other variables (i.e. confounders) make us select into / out of `\(D_{i}\)`. This is called selection, confounder, or backdoor bias.
+]]]
 
 ---
 layout: false
-# Balance test
-
-.panelset[
-.panel[.panel-name[R code]
-
-```r
-APAX %&gt;%
-  # Select variables for which I want my balance test,
-  select(article, news_yn, age, nbh_exposed, imor, german, gewFAKT) %&gt;%
-  rename(weights = gewFAKT) %&gt;% # Rename the weights variable! 
-  datasummary_balance( # Make a balance table,
-*   formula = ~ article, # by treatment/control
-    data = . ,
-    title = "Socio-demographic characterisitcs by treatment and control"
-  )
-```
-]
-
-.panel[.panel-name[Balance table]
-&lt;table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;"&gt;
-&lt;caption&gt;Socio-demographic characterisitcs by treatment and control&lt;/caption&gt;
- &lt;thead&gt;
-&lt;tr&gt;
-&lt;th style="empty-cells: hide;border-bottom:hidden;" colspan="2"&gt;&lt;/th&gt;
-&lt;th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="2"&gt;&lt;div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; "&gt;Contr (N=358)&lt;/div&gt;&lt;/th&gt;
-&lt;th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="2"&gt;&lt;div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; "&gt;Treat_1 (N=375)&lt;/div&gt;&lt;/th&gt;
-&lt;th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="2"&gt;&lt;div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; "&gt;Treat_2 (N=360)&lt;/div&gt;&lt;/th&gt;
-&lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
-   &lt;th style="text-align:left;"&gt;    &lt;/th&gt;
-   &lt;th style="text-align:right;"&gt; Mean &lt;/th&gt;
-   &lt;th style="text-align:right;"&gt; Std. Dev. &lt;/th&gt;
-   &lt;th style="text-align:right;"&gt; Mean &lt;/th&gt;
-   &lt;th style="text-align:right;"&gt; Std. Dev. &lt;/th&gt;
-   &lt;th style="text-align:right;"&gt; Mean &lt;/th&gt;
-   &lt;th style="text-align:right;"&gt; Std. Dev. &lt;/th&gt;
-  &lt;/tr&gt;
- &lt;/thead&gt;
-&lt;tbody&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; news_yn &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 0.8 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 0.4 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 0.9 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 0.3 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 0.8 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 0.4 &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; age &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 41.8 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 15.7 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 41.2 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 12.4 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 43.8 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 16.9 &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;box-shadow: 0px 1px"&gt; nbh_exposed &lt;/td&gt;
-   &lt;td style="text-align:left;box-shadow: 0px 1px"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:right;box-shadow: 0px 1px"&gt; 4.2 &lt;/td&gt;
-   &lt;td style="text-align:right;box-shadow: 0px 1px"&gt; 0.9 &lt;/td&gt;
-   &lt;td style="text-align:right;box-shadow: 0px 1px"&gt; 4.2 &lt;/td&gt;
-   &lt;td style="text-align:right;box-shadow: 0px 1px"&gt; 1.1 &lt;/td&gt;
-   &lt;td style="text-align:right;box-shadow: 0px 1px"&gt; 4.2 &lt;/td&gt;
-   &lt;td style="text-align:right;box-shadow: 0px 1px"&gt; 1.0 &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; N &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; Pct. &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; N &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; Pct. &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; N &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; Pct. &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; imor &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; Child of immigrant &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 156 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 43.6 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 157 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 41.9 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 150 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 41.7 &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; Immigrant &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 202 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 56.4 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 218 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 58.1 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 210 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 58.3 &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; german &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; Ja &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 215 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 60.1 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 222 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 59.2 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 213 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 59.2 &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; Nein &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 143 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 39.9 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 153 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 40.8 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 147 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 40.8 &lt;/td&gt;
-  &lt;/tr&gt;
-&lt;/tbody&gt;
-&lt;/table&gt;
-]]
-
----
-# Causal effect of news articles
-
-.push-left[
-
-```r
-# Run OLS regression to analyze the survey RCT.
-ols &lt;- lm_robust(dis_index ~ article, 
-                 weight = gewFAKT, data = APAX)
-zols &lt;- lm_robust(z_dis_index ~ article, 
-                  weight = gewFAKT, data = APAX)
-
-# Make a nice regression table of results.
-htmlreg(
-  list(ols, zols), include.ci = FALSE, digits = 3,
-  custom.model.names = c("OLS", "Z-OLS"),
-  custom.coef.names = c("Intercept (Venus control)", 
-                        "Article on discrimination", 
-                        "Article on integration"))
-```
-]
-
-.push-right[
-&lt;table class="texreg" style="margin: 10px auto;border-collapse: collapse;border-spacing: 0px;caption-side: bottom;color: #000000;border-top: 2px solid #000000;"&gt;
-&lt;caption&gt;Statistical models&lt;/caption&gt;
-&lt;thead&gt;
-&lt;tr&gt;
-&lt;th style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/th&gt;
-&lt;th style="padding-left: 5px;padding-right: 5px;"&gt;OLS&lt;/th&gt;
-&lt;th style="padding-left: 5px;padding-right: 5px;"&gt;Z-OLS&lt;/th&gt;
-&lt;/tr&gt;
-&lt;/thead&gt;
-&lt;tbody&gt;
-&lt;tr style="border-top: 1px solid #000000;"&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Intercept (Venus control)&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;1.979&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;-0.171&lt;sup&gt;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.067)&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.074)&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Article on discrimination&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.239&lt;sup&gt;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.264&lt;sup&gt;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.107)&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.118)&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Article on integration&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.137&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.151&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.118)&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.130)&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr style="border-top: 1px solid #000000;"&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;R&lt;sup&gt;2&lt;/sup&gt;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.012&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.012&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Adj. R&lt;sup&gt;2&lt;/sup&gt;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.010&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.010&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Num. obs.&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;1085&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;1085&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr style="border-bottom: 2px solid #000000;"&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;RMSE&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.743&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.818&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tbody&gt;
-&lt;tfoot&gt;
-&lt;tr&gt;
-&lt;td style="font-size: 0.8em;" colspan="3"&gt;&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;p &amp;lt; 0.001; &lt;sup&gt;&amp;#42;&amp;#42;&lt;/sup&gt;p &amp;lt; 0.01; &lt;sup&gt;&amp;#42;&lt;/sup&gt;p &amp;lt; 0.05&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tfoot&gt;
-&lt;/table&gt;
-]
-
----
-# Visualize
-
-.panelset[
-.panel[.panel-name[Preparation code]
-
-```r
-(plotdata &lt;- zols %&gt;%
-   tidy() %&gt;% # Turn results into a tibble,
-   mutate( # Rename variables for the plot.
-     term = case_when(
-       term == "articleTreat_1" ~ "Discrimination",
-       term == "articleTreat_2" ~ "Integration",
-       term == "(Intercept)" ~ "Intercept")))
-#             term estimate std.error statistic p.value conf.low conf.high   df     outcome
-# 1      Intercept   -0.171    0.0743     -2.30  0.0216  -0.3166   -0.0252 1082 z_dis_index
-# 2 Discrimination    0.264    0.1176      2.24  0.0252   0.0328    0.4944 1082 z_dis_index
-# 3    Integration    0.151    0.1302      1.16  0.2475  -0.1049    0.4062 1082 z_dis_index
-```
-]
-
-.panel[.panel-name[Plot]
-.push-left[
-
-```r
-ggplot(data = plotdata %&gt;% filter(term != "Intercept"),
-       aes(y = estimate, x = term)) +
-  # Point with error-bars,
-  geom_hline(yintercept = 0, color = "orange", 
-             lty = "dashed") +
-  geom_pointrange(aes(min = conf.low, max = conf.high)) +
-  coord_flip() + # Flip Y- &amp; X-Axis,
-  labs(
-    title = "Causal effect of news articles", 
-    x = "Article on",
-    # Write Greek beta into axis title.
-    y = "Comparison to control group (article on Venus) 
-    in standard deviations") + 
-  theme_minimal()
-```
-]
-.push-right[
-&lt;img src="4-RCT_files/figure-html/unnamed-chunk-28-1.png" width="90%" style="display: block; margin: auto;" /&gt;
-]
-]]
-
----
-# Learning goal achieved!
-
-.left-column[
-News media consumption *increases* immigrant minorities' perceptions that they are being discriminated! .backgrnote[
-(If the news report about discrimination in society.)]
-]
-
-.right-column[
-&lt;img src="4-RCT_files/figure-html/unnamed-chunk-29-1.png" width="90%" style="display: block; margin: auto;" /&gt;
-]
-
----
 class: middle clear
 
 .left-column[
 &lt;img src="https://www.laserfiche.com/wp-content/uploads/2014/10/femalecoder.jpg" width="80%" style="display: block; margin: auto;" /&gt;
+
+&lt;iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
 ]
 
 .right-column[
-&lt;iframe src='exercise3.html' width='1000' height='600' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+&lt;br&gt;
+&lt;iframe src='exercise2.html' width='1000' height='600' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
 ]
 
 ---
@@ -986,16 +693,14 @@ class: inverse
 
 1. Causal claims are counter factual claims. Therefore they imply a comparison.
 2. Potential outcomes: A theoretical framework to think about the comparison implied in causal claims.
-3. Direct comparisons are often fruitless and naïv, because of selection/confounder bias.
-4. Selection bias: The baseline of the outcome is unequal between treated and non-treated subjects, because certain type of people select into/out of the treatment.
-5. Balance test: Attempt to test for selection bias, but can only be applied to variables that are observed in the data at hand.
-6. Directed Acyclic Graphs (DAG): A graphical theoretical framework to think about causality. It consists of nodes and directed edges. It may not contain cycles.
-7. Backdoor paths: All paths linking `\(X\)` and `\(Y\)` that start with an arrow into `\(X\)`. Backdoor paths result in confounder/selection bias.
-8. Confounder bias: = selection bias.
-9. Experiment: An artificial environment controlled by the researcher. Allows researchers to control treatment assignment.
-10. Randomized Controlled Trials (RCT): An experiment with treatment and control group in which researchers assign treatment or control at random.
-11. Randomization: Random assignment of treatment and control ensures a balanced comparison (no selection/confounder bias). Randomization can fail, especially in small samples.
-12. RCTs can be analyzed with a simple OLS regression.
+3. Personal causal effect: The unobservable comparison for an individual case `\(i\)` to experience treatment `\(D_{i}=1\)` as compared to not experience that treatment ($D_{i}=0$).
+3. Average causal effect: The average of personal causal effects.
+4. Direct comparisons (i.e. differences in group means) are often fruitless and naïv, because of selection/confounder bias.
+5. Selection bias: The baseline of the outcome is unequal between treated and non-treated subjects, because certain type of people select into/out of the treatment.
+6. Balance test: Attempt to test for selection bias, but can only be applied to variables that are observed in the data at hand.
+7. Directed Acyclic Graphs (DAG): A graphical theoretical framework to think about causality. It consists of nodes and directed edges. It may not contain cycles.
+8. Backdoor paths: All paths linking `\(X\)` and `\(Y\)` that start with an arrow into `\(X\)`. Backdoor paths result in confounder/selection bias.
+9. Confounder bias: = selection bias.
 
 ---
 class: inverse
@@ -1014,9 +719,6 @@ Publishing, pp. 272-286.
 
 Pearl, J., M. Glymour, and N. P. Jewell (2016). _Causal Inference in Statistics - A Primer_. 1.th ed.
 Chichester, West Sussex: Wiley.
-
-Polack, F. P., S. J. Thomas, N. Kitchin, et al. (2020). "Safety and Efficacy of the BNT162b2 mRNA
-Covid-19 Vaccine". In: _New England Journal of Medicine_, pp. 2603-2615.
 
 Schaeffer, M. and J. Kas (2021). "The Integration Paradox: A Theoretical Synthesis and Meta-Analysis".
 In: _Unpublished manuscript_.

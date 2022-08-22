@@ -1,6 +1,6 @@
 ---
-title: "Randomized Controlled Trials (RCT)"
-subtitle: "The Gold Standard of Causal Inference"
+title: "Selection Bias"
+subtitle: "or why correlation ≠ causation"
 author: "Merlin Schaeffer<br> Department of Sociology"
 date: "`r Sys.Date()`"
 output: 
@@ -42,21 +42,31 @@ myBib <- ReadBib("./../../../Stats_II.bib", check = FALSE)
 xaringanExtra::use_xaringan_extra(c("tile_view", "tachyons"))
 xaringanExtra::use_panelset()
 ```
-class: clear
-
-```{r, echo = FALSE, out.width='60%', fig.align='center'}
-knitr::include_graphics('https://pbs.twimg.com/media/EouSsOKUUAM0P_y.jpg')
-```
-.backgrnote[.center[*Source:* `r Citet(myBib, "polack_safety_2020")`]]
-
----
 # The goal of social science research
 
-.font140[.center[.alert[Use data to discover patterns ("social facts" in Durkheim's terms), <br> and the social mechanisms that **bring them about**.]]]
+.font140[.center[.alert[Use data to discover patterns ("social facts" in Durkheim's terms), <br> and the **social mechanisms that bring them about**.]]]
 
 ```{r, echo = FALSE, out.width='70%', fig.align='center'}
 knitr::include_graphics('https://liu.se/-/media/istock-501261958.jpg?mw=1120&mh=1120&hash=DA8977CCE6A6E600AE80A40CFEE771C9')
 ```
+
+---
+class: inverse middle
+# Today's schedule
+
+1. **Application**: The Integration (or Discrimination) Paradox
+
+2. **Hypothesis $\rightarrow$ comparison**
+
+3. **Fruitless naïv comparison**
+
+4. **Potential outcomes**
+  + Average causal effect
+  + Selection bias
+
+5. **Directed Acycical Graphs (DAGs)**
+  + Backdoor paths
+  + Confounder bias (= selection bias)
 
 ---
 class: inverse
@@ -101,7 +111,7 @@ knitr::include_graphics('img/Steinmann3.png')
 ]]]
 
 ---
-# The fallacy!
+# The direct-question fallacy!
 
 .left-column[
 
@@ -137,10 +147,14 @@ knitr::include_graphics('https://feeds.abplive.com/onecms/images/uploaded-images
 ]
 
 ---
+class: inverse middle center
+# Hypothesis $\rightarrow$ comparison
+
+---
 class: clear
 # Instead: Hypothesis $\rightarrow$ comparison
 
-.alert[Causal claims imply a counter factual: Things would have been different, had] $X$ .alert[not happened.]
+.alert[Causal claims imply a counter factual: Things would have been different, had] $X$ .alert[(not) happened.]
 
 - $H_{1}:$ Media consumption increases immigrant minorities' perceptions that they are being discriminated!
   + .backgrnote[ 
@@ -168,7 +182,7 @@ $$\downarrow$$
 ]
 
 ---
-# Preparations
+# Preparation
 
 .panelset[
 .panel[.panel-name[Packages for today's session]
@@ -238,6 +252,10 @@ APAX
 ]]
 
 ---
+class: inverse middle center
+# Fruitless naïv comparison
+
+---
 # Fruitless naïv comparison
 
 .push-left[
@@ -250,15 +268,21 @@ ggplot(data = APAX, aes(y = dis_index, x = news)) +
   theme_minimal() +
   theme(legend.position = "none")
 ```
-]
+.content-box-green[
+How does this scatter plot test the comparison stated in $H_{1}$?
+]]
 
 --
 
+.push-right[
 ```{r naiv_OLS}
 ols <- lm_robust(dis_index ~ news_yn, 
                  weight = gewFAKT, data = APAX)
 screenreg(ols, include.ci = FALSE, digits = 3)
 ```
+.content-box-green[
+What do we learn about $H_{1}$ here?
+]]
 
 ---
 # Small recap .font60[Hypotheses tests, *t*- and, *p*-values]
@@ -270,6 +294,8 @@ screenreg(ols, include.ci = FALSE, digits = 3)
 
 .right-column[.font80[
 $`r coef(ols)["news_yn"]` = Avg_{n}[\text{Discrimination}|\text{Read news} = 1] - Avg_{n}[\text{Discrimination}|\text{Read news} = 0]$
+
+$`r coef(ols)["news_yn"]` \ngtr 0$
 ]
 
 .mini-left[
@@ -313,17 +339,30 @@ ggplot(data= data, aes(x = betas, y = density)) +
 ]]
 
 ---
+class: inverse middle center
+# Break
+
+<iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'></iframe>
+
+---
 class: middle clear
 
 .left-column[
 ```{r, echo = FALSE, out.width='80%'}
 knitr::include_graphics('https://www.laserfiche.com/wp-content/uploads/2014/10/femalecoder.jpg')
 ```
+
+<iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'></iframe>
 ]
 
 .right-column[
+<br>
 <iframe src='exercise1.html' width='1000' height='600' frameborder='0' scrolling='yes'></iframe>
 ]
+
+---
+class: inverse middle center
+# Potential outcomes
 
 ---
 # Potential outcomes .font60[Ferda's personal news effect]
@@ -358,6 +397,17 @@ Why can we *never* observe Ferda's news effect?
 .center[
 If a person tells us how something affect(ed) them, it is an interesting  personal interpretation. <br> $\Rightarrow$ *But it is not scientific evidence of an effect on them!*
 ]]
+
+---
+layout: false
+class: center inverse
+# More generally: The average causal effect
+
+$$\underbrace{Avg_{n}[Y_{1i}-Y_{0i}] = \frac{1}{n} \displaystyle\sum_{i=1}^{n}Y_{1i} - \frac{1}{n} \displaystyle\sum_{i=1}^{n}Y_{0i}}_{\text{Average causal effect!}}.$$
+
+*The average causal effect is the average of personal causal effects!*
+
+For example, the average causal effect of reading the news: compares discrimination for everyone in the sample in the hypothetical scenario that they all read the news, to the discrimination for everyone in the sample in the hypothetical scenario that they did not read the news. Obviously, this can never be observed!
 
 ---
 layout: true
@@ -416,31 +466,47 @@ $\Rightarrow$ Tuki's *baseline* <br> (i.e., no news) perceived discrimination <b
 
 ---
 layout: false
-# More generally
-
-.right-column[
-.content-box-red[.center[
-$\text{Selection bias} = \underbrace{Avg_{n}[Y_{0} | X = 1]}_{\text{Unobserved!}} - Avg_{n}[Y_{0} |X = 0].$
-
-$\rightarrow$ The difference in average $Y_{0}$ (the baseline of the outcome) between the groups we compare.
-
-$\underbrace{\text{Difference in group means}}_{\text{Fruitless naïv comparison}} = \text{Average causal effect} + \text{Selection bias}$.
-]]
-
-.content-box-green[.center[
-Think carefully:<br>Is $Avg_{n}[Y_{0}]$ (the baseline level of the outcome) <br>likely to differ between immigrant minorities who read news regularly and those who do not?
-
-That is, had those who read the news not read them, would they feel as discriminated as those who do not read the news?
-]]]
+class: inverse center
+# More generally: Differences in group means
 
 .left-column[
+$\begin{equation} D_{i}=\begin{cases} 1, & \text{if}\ i = \text{Reads news} \\ 0, & \text{otherwise}\end{cases}\end{equation}$
+]
+
+.right-column[
+$Avg_{n}[Y_{1i}|D_{i} = 1] - Avg_{n}[Y_{0i}|D_{i} = 0]$
+
+Differences in group means are (most of the time) a comparison of apples (i.e. Ferda) to oranges (i.e. Tuki).
+]
+
+
+---
+# Why? Selection bias!
+
+.left-column[
+
 ```{r, echo = FALSE, out.width='100%', fig.align='center'}
 knitr::include_graphics('https://media.istockphoto.com/photos/children-pulling-a-rope-picture-id521182687?k=20&m=521182687&s=612x612&w=0&h=OeGtAQn8dz4bDiasD09E7QFrNvbQCUoaolztX8QKbcI=')
 ```
 ]
 
+.right-column[
+.content-box-red[.center[
+$\text{Selection bias} = \underbrace{Avg_{n}[Y_{0i} | D_{i} = 1]}_{\text{Unobserved!}} - Avg_{n}[Y_{0i} | D_{i} = 0].$
+
+$\rightarrow$ The difference in average $Y_{0i}$ (the baseline of the outcome) between the groups we compare.
+
+$\underbrace{\text{Difference in group means}}_{\text{Fruitless naïv comparison}} = \text{Average causal effect} + \text{Selection bias}$!
+]]
+
+.content-box-green[.center[
+Think carefully:<br>Is $Avg_{n}[Y_{0i}]$ (the baseline level of the outcome) <br>likely to differ between immigrant minorities who read news regularly and those who do not?
+
+That is, had those who read the news not read them, would they feel as discriminated as those who do not read the news?
+]]]
+
 ---
-# Imbalance .font60[Why the comparison is fruitless and naïv]
+# (Im-)balance .font70[.alert[of oberserved variables!]]
 
 .panelset[
 .panel[.panel-name[R code]
@@ -463,6 +529,10 @@ APAX %>%
 ```{r ref.label = "balance1", echo = FALSE}
 ```
 ]]
+
+---
+class: inverse middle center
+# Directed Acyclical Graphs (DAGs)
 
 ---
 layout: true
@@ -501,7 +571,7 @@ layout: true
 \begin{tikzpicture}
 \sffamily
     \node[state] (1) at (0,0) {$C$};
-    \node[state] (2) [below = of 1] {$X$};
+    \node[state] (2) [below = of 1] {$D$};
     \node[state] (3) [right = of 2] {$Y$};
 
     \path (1) edge  (2);
@@ -545,261 +615,35 @@ The red bi-directed arrow is officially not part of the DAG, but helps you see t
 
 ---
 layout: false
-class: middle clear
-
-.left-column[
-```{r, echo = FALSE, out.width='80%'}
-knitr::include_graphics('https://www.laserfiche.com/wp-content/uploads/2014/10/femalecoder.jpg')
-```
-]
-
-.right-column[
-<iframe src='exercise2.html' width='1000' height='600' frameborder='0' scrolling='yes'></iframe>
-]
-
----
-# Solution: Experiment
-
-.left-column[
-- We do not observe, we actively intervene.
-
-- Thereby *we* control, who gets $X$ and who does not!
-
-```{r, echo = FALSE, out.width='67%', fig.align='center'}
-knitr::include_graphics('./img/randomization1.png')
-```
-]
-
-.push-right[
-```{tikz, DAG3,  echo = FALSE, out.width='40%'}
-\usetikzlibrary{shapes,decorations,arrows,calc,arrows.meta,fit,positioning}
-\tikzset{
-    -Latex,auto,node distance =1 cm and 1 cm,semithick,
-    state/.style ={ellipse, draw, minimum width = 0.7 cm},
-    point/.style = {circle, draw, inner sep=0.04cm,fill,node contents={}},
-    bidirected/.style={Latex-Latex,dashed},
-    el/.style = {inner sep=2pt, align=left, sloped}
-}
-
-\begin{tikzpicture}
-\sffamily
-    \node[state] (1) at (0,0) {$C$};
-    \node[state] (2) [below = of 1] {$X$};
-    \node[state] (3) [right = of 2] {$Y$};
-
-    \path (2) edge (3);
-    \path (1) edge (3);
-\end{tikzpicture}
-```
-]
-
----
-# Randomized Controlled Trials (RCT)
-
+# Learning goal achieved!
 
 .push-left[
-
-```{r, echo = FALSE, out.width='100%', fig.align='center'}
-knitr::include_graphics('./img/randomization2.png')
-```
-
-- We .alert[randomly] decide, who gets: 
-  + $\text{Read news = 0} \rightarrow$ *control group*, 
-  + $\text{Read news = 1} \rightarrow$ *treatment group*.
-]
-
---
-
-.push-right[
-
-```{r, echo = FALSE, out.width='70%', fig.align='center'}
-knitr::include_graphics('https://lotterylab.s3.amazonaws.com/summernoteimages/606ffa6b3468c.gif')
-```
-
-- Randomization is "fair": Everyone has the same probability to be part of the treatment or control group, .alert[regardless of who they are]!
-
-.content-box-green[
-.center[Why does this result in equal (Discr) baselines?]
-$$\begin{equation} \begin{split}
-Avg[\text{Discr}_{i, \text{Read news} = 0}|\text{Read news} = 1] \\
-= Avg[\text{Discr}_{i, \text{Read news} = 0}|\text{Read news} = 0]
-\end{split} \end{equation}$$
-]]
-
----
-# Randomized Controlled Trials (RCT)
-
-.push-left[
-
-- If we randomly divide subjects into treatment and control groups, they come from the same underlying population. 
-  + $\rightarrow$ they will be the same *in every way*,<br> **including their $Y_{0}$ **!
-
-- Beware, in practice randomization can fail, especially if your sample is small.
-  
-
-]
-
----
-layout: true
-class: clear
-.push-left[
-<br>
-
-.font160[**APAX survey experiment**]
-- We asked APAX subjects to read a news article.
-
-```{r, echo = FALSE, out.width='80%', fig.align='center'}
-knitr::include_graphics('./img/randomization2.png')
-```
-
-- Survey app .alert[randomly] decided, who got: 
-  + Venus $\rightarrow$ *control group*, 
-  + Discrimination $\rightarrow$ *treatment group 1*.
-  + Integration $\rightarrow$ *treatment group 2*.
-
-
-
-]
-
----
-
-.push-right[
-```{r, echo = FALSE, out.width='100%', fig.align='center'}
-knitr::include_graphics('./img/Contr.png')
+```{r ref.label = "naiv", out.width = "100%", fig.height = 3.5, fig.width = 5, echo = FALSE}
 ```
 ]
 
----
+.push-right[.center[
+.content-box-red[
+Correlation ≠ causation,
 
-.push-right[
-```{r, echo = FALSE, out.width='89%', fig.align='center'}
-knitr::include_graphics('./img/Exp2.png')
-```
-]
-
----
-
-.push-right[
-```{r, echo = FALSE, out.width='75%', fig.align='center'}
-knitr::include_graphics('./img/Exp1.png')
-```
-]
+because the baseline of the outcome $Y_{0i}$ likely differs between the groups we compare. This is, because certain other variables (i.e. confounders) make us select into / out of $D_{i}$. This is called selection, confounder, or backdoor bias.
+]]]
 
 ---
 layout: false
-# Balance test
-
-.panelset[
-.panel[.panel-name[R code]
-```{r balance2, results = FALSE}
-APAX %>%
-  # Select variables for which I want my balance test,
-  select(article, news_yn, age, nbh_exposed, imor, german, gewFAKT) %>%
-  rename(weights = gewFAKT) %>% # Rename the weights variable! 
-  datasummary_balance( # Make a balance table,
-    formula = ~ article, # by treatment/control #<< 
-    data = . ,
-    title = "Socio-demographic characterisitcs by treatment and control"
-  )
-```
-]
-
-.panel[.panel-name[Balance table]
-```{r ref.label = "balance2", echo = FALSE}
-```
-]]
-
----
-# Causal effect of news articles
-
-.push-left[
-```{r OLS_causal, results = 'hide'}
-# Run OLS regression to analyze the survey RCT.
-ols <- lm_robust(dis_index ~ article, 
-                 weight = gewFAKT, data = APAX)
-zols <- lm_robust(z_dis_index ~ article, 
-                  weight = gewFAKT, data = APAX)
-
-# Make a nice regression table of results.
-htmlreg(
-  list(ols, zols), include.ci = FALSE, digits = 3,
-  custom.model.names = c("OLS", "Z-OLS"),
-  custom.coef.names = c("Intercept (Venus control)", 
-                        "Article on discrimination", 
-                        "Article on integration"))
-```
-]
-
-.push-right[
-```{r ref.label = "OLS_causal", echo = FALSE, results = 'asis'}
-```
-]
-
----
-# Visualize
-
-.panelset[
-.panel[.panel-name[Preparation code]
-```{r}
-(plotdata <- zols %>%
-   tidy() %>% # Turn results into a tibble,
-   mutate( # Rename variables for the plot.
-     term = case_when(
-       term == "articleTreat_1" ~ "Discrimination",
-       term == "articleTreat_2" ~ "Integration",
-       term == "(Intercept)" ~ "Intercept")))
-```
-]
-
-.panel[.panel-name[Plot]
-.push-left[
-```{r Coefplot, fig.show = 'hide'}
-ggplot(data = plotdata %>% filter(term != "Intercept"),
-       aes(y = estimate, x = term)) +
-  # Point with error-bars,
-  geom_hline(yintercept = 0, color = "orange", 
-             lty = "dashed") +
-  geom_pointrange(aes(min = conf.low, max = conf.high)) +
-  coord_flip() + # Flip Y- & X-Axis,
-  labs(
-    title = "Causal effect of news articles", 
-    x = "Article on",
-    # Write Greek beta into axis title.
-    y = "Comparison to control group (article on Venus) 
-    in standard deviations") + 
-  theme_minimal()
-```
-]
-.push-right[
-```{r ref.label = "Coefplot", out.width='90%', fig.height = 3, fig.width = 5, echo = FALSE}
-```
-]
-]]
-
----
-# Learning goal achieved!
-
-.left-column[
-News media consumption *increases* immigrant minorities' perceptions that they are being discriminated! .backgrnote[
-(If the news report about discrimination in society.)]
-]
-
-.right-column[
-```{r ref.label = "Coefplot", out.width='90%', fig.height = 3, fig.width = 5, echo = FALSE}
-```
-]
-
----
 class: middle clear
 
 .left-column[
 ```{r, echo = FALSE, out.width='80%'}
 knitr::include_graphics('https://www.laserfiche.com/wp-content/uploads/2014/10/femalecoder.jpg')
 ```
+
+<iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'></iframe>
 ]
 
 .right-column[
-<iframe src='exercise3.html' width='1000' height='600' frameborder='0' scrolling='yes'></iframe>
+<br>
+<iframe src='exercise2.html' width='1000' height='600' frameborder='0' scrolling='yes'></iframe>
 ]
 
 ---
@@ -808,16 +652,14 @@ class: inverse
 
 1. Causal claims are counter factual claims. Therefore they imply a comparison.
 2. Potential outcomes: A theoretical framework to think about the comparison implied in causal claims.
-3. Direct comparisons are often fruitless and naïv, because of selection/confounder bias.
-4. Selection bias: The baseline of the outcome is unequal between treated and non-treated subjects, because certain type of people select into/out of the treatment.
-5. Balance test: Attempt to test for selection bias, but can only be applied to variables that are observed in the data at hand.
-6. Directed Acyclic Graphs (DAG): A graphical theoretical framework to think about causality. It consists of nodes and directed edges. It may not contain cycles.
-7. Backdoor paths: All paths linking $X$ and $Y$ that start with an arrow into $X$. Backdoor paths result in confounder/selection bias.
-8. Confounder bias: = selection bias.
-9. Experiment: An artificial environment controlled by the researcher. Allows researchers to control treatment assignment.
-10. Randomized Controlled Trials (RCT): An experiment with treatment and control group in which researchers assign treatment or control at random.
-11. Randomization: Random assignment of treatment and control ensures a balanced comparison (no selection/confounder bias). Randomization can fail, especially in small samples.
-12. RCTs can be analyzed with a simple OLS regression.
+3. Personal causal effect: The unobservable comparison for an individual case $i$ to experience treatment $D_{i}=1$ as compared to not experience that treatment ($D_{i}=0$).
+3. Average causal effect: The average of personal causal effects.
+4. Direct comparisons (i.e. differences in group means) are often fruitless and naïv, because of selection/confounder bias.
+5. Selection bias: The baseline of the outcome is unequal between treated and non-treated subjects, because certain type of people select into/out of the treatment.
+6. Balance test: Attempt to test for selection bias, but can only be applied to variables that are observed in the data at hand.
+7. Directed Acyclic Graphs (DAG): A graphical theoretical framework to think about causality. It consists of nodes and directed edges. It may not contain cycles.
+8. Backdoor paths: All paths linking $X$ and $Y$ that start with an arrow into $X$. Backdoor paths result in confounder/selection bias.
+9. Confounder bias: = selection bias.
 
 ---
 class: inverse
