@@ -72,7 +72,7 @@ knitr::include_graphics('https://www.templehealth.org/sites/default/files/styles
 
 
 .right-column[
-> In the following you are asked to take a stand on the case of [name] who has lived in Denmark [length of residence]. [Name] has been tested positive for COVID-19 (Corona virus) and later developed severe symptoms such as fever, fatigue, dry coughs, breathing difficulties, and chest pains. He is [age]. The doctor who examined [name], assessed that he needs treatment. However, given the increased pressure the healthcare system is experiencing, [name] might be admitted a hospital bed at the expense of someone else.
+> In the following you are asked to take a stand on the case of **[name]** who has lived in Denmark **[length of residence]**. **[Name]** has been tested positive for COVID-19 (Corona virus) and later developed severe symptoms such as fever, fatigue, dry coughs, breathing difficulties, and chest pains. He is **[age]**. The doctor who examined **[name]**, assessed that he needs treatment. However, given the increased pressure the healthcare system is experiencing, **[name]** might be admitted a hospital bed at the expense of someone else.
 
 > Based on the above scenario, to what degree do you feel this person should be prioritized a hospital bed?
 ]
@@ -150,13 +150,13 @@ class: inverse middle
 1. Explanatory sociology
 
 
-2. Learning Goals
+2. Learning goals
   + Advanced OLS regression
   + Visualization of regression results
-  + Causal Inference
+  + Causal inference
   
   
-3. Course Organization
+3. Course organization
 
 ---
 class: inverse middle center
@@ -301,11 +301,8 @@ knitr::include_graphics('https://www.journals.uchicago.edu/cms/10.1086/686942/as
 ]
 
 ---
-# 1 Randomized controlled trials (RCT)
-
----
 layout: true
-# 2 Multiple regression
+# Example 1: Multiple regression
 
 ---
 .push-left[
@@ -376,13 +373,33 @@ knitr::include_graphics('./img/Card_n_Dahl.png')
 
 ---
 layout: false
-# 3 Instrument variable regression
-
-
----
-# 4 Regression discontinuity design
+class: clear
+# Example 2: Regression discontinuity design
 
 .push-left[
+```{r, echo = FALSE, out.width='62%', fig.align='center'}
+knitr::include_graphics('https://pbs.twimg.com/media/FOH1FlhWUAIqbN1.jpg:large')
+```
+]
+
+.push-right[
+```{r, echo = FALSE, out.width='100%', fig.align='center'}
+knitr::include_graphics('https://pbs.twimg.com/media/FZIn0ymXgAAOopA.jpg:large')
+```
+]
+
+---
+class: clear
+# Example 2: Regression discontinuity design
+
+.push-left[
+```{r, echo = FALSE, out.width='62%', fig.align='center'}
+knitr::include_graphics('https://pbs.twimg.com/media/FOH1FlhWUAIqbN1.jpg:large')
+```
+]
+
+
+.push-right[
 .center[Municipalities where far-right candidates *ran*
 versus where they *won*]
 ```{r, echo = FALSE, out.width='100%', fig.align='center'}
@@ -390,14 +407,24 @@ knitr::include_graphics('./img/Map_Italy.png')
 ```
 ]
 
-.push-right[
-```{r, echo = FALSE, out.width='100%', fig.align='center'}
+---
+class: clear
+# Example 2: Regression discontinuity design
+
+```{r, echo = FALSE, out.width='50%', fig.align='center'}
 knitr::include_graphics('./img/Romarri.png')
 ```
 .backgrnote[.center[*Source:* `r Citet(myBib, "polack_safety_2020")`]]
-]
 
 ---
+class: inverse middle center
+# Break
+
+<iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'></iframe>
+
+
+---
+layout: false
 class: inverse middle center
 # Course organization
 
@@ -428,7 +455,7 @@ knitr::include_graphics('https://www.rstudio.com/wp-content/uploads/2018/10/RStu
 .right-column[
 Data collected by the Worldbank
 ```{r, echo = FALSE, out.width='90%', fig.align='center'}
-knitr::include_graphics('./../1-Correlation-n-Regression/1-Correlation-n-Regression_files/figure-html/socialism-corr1-1.png')
+knitr::include_graphics('./../1-Correlation-n-Regression/1-Corr-n-Reg_files/figure-html/socialism-corr1-1.png')
 ```  
 
 ]
@@ -508,3 +535,9 @@ class: inverse
 
 ---
 # References
+
+.font80[
+```{r ref, results = 'asis', echo = FALSE}
+PrintBibliography(myBib)
+```
+]

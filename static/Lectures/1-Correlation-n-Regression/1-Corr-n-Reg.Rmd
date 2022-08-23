@@ -120,10 +120,13 @@ knitr::include_graphics('https://almayasabdam.com/wp-content/uploads/2020/09/149
 pacman::p_load(
   tidyverse, # Data manipulation,
   ggplot2, # beautiful figures,
-  democracyData, # download democracy datasets used in the scholarly literature.
   wbstats, # download data from Worldbank. Tremendous source of global socio-economic data.
   texreg, # regression tables with nice layout,
-  countrycode) # Easy recodings of country names.
+  countrycode, # Easy recodings of country names,
+  remotes) # Install beta version packages from GitHub.
+
+remotes::install_github("xmarquez/democracyData")
+pacman::p_load(democracyData) # download democracy datasets used in the scholarly literature.
 ```
 ]]
 
