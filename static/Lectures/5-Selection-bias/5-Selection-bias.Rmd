@@ -1,5 +1,5 @@
 ---
-title: "Selection Bias"
+title: "5. Selection Bias"
 subtitle: "or why correlation ≠ causation"
 author: "Merlin Schaeffer<br> Department of Sociology"
 date: "`r Sys.Date()`"
@@ -363,7 +363,11 @@ knitr::include_graphics('https://www.laserfiche.com/wp-content/uploads/2014/10/f
 ---
 class: inverse middle center
 # Potential outcomes
+## The Neyman–Rubin framework of causality
 
+> The Rubin causal model is based on the idea of potential outcomes. For example, a person would have a particular income at age 40 if they had attended college, whereas they would have a different income at age 40 if they had not attended college. To measure the causal effect of going to college for this person, we need to compare the outcome for the same individual in both alternative futures. Since it is impossible to see both potential outcomes at once, one of the potential outcomes is always missing. This dilemma is the "fundamental problem of causal inference"
+
+> -- *Source*: [.white[Wikipedia]](https://en.wikipedia.org/wiki/Rubin_causal_model)
 ---
 # Potential outcomes .font60[Ferda's personal news effect]
 
@@ -407,7 +411,7 @@ $$\underbrace{Avg_{n}[Y_{1i}-Y_{0i}] = \frac{1}{n} \displaystyle\sum_{i=1}^{n}Y_
 
 *The average causal effect is the average of personal causal effects!*
 
-For example, the average causal effect of reading the news: compares discrimination for everyone in the sample in the hypothetical scenario that they all read the news, to the discrimination for everyone in the sample in the hypothetical scenario that they did not read the news. Obviously, this can never be observed!
+For example, the average causal effect of reading the news compares discrimination for everyone in the sample in the hypothetical scenario that they all read the news, to the discrimination for everyone in the sample in the hypothetical scenario that they did not read the news.
 
 ---
 layout: true
@@ -476,7 +480,7 @@ $\begin{equation} D_{i}=\begin{cases} 1, & \text{if}\ i = \text{Reads news} \\ 0
 .right-column[
 $Avg_{n}[Y_{1i}|D_{i} = 1] - Avg_{n}[Y_{0i}|D_{i} = 0]$
 
-Differences in group means are (most of the time) a comparison of apples (i.e. Ferda) to oranges (i.e. Tuki).
+Differences in group means are (most of the time) a comparison of apples (i.e. Ferda) to oranges (i.e. Tuki), which does not tell us about the average causal effect $(Avg_{n}[Y_{1i}-Y_{0i}])$.
 ]
 
 

@@ -63,17 +63,17 @@ p <- results$p.value[results$term == "eduyrs"] %>% as.scalar()
 
 2. How much does a year-increase in education go along with a change in trust in politicians? `r fitb(coef, width = "5")` 
 
-3. What is the estimated standard error of this $\hat{\beta}$? `r fitb(se, width = "5")`
+3. What is the estimated standard error of this association? `r fitb(se, width = "5")`
 
-4. What does the $t$-value of `teh` indicate? `r mcq(c("It's too large to be significant", "Its too small to be significant", answer = "The slope estimate beta is that many standard errors away from 0", "The probability that our hypothesis is correct is only ca 5%"))`.
+4. What does the *t*-value of `teh` indicate? `r mcq(c("It's too large to be significant", "Its too small to be significant", answer = "The slope estimate beta is that many standard errors away from 0", "The probability that our hypothesis is correct is only ca 5%"))`.
 
 5. What is the correct interpretation of the *p*-value `p`? `r mcq(c("The probability that education predicts trust is very low", "The p-value is too small to be significant", "The probability of the H0 is very small", answer = "The probability of randomly drawing a sample with this slope estimate, given that the slope estimate is 0 in reality"))`.
 
-6. Can we reject the $H_{0}$?
+6. Can we reject the H0?
 
 7. Is the association between trust in the legal system and education statistically significant?
 
-8. Make a scatterplot that visualizes the linear relationship and also contains a 95% CI for the OLS line. Make sure to use weights and to express weights as size of the scattered dots.
+8. Make a scatter plot that visualizes the linear relationship and also contains a 95% CI for the OLS line. Make sure to use weights and to express weights as size of the scattered dots.
 `r hide("R solution -> dont' peak to early ;) !")`
 ```{r}
 ggplot(data = ESS, aes(y = trstlgl, x = eduyrs)) +

@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="" xml:lang="">
   <head>
-    <title>Selection Bias</title>
+    <title>5. Selection Bias</title>
     <meta charset="utf-8" />
     <meta name="author" content="Merlin Schaeffer  Department of Sociology" />
-    <meta name="date" content="2022-08-22" />
+    <meta name="date" content="2022-08-29" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
     <script src="libs/tile-view/tile-view.js"></script>
@@ -20,7 +20,7 @@
 class: center, middle, inverse, title-slide
 
 .title[
-# Selection Bias
+# 5. Selection Bias
 ]
 .subtitle[
 ## or why correlation ≠ causation
@@ -29,7 +29,7 @@ class: center, middle, inverse, title-slide
 ### Merlin Schaeffer<br> Department of Sociology
 ]
 .date[
-### 2022-08-22
+### 2022-08-29
 ]
 
 ---
@@ -255,7 +255,7 @@ class: inverse middle center
 # Fruitless naïv comparison
 
 .push-left[
-&lt;img src="4-Selection-bias_files/figure-html/naiv-1.png" width="98%" style="display: block; margin: auto;" /&gt;
+&lt;img src="5-Selection-bias_files/figure-html/naiv-1.png" width="98%" style="display: block; margin: auto;" /&gt;
 .content-box-green[
 How does this scatter plot test the comparison stated in `\(H_{1}\)`?
 ]]
@@ -326,7 +326,7 @@ screenreg(ols, include.ci = FALSE, digits = 3)
 ]
 
 .big-right[
-&lt;img src="4-Selection-bias_files/figure-html/Hypo_test-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="5-Selection-bias_files/figure-html/Hypo_test-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]]
 
 ---
@@ -352,7 +352,11 @@ class: middle clear
 ---
 class: inverse middle center
 # Potential outcomes
+## The Neyman–Rubin framework of causality
 
+&gt; The Rubin causal model is based on the idea of potential outcomes. For example, a person would have a particular income at age 40 if they had attended college, whereas they would have a different income at age 40 if they had not attended college. To measure the causal effect of going to college for this person, we need to compare the outcome for the same individual in both alternative futures. Since it is impossible to see both potential outcomes at once, one of the potential outcomes is always missing. This dilemma is the "fundamental problem of causal inference"
+
+&gt; -- *Source*: [.white[Wikipedia]](https://en.wikipedia.org/wiki/Rubin_causal_model)
 ---
 # Potential outcomes .font60[Ferda's personal news effect]
 
@@ -394,7 +398,7 @@ class: center inverse
 
 *The average causal effect is the average of personal causal effects!*
 
-For example, the average causal effect of reading the news: compares discrimination for everyone in the sample in the hypothetical scenario that they all read the news, to the discrimination for everyone in the sample in the hypothetical scenario that they did not read the news. Obviously, this can never be observed!
+For example, the average causal effect of reading the news compares discrimination for everyone in the sample in the hypothetical scenario that they all read the news, to the discrimination for everyone in the sample in the hypothetical scenario that they did not read the news.
 
 ---
 layout: true
@@ -461,7 +465,7 @@ class: inverse center
 .right-column[
 `\(Avg_{n}[Y_{1i}|D_{i} = 1] - Avg_{n}[Y_{0i}|D_{i} = 0]\)`
 
-Differences in group means are (most of the time) a comparison of apples (i.e. Ferda) to oranges (i.e. Tuki).
+Differences in group means are (most of the time) a comparison of apples (i.e. Ferda) to oranges (i.e. Tuki), which does not tell us about the average causal effect `\((Avg_{n}[Y_{1i}-Y_{0i}])\)`.
 ]
 
 
@@ -643,7 +647,7 @@ layout: true
 ---
 
 .push-right[
-&lt;img src="4-Selection-bias_files/figure-html/DAG1-1.png" width="40%" style="display: block; margin: auto;" /&gt;
+&lt;img src="5-Selection-bias_files/figure-html/DAG1-1.png" width="40%" style="display: block; margin: auto;" /&gt;
 .backgrnote[
 The red bi-directed arrow is officially not part of the DAG, but helps you see that the correlation between `\(X\)` and `\(Y\)` is spurious because of `\(C\)`.
 ]]
@@ -651,7 +655,7 @@ The red bi-directed arrow is officially not part of the DAG, but helps you see t
 ---
 
 .push-right[
-&lt;img src="4-Selection-bias_files/figure-html/DAG2-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="5-Selection-bias_files/figure-html/DAG2-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 
 .backgrnote[
 The red bi-directed arrow is officially not part of the DAG, but helps you see that the correlation between read news and perceived discrimination is biased because immigrant minorities who obtained German citizenship read news more often than those who are foreign citizens.]
@@ -662,7 +666,7 @@ layout: false
 # Learning goal achieved!
 
 .push-left[
-&lt;img src="4-Selection-bias_files/figure-html/unnamed-chunk-16-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="5-Selection-bias_files/figure-html/unnamed-chunk-16-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]
 
 .push-right[.center[
