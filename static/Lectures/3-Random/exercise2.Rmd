@@ -1,0 +1,85 @@
+---
+title: "Exercise 2 (20 minutes)"
+subtitle: "When you're done, assist some of the others ..."
+output: webexercises::webexercises_default
+---
+
+```{r setup, include = FALSE}
+options(htmltools.dir.version = FALSE, servr.interval = 0.5, width = 115, digits = 2)
+knitr::opts_chunk$set(
+  collapse = TRUE, message = FALSE, 
+  warning = FALSE, cache = FALSE,
+  comment = "#", strip.white = TRUE)
+
+library(webexercises)
+library(essentials)
+```
+
+```{r results = FALSE, echo = FALSE}
+pacman::p_load(
+  tidyverse, # Data manipulation,
+  haven, # Handle labelled data.
+  ggplot2, # beautiful figures,
+  estimatr, # Regression for weighted data,
+  modelr, 
+  texreg) # regression tables with nice layout.
+
+# 1. read the ESS round 9 data
+ESS <- read_spss("../../../assets/ESS9e03_1.sav") %>%
+  filter(cntry == "DK") %>% # Keep only the Danish data,
+  # Keep only a minimum set of variables we need today,
+  select(idno, pspwght, gndr, eduyrs, agea, 
+         psppsgva, trstlgl, trstplc) %>%
+  mutate(psppsgva = zap_labels(psppsgva), # Make numeric
+         trstlgl = zap_labels(trstlgl), # Make numeric
+         trstplc = zap_labels(trstplc), # Make numeric
+         pspwght = zap_labels(pspwght), # Make numeric
+         eduyrs = case_when( # Censor years of education at 9 & 21 years.
+           eduyrs > 21 ~ 21,
+           eduyrs < 9 ~ 9,
+           TRUE ~ as.numeric(eduyrs)),
+         gndr = as_factor(gndr)) %>% # Make factor
+drop_na() # Delete cases with missing values.
+```
+
+1. Regress trust in the legal system on years of education. Use the `summary()` command to display the output.  
+
+`r hide("R solution -> dont' peak to early ;) !")`
+```{r}
+# Run the regression and make a regression table.
+mod1 <- lm_robust(trstlgl ~ eduyrs, data = ESS, weights = pspwght)
+summary(mod1)
+```
+`r unhide()`
+```{r include = FALSE}
+# Results for the questions
+coef <- coef(mod1)["eduyrs"] %>% round(., 3) %>% as.scalar()
+se <- vcov(mod1) %>% diag()
+se <- se["eduyrs"] %>% sqrt() %>% round(., 3) %>% as.scalar()
+results <- tidy(mod1)
+teh <- results$statistic[results$term == "eduyrs"] %>% as.scalar()
+p <- results$p.value[results$term == "eduyrs"] %>% as.scalar()
+```
+
+2. How much does a year-increase in education go along with a change in trust in politicians? `r fitb(coef, width = "5")` 
+
+3. What is the estimated standard error of this $\hat{\beta}$? `r fitb(se, width = "5")`
+
+4. What does the $t$-value of `teh` indicate? `r mcq(c("It's too large to be significant", "Its too small to be significant", answer = "The slope estimate beta is that many standard errors away from 0", "The probability that our hypothesis is correct is only ca 5%"))`.
+
+5. What is the correct interpretation of the *p*-value `p`? `r mcq(c("The probability that education predicts trust is very low", "The p-value is too small to be significant", "The probability of the H0 is very small", answer = "The probability of randomly drawing a sample with this slope estimate, given that the slope estimate is 0 in reality"))`.
+
+6. Can we reject the $H_{0}$?
+
+7. Is the association between trust in the legal system and education statistically significant?
+
+8. Make a scatterplot that visualizes the linear relationship and also contains a 95% CI for the OLS line. Make sure to use weights and to express weights as size of the scattered dots.
+`r hide("R solution -> dont' peak to early ;) !")`
+```{r}
+ggplot(data = ESS, aes(y = trstlgl, x = eduyrs)) +
+  geom_jitter(aes(size = pspwght), alpha = 1/3, height = 0.1, width = 0.1) +
+  geom_smooth(aes(weight = pspwght), method = "lm") +
+  labs(y = "Trust in the legal system", x = "Years of education") +
+  theme_minimal()
+```
+`r unhide()`

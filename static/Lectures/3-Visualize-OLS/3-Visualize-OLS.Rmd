@@ -265,6 +265,43 @@ htmlreg(list(zols, zols_2),
 ]
 
 ---
+class: clear
+# Visualizing uncertainty .font70[95% CIs in coefficient plots]
+
+.panelset[
+.panel[.panel-name[Preparation code]
+```{r}
+(plotdata <- lm_robust(psppsgva ~ eduyrs, data = ESS_sample) %>%
+   tidy() %>% # Turn results into a tibble,
+   mutate( # Rename variables for the plot.
+     term = case_when(
+       term == "eduyrs" ~ "Years of Education",
+       term == "(Intercept)" ~ "Intercept")))
+```
+]
+
+.panel[.panel-name[Plot]
+.push-left[
+```{r Coefplot, fig.show = 'hide'}
+ggplot(data = plotdata, aes(y = estimate, x = term)) +
+  # Point with error-bars,
+  geom_pointrange(aes(min = conf.low, max = conf.high)) +
+  coord_flip() + # Flip Y- & X-Axis,
+  labs(
+    title = "Regression of political efficacy", 
+    x = "",
+    # Write Greek beta into axis title.
+    y = expression("Estimate of"~beta)) + 
+  theme_minimal()
+```
+]
+.push-right[
+```{r ref.label = "Coefplot", out.width='90%', fig.height = 4, fig.width = 6, echo = FALSE}
+```
+]
+]]
+
+---
 class: inverse
 # Today's general lessons
 

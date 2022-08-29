@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Advanced Quantitative Methods</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Merlin Schaeffer  Department of Sociology" />
+    <meta name="date" content="2022-08-29" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
+    <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
+    <script src="libs/tile-view/tile-view.js"></script>
+    <link href="libs/tachyons/tachyons.min.css" rel="stylesheet" />
+    <link href="libs/panelset/panelset.css" rel="stylesheet" />
+    <script src="libs/panelset/panelset.js"></script>
+    <link rel="stylesheet" href="../template/Merlin169.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+.title[
+# Advanced Quantitative Methods
+]
+.subtitle[
+## 1. Introduction
+]
+.author[
+### Merlin Schaeffer<br> Department of Sociology
+]
+.date[
+### 2022-08-29
+]
+
+---
+
+
+class: middle center
+background-image: url("https://stanfordbloodcenter.org/wp-content/uploads/2021/01/iStock-1208283967.jpg")
+background-position: center
+background-size: cover
+
+.font160[
+**My research agenda**
+]
+.font200[
+**Theory-driven empirical analysis of &lt;br&gt; &lt;br&gt; immigration-based ethnic diversity and stratification, &lt;br&gt; &lt;br&gt;&amp; their contentious political consequences**
+]
+
+---
+class: clear
+&lt;img src="./img/Stages.png" width="100%" style="display: block; margin: auto;" /&gt;
+
+---
+layout: true
+# Some of my current work
+
+---
+.left-column[
+&lt;img src="https://www.templehealth.org/sites/default/files/styles/without_crop/public/2021-01/man-wearing-mask-coughing-into-shoulder.jpg?itok=Z6mUgWPd" width="100%" style="display: block; margin: auto;" /&gt;
+]
+
+
+.right-column[
+&gt; In the following you are asked to take a stand on the case of **[name]** who has lived in Denmark **[length of residence]**. **[Name]** has been tested positive for COVID-19 (Corona virus) and later developed severe symptoms such as fever, fatigue, dry coughs, breathing difficulties, and chest pains. He is **[age]**. The doctor who examined **[name]**, assessed that he needs treatment. However, given the increased pressure the healthcare system is experiencing, **[name]** might be admitted a hospital bed at the expense of someone else.
+
+&gt; Based on the above scenario, to what degree do you feel this person should be prioritized a hospital bed?
+.center[.backgrnote[*Source*: Larsen and Schaeffer (2021)]]
+]
+
+---
+
+
+&lt;img src="https://www.tandfonline.com/na101/home/literatum/publisher/tandf/journals/content/cjms20/2021/cjms20.v047.i07/1369183x.2020.1860742/20220705/images/large/cjms_a_1860742_f0001_oc.jpeg" width="80%" style="display: block; margin: auto;" /&gt;
+.center[.backgrnote[*Source*: Larsen and Schaeffer (2021)]]
+
+---
+
+&lt;img src="./img/Krzysz.png" width="45%" style="display: block; margin: auto;" /&gt;
+.center[.backgrnote[*Source*: Krakowski, Romarri, Rosenberg, and Schaeffer (2022)]]
+
+---
+
+&lt;img src="./img/Ethnic_Discr2-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+.center[.backgrnote[*Source*: Krakowski, Romarri, Rosenberg, et al. (2022)]]
+
+---
+
+
+&lt;img src="https://www.degruyter.com/document/doi/10.1515/zfsoz-2017-1022/asset/graphic/j_zfsoz-2017-1022_abb_001.jpg" width="60%" style="display: block; margin: auto;" /&gt;
+.center[.backgrnote[*Source*: Jünger and Schaeffer (2022b); Jünger and Schaeffer (2022a); Klinger, Müller, and Schaeffer (2017)]]
+
+---
+layout: false
+class: inverse middle center
+
+.push-left[.font200[
+Did you do the
+
+**pre-work setup**?
+]]
+
+
+.push-right[
+&lt;iframe src='https://merlin-advanced-stats.netlify.app/about/' width='1000' height='600' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+]
+
+---
+layout: false
+class: inverse middle
+# I assume
+
+- You know how to use R and RStudio.
+
+
+--
+
+
+- You know basic statistics:
+  + Descriptive statistics: `\(\%\)`, `\(\bar{x}\)`, `\(\text{SD}(x)\)`.
+  + Associations: Correlation `\(r_{y,x}\)`, OLS regression `\(y_{i} = \alpha + \beta x_{i} + \epsilon_{i}\)`.
+  + Inference: Confidence intervals, `\(t\)`-values &amp; `\(p\)`-values.
+
+--
+
+
+- *You want to do professional analyses and communicate your results with appealing visualizations.*
+
+---
+class: inverse middle
+# Today's schedule
+
+1. Explanatory sociology
+
+
+2. Learning goals
+  + Advanced OLS regression
+  + Visualization of regression results
+  + Causal inference
+  
+  
+3. Course organization
+
+---
+class: inverse middle center
+# Explanatory sociology
+
+---
+# 4 Types of research questions
+
+.push-left[
+- **Ontological**: What is the nature of X?
+  + What is power?
+  + What is gender; how is it different from race?
+  + What defines a state? .backgrnote[
+&gt; A human community that (successfully) claims the monopoly of the legitimate use of physical force within a given territory
+
+&gt; --- Max Weber, “Politics as a Vocation” 1918]
+
+
+- **Critical**: Is X (un-)just?
+  + Is home office exploitation?
+  + Is color-blind ideology a new form of racism?
+]
+
+--
+
+.push-right[
+- **Descriptive**: What is the case?
+  + What are the survival strategies of the poor?
+  + How did Danes structure their days during the COVID-19 lockdowns?
+
+
+- **Explanatory**: Why is X the case?
+  - Why does the suicide rate vary across societies?
+  - How does capitalism affect human beings?
+  - How does urbanization change our psyche?
+  - Why do people obey power?
+  - How does a state gain legitimacy over the use of physical force? 
+]
+
+--
+
+.content-box-green[
+.center[
+What type of research question do my three examples try to answer?
+
+What are you interested in?
+]]
+
+---
+# 4 Types of research questions
+
+.push-left[
+- **Ontological**: What is the nature of X?
+  + What is power?
+  + What is gender; how is it different from race?
+  + What defines a state? .backgrnote[
+&gt; A human community that (successfully) claims the monopoly of the legitimate use of physical force within a given territory
+
+&gt; --- Max Weber, “Politics as a Vocation” 1918]
+
+
+- **Critical**: Is X (un-)just?
+  + Is home office exploitation?
+  + Is color-blind ideology a new form of racism?
+]
+
+.push-right[
+- **Descriptive**: What is the case?
+  + What are the survival strategies of the poor?
+  + How did Danes structure their days during the COVID-19 lockdowns?
+
+
+.content-box-red[
+- **Explanatory**: Why is X the case?
+  - Why does the suicide rate vary across societies?
+  - How does capitalism affect human beings?
+  - How does urbanization change our psyche?
+  - Why do people obey power?
+  - How does a state gain legitimacy over the use of physical force? 
+]]
+
+---
+# The goal of empirical social science
+
+.font140[.center[.alert[Use data to discover patterns ("social facts" in Durkheim's terms), &lt;br&gt; and the **social mechanisms that bring them about**.]]]
+
+&lt;img src="https://liu.se/-/media/istock-501261958.jpg?mw=1120&amp;mh=1120&amp;hash=DA8977CCE6A6E600AE80A40CFEE771C9" width="70%" style="display: block; margin: auto;" /&gt;
+
+---
+class: inverse middle center
+# Learning goals
+
+---
+# This semester / Learning goals
+
+.push-left[
+- More flexible OLS regression:
+  + Multiple regression,
+  + Interaction effects,
+  + Polynomials.
+- Visualization of regression results.
+- Work with various data.
+
+&lt;img src="https://www.journals.uchicago.edu/cms/10.1086/686942/asset/images/medium/fg3.gif" width="80%" style="display: block; margin: auto;" /&gt;
+.backgrnote[.center[*Source:* Legewie and Schaeffer (2016)]]
+
+]
+
+--
+
+.push-right[
+- .alert[Causal Inference]:
+  1. Randomized Controlled Trials (RCTs),
+  2. Multiple Regression,
+  3. Instrument Variable Regression,
+  4. Regression Discontinuity Design.
+
+&lt;img src="1-Introduction_files/figure-html/DAG1-1.png" width="50%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+layout: true
+# Example 1: Multiple regression
+
+---
+.push-left[
+&lt;img src="1-Introduction_files/figure-html/unnamed-chunk-9-1.png" width="40%" style="display: block; margin: auto;" /&gt;
+.backgrnote[
+The red bi-directed arrow is officially not part of the DAG, but helps you see that the correlation between `\(X\)` and `\(Y\)` is spurious because of `\(C\)`.
+]]
+
+---
+
+.push-left[
+&lt;img src="1-Introduction_files/figure-html/DAG2-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+
+.backgrnote[
+The red bi-directed arrow is officially not part of the DAG, but helps you see that the correlation between read news and perceived discrimination is biased because immigrant minorities who obtained German citizenship read news more often than those who are foreign citizens.]
+
+&lt;img src="https://wpr-public.s3.amazonaws.com/wprorg/styles/facebook/s3/field/image/ap20296067506098.jpg?itok=hZu82HBq" width="60%" style="display: block; margin: auto;" /&gt;
+
+]
+
+---
+
+.left-column[
+&lt;img src="1-Introduction_files/figure-html/unnamed-chunk-11-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+.backgrnote[
+The red bi-directed arrow is officially not part of the DAG, but helps you see that the correlation between read news and perceived discrimination is biased because immigrant minorities who obtained German citizenship read news more often than those who are foreign citizens.]
+
+&lt;img src="https://wpr-public.s3.amazonaws.com/wprorg/styles/facebook/s3/field/image/ap20296067506098.jpg?itok=hZu82HBq" width="100%" style="display: block; margin: auto;" /&gt;
+]
+
+.right-column[
+&lt;img src="./img/Card_n_Dahl.png" width="100%" style="display: block; margin: auto;" /&gt;
+.backgrnote[.center[*Source:* Card and Dahl (2011)]]
+]
+
+---
+layout: false
+class: clear
+# Example 2: Regression discontinuity design
+
+.push-left[
+&lt;img src="https://pbs.twimg.com/media/FOH1FlhWUAIqbN1.jpg:large" width="62%" style="display: block; margin: auto;" /&gt;
+]
+
+.push-right[
+&lt;img src="https://pbs.twimg.com/media/FZIn0ymXgAAOopA.jpg:large" width="100%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+class: clear
+# Example 2: Regression discontinuity design
+
+.push-left[
+&lt;img src="https://pbs.twimg.com/media/FOH1FlhWUAIqbN1.jpg:large" width="62%" style="display: block; margin: auto;" /&gt;
+]
+
+
+.push-right[
+.center[Municipalities where far-right candidates *ran*
+versus where they *won*]
+&lt;img src="./img/Map_Italy.png" width="100%" style="display: block; margin: auto;" /&gt;
+.backgrnote[.center[*Source:* Romarri (2020)]]
+]
+
+---
+class: clear
+# Example 2: Regression discontinuity design
+
+&lt;img src="./img/Romarri.png" width="50%" style="display: block; margin: auto;" /&gt;
+.backgrnote[.center[*Source:* Romarri (2020)]]
+
+---
+class: inverse middle center
+# Break
+
+&lt;iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+
+
+---
+layout: false
+class: inverse middle center
+# Course organization
+
+---
+# Weekly course elements
+
+&lt;img src="./img/Structure.png" width="100%" style="display: block; margin: auto;" /&gt;
+
+---
+layout: true
+# Working with data
+
+.left-column[
+&lt;img src="https://www.rstudio.com/wp-content/uploads/2018/10/RStudio-Logo-Flat.png" width="50%" style="display: block; margin: auto;" /&gt;
+- We presume that you are familiar with using R.
+
+- You will learn to work with various different types of data in this course.
+
+- Become as fluent in working with data as you are in Danish/English ;)
+]
+
+---
+.right-column[
+.center[Data collected by the Worldbank]
+&lt;img src="./../1-Correlation-n-Regression/1-Corr-n-Reg_files/figure-html/socialism-corr1-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+]
+
+---
+
+.right-column[
+.center[European Social Survey]
+&lt;img src="./../2-Random/2-Random_files/figure-html/true_ols-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+]
+
+---
+
+.right-column[
+.center[APAX survey]
+&lt;img src="./../4-Selection-bias/4-Selection-bias_files/figure-html/naiv-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+]
+
+---
+layout: false
+# Textbooks
+
+.push-left[
+.center[We continue to use the book from last semester]
+
+&lt;img src="https://imgcdn.saxo.com/_9781292362328" width="40%" style="display: block; margin: auto;" /&gt;
+.backgrnote[.center[Veaux, Velleman, and Bock (2021)]]
+]
+
+.push-right[
+.center[Additionally, we will use Angrist and Pischke's excellent introduction to causal inference.]
+
+&lt;img src="https://imgcdn.saxo.com/_9780691152844" width="40%" style="display: block; margin: auto;" /&gt;
+.backgrnote[.center[Angrist and Pischke (2014)]]
+]
+
+---
+# Recommendations
+
+.push-left[
+- Take notes!
+  + I will use the blackboard.
+  + The slides are visualizations, not a textbook written in bullet points.
+  + Many things I say are not on the slides.
+ 
+  
+- Activate email notifications on Absalon.
+
+
+- Regularly check your KU email or forward it to your personal email.
+]
+
+.push-right[
+&lt;img src="https://media.istockphoto.com/vectors/school-children-vector-id513534403?s=170667a" width="80%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+class: inverse middle center
+# Questions
+
+&lt;img src="https://www.mountpolley.com/wp-content/uploads/2020/08/pexels-pixabay-356079-1200x726.jpg" width="50%" style="display: block; margin: auto;" /&gt;
+
+---
+# References
+
+.push-left[
+.font70[
+Angrist, J. D. and J. Pischke (2014). _Mastering 'Metrics: The Path from Cause to Effect_. Princeton
+University Press.
+
+Card, D. and G. B. Dahl (2011). "Family Violence and Football: The Effect of Unexpected Emotional Cues
+on Violent Behavior*". In: _The Quarterly Journal of Economics_, pp. 103-143.
+
+Jünger, S. and M. Schaeffer (2022a). "Der Halo-Effekt in Deutschland – Revisited. Sind Menschen, die
+in der Nähe von – aber nicht in – ethnisch diversen Nachbarschaften leben, besonders xenophob und
+rassistisch?" In: _Differenz im Raum_. Ed. by H. Kruse and J. Teltemann. Wiesbaden: Springer
+Fachmedien Wiesbaden, pp. 195-218.
+
+Jünger, S. and M. Schaeffer (2022b). "Immigration and Social Integration - What are the Consequences
+of Ethnic Residential Boundaries and Halos for Social Integration in Germany?"
+
+Klinger, J., S. Müller, and M. Schaeffer (2017). "Der Halo-Effekt in einheimisch-homogenen
+Nachbarschaften Steigert die ethnische Diversität angrenzender Nachbarschaften die Xenophobie in
+Deutschland?" In: _Zeitschrift für Soziologie_, pp. 402-419.
+]]
+
+.push-right[
+.font70[
+Krakowski, K., A. Romarri, D. Rosenberg, et al. (2022). "Populist Right-Wing Governors, Healthcare
+Chauvinism, and Public Health in the Time of the Global Pandemic".
+
+Larsen, M. H. and M. Schaeffer (2021). "Healthcare chauvinism during the COVID-19 pandemic". In:
+_Journal of Ethnic and Migration Studies_, pp. 1455-1473.
+
+Legewie, J. and M. Schaeffer (2016). "Contested Boundaries: Explaining Where Ethnoracial Diversity
+Provokes Neighborhood Conflict". In: _American Journal of Sociology_, pp. 125-161.
+
+Romarri, A. (2020). _Do Far-Right Mayors Increase the Probability of Hate Crimes? Evidence From
+Italy_. SSRN Scholarly Paper ID 3506811. Rochester, NY: Social Science Research Network.
+
+Veaux, D., Velleman, and Bock (2021). _Stats: Data and Models, Global Edition_. Pearson Higher Ed.
+]]
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="../template/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightLanguage": "r",
+"highlightStyle": "zenburn",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"ratio": "16:9"
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
