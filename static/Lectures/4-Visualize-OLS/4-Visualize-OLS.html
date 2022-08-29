@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>4 Regression</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Merlin Schaeffer  Department of Sociology" />
+    <meta name="date" content="2022-08-29" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
+    <link href="libs/panelset/panelset.css" rel="stylesheet" />
+    <script src="libs/panelset/panelset.js"></script>
+    <link rel="stylesheet" href="../template/Merlin169.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+.title[
+# 4 Regression
+]
+.subtitle[
+## Categorical predictors, Assumptions, and the basics of visualizing regression results
+]
+.author[
+### Merlin Schaeffer<br> Department of Sociology
+]
+.date[
+### 2022-08-29
+]
+
+---
+
+
+
+# The goal of social science research
+
+.font140[.center[.alert[Use data to **discover patterns** ("social facts" in Durkheim's terms), &lt;br&gt; and the social mechanisms that bring them about.]]]
+
+&lt;img src="https://liu.se/-/media/istock-501261958.jpg?mw=1120&amp;mh=1120&amp;hash=DA8977CCE6A6E600AE80A40CFEE771C9" width="70%" style="display: block; margin: auto;" /&gt;
+---
+class: inverse middle
+# Today's schedule
+
+1. **Application**: Colonialism and poverty
+  + Worldbank API
+  + History of colonial rule data.
+  + Join/merge both data sources
+  
+2. **OLS assumptions**
+  + No outliers
+  + Linearity
+  + 
+  
+3. **Categorical predictors**
+  + Dummy coding
+  
+4. **Visualizing regression**
+  + Coefficient plots
+  + Model predictions
+  
+---
+class: inverse
+# Colonial legacy
+
+.push-left[
+&lt;img src="https://cdn.cfr.org/sites/default/files/styles/open_graph_article/public/image/2020/01/France-Macron-Pau-Summit-G5-Sahel.jpg?h=63648819" width="100%" style="display: block; margin: auto;" /&gt;
+]
+
+--
+
+.push-right[
+&lt;img src="https://en.natmus.dk/typo3temp/assets/images/csm_neky-holbech-16x9_b72c084303_2836164db1.jpg" width="80%" style="display: block; margin: auto;" /&gt;
+
+&lt;img src="https://ichef.bbci.co.uk/news/976/cpsprodpb/6E2E/production/_113460282_mediaitem113460280.jpg" width="80%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+class: inverse
+# Colonial legacy and poverty
+
+.push-left[.font140[.center[
+How much could former colonies reduce extreme poverty since independence?
+]]]
+
+.push-right[.font140[.center[
+How do different colonial legacies compare to one another (e.g., former French vs British colonies) in terms of contemporary extreme poverty?
+]]]
+
+---
+# Preparations
+
+.panelset[
+.panel[.panel-name[Packages for today's session]
+
+```r
+pacman::p_load(
+  tidyverse, # Data manipulation,
+  ggplot2, # beautiful figures,
+  wbstats, # download data from Worldbank. Tremendous source of global socio-economic data.
+  texreg, # regression tables with nice layout,
+  countrycode) # Easy recodings of country names,
+```
+]]
+
+---
+class: clear
+# Worldbank Data .font70[On extreme poverty across the World]
+
+.panelset[
+.panel[.panel-name[Searching Wb archive]
+- With `wbstats::wb_search()`, you can search the Wb archive for any keyword! Here I use "poverty":
+
+```r
+*(wb_poverty_archive &lt;- wb_search("poverty"))
+# # A tibble: 702 × 3
+#    indicator_id         indicator                               indicator_desc                                                                                                            
+#    &lt;chr&gt;                &lt;chr&gt;                                   &lt;chr&gt;                                                                                                                     
+#  1 1.0.HCount.1.90usd   Poverty Headcount ($1.90 a day)         The poverty headcount index measures the proportion of the population with daily per capita income (in 2011 PPP) below th…
+#  2 1.0.HCount.2.5usd    Poverty Headcount ($2.50 a day)         The poverty headcount index measures the proportion of the population with daily per capita income (in 2005 PPP) below th…
+#  3 1.0.HCount.Mid10to50 Middle Class ($10-50 a day) Headcount   The poverty headcount index measures the proportion of the population with daily per capita income (in 2005 PPP) below th…
+#  4 1.0.HCount.Ofcl      Official Moderate Poverty Rate-National The poverty headcount index measures the proportion of the population with daily per capita income below the official pov…
+#  5 1.0.HCount.Poor4uds  Poverty Headcount ($4 a day)            The poverty headcount index measures the proportion of the population with daily per capita income (in 2005 PPP) below th…
+#  6 1.0.HCount.Vul4to10  Vulnerable ($4-10 a day) Headcount      The poverty headcount index measures the proportion of the population with daily per capita income (in 2005 PPP) below th…
+#  7 1.0.PGap.1.90usd     Poverty Gap ($1.90 a day)               The poverty gap captures the mean aggregate income or consumption shortfall relative to the poverty line across the entir…
+#  8 1.0.PGap.2.5usd      Poverty Gap ($2.50 a day)               The poverty gap captures the mean aggregate income or consumption shortfall relative to the poverty line across the entir…
+#  9 1.0.PGap.Poor4uds    Poverty Gap ($4 a day)                  The poverty gap captures the mean aggregate income or consumption shortfall relative to the poverty line across the entir…
+# 10 1.0.PSev.1.90usd     Poverty Severity ($1.90 a day)          The poverty severity index combines information on both poverty and inequality among the poor by averaging the squares of…
+# # … with 692 more rows
+```
+]
+.panel[.panel-name[Get Wb data]
+
+```r
+*(Dat &lt;- wb_data("SI.POV.DDAY", # Download poverty data: &lt;1.90$ per day,
+*               start_date = 2002, end_date = 2022) %&gt;%
+   rename(poverty = SI.POV.DDAY) %&gt;% # rename poverty variable,
+   select(country, date, poverty) %&gt;% # Keep only 3 variables
+   drop_na(poverty) %&gt;% # Drop cases with missing data,
+   group_by(country) %&gt;% # Group by country,
+   filter(date == max(date)) %&gt;% # Keep the most recent data per country.
+   ungroup())
+# # A tibble: 163 × 3
+#    country     date poverty
+#    &lt;chr&gt;      &lt;dbl&gt;   &lt;dbl&gt;
+#  1 Albania     2019     0  
+#  2 Algeria     2011     0.4
+#  3 Angola      2018    49.9
+#  4 Argentina   2020     1.6
+#  5 Armenia     2020     0.4
+#  6 Australia   2018     0.5
+#  7 Austria     2019     0.6
+#  8 Azerbaijan  2005     0  
+#  9 Bangladesh  2016    14.3
+# 10 Belarus     2020     0  
+# # … with 153 more rows
+```
+]
+.panel[.panel-name[Extreme poverty across the world]
+&lt;img src="4-Visualize-OLS_files/figure-html/poverty-world-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]]
+
+---
+# Colonia legacy
+
+.push-left[
+&lt;iframe src='https://academic.oup.com/sf/article/88/2/785/2235304' width='800' height='500' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+]
+
+.push-right[
+&lt;img src="./img/Colonial.png" width="100%" style="display: block; margin: auto;" /&gt;
+.center[.backgrnote[*Source*: Veaux, Velleman, and Bock (2021, p.199)]]
+]
+
+---
+# Colonia legacy
+
+.push-left[
+&lt;img src="./img/Colonial2.png" width="100%" style="display: block; margin: auto;" /&gt;
+.center[.backgrnote[*Source*: Veaux, Velleman, and Bock (2021, p.199)]]
+]
+
+.push-right[
+&lt;img src="./img/Colonial3.png" width="100%" style="display: block; margin: auto;" /&gt;
+.center[.backgrnote[*Source*: Veaux, Velleman, and Bock (2021, p.199)]]
+]
+
+---
+# Hand coding ;( .font70[Colonia power]
+
+
+```r
+Dat &lt;- Dat %&gt;% 
+  mutate(
+    colonizer = case_when(
+      str_detect(country, "Algeria|Benin|Burkina Faso|Cambodia|Central African Republic|Chad|Congo, Rep.|Cote D'Ivoire") |
+        str_detect(country, "Djibouti|Gabon|Guinea|Haiti|Laos|Lebanon|Madagascar|Mali|Mauritania|Niger") | 
+        str_detect(country, "Senegal|Syria|Togo|Tunisia|Vietnam") ~ "France", # France
+      str_detect(country, "Angola|Brazil|Mozambique|Guinea-Bissau") ~ "Portugal", # Portugal
+      str_detect(country, "Argentina|Bolivia|Chile|Colombia|Costa Rica|Cuba|Dominican Republic|Ecuador") |
+        str_detect(country, "El Salvador|Guatemala|Honduras|Mexico|Nicaragua|Panama|Paraguay|Peru") |
+        str_detect(country, "Uruguay|Venezuela") ~ "Spain", # Spain
+      str_detect(country, "Australia|Bahrain|Bangladesh|Botswana|Canada|Cyprus|Egypt|Fiji") |
+        str_detect(country, "Gambia|Ghana|Guyana|India|Iraq|Israel|Jamaica|Jordan|Kenya|Kuwait") |
+        str_detect(country, "Lesotho|Malawi|Malaysia|Mauritius|Myanmar|New Zealand|Nigeria|Oman") | 
+        str_detect(country, "Pakistan|Qatar|Sierra Leone|Singapore|South Africa") | 
+        str_detect(country, "Sri Lanka|Sudan|Swaziland|Tanzania|Trinidad/Tobago|Uganda") | 
+        str_detect(country, "United Arab Emirates|USA|Yemen|Zambia|Zimbabwe") ~ "Britain", # Britain
+      str_detect(country, "Burundi|Congo, Dem. Rep.|Rwanda") ~ "Belgium", # Belgium
+      str_detect(country, "Liberia|Philippines") ~ "USA", # USA
+      str_detect(country, "Libya|Somalia") ~ "Italy", # Italy
+      str_detect(country, "Indonesia") ~ "Holland", # Holland
+      str_detect(country, "Korea|Taiwan") ~ "Japan")) # Japan
+```
+
+---
+# Hand coding ;( .font70[Years of independence]
+
+
+```r
+Dat &lt;- Dat %&gt;% 
+  mutate(
+    years_indep = case_when(
+      str_detect(country, "Argentina|Bolivia|Colombia") ~ date - 1819,
+      country == "Australia" ~ date - 1901,
+      str_detect(country, "Algeria|Burundi|Rwanda|Jamaica|Trinidad/ Tobago|Uganda") ~ date - 1962,
+      str_detect(country, "Angola|Mozambigue") ~ date - 1962,
+      str_detect(country, "Bahrain|Oman|Qatar|United Arab Emirates") ~ date - 1971))
+```
+
+
+---
+# Categorical predicators
+
+.panelset[
+.panel[.panel-name[Continent]
+
+```r
+(Dat &lt;- Dat %&gt;%
+   mutate(
+     continent = countrycode( # Nice function from the countrycode package ;)
+       sourcevar = country, # What is the original variable?
+       origin = "country.name", # What info does the original variable contain?
+       destination = "continent") %&gt;% # What do you want as output?
+       factor() %&gt;% fct_relevel("Europe"))) # Turn into factor and make "Europe" the reference.
+# # A tibble: 163 × 6
+#    country     date poverty colonizer years_indep continent
+#    &lt;chr&gt;      &lt;dbl&gt;   &lt;dbl&gt; &lt;chr&gt;           &lt;dbl&gt; &lt;fct&gt;    
+#  1 Albania     2019     0   &lt;NA&gt;               NA Europe   
+#  2 Algeria     2011     0.4 France             49 Africa   
+#  3 Angola      2018    49.9 Portugal           56 Africa   
+#  4 Argentina   2020     1.6 Spain             201 Americas 
+#  5 Armenia     2020     0.4 &lt;NA&gt;               NA Asia     
+#  6 Australia   2018     0.5 Britain           117 Oceania  
+#  7 Austria     2019     0.6 &lt;NA&gt;               NA Europe   
+#  8 Azerbaijan  2005     0   &lt;NA&gt;               NA Asia     
+#  9 Bangladesh  2016    14.3 Britain            NA Asia     
+# 10 Belarus     2020     0   &lt;NA&gt;               NA Europe   
+# # … with 153 more rows
+```
+]
+.panel[.panel-name[Scatter plot]
+
+.left-column[
+.content-box-green[
+1. Where does the regression line pass through the cloud of countries without a socialist past?
+2. Where does the regression line pass through the cloud of countries with a socialist past?
+3. What does this sugest about the slope `\(\beta\)`?
+]
+]
+.right-column[
+&lt;img src="4-Visualize-OLS_files/figure-html/categorical-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]]
+.panel[.panel-name[Dummy coding]
+
+.push-left[
+`$$x=
+  \begin{cases}
+    1, &amp; \text{if condition is met} \\
+    0 &amp; \text{otherwise}
+  \end{cases}$$`
+
+Contintent                       | Africa | Asia | ...
+---------------------------------|----|----|----
+Burundi                 | 1  | 0  | 0 
+Somalia                 | 1  | 0  | 0
+...                 | 1  | 0  | 0
+China                          | 0  | 1  | 0  
+Japan                          | 0  | 1  | 0
+...                          | 0  | 1  | 0
+Reference &lt;br&gt; .backgrnote[(Europe)] | 0  | 0  | 0
+]
+
+.push-right[
+&lt;img src="4-Visualize-OLS_files/figure-html/categorical2-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]]
+.panel[.panel-name[How it's done in R]
+.push-left[
+
+```r
+# R recognizes categorical variables automatically.
+ols_2 &lt;- lm(data = Dat, formula = poverty ~ continent)
+
+htmlreg(ols_2, # Nicely-formatted table.
+        custom.coef.names = c("Intercept", "Africa", 
+                              "Americas", "Asia", 
+                              "Oceania")) 
+```
+
+&lt;img src="4-Visualize-OLS_files/figure-html/unnamed-chunk-59-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+]
+
+.push-right[.font90[
+&lt;table class="texreg" style="margin: 10px auto;border-collapse: collapse;border-spacing: 0px;caption-side: bottom;color: #000000;border-top: 2px solid #000000;"&gt;
+&lt;caption&gt;Statistical models&lt;/caption&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/th&gt;
+&lt;th style="padding-left: 5px;padding-right: 5px;"&gt;Model 1&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr style="border-top: 1px solid #000000;"&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Intercept&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.49&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(2.40)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Africa&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;30.56&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(3.19)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Americas&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;4.07&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(3.94)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Asia&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;4.89&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(3.46)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Oceania&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;7.63&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(4.94)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr style="border-top: 1px solid #000000;"&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;R&lt;sup&gt;2&lt;/sup&gt;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.43&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Adj. R&lt;sup&gt;2&lt;/sup&gt;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.42&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr style="border-bottom: 2px solid #000000;"&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Num. obs.&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;161&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;tfoot&gt;
+&lt;tr&gt;
+&lt;td style="font-size: 0.8em;" colspan="2"&gt;&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;p &amp;lt; 0.001; &lt;sup&gt;&amp;#42;&amp;#42;&lt;/sup&gt;p &amp;lt; 0.01; &lt;sup&gt;&amp;#42;&lt;/sup&gt;p &amp;lt; 0.05&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tfoot&gt;
+&lt;/table&gt;
+]]]
+
+.panel[.panel-name[Interpretation]
+.push-left[.font90[
+&lt;table class="texreg" style="margin: 10px auto;border-collapse: collapse;border-spacing: 0px;caption-side: bottom;color: #000000;border-top: 2px solid #000000;"&gt;
+&lt;caption&gt;Statistical models&lt;/caption&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/th&gt;
+&lt;th style="padding-left: 5px;padding-right: 5px;"&gt;Model 1&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr style="border-top: 1px solid #000000;"&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Intercept&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.49&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(2.40)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Africa&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;30.56&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(3.19)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Americas&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;4.07&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(3.94)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Asia&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;4.89&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(3.46)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Oceania&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;7.63&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(4.94)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr style="border-top: 1px solid #000000;"&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;R&lt;sup&gt;2&lt;/sup&gt;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.43&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Adj. R&lt;sup&gt;2&lt;/sup&gt;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.42&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr style="border-bottom: 2px solid #000000;"&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Num. obs.&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;161&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;tfoot&gt;
+&lt;tr&gt;
+&lt;td style="font-size: 0.8em;" colspan="2"&gt;&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;p &amp;lt; 0.001; &lt;sup&gt;&amp;#42;&amp;#42;&lt;/sup&gt;p &amp;lt; 0.01; &lt;sup&gt;&amp;#42;&lt;/sup&gt;p &amp;lt; 0.05&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tfoot&gt;
+&lt;/table&gt;
+]]
+.push-right[
+
+$$
+`\begin{aligned}
+\operatorname{\widehat{poverty}} &amp;= 0.49 + 30.56(\operatorname{continent}_{\operatorname{Africa}})\ + \\
+&amp;\quad 4.07(\operatorname{continent}_{\operatorname{Americas}}) + 4.89(\operatorname{continent}_{\operatorname{Asia}})\ + \\
+&amp;\quad 7.63(\operatorname{continent}_{\operatorname{Oceania}})
+\end{aligned}`
+$$
+
+
+- When Africa = 0, and Asia = 0, and America == 0, and Oceania = 0, then poverty is on average 0.49%.&lt;br&gt; `\(\rightarrow\)` The average poverty across countries in the reference group (Europe) is 0.49%.
+
+- Across African countries, poverty is on average 30.56% higher than across European ones.
+  + Across African countries, poverty is thus: `\(0.49\% + 30.56\% = 31.05\%\)`.
+
+]
+
+]]
+
+
+---
+class: clear
+# Assumptions
+
+.left-column[
+.content-box-blue[.center[
+**4 requirements for OLS results to predict useful conditional means:**
+]
+1. **No outliers.**
+2. **Linear relationship.**
+3. Homogeneous trends across subpopulations.
+4. No unsupported extrapolation
+
+`\(\rightarrow\)` Scatter plots!
+]]
+
+.right-column[
+&lt;iframe src='https://seeing-theory.brown.edu/regression-analysis/index.html#section1' width='700' height='670' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+]
+
+---
+# Outlier 
+
+.left-column[
+- **Leverage:** a case has a strong influence on the regression line.
+  + China and Vietnam drive our results!
+  
+
+- **Z-standardized residuals:** a case is far from the regression line.
+  + Haiti with poverty of 72.8% is such a case. But so is Denmark with its 0.3% poverty rate.
+]
+
+.right-column[
+
+```r
+plot(ols_2, which = 5) # The best outlier plot.
+```
+
+&lt;img src="4-Visualize-OLS_files/figure-html/outlier-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+# Linearity
+
+.left-column[
+- The gray dotted line is out regression model.
+
+- The red line should ideally be the same.
+  + .alert[Here the linearity assumption clearly does not hold.]
+]
+
+.right-column[
+
+```r
+plot(ols_2, which = 1) # The best outlier plot.
+```
+
+&lt;img src="4-Visualize-OLS_files/figure-html/linearity-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+class: middle clear
+
+.left-column[
+&lt;img src="https://cdn.dribbble.com/users/10549/screenshots/9890798/media/f38f0e4d71d9763c7533641d2418b35b.png?compress=1&amp;resize=1200x900&amp;vertical=top" width="100%" style="display: block; margin: auto;" /&gt;
+
+
+]
+
+.right-column[
+&lt;iframe src='https://merlin-advanced-stats.netlify.app/lectures/1-correlation-n-regression/exercise3.html' width='1000' height='600' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+]
+
+---
+# Learning goal achieved!
+
+.push-left[
+- No, there is no freedom-equality trade-off!
+  + Socialist countries don't seem to be better or worse at fighting poverty.
+  + Instead our z-standardized results tell us that granting more rights to citizens is much more strongly associated with lower levels of poverty than is socialism.
+  
+
+
+
+```r
+# # Regression models.
+# zols &lt;- lm(z_poverty ~ z_socialist, Dat) 
+# zols_2 &lt;- lm(z_poverty ~ z_citizen_rights, Dat)
+# 
+# # Nicely-formatted table.
+# htmlreg(list(zols, zols_2), 
+#         custom.coef.names = c("Intercept", "Socialism", 
+#                               "Citizenhip rights"))
+```
+]
+
+.push-right[
+
+]
+
+---
+class: clear
+# Visualizing uncertainty .font70[95% CIs in coefficient plots]
+
+.panelset[
+.panel[.panel-name[Preparation code]
+
+```r
+# (plotdata &lt;- lm_robust(psppsgva ~ eduyrs, data = ESS_sample) %&gt;%
+#    tidy() %&gt;% # Turn results into a tibble,
+#    mutate( # Rename variables for the plot.
+#      term = case_when(
+#        term == "eduyrs" ~ "Years of Education",
+#        term == "(Intercept)" ~ "Intercept")))
+```
+]
+
+.panel[.panel-name[Plot]
+.push-left[
+
+```r
+# ggplot(data = plotdata, aes(y = estimate, x = term)) +
+#   # Point with error-bars,
+#   geom_pointrange(aes(min = conf.low, max = conf.high)) +
+#   coord_flip() + # Flip Y- &amp; X-Axis,
+#   labs(
+#     title = "Regression of political efficacy", 
+#     x = "",
+#     # Write Greek beta into axis title.
+#     y = expression("Estimate of"~beta)) + 
+#   theme_minimal()
+```
+]
+.push-right[
+
+]
+]]
+
+---
+class: inverse
+# Today's general lessons
+
+1. If you want to use a categorical variable as a predictor in a regression analysis, it is (typically) dummy coded. That means, it's tells us the average difference in the outcome between a category to the reference group.
+2. We should make sure that the correlations and regressions we estimate actually capture aprrox. linear relationships and that they are not driven by outliers.
+
+---
+class: inverse
+# Today's (important) functions
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="../template/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightLanguage": "r",
+"highlightStyle": "zenburn",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"ratio": "16:9"
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

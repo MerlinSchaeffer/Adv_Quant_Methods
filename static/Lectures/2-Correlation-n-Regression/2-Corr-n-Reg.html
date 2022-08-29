@@ -381,16 +381,16 @@ Dat &lt;- Dat %&gt;% mutate(socialist = case_when( # Years socialist minus years
   country == "China" ~ date - 1949,
   country == "Vietnam" ~ date - 1945,
   country == "Algeria" ~ date - 1962,
-  grepl(country,"Portugal|Bangladesh") ~ date - 1972,
+  str_detect(country,"Portugal|Bangladesh") ~ date - 1972,
   country == "Guinea-Bissau" ~ date - 1973,
   country == "India" ~ date - 1976,
   country == "Nicaragua" ~ date - 1979,
   country == "Sri Lanka" ~ date - 1978,
   country == "Tanzania" ~ date - 1964,
   country == "Albania" ~ (1992 - 1944) - (date - 1992),
-  grepl(country, "Angola|Cabo Verde|Madagascar") ~ (1992 - 1975) - (date - 1992),
-  grepl(country,"Belarus|Bulgaria") ~ (1990 - 1946) - (date - 1990),
-  grepl(country, "Benin|Mozambique") ~ (1990 - 1975) - (date - 1990),
+  str_detect(country, "Angola|Cabo Verde|Madagascar") ~ (1992 - 1975) - (date - 1992),
+  str_detect(country,"Belarus|Bulgaria") ~ (1990 - 1946) - (date - 1990),
+  str_detect(country, "Benin|Mozambique") ~ (1990 - 1975) - (date - 1990),
   country == "Chad" ~ (1975 - 1962) - (date - 1975), country == "Congo, Rep." ~ (1992 - 1970) - (date - 1992),
   country == "Czech Republic" ~ (1990 - 1948) - (date - 1990), country == "Djibouti" ~ (1992 - 1981) - (date - 1992),
   country == "Ethiopia" ~ (1991 - 1974) - (date - 1991), country == "Ghana" ~ (1966 - 1960) - (date - 1966),
@@ -404,7 +404,7 @@ Dat &lt;- Dat %&gt;% mutate(socialist = case_when( # Years socialist minus years
   country == "Sudan" ~ (1985 - 1969) - (date - 1985), country == "Syria" ~ (2012 - 1963) - (date - 2012),
   country == "Tunisia" ~ (1988 - 1964) - (date - 1988), country == "Ukraine" ~ (1991 - 1919) - (date - 1991),
   country == "Yemen, Rep." ~ (1991 - 1967) - (date - 1991), country == "Zambia" ~ (1991 - 1973) - (date - 1991),
-  grepl(country,"Slovenia|Croatia|Serbia|Montenegro|Bosnia and Herzegovina|North Macedonia|Kosovo") ~ (1992 - 1943) - (date - 1992),
+  str_detect(country,"Slovenia|Croatia|Serbia|Montenegro|Bosnia and Herzegovina|North Macedonia|Kosovo") ~ (1992 - 1943) - (date - 1992),
   TRUE ~ 0),
   socialist = case_when( # Min. 5 years given socialist history,
     (socialist &lt; 5 &amp; socialist &gt; 0) | socialist &lt; 0 ~ 5,
@@ -420,14 +420,14 @@ Dat
 #    &lt;chr&gt;      &lt;dbl&gt;   &lt;dbl&gt;          &lt;dbl&gt;     &lt;dbl&gt;
 #  1 Albania     2019    10                8        21
 #  2 Algeria     2011    28.6              3        49
-#  3 Angola      2018    88.5              3         0
+#  3 Angola      2018    88.5              3         5
 #  4 Argentina   2020    18.2             10         0
 #  5 Armenia     2020    44.7              6         0
 #  6 Australia   2018     0.7             12         0
 #  7 Austria     2019     0.8             12         0
 #  8 Azerbaijan  2005     7                3         0
-#  9 Bangladesh  2016    84.2              6         0
-# 10 Belarus     2020     0.1              1         0
+#  9 Bangladesh  2016    84.2              6        44
+# 10 Belarus     2020     0.1              1        14
 # # … with 137 more rows
 ```
 ]
@@ -489,16 +489,16 @@ class: clear
 # # A tibble: 147 × 7
 #    country     date poverty citizen_rights socialist z_socialist z_poverty
 #    &lt;chr&gt;      &lt;dbl&gt;   &lt;dbl&gt;          &lt;dbl&gt;     &lt;dbl&gt;       &lt;dbl&gt;     &lt;dbl&gt;
-#  1 Albania     2019    10                8        21       1.25     -0.819
-#  2 Algeria     2011    28.6              3        49       3.39     -0.287
-#  3 Angola      2018    88.5              3         0      -0.348     1.42 
-#  4 Argentina   2020    18.2             10         0      -0.348    -0.584
-#  5 Armenia     2020    44.7              6         0      -0.348     0.173
-#  6 Australia   2018     0.7             12         0      -0.348    -1.08 
-#  7 Austria     2019     0.8             12         0      -0.348    -1.08 
-#  8 Azerbaijan  2005     7                3         0      -0.348    -0.904
-#  9 Bangladesh  2016    84.2              6         0      -0.348     1.30 
-# 10 Belarus     2020     0.1              1         0      -0.348    -1.10 
+#  1 Albania     2019    10                8        21       0.995    -0.819
+#  2 Algeria     2011    28.6              3        49       2.94     -0.287
+#  3 Angola      2018    88.5              3         5      -0.116     1.42 
+#  4 Argentina   2020    18.2             10         0      -0.464    -0.584
+#  5 Armenia     2020    44.7              6         0      -0.464     0.173
+#  6 Australia   2018     0.7             12         0      -0.464    -1.08 
+#  7 Austria     2019     0.8             12         0      -0.464    -1.08 
+#  8 Azerbaijan  2005     7                3         0      -0.464    -0.904
+#  9 Bangladesh  2016    84.2              6        44       2.59      1.30 
+# 10 Belarus     2020     0.1              1        14       0.509    -1.10 
 # # … with 137 more rows
 ```
 ]
@@ -561,8 +561,8 @@ Dat %&gt;% # Use our data,
   select(poverty, socialist) %&gt;% # Select vars for analysis,
 * cor() # Estimate correlation.
 #           poverty socialist
-# poverty    1.0000    0.0272
-# socialist  0.0272    1.0000
+# poverty    1.0000   -0.0353
+# socialist -0.0353    1.0000
 ```
 ]]]
 
@@ -641,7 +641,7 @@ Models should not be driven by few singular cases, like in this example.]
 - **Residuals**, `\(e_{i} =y_{i} - \hat{y}\)`
   + the differences between what our model predicts and the actual data.
 
-`\(e_{\text{Denmark}} = 0.4\% - 38.3\%=-37.9\%\)`
+`\(e_{\text{Denmark}} = 0.4\% - 39.2\%=-38.8\%\)`
 ]
 .right-column[
 &lt;img src="2-Corr-n-Reg_files/figure-html/residuals-1.png" width="100%" style="display: block; margin: auto;" /&gt;
@@ -731,28 +731,28 @@ htmlreg(list(ols, zols), # Nicely-formatted table.
 &lt;tbody&gt;
 &lt;tr style="border-top: 1px solid #000000;"&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(Intercept)&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;38.33&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;39.23&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;-0.00&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(3.07)&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(3.19)&lt;/td&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.08)&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;socialist&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.07&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;-0.09&lt;/td&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.22)&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.20)&lt;/td&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;z_socialist&lt;/td&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.03&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;-0.04&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
@@ -790,16 +790,16 @@ htmlreg(list(ols, zols), # Nicely-formatted table.
 
 .push-right[
 $$
-\operatorname{\widehat{poverty}} = 38.33 + 0.07(\operatorname{socialist})
+\operatorname{\widehat{poverty}} = 39.23 - 0.09(\operatorname{socialist})
 $$
  `\(\rightarrow\)` the best-fitting line that `\(\min \sum_{i=1}^{n} e_{i}^{2}\)`.
 
-- Among countries without a socialist past, poverty is on average 38.33%.
-  + `\((\hat{y}|\text{Socialism = 0}) = 38.33\%\)`.
+- Among countries without a socialist past, poverty is on average 39.23%.
+  + `\((\hat{y}|\text{Socialism = 0}) = 39.23\%\)`.
   
-- With every year of socialism, the average level of poverty 0.07% lower.
+- With every year of socialism, the average level of poverty -0.09% lower.
 
-- This model accounts for 0.07% more of the variation of poverty across the world, than simply using the mean as best guess `\(\bar{y} = 38.66\%\)`.
+- This model accounts for 0.12% more of the variation of poverty across the world, than simply using the mean as best guess `\(\bar{y} = 38.66\%\)`.
 ]]]
 
 ---
@@ -808,7 +808,7 @@ $$
 .left-column[
 .center[**1. Causal**]
 
-With every additional year of socialism, poverty is expected to decline by 0.07%. Thus, if China and Vietnam stay socialist, poverty will further decline.
+With every additional year of socialism, poverty is expected to decline by -0.09%. Thus, if China and Vietnam stay socialist, poverty will further decline.
 
 .alert[Beware, this interpretation only holds under some conditions. Fortunately, I will teach you how to estimate regressions that have a causal interpretation later this semester!]
 ]
@@ -820,7 +820,7 @@ With every additional year of socialism, poverty is expected to decline by 0.07%
 **2. Descriptive: conditional means `\(\bar{y}|x\)`**
 ]
 
-With every year of socialism, the average level of poverty 0.07% lower.
+With every year of socialism, the average level of poverty -0.09% lower.
 
 Here regression is a (linear) model that describes the average of the outcome for different values of the predictor.
 ]
