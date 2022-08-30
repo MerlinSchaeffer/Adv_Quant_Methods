@@ -4,8 +4,11 @@
     <title>4 Regression</title>
     <meta charset="utf-8" />
     <meta name="author" content="Merlin Schaeffer  Department of Sociology" />
-    <meta name="date" content="2022-08-29" />
+    <meta name="date" content="2022-08-30" />
     <script src="libs/header-attrs/header-attrs.js"></script>
+    <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
+    <script src="libs/tile-view/tile-view.js"></script>
+    <link href="libs/tachyons/tachyons.min.css" rel="stylesheet" />
     <link href="libs/panelset/panelset.css" rel="stylesheet" />
     <script src="libs/panelset/panelset.js"></script>
     <link rel="stylesheet" href="../template/Merlin169.css" type="text/css" />
@@ -24,7 +27,7 @@ class: center, middle, inverse, title-slide
 ### Merlin Schaeffer<br> Department of Sociology
 ]
 .date[
-### 2022-08-29
+### 2022-08-30
 ]
 
 ---
@@ -41,14 +44,11 @@ class: inverse middle
 # Today's schedule
 
 1. **Application**: Colonialism and poverty
-  + Worldbank API
   + History of colonial rule data.
-  + Join/merge both data sources
   
 2. **OLS assumptions**
   + No outliers
   + Linearity
-  + 
   
 3. **Categorical predictors**
   + Dummy coding
@@ -77,13 +77,16 @@ class: inverse
 class: inverse
 # Colonial legacy and poverty
 
-.push-left[.font140[.center[
-How much could former colonies reduce extreme poverty since independence?
-]]]
+.left-column[
+- .font130[How much could former colonies reduce extreme poverty since independence?]
 
-.push-right[.font140[.center[
-How do different colonial legacies compare to one another (e.g., former French vs British colonies) in terms of contemporary extreme poverty?
-]]]
+- .font130[How do different colonial legacies compare to one another &lt;br&gt; (former French vs British colonies) &lt;br&gt; in terms of contemporary extreme poverty?]
+]
+
+.right-column[
+.font130[.center[Colonial empires 1945]]
+&lt;img src="https://upload.wikimedia.org/wikipedia/commons/a/a9/Colonization_1945.png" width="100%" style="display: block; margin: auto;" /&gt;
+.center[*Source*: [.white[Wikipedia]](https://en.wikipedia.org/wiki/File:World_1914_empires_colonies_territory.PNG)]]
 
 ---
 # Preparations
@@ -96,6 +99,7 @@ pacman::p_load(
   tidyverse, # Data manipulation,
   ggplot2, # beautiful figures,
   wbstats, # download data from Worldbank. Tremendous source of global socio-economic data.
+  estimatr, # OLS with robust SE,
   texreg, # regression tables with nice layout,
   countrycode) # Easy recodings of country names,
 ```
@@ -110,33 +114,34 @@ class: clear
 - With `wbstats::wb_search()`, you can search the Wb archive for any keyword! Here I use "poverty":
 
 ```r
-*(wb_poverty_archive &lt;- wb_search("poverty"))
+(wb_poverty_archive &lt;- wb_search("poverty"))
 # # A tibble: 702 × 3
-#    indicator_id         indicator                               indicator_desc                                                                                                            
-#    &lt;chr&gt;                &lt;chr&gt;                                   &lt;chr&gt;                                                                                                                     
-#  1 1.0.HCount.1.90usd   Poverty Headcount ($1.90 a day)         The poverty headcount index measures the proportion of the population with daily per capita income (in 2011 PPP) below th…
-#  2 1.0.HCount.2.5usd    Poverty Headcount ($2.50 a day)         The poverty headcount index measures the proportion of the population with daily per capita income (in 2005 PPP) below th…
-#  3 1.0.HCount.Mid10to50 Middle Class ($10-50 a day) Headcount   The poverty headcount index measures the proportion of the population with daily per capita income (in 2005 PPP) below th…
-#  4 1.0.HCount.Ofcl      Official Moderate Poverty Rate-National The poverty headcount index measures the proportion of the population with daily per capita income below the official pov…
-#  5 1.0.HCount.Poor4uds  Poverty Headcount ($4 a day)            The poverty headcount index measures the proportion of the population with daily per capita income (in 2005 PPP) below th…
-#  6 1.0.HCount.Vul4to10  Vulnerable ($4-10 a day) Headcount      The poverty headcount index measures the proportion of the population with daily per capita income (in 2005 PPP) below th…
-#  7 1.0.PGap.1.90usd     Poverty Gap ($1.90 a day)               The poverty gap captures the mean aggregate income or consumption shortfall relative to the poverty line across the entir…
-#  8 1.0.PGap.2.5usd      Poverty Gap ($2.50 a day)               The poverty gap captures the mean aggregate income or consumption shortfall relative to the poverty line across the entir…
-#  9 1.0.PGap.Poor4uds    Poverty Gap ($4 a day)                  The poverty gap captures the mean aggregate income or consumption shortfall relative to the poverty line across the entir…
-# 10 1.0.PSev.1.90usd     Poverty Severity ($1.90 a day)          The poverty severity index combines information on both poverty and inequality among the poor by averaging the squares of…
+#    indicator_id         indicator                               indicator_desc                                     
+#    &lt;chr&gt;                &lt;chr&gt;                                   &lt;chr&gt;                                              
+#  1 1.0.HCount.1.90usd   Poverty Headcount ($1.90 a day)         The poverty headcount index measures the proportio…
+#  2 1.0.HCount.2.5usd    Poverty Headcount ($2.50 a day)         The poverty headcount index measures the proportio…
+#  3 1.0.HCount.Mid10to50 Middle Class ($10-50 a day) Headcount   The poverty headcount index measures the proportio…
+#  4 1.0.HCount.Ofcl      Official Moderate Poverty Rate-National The poverty headcount index measures the proportio…
+#  5 1.0.HCount.Poor4uds  Poverty Headcount ($4 a day)            The poverty headcount index measures the proportio…
+#  6 1.0.HCount.Vul4to10  Vulnerable ($4-10 a day) Headcount      The poverty headcount index measures the proportio…
+#  7 1.0.PGap.1.90usd     Poverty Gap ($1.90 a day)               The poverty gap captures the mean aggregate income…
+#  8 1.0.PGap.2.5usd      Poverty Gap ($2.50 a day)               The poverty gap captures the mean aggregate income…
+#  9 1.0.PGap.Poor4uds    Poverty Gap ($4 a day)                  The poverty gap captures the mean aggregate income…
+# 10 1.0.PSev.1.90usd     Poverty Severity ($1.90 a day)          The poverty severity index combines information on…
 # # … with 692 more rows
 ```
 ]
 .panel[.panel-name[Get Wb data]
 
 ```r
-*(Dat &lt;- wb_data("SI.POV.DDAY", # Download poverty data: &lt;1.90$ per day,
-*               start_date = 2002, end_date = 2022) %&gt;%
+(Dat &lt;- wb_data("SI.POV.DDAY", # Download poverty data: &lt;1.90$ per day,
+                start_date = 2002, end_date = 2022) %&gt;%
    rename(poverty = SI.POV.DDAY) %&gt;% # rename poverty variable,
    select(country, date, poverty) %&gt;% # Keep only 3 variables
    drop_na(poverty) %&gt;% # Drop cases with missing data,
    group_by(country) %&gt;% # Group by country,
    filter(date == max(date)) %&gt;% # Keep the most recent data per country.
+   mutate(date = as.numeric(date)) %&gt;%
    ungroup())
 # # A tibble: 163 × 3
 #    country     date poverty
@@ -159,7 +164,10 @@ class: clear
 ]]
 
 ---
-# Colonia legacy
+# Colonial legacy
+
+.panelset[
+.panel[.panel-name[A study]
 
 .push-left[
 &lt;iframe src='https://academic.oup.com/sf/article/88/2/785/2235304' width='800' height='500' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
@@ -169,31 +177,29 @@ class: clear
 &lt;img src="./img/Colonial.png" width="100%" style="display: block; margin: auto;" /&gt;
 .center[.backgrnote[*Source*: Veaux, Velleman, and Bock (2021, p.199)]]
 ]
+]
 
----
-# Colonia legacy
+.panel[.panel-name[Its data]
 
 .push-left[
 &lt;img src="./img/Colonial2.png" width="100%" style="display: block; margin: auto;" /&gt;
-.center[.backgrnote[*Source*: Veaux, Velleman, and Bock (2021, p.199)]]
 ]
 
 .push-right[
 &lt;img src="./img/Colonial3.png" width="100%" style="display: block; margin: auto;" /&gt;
 .center[.backgrnote[*Source*: Veaux, Velleman, and Bock (2021, p.199)]]
-]
+]]
 
----
-# Hand coding ;( .font70[Colonia power]
+.panel[.panel-name[Coding colonial powers]
 
 
 ```r
 Dat &lt;- Dat %&gt;% 
   mutate(
     colonizer = case_when(
-      str_detect(country, "Algeria|Benin|Burkina Faso|Cambodia|Central African Republic|Chad|Congo, Rep.|Cote D'Ivoire") |
-        str_detect(country, "Djibouti|Gabon|Guinea|Haiti|Laos|Lebanon|Madagascar|Mali|Mauritania|Niger") | 
-        str_detect(country, "Senegal|Syria|Togo|Tunisia|Vietnam") ~ "France", # France
+      str_detect(country, "Algeria|Benin|Burkina Faso|Cambodia|Central African Republic|Chad") |
+        str_detect(country, "Djibouti|Gabon|Guinea|Haiti|Laos|Lebanon|Madagascar|Mali|Congo, Rep.|Cote D'Ivoire") | 
+        str_detect(country, "Mauritania|Niger|Senegal|Syria|Togo|Tunisia|Vietnam") ~ "France", # France
       str_detect(country, "Angola|Brazil|Mozambique|Guinea-Bissau") ~ "Portugal", # Portugal
       str_detect(country, "Argentina|Bolivia|Chile|Colombia|Costa Rica|Cuba|Dominican Republic|Ecuador") |
         str_detect(country, "El Salvador|Guatemala|Honduras|Mexico|Nicaragua|Panama|Paraguay|Peru") |
@@ -203,72 +209,283 @@ Dat &lt;- Dat %&gt;%
         str_detect(country, "Lesotho|Malawi|Malaysia|Mauritius|Myanmar|New Zealand|Nigeria|Oman") | 
         str_detect(country, "Pakistan|Qatar|Sierra Leone|Singapore|South Africa") | 
         str_detect(country, "Sri Lanka|Sudan|Swaziland|Tanzania|Trinidad/Tobago|Uganda") | 
-        str_detect(country, "United Arab Emirates|USA|Yemen|Zambia|Zimbabwe") ~ "Britain", # Britain
-      str_detect(country, "Burundi|Congo, Dem. Rep.|Rwanda") ~ "Belgium", # Belgium
-      str_detect(country, "Liberia|Philippines") ~ "USA", # USA
-      str_detect(country, "Libya|Somalia") ~ "Italy", # Italy
-      str_detect(country, "Indonesia") ~ "Holland", # Holland
-      str_detect(country, "Korea|Taiwan") ~ "Japan")) # Japan
+        str_detect(country, "United Arab Emirates|United States|Yemen|Zambia|Zimbabwe") ~ "Britain", # Britain
+      str_detect(country, "Burundi|Congo, Dem. Rep.|Rwanda") ~ "Belgium")) # Belgium
+      # str_detect(country, "Liberia|Philippines") ~ "USA", # USA
+      # str_detect(country, "Libya|Somalia") ~ "Italy", # Italy
+      # str_detect(country, "Indonesia") ~ "Holland", # Holland
+      # str_detect(country, "Namibia") ~ "South Africa", # Holland
+      # str_detect(country, "Korea|Taiwan") ~ "Japan")) # Japan
 ```
+]
 
----
-# Hand coding ;( .font70[Years of independence]
+.panel[.panel-name[Plot Colonizer]
+&lt;img src="4-Visualize-OLS_files/figure-html/col-powers-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
 
+.panel[.panel-name[Coding independence]
+.font60[
 
 ```r
 Dat &lt;- Dat %&gt;% 
   mutate(
     years_indep = case_when(
+      is.na(colonizer) ~ as.numeric(NA),
+      country == "United States" ~ date - 1783, country == "Haiti" ~ date - 1804, 
+      country == "Paraguay" ~ date - 1811, country == "Chile" ~ date - 1818,
       str_detect(country, "Argentina|Bolivia|Colombia") ~ date - 1819,
-      country == "Australia" ~ date - 1901,
+      str_detect(country, "Costa Rica|Dominican Republic|Mexico|Nicaragua|Panama|El Salvador|Guatemala|Honduras|Venezuela") ~ date - 1821,
+      str_detect(country, "Brazil|Ecuador") ~ date - 1822,
+      country == "Peru" ~ date - 1824, country == "Uruguay" ~ date - 1828,
+      country == "Cuba" ~ date - 1899, country == "Australia" ~ date - 1901,
+      country == "New Zealand" ~ date - 1907, country == "South Africa" ~ date - 1910,
+      country == "Egypt" ~ date - 1922, country == "Iraq" ~ date - 1932,
+      str_detect(country, "Korea|Taiwan|Vietnam") ~ date - 1945,
+      str_detect(country, "Lebanon|Philippines|Syria") ~ date - 1946,
+      str_detect(country, "Bangladesh|Pakistan|India|Liberia") ~ date - 1947,
+      str_detect(country, "Myanmar|Israel|Jordan|Sri Lanka") ~ date - 1948,
+      country == "Indonesia" ~ date - 1949, country == "Libya" ~ date - 1951,
+      str_detect(country, "Cambodia|Loas") ~ date - 1954,
+      str_detect(country, "Morocco|Sudan|Tunisia") ~ date - 1956,
+      str_detect(country, "Malaysia|Ghana") ~ date - 1957,
+      country == "Guinea" ~ date - 1958, country == "Singapore" ~ date - 1959,
+      str_detect(country, "Benin|Burkina Faso|Central African Republic|Chad|Congo, Dem. Rep.|Congo, Rep.|Code D'Ivoire|Mali|Mauritania|Niger|Nigeria|Senegal|Gabon|Somalia|Togo") ~ date - 1960,
+      str_detect(country, "Kuwait|Sierra Leone|Tanzania") ~ date - 1961,
       str_detect(country, "Algeria|Burundi|Rwanda|Jamaica|Trinidad/ Tobago|Uganda") ~ date - 1962,
-      str_detect(country, "Angola|Mozambigue") ~ date - 1962,
-      str_detect(country, "Bahrain|Oman|Qatar|United Arab Emirates") ~ date - 1971))
+      country == "Kenya" ~ date - 1963,
+      str_detect(country, "Malawi|Zambia") ~ date - 1964,
+      str_detect(country, "Gambia|Zimbabwe") ~ date - 1965,
+      str_detect(country, "Botswana|Lesotho|Guyana") ~ date - 1966,
+      str_detect(country, "Canada|Yemen") ~ date - 1967,
+      str_detect(country, "Mauritius|Swaziland") ~ date - 1968,
+      country == "Fiji" ~ date - 1970,
+      str_detect(country, "Bahrain|Oman|Qatar|United Arab Emirates") ~ date - 1971,
+      country == "Guinea-Bissau" ~ date - 1974,
+      str_detect(country, "Angola|Mozambigue|Papua New Guinea") ~ date - 1975,
+      country == "Djibouti" ~ date - 1977, 
+      country == "Namibia" ~ date - 1990))
 ```
+]]
 
+.panel[.panel-name[Plot indep.]
+&lt;img src="4-Visualize-OLS_files/figure-html/pov-indep-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]]
+
+---
+# Poverty and years of independence
+
+.left-column[
+
+```r
+# Estimate OLS regression
+ols &lt;- lm_robust( 
+  poverty ~ years_indep, 
+  data = Dat)
+
+# Regression table
+screenreg(ols, include.ci = FALSE, 
+          digits = 3)
+# 
+# =======================
+#              Model 1   
+# -----------------------
+# (Intercept)  31.523 ***
+#              (4.456)   
+# years_indep  -0.138 ***
+#              (0.025)   
+# -----------------------
+# R^2           0.168    
+# Adj. R^2      0.157    
+# Num. obs.    75        
+# RMSE         19.968    
+# =======================
+# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
+```
+]
+
+.right-column[
+&lt;img src="4-Visualize-OLS_files/figure-html/indep-world-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+class: inverse middle center
+# OLS assumptions
+
+---
+class: clear
+# OLS Assumptions
+
+.left-column[
+.content-box-blue[.center[
+**Requirements for OLS to predict useful results:**
+]
+1. **No outliers.**
+2. **Linear relationship.**
+3. Homoscedasticity.
+  - If you use `lm_robust()`, don't worry.
+ 
+4. Homogeneous trends across subpopulations.
+5. No unsupported extrapolation.
+
+`\(\rightarrow\)` Scatter plots!
+]]
+
+.right-column[
+&lt;iframe src='https://seeing-theory.brown.edu/regression-analysis/index.html#section1' width='700' height='670' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+]
+
+---
+# Outlier 
+
+.left-column[
+- **Leverage:** case has strong influence on regression line.
+  
+
+- **Z-standardized residuals:** case far from regression line.
+  + Somalia with extreme poverty of 68.6%.
+
+
+```r
+# Re-estimate model using lm(),
+ols &lt;- lm(poverty ~ years_indep, 
+          data = Dat)
+
+# The best outlier plot.
+plot(ols, which = 5) 
+```
+]
+
+.right-column[
+&lt;img src="4-Visualize-OLS_files/figure-html/unnamed-chunk-15-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+# An artificial outlier
+.panelset[
+.panel[.panel-name[Let's create an outlier]
+
+```r
+Dat_outl &lt;- Dat %&gt;%
+  mutate( # Let's create an outlier:
+    years_indep = case_when(
+      country == "Sweden" ~ 500, # years of independence
+      TRUE ~ years_indep),
+    poverty = case_when(
+      country == "Sweden" ~ 99.99, # 99.99% poverty
+      TRUE ~ poverty))
+```
+]
+
+.panel[.panel-name[OLS]
+.left-column[
+
+```r
+ols_outl &lt;- lm_robust( # Estimation
+  poverty ~ years_indep, 
+  data = Dat_outl)
+
+screenreg(ols_outl, # Regression table
+          include.ci = FALSE, 
+          digits = 3)
+# 
+# =====================
+#              Model 1 
+# ---------------------
+# (Intercept)  21.535 *
+#              (9.005) 
+# years_indep  -0.021  
+#              (0.096) 
+# ---------------------
+# R^2           0.005  
+# Adj. R^2     -0.008  
+# Num. obs.    76      
+# RMSE         23.644  
+# =====================
+# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
+```
+]
+
+.right-column[
+&lt;img src="4-Visualize-OLS_files/figure-html/Sweden-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]]
+.panel[.panel-name[Outlier analysis]
+.left-column[
+- **Leverage:** case has strong influence on regression line.
+  
+
+- **Z-standardized residuals:** case far from regression line.
+
+
+```r
+# Re-estimate model using lm(),
+ols_outl &lt;- lm(poverty ~ years_indep, 
+          data = Dat_outl)
+
+# The best outlier plot.
+plot(ols_outl, which = 5) 
+```
+]
+
+.right-column[
+&lt;img src="4-Visualize-OLS_files/figure-html/unnamed-chunk-18-1.png" width="75%" style="display: block; margin: auto;" /&gt;
+]
+]]
+
+---
+# Linearity
+
+.left-column[
+- The gray dotted line is out regression model.
+
+- The red line should ideally be the same.
+  + .alert[Here the linearity assumption doesn't perfectly hold, but seems overall OK.]
+
+
+```r
+# The best outlier plot.
+plot(ols, which = 1)
+```
+]
+
+.right-column[
+&lt;img src="4-Visualize-OLS_files/figure-html/unnamed-chunk-19-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+# Linearity .font70[And our strange outlier ...]
+
+.left-column[
+- The gray dotted line is out regression model.
+
+- The red line should ideally be the same.
+
+
+```r
+# The best outlier plot.
+plot(ols_outl, which = 1)
+```
+]
+
+.right-column[
+&lt;img src="4-Visualize-OLS_files/figure-html/unnamed-chunk-20-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+]
 
 ---
 # Categorical predicators
 
 .panelset[
-.panel[.panel-name[Continent]
-
-```r
-(Dat &lt;- Dat %&gt;%
-   mutate(
-     continent = countrycode( # Nice function from the countrycode package ;)
-       sourcevar = country, # What is the original variable?
-       origin = "country.name", # What info does the original variable contain?
-       destination = "continent") %&gt;% # What do you want as output?
-       factor() %&gt;% fct_relevel("Europe"))) # Turn into factor and make "Europe" the reference.
-# # A tibble: 163 × 6
-#    country     date poverty colonizer years_indep continent
-#    &lt;chr&gt;      &lt;dbl&gt;   &lt;dbl&gt; &lt;chr&gt;           &lt;dbl&gt; &lt;fct&gt;    
-#  1 Albania     2019     0   &lt;NA&gt;               NA Europe   
-#  2 Algeria     2011     0.4 France             49 Africa   
-#  3 Angola      2018    49.9 Portugal           56 Africa   
-#  4 Argentina   2020     1.6 Spain             201 Americas 
-#  5 Armenia     2020     0.4 &lt;NA&gt;               NA Asia     
-#  6 Australia   2018     0.5 Britain           117 Oceania  
-#  7 Austria     2019     0.6 &lt;NA&gt;               NA Europe   
-#  8 Azerbaijan  2005     0   &lt;NA&gt;               NA Asia     
-#  9 Bangladesh  2016    14.3 Britain            NA Asia     
-# 10 Belarus     2020     0   &lt;NA&gt;               NA Europe   
-# # … with 153 more rows
-```
-]
 .panel[.panel-name[Scatter plot]
 
 .left-column[
 .content-box-green[
 1. Where does the regression line pass through the cloud of countries without a socialist past?
 2. Where does the regression line pass through the cloud of countries with a socialist past?
-3. What does this sugest about the slope `\(\beta\)`?
-]
-]
+3. What does this suggest about the slope `\(\hat{\beta}\)`?
+]]
 .right-column[
 &lt;img src="4-Visualize-OLS_files/figure-html/categorical-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]]
+
 .panel[.panel-name[Dummy coding]
 
 .push-left[
@@ -278,37 +495,38 @@ Dat &lt;- Dat %&gt;%
     0 &amp; \text{otherwise}
   \end{cases}$$`
 
-Contintent                       | Africa | Asia | ...
+Contintent                       | Belgium | France | ...
 ---------------------------------|----|----|----
 Burundi                 | 1  | 0  | 0 
-Somalia                 | 1  | 0  | 0
+Rwanda                 | 1  | 0  | 0
 ...                 | 1  | 0  | 0
-China                          | 0  | 1  | 0  
-Japan                          | 0  | 1  | 0
+Cambodia                          | 0  | 1  | 0  
+Algeria                          | 0  | 1  | 0
 ...                          | 0  | 1  | 0
-Reference &lt;br&gt; .backgrnote[(Europe)] | 0  | 0  | 0
+Reference &lt;br&gt; .backgrnote[(Britain)] | 0  | 0  | 0
 ]
 
 .push-right[
 &lt;img src="4-Visualize-OLS_files/figure-html/categorical2-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]]
+
 .panel[.panel-name[How it's done in R]
 .push-left[
 
 ```r
 # R recognizes categorical variables automatically.
-ols_2 &lt;- lm(data = Dat, formula = poverty ~ continent)
+ols_2 &lt;- lm_robust(poverty ~ colonizer, data = Dat)
 
 htmlreg(ols_2, # Nicely-formatted table.
-        custom.coef.names = c("Intercept", "Africa", 
-                              "Americas", "Asia", 
-                              "Oceania")) 
+        include.ci = FALSE, digits = 3, single.row = TRUE,
+        custom.coef.names = c("Intercept", "France",
+                              "Spain", "Belgium",
+                              "Portugal"))
 ```
 
-&lt;img src="4-Visualize-OLS_files/figure-html/unnamed-chunk-59-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+&lt;img src="4-Visualize-OLS_files/figure-html/unnamed-chunk-21-1.png" width="80%" style="display: block; margin: auto;" /&gt;
 ]
-
-.push-right[.font90[
+.push-right[
 &lt;table class="texreg" style="margin: 10px auto;border-collapse: collapse;border-spacing: 0px;caption-side: bottom;color: #000000;border-top: 2px solid #000000;"&gt;
 &lt;caption&gt;Statistical models&lt;/caption&gt;
 &lt;thead&gt;
@@ -320,55 +538,39 @@ htmlreg(ols_2, # Nicely-formatted table.
 &lt;tbody&gt;
 &lt;tr style="border-top: 1px solid #000000;"&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Intercept&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.49&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;17.779  (3.890)&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(2.40)&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;France&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;5.656  (5.870)&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Africa&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;30.56&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Spain&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;-13.596  (4.013)&lt;sup&gt;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(3.19)&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Belgium&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;51.055  (7.401)&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Americas&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;4.07&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(3.94)&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Asia&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;4.89&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(3.46)&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Oceania&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;7.63&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(4.94)&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Portugal&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;20.655 (19.192)&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr style="border-top: 1px solid #000000;"&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;R&lt;sup&gt;2&lt;/sup&gt;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.43&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.311&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Adj. R&lt;sup&gt;2&lt;/sup&gt;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.42&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.274&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Num. obs.&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;79&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr style="border-bottom: 2px solid #000000;"&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Num. obs.&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;161&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;RMSE&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;19.582&lt;/td&gt;
 &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;tfoot&gt;
@@ -377,7 +579,7 @@ htmlreg(ols_2, # Nicely-formatted table.
 &lt;/tr&gt;
 &lt;/tfoot&gt;
 &lt;/table&gt;
-]]]
+]]
 
 .panel[.panel-name[Interpretation]
 .push-left[.font90[
@@ -392,55 +594,39 @@ htmlreg(ols_2, # Nicely-formatted table.
 &lt;tbody&gt;
 &lt;tr style="border-top: 1px solid #000000;"&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Intercept&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.49&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;17.779  (3.890)&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(2.40)&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;France&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;5.656  (5.870)&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Africa&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;30.56&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Spain&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;-13.596  (4.013)&lt;sup&gt;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(3.19)&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Belgium&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;51.055  (7.401)&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Americas&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;4.07&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(3.94)&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Asia&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;4.89&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(3.46)&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Oceania&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;7.63&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(4.94)&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Portugal&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;20.655 (19.192)&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr style="border-top: 1px solid #000000;"&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;R&lt;sup&gt;2&lt;/sup&gt;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.43&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.311&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Adj. R&lt;sup&gt;2&lt;/sup&gt;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.42&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.274&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Num. obs.&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;79&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr style="border-bottom: 2px solid #000000;"&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Num. obs.&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;161&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;RMSE&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;19.582&lt;/td&gt;
 &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;tfoot&gt;
@@ -452,84 +638,27 @@ htmlreg(ols_2, # Nicely-formatted table.
 ]]
 .push-right[
 
+
 $$
 `\begin{aligned}
-\operatorname{\widehat{poverty}} &amp;= 0.49 + 30.56(\operatorname{continent}_{\operatorname{Africa}})\ + \\
-&amp;\quad 4.07(\operatorname{continent}_{\operatorname{Americas}}) + 4.89(\operatorname{continent}_{\operatorname{Asia}})\ + \\
-&amp;\quad 7.63(\operatorname{continent}_{\operatorname{Oceania}})
+\operatorname{\widehat{poverty}} &amp;= 17.78 + 5.66(\operatorname{colonizer}_{\operatorname{France}})\ - \\
+&amp;\quad 13.6(\operatorname{colonizer}_{\operatorname{Spain}}) + 51.05(\operatorname{colonizer}_{\operatorname{Belgium}})\ + \\
+&amp;\quad 20.65(\operatorname{colonizer}_{\operatorname{Portugal}})
 \end{aligned}`
 $$
 
 
-- When Africa = 0, and Asia = 0, and America == 0, and Oceania = 0, then poverty is on average 0.49%.&lt;br&gt; `\(\rightarrow\)` The average poverty across countries in the reference group (Europe) is 0.49%.
+- When France = 0, Belgium = 0, Spain == 0, and Portugal = 0, then poverty is on average 17.78%.&lt;br&gt; `\(\rightarrow\)` Average poverty across countries colonized by Britain: 17.78%.
 
-- Across African countries, poverty is on average 30.56% higher than across European ones.
-  + Across African countries, poverty is thus: `\(0.49\% + 30.56\% = 31.05\%\)`.
-
-]
-
-]]
-
+- Across countries colonized by France, poverty is on average 5.66% higher than among those colonized by Britain; yet this difference is statistically not significant/systematic (could be the result of randomness).
+  + Across countries colonized by France, poverty is thus: `\(17.78\% + 5.66\% = 23.44\%\)`.
+]]]
 
 ---
-class: clear
-# Assumptions
+class: inverse middle center
+# Break
 
-.left-column[
-.content-box-blue[.center[
-**4 requirements for OLS results to predict useful conditional means:**
-]
-1. **No outliers.**
-2. **Linear relationship.**
-3. Homogeneous trends across subpopulations.
-4. No unsupported extrapolation
-
-`\(\rightarrow\)` Scatter plots!
-]]
-
-.right-column[
-&lt;iframe src='https://seeing-theory.brown.edu/regression-analysis/index.html#section1' width='700' height='670' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
-]
-
----
-# Outlier 
-
-.left-column[
-- **Leverage:** a case has a strong influence on the regression line.
-  + China and Vietnam drive our results!
-  
-
-- **Z-standardized residuals:** a case is far from the regression line.
-  + Haiti with poverty of 72.8% is such a case. But so is Denmark with its 0.3% poverty rate.
-]
-
-.right-column[
-
-```r
-plot(ols_2, which = 5) # The best outlier plot.
-```
-
-&lt;img src="4-Visualize-OLS_files/figure-html/outlier-1.png" width="80%" style="display: block; margin: auto;" /&gt;
-]
-
----
-# Linearity
-
-.left-column[
-- The gray dotted line is out regression model.
-
-- The red line should ideally be the same.
-  + .alert[Here the linearity assumption clearly does not hold.]
-]
-
-.right-column[
-
-```r
-plot(ols_2, which = 1) # The best outlier plot.
-```
-
-&lt;img src="4-Visualize-OLS_files/figure-html/linearity-1.png" width="80%" style="display: block; margin: auto;" /&gt;
-]
+&lt;iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
 
 ---
 class: middle clear
@@ -537,38 +666,13 @@ class: middle clear
 .left-column[
 &lt;img src="https://cdn.dribbble.com/users/10549/screenshots/9890798/media/f38f0e4d71d9763c7533641d2418b35b.png?compress=1&amp;resize=1200x900&amp;vertical=top" width="100%" style="display: block; margin: auto;" /&gt;
 
-
+&lt;iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
 ]
 
 .right-column[
-&lt;iframe src='https://merlin-advanced-stats.netlify.app/lectures/1-correlation-n-regression/exercise3.html' width='1000' height='600' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
-]
+&lt;br&gt;
 
----
-# Learning goal achieved!
-
-.push-left[
-- No, there is no freedom-equality trade-off!
-  + Socialist countries don't seem to be better or worse at fighting poverty.
-  + Instead our z-standardized results tell us that granting more rights to citizens is much more strongly associated with lower levels of poverty than is socialism.
-  
-
-
-
-```r
-# # Regression models.
-# zols &lt;- lm(z_poverty ~ z_socialist, Dat) 
-# zols_2 &lt;- lm(z_poverty ~ z_citizen_rights, Dat)
-# 
-# # Nicely-formatted table.
-# htmlreg(list(zols, zols_2), 
-#         custom.coef.names = c("Intercept", "Socialism", 
-#                               "Citizenhip rights"))
-```
-]
-
-.push-right[
-
+&lt;iframe src='exercise1.html' width='1000' height='600' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
 ]
 
 ---
@@ -608,6 +712,54 @@ class: clear
 
 ]
 ]]
+
+---
+# Learning goal achieved!
+
+.push-left[
+- No, there is no freedom-equality trade-off!
+  + Socialist countries don't seem to be better or worse at fighting poverty.
+  + Instead our z-standardized results tell us that granting more rights to citizens is much more strongly associated with lower levels of poverty than is socialism.
+  
+
+
+
+```r
+# # Regression models.
+# zols &lt;- lm(z_poverty ~ z_socialist, Dat) 
+# zols_2 &lt;- lm(z_poverty ~ z_citizen_rights, Dat)
+# 
+# # Nicely-formatted table.
+# htmlreg(list(zols, zols_2), 
+#         custom.coef.names = c("Intercept", "Socialism", 
+#                               "Citizenhip rights"))
+```
+]
+
+.push-right[
+
+]
+
+---
+class: inverse middle center
+# Break
+
+&lt;iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+
+---
+class: middle clear
+
+.left-column[
+&lt;img src="https://cdn.dribbble.com/users/10549/screenshots/9890798/media/f38f0e4d71d9763c7533641d2418b35b.png?compress=1&amp;resize=1200x900&amp;vertical=top" width="100%" style="display: block; margin: auto;" /&gt;
+
+&lt;iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+]
+
+.right-column[
+&lt;br&gt;
+
+&lt;iframe src='exercise2.html' width='1000' height='600' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+]
 
 ---
 class: inverse

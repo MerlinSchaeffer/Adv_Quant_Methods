@@ -28,7 +28,7 @@ options(htmltools.preserve.raw = FALSE,
         htmltools.dir.version = FALSE, servr.interval = 0.5, width = 115, digits = 3)
 knitr::opts_chunk$set(
   collapse = TRUE, message = FALSE, fig.retina = 3, error = TRUE,
-  warning = FALSE, cache = TRUE, fig.align = 'center',
+  warning = FALSE, cache = FALSE, fig.align = 'center',
   comment = "#", strip.white = TRUE, tidy = FALSE)
 
 BibOptions(check.entries = FALSE, 
@@ -54,14 +54,11 @@ class: inverse middle
 # Today's schedule
 
 1. **Application**: Colonialism and poverty
-  + Worldbank API
   + History of colonial rule data.
-  + Join/merge both data sources
   
 2. **OLS assumptions**
   + No outliers
   + Linearity
-  + 
   
 3. **Categorical predictors**
   + Dummy coding
@@ -96,13 +93,18 @@ knitr::include_graphics('https://ichef.bbci.co.uk/news/976/cpsprodpb/6E2E/produc
 class: inverse
 # Colonial legacy and poverty
 
-.push-left[.font140[.center[
-How much could former colonies reduce extreme poverty since independence?
-]]]
+.left-column[
+- .font130[How much could former colonies reduce extreme poverty since independence?]
 
-.push-right[.font140[.center[
-How do different colonial legacies compare to one another (e.g., former French vs British colonies) in terms of contemporary extreme poverty?
-]]]
+- .font130[How do different colonial legacies compare to one another <br> (former French vs British colonies) <br> in terms of contemporary extreme poverty?]
+]
+
+.right-column[
+.font130[.center[Colonial empires 1945]]
+```{r, echo = FALSE, out.width='100%', fig.align='center'}
+knitr::include_graphics('https://upload.wikimedia.org/wikipedia/commons/a/a9/Colonization_1945.png')
+```
+.center[*Source*: [.white[Wikipedia]](https://en.wikipedia.org/wiki/File:World_1914_empires_colonies_territory.PNG)]]
 
 ---
 # Preparations
@@ -114,6 +116,7 @@ pacman::p_load(
   tidyverse, # Data manipulation,
   ggplot2, # beautiful figures,
   wbstats, # download data from Worldbank. Tremendous source of global socio-economic data.
+  estimatr, # OLS with robust SE,
   texreg, # regression tables with nice layout,
   countrycode) # Easy recodings of country names,
 ```
@@ -127,18 +130,19 @@ class: clear
 .panel[.panel-name[Searching Wb archive]
 - With `wbstats::wb_search()`, you can search the Wb archive for any keyword! Here I use "poverty":
 ```{r}
-(wb_poverty_archive <- wb_search("poverty")) #<<
+(wb_poverty_archive <- wb_search("poverty"))
 ```
 ]
 .panel[.panel-name[Get Wb data]
 ```{r}
-(Dat <- wb_data("SI.POV.DDAY", # Download poverty data: <1.90$ per day, #<<
-                start_date = 2002, end_date = 2022) %>% #<<
+(Dat <- wb_data("SI.POV.DDAY", # Download poverty data: <1.90$ per day,
+                start_date = 2002, end_date = 2022) %>%
    rename(poverty = SI.POV.DDAY) %>% # rename poverty variable,
    select(country, date, poverty) %>% # Keep only 3 variables
    drop_na(poverty) %>% # Drop cases with missing data,
    group_by(country) %>% # Group by country,
    filter(date == max(date)) %>% # Keep the most recent data per country.
+   mutate(date = as.numeric(date)) %>%
    ungroup())
 ```
 ]
@@ -148,14 +152,17 @@ ggplot(data = Dat, # Make coord system for data,
        aes(y = poverty, # Y- and X-axis of plot,
            x = reorder(country, poverty))) +
   geom_bar(stat = "identity") + # plot data as is in a bar chart,
-  labs(y = "% population with less than 5.50$ a day", x = "") + # Axis labels,
+  labs(y = "% population with less than 1.90$ a day", x = "") + # Axis labels,
   theme_minimal() + # Simple background layout,
   theme(axis.text.x = element_text(angle = 60, hjust = 1)) # Write country names in a 60 degree angle.
 ```
 ]]
 
 ---
-# Colonia legacy
+# Colonial legacy
+
+.panelset[
+.panel[.panel-name[A study]
 
 .push-left[
 <iframe src='https://academic.oup.com/sf/article/88/2/785/2235304' width='800' height='500' frameborder='0' scrolling='yes'></iframe>
@@ -167,15 +174,14 @@ knitr::include_graphics('./img/Colonial.png')
 ```
 .center[.backgrnote[*Source*: `r Citet(myBib, "veaux_stats_2021", after = ", p.199")`]]
 ]
+]
 
----
-# Colonia legacy
+.panel[.panel-name[Its data]
 
 .push-left[
 ```{r, echo = FALSE, out.width='100%', fig.align='center'}
 knitr::include_graphics('./img/Colonial2.png')
 ```
-.center[.backgrnote[*Source*: `r Citet(myBib, "veaux_stats_2021", after = ", p.199")`]]
 ]
 
 .push-right[
@@ -183,18 +189,17 @@ knitr::include_graphics('./img/Colonial2.png')
 knitr::include_graphics('./img/Colonial3.png')
 ```
 .center[.backgrnote[*Source*: `r Citet(myBib, "veaux_stats_2021", after = ", p.199")`]]
-]
+]]
 
----
-# Hand coding ;( .font70[Colonia power]
+.panel[.panel-name[Coding colonial powers]
 
 ```{r}
 Dat <- Dat %>% 
   mutate(
     colonizer = case_when(
-      str_detect(country, "Algeria|Benin|Burkina Faso|Cambodia|Central African Republic|Chad|Congo, Rep.|Cote D'Ivoire") |
-        str_detect(country, "Djibouti|Gabon|Guinea|Haiti|Laos|Lebanon|Madagascar|Mali|Mauritania|Niger") | 
-        str_detect(country, "Senegal|Syria|Togo|Tunisia|Vietnam") ~ "France", # France
+      str_detect(country, "Algeria|Benin|Burkina Faso|Cambodia|Central African Republic|Chad") |
+        str_detect(country, "Djibouti|Gabon|Guinea|Haiti|Laos|Lebanon|Madagascar|Mali|Congo, Rep.|Cote D'Ivoire") | 
+        str_detect(country, "Mauritania|Niger|Senegal|Syria|Togo|Tunisia|Vietnam") ~ "France", # France
       str_detect(country, "Angola|Brazil|Mozambique|Guinea-Bissau") ~ "Portugal", # Portugal
       str_detect(country, "Argentina|Bolivia|Chile|Colombia|Costa Rica|Cuba|Dominican Republic|Ecuador") |
         str_detect(country, "El Salvador|Guatemala|Honduras|Mexico|Nicaragua|Panama|Paraguay|Peru") |
@@ -204,162 +209,132 @@ Dat <- Dat %>%
         str_detect(country, "Lesotho|Malawi|Malaysia|Mauritius|Myanmar|New Zealand|Nigeria|Oman") | 
         str_detect(country, "Pakistan|Qatar|Sierra Leone|Singapore|South Africa") | 
         str_detect(country, "Sri Lanka|Sudan|Swaziland|Tanzania|Trinidad/Tobago|Uganda") | 
-        str_detect(country, "United Arab Emirates|USA|Yemen|Zambia|Zimbabwe") ~ "Britain", # Britain
-      str_detect(country, "Burundi|Congo, Dem. Rep.|Rwanda") ~ "Belgium", # Belgium
-      str_detect(country, "Liberia|Philippines") ~ "USA", # USA
-      str_detect(country, "Libya|Somalia") ~ "Italy", # Italy
-      str_detect(country, "Indonesia") ~ "Holland", # Holland
-      str_detect(country, "Korea|Taiwan") ~ "Japan")) # Japan
+        str_detect(country, "United Arab Emirates|United States|Yemen|Zambia|Zimbabwe") ~ "Britain", # Britain
+      str_detect(country, "Burundi|Congo, Dem. Rep.|Rwanda") ~ "Belgium")) # Belgium
+      # str_detect(country, "Liberia|Philippines") ~ "USA", # USA
+      # str_detect(country, "Libya|Somalia") ~ "Italy", # Italy
+      # str_detect(country, "Indonesia") ~ "Holland", # Holland
+      # str_detect(country, "Namibia") ~ "South Africa", # Holland
+      # str_detect(country, "Korea|Taiwan") ~ "Japan")) # Japan
 ```
+]
 
----
-# Hand coding ;( .font70[Years of independence]
+.panel[.panel-name[Plot Colonizer]
+```{r col-powers, out.width='100%', fig.height = 4.5, fig.width = 12, results = FALSE, echo = FALSE}
+Dat <- Dat %>%
+  mutate(
+    colonizer = factor(colonizer, levels=names(sort(table(colonizer), decreasing = TRUE))))
 
+ggplot(data = Dat %>% filter(!is.na(colonizer)), # Make coord system for data,
+       aes(x = colonizer)) + # Y- and X-axis of plot,
+  geom_bar() + # plot data as is in a bar chart,
+  labs(y = "Nr of (former) colonies", x = "") + # Axis labels,
+  theme_minimal()
+```
+]
+
+.panel[.panel-name[Coding independence]
+.font60[
 ```{r}
 Dat <- Dat %>% 
   mutate(
     years_indep = case_when(
+      is.na(colonizer) ~ as.numeric(NA),
+      country == "United States" ~ date - 1783, country == "Haiti" ~ date - 1804, 
+      country == "Paraguay" ~ date - 1811, country == "Chile" ~ date - 1818,
       str_detect(country, "Argentina|Bolivia|Colombia") ~ date - 1819,
-      country == "Australia" ~ date - 1901,
+      str_detect(country, "Costa Rica|Dominican Republic|Mexico|Nicaragua|Panama|El Salvador|Guatemala|Honduras|Venezuela") ~ date - 1821,
+      str_detect(country, "Brazil|Ecuador") ~ date - 1822,
+      country == "Peru" ~ date - 1824, country == "Uruguay" ~ date - 1828,
+      country == "Cuba" ~ date - 1899, country == "Australia" ~ date - 1901,
+      country == "New Zealand" ~ date - 1907, country == "South Africa" ~ date - 1910,
+      country == "Egypt" ~ date - 1922, country == "Iraq" ~ date - 1932,
+      str_detect(country, "Korea|Taiwan|Vietnam") ~ date - 1945,
+      str_detect(country, "Lebanon|Philippines|Syria") ~ date - 1946,
+      str_detect(country, "Bangladesh|Pakistan|India|Liberia") ~ date - 1947,
+      str_detect(country, "Myanmar|Israel|Jordan|Sri Lanka") ~ date - 1948,
+      country == "Indonesia" ~ date - 1949, country == "Libya" ~ date - 1951,
+      str_detect(country, "Cambodia|Loas") ~ date - 1954,
+      str_detect(country, "Morocco|Sudan|Tunisia") ~ date - 1956,
+      str_detect(country, "Malaysia|Ghana") ~ date - 1957,
+      country == "Guinea" ~ date - 1958, country == "Singapore" ~ date - 1959,
+      str_detect(country, "Benin|Burkina Faso|Central African Republic|Chad|Congo, Dem. Rep.|Congo, Rep.|Code D'Ivoire|Mali|Mauritania|Niger|Nigeria|Senegal|Gabon|Somalia|Togo") ~ date - 1960,
+      str_detect(country, "Kuwait|Sierra Leone|Tanzania") ~ date - 1961,
       str_detect(country, "Algeria|Burundi|Rwanda|Jamaica|Trinidad/ Tobago|Uganda") ~ date - 1962,
-      str_detect(country, "Angola|Mozambigue") ~ date - 1962,
-      str_detect(country, "Bahrain|Oman|Qatar|United Arab Emirates") ~ date - 1971))
+      country == "Kenya" ~ date - 1963,
+      str_detect(country, "Malawi|Zambia") ~ date - 1964,
+      str_detect(country, "Gambia|Zimbabwe") ~ date - 1965,
+      str_detect(country, "Botswana|Lesotho|Guyana") ~ date - 1966,
+      str_detect(country, "Canada|Yemen") ~ date - 1967,
+      str_detect(country, "Mauritius|Swaziland") ~ date - 1968,
+      country == "Fiji" ~ date - 1970,
+      str_detect(country, "Bahrain|Oman|Qatar|United Arab Emirates") ~ date - 1971,
+      country == "Guinea-Bissau" ~ date - 1974,
+      str_detect(country, "Angola|Mozambigue|Papua New Guinea") ~ date - 1975,
+      country == "Djibouti" ~ date - 1977, 
+      country == "Namibia" ~ date - 1990))
 ```
+]]
 
+.panel[.panel-name[Plot indep.]
+```{r pov-indep, out.width='100%', fig.height = 8, fig.width = 20, results = FALSE, echo = FALSE}
+ggplot(data = Dat %>% filter(!is.na(colonizer) & !is.na(years_indep)), # Make coord system for data,
+       aes(y = years_indep, # Y- and X-axis of plot,
+           x = reorder(country, years_indep))) +
+  geom_bar(stat = "identity") + # plot data as is in a bar chart,
+  labs(y = "Years since independence", x = "") + # Axis labels,
+  theme_minimal() + # Simple background layout,
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) # Write country names in a 60 degree angle.
+```
+]]
 
 ---
-# Categorical predicators
-
-.panelset[
-.panel[.panel-name[Continent]
-```{r}
-(Dat <- Dat %>%
-   mutate(
-     continent = countrycode( # Nice function from the countrycode package ;)
-       sourcevar = country, # What is the original variable?
-       origin = "country.name", # What info does the original variable contain?
-       destination = "continent") %>% # What do you want as output?
-       factor() %>% fct_relevel("Europe"))) # Turn into factor and make "Europe" the reference.
-```
-]
-.panel[.panel-name[Scatter plot]
+# Poverty and years of independence
 
 .left-column[
-.content-box-green[
-1. Where does the regression line pass through the cloud of countries without a socialist past?
-2. Where does the regression line pass through the cloud of countries with a socialist past?
-3. What does this sugest about the slope $\beta$?
+```{r}
+# Estimate OLS regression
+ols <- lm_robust( 
+  poverty ~ years_indep, 
+  data = Dat)
+
+# Regression table
+screenreg(ols, include.ci = FALSE, 
+          digits = 3)
+```
 ]
-]
+
 .right-column[
-```{r categorical, out.width='100%', fig.height = 4, fig.width = 6.5, results = FALSE, echo = FALSE}
-Dat_bi <- Dat %>%
-   mutate(
-     continent_bi = case_when(
-       continent == "Americas" ~ 1,
-       continent == "Europe" ~ 0,
-       TRUE ~ as.numeric(NA)))
-
-ggplot(data = Dat_bi, aes(y = poverty, x = continent_bi)) +
+```{r indep-world, out.width='100%', fig.height = 4, fig.width = 6, results = FALSE, echo = FALSE}
+ggplot(data = Dat %>% filter(!is.na(colonizer) & !is.na(years_indep)), # Make coord system for data,
+       aes(y = poverty, # Y- and X-axis of plot,
+           x = years_indep)) +
+  geom_smooth(method = "lm") +
   geom_text(aes(label = country)) +
-  geom_smooth(method = "lm", se = FALSE) +
-  scale_x_continuous(breaks = c(0, 1), labels = c("Europe", "Americas")) +
-  labs(y = "% population with less \n than 5.50$ a day", 
-       x = "") +
-  theme_minimal() +
-  guides(color = "none")
-```
-]]
-.panel[.panel-name[Dummy coding]
-
-.push-left[
-$$x=
-  \begin{cases}
-    1, & \text{if condition is met} \\
-    0 & \text{otherwise}
-  \end{cases}$$
-
-Contintent                       | Africa | Asia | ...
----------------------------------|----|----|----
-Burundi                 | 1  | 0  | 0 
-Somalia                 | 1  | 0  | 0
-...                 | 1  | 0  | 0
-China                          | 0  | 1  | 0  
-Japan                          | 0  | 1  | 0
-...                          | 0  | 1  | 0
-Reference <br> .backgrnote[(Europe)] | 0  | 0  | 0
-]
-
-.push-right[
-```{r categorical2, out.width='100%', fig.height = 4, fig.width = 6.5, results = FALSE, echo = FALSE}
-Dat_bi <- Dat %>%
-   mutate(
-     continent_bi = case_when(
-       continent == "Asia" ~ 1,
-       TRUE ~ 0))
-
-ggplot(data = Dat_bi, aes(y = poverty, x = continent_bi)) +
-  geom_text(aes(label = country)) +
-  geom_smooth(method = "lm", se = FALSE) +
-  scale_x_continuous(breaks = c(0, 1)) +
-  labs(y = "% population with less \n than 5.50$ a day", 
-       x = "Asia") +
-  theme_minimal() +
-  guides(color = "none")
-```
-]]
-.panel[.panel-name[How it's done in R]
-.push-left[
-```{r ols_2, eval = FALSE}
-# R recognizes categorical variables automatically.
-ols_2 <- lm(data = Dat, formula = poverty ~ continent)
-
-htmlreg(ols_2, # Nicely-formatted table.
-        custom.coef.names = c("Intercept", "Africa", 
-                              "Americas", "Asia", 
-                              "Oceania")) 
-```
-
-```{r ref.label = "categorical", out.width='80%', fig.height = 4, fig.width = 6.5, results = FALSE, echo = FALSE}
+  labs(y = "% population with less than 1.90$ a day", x = "Years since independence") + # Axis labels,
+  theme_minimal() # Simple background layout
 ```
 ]
 
-.push-right[.font90[
-```{r ref.label = "ols_2", results = 'asis', echo = FALSE}
-```
-]]]
-
-.panel[.panel-name[Interpretation]
-.push-left[.font90[
-```{r ref.label = "ols_2", results = 'asis', echo = FALSE}
-```
-]]
-.push-right[
-
-`r extract_eq(ols_2, wrap = TRUE, terms_per_line = 2, use_coefs = TRUE)`
-
-- When Africa = 0, and Asia = 0, and America == 0, and Oceania = 0, then poverty is on average `r round(coef(ols_2)[1], 2)`%.<br> $\rightarrow$ The average poverty across countries in the reference group (Europe) is `r round(coef(ols_2)[1], 2)`%.
-
-- Across African countries, poverty is on average `r round(coef(ols_2)[2], 2)`% higher than across European ones.
-  + Across African countries, poverty is thus: $`r round(coef(ols_2)[1], 2)`\% + `r round(coef(ols_2)[2], 2)`\% = `r round(coef(ols_2)[1], 2) + round(coef(ols_2)[2], 2)`\%$.
-
-]
-
-]]
-
+---
+class: inverse middle center
+# OLS assumptions
 
 ---
 class: clear
-# Assumptions
+# OLS Assumptions
 
 .left-column[
 .content-box-blue[.center[
-**4 requirements for OLS results to predict useful conditional means:**
+**Requirements for OLS to predict useful results:**
 ]
 1. **No outliers.**
 2. **Linear relationship.**
-3. Homogeneous trends across subpopulations.
-4. No unsupported extrapolation
+3. Homoscedasticity.
+  - If you use `lm_robust()`, don't worry.
+ 
+4. Homogeneous trends across subpopulations.
+5. No unsupported extrapolation.
 
 $\rightarrow$ Scatter plots!
 ]]
@@ -372,19 +347,89 @@ $\rightarrow$ Scatter plots!
 # Outlier 
 
 .left-column[
-- **Leverage:** a case has a strong influence on the regression line.
-  + China and Vietnam drive our results!
+- **Leverage:** case has strong influence on regression line.
   
 
-- **Z-standardized residuals:** a case is far from the regression line.
-  + Haiti with poverty of `r Dat$poverty[Dat$country == "Burundi"]`% is such a case. But so is Denmark with its `r Dat$poverty[Dat$country == "Denmark"]`% poverty rate.
+- **Z-standardized residuals:** case far from regression line.
+  + Somalia with extreme poverty of `r Dat$poverty[Dat$country == "Somalia"]`%.
+
+```{r outlier, results = FALSE, fig.show='hide'}
+# Re-estimate model using lm(),
+ols <- lm(poverty ~ years_indep, 
+          data = Dat)
+
+# The best outlier plot.
+plot(ols, which = 5) 
+```
 ]
 
 .right-column[
-```{r outlier, out.width='80%', fig.height = 4, fig.width = 5, results = FALSE}
-plot(ols_2, which = 5) # The best outlier plot.
+```{r ref.label = "outlier", out.width='80%', fig.height = 4, fig.width = 5, results = FALSE, echo = FALSE}
 ```
 ]
+
+---
+# An artificial outlier
+.panelset[
+.panel[.panel-name[Let's create an outlier]
+```{r}
+Dat_outl <- Dat %>%
+  mutate( # Let's create an outlier:
+    years_indep = case_when(
+      country == "Sweden" ~ 500, # years of independence
+      TRUE ~ years_indep),
+    poverty = case_when(
+      country == "Sweden" ~ 99.99, # 99.99% poverty
+      TRUE ~ poverty))
+```
+]
+
+.panel[.panel-name[OLS]
+.left-column[
+```{r}
+ols_outl <- lm_robust( # Estimation
+  poverty ~ years_indep, 
+  data = Dat_outl)
+
+screenreg(ols_outl, # Regression table
+          include.ci = FALSE, 
+          digits = 3)
+```
+]
+
+.right-column[
+```{r Sweden, out.width='100%', fig.height = 4, fig.width = 6.5, results = FALSE, echo = FALSE}
+ggplot(data = Dat_outl, # Make coord system for data,
+       aes(y = poverty, # Y- and X-axis of plot,
+           x = years_indep)) +
+  geom_smooth(method = "lm") +
+  geom_text(aes(label = country)) +
+  labs(y = "% population with less than 1.90$ a day", x = "Years since independence") + # Axis labels,
+  theme_minimal() # Simple background layout
+```
+]]
+.panel[.panel-name[Outlier analysis]
+.left-column[
+- **Leverage:** case has strong influence on regression line.
+  
+
+- **Z-standardized residuals:** case far from regression line.
+
+```{r outlier2, results = FALSE, fig.show='hide'}
+# Re-estimate model using lm(),
+ols_outl <- lm(poverty ~ years_indep, 
+          data = Dat_outl)
+
+# The best outlier plot.
+plot(ols_outl, which = 5) 
+```
+]
+
+.right-column[
+```{r ref.label = "outlier2", out.width='75%', fig.height = 4, fig.width = 5, results = FALSE, echo = FALSE}
+```
+]
+]]
 
 ---
 # Linearity
@@ -393,14 +438,154 @@ plot(ols_2, which = 5) # The best outlier plot.
 - The gray dotted line is out regression model.
 
 - The red line should ideally be the same.
-  + .alert[Here the linearity assumption clearly does not hold.]
+  + .alert[Here the linearity assumption doesn't perfectly hold, but seems overall OK.]
+
+```{r linearity, results = FALSE, fig.show = 'hide'}
+# The best outlier plot.
+plot(ols, which = 1)
+```
 ]
 
 .right-column[
-```{r linearity, out.width='80%', fig.height = 4, fig.width = 5, results = FALSE}
-plot(ols_2, which = 1) # The best outlier plot.
+```{r ref.label = "linearity", out.width='80%', fig.height = 4, fig.width = 5, results = FALSE, echo = FALSE}
 ```
 ]
+
+---
+# Linearity .font70[And our strange outlier ...]
+
+.left-column[
+- The gray dotted line is out regression model.
+
+- The red line should ideally be the same.
+
+```{r linearity2, results = FALSE, fig.show = 'hide'}
+# The best outlier plot.
+plot(ols_outl, which = 1)
+```
+]
+
+.right-column[
+```{r ref.label = "linearity2", out.width='80%', fig.height = 4, fig.width = 5, results = FALSE, echo = FALSE}
+```
+]
+
+---
+# Categorical predicators
+
+.panelset[
+.panel[.panel-name[Scatter plot]
+
+.left-column[
+.content-box-green[
+1. Where does the regression line pass through the cloud of countries without a socialist past?
+2. Where does the regression line pass through the cloud of countries with a socialist past?
+3. What does this suggest about the slope $\hat{\beta}$?
+]]
+.right-column[
+```{r categorical, out.width='100%', fig.height = 3, fig.width = 5, results = FALSE, echo = FALSE}
+Dat_bi <- Dat %>%
+   mutate(
+     colonizer_bi = case_when(
+       colonizer == "Belgium" ~ 1,
+       colonizer == "Britain" ~ 0,
+       TRUE ~ as.numeric(NA)))
+
+ggplot(data = Dat_bi, aes(y = poverty, x = colonizer_bi)) +
+  geom_text(aes(label = country), size = 3) +
+  geom_smooth(method = "lm") +
+  scale_x_continuous(breaks = c(0, 1), labels = c("Britain", "Belgium")) +
+  labs(y = "% population with less \n than 1.90$ a day", 
+       x = "Colonializer") +
+  theme_minimal() +
+  guides(color = "none")
+```
+]]
+
+.panel[.panel-name[Dummy coding]
+
+.push-left[
+$$x=
+  \begin{cases}
+    1, & \text{if condition is met} \\
+    0 & \text{otherwise}
+  \end{cases}$$
+
+Contintent                       | Belgium | France | ...
+---------------------------------|----|----|----
+Burundi                 | 1  | 0  | 0 
+Rwanda                 | 1  | 0  | 0
+...                 | 1  | 0  | 0
+Cambodia                          | 0  | 1  | 0  
+Algeria                          | 0  | 1  | 0
+...                          | 0  | 1  | 0
+Reference <br> .backgrnote[(Britain)] | 0  | 0  | 0
+]
+
+.push-right[
+```{r categorical2, out.width='100%', fig.height = 3, fig.width = 4.5, results = FALSE, echo = FALSE}
+Dat_bi <- Dat %>%
+   mutate(
+     colonizer_bi = case_when(
+       colonizer == "Belgium" ~ 1,
+       TRUE ~ 0))
+
+ggplot(data = Dat_bi, aes(y = poverty, x = colonizer_bi)) +
+  geom_text(aes(label = country)) +
+  geom_smooth(method = "lm") +
+  scale_x_continuous(breaks = c(0, 1)) +
+  labs(y = "% population with less \n than 1.90$ a day", 
+       x = "Belgium") +
+  theme_minimal() +
+  guides(color = "none")
+```
+]]
+
+.panel[.panel-name[How it's done in R]
+.push-left[
+```{r ols_2, eval = FALSE}
+# R recognizes categorical variables automatically.
+ols_2 <- lm_robust(poverty ~ colonizer, data = Dat)
+
+htmlreg(ols_2, # Nicely-formatted table.
+        include.ci = FALSE, digits = 3, single.row = TRUE,
+        custom.coef.names = c("Intercept", "France",
+                              "Spain", "Belgium",
+                              "Portugal"))
+```
+
+```{r ref.label = "categorical", out.width='80%', fig.height = 4, fig.width = 6.5, results = FALSE, echo = FALSE}
+```
+]
+.push-right[
+```{r ref.label = "ols_2", results = 'asis', echo = FALSE}
+```
+]]
+
+.panel[.panel-name[Interpretation]
+.push-left[.font90[
+```{r ref.label = "ols_2", results = 'asis', echo = FALSE}
+```
+]]
+.push-right[
+```{r include = FALSE}
+# R recognizes categorical variables automatically.
+ols_2 <- lm(poverty ~ colonizer, data = Dat)
+```
+
+`r extract_eq(ols_2, wrap = TRUE, terms_per_line = 2, use_coefs = TRUE)`
+
+- When France = 0, Belgium = 0, Spain == 0, and Portugal = 0, then poverty is on average `r round(coef(ols_2)[1], 2)`%.<br> $\rightarrow$ Average poverty across countries colonized by Britain: `r round(coef(ols_2)[1], 2)`%.
+
+- Across countries colonized by France, poverty is on average `r round(coef(ols_2)[2], 2)`% higher than among those colonized by Britain; yet this difference is statistically not significant/systematic (could be the result of randomness).
+  + Across countries colonized by France, poverty is thus: $`r round(coef(ols_2)[1], 2)`\% + `r round(coef(ols_2)[2], 2)`\% = `r round(coef(ols_2)[1], 2) + round(coef(ols_2)[2], 2)`\%$.
+]]]
+
+---
+class: inverse middle center
+# Break
+
+<iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'></iframe>
 
 ---
 class: middle clear
@@ -410,43 +595,13 @@ class: middle clear
 knitr::include_graphics('https://cdn.dribbble.com/users/10549/screenshots/9890798/media/f38f0e4d71d9763c7533641d2418b35b.png?compress=1&resize=1200x900&vertical=top')
 ```
 
-```{r ref.label = "pov-citiz-corr2", out.width='90%', fig.height = 4, fig.width = 7.5, results = FALSE, echo = FALSE}
-```
+<iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'></iframe>
 ]
 
 .right-column[
-<iframe src='https://merlin-advanced-stats.netlify.app/lectures/1-correlation-n-regression/exercise3.html' width='1000' height='600' frameborder='0' scrolling='yes'></iframe>
-]
+<br>
 
----
-# Learning goal achieved!
-
-.push-left[
-- No, there is no freedom-equality trade-off!
-  + Socialist countries don't seem to be better or worse at fighting poverty.
-  + Instead our z-standardized results tell us that granting more rights to citizens is much more strongly associated with lower levels of poverty than is socialism.
-  
-```{r echo = FALSE}
-# Dat <- Dat %>%
-#   mutate(
-#     z_citizen_rights = scale(citizen_rights) %>% as.numeric())
-```
-
-```{r goal, results = FALSE}
-# # Regression models.
-# zols <- lm(z_poverty ~ z_socialist, Dat) 
-# zols_2 <- lm(z_poverty ~ z_citizen_rights, Dat)
-# 
-# # Nicely-formatted table.
-# htmlreg(list(zols, zols_2), 
-#         custom.coef.names = c("Intercept", "Socialism", 
-#                               "Citizenhip rights"))
-```
-]
-
-.push-right[
-```{r ref.label = "goal", echo = FALSE, results = 'asis'}
-```
+<iframe src='exercise1.html' width='1000' height='600' frameborder='0' scrolling='yes'></iframe>
 ]
 
 ---
@@ -485,6 +640,60 @@ class: clear
 ```
 ]
 ]]
+
+---
+# Learning goal achieved!
+
+.push-left[
+- No, there is no freedom-equality trade-off!
+  + Socialist countries don't seem to be better or worse at fighting poverty.
+  + Instead our z-standardized results tell us that granting more rights to citizens is much more strongly associated with lower levels of poverty than is socialism.
+  
+```{r echo = FALSE}
+# Dat <- Dat %>%
+#   mutate(
+#     z_citizen_rights = scale(citizen_rights) %>% as.numeric())
+```
+
+```{r goal, results = FALSE}
+# # Regression models.
+# zols <- lm(z_poverty ~ z_socialist, Dat) 
+# zols_2 <- lm(z_poverty ~ z_citizen_rights, Dat)
+# 
+# # Nicely-formatted table.
+# htmlreg(list(zols, zols_2), 
+#         custom.coef.names = c("Intercept", "Socialism", 
+#                               "Citizenhip rights"))
+```
+]
+
+.push-right[
+```{r ref.label = "goal", echo = FALSE, results = 'asis'}
+```
+]
+
+---
+class: inverse middle center
+# Break
+
+<iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'></iframe>
+
+---
+class: middle clear
+
+.left-column[
+```{r, echo = FALSE, out.width='100%'}
+knitr::include_graphics('https://cdn.dribbble.com/users/10549/screenshots/9890798/media/f38f0e4d71d9763c7533641d2418b35b.png?compress=1&resize=1200x900&vertical=top')
+```
+
+<iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'></iframe>
+]
+
+.right-column[
+<br>
+
+<iframe src='exercise2.html' width='1000' height='600' frameborder='0' scrolling='yes'></iframe>
+]
 
 ---
 class: inverse
