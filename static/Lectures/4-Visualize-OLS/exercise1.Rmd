@@ -1,0 +1,148 @@
+---
+title: "Exercise 1 (20 minutes)"
+subtitle: "When you're done, assist some of the others ..."
+output: webexercises::webexercises_default
+---
+
+```{r setup, include = FALSE}
+options(htmltools.dir.version = FALSE, servr.interval = 0.5, width = 115, digits = 2)
+knitr::opts_chunk$set(
+  collapse = TRUE, message = FALSE, 
+  warning = FALSE, cache = FALSE,
+  comment = "#", strip.white = TRUE)
+
+library(webexercises)
+```
+
+1. Start a new R-Script and copy the lines of R code from my slides that generate 'Dat'. Alter the code such that former Danish colonies are identified. Unfortunately, we only have two countries in the Worldbank data that can be somewhat considered as former Danish colonies according to [Wikipedia](https://en.wikipedia.org/wiki/Danish_overseas_colonies): Iceland and Estonia. Check Wikipedia to see when they became independent from Denmark. Then download and join/merge the Freedom House data.
+  
+`r hide("R solution -> dont' peak to early ;) !")`
+```{r}
+pacman::p_load(
+  tidyverse, # Data manipulation,
+  ggplot2, # beautiful figures,
+  democracyData, # download democracy datasets used in the scholarly literature.
+  wbstats, # download data from Worldbank. Tremendous source of global socio-economic data.
+  estimatr, # OLS with robust SE,
+  texreg) # regression tables with nice layout,
+
+# 1. The worldbank data
+Dat <- wb_data("SI.POV.DDAY", # Download poverty data: <1.90$ per day,
+               start_date = 2002, end_date = 2022) %>%
+  rename(poverty = SI.POV.DDAY) %>% # rename poverty variable,
+  select(country, date, poverty) %>% # Keep only 3 variables
+  drop_na(poverty) %>% # Drop cases with missing data,
+  group_by(country) %>% # Group by country,
+  filter(date == max(date)) %>% # Keep the most recent data per country.
+  mutate(date = as.numeric(date)) %>% ungroup()
+
+# 2. Colonizer data
+Dat <- Dat %>% 
+  mutate(
+    colonizer = case_when(
+      str_detect(country, "Algeria|Benin|Burkina Faso|Cambodia|Central African Republic|Chad") |
+        str_detect(country, "Djibouti|Gabon|Guinea|Haiti|Laos|Lebanon|Madagascar|Mali|Congo, Rep.|Cote D'Ivoire") | 
+        str_detect(country, "Mauritania|Niger|Senegal|Syria|Togo|Tunisia|Vietnam") ~ "France", # France
+      str_detect(country, "Angola|Brazil|Mozambique|Guinea-Bissau") ~ "Portugal", # Portugal
+      str_detect(country, "Argentina|Bolivia|Chile|Colombia|Costa Rica|Cuba|Dominican Republic|Ecuador") |
+        str_detect(country, "El Salvador|Guatemala|Honduras|Mexico|Nicaragua|Panama|Paraguay|Peru") |
+        str_detect(country, "Uruguay|Venezuela") ~ "Spain", # Spain
+      str_detect(country, "Australia|Bahrain|Bangladesh|Botswana|Canada|Cyprus|Egypt|Fiji") |
+        str_detect(country, "Gambia|Ghana|Guyana|India|Iraq|Israel|Jamaica|Jordan|Kenya|Kuwait") |
+        str_detect(country, "Lesotho|Malawi|Malaysia|Mauritius|Myanmar|New Zealand|Nigeria|Oman") | 
+        str_detect(country, "Pakistan|Qatar|Sierra Leone|Singapore|South Africa") | 
+        str_detect(country, "Sri Lanka|Sudan|Swaziland|Tanzania|Trinidad/Tobago|Uganda") | 
+        str_detect(country, "United Arab Emirates|United States|Yemen|Zambia|Zimbabwe") ~ "Britain", # Britain
+      str_detect(country, "Burundi|Congo, Dem. Rep.|Rwanda") ~ "Belgium",
+    str_detect(country, "Iceland|Estonia") ~ "Denmark")) # Denmark
+
+# 3. Independence from colonialism data
+Dat <- Dat %>% 
+  mutate(
+    years_indep = case_when(
+      is.na(colonizer) ~ as.numeric(NA),
+      country == "Estonia" ~ date - 1645,
+      country == "United States" ~ date - 1783, country == "Haiti" ~ date - 1804, 
+      country == "Paraguay" ~ date - 1811, country == "Chile" ~ date - 1818,
+      str_detect(country, "Argentina|Bolivia|Colombia") ~ date - 1819,
+      str_detect(country, "Costa Rica|Dominican Republic|Mexico|Nicaragua|Panama|El Salvador|Guatemala|Honduras|Venezuela") ~ date - 1821,
+      str_detect(country, "Brazil|Ecuador") ~ date - 1822,
+      country == "Peru" ~ date - 1824, country == "Uruguay" ~ date - 1828,
+      country == "Cuba" ~ date - 1899, country == "Australia" ~ date - 1901,
+      country == "New Zealand" ~ date - 1907, country == "South Africa" ~ date - 1910,
+      country == "Egypt" ~ date - 1922, country == "Iraq" ~ date - 1932,
+      str_detect(country, "Iceland") ~ date - 1944,
+      str_detect(country, "Korea|Taiwan|Vietnam") ~ date - 1945,
+      str_detect(country, "Lebanon|Philippines|Syria") ~ date - 1946,
+      str_detect(country, "Bangladesh|Pakistan|India|Liberia") ~ date - 1947,
+      str_detect(country, "Myanmar|Israel|Jordan|Sri Lanka") ~ date - 1948,
+      country == "Indonesia" ~ date - 1949, country == "Libya" ~ date - 1951,
+      str_detect(country, "Cambodia|Loas") ~ date - 1954,
+      str_detect(country, "Morocco|Sudan|Tunisia") ~ date - 1956,
+      str_detect(country, "Malaysia|Ghana") ~ date - 1957,
+      country == "Guinea" ~ date - 1958, country == "Singapore" ~ date - 1959,
+      str_detect(country, "Benin|Burkina Faso|Central African Republic|Chad|Congo, Dem. Rep.|Congo, Rep.|Code D'Ivoire|Mali|Mauritania|Niger|Nigeria|Senegal|Gabon|Somalia|Togo") ~ date - 1960,
+      str_detect(country, "Kuwait|Sierra Leone|Tanzania") ~ date - 1961,
+      str_detect(country, "Algeria|Burundi|Rwanda|Jamaica|Trinidad/ Tobago|Uganda") ~ date - 1962,
+      country == "Kenya" ~ date - 1963,
+      str_detect(country, "Malawi|Zambia") ~ date - 1964,
+      str_detect(country, "Gambia|Zimbabwe") ~ date - 1965,
+      str_detect(country, "Botswana|Lesotho|Guyana") ~ date - 1966,
+      str_detect(country, "Canada|Yemen") ~ date - 1967,
+      str_detect(country, "Mauritius|Swaziland") ~ date - 1968,
+      country == "Fiji" ~ date - 1970,
+      str_detect(country, "Bahrain|Oman|Qatar|United Arab Emirates") ~ date - 1971,
+      country == "Guinea-Bissau" ~ date - 1974,
+      str_detect(country, "Angola|Mozambigue|Papua New Guinea") ~ date - 1975,
+      country == "Djibouti" ~ date - 1977, 
+      country == "Namibia" ~ date - 1990))
+
+# 4. Download Freedom House data for all countries since 1972,
+Dat_citi_rights <- download_fh(verbose = FALSE) %>% 
+   rename(country = fh_country, # rename country ID,
+          citizen_rights = fh_total_reversed, # rename Citizenship rights indicator,
+          date = year) %>% # rename year,
+   select(country, date, citizen_rights) # Keep only these 3 variables.
+
+# 3. Join Dat and Freedom House data
+Dat <- inner_join(Dat, Dat_citi_rights, by = c("country", "date"))
+```
+`r unhide()`
+
+2. Make a scatterplot with citizenship rights as outcome on the Y-axis and the years since independence as predictor on the X-axis. Make sure to add a regression line with 95% confidence interval to it.
+`r hide("R solution -> dont' peak to early ;) !")`
+```{r out.width='100%', fig.height = 4, fig.width = 7.5, results = FALSE, echo = TRUE}
+ggplot(data = Dat, aes(y = citizen_rights, x = years_indep)) +
+  geom_smooth(method = "lm") +
+  geom_text(aes(label = country)) +
+  labs(y = "% population with less than 5.50$ a day", 
+       x = "Freedom House index of citizenship rights") +
+  theme_minimal() +
+  guides(color = "none")
+```
+`r unhide()`
+
+3. Run an OLS regression with citizenship rights as outcome and the years since independence as predictor. Is the association statistically significant? `r mcq(c(answer = "Yes, the SE is < 1/2 the coefficient", "No"))` 
+`r hide("R solution -> dont' peak to early ;) !")`
+```{r out.width='100%', fig.height = 4, fig.width = 7.5, results = FALSE, echo = TRUE}
+ols <- lm_robust(citizen_rights ~  years_indep, data = Dat)
+screenreg(ols, include.ci = FALSE, digits = 3)
+```
+`r unhide()`
+
+4. Re-run the model using `lm()` and check whether Estonia is an outlier and whether the linearity assumption is strongly violated. `r mcq(c("Yes, Estonia is an outlier with a large Cook's D", "Yes, the association is clearly not linear", answer = "No, Estonia is no outlier and the association is roughly linear"))` 
+`r hide("R solution -> dont' peak to early ;) !")`
+```{r out.width='100%', fig.height = 4, fig.width = 7.5, results = FALSE, echo = TRUE}
+ols <- lm(citizen_rights ~  years_indep, data = Dat)
+plot(ols, which = 5) # Outlier
+plot(ols, which = 1) #Linearity
+```
+`r unhide()`
+
+4. How does the Danish colonial legacy compare to that of other countries in terms of extreme poverty? `r mcq(c("Not significantly different", "Worse than in the reference (Belgium)", answer = "Significantly better than in the reference (Belgium)"))`
+`r hide("R solution -> dont' peak to early ;) !")`
+```{r out.width='100%', fig.height = 4, fig.width = 7.5, results = FALSE, echo = TRUE}
+ols2 <- lm_robust(poverty ~  colonizer, data = Dat)
+screenreg(ols2, include.ci = FALSE, digits = 3)
+```
+`r unhide()`

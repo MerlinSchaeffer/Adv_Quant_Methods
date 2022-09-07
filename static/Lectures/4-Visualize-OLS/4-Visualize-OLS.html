@@ -4,7 +4,7 @@
     <title>4 Regression</title>
     <meta charset="utf-8" />
     <meta name="author" content="Merlin Schaeffer  Department of Sociology" />
-    <meta name="date" content="2022-08-30" />
+    <meta name="date" content="2022-09-07" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
     <script src="libs/tile-view/tile-view.js"></script>
@@ -21,13 +21,13 @@ class: center, middle, inverse, title-slide
 # 4 Regression
 ]
 .subtitle[
-## Categorical predictors, Assumptions, and the basics of visualizing regression results
+## Categorical predictors, OLS Assumptions, and the basics of visualizing regression results
 ]
 .author[
 ### Merlin Schaeffer<br> Department of Sociology
 ]
 .date[
-### 2022-08-30
+### 2022-09-07
 ]
 
 ---
@@ -75,7 +75,7 @@ class: inverse
 
 ---
 class: inverse
-# Colonial legacy and poverty
+# Colonial legacy and extreme poverty
 
 .left-column[
 - .font130[How much could former colonies reduce extreme poverty since independence?]
@@ -98,10 +98,10 @@ class: inverse
 pacman::p_load(
   tidyverse, # Data manipulation,
   ggplot2, # beautiful figures,
+  democracyData, # download democracy datasets used in the scholarly literature.
   wbstats, # download data from Worldbank. Tremendous source of global socio-economic data.
   estimatr, # OLS with robust SE,
-  texreg, # regression tables with nice layout,
-  countrycode) # Easy recodings of country names,
+  texreg) # regression tables with nice layout,
 ```
 ]]
 
@@ -141,8 +141,7 @@ class: clear
    drop_na(poverty) %&gt;% # Drop cases with missing data,
    group_by(country) %&gt;% # Group by country,
    filter(date == max(date)) %&gt;% # Keep the most recent data per country.
-   mutate(date = as.numeric(date)) %&gt;%
-   ungroup())
+   mutate(date = as.numeric(date)) %&gt;% ungroup())
 # # A tibble: 163 × 3
 #    country     date poverty
 #    &lt;chr&gt;      &lt;dbl&gt;   &lt;dbl&gt;
@@ -471,6 +470,10 @@ plot(ols_outl, which = 1)
 ]
 
 ---
+class: inverse middle center
+# Categorical predicators
+
+---
 # Categorical predicators
 
 .panelset[
@@ -676,68 +679,211 @@ class: middle clear
 ]
 
 ---
+class: inverse middle center
+# Visualizing regression models
+
+---
 class: clear
-# Visualizing uncertainty .font70[95% CIs in coefficient plots]
+# 1 Coefficient plots
 
 .panelset[
 .panel[.panel-name[Preparation code]
 
 ```r
-# (plotdata &lt;- lm_robust(psppsgva ~ eduyrs, data = ESS_sample) %&gt;%
-#    tidy() %&gt;% # Turn results into a tibble,
-#    mutate( # Rename variables for the plot.
-#      term = case_when(
-#        term == "eduyrs" ~ "Years of Education",
-#        term == "(Intercept)" ~ "Intercept")))
+(plotdata &lt;- lm_robust(poverty ~ colonizer, data = Dat) %&gt;%
+*  tidy() %&gt;% # Turn results into a tibble,
+   mutate( # Rename variables for the plot.
+     term = case_when(
+       term == "colonizerFrance" ~ "France",
+       term == "colonizerSpain" ~ "Spain",
+       term == "colonizerBelgium" ~ "Belgium",
+       term == "colonizerPortugal" ~ "Portugal",
+       term == "(Intercept)" ~ "Intercept \n (Britain)")))
+#                     term estimate std.error statistic  p.value conf.low conf.high df outcome
+# 1 Intercept \n (Britain)    17.78      3.89     4.571 1.91e-05    10.03      25.5 74 poverty
+# 2                 France     5.66      5.87     0.964 3.38e-01    -6.04      17.4 74 poverty
+# 3                  Spain   -13.60      4.01    -3.388 1.13e-03   -21.59      -5.6 74 poverty
+# 4                Belgium    51.05      7.40     6.898 1.52e-09    36.31      65.8 74 poverty
+# 5               Portugal    20.65     19.19     1.076 2.85e-01   -17.59      58.9 74 poverty
 ```
 ]
 
+.panel[.panel-name[R plotting]
+
+```r
+ggplot(data = plotdata, aes(y = estimate, 
+                            # Order by effect size
+                            x = reorder(term, estimate))) +
+  geom_hline(yintercept = 0, color = "red", lty = "dashed") +
+  # Point with error-bars,
+  geom_pointrange(aes(min = conf.low, max = conf.high)) +
+  coord_flip() + # Flip Y- &amp; X-Axis,
+  labs(
+    title = "Regression of extreme poverty",
+    x = "Colonizer",
+    # Write Greek beta into axis title.
+    y = expression("Estimate of"~beta)) +
+  theme_minimal()
+```
+]
 .panel[.panel-name[Plot]
+.push-left[
+&lt;img src="4-Visualize-OLS_files/figure-html/unnamed-chunk-27-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
+.push-right[
+&lt;table class="texreg" style="margin: 10px auto;border-collapse: collapse;border-spacing: 0px;caption-side: bottom;color: #000000;border-top: 2px solid #000000;"&gt;
+&lt;caption&gt;Statistical models&lt;/caption&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/th&gt;
+&lt;th style="padding-left: 5px;padding-right: 5px;"&gt;Model 1&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr style="border-top: 1px solid #000000;"&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Intercept&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;17.779  (3.890)&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;France&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;5.656  (5.870)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Spain&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;-13.596  (4.013)&lt;sup&gt;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Belgium&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;51.055  (7.401)&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Portugal&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;20.655 (19.192)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr style="border-top: 1px solid #000000;"&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;R&lt;sup&gt;2&lt;/sup&gt;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.311&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Adj. R&lt;sup&gt;2&lt;/sup&gt;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.274&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Num. obs.&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;79&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr style="border-bottom: 2px solid #000000;"&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;RMSE&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;19.582&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;tfoot&gt;
+&lt;tr&gt;
+&lt;td style="font-size: 0.8em;" colspan="2"&gt;&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;p &amp;lt; 0.001; &lt;sup&gt;&amp;#42;&amp;#42;&lt;/sup&gt;p &amp;lt; 0.01; &lt;sup&gt;&amp;#42;&lt;/sup&gt;p &amp;lt; 0.05&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tfoot&gt;
+&lt;/table&gt;
+]]]
+
+---
+# 2 Model predictions
+
+.panelset[
+.panel[.panel-name[The OLS model]
 .push-left[
 
 ```r
-# ggplot(data = plotdata, aes(y = estimate, x = term)) +
-#   # Point with error-bars,
-#   geom_pointrange(aes(min = conf.low, max = conf.high)) +
-#   coord_flip() + # Flip Y- &amp; X-Axis,
-#   labs(
-#     title = "Regression of political efficacy", 
-#     x = "",
-#     # Write Greek beta into axis title.
-#     y = expression("Estimate of"~beta)) + 
-#   theme_minimal()
+(ols &lt;- lm_robust(poverty ~ years_indep, data = Dat))
+#             Estimate Std. Error t value Pr(&gt;|t|) CI Lower CI Upper DF
+# (Intercept)   31.523     4.4563    7.07 7.60e-10   22.642  40.4049 73
+# years_indep   -0.138     0.0248   -5.57 3.95e-07   -0.187  -0.0887 73
 ```
 ]
 .push-right[
-
-]
+&lt;img src="4-Visualize-OLS_files/figure-html/Coefplot2-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]]
+.panel[.panel-name[Predictions]
+.push-left[
+**Step 1**: Generate fictional data of `\(x\)` with theoretically-informative values.
+
+
+```r
+(fict_dat &lt;- tibble(years_indep = 1:500))
+# # A tibble: 500 × 1
+#    years_indep
+#          &lt;int&gt;
+#  1           1
+#  2           2
+#  3           3
+#  4           4
+#  5           5
+#  6           6
+#  7           7
+#  8           8
+#  9           9
+# 10          10
+# # … with 490 more rows
+```
+]
+.push-right[
+**Step 2**: Apply estimated model to fictional data. Given fictional data, what `\(\hat{y}\)` does our model predict?
+
+
+```r
+*(fict_dat &lt;- predict(
+* ols, newdata = fict_dat,
+* interval = "confidence", level = 0.95)$fit %&gt;%
+   as_tibble() %&gt;% # Turn into a tibble, then
+   bind_cols(fict_dat, .)) # Add to the synthetic data.
+# # A tibble: 500 × 4
+#    years_indep   fit   lwr   upr
+#          &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+#  1           1  31.4  22.6  40.2
+#  2           2  31.2  22.5  40.0
+#  3           3  31.1  22.4  39.8
+#  4           4  31.0  22.3  39.7
+#  5           5  30.8  22.2  39.5
+#  6           6  30.7  22.1  39.3
+#  7           7  30.6  22.0  39.1
+#  8           8  30.4  21.9  38.9
+#  9           9  30.3  21.8  38.7
+# 10          10  30.1  21.7  38.6
+# # … with 490 more rows
+```
+]]
+.panel[.panel-name[Visualization]
+.push-left[
+
+```r
+ggplot(data = fict_dat, aes(y = fit, x = years_indep)) +
+  geom_vline(xintercept = c(34, 236), color = "red", lty = "dashed") +
+  geom_ribbon(aes(ymin = lwr, ymax = upr), alpha = 0.5) +
+  geom_line() +
+  labs(
+    title = "Predictions based on regression of extreme poverty",
+    x = "By years since independence",
+    # Write Greek beta into axis title.
+    y = "Predicted average of extreme poverty") +
+  theme_minimal()
+```
+]
+.push-right[
+&lt;img src="4-Visualize-OLS_files/figure-html/unnamed-chunk-32-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]]]
 
 ---
 # Learning goal achieved!
 
-.push-left[
-- No, there is no freedom-equality trade-off!
-  + Socialist countries don't seem to be better or worse at fighting poverty.
-  + Instead our z-standardized results tell us that granting more rights to citizens is much more strongly associated with lower levels of poverty than is socialism.
-  
+.left-column[
+- .font130[How much could former colonies reduce extreme poverty since independence?]
 
-
-
-```r
-# # Regression models.
-# zols &lt;- lm(z_poverty ~ z_socialist, Dat) 
-# zols_2 &lt;- lm(z_poverty ~ z_citizen_rights, Dat)
-# 
-# # Nicely-formatted table.
-# htmlreg(list(zols, zols_2), 
-#         custom.coef.names = c("Intercept", "Socialism", 
-#                               "Citizenhip rights"))
-```
+- .font130[How do different colonial legacies compare to one another &lt;br&gt; (former French vs British colonies) &lt;br&gt; in terms of contemporary extreme poverty?]
 ]
 
-.push-right[
+.right-column[
+&lt;img src="4-Visualize-OLS_files/figure-html/unnamed-chunk-33-1.png" width="60%" style="display: block; margin: auto;" /&gt;
 
+&lt;img src="4-Visualize-OLS_files/figure-html/unnamed-chunk-34-1.png" width="60%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -765,12 +911,20 @@ class: middle clear
 class: inverse
 # Today's general lessons
 
-1. If you want to use a categorical variable as a predictor in a regression analysis, it is (typically) dummy coded. That means, it's tells us the average difference in the outcome between a category to the reference group.
-2. We should make sure that the correlations and regressions we estimate actually capture aprrox. linear relationships and that they are not driven by outliers.
+1. Outliers may drive results of OLS regression.
+  + Cook's D helps us identify them.
+2. OLS assumes an approx. linear relationship between outcome and predictor, if the predictor is a continuous variable. Always check whether this holds in your case. If your predictor is categorical, you don't need to worry!
+3. If you want to use a categorical variable as a predictor in a regression analysis, it is (typically) dummy coded. That means, it's tells us the average difference in the outcome between a category to the reference group.
+4. R recognizes categorical/factor variables, and dummy-codes them automatically for your OLS regression. The first category is made the reference.
+5. OLS regression can be visualized as coefficient plots, but also by visualizing the predictions that the model makes for fictional data. The latter is better suited for a continuous predictor.
 
 ---
-class: inverse
 # Today's (important) functions
+
+- After `lm()`, `plot(YOUR_MODELOBJECT, which = 5)` helps to identify outlier.
+- After `lm()`, `plot(YOUR_MODELOBJECT, which = 1)` helps to test, whether the linearity assumption is violated.
+- `tidy()` Turns OLS regression results into a tibble.
+- `predict()` Can be applied to fictional data to predict `\(\hat{Y}\)` based on your estimated OLS regression. 
 
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
