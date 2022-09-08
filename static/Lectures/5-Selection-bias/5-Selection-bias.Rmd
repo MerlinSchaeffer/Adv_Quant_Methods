@@ -224,7 +224,7 @@ Discrimination means that a person is treated worse than others including specif
 .panel[.panel-name[Get the APAX data]
 .left-column[.font80[
 ```{r results = FALSE}
-load("APAX.RData") # Read APAX data,
+load("../../../assets/APAX.RData") # Read APAX data,
 APAX <- APAX %>% mutate(
   # News in minutes,
   news = news_hrs*60 + news_mins, 
@@ -405,13 +405,22 @@ If a person tells us how something affect(ed) them, it is an interesting  person
 ---
 layout: false
 class: center inverse
-# More generally: The average causal effect
+# More generally: <br>The average causal effect
 
-$$\underbrace{Avg_{n}[Y_{1i}-Y_{0i}] = \frac{1}{n} \displaystyle\sum_{i=1}^{n}Y_{1i} - \frac{1}{n} \displaystyle\sum_{i=1}^{n}Y_{0i}}_{\text{Average causal effect!}}.$$
+$$Avg_{n}[Y_{1i}-Y_{0i}] = \frac{1}{n} \displaystyle\sum_{i=1}^{n}Y_{1i} - \frac{1}{n} \displaystyle\sum_{i=1}^{n}Y_{0i}.$$
 
-*The average causal effect is the average of personal causal effects!*
+.left[
+.push-left[
+- The average causal effect is the average of all personal causal effects in your sample!
 
+- Unlike personal causal effects, we can sometimes estimate average causal effects.
+  + Next week you learn how.
+  + This week you learn why it's difficult ;)
+]
+
+.push-right[
 For example, the average causal effect of reading the news compares discrimination for everyone in the sample in the hypothetical scenario that they all read the news, to the discrimination for everyone in the sample in the hypothetical scenario that they did not read the news.
+]]
 
 ---
 layout: true
@@ -470,44 +479,65 @@ $\Rightarrow$ Tuki's *baseline* <br> (i.e., no news) perceived discrimination <b
 
 ---
 layout: false
-class: inverse center
-# More generally: Differences in group means
+# Observed vs Potential Outcomes
 
-.left-column[
-$\begin{equation} D_{i}=\begin{cases} 1, & \text{if}\ i = \text{Reads news} \\ 0, & \text{otherwise}\end{cases}\end{equation}$
+$$\begin{equation} D_{i}=\begin{cases} 1, & \text{if}\ i = \text{Reads news} \\ 0, & \text{otherwise}\end{cases}\end{equation}$$
+
+.push-left[.content-box-blue[
+.center[**Observed outcomes**]
+
+- $Y_{1i}|D_{i} = 1$: Outcome of treated, if treated.
+  + .font70[Observed discrimination among those who read news.]
+
+
+- $Y_{0i}|D_{i} = 0$: Outcome of non-treated, if not treated.
+  + .font70[Observed discrimination among those who don't read news.]
+]]
+
+.push-left[.content-box-red[
+.center[**Potential outcomes**]
+
+- $Y_{0i}|D_{i} = 1$: Outcome of treated, if not treated.
+  + .font70[Observed discrimination among those who read news,<br> *if they had not read them*.]
+
+
+- $Y_{1i}|D_{i} = 0$: Outcome of non-treated, if treated.
+  + .font70[Observed discrimination among those who don't read news,<br> *if they had read it them*.]
+]]
+
+---
+# Differences in observed group means
+
+$$Avg_{n}[Y_{1i}|D_{i} = 1] - Avg_{n}[Y_{0i}|D_{i} = 0]$$
+.push-left[
+```{r, echo = FALSE, out.width='100%', fig.align='center'}
+knitr::include_graphics('https://vitaliscounseling.com/wp-content/uploads/2020/12/compare-643305_1280.png')
+```
 ]
-
-.right-column[
-$Avg_{n}[Y_{1i}|D_{i} = 1] - Avg_{n}[Y_{0i}|D_{i} = 0]$
-
-Differences in group means are (most of the time) a comparison of apples (i.e. Ferda) to oranges (i.e. Tuki), which does not tell us about the average causal effect $(Avg_{n}[Y_{1i}-Y_{0i}])$.
+.push-right[
+Differences in observed group means are (most of the time) a comparison of apples (i.e. Ferda) to oranges (i.e. Tuki), which does not tell us about the average causal effect: $Avg_{n}[Y_{1i}-Y_{0i}]$!
 ]
-
-
 ---
 # Why? Selection bias!
 
-.left-column[
+$$\begin{equation} \begin{split}
+\underbrace{Avg_{n}[Y_{1i}|D_{i} = 1] - Avg_{n}[Y_{0i}|D_{i} = 0]}_{\text{Difference in observed group means}} = \underbrace{Avg_{n}[Y_{1i}|D_{i} = 1] -  Avg_{n}[Y_{0i}|D_{i} = 1]}_{\text{Average causal effect } among \text{ } the \text{ } treated} + \underbrace{Avg_{n}[Y_{0i}|D_{i} = 1] -  Avg_{n}[Y_{0i}|D_{i} = 0]}_{\text{Selection bias}}.
+\end{split} \end{equation}$$
 
-```{r, echo = FALSE, out.width='100%', fig.align='center'}
-knitr::include_graphics('https://media.istockphoto.com/photos/children-pulling-a-rope-picture-id521182687?k=20&m=521182687&s=612x612&w=0&h=OeGtAQn8dz4bDiasD09E7QFrNvbQCUoaolztX8QKbcI=')
-```
-]
 
-.right-column[
 .content-box-red[.center[
 $\text{Selection bias} = \underbrace{Avg_{n}[Y_{0i} | D_{i} = 1]}_{\text{Unobserved!}} - Avg_{n}[Y_{0i} | D_{i} = 0].$
 
-$\rightarrow$ The difference in average $Y_{0i}$ (the baseline of the outcome) between the groups we compare.
-
-$\underbrace{\text{Difference in group means}}_{\text{Fruitless naïv comparison}} = \text{Average causal effect} + \text{Selection bias}$!
+$\rightarrow$ The difference in $Avg_{n}(Y_{0i})$ (the baseline of the outcome) between the groups we compare.
 ]]
 
-.content-box-green[.center[
-Think carefully:<br>Is $Avg_{n}[Y_{0i}]$ (the baseline level of the outcome) <br>likely to differ between immigrant minorities who read news regularly and those who do not?
+--
 
-That is, had those who read the news not read them, would they feel as discriminated as those who do not read the news?
-]]]
+.content-box-green[.center[
+**Think carefully**<br>Is $Avg_{n}[Y_{0i}]$ (the baseline level of the outcome) <br>likely to differ between immigrant minorities who read news regularly and those who do not?
+
+That is, if those who read the news, had not read them:<br> would they feel as discriminated as those who don't read the news?
+]]
 
 ---
 # (Im-)balance .font70[.alert[of oberserved variables!]]
