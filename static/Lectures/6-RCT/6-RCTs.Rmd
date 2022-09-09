@@ -194,21 +194,16 @@ screenreg(ols, include.ci = FALSE, digits = 3)
 ---
 # Why? Selection bias!
 
-.left-column[
+$$\begin{equation} \begin{split}
+\underbrace{Avg_{n}[Y_{1i}|D_{i} = 1] - Avg_{n}[Y_{0i}|D_{i} = 0]}_{\text{Difference in observed group means}} = \underbrace{Avg_{n}[Y_{1i}|D_{i} = 1] -  Avg_{n}[Y_{0i}|D_{i} = 1]}_{\text{Average causal effect } among \text{ } the \text{ } treated} + \underbrace{Avg_{n}[Y_{0i}|D_{i} = 1] -  Avg_{n}[Y_{0i}|D_{i} = 0]}_{\text{Selection bias}}.
+\end{split} \end{equation}$$
 
-```{r, echo = FALSE, out.width='100%', fig.align='center'}
-knitr::include_graphics('https://media.istockphoto.com/photos/children-pulling-a-rope-picture-id521182687?k=20&m=521182687&s=612x612&w=0&h=OeGtAQn8dz4bDiasD09E7QFrNvbQCUoaolztX8QKbcI=')
-```
-]
 
-.right-column[
 .content-box-red[.center[
 $\text{Selection bias} = \underbrace{Avg_{n}[Y_{0i} | D_{i} = 1]}_{\text{Unobserved!}} - Avg_{n}[Y_{0i} | D_{i} = 0].$
 
-$\rightarrow$ The difference in average $Y_{0i}$ (the baseline of the outcome) between the groups we compare.
-
-$\underbrace{\text{Difference in group means}}_{\text{Fruitless naïv comparison}} = \text{Average causal effect} + \text{Selection bias}$!
-]]]
+$\rightarrow$ The difference in $Avg_{n}(Y_{0i})$ (the baseline of the outcome) between the groups we compare.
+]]
 
 ---
 # (Im-)balance .font70[.alert[of oberserved variables!]]
@@ -260,10 +255,11 @@ class: inverse middle center
 # Solution: Experiments
 
 ---
+layout: true
 # Experiment
 
 .left-column[
-- We do not observe, we *actively intervene*.
+- We do not *passively observe*, <br> we .alert[actively intervene].
 
 - Thereby *we* control, who gets $X$ and who does not!
 
@@ -272,30 +268,78 @@ knitr::include_graphics('./img/randomization1.png')
 ```
 ]
 
+---
+
 .push-right[
-```{tikz, DAG3,  echo = FALSE, out.width='60%'}
+```{tikz, DAG3,  echo = FALSE, out.width='70%'}
 \usetikzlibrary{shapes,decorations,arrows,calc,arrows.meta,fit,positioning}
 \tikzset{
-    -Latex,auto,node distance =1 cm and 1 cm,semithick,
-    state/.style ={ellipse, draw, minimum width = 0.7 cm},
-    point/.style = {circle, draw, inner sep=0.04cm,fill,node contents={}},
-    bidirected/.style={Latex-Latex,dashed},
-    el/.style = {inner sep=2pt, align=left, sloped}
+  -Latex,auto,node distance =1 cm and 1 cm,semithick,
+  state/.style ={ellipse, draw, minimum width = 0.7 cm},
+  point/.style = {circle, draw, inner sep=0.04cm,fill,node contents={}},
+  bidirected/.style={Latex-Latex,dashed},
+  el/.style = {inner sep=2pt, align=left, sloped}
 }
 
 \begin{tikzpicture}
 \sffamily
-    \node[state] (1) at (0,0) {$C$};
-    \node[state] (2) [below = of 1] {$X$};
-    \node[state] (3) [right = of 2] {$Y$};
+\node[state] (1) [red] at (0,0) {$I$};
+\node[state] (2) [right = of 1] {$X$};
+\node[state] (3) [above = of 2] {$C$};
+\node[state] (4) [right = of 2] {$Y$};
 
-    \path (2) edge (3);
-    \path (1) edge (3);
+\path (1) [red] edge (2);
+\path (2) edge (4);
+\path (3) edge [dashed] (4);
+\path (3) edge [dashed] (2);
 \end{tikzpicture}
 ```
 ]
 
 ---
+
+
+.push-right[
+```{tikz, ref.label = "DAG3",  echo = FALSE, out.width='70%'}
+```
+
+.content-box-green[.center[
+How do we $\color{red}{I}$ntervene such that there will be no correlation to any confounder?
+]]]
+
+---
+layout: false
+class: middle center
+background-image: url("https://images.theconversation.com/files/439369/original/file-20220104-19-12kg47e.jpg?ixlib=rb-1.1.0&q=45&auto=format&w=1200&h=900.0&fit=crop")
+background-position: center
+background-size: cover
+
+
+---
+layout: false
+class: inverse middle center
+# Break
+
+<iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'></iframe>
+
+---
+class: middle clear
+
+.left-column[
+```{r, echo = FALSE, out.width='80%'}
+knitr::include_graphics('https://www.laserfiche.com/wp-content/uploads/2014/10/femalecoder.jpg')
+```
+
+<iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'></iframe>
+]
+
+.right-column[
+<br>
+<iframe src='exercise1.html' width='1000' height='600' frameborder='0' scrolling='yes'></iframe>
+]
+
+---
+layout: true
 # Randomized Controlled Trials (RCT)
 
 
@@ -310,7 +354,9 @@ knitr::include_graphics('./img/randomization2.png')
   + $\text{Read news = 1} \rightarrow$ *treatment group*.
 ]
 
---
+---
+
+---
 
 .push-right[
 
@@ -318,27 +364,64 @@ knitr::include_graphics('./img/randomization2.png')
 knitr::include_graphics('https://lotterylab.s3.amazonaws.com/summernoteimages/606ffa6b3468c.gif')
 ```
 
-- Randomization is "fair": Everyone has the same probability to be part of the treatment or control group, .alert[regardless of who they are]!
+Randomization is "fair": Everyone has the same probability to be part of the treatment or control group, .alert[regardless of who they are]!
 
 .content-box-green[
-.center[Why does this result in equal (Discr) baselines?]
-$$\begin{equation} \begin{split}
-Avg[\text{Discr}_{i, \text{Read news} = 0}|\text{Read news} = 1] \\
-= Avg[\text{Discr}_{i, \text{Read news} = 0}|\text{Read news} = 0]
-\end{split} \end{equation}$$
+Why does this result in equal $Y_{0i}$ baselines?
+$$Avg_{n}[Y_{0i}|\text{News} = 1] = Avg_{n}[Y_{0i}|\text{News} = 0]$$
 ]]
 
 ---
+layout: false
 # Randomized Controlled Trials (RCT)
 
 .push-left[
 
 - If we *randomly* divide subjects into treatment and control groups: They come from the same underlying population. 
-  + $\rightarrow$ Similar .alert[On average], *in every way*,<br> **including their $Y_{0}$ **!
+  <br> <br> $\rightarrow$ Similar .alert[on average], *in every way*,<br> **including their $Y_{0}$ **!
 
 - Beware, in practice randomization can fail, especially if your sample is small.
-  
+]
 
+.push-right[
+```{r, echo = FALSE, out.width='90%', fig.align='center'}
+knitr::include_graphics('./img/randomization2.png')
+```
+]
+
+---
+# RCTs and potential outcomes
+
+.push-left[
+```{r, echo = FALSE, out.width='60%', fig.align='center'}
+knitr::include_graphics('./img/randomization2.png')
+```
+
+- If we *randomly* divide subjects into treatment and control groups: They come from the same underlying population. 
+  <br> <br> $\rightarrow$ Similar .alert[on average], *in every way*,<br> **including their $Y_{0}$ **!
+  <br> <br> $\rightarrow E[Y_{0i}|D=1] = E[Y_{0i}|D=0]$!
+]
+
+--
+
+.push-right[
+
+$$\begin{equation}\begin{split} E & [Y_{1i}|D=1] - E[Y_{0i}|D=0] \\  \\ & = E[\color{red}{Y_{0i} + \kappa} |D=1] - E[Y_{0i}|D=0], \\ \\ &= \color{red}{\kappa} + \underbrace{E[Y_{0i} |D=1] - E[Y_{0i}|D=0]}_{\underbrace{0}_{\text{(if randomization has worked)}}}, \\ \\ & = \underbrace{\color{red}{\kappa}.}_{\text{The average causal effect}} \end{split}\end{equation}$$
+]
+
+
+---
+# RCTs and DAGs
+
+.left-column[
+- There is no backdoor path. <br> (no path from $I$ to $Y$ that starts with an arrow into $I$)
+
+$\rightarrow$ No selection/collider bias!
+]
+
+.right-column[
+```{tikz, ref.label = "DAG3",  echo = FALSE, out.width='70%'}
+```
 ]
 
 ---
@@ -354,13 +437,15 @@ class: clear
 knitr::include_graphics('./img/randomization2.png')
 ```
 
-- Survey app .alert[randomly] decided, who got: 
+<br>
+
+- Survey app .alert[randomly] decided, who got:
+
   + Venus $\rightarrow$ *control group*, 
-  + Discrimination $\rightarrow$ *treatment group 1*.
+  
+  + Discrimination $\rightarrow$ *treatment group 1*,
+  
   + Integration $\rightarrow$ *treatment group 2*.
-
-
-
 ]
 
 ---
@@ -392,6 +477,10 @@ layout: false
 # Balance test
 
 .panelset[
+.panel[.panel-name[Balance table (surveyed news reading)]
+```{r ref.label = "balance1", echo = FALSE}
+```
+]
 .panel[.panel-name[R code]
 ```{r balance2, results = FALSE}
 APAX %>%
@@ -406,7 +495,7 @@ APAX %>%
 ```
 ]
 
-.panel[.panel-name[Balance table]
+.panel[.panel-name[Balance table (RCT news)]
 ```{r ref.label = "balance2", echo = FALSE}
 ```
 ]]
@@ -432,6 +521,8 @@ htmlreg(
 ```
 ]
 
+--
+
 .push-right[
 ```{r ref.label = "OLS_causal", echo = FALSE, results = 'asis'}
 ```
@@ -441,41 +532,32 @@ htmlreg(
 # Visualize
 
 .panelset[
-.panel[.panel-name[Preparation code]
-```{r}
-(plotdata <- zols %>%
-   tidy() %>% # Turn results into a tibble,
-   mutate( # Rename variables for the plot.
-     term = case_when(
-       term == "articleTreat_1" ~ "Discrimination",
-       term == "articleTreat_2" ~ "Integration",
-       term == "(Intercept)" ~ "Intercept")))
-```
-]
+.panel[.panel-name[R code]
+```{r Coefplot, fig.show='hide'}
+plotdata <- zols %>%
+  tidy() %>% # Turn results into a tibble,
+  filter(term != "(Intercept)") %>% # Delete intercept from the data,
+  mutate( # Rename variables for the plot.
+    term = case_when(
+      term == "articleTreat_1" ~ "Discrimination",
+      term == "articleTreat_2" ~ "Integration"))
 
-.panel[.panel-name[Plot]
-.push-left[
-```{r Coefplot, fig.show = 'hide'}
-ggplot(data = plotdata %>% filter(term != "Intercept"),
-       aes(y = estimate, x = term)) +
-  # Point with error-bars,
+ggplot(data = plotdata,  aes(y = estimate, x = term)) +
   geom_hline(yintercept = 0, color = "orange", 
              lty = "dashed") +
   geom_pointrange(aes(min = conf.low, max = conf.high)) +
   coord_flip() + # Flip Y- & X-Axis,
-  labs(
-    title = "Causal effect of news articles", 
-    x = "Article on",
-    # Write Greek beta into axis title.
-    y = "Comparison to control group (article on Venus) 
+  labs(title = "Causal effect of news articles", 
+       x = "Article on",
+       y = "Comparison to control group (article on Venus) 
     in standard deviations") + 
   theme_minimal()
 ```
 ]
-.push-right[
-```{r ref.label = "Coefplot", out.width='90%', fig.height = 3, fig.width = 5, echo = FALSE}
+
+.panel[.panel-name[Plot]
+```{r ref.label = "Coefplot", out.width='65%', fig.height = 3, fig.width = 6, echo = FALSE, results = FALSE}
 ```
-]
 ]]
 
 ---
@@ -483,11 +565,12 @@ ggplot(data = plotdata %>% filter(term != "Intercept"),
 
 .left-column[
 News media consumption *increases* immigrant minorities' perceptions that they are being discriminated! .backgrnote[
-(If the news report about discrimination in society.)]
-]
+
+  + If the news report about discrimination in society ...
+]]
 
 .right-column[
-```{r ref.label = "Coefplot", out.width='90%', fig.height = 3, fig.width = 5, echo = FALSE}
+```{r ref.label = "Coefplot", out.width='90%', fig.height = 3, fig.width = 6, echo = FALSE, results = FALSE}
 ```
 ]
 
@@ -501,32 +584,17 @@ knitr::include_graphics('https://www.laserfiche.com/wp-content/uploads/2014/10/f
 ]
 
 .right-column[
-<iframe src='exercise3.html' width='1000' height='600' frameborder='0' scrolling='yes'></iframe>
+<iframe src='exercise2.html' width='1000' height='600' frameborder='0' scrolling='yes'></iframe>
 ]
 
 ---
 class: inverse
 # Today's general lessons
 
-1. Causal claims are counter factual claims. Therefore they imply a comparison.
-2. Potential outcomes: A theoretical framework to think about the comparison implied in causal claims.
-3. Direct comparisons are often fruitless and naïv, because of selection/confounder bias.
-4. Selection bias: The baseline of the outcome is unequal between treated and non-treated subjects, because certain type of people select into/out of the treatment.
-5. Balance test: Attempt to test for selection bias, but can only be applied to variables that are observed in the data at hand.
-6. Directed Acyclic Graphs (DAG): A graphical theoretical framework to think about causality. It consists of nodes and directed edges. It may not contain cycles.
-7. Backdoor paths: All paths linking $X$ and $Y$ that start with an arrow into $X$. Backdoor paths result in confounder/selection bias.
-8. Confounder bias: = selection bias.
-9. Experiment: An artificial environment controlled by the researcher. Allows researchers to control treatment assignment.
-10. Randomized Controlled Trials (RCT): An experiment with treatment and control group in which researchers assign treatment or control at random.
-11. Randomization: Random assignment of treatment and control ensures a balanced comparison (no selection/confounder bias). Randomization can fail, especially in small samples.
-12. RCTs can be analyzed with a simple OLS regression.
-
----
-class: inverse
-# Today's (important) functions
-
-1. `funiture::rowmeans()`: Combine several variables (that need to have a similar scale) to an additive index.
-2. `modelsummary::datasummary_balance()`: Make a balance table.
+1. Experiment: An artificial environment controlled by the researcher. Allows researchers to control "treatment" assignment.
+2. Randomized Controlled Trials (RCT): An experiment with treatment and control group in which researchers assign treatment or control at random.
+3. Randomization: Random assignment of treatment and control ensures a balanced comparison (no selection/confounder bias). Randomization can fail, especially in small samples.
+4. RCTs can be analyzed with a simple OLS regression.
 
 ---
 # References

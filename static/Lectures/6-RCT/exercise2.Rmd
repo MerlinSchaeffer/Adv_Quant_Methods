@@ -1,5 +1,5 @@
 ---
-title: "Exercise 3 (15 minutes)"
+title: "Exercise 2 (20 minutes)"
 subtitle: "When you're done, assist some of the others ..."
 output: webexercises::webexercises_default
 ---
@@ -44,7 +44,7 @@ APAX <- APAX %>% mutate(
 ```
 
 
-1. Use the APAX survey experiment. Estimate the causal effect of reading an article on discrimination or integration compared to an article on Venus. Estimate z-standardized effects,
+1. The APAX data also contains a variable `antidiscr_law` on support for anti-discrimination policy: "How good or bad is it for a country to have a law against ethnic discrimination in the work place?". The answer categories are: (1) Very bad, (2) Bad, (3) So/so, (4) Good, (5) Very good. Use the APAX survey experiment. Estimate the causal effect of reading an article on support for anti-discrimination policy. Estimate z-standardized effects,
 `r hide("R solution -> dont' peak to early ;) !")`
 ```{r}
 APAX <- APAX %>%
@@ -71,9 +71,9 @@ coef <- coef(zols)["articleTreat_2"] %>% round(., 3) %>% as.scalar()
 se <- vcov(zols) %>% diag()
 se <- se["articleTreat_2"] %>% sqrt() %>% round(., 3) %>% as.scalar()
 ```
-3. What is the causal effect of reading news about discrimination in society on supporting equal treatment policies? The causal effect is: `r fitb(coef, width = "5")`. What is the estimated standard error of this $\hat{\beta}$? `r fitb(se, width = "5")`. *What do these two statistics suggest about a causal effect?*
+3. What is the causal effect of reading news about integration in society on supporting equal treatment policies? The causal effect is: `r fitb(coef, width = "5")`. What is the estimated standard error of this $\hat{\beta}$? `r fitb(se, width = "5")`. *What do these two statistics suggest about a causal effect?*
 
-4. Make a coeffient plot to vosualize these results.
+4. Make a coeffient plot to visualize these results.
 `r hide("R solution -> dont' peak to early ;) !")`
 ```{r}
 (plotdata <- zols %>%

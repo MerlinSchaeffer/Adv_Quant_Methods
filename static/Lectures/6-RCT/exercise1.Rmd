@@ -1,0 +1,73 @@
+---
+title: "Exercise 1 (20 minutes)"
+subtitle: "When you're done, assist some of the others ..."
+output: webexercises::webexercises_default
+---
+
+```{r setup, include = FALSE}
+options(htmltools.dir.version = FALSE, servr.interval = 0.5, width = 115, digits = 2)
+knitr::opts_chunk$set(
+  collapse = TRUE, message = FALSE, 
+  warning = FALSE, cache = FALSE,
+  comment = "#", strip.white = TRUE)
+
+library(webexercises)
+
+set.seed(831983)
+```
+
+
+1. Use the APAX data and replicate my operationalization of the variables.
+`r hide("R solution -> dont' peak to early ;) !")`
+```{r}
+pacman::p_load(
+  tidyverse, # Data manipulation,
+  furniture, # For row-means,
+  ggplot2, # beautiful figures,
+  estimatr, # Regression for weighted data,
+  modelr, # Turn results of lm() into a tibble,
+  modelsummary, # for balance tables,
+  texreg) # regression tables with nice layout.
+
+# 1. read the APAX data
+load("../../../assets/APAX.Rdata") # Read APAX data,
+APAX <- APAX %>% mutate(
+  # News in minutes,
+  news = news_hrs*60 + news_mins, 
+  news_yn = case_when( # News Yes/No,
+    news < 10 ~ 0, # Less than 15  minutes,
+    news > 14 ~ 1, # More than 15  minutes,
+    TRUE ~ as.numeric(NA)),
+  # Average discrimination index across domains,
+  dis_index = rowmeans( #<<
+    dis_trainee, dis_job, dis_school, #<<
+    dis_house, dis_gov, dis_public, #<<
+    na.rm = TRUE), #<<
+  # Z-standardized discrimination index.
+  z_dis_index = scale(dis_index) %>% 
+    as.numeric())
+```
+`r unhide()`
+
+2. Make a new variable called `APAX$candy`, which randomly "gives" candy to half of the respondents. Use the `rbinom()` function to do so. Use the help function `?rbinom()` or google "R rbinom()" to learn what the function does and how it function works.
+`r hide("R solution -> dont' peak to early ;) !")`
+```{r}
+APAX <- APAX %>% mutate(
+  candy = rbinom(nrow(APAX), size = 1, prob = 0.5))
+```
+`r unhide()`
+
+3. In the APAX survey, we also asked respondents about their gender and how their physical appearance is typically described in Germany, with answers ranging from White, over Black, to Asian. Test whether APAX respondents got `candy` regardless of their gender and their racial appearance. That is, did people who appear Asian get candy more often than those who appear white etc.? *What do you conclude from the balance table*? *Also, which groups seem rather well, and which ones seem less well balanced*?
+`r hide("R solution -> dont' peak to early ;) !")`
+```{r}
+APAX %>%
+  # Select variables for which I want my balance test,
+  select(candy, appearance, gender, gewFAKT) %>%
+  rename(weights = gewFAKT) %>% # Rename the weights variable!
+  datasummary_balance( # Make a balance table,
+    formula = ~ candy, # by candy Yes/No
+    data = . ,
+    title = "Gender and physical appearance of those who got candy and those who didn't") 
+```
+`r unhide()`
+
