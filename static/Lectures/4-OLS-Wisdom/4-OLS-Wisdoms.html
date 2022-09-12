@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="" xml:lang="">
   <head>
-    <title>4 Regression</title>
+    <title>4 OLS Wisdom</title>
     <meta charset="utf-8" />
     <meta name="author" content="Merlin Schaeffer  Department of Sociology" />
-    <meta name="date" content="2022-09-07" />
+    <meta name="date" content="2022-09-12" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
     <script src="libs/tile-view/tile-view.js"></script>
@@ -18,16 +18,16 @@
 class: center, middle, inverse, title-slide
 
 .title[
-# 4 Regression
+# 4 OLS Wisdom
 ]
 .subtitle[
-## Categorical predictors, OLS Assumptions, and the basics of visualizing regression results
+## OLS Assumptions, categorical predictors, binary outcomes, and the basics of visualizing regression results
 ]
 .author[
 ### Merlin Schaeffer<br> Department of Sociology
 ]
 .date[
-### 2022-09-07
+### 2022-09-12
 ]
 
 ---
@@ -53,7 +53,10 @@ class: inverse middle
 3. **Categorical predictors**
   + Dummy coding
   
-4. **Visualizing regression**
+4. **Binary outcomes**
+  + Linear probability model (LPM)
+  
+5. **Visualizing regression**
   + Coefficient plots
   + Model predictions
   
@@ -159,7 +162,7 @@ class: clear
 ```
 ]
 .panel[.panel-name[Extreme poverty across the world]
-&lt;img src="4-Visualize-OLS_files/figure-html/poverty-world-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="4-OLS-Wisdoms_files/figure-html/poverty-world-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]]
 
 ---
@@ -219,7 +222,7 @@ Dat &lt;- Dat %&gt;%
 ]
 
 .panel[.panel-name[Plot Colonizer]
-&lt;img src="4-Visualize-OLS_files/figure-html/col-powers-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="4-OLS-Wisdoms_files/figure-html/col-powers-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]
 
 .panel[.panel-name[Coding independence]
@@ -267,7 +270,7 @@ Dat &lt;- Dat %&gt;%
 ]]
 
 .panel[.panel-name[Plot indep.]
-&lt;img src="4-Visualize-OLS_files/figure-html/pov-indep-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="4-OLS-Wisdoms_files/figure-html/pov-indep-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]]
 
 ---
@@ -303,7 +306,7 @@ screenreg(ols, include.ci = FALSE,
 ]
 
 .right-column[
-&lt;img src="4-Visualize-OLS_files/figure-html/indep-world-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="4-OLS-Wisdoms_files/figure-html/indep-world-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -355,7 +358,7 @@ plot(ols, which = 5)
 ]
 
 .right-column[
-&lt;img src="4-Visualize-OLS_files/figure-html/unnamed-chunk-15-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+&lt;img src="4-OLS-Wisdoms_files/figure-html/unnamed-chunk-15-1.png" width="80%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -405,7 +408,7 @@ screenreg(ols_outl, # Regression table
 ]
 
 .right-column[
-&lt;img src="4-Visualize-OLS_files/figure-html/Sweden-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="4-OLS-Wisdoms_files/figure-html/Sweden-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]]
 .panel[.panel-name[Outlier analysis]
 .left-column[
@@ -426,7 +429,7 @@ plot(ols_outl, which = 5)
 ]
 
 .right-column[
-&lt;img src="4-Visualize-OLS_files/figure-html/unnamed-chunk-18-1.png" width="75%" style="display: block; margin: auto;" /&gt;
+&lt;img src="4-OLS-Wisdoms_files/figure-html/unnamed-chunk-18-1.png" width="75%" style="display: block; margin: auto;" /&gt;
 ]
 ]]
 
@@ -447,7 +450,7 @@ plot(ols, which = 1)
 ]
 
 .right-column[
-&lt;img src="4-Visualize-OLS_files/figure-html/unnamed-chunk-19-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+&lt;img src="4-OLS-Wisdoms_files/figure-html/unnamed-chunk-19-1.png" width="80%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -466,7 +469,7 @@ plot(ols_outl, which = 1)
 ]
 
 .right-column[
-&lt;img src="4-Visualize-OLS_files/figure-html/unnamed-chunk-20-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+&lt;img src="4-OLS-Wisdoms_files/figure-html/unnamed-chunk-20-1.png" width="80%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -486,7 +489,7 @@ class: inverse middle center
 3. What does this suggest about the slope `\(\hat{\beta}\)`?
 ]]
 .right-column[
-&lt;img src="4-Visualize-OLS_files/figure-html/categorical-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="4-OLS-Wisdoms_files/figure-html/categorical-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]]
 
 .panel[.panel-name[Dummy coding]
@@ -510,7 +513,7 @@ Reference &lt;br&gt; .backgrnote[(Britain)] | 0  | 0  | 0
 ]
 
 .push-right[
-&lt;img src="4-Visualize-OLS_files/figure-html/categorical2-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="4-OLS-Wisdoms_files/figure-html/categorical2-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]]
 
 .panel[.panel-name[How it's done in R]
@@ -527,7 +530,7 @@ htmlreg(ols_2, # Nicely-formatted table.
                               "Portugal"))
 ```
 
-&lt;img src="4-Visualize-OLS_files/figure-html/unnamed-chunk-21-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+&lt;img src="4-OLS-Wisdoms_files/figure-html/unnamed-chunk-21-1.png" width="80%" style="display: block; margin: auto;" /&gt;
 ]
 .push-right[
 &lt;table class="texreg" style="margin: 10px auto;border-collapse: collapse;border-spacing: 0px;caption-side: bottom;color: #000000;border-top: 2px solid #000000;"&gt;
@@ -680,6 +683,11 @@ class: middle clear
 
 ---
 class: inverse middle center
+# Binary outcomes
+
+---
+---
+class: inverse middle center
 # Visualizing regression models
 
 ---
@@ -728,7 +736,7 @@ ggplot(data = plotdata, aes(y = estimate,
 ]
 .panel[.panel-name[Plot]
 .push-left[
-&lt;img src="4-Visualize-OLS_files/figure-html/unnamed-chunk-27-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="4-OLS-Wisdoms_files/figure-html/unnamed-chunk-27-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]
 .push-right[
 &lt;table class="texreg" style="margin: 10px auto;border-collapse: collapse;border-spacing: 0px;caption-side: bottom;color: #000000;border-top: 2px solid #000000;"&gt;
@@ -800,7 +808,7 @@ ggplot(data = plotdata, aes(y = estimate,
 ```
 ]
 .push-right[
-&lt;img src="4-Visualize-OLS_files/figure-html/Coefplot2-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="4-OLS-Wisdoms_files/figure-html/Coefplot2-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]]
 .panel[.panel-name[Predictions]
 .push-left[
@@ -868,7 +876,7 @@ ggplot(data = fict_dat, aes(y = fit, x = years_indep)) +
 ```
 ]
 .push-right[
-&lt;img src="4-Visualize-OLS_files/figure-html/unnamed-chunk-32-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="4-OLS-Wisdoms_files/figure-html/unnamed-chunk-32-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]]]
 
 ---
@@ -881,9 +889,9 @@ ggplot(data = fict_dat, aes(y = fit, x = years_indep)) +
 ]
 
 .right-column[
-&lt;img src="4-Visualize-OLS_files/figure-html/unnamed-chunk-33-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+&lt;img src="4-OLS-Wisdoms_files/figure-html/unnamed-chunk-33-1.png" width="60%" style="display: block; margin: auto;" /&gt;
 
-&lt;img src="4-Visualize-OLS_files/figure-html/unnamed-chunk-34-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+&lt;img src="4-OLS-Wisdoms_files/figure-html/unnamed-chunk-34-1.png" width="60%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
