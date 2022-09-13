@@ -1,0 +1,102 @@
+---
+title: "Exercise 2 (20 minutes)"
+subtitle: "When you're done, assist some of the others ..."
+output: webexercises::webexercises_default
+---
+
+```{r setup, include = FALSE}
+options(htmltools.dir.version = FALSE, servr.interval = 0.5, width = 115, digits = 2)
+knitr::opts_chunk$set(
+  collapse = TRUE, message = FALSE, 
+  warning = FALSE, cache = FALSE,
+  comment = "#", strip.white = TRUE)
+
+library(webexercises)
+library(tidyverse)
+library(essentials)
+
+pacman::p_load(
+  tidyverse, # Data manipulation,
+  furniture, # For row-means,
+  ggplot2, # beautiful figures,
+  estimatr, # Regression for weighted data,
+  modelr, # Turn results of lm() into a tibble,
+  modelsummary, # for balance tables,
+  texreg) # regression tables with nice layout.
+
+# 1. read the APAX data
+load("../../../assets/APAX.Rdata") # Read APAX data,
+APAX <- APAX %>% mutate(
+  # News in minutes,
+  news = news_hrs*60 + news_mins, 
+  news_yn = case_when( # News Yes/No,
+    news < 10 ~ 0, # Less than 15  minutes,
+    news > 14 ~ 1, # More than 15  minutes,
+    TRUE ~ as.numeric(NA)),
+  # Average discrimination index across domains,
+  dis_index = rowmeans( #<<
+    dis_trainee, dis_job, dis_school, #<<
+    dis_house, dis_gov, dis_public, #<<
+    na.rm = TRUE), #<<
+  # Z-standardized discrimination index.
+  z_dis_index = scale(dis_index) %>% 
+    as.numeric())
+```
+
+
+1. The APAX data also contains a variable `antidiscr_law` on support for anti-discrimination policy: "How good or bad is it for a country to have a law against ethnic discrimination in the work place?". The answer categories are: (1) Very bad, (2) Bad, (3) So/so, (4) Good, (5) Very good. Use the APAX survey experiment. Estimate the causal effect of reading an article on support for anti-discrimination policy. Estimate z-standardized effects,
+`r hide("R solution -> dont' peak to early ;) !")`
+```{r}
+APAX <- APAX %>%
+  mutate(
+    z_antidiscr_law = scale(antidiscr_law) %>% as.numeric())
+
+zols <- lm_robust(z_antidiscr_law ~ article, 
+                 weight = gewFAKT, data = APAX)
+
+screenreg(zols, include.ci = FALSE, digits = 3)
+```
+`r unhide()`
+
+```{r include = FALSE}
+coef <- coef(zols)["articleTreat_1"] %>% round(., 3) %>% as.scalar()
+se <- vcov(zols) %>% diag()
+se <- se["articleTreat_1"] %>% sqrt() %>% round(., 3) %>% as.scalar()
+```
+
+2. What is the causal effect of reading news about discrimination in society on supporting equal treatment policies? The causal effect is: `r fitb(coef, width = "5")`. What is the estimated standard error of this $\hat{\beta}$? `r fitb(se, width = "5")`. *What do these two statistics suggest about a causal effect?*
+
+```{r include = FALSE}
+coef <- coef(zols)["articleTreat_2"] %>% round(., 3) %>% as.scalar()
+se <- vcov(zols) %>% diag()
+se <- se["articleTreat_2"] %>% sqrt() %>% round(., 3) %>% as.scalar()
+```
+3. What is the causal effect of reading news about integration in society on supporting equal treatment policies? The causal effect is: `r fitb(coef, width = "5")`. What is the estimated standard error of this $\hat{\beta}$? `r fitb(se, width = "5")`. *What do these two statistics suggest about a causal effect?*
+
+4. Make a coeffient plot to visualize these results.
+`r hide("R solution -> dont' peak to early ;) !")`
+```{r}
+(plotdata <- zols %>%
+   tidy() %>% # Turn results into a tibble,
+   mutate( # Rename variables for the plot.
+     term = case_when(
+       term == "articleTreat_1" ~ "Discrimination",
+       term == "articleTreat_2" ~ "Integration",
+       term == "(Intercept)" ~ "Intercept")))
+
+ggplot(data = plotdata %>% filter(term != "Intercept"),
+       aes(y = estimate, x = term)) +
+  # Point with error-bars,
+  geom_hline(yintercept = 0, color = "orange", 
+             lty = "dashed") +
+  geom_pointrange(aes(min = conf.low, max = conf.high)) +
+  coord_flip() + # Flip Y- & X-Axis,
+  labs(
+    title = "Causal effect of news articles", 
+    x = "Article on",
+    # Write Greek beta into axis title.
+    y = "Comparison to control group (article on Venus) 
+    in standard deviations") + 
+  theme_minimal()
+```
+`r unhide()`

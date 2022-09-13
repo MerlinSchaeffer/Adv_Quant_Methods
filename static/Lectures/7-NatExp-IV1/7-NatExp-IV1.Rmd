@@ -1,0 +1,369 @@
+---
+title: "Natural Experiments & <br><br> Instrument Variables (IV)"
+subtitle: "Sometimes nature interferes"
+author: "Merlin Schaeffer<br> Department of Sociology"
+date: "`r Sys.Date()`"
+output: 
+  xaringan::moon_reader:
+    chakra: "../template/remark-latest.min.js"
+    css: ["../template/Merlin169.css"]
+    lib_dir: libs
+    # self_contained: true
+    nature:
+      highlightLanguage: r
+      highlightStyle: zenburn
+      highlightLines: true
+      countIncrementalSlides: false
+      ratio: '16:9'
+---
+```{r setup, include = FALSE}
+library(RefManageR)
+library(knitr)
+library(ggrepel) # Nicely placed labels in figures.
+library(modelr)
+library(webexercises) # Small web-based answer scales.
+library(equatiomatic) # Regression equations from model objects.
+library(essentials)
+
+options(htmltools.preserve.raw = FALSE,
+        htmltools.dir.version = FALSE, servr.interval = 0.5, width = 115, digits = 3)
+knitr::opts_chunk$set(
+  collapse = TRUE, message = FALSE, fig.retina = 3, error = TRUE,
+  warning = FALSE, cache = TRUE, fig.align = 'center',
+  comment = "#", strip.white = TRUE, tidy = FALSE)
+
+BibOptions(check.entries = FALSE, 
+           bib.style = "authoryear", 
+           style = "markdown",
+           hyperlink = FALSE,
+           no.print.fields = c("doi", "url", "ISSN", "urldate", "language", "note", "isbn", "volume"))
+myBib <- ReadBib("./../../../Stats_II.bib", check = FALSE)
+
+xaringanExtra::use_xaringan_extra(c("tile_view", "tachyons"))
+xaringanExtra::use_panelset()
+```
+# The goal of social science research
+
+.font140[.center[.alert[Use data to discover patterns ("social facts" in Durkheim's terms), <br> and **the social mechanisms that bring them about**.]]]
+
+```{r, echo = FALSE, out.width='70%', fig.align='center'}
+knitr::include_graphics('https://liu.se/-/media/istock-501261958.jpg?mw=1120&mh=1120&hash=DA8977CCE6A6E600AE80A40CFEE771C9')
+```
+
+---
+class: inverse middle
+# Today's schedule
+
+1. **Application 1**: Terrorist attacks and xenophobia. 
+
+2. **Natural experiments**
+
+3. **Application 2:** Police response to domestic violence.
+
+4. **Intention to treat designs**
+
+5. **Instrument Variables (IV)**
+
+---
+# Terrorism and xenophobia
+
+.push-left[
+```{r, echo = FALSE, out.width='80%'}
+knitr::include_graphics('https://cdn.britannica.com/25/74225-050-7F97DCE4/second-jetliners-terrorists-al-Qaeda-smoke-billows-crash-Sept-11-2001.jpg')
+```
+
+
+]
+
+.push-right[
+```{r, echo = FALSE, out.width='77.5%'}
+knitr::include_graphics('https://cdn.britannica.com/33/129733-050-AF95D301/Smoke-flames-twin-towers-attacks-World-Trade-September-11-2001.jpg')
+```
+]
+
+---
+class: inverse middle center
+# Research question 1 of the day
+
+.right-column[
+```{r, echo = FALSE, out.width='60%'}
+knitr::include_graphics('https://api.time.com/wp-content/uploads/2019/07/gettyimages-1064896696.jpg')
+knitr::include_graphics('https://www.brookings.edu/wp-content/uploads/2019/07/Denmark.jpg?w=1200&h=630&crop=1')
+```
+]
+
+--
+
+.left-column[
+.font130[
+**What is the average causal effect of terrorist attacks on xenophobia?**
+]]
+
+---
+# We need an RCT!
+
+.push-left[
+```{r, echo = FALSE, out.width='60%', fig.align='center'}
+knitr::include_graphics('./img/randomization2.png')
+```
+
+- If we *randomly* divide subjects into treatment and control groups: They come from the same underlying population. 
+  <br> <br> $\rightarrow$ Similar .alert[on average], *in every way*,<br> **including their $Y_{0}$ **!
+  <br> <br> $\rightarrow E[Y_{0i}|D=1] = E[Y_{0i}|D=0]$!
+]
+
+.push-right[
+
+$$\begin{equation}\begin{split} E & [Y_{1i}|D=1] - E[Y_{0i}|D=0] \\  \\ & = E[\color{red}{Y_{0i} + \kappa} |D=1] - E[Y_{0i}|D=0], \\ \\ &= \color{red}{\kappa} + \underbrace{E[Y_{0i} |D=1] - E[Y_{0i}|D=0]}_{\underbrace{0}_{\text{(if randomization has worked)}}}, \\ \\ & = \underbrace{\color{red}{\kappa}.}_{\text{The average causal effect}} \end{split}\end{equation}$$
+]
+
+---
+# But that's impossible and un-ethical!
+
+.left-column[.center[
+.alert[We cannot 
+
+treat people with terrorism!]
+]]
+
+.right-column[
+```{tikz, DAG1,  echo = FALSE, out.width='70%'}
+\usetikzlibrary{shapes,decorations,arrows,calc,arrows.meta,fit,positioning}
+\tikzset{
+  -Latex,auto,node distance =1 cm and 1 cm,semithick,
+  state/.style ={ellipse, draw, minimum width = 0.7 cm},
+  point/.style = {circle, draw, inner sep=0.04cm,fill,node contents={}},
+  bidirected/.style={Latex-Latex,dashed},
+  el/.style = {inner sep=2pt, align=left, sloped}
+}
+
+\begin{tikzpicture}
+\sffamily
+\node[state] (1) [red] at (0,0) {$I$};
+\node[state] (2) [right = of 1] {$X$};
+\node[state] (3) [above = of 2] {$C$};
+\node[state] (4) [right = of 2] {$Y$};
+
+\path (1) [red] edge (2);
+\path (2) edge (4);
+\path (3) edge [dashed] (4);
+\path (3) edge [dashed] (2);
+\end{tikzpicture}
+```
+]
+
+---
+class: clear
+.left-column[
+<br>
+
+```{r, echo = FALSE, out.width='100%'}
+knitr::include_graphics('https://jlegewie.com/files/joscha.jpg')
+```
+
+### My friend Joscha 
+
+### had an idea
+
+]
+
+.right-column[
+```{r, echo = FALSE, out.width='60%'}
+knitr::include_graphics('./img/Joscha1.png')
+```
+]
+
+---
+# Natural experiments
+
+
+.push-left[
+**Natural experiment**: .alert[Random exposure] to treatment or control conditions are determined .alert[by nature] (or by other factors outside the control of researchers).
+
+In comparison to a normal RCT, this allows for:
+> an experiment [...] on the grandest scale.
+
+> --- `r Citet(myBib, "snow_mode_1856")`
+]
+
+.push-right[.center[
+The first natural experiment: <br>
+The cause of Cholera]
+```{r, echo = FALSE, out.width='80%'}
+knitr::include_graphics('https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/Snow-cholera-map-1.jpg/1920px-Snow-cholera-map-1.jpg')
+```
+.center[.backgrnote[*Source:* `r Citet(myBib, "snow_mode_1856")`]]
+]
+---
+# The 2002 Bali bombings
+
+.left-column[
+```{r, echo = FALSE, out.width='100%'}
+knitr::include_graphics('https://www.iri.org/wp-content/uploads/2018/01/335017fda2a54fdc58700d83f73217c0.jpg?w=650')
+knitr::include_graphics('https://dynaimage.cdn.cnn.com/cnn/c_fill,g_auto,w_1200,h_675,ar_16:9/https%3A%2F%2Fcdn.cnn.com%2Fcnnnext%2Fdam%2Fassets%2F201213212550-indonesia-bali-bombings-arrest-intl-hnk-file-101602.jpg')
+```
+]
+
+.right-column[
+<iframe src='https://en.wikipedia.org/wiki/2002_Bali_bombings' width='1000' height='600' frameborder='0' scrolling='yes'></iframe>
+]
+
+---
+# The natural experiment
+
+```{r, echo = FALSE, out.width='70%'}
+knitr::include_graphics('./img/Joscha2.png')
+```
+.center[.backgrnote[*Source:* `r Citet(myBib, "legewie_terrorist_2013")`]]
+
+--
+
+.push-left[
+.alert[Assumption 1]: The European Social Survey is based on random sampling. .alert[The day of] $i$.alert['s interview is also random!]
+
+- *Reachability bias*: Respondents who are easier to contact tend to be interviewed earlier during the survey period.
+]
+
+--
+
+.push-right[
+.alert[Assumption 2]: No other event or change over time had a causal effect on $Y_{i}$.
+]
+
+---
+# Balance?
+
+.left-column[
+$$E[Y_{0i}|D=1] = E[Y_{0i}|D=0]?$$
+
+```{tikz, ref.label = "DAG1", echo = FALSE, out.width='100%'}
+```
+]
+
+.right-column[
+```{r, echo = FALSE, out.width='100%'}
+knitr::include_graphics('./img/Joscha3.png')
+```
+.center[.backgrnote[*Source:* `r Citet(myBib, "legewie_terrorist_2013")`]]
+]
+
+---
+# RCTs vs Natural experiments
+
+.push-left[.content-box-red[
+.font120[.center[**Internal validity**]]
+
+With an RCT, we have control treatment assignment and thus know that the intervention $I$ was randomly assigned.
+
+```{tikz, ref.label = "DAG1", echo = FALSE, out.width='70%'}
+```
+]]
+
+--
+
+.push-left[.content-box-blue[
+.font120[.center[**External validity**]]
+
+With a natural experiment, we can study a real event $E$ and not some artificial intervention $I$.
+<br><br>
+
+```{tikz, DAG2, echo = FALSE, out.width='70%'}
+\usetikzlibrary{shapes,decorations,arrows,calc,arrows.meta,fit,positioning}
+\tikzset{
+  -Latex,auto,node distance =1 cm and 1 cm,semithick,
+  state/.style ={ellipse, draw, minimum width = 0.7 cm},
+  point/.style = {circle, draw, inner sep=0.04cm,fill,node contents={}},
+  bidirected/.style={Latex-Latex,dashed},
+  el/.style = {inner sep=2pt, align=left, sloped}
+}
+
+\begin{tikzpicture}
+\sffamily
+\node[state] (1) [red] at (0,0) {$E$};
+\node[state] (2) [right = of 1] {$X$};
+\node[state] (3) [above = of 2] {$C$};
+\node[state] (4) [right = of 2] {$Y$};
+
+\path (1) [red] edge (2);
+\path (1) [red, bidirected] edge (3);
+\path (2) edge (4);
+\path (3) edge [dashed] (4);
+\path (3) edge [dashed] (2);
+\end{tikzpicture}
+```
+]]
+---
+class: clear
+# Learning goal 1 .font60[Terror attacks can increase xenophobia]
+
+.right-column[
+```{r, echo = FALSE, out.width='100%'}
+knitr::include_graphics('./img/Joscha4.png')
+```
+.center[.backgrnote[*Source:* `r Citet(myBib, "legewie_terrorist_2013")`]]
+]
+
+--
+
+.left-column[.content-box-green[.center[
+If you want to learn what Joscha has to say about:
+
+*Why was there a causal effect in Portugal etc., but not in the UK etc.?* 
+
+Read his article ;)
+]]]
+
+---
+class: inverse middle center
+# Break
+
+<iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'></iframe>
+
+---
+class: middle clear
+
+.left-column[
+```{r, echo = FALSE, out.width='100%'}
+knitr::include_graphics('https://www.latentview.com/wp-content/uploads/2016/04/LatentView-Turns-Ten-A-decade-of-data-science.jpg')
+```
+
+<iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'></iframe>
+]
+
+.right-column[
+<br>
+<iframe src='exercise1.html' width='1000' height='600' frameborder='0' scrolling='yes'></iframe>
+]
+
+---
+
+<!-- --- -->
+<!-- class: middle clear -->
+
+<!-- .left-column[ -->
+<!-- ```{r, echo = FALSE, out.width='80%'} -->
+<!-- knitr::include_graphics('https://www.laserfiche.com/wp-content/uploads/2014/10/femalecoder.jpg') -->
+<!-- ``` -->
+<!-- ] -->
+
+<!-- .right-column[ -->
+<!-- <iframe src='exercise2.html' width='1000' height='600' frameborder='0' scrolling='yes'></iframe> -->
+<!-- ] -->
+
+---
+class: inverse
+# Today's general lessons
+
+1. Experiment: An artificial environment controlled by the researcher. Allows researchers to control "treatment" assignment.
+2. Randomized Controlled Trials (RCT): An experiment with treatment and control group in which researchers assign treatment or control at random.
+3. Randomization: Random assignment of treatment and control ensures a balanced comparison (no selection/confounder bias). Randomization can fail, especially in small samples.
+4. RCTs can be analyzed with a simple OLS regression.
+
+---
+# References
+
+.font80[
+```{r ref, results = 'asis', echo = FALSE}
+PrintBibliography(myBib)
+```
+]
