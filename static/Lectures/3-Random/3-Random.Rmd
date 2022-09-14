@@ -184,12 +184,10 @@ knitr::include_graphics('https://lotterylab.s3.amazonaws.com/summernoteimages/60
 .push-left[
 1) Populations are too large to study everyone.
 
-```{r, echo = FALSE, out.width='50%', fig.align='center'}
-knitr::include_graphics('https://www.kuechengoetter.de/uploads/media/630x630/02/28602-suppentopf-mit-nudeln-und-haehnchen.jpg?v=1-0')
+```{r, echo = FALSE, out.width='100%', fig.align='center'}
+knitr::include_graphics('https://pbs.twimg.com/media/FciuC51WYAQIv3D?format=png&name=900x900')
 ```
-.center[.backgrnote[
-Our sample is basically a tasting of what's cooking.]]
-
+.center[.backgrnote[*Source:* `r Citet(myBib, "llaudet_data_2022")`]]
 ]
 
 --
@@ -226,6 +224,7 @@ knitr::include_graphics('img/Convenience_Sample.png')
 ]
 
 ---
+layout: true
 # Random samples!
 
 .push-left[
@@ -242,17 +241,27 @@ Everyone in the (unobservable super) population has the same probability to be p
 $\rightarrow$ No group can be forgotten.
 ]
 
---
+---
+
+.push-right[
+```{r, echo = FALSE, out.width='100%', fig.align='center'}
+knitr::include_graphics('https://pbs.twimg.com/media/FciuC51WYAQIv3D?format=png&name=900x900')
+```
+.center[.backgrnote[*Source:* `r Citet(myBib, "llaudet_data_2022")`]]
+]
+
+---
 
 .push-right[
 ```{r, echo = FALSE, out.width='50%', fig.align='center'}
 knitr::include_graphics('https://www.kuechengoetter.de/uploads/media/630x630/02/28602-suppentopf-mit-nudeln-und-haehnchen.jpg?v=1-0')
 ```
 .center[.backgrnote[
-Random sampling is the equivalent of giving the soup a proper stir before we taste it ;).]]
+Random sampling is the equivalent of <br> giving the soup a proper stir before we taste it ;).]]
 ]
 
 ---
+layout: false
 class: inverse middle center
 
 Nice talk man.
@@ -995,9 +1004,9 @@ $\underbrace{H_{0}:}_{\text{Aka }H_{\text{0pponent  }} ;)}\beta_{\text{Years of 
 .right-column[
 .panelset[
 .panel[.panel-name[Regression model]
-```{r}
-mod <- lm_robust(psppsgva ~ eduyrs, data = ESS_sample)
-summary(mod, include.ci = FALSE, digits = 3)
+```{r ols}
+ols <- lm_robust(psppsgva ~ eduyrs, data = ESS_sample)
+summary(ols, include.ci = FALSE, digits = 3)
 ```
 ]
 
@@ -1007,8 +1016,8 @@ library("car")
 library("highr")
 library("lattice")
 
-coef <- coef(mod)["eduyrs"] %>% round(3) %>% as.scalar()
-se <- vcov(mod) %>% diag() %>% sqrt() %>% round(3)
+coef <- coef(ols)["eduyrs"] %>% round(3) %>% as.scalar()
+se <- vcov(ols) %>% diag() %>% sqrt() %>% round(3)
 se <- se["eduyrs"] %>% as.scalar()
 critval <- qt(0.975, 48)
 
@@ -1040,7 +1049,7 @@ ggplot(data= data, aes(x = betas, y = density)) +
 ]
 .push-right[
 ```{r density2, out.width='90%', fig.height = 4, fig.width = 6, echo = FALSE}
-teh <- mod %>% tidy() %>% filter(term == "eduyrs") %>% select(statistic) %>% pull()
+teh <- ols %>% tidy() %>% filter(term == "eduyrs") %>% select(statistic) %>% pull()
 #First subst the data and add the coordinates to make it shade to y = 0
 shade2 <- rbind(c(-teh*se,-teh*se), subset(data, betas > -teh*se & betas < teh*se), c(teh*se, 0))
 
@@ -1073,9 +1082,7 @@ knitr::include_graphics('https://media.istockphoto.com/vectors/politician-and-ma
 .right-column[
 .panelset[
 .panel[.panel-name[Regression table]
-```{r}
-mod <- lm_robust(psppsgva ~ eduyrs, data = ESS)
-summary(mod, include.ci = FALSE, digits = 3)
+```{r ref.label = "ols"}
 ```
 ]
 .panel[.panel-name[Scatterplot]
@@ -1088,22 +1095,6 @@ ggplot(data = ESS, aes(y = psppsgva, x = eduyrs)) +
        x = "Years of education") +
   theme_minimal() +
   theme(legend.position = "none")
-```
-]
-.panel[.panel-name[Coefficient plot]
-```{r goal2, out.width='90%', fig.height = 4, fig.width = 6, echo = FALSE}
-lm_robust(psppsgva ~ eduyrs, data = ESS) %>%
-  tidy() %>%
-  mutate(
-    term = case_when(
-      term == "eduyrs" ~ "Years of education",
-      term == "(Intercept)" ~ "Intercept")) %>%
-  ggplot(aes(y = estimate, x = term)) +
-  geom_hline(yintercept = 0, color = "orange") +
-  geom_pointrange(aes(ymin = conf.low, ymax = conf.high)) +
-  coord_flip() +
-  labs(x = "", y = expression("Estimate of"~beta)) +
-  theme_minimal()
 ```
 ]]]
 

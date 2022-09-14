@@ -4,7 +4,7 @@
     <title>3. Randomness!</title>
     <meta charset="utf-8" />
     <meta name="author" content="Merlin Schaeffer  Department of Sociology" />
-    <meta name="date" content="2022-08-29" />
+    <meta name="date" content="2022-09-14" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
     <script src="libs/tile-view/tile-view.js"></script>
@@ -27,7 +27,7 @@ class: center, middle, inverse, title-slide
 ### Merlin Schaeffer<br> Department of Sociology
 ]
 .date[
-### 2022-08-29
+### 2022-09-14
 ]
 
 ---
@@ -168,10 +168,8 @@ Why do many games have a random element?
 .push-left[
 1) Populations are too large to study everyone.
 
-&lt;img src="https://www.kuechengoetter.de/uploads/media/630x630/02/28602-suppentopf-mit-nudeln-und-haehnchen.jpg?v=1-0" width="50%" style="display: block; margin: auto;" /&gt;
-.center[.backgrnote[
-Our sample is basically a tasting of what's cooking.]]
-
+&lt;img src="https://pbs.twimg.com/media/FciuC51WYAQIv3D?format=png&amp;name=900x900" width="100%" style="display: block; margin: auto;" /&gt;
+.center[.backgrnote[*Source:* Llaudet and Imai (2022)]]
 ]
 
 --
@@ -206,6 +204,7 @@ If you sampled among your friends and family, what biases would that result in? 
 ]
 
 ---
+layout: true
 # Random samples!
 
 .push-left[
@@ -220,15 +219,23 @@ Everyone in the (unobservable super) population has the same probability to be p
 `\(\rightarrow\)` No group can be forgotten.
 ]
 
---
+---
+
+.push-right[
+&lt;img src="https://pbs.twimg.com/media/FciuC51WYAQIv3D?format=png&amp;name=900x900" width="100%" style="display: block; margin: auto;" /&gt;
+.center[.backgrnote[*Source:* Llaudet and Imai (2022)]]
+]
+
+---
 
 .push-right[
 &lt;img src="https://www.kuechengoetter.de/uploads/media/630x630/02/28602-suppentopf-mit-nudeln-und-haehnchen.jpg?v=1-0" width="50%" style="display: block; margin: auto;" /&gt;
 .center[.backgrnote[
-Random sampling is the equivalent of giving the soup a proper stir before we taste it ;).]]
+Random sampling is the equivalent of &lt;br&gt; giving the soup a proper stir before we taste it ;).]]
 ]
 
 ---
+layout: false
 class: inverse middle center
 
 Nice talk man.
@@ -650,9 +657,9 @@ for (draw in 3:1000) {
 # estimates of beta will lie in 
 # the interval:
 mean(beta_hat) - 1.96 * sd(beta_hat)
-# [1] -0.0276
+# [1] -0.0337
 mean(beta_hat) + 1.96 * sd(beta_hat)
-# [1] 0.108
+# [1] 0.107
 ```
 ]]
 
@@ -677,9 +684,9 @@ mean(beta_hat) + 1.96 * sd(beta_hat)
 # 95% of the estimates of beta 
 # will lie in the interval
 mean(beta_hat) - crit_val * sd(beta_hat)
-# [1] -0.0294
+# [1] -0.0355
 mean(beta_hat) + crit_val * sd(beta_hat)
-# [1] 0.11
+# [1] 0.109
 ```
 ]]
 
@@ -740,10 +747,10 @@ True sampling error from our repeated samples:
 
 ```r
 sd(beta_hat)
-# [1] 0.0347
+# [1] 0.0359
 ```
 
-&lt;img src="3-Random_files/figure-html/unnamed-chunk-32-1.gif" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="3-Random_files/figure-html/unnamed-chunk-33-1.gif" width="100%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -855,11 +862,11 @@ ggplot(data = ESS_sample, aes(y = psppsgva, x = eduyrs)) +
 ]
 .panel[.panel-name[Plot]
 .push-left[
-&lt;img src="3-Random_files/figure-html/unnamed-chunk-36-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+&lt;img src="3-Random_files/figure-html/unnamed-chunk-37-1.png" width="90%" style="display: block; margin: auto;" /&gt;
 ]
 
 .push-right[
-&lt;img src="3-Random_files/figure-html/unnamed-chunk-37-1.gif" width="90%" style="display: block; margin: auto;" /&gt;
+&lt;img src="3-Random_files/figure-html/unnamed-chunk-38-1.gif" width="90%" style="display: block; margin: auto;" /&gt;
 ]]]
 
 ---
@@ -991,8 +998,8 @@ Can you come up with another example?
 .panel[.panel-name[Regression model]
 
 ```r
-mod &lt;- lm_robust(psppsgva ~ eduyrs, data = ESS_sample)
-summary(mod, include.ci = FALSE, digits = 3)
+ols &lt;- lm_robust(psppsgva ~ eduyrs, data = ESS_sample)
+summary(ols, include.ci = FALSE, digits = 3)
 # 
 # Call:
 # lm_robust(formula = psppsgva ~ eduyrs, data = ESS_sample)
@@ -1040,28 +1047,25 @@ summary(mod, include.ci = FALSE, digits = 3)
 .panel[.panel-name[Regression table]
 
 ```r
-mod &lt;- lm_robust(psppsgva ~ eduyrs, data = ESS)
-summary(mod, include.ci = FALSE, digits = 3)
+ols &lt;- lm_robust(psppsgva ~ eduyrs, data = ESS_sample)
+summary(ols, include.ci = FALSE, digits = 3)
 # 
 # Call:
-# lm_robust(formula = psppsgva ~ eduyrs, data = ESS)
+# lm_robust(formula = psppsgva ~ eduyrs, data = ESS_sample)
 # 
 # Standard error type:  HC2 
 # 
 # Coefficients:
-#             Estimate Std. Error t value  Pr(&gt;|t|) CI Lower CI Upper   DF
-# (Intercept)   2.1994    0.09466   23.24 2.41e-102   2.0137   2.3850 1509
-# eduyrs        0.0391    0.00645    6.06  1.74e-09   0.0264   0.0517 1509
+#             Estimate Std. Error t value Pr(&gt;|t|) CI Lower CI Upper DF
+# (Intercept)    1.965      0.635   3.096  0.00327   0.6889    3.242 48
+# eduyrs         0.042      0.043   0.976  0.33405  -0.0445    0.128 48
 # 
-# Multiple R-squared:  0.0256 ,	Adjusted R-squared:  0.0249 
-# F-statistic: 36.7 on 1 and 1509 DF,  p-value: 1.74e-09
+# Multiple R-squared:  0.0274 ,	Adjusted R-squared:  0.00713 
+# F-statistic: 0.952 on 1 and 48 DF,  p-value: 0.334
 ```
 ]
 .panel[.panel-name[Scatterplot]
 &lt;img src="3-Random_files/figure-html/goal-1.png" width="90%" style="display: block; margin: auto;" /&gt;
-]
-.panel[.panel-name[Coefficient plot]
-&lt;img src="3-Random_files/figure-html/goal2-1.png" width="90%" style="display: block; margin: auto;" /&gt;
 ]]]
 
 ---
