@@ -60,7 +60,7 @@ class: inverse middle
 
 3. **Application 2:** Police response to domestic violence.
 
-4. **Intention to treat designs**
+4. **Intention to treat designs (ITT)**
 
 5. **Instrument Variables (IV)**
 
@@ -151,6 +151,11 @@ treat people with terrorism!]
 \end{tikzpicture}
 ```
 ]
+
+---
+class: inverse middle center
+# Natural Experiments
+
 
 ---
 class: clear
@@ -292,6 +297,24 @@ With a natural experiment, we can study a real event $E$ and not some artificial
 \end{tikzpicture}
 ```
 ]]
+
+---
+# Natural experiments .font70[How to?!]
+
+.left-column[.content-box-blue[
+Analyzing a natural experiment does not necessarily involve much statistical sophistication; often simple OLS suffices.
+
+*But finding one is as tough as finding truffles; you got to be lucky!*
+
+.center[**_Are you such a <br>lucky truffle pig?_**]
+]]
+
+.right-column[
+```{r, echo = FALSE, out.width='80%'}
+knitr::include_graphics('https://upload.wikimedia.org/wikipedia/commons/5/5e/Cochon_truffier.JPG')
+```
+]
+
 ---
 class: clear
 # Learning goal 1 .font60[Terror attacks can increase xenophobia]
@@ -306,9 +329,13 @@ knitr::include_graphics('./img/Joscha4.png')
 --
 
 .left-column[.content-box-green[.center[
-If you want to learn what Joscha has to say about:
+My friend Joscha <br> is a truffle pig ;)
 
-*Why was there a causal effect in Portugal etc., but not in the UK etc.?* 
+Based on the idea that the day of a survey interview is random, he could estimate the causal effect of the Bali 2002 terror attack.
+
+Do you want to learn what Joscha has to say about:
+
+*Why was there an effect in Portugal, but not in the UK?* 
 
 Read his article ;)
 ]]]
@@ -336,19 +363,66 @@ knitr::include_graphics('https://www.latentview.com/wp-content/uploads/2016/04/L
 ]
 
 ---
+class: inverse middle center
+# Intention to Treat (ITT) Designs
 
-<!-- --- -->
-<!-- class: middle clear -->
+---
+# .font80[One of the largest RCTs in the social sciences]
 
-<!-- .left-column[ -->
-<!-- ```{r, echo = FALSE, out.width='80%'} -->
-<!-- knitr::include_graphics('https://www.laserfiche.com/wp-content/uploads/2014/10/femalecoder.jpg') -->
-<!-- ``` -->
-<!-- ] -->
+.left-column[
+```{r, echo = FALSE, out.width='55%'}
+knitr::include_graphics('https://s3.amazonaws.com/uploads.thirdway.org/legacy/publishing/images/files/000/000/955/NEXT_-_Moving_to_Opportunity_COVER_Web.jpg?1422480199')
+```
 
-<!-- .right-column[ -->
-<!-- <iframe src='exercise2.html' width='1000' height='600' frameborder='0' scrolling='yes'></iframe> -->
-<!-- ] -->
+```{r, echo = FALSE, out.width='100%'}
+knitr::include_graphics('https://media.npr.org/assets/news/2010/12/06/chicago-176e8cb0fb2f87289bbda3bfd2b8b4f492fa572d-s1100-c50.jpg')
+```
+]
+
+.right-column[
+<iframe src='https://en.wikipedia.org/wiki/Moving_to_Opportunity' width='1000' height='600' frameborder='0' scrolling='yes'></iframe>
+]
+
+---
+# Intention to treat $\neq$ treatment
+
+.left-column[
+```{r, echo = FALSE, out.width='100%'}
+knitr::include_graphics('https://i.ytimg.com/vi/h5MD2ptO998/maxresdefault.jpg')
+```
+
+```{tikz, DAG3, echo = FALSE, out.width='100%'}
+\usetikzlibrary{shapes,decorations,arrows,calc,arrows.meta,fit,positioning,quotes}
+\tikzset{
+  -Latex,auto,node distance =1 cm and 1 cm,semithick,
+  state/.style ={ellipse, draw, minimum width = 0.7 cm},
+  point/.style = {circle, draw, inner sep=0.04cm,fill,node contents={}},
+  bidirected/.style={Latex-Latex,dashed},
+  el/.style = {inner sep=2pt, align=left, sloped}
+}
+
+\begin{tikzpicture}
+\sffamily
+\node[state] (1) [red] at (0,0) {$I$};
+\node[state] (2) [right = of 1] {$X$};
+\node[state] (3) [above = of 2] {$C$};
+\node[state] (4) [right = of 2] {$Y$};
+
+\path (1) [red] edge ["0.4766"] (2);
+\path (2) edge (4);
+\path (3) edge [dashed] (4);
+\path (3) edge [dashed] (2);
+\end{tikzpicture}
+```
+]
+
+.right-column[
+```{r, echo = FALSE, out.width='95%'}
+knitr::include_graphics('./img/Chetty1.png')
+```
+.center[.backgrnote[*Source:* `r Citet(myBib, "chetty_effects_2016")`]]
+]
+
 
 ---
 class: inverse
