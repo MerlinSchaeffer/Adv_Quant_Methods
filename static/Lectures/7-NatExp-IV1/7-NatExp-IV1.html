@@ -4,7 +4,7 @@
     <title>Natural Experiments &amp;    Instrument Variables (IV)</title>
     <meta charset="utf-8" />
     <meta name="author" content="Merlin Schaeffer  Department of Sociology" />
-    <meta name="date" content="2022-09-14" />
+    <meta name="date" content="2022-09-15" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
     <script src="libs/tile-view/tile-view.js"></script>
@@ -27,7 +27,7 @@ class: center, middle, inverse, title-slide
 ### Merlin Schaeffer<br> Department of Sociology
 ]
 .date[
-### 2022-09-14
+### 2022-09-15
 ]
 
 ---
@@ -45,13 +45,18 @@ class: inverse middle
 
 1. **Application 1**: Terrorist attacks and xenophobia. 
 
-2. **Natural experiments**
+2. **Natural Experiments**
+  + RCTs versus Natural Experiments
 
-3. **Application 2:** Police response to domestic violence.
+3. **Application 2:** Moving out of poor neighborhoods during early childhood.
 
-4. **Intention to treat designs (ITT)**
+4. **Intention to Treat (ITT)** Effects
+  + RCTs versus ITTs
 
 5. **Instrument Variables (IV)**
+  - 3 IV requirements
+  - First stage, reduced form, &amp; IV estimator
+  - Why IV is LATE (local average treatment effect)
 
 ---
 # Terrorism and xenophobia
@@ -78,7 +83,11 @@ class: inverse middle center
 
 .left-column[
 .font130[
-**What is the average causal effect of terrorist attacks on xenophobia?**
+**What is the** 
+
+**average causal effect**
+
+**of terrorist attacks on xenophobia?**
 ]]
 
 ---
@@ -142,7 +151,7 @@ class: clear
 In comparison to a normal RCT, this allows for:
 &gt; an experiment [...] on the grandest scale.
 
-&gt; --- Snow (1856)
+&gt; -- Snow (1856)
 ]
 
 .push-right[.center[
@@ -294,6 +303,7 @@ class: inverse middle center
 ]
 
 ---
+layout: true
 # Intention to treat `\(\neq\)` treatment
 
 .left-column[
@@ -302,26 +312,205 @@ class: inverse middle center
 &lt;img src="7-NatExp-IV1_files/figure-html/DAG3-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]
 
+---
+
 .right-column[
-&lt;img src="./img/Chetty1.png" width="95%" style="display: block; margin: auto;" /&gt;
+&lt;img src="./img/Chetty1.png" width="80%" style="display: block; margin: auto;" /&gt;
 .center[.backgrnote[*Source:* Chetty, Hendren, and Katz (2016)]]
 ]
 
+---
+
+.right-column[
+&lt;img src="./img/Chetty2.png" width="80%" style="display: block; margin: auto;" /&gt;
+.center[.backgrnote[*Source:* Chetty, Hendren, and Katz (2016)]]
+
+.content-box-green[.center[
+Are these average causal effects of moving out of poor neighborhoods during childhood?
+]]]
+
+---
+
+.right-column[
+&lt;img src="./img/Chetty2.png" width="80%" style="display: block; margin: auto;" /&gt;
+.center[.backgrnote[*Source:* Chetty, Hendren, and Katz (2016)]]
+
+.content-box-blue[
+
+.center[Since support for moving out of poor neighborhoods was randomly assigned by a lottery...]
+
+`\(\rightarrow\)` The ITTs are average causal effects.
+
+`\(\rightarrow\)` But they are average causal effects .alert[of being offered support] `\(\color{red}{Z}\)` .alert[, not of having moved to a better neighborhood] `\(\color{black}{D}\)`.alert[!]
+
+]]
+
+---
+layout: false
+# RCTs vs ITTs
+
+.push-left[.content-box-red[
+.font120[.center[**RCT**]]
+
+`$$\begin{equation}\begin{split} &amp; |r_{I,D}| = 1 \\ &amp;\rightarrow I = D! \end{split}\end{equation}$$`
+
+That is, the absolute correlation between intervention `\(I\)` and predictor of interest `\(D\)` is 1, making them practically the same thing.
+&lt;br&gt;
+&lt;br&gt;
+
+&lt;img src="7-NatExp-IV1_files/figure-html/DAG4-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+]]
+
+--
+
+.push-left[.content-box-blue[
+.font120[.center[**ITT**]]
+
+`$$\begin{equation}\begin{split} &amp; |r_{Z, D}| &lt; 1 \\ &amp;\rightarrow Z \neq D! \end{split}\end{equation}$$`
+
+That is, the absolute correlation between intervention `\(Z\)` and predictor of interest `\(D\)` is smaller than 1, inducing some portion of random variation into `\(D\)`.
+
+
+&lt;img src="7-NatExp-IV1_files/figure-html/DAG5-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+]]
+
+---
+layout: false
+class: inverse middle center
+# .font50[Fortunately, the Intervention (i.e. intention to treat) can be used as an:]&lt;br&gt; Instrument Variable (IV)
+
+---
+layout: true
+# Instrument Variables (IV)
+
+.left-column[.content-box-red[
+.center[**3 Requirements**]
+1. *First stage*: Instrument has causal effect on outcome `\(Y_{i}\)`.
+
+2. *Randomization*: Instrument is randomly assigned (RCT or natural experiment).
+
+3. *Exclusion restriction*: Instrument affects outcome `\(Y_{i}\)` **_only_** through its effect on `\(D\)`.
+  + In practice very difficult to test
+]]
+
+---
+.right-column[
+&lt;img src="7-NatExp-IV1_files/figure-html/unnamed-chunk-23-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
+.right-column[
+&lt;img src="7-NatExp-IV1_files/figure-html/DAG6-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
+
+
+---
+
+.right-column[
+&lt;img src="7-NatExp-IV1_files/figure-html/DAG7-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+
+`$$\underbrace{\kappa_{\text{Support}\rightarrow\text{Income}}}_{1624\text{ Dollar}} = \underbrace{\kappa_{\text{Support}\rightarrow\text{Moving}}}_{0.4766} \times \underbrace{\kappa_{\text{Moving}\rightarrow\text{Income}}}_{?}$$`
+
+]
+
+---
+
+.right-column[
+&lt;img src="7-NatExp-IV1_files/figure-html/unnamed-chunk-24-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+
+`$$\begin{equation}\begin{split} &amp; \underbrace{\kappa_{\text{Support}\rightarrow\text{Income}}}_{1624\text{ Dollar}} = \underbrace{\kappa_{\text{Support}\rightarrow\text{Moving}}}_{0.4766} \times \underbrace{\kappa_{\text{Moving}\rightarrow\text{Income}}}_{?} \\ \\ &amp; \frac{\kappa_{\text{Support}\rightarrow\text{Income}}}{\kappa_{\text{Support}\rightarrow\text{Moving}}} = \underbrace{\kappa_{\text{Moving}\rightarrow\text{Income}}}_{?} \end{split}\end{equation}$$`
+]
+---
+layout: false
+# IV .font60[in general]
+
+.push-left[
+&lt;img src="7-NatExp-IV1_files/figure-html/DAG8-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+
+**First Stage:** `\(E[D_{i}|Z_{i}=1]-E[D_{i}|Z_{i}=0]; \text{call this }\phi.\)`
+
+**Reduced Form:** `\(E[Y_{i}|Z_{i}=1]-E[Y_{i}|Z_{i}=0]; \text{call this }\rho.\)`
+
+**IV Estimator:** `\(\lambda = \frac{\rho}{\phi} = \frac{E[Y_{i}|Z_{i}=1]-E[Y_{i}|Z_{i}=0]}{E[D_{i}|Z_{i}=1]-E[D_{i}|Z_{i}=0]}.\)`
+]
+
+--
+
+.push-right[.content-box-blue[
+.center[**The exclusion restriction matters!**&lt;br&gt;(but we can never test it)]
+&lt;img src="7-NatExp-IV1_files/figure-html/unnamed-chunk-25-1.png" width="65%" style="display: block; margin: auto;" /&gt;
+
+`$$\frac{1624}{0.4766} = \frac{\rho \color{red}{+ ?}}{\phi}\neq \lambda$$`
+.center[.alert[
+If the exclusion restriction does not hold, &lt;br&gt; we weigh-up other causal effects than `\(D\)` by `\(\frac{1}{\phi}\)`
+]]]]
+
+---
+layout: false
+# IV is LATE .font60[Local Average Treatment Effect]
+
+.push-left[
+&lt;img src="7-NatExp-IV1_files/figure-html/unnamed-chunk-26-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+
+**First Stage:** `\(E[D_{i}|Z_{i}=1]-E[D_{i}|Z_{i}=0]; \text{call this }\phi.\)`
+
+**Reduced Form:** `\(E[Y_{i}|Z_{i}=1]-E[Y_{i}|Z_{i}=0]; \text{call this }\rho.\)`
+
+**IV Estimator of LATE:** `\(\lambda = \frac{\rho}{\phi} = \frac{E[Y_{i}|Z_{i}=1]-E[Y_{i}|Z_{i}=0]}{E[D_{i}|Z_{i}=1]-E[D_{i}|Z_{i}=0]} \color{red}{= E[Y_{1i}-Y_{0i}|\text{Complier}_{i}=1]}.\)`
+]
+
+.push-right[
+&lt;img src="7-NatExp-IV1_files/figure-html/Tree1-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+layout: false
+# IV is LATE .font60[Local Average Treatment Effect]
+
+.push-left[
+&lt;img src="7-NatExp-IV1_files/figure-html/unnamed-chunk-27-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+
+**First Stage:** `\(E[D_{i}|Z_{i}=1]-E[D_{i}|Z_{i}=0]; \text{call this }\phi.\)`
+
+**Reduced Form:** `\(E[Y_{i}|Z_{i}=1]-E[Y_{i}|Z_{i}=0]; \text{call this }\rho.\)`
+
+**IV Estimator of LATE:** `\(\lambda = \frac{\rho}{\phi} = \frac{E[Y_{i}|Z_{i}=1]-E[Y_{i}|Z_{i}=0]}{E[D_{i}|Z_{i}=1]-E[D_{i}|Z_{i}=0]} \color{red}{= E[Y_{1i}-Y_{0i}|\text{Complier}_{i}=1]}.\)`
+]
+
+.push-right[
+&lt;img src="7-NatExp-IV1_files/figure-html/unnamed-chunk-28-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+**IV is LATE**: Never- &amp; Always-taker don't respond to our intention to treat them. IV tells us nothing about them, but only about compliers.
+
+**Monotonicity**: If there are defiers (&amp; compliers),&lt;br&gt; IV produces garbage.
+]
 
 ---
 class: inverse
 # Today's general lessons
 
-1. Experiment: An artificial environment controlled by the researcher. Allows researchers to control "treatment" assignment.
-2. Randomized Controlled Trials (RCT): An experiment with treatment and control group in which researchers assign treatment or control at random.
-3. Randomization: Random assignment of treatment and control ensures a balanced comparison (no selection/confounder bias). Randomization can fail, especially in small samples.
-4. RCTs can be analyzed with a simple OLS regression.
+1. *Natural Experiment*: Sometimes nature or other forces randomly exposure people to treatment or control conditions. Compared to RCTs we have less control that exposure was truly random, but we can often study more interesting - real - events.
+
+2. *Intention to Treat*: Some people do not comply with the experimental group we assign them to. In that case we estimate an average causal intention to treat effect, if we focus on the randomly assigned treatment alone.
+
+3. *Instrument Variables (IV) Estimation*: Instrument variable regression allows us to recover the causal effect of the treatment (not the intention) in such situations.
+
+4. *LATE (Local average treatment effect:* IV only estimates the treatment effect among compliers; we cannot know how people who did not comply to the intended treatment would have been affected by the treatment.
 
 ---
 # References
 
 .font80[
-NULL
+Chetty, R., N. Hendren, and L. F. Katz (2016). "The Effects of Exposure to Better Neighborhoods on
+Children: New Evidence from the Moving to Opportunity Experiment". In: _The American Economic Review_,
+pp. 855-902.
+
+Legewie, J. (2013). "Terrorist Events and Attitudes toward Immigrants: A Natural Experiment". In:
+_American Journal of Sociology_, pp. 1199-1245.
+
+Snow, J. (1856). "On the Mode of Communication of Cholera". In: _Edinburgh Medical Journal_, pp.
+668-670.
 ]
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
