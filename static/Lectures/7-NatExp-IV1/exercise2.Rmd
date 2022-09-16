@@ -12,91 +12,77 @@ knitr::opts_chunk$set(
   comment = "#", strip.white = TRUE)
 
 library(webexercises)
-library(tidyverse)
-library(essentials)
-
-pacman::p_load(
-  tidyverse, # Data manipulation,
-  furniture, # For row-means,
-  ggplot2, # beautiful figures,
-  estimatr, # Regression for weighted data,
-  modelr, # Turn results of lm() into a tibble,
-  modelsummary, # for balance tables,
-  texreg) # regression tables with nice layout.
-
-# 1. read the APAX data
-load("../../../assets/APAX.Rdata") # Read APAX data,
-APAX <- APAX %>% mutate(
-  # News in minutes,
-  news = news_hrs*60 + news_mins, 
-  news_yn = case_when( # News Yes/No,
-    news < 10 ~ 0, # Less than 15  minutes,
-    news > 14 ~ 1, # More than 15  minutes,
-    TRUE ~ as.numeric(NA)),
-  # Average discrimination index across domains,
-  dis_index = rowmeans( #<<
-    dis_trainee, dis_job, dis_school, #<<
-    dis_house, dis_gov, dis_public, #<<
-    na.rm = TRUE), #<<
-  # Z-standardized discrimination index.
-  z_dis_index = scale(dis_index) %>% 
-    as.numeric())
 ```
 
+```{r eval = FALSE}
+# Run this line of code once. 
+# It downloads Data from Gelman & Hill's "Regression and other Stories"
+remotes::install_github("avehtari/ROS-Examples", subdir = "rpackage")
+```
 
-1. The APAX data also contains a variable `antidiscr_law` on support for anti-discrimination policy: "How good or bad is it for a country to have a law against ethnic discrimination in the work place?". The answer categories are: (1) Very bad, (2) Bad, (3) So/so, (4) Good, (5) Very good. Use the APAX survey experiment. Estimate the causal effect of reading an article on support for anti-discrimination policy. Estimate z-standardized effects,
+```{r}
+pacman::p_load(
+  tidyverse, # Data manipulation,
+  haven, # Handle Stata data.
+  ggplot2, # beautiful figures,
+  estimatr, # Regression for weighted data,
+  furniture, # For row-means,
+  rosdata, # Data from Gelman & Hill's "Regression and other Stories"
+  texreg) # regression tables with nice layout.
+
+# Load the Sesame Street data
+data(sesame)
+sesame <- as_tibble(sesame) # Turn into tibble.
+```
+
+1. The variable `watched` indicates whether a kid watched Sesame Street. The variable `postlet` contains the results of the XYZ. Did kids who watched Sesame Street perform better on the XYZ? `r mcq(c("No, the result is not statistically significant", "No, the slope coefficient is actually negative", "Yes, the R2 is larger than 0.1", answer = "Yes, on average kids who whatched have ca. 13 points more and this is statistically significant", "Yes, we see three stars"))`. Is this evidence of an average causal effect? `r mcq(c("No, because there is no significant effect", "Yes, because the result is significantly positive", answer = "No, there could be selection bias into watching Sesame Street"))`
+
 `r hide("R solution -> dont' peak to early ;) !")`
 ```{r}
-APAX <- APAX %>%
-  mutate(
-    z_antidiscr_law = scale(antidiscr_law) %>% as.numeric())
-
-zols <- lm_robust(z_antidiscr_law ~ article, 
-                 weight = gewFAKT, data = APAX)
-
-screenreg(zols, include.ci = FALSE, digits = 3)
+ols <- lm_robust(postlet ~ watched, data = sesame)
+screenreg(ols, include.ci = FALSE, digits = 3)
 ```
 `r unhide()`
 
-```{r include = FALSE}
-coef <- coef(zols)["articleTreat_1"] %>% round(., 3) %>% as.scalar()
-se <- vcov(zols) %>% diag()
-se <- se["articleTreat_1"] %>% sqrt() %>% round(., 3) %>% as.scalar()
-```
+2. The variable `encouraged` indicates whether a kid was randomly encouraged by its teacher to watch Sesame Street. Did kids who were encouraged to watch Sesame Street perform better on the XYZ? `r mcq(c(answer = "No, the result is not statistically significant", "No, the slope coefficient is actually negative", "No, the R2 is smaller than 0.1", "Yes, on average kids who whatched have ca. 3 points more and this is statistically significant"))`. Is this evidence of an average causal effect? `r mcq(c("No, because not all kids who were encouraged actually watched", "No, correlation is not causation", answer = "Yes, but of being encouraged not of watching Sesame Street"))`. In IV language, this is the `r mcq(c(answer = "Reduced form", "First stage", "LATE estimate"))`.
 
-2. What is the causal effect of reading news about discrimination in society on supporting equal treatment policies? The causal effect is: `r fitb(coef, width = "5")`. What is the estimated standard error of this $\hat{\beta}$? `r fitb(se, width = "5")`. *What do these two statistics suggest about a causal effect?*
-
-```{r include = FALSE}
-coef <- coef(zols)["articleTreat_2"] %>% round(., 3) %>% as.scalar()
-se <- vcov(zols) %>% diag()
-se <- se["articleTreat_2"] %>% sqrt() %>% round(., 3) %>% as.scalar()
-```
-3. What is the causal effect of reading news about integration in society on supporting equal treatment policies? The causal effect is: `r fitb(coef, width = "5")`. What is the estimated standard error of this $\hat{\beta}$? `r fitb(se, width = "5")`. *What do these two statistics suggest about a causal effect?*
-
-4. Make a coeffient plot to visualize these results.
 `r hide("R solution -> dont' peak to early ;) !")`
 ```{r}
-(plotdata <- zols %>%
-   tidy() %>% # Turn results into a tibble,
-   mutate( # Rename variables for the plot.
-     term = case_when(
-       term == "articleTreat_1" ~ "Discrimination",
-       term == "articleTreat_2" ~ "Integration",
-       term == "(Intercept)" ~ "Intercept")))
+ols2 <- lm_robust(postlet ~ encouraged, data = sesame)
+screenreg(ols2, include.ci = FALSE, digits = 3)
+```
+`r unhide()`
 
-ggplot(data = plotdata %>% filter(term != "Intercept"),
-       aes(y = estimate, x = term)) +
-  # Point with error-bars,
-  geom_hline(yintercept = 0, color = "orange", 
-             lty = "dashed") +
-  geom_pointrange(aes(min = conf.low, max = conf.high)) +
-  coord_flip() + # Flip Y- & X-Axis,
-  labs(
-    title = "Causal effect of news articles", 
-    x = "Article on",
-    # Write Greek beta into axis title.
-    y = "Comparison to control group (article on Venus) 
-    in standard deviations") + 
-  theme_minimal()
+3. How many kids complied to the encouragement? `r fitb(3.17, width = "4")` kids did. How much higher was the proportion of kids who watched Sesame Street among the encouraged kids compared to the non-encouraged kids? It was `r fitb(0.362, width = "4")` (three digits).
+`r hide("R solution -> dont' peak to early ;) !")`. In IV language, this is the `r mcq(c("Reduced form", answer = "First stage", "LATE estimate"))`.
+```{r}
+# Make a table of absolute frequencies
+(sesam_tab <- sesame %>% 
+   select('watched','encouraged') %>% 
+   table())
+
+# Compliers are the encouraged who watched + the non-encouraged who didn't watch:
+138 + 40
+
+ols3 <- lm_robust(watched ~ encouraged, data = sesame)
+screenreg(ols3, include.ci = FALSE, digits = 3)
+```
+`r unhide()`
+
+4. Based on the above information, what is the IV estimate of the local average causal effect among complying kids? It is: `r fitb(7.94, width = "4")` (two digits).
+`r hide("R solution -> dont' peak to early ;) !")`
+```{r}
+# The IV estimate is:
+2.876  / 0.362
+```
+`r unhide()`
+
+5. Install the following package: `install.packages("ivreg", dependencies = TRUE)`. Your can read about it here: [ivreg homepage](https://cran.r-project.org/web/packages/ivreg/vignettes/ivreg.html). Use the command `ivreg()` to estimate the IV Local Average Treatment Effect. Does watching Sesame Street make Kids better at XYZ? `r mcq(c(answer = "No, the LATE is not statistically significant", "Yes, the effect is positive"))`
+
+`r hide("R solution -> dont' peak to early ;) !")`
+```{r}
+pacman::p_load(ivreg)
+twosls <- ivreg(postlet ~ watched | encouraged, data = sesame)
+screenreg(twosls)
 ```
 `r unhide()`
