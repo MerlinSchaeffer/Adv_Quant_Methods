@@ -4,7 +4,7 @@
     <title>2. Recap: Correlation &amp; OLS Regression</title>
     <meta charset="utf-8" />
     <meta name="author" content="Merlin Schaeffer  Department of Sociology" />
-    <meta name="date" content="2022-09-14" />
+    <meta name="date" content="2022-09-16" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
     <script src="libs/tile-view/tile-view.js"></script>
@@ -27,7 +27,7 @@ class: center, middle, inverse, title-slide
 ### Merlin Schaeffer<br> Department of Sociology
 ]
 .date[
-### 2022-09-14
+### 2022-09-16
 ]
 
 ---
@@ -106,12 +106,15 @@ pacman::p_load(
   tidyverse, # Data manipulation,
   ggplot2, # beautiful figures,
   wbstats, # download data from Worldbank. Tremendous source of global socio-economic data.
+  # democracyData, # download democracy data used in the scholarly literature.
   texreg, # regression tables with nice layout,
   countrycode, # Easy recodings of country names,
   remotes) # Install beta version packages from GitHub.
 
+# Make sure to run the two lines of code below only once, to delete them afterwards, 
+# and to un-comment "democracyData" in the pacman::p_load() above afterwards.
 remotes::install_github("xmarquez/democracyData")
-pacman::p_load(democracyData) # download democracy datasets used in the scholarly literature.
+pacman::p_load(democracyData) # download democracy data used in the scholarly literature.
 ```
 ]]
 
@@ -214,16 +217,16 @@ class: clear
 # # A tibble: 163 × 3
 #    country     date poverty
 #    &lt;chr&gt;      &lt;dbl&gt;   &lt;dbl&gt;
-#  1 Albania     2019    10  
-#  2 Algeria     2011    28.6
-#  3 Angola      2018    88.5
-#  4 Argentina   2020    18.2
-#  5 Armenia     2020    44.7
-#  6 Australia   2018     0.7
+#  1 Albania     2019    10.9
+#  2 Algeria     2011    36.6
+#  3 Angola      2018    78  
+#  4 Argentina   2020    14.1
+#  5 Armenia     2020    53.5
+#  6 Australia   2018     1  
 #  7 Austria     2019     0.8
-#  8 Azerbaijan  2005     7  
-#  9 Bangladesh  2016    84.2
-# 10 Belarus     2020     0.1
+#  8 Azerbaijan  2005    31.3
+#  9 Bangladesh  2016    86.9
+# 10 Belarus     2020     1.3
 # # … with 153 more rows
 ```
 ]
@@ -294,16 +297,16 @@ Dat_poverty
 # # A tibble: 163 × 3
 #    country     date poverty
 #    &lt;chr&gt;      &lt;dbl&gt;   &lt;dbl&gt;
-#  1 Albania     2019    10  
-#  2 Algeria     2011    28.6
-#  3 Angola      2018    88.5
-#  4 Argentina   2020    18.2
-#  5 Armenia     2020    44.7
-#  6 Australia   2018     0.7
+#  1 Albania     2019    10.9
+#  2 Algeria     2011    36.6
+#  3 Angola      2018    78  
+#  4 Argentina   2020    14.1
+#  5 Armenia     2020    53.5
+#  6 Australia   2018     1  
 #  7 Austria     2019     0.8
-#  8 Azerbaijan  2005     7  
-#  9 Bangladesh  2016    84.2
-# 10 Belarus     2020     0.1
+#  8 Azerbaijan  2005    31.3
+#  9 Bangladesh  2016    86.9
+# 10 Belarus     2020     1.3
 # # … with 153 more rows
 ```
 ]
@@ -347,16 +350,16 @@ Dat_poverty
 # # A tibble: 147 × 4
 #    country     date poverty citizen_rights
 #    &lt;chr&gt;      &lt;dbl&gt;   &lt;dbl&gt;          &lt;dbl&gt;
-#  1 Albania     2019    10                8
-#  2 Algeria     2011    28.6              3
-#  3 Angola      2018    88.5              3
-#  4 Argentina   2020    18.2             10
-#  5 Armenia     2020    44.7              6
-#  6 Australia   2018     0.7             12
+#  1 Albania     2019    10.9              8
+#  2 Algeria     2011    36.6              3
+#  3 Angola      2018    78                3
+#  4 Argentina   2020    14.1             10
+#  5 Armenia     2020    53.5              6
+#  6 Australia   2018     1               12
 #  7 Austria     2019     0.8             12
-#  8 Azerbaijan  2005     7                3
-#  9 Bangladesh  2016    84.2              6
-# 10 Belarus     2020     0.1              1
+#  8 Azerbaijan  2005    31.3              3
+#  9 Bangladesh  2016    86.9              6
+# 10 Belarus     2020     1.3              1
 # # … with 137 more rows
 ```
 
@@ -421,16 +424,16 @@ Dat
 # # A tibble: 147 × 5
 #    country     date poverty citizen_rights socialist
 #    &lt;chr&gt;      &lt;dbl&gt;   &lt;dbl&gt;          &lt;dbl&gt;     &lt;dbl&gt;
-#  1 Albania     2019    10                8        21
-#  2 Algeria     2011    28.6              3        49
-#  3 Angola      2018    88.5              3         5
-#  4 Argentina   2020    18.2             10         0
-#  5 Armenia     2020    44.7              6         0
-#  6 Australia   2018     0.7             12         0
+#  1 Albania     2019    10.9              8        21
+#  2 Algeria     2011    36.6              3        49
+#  3 Angola      2018    78                3         5
+#  4 Argentina   2020    14.1             10         0
+#  5 Armenia     2020    53.5              6         0
+#  6 Australia   2018     1               12         0
 #  7 Austria     2019     0.8             12         0
-#  8 Azerbaijan  2005     7                3         0
-#  9 Bangladesh  2016    84.2              6        44
-# 10 Belarus     2020     0.1              1        14
+#  8 Azerbaijan  2005    31.3              3         0
+#  9 Bangladesh  2016    86.9              6        44
+# 10 Belarus     2020     1.3              1        14
 # # … with 137 more rows
 ```
 ]
@@ -492,16 +495,16 @@ class: clear
 # # A tibble: 147 × 7
 #    country     date poverty citizen_rights socialist z_socialist z_poverty
 #    &lt;chr&gt;      &lt;dbl&gt;   &lt;dbl&gt;          &lt;dbl&gt;     &lt;dbl&gt;       &lt;dbl&gt;     &lt;dbl&gt;
-#  1 Albania     2019    10                8        21       0.995    -0.819
-#  2 Algeria     2011    28.6              3        49       2.94     -0.287
-#  3 Angola      2018    88.5              3         5      -0.116     1.42 
-#  4 Argentina   2020    18.2             10         0      -0.464    -0.584
-#  5 Armenia     2020    44.7              6         0      -0.464     0.173
-#  6 Australia   2018     0.7             12         0      -0.464    -1.08 
-#  7 Austria     2019     0.8             12         0      -0.464    -1.08 
-#  8 Azerbaijan  2005     7                3         0      -0.464    -0.904
-#  9 Bangladesh  2016    84.2              6        44       2.59      1.30 
-# 10 Belarus     2020     0.1              1        14       0.509    -1.10 
+#  1 Albania     2019    10.9              8        21       0.983    -0.864
+#  2 Algeria     2011    36.6              3        49       2.91     -0.140
+#  3 Angola      2018    78                3         5      -0.119     1.03 
+#  4 Argentina   2020    14.1             10         0      -0.463    -0.774
+#  5 Armenia     2020    53.5              6         0      -0.463     0.336
+#  6 Australia   2018     1               12         0      -0.463    -1.14 
+#  7 Austria     2019     0.8             12         0      -0.463    -1.15 
+#  8 Azerbaijan  2005    31.3              3         0      -0.463    -0.289
+#  9 Bangladesh  2016    86.9              6        44       2.57      1.28 
+# 10 Belarus     2020     1.3              1        14       0.501    -1.14 
 # # … with 137 more rows
 ```
 ]
@@ -564,8 +567,8 @@ Dat %&gt;% # Use our data,
   select(poverty, socialist) %&gt;% # Select vars for analysis,
 * cor() # Estimate correlation.
 #           poverty socialist
-# poverty    1.0000   -0.0353
-# socialist -0.0353    1.0000
+# poverty    1.0000   -0.0383
+# socialist -0.0383    1.0000
 ```
 ]]]
 
@@ -644,7 +647,7 @@ Models should not be driven by few singular cases, like in this example.]
 - **Residuals**, `\(e_{i} =y_{i} - \hat{y}\)`
   + the differences between what our model predicts and the actual data.
 
-`\(e_{\text{Denmark}} = 0.4\% - 39.2\%=-38.8\%\)`
+`\(e_{\text{Denmark}} = 0.4\% - 42.2\%=-41.8\%\)`
 ]
 .right-column[
 &lt;img src="2-Corr-n-Reg_files/figure-html/residuals-1.png" width="100%" style="display: block; margin: auto;" /&gt;
@@ -734,12 +737,12 @@ htmlreg(list(ols, zols), # Nicely-formatted table.
 &lt;tbody&gt;
 &lt;tr style="border-top: 1px solid #000000;"&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(Intercept)&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;39.23&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;42.20&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;-0.00&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(3.19)&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(3.24)&lt;/td&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.08)&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
@@ -793,16 +796,16 @@ htmlreg(list(ols, zols), # Nicely-formatted table.
 
 .push-right[
 $$
-\operatorname{\widehat{poverty}} = 39.23 - 0.09(\operatorname{socialist})
+\operatorname{\widehat{poverty}} = 42.2 - 0.09(\operatorname{socialist})
 $$
  `\(\rightarrow\)` the best-fitting line that `\(\min \sum_{i=1}^{n} e_{i}^{2}\)`.
 
-- Among countries without a socialist past, poverty is on average 39.23%.
-  + `\((\hat{y}|\text{Socialism = 0}) = 39.23\%\)`.
+- Among countries without a socialist past, poverty is on average 42.2%.
+  + `\((\hat{y}|\text{Socialism = 0}) = 42.2\%\)`.
   
 - With every year of socialism, the average level of poverty -0.09% lower.
 
-- This model accounts for 0* 100 % more of the variation of poverty across the world, than simply using the mean as best guess `\(\bar{y} = 38.66\%\)`.
+- This model accounts for 0* 100 % more of the variation of poverty across the world, than simply using the mean as best guess `\(\bar{y} = 41.57\%\)`.
 ]]]
 
 ---
