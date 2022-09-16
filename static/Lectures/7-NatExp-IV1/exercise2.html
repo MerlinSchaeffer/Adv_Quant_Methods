@@ -709,9 +709,16 @@ screenreg(ols, include.ci = FALSE, digits = 3)
 <ol start="2" style="list-style-type: decimal">
 <li>The variable <code>encouraged</code> indicates whether a kid was
 randomly encouraged by its pædagog to watch Sesame Street. The variable
-<code>prelet</code> contains the result of the same letter-recognition
+<code>prelet</code> contains results from the same letter-recognition
 test, which the pædagogerne had conducted <em>before</em> they started
-to</li>
+to encourage kids to watch Sesame Street. Did the randomization of the
+encouragement work, or is there imbalance?
+<select class="webex-select"><option value="blank"></option><option value>Yes,
+the kids who got encouraged were already better at the
+test</option><option value>Yes, the kids who got encouraged were
+slightly worse at the test</option><option value="answer">No, while
+there is a difference of ca. 2 words on average, this difference is not
+1.96 times it&#39;s standard error.</option></select>.</li>
 </ol>
 <div class="webex-solution">
 <button>
@@ -723,10 +730,10 @@ R solution -&gt; dont&#39; peak to early ;) !
   datasummary_balance( # Make a balance table,
     formula = ~ encouraged, # by Reading news Yes/No
     data = . ,
-    title = &quot;Physical appearance of those who read news and those who don&#39;t&quot;) </code></pre>
+    title = &quot;Correctly identified letters before encouragement, by encouragement&quot;) </code></pre>
 <table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <caption>
-Physical appearance of those who read news and those who don&#39;t
+Correctly identified letters before encouragement, by encouragement
 </caption>
 <thead>
 <tr>

@@ -45,7 +45,7 @@ screenreg(ols, include.ci = FALSE, digits = 3)
 ```
 `r unhide()`
 
-2. The variable `encouraged` indicates whether a kid was randomly encouraged by its pædagog to watch Sesame Street. The variable `prelet` contains the result of the same letter-recognition test, which the pædagogerne had conducted *before* they started to 
+2. The variable `encouraged` indicates whether a kid was randomly encouraged by its pædagog to watch Sesame Street. The variable `prelet` contains results from the same letter-recognition test, which the pædagogerne had conducted *before* they started to encourage kids to watch Sesame Street. Did the randomization of the encouragement work, or is there imbalance? `r mcq(c("Yes, the kids who got encouraged were already better at the test", "Yes, the kids who got encouraged were slightly worse at the test", answer = "No, while there is a difference of ca. 2 words on average, this difference is not 1.96 times it's standard error."))`.
 
 `r hide("R solution -> dont' peak to early ;) !")`
 ```{r}
@@ -55,7 +55,7 @@ sesame %>%
   datasummary_balance( # Make a balance table,
     formula = ~ encouraged, # by Reading news Yes/No
     data = . ,
-    title = "Physical appearance of those who read news and those who don't") 
+    title = "Correctly identified letters before encouragement, by encouragement") 
 ```
 `r unhide()`
 
