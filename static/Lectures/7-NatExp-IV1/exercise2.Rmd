@@ -27,6 +27,7 @@ pacman::p_load(
   ggplot2, # beautiful figures,
   estimatr, # Regression for weighted data,
   furniture, # For row-means,
+  modelsummary, # for balance tables,
   rosdata, # Data from Gelman & Hill's "Regression and other Stories"
   texreg) # regression tables with nice layout.
 
@@ -35,7 +36,7 @@ data(sesame)
 sesame <- as_tibble(sesame) # Turn into tibble.
 ```
 
-1. The variable `watched` indicates whether a kid watched Sesame Street. The variable `postlet` contains the results of the XYZ. Did kids who watched Sesame Street perform better on the XYZ? `r mcq(c("No, the result is not statistically significant", "No, the slope coefficient is actually negative", "Yes, the R2 is larger than 0.1", answer = "Yes, on average kids who whatched have ca. 13 points more and this is statistically significant", "Yes, we see three stars"))`. Is this evidence of an average causal effect? `r mcq(c("No, because there is no significant effect", "Yes, because the result is significantly positive", answer = "No, there could be selection bias into watching Sesame Street"))`
+1. The variable `watched` indicates whether a kid actually watched Sesame Street. The variable `postlet` contains the results of the letter-recognition test. Did kids who watched Sesame Street perform better on the letter-recognition test? `r mcq(c("No, the result is not statistically significant", "No, the slope coefficient is actually negative", "Yes, the R2 is larger than 0.1", answer = "Yes, on average kids who whatched guessed ca. 13 letters more correctly and this is statistically significant", "Yes, we see three stars"))`. Is this evidence of an average causal effect? `r mcq(c("No, because there is no significant effect", "Yes, because the result is significantly positive", answer = "No, there could be selection bias into watching Sesame Street"))`.
 
 `r hide("R solution -> dont' peak to early ;) !")`
 ```{r}
@@ -44,7 +45,21 @@ screenreg(ols, include.ci = FALSE, digits = 3)
 ```
 `r unhide()`
 
-2. The variable `encouraged` indicates whether a kid was randomly encouraged by its teacher to watch Sesame Street. Did kids who were encouraged to watch Sesame Street perform better on the XYZ? `r mcq(c(answer = "No, the result is not statistically significant", "No, the slope coefficient is actually negative", "No, the R2 is smaller than 0.1", "Yes, on average kids who whatched have ca. 3 points more and this is statistically significant"))`. Is this evidence of an average causal effect? `r mcq(c("No, because not all kids who were encouraged actually watched", "No, correlation is not causation", answer = "Yes, but of being encouraged not of watching Sesame Street"))`. In IV language, this is the `r mcq(c(answer = "Reduced form", "First stage", "LATE estimate"))`.
+2. The variable `encouraged` indicates whether a kid was randomly encouraged by its pædagog to watch Sesame Street. The variable `prelet` contains the result of the same letter-recognition test, which the pædagogerne had conducted *before* they started to 
+
+`r hide("R solution -> dont' peak to early ;) !")`
+```{r}
+sesame %>%
+  # Select variables for which I want my balance test,
+  select(encouraged, prelet) %>%
+  datasummary_balance( # Make a balance table,
+    formula = ~ encouraged, # by Reading news Yes/No
+    data = . ,
+    title = "Physical appearance of those who read news and those who don't") 
+```
+`r unhide()`
+
+3. The variable `encouraged` indicates whether a kid was randomly encouraged by its pædagog to watch Sesame Street. Did kids who were encouraged to watch Sesame Street perform better on the letter-recognition test? `r mcq(c(answer = "No, the result is not statistically significant", "No, the slope coefficient is actually negative", "No, the R2 is smaller than 0.1", "Yes, on average kids who whatched guessed ca. 3 letters more correctly and this is statistically significant"))`. Is this evidence of an average causal effect? `r mcq(c("No, because not all kids who were encouraged actually watched", "No, correlation is not causation", answer = "Yes, but of being encouraged not of watching Sesame Street!"))`. In IV language, this is the `r mcq(c(answer = "Reduced form", "First stage", "LATE estimate"))`.
 
 `r hide("R solution -> dont' peak to early ;) !")`
 ```{r}
@@ -53,7 +68,7 @@ screenreg(ols2, include.ci = FALSE, digits = 3)
 ```
 `r unhide()`
 
-3. How many kids complied to the encouragement? `r fitb(3.17, width = "4")` kids did. How much higher was the proportion of kids who watched Sesame Street among the encouraged kids compared to the non-encouraged kids? It was `r fitb(0.362, width = "4")` (three digits).
+4. How many kids complied to the encouragement? `r fitb(3.17, width = "4")` kids did. How much higher was the proportion of kids who watched Sesame Street among the encouraged kids compared to the non-encouraged kids? It was `r fitb(0.362, width = "4")` (three digits).
 `r hide("R solution -> dont' peak to early ;) !")`. In IV language, this is the `r mcq(c("Reduced form", answer = "First stage", "LATE estimate"))`.
 ```{r}
 # Make a table of absolute frequencies
@@ -69,7 +84,7 @@ screenreg(ols3, include.ci = FALSE, digits = 3)
 ```
 `r unhide()`
 
-4. Based on the above information, what is the IV estimate of the local average causal effect among complying kids? It is: `r fitb(7.94, width = "4")` (two digits).
+5. Based on the above information, what is the IV estimate of the local average causal effect among complying kids? It is: `r fitb(7.94, width = "4")` (two digits).
 `r hide("R solution -> dont' peak to early ;) !")`
 ```{r}
 # The IV estimate is:
@@ -77,7 +92,7 @@ screenreg(ols3, include.ci = FALSE, digits = 3)
 ```
 `r unhide()`
 
-5. Install the following package: `install.packages("ivreg", dependencies = TRUE)`. Your can read about it here: [ivreg homepage](https://cran.r-project.org/web/packages/ivreg/vignettes/ivreg.html). Use the command `ivreg()` to estimate the IV Local Average Treatment Effect. Does watching Sesame Street make Kids better at XYZ? `r mcq(c(answer = "No, the LATE is not statistically significant", "Yes, the effect is positive"))`
+6. Install the following package: `install.packages("ivreg", dependencies = TRUE)`. Your can read about it here: [ivreg homepage](https://cran.r-project.org/web/packages/ivreg/vignettes/ivreg.html). Use the command `ivreg()` to estimate the IV Local Average Treatment Effect. Does watching Sesame Street make Kids better at XYZ? `r mcq(c(answer = "No, the LATE is not statistically significant", "Yes, the effect is positive"))`
 
 `r hide("R solution -> dont' peak to early ;) !")`
 ```{r}
