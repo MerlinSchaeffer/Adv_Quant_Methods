@@ -1,0 +1,91 @@
+---
+header:
+  caption: ""
+  image: ""
+title: About
+view: 2
+---
+
+
+
+<p>This course introduces you to advanced regression analysis and its application in sociological research with a special focus on causal analysis. It builds on your Intro to R course a yar ago and your Basic Statistics course last semester.</p>
+<p>The course progression starts with a recapitulation of ordinary least squares regression as the workhorse of
+contemporary quantitative sociology. From there it advances your knowledge of OLS regression and introduces applications of OLS that allow you to investigate complex relationships and causal effects.</p>
+<div id="before-the-first-session" class="section level1">
+<h1>Before the first session!</h1>
+<p>Before the first session, I would like you to please follow these steps in exactly this order, regardless of whether you have worked with R and RStudio before.</p>
+<ol style="list-style-type: decimal">
+<li><p><a href="https://mirrors.dotsrc.org/cran/">Get a recent version of R (&gt;= 4.0.0)</a>.</p></li>
+<li><p><a href="https://rstudio.com/products/rstudio/download/#download">Install RStudio</a>. Check also <a href="https://psyteachr.github.io/msc-data-skills/installingr.html#installing-base-r">this homepage</a>.</p></li>
+<li><p>As a third step, run the lines of code below in the Console of your RStudio. Note that this can take a while. If you are asked whether you want to “Do you want to install from sources the package which needs compilation?” answer: “no”. Make sure to wait until the courser blinks behind a <code>&gt;</code> again. Press enter again two times to produce two more <code>&gt;</code>.</p></li>
+</ol>
+<pre class="r"><code>update.packages(ask = FALSE)
+
+install.packages(&quot;pacman&quot;)
+
+pacman::p_load(
+  tidyverse, # Data manipulation,
+  ggplot2, # beautiful figures,
+  wbstats, # download data from Worldbank. Tremendous source of global socio-economic data.
+  texreg, # regression tables with nice layout,
+  estimatr, # Regression for weighted data,
+  modelr, # Turn results of lm() into a tibble,
+  furniture, # For row-means,
+  modelsummary, # for balance tables,
+  ivreg, # IV 2SLS,
+  countrycode, # Easy recodings of country names,
+  remotes) # Install beta version packages from GitHub.
+
+remotes::install_github(&quot;jrnold/masteringmetrics&quot;, subdir = &quot;masteringmetrics&quot;)
+remotes::install_github(&quot;xmarquez/democracyData&quot;)
+remotes::install_github(&quot;avehtari/ROS-Examples&quot;, subdir = &quot;rpackage&quot;)
+
+pacman::p_load(
+  rosdata, # Data from Gelman &amp; Hill&#39;s &quot;Regression and other Stories&quot;
+  masteringmetrics, # Data and examples from Mastering Metrics
+  democracyData) # download democracy data used in the scholarly literature.</code></pre>
+<ol start="4" style="list-style-type: decimal">
+<li>Now type <code>sessionInfo()</code> into your console and check whether all of the following are mentioned under “other attached packages”: tidyverse, ggplot2, wbstats, texreg, estimatr, modelr, furniture, modelsummary, ivreg, countrycode, remotes, rosdata, masteringmetrics, and finally democracyData. <strong>If any package is missing. Contact a tutor to help you set everything up properly.</strong></li>
+</ol>
+<ul>
+<li>Please always make sure to bring your laptop to class.</li>
+</ul>
+</div>
+<div id="course-components-and-expectations" class="section level1">
+<h1>Course Components and Expectations</h1>
+<p>This course is comprised of methodological and substantive lectures introducing important
+concepts, statistical methods, and their broader relevance, on the one hand, and exercise classes in
+which students will gain first-hand experience in using and discussing them, on the other. For successful participation in this course there are three expectations:</p>
+<ol style="list-style-type: decimal">
+<li>Thoroughly prepare for each class with the assigned readings.</li>
+<li>Actively follow lectures asking questions were relevant and engage in discussion and posed tasks in exercise classes.</li>
+<li>Solve the exercises in class, and the weekly Online Quizzes on Absalon.</li>
+<li>Prepare and submit a portfolio exam, which is an integrated exam with Mads’ Jæger’s course.</li>
+</ol>
+</div>
+<div id="course-structure" class="section level1">
+<h1>Course structure</h1>
+<p>We meet once a week, every Wednesday at 10am. Every session lasts three hours and consists of two iterations of lecture, 15 minutes break, and small exercise. In addition, you have a tutoring session every week where you can work in a smaller setting, ask questions, and properly work with R on stats problems.</p>
+<p><img src="Lectures/1-Intro/img/Structure.png" /></p>
+</div>
+<div id="course-schedule-and-team" class="section level1">
+<h1>Course Schedule and Team</h1>
+<p>Wednesdays, kl. 10-13: Lecture @ CSS 35-01-06 (Merlin Schaeffer)</p>
+<p>Friday, kl. 13-15, Exercise group 1 @ CSS 2-2-12 (Jonas Strøyberg Jensen)</p>
+<p>Friday, kl. 13-15, Exercise group 2 @ CSS 35-0-12 (Rasmus Henriksen Klokker)</p>
+<p>Thursday, kl. 8-10, Exercise group 3 @ CSS 2-1-49 (Rasmus Henriksen Klokker)</p>
+<p>Friday, kl. 13-15, Exercise group 4 @ CSS 2-1-18 (Tobias Schjødt Kjær)</p>
+</div>
+<div id="course-literature" class="section level1">
+<h1>Course Literature</h1>
+<p>In this course we use two text books. To recap on OLs regression and statistical inference, we continue to use the textbook from last semester:</p>
+<ul>
+<li>Veaux, De, Velleman, and Bock. 2021. Stats: Data and Models, Global Edition. Pearson Higher Ed.</li>
+</ul>
+<p>In addition, we will make heavy use of another book to understand, how regression analysis can be used to identify causal effects:</p>
+<ul>
+<li>Angrist, Joshua D., and Jörn-Steffen Pischke. 2014. Mastering ’Metrics: The Path from Cause to Effect. Princeton University Press.</li>
+</ul>
+<p>Both books are available from Academic Books on the City Campus as well as on the term
+shelves at the university library.</p>
+</div>
