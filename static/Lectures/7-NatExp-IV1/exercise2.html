@@ -652,292 +652,471 @@ pre code {
 
 <pre class="r"><code># Run this line of code once. 
 # It downloads Data from Gelman &amp; Hill&#39;s &quot;Regression and other Stories&quot;
-remotes::install_github(&quot;avehtari/ROS-Examples&quot;, subdir = &quot;rpackage&quot;)</code></pre>
+remotes::install_github(&quot;jrnold/masteringmetrics&quot;, subdir = &quot;masteringmetrics&quot;)</code></pre>
 <pre class="r"><code>pacman::p_load(
   tidyverse, # Data manipulation,
-  haven, # Handle Stata data.
   ggplot2, # beautiful figures,
+  texreg, # regression tables with nice layout,
   estimatr, # Regression for weighted data,
-  furniture, # For row-means,
+  modelr, # Turn results of lm() into a tibble,
   modelsummary, # for balance tables,
-  rosdata, # Data from Gelman &amp; Hill&#39;s &quot;Regression and other Stories&quot;
-  texreg) # regression tables with nice layout.
+  ivreg, # IV 2SLS,
+  masteringmetrics, # Data and examples from Mastering Metrics
+  remotes) # Install beta version packages from GitHub.
 
-# Load the Sesame Street data
-data(sesame)
-sesame &lt;- as_tibble(sesame) # Turn into tibble.</code></pre>
+# Load the data from the Minneapolis Domestic Violence Experiment
+data(&quot;mdve&quot;, package = &quot;masteringmetrics&quot;)</code></pre>
 <ol style="list-style-type: decimal">
-<li>The variable <code>watched</code> indicates whether a kid actually
-watched Sesame Street. The variable <code>postlet</code> contains the
-results of the letter-recognition test. Did kids who watched Sesame
-Street perform better on the letter-recognition test?
-<select class="webex-select"><option value="blank"></option><option value>No,
-the result is not statistically significant</option><option value>No,
-the slope coefficient is actually negative</option><option value>Yes,
-the R2 is larger than 0.1</option><option value="answer">Yes, on average
-kids who whatched guessed ca. 13 letters more correctly and this is
-statistically significant</option><option value>Yes, we see three
-stars</option></select>. Is this evidence of an average causal effect?
-<select class="webex-select"><option value="blank"></option><option value>No,
-because there is no significant effect</option><option value>Yes,
-because the result is significantly
-positive</option><option value="answer">No, there could be selection
-bias into watching Sesame Street</option></select>.</li>
+<li>The variable <code>T_RANDOM</code> contains the information about
+which strategy the police offers where supposed to use for the
+respective domestic violence emergency call: 1 indicates &quot;Arrest&quot;, 2
+&quot;Advise to stop&quot;, 3 &quot;Suspect Told to Leave&quot;, and 4 &quot;Other&quot;. By contrast,
+the variable <code>T_FINAL</code> contains the information about what
+the police officers actually did when arriving at the scene. Recode the
+two variables into a respective factor variable, which combines 2 &amp;
+3 into a category &quot;Coddle&quot; versus 1 &quot;Arrested&quot;, and 4 as
+<code>NA</code>. Make &quot;Arrested&quot; the reference.</li>
 </ol>
+<p>How many police officers complied to the strategy that was
+<em>randomly</em> assigned to them?
+<input class="webex-solveme nospaces" size="3" data-answer="[&quot;268&quot;]"></input></p>
 <div class="webex-solution">
 <button>
 R solution -&gt; dont&#39; peak to early ;) !
 </button>
-<pre class="r"><code>ols &lt;- lm_robust(postlet ~ watched, data = sesame)
-screenreg(ols, include.ci = FALSE, digits = 3)
-# 
-# ========================
-#              Model 1    
-# ------------------------
-# (Intercept)   16.907 ***
-#               (1.290)   
-# watched       12.689 ***
-#               (1.604)   
-# ------------------------
-# R^2            0.158    
-# Adj. R^2       0.154    
-# Num. obs.    240        
-# RMSE          12.302    
-# ========================
-# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05</code></pre>
+<pre class="r"><code>mdve &lt;- mdve %&gt;%
+  # Recode into factor variables with two categories
+  mutate( 
+    T_RANDOM = case_when(
+      T_RANDOM == 2 | T_RANDOM == 3 ~ &quot;Coddle!&quot;,
+      T_RANDOM == 1 ~ &quot;Arrest!&quot;,
+      TRUE ~ as.character(NA)) %&gt;% fct_relevel(&quot;Arrest!&quot;),
+    T_FINAL = case_when(
+      T_FINAL == 2 | T_FINAL == 3 ~ &quot;Coddled&quot;,
+      T_FINAL == 1 ~ &quot;Arrested&quot;,
+      TRUE ~ as.character(NA)) %&gt;% fct_relevel(&quot;Arrested&quot;))
+
+# Make frequency table
+mdve %&gt;%
+  select(T_RANDOM, T_FINAL) %&gt;%
+  table()
+#          T_FINAL
+# T_RANDOM  Arrested Coddled
+#   Arrest!       91       1
+#   Coddle!       45     177
+# Compliers:
+91 + 177
+# [1] 268</code></pre>
 </div>
 <ol start="2" style="list-style-type: decimal">
-<li>The variable <code>encouraged</code> indicates whether a kid was
-randomly encouraged by its pædagog to watch Sesame Street. The variable
-<code>prelet</code> contains results from the same letter-recognition
-test, which the pædagogerne had conducted <em>before</em> they started
-to encourage kids to watch Sesame Street. Did the randomization of the
-encouragement work, or is there imbalance?
-<select class="webex-select"><option value="blank"></option><option value>Yes,
-the kids who got encouraged were already better at the
-test</option><option value>Yes, the kids who got encouraged were
-slightly worse at the test</option><option value="answer">No, while
-there is a difference of ca. 2 words on average, this difference is not
-1.96 times it&#39;s standard error.</option></select>.</li>
+<li>The variable <code>S_RACE</code> indicates the subject&#39;s (i.e. the
+person accused of domestic violence) race. The categories used by the
+police back in &#39;81 where: 1 &quot;White&quot;, 2 &quot;Black&quot;, 3 &quot;Indian&quot;, 4 &quot;Asian&quot;, 5
+&quot;Hispanic&quot;, as well as sevel small other categories. Did the
+randomization work, or where certain groups more likely to face a police
+officers who got advised to arrest/coddle them?
+<select class="webex-select"><option value="blank"></option><option value>No,
+there is strong imbalance in the absolute
+frequencies</option><option value>Yes, the proprotions of the
+different groups are pretty similar across the two
+strategies</option><option value="answer">For &#39;Indians&#39; the balance
+looks pretty off</option></select>.</li>
 </ol>
 <div class="webex-solution">
 <button>
 R solution -&gt; dont&#39; peak to early ;) !
 </button>
-<pre class="r"><code>sesame %&gt;%
+<pre class="r"><code>mdve &lt;- mdve %&gt;%
+  mutate( # Recode race variable
+    S_RACE = case_when(
+      S_RACE == 1 ~ &quot;White&quot;,
+      S_RACE == 2 ~ &quot;Black&quot;,
+      S_RACE == 3 ~ &quot;Indian&quot;,
+      S_RACE == 4 ~ &quot;Asian&quot;,
+      S_RACE == 5 ~ &quot;Hispanic&quot;,
+      TRUE ~ &quot;Other&quot;))
+
+mdve %&gt;%
   # Select variables for which I want my balance test,
-  select(encouraged, prelet) %&gt;%
+  select(T_RANDOM, S_RACE) %&gt;%
   datasummary_balance( # Make a balance table,
-    formula = ~ encouraged, # by Reading news Yes/No
+    formula = ~ T_RANDOM, # by police strategy
     data = . ,
-    title = &quot;Correctly identified letters before encouragement, by encouragement&quot;) </code></pre>
+    title = &quot;Subject&#39;s race by assigned policing strategy&quot;) </code></pre>
 <table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <caption>
-Correctly identified letters before encouragement, by encouragement
+Subject&#39;s race by assigned policing strategy
 </caption>
 <thead>
 <tr>
-<th style="empty-cells: hide;border-bottom:hidden;" colspan="1">
-</th>
-<th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="2">
-<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
-0
-</div>
-</th>
-<th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="2">
-<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
-1
-</div>
-</th>
 <th style="empty-cells: hide;border-bottom:hidden;" colspan="2">
+</th>
+<th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="2">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
+Arrest! (N=93)
+</div>
+</th>
+<th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="2">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
+Coddle! (N=237)
+</div>
 </th>
 </tr>
 <tr>
 <th style="text-align:left;">
 </th>
-<th style="text-align:right;">
-Mean
+<th style="text-align:left;">
 </th>
 <th style="text-align:right;">
-Std. Dev.
+N
 </th>
 <th style="text-align:right;">
-Mean
+Pct.
 </th>
 <th style="text-align:right;">
-Std. Dev.
+N
 </th>
 <th style="text-align:right;">
-Diff. in Means
-</th>
-<th style="text-align:right;">
-Std. Error
+Pct.
 </th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td style="text-align:left;">
-prelet
+S_RACE
+</td>
+<td style="text-align:left;">
+Asian
 </td>
 <td style="text-align:right;">
-17.0
+0
 </td>
 <td style="text-align:right;">
-10.0
+0.0
 </td>
 <td style="text-align:right;">
-15.3
+2
 </td>
 <td style="text-align:right;">
-7.5
+0.8
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
+Black
 </td>
 <td style="text-align:right;">
--1.7
+34
 </td>
 <td style="text-align:right;">
-1.2
+36.6
+</td>
+<td style="text-align:right;">
+83
+</td>
+<td style="text-align:right;">
+35.0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
+Hispanic
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1.1
+</td>
+<td style="text-align:right;">
+7
+</td>
+<td style="text-align:right;">
+3.0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
+Indian
+</td>
+<td style="text-align:right;">
+19
+</td>
+<td style="text-align:right;">
+20.4
+</td>
+<td style="text-align:right;">
+32
+</td>
+<td style="text-align:right;">
+13.5
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
+Other
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1.1
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+1.7
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
+White
+</td>
+<td style="text-align:right;">
+38
+</td>
+<td style="text-align:right;">
+40.9
+</td>
+<td style="text-align:right;">
+109
+</td>
+<td style="text-align:right;">
+46.0
 </td>
 </tr>
 </tbody>
 </table>
 </div>
 <ol start="3" style="list-style-type: decimal">
-<li>The variable <code>encouraged</code> indicates whether a kid was
-randomly encouraged by its pædagog to watch Sesame Street. Did kids who
-were encouraged to watch Sesame Street perform better on the
-letter-recognition test?
-<select class="webex-select"><option value="blank"></option><option value="answer">No,
-the result is not statistically significant</option><option value>No,
-the slope coefficient is actually negative</option><option value>No,
-the R2 is smaller than 0.1</option><option value>Yes, on average kids
-who whatched guessed ca. 3 letters more correctly and this is
-statistically significant</option></select>. Is this evidence of an
-average causal effect?
-<select class="webex-select"><option value="blank"></option><option value>No,
-because not all kids who were encouraged actually
-watched</option><option value>No, correlation is not
-causation</option><option value="answer">Yes, but of being encouraged
-not of watching Sesame Street!</option></select>. In IV language, this
-is the
-<select class="webex-select"><option value="blank"></option><option value="answer">Reduced
-form</option><option value>First stage</option><option value>LATE
-estimate</option></select>.</li>
+<li>How about if we look at the strategy that the police officers
+actually used?
+<select class="webex-select"><option value="blank"></option><option value>There
+is still strong imbalance in the absolute
+frequencies</option><option value="answer">Interestingly, now the
+proprotions of the different groups are pretty similar across the two
+strategies</option><option value>Particularly white subjects got the
+more lenient treatment than randomly assigned.</option></select>.</li>
 </ol>
 <div class="webex-solution">
 <button>
 R solution -&gt; dont&#39; peak to early ;) !
 </button>
-<pre class="r"><code>ols2 &lt;- lm_robust(postlet ~ encouraged, data = sesame)
-screenreg(ols2, include.ci = FALSE, digits = 3)
-# 
-# ========================
-#              Model 1    
-# ------------------------
-# (Intercept)   24.920 ***
-#               (1.520)   
-# encouraged     2.876    
-#               (1.839)   
-# ------------------------
-# R^2            0.011    
-# Adj. R^2       0.007    
-# Num. obs.    240        
-# RMSE          13.331    
-# ========================
-# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05</code></pre>
+<pre class="r"><code>mdve %&gt;%
+  # Select variables for which I want my balance test,
+  select(T_FINAL, S_RACE) %&gt;%
+  datasummary_balance( # Make a balance table,
+    formula = ~ T_FINAL, # by police strategy
+    data = . ,
+    title = &quot;Subject&#39;s race by assigned policing strategy&quot;) </code></pre>
+<table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+Subject&#39;s race by assigned policing strategy
+</caption>
+<thead>
+<tr>
+<th style="empty-cells: hide;border-bottom:hidden;" colspan="2">
+</th>
+<th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="2">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
+Arrested (N=136)
+</div>
+</th>
+<th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="2">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
+Coddled (N=178)
+</div>
+</th>
+</tr>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+N
+</th>
+<th style="text-align:right;">
+Pct.
+</th>
+<th style="text-align:right;">
+N
+</th>
+<th style="text-align:right;">
+Pct.
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+S_RACE
+</td>
+<td style="text-align:left;">
+Asian
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.0
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+1.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
+Black
+</td>
+<td style="text-align:right;">
+49
+</td>
+<td style="text-align:right;">
+36.0
+</td>
+<td style="text-align:right;">
+62
+</td>
+<td style="text-align:right;">
+34.8
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
+Hispanic
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+1.5
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+2.2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
+Indian
+</td>
+<td style="text-align:right;">
+24
+</td>
+<td style="text-align:right;">
+17.6
+</td>
+<td style="text-align:right;">
+24
+</td>
+<td style="text-align:right;">
+13.5
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
+Other
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0.7
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+1.7
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
+White
+</td>
+<td style="text-align:right;">
+60
+</td>
+<td style="text-align:right;">
+44.1
+</td>
+<td style="text-align:right;">
+83
+</td>
+<td style="text-align:right;">
+46.6
+</td>
+</tr>
+</tbody>
+</table>
 </div>
 <ol start="4" style="list-style-type: decimal">
-<li>How many kids complied to the encouragement?
-<input class="webex-solveme nospaces" size="4" data-answer="[&quot;3.17&quot;]"></input>
-kids did. How much higher was the proportion of kids who watched Sesame
-Street among the encouraged kids compared to the non-encouraged kids? It
-was
-<input class="webex-solveme nospaces" size="4" data-answer="[&quot;0.362&quot;,&quot;.362&quot;]"></input>
-(three digits).</li>
+<li>How much higher was the probability that police officers would
+&quot;coddle&quot; a subject rather than arrest them, if they were randomly told
+to do so?
+<input class="webex-solveme nospaces" size="3" data-answer="[&quot;0.786427732079906&quot;,&quot;.786427732079906&quot;]"></input>
+(2 decimals). In IV language, this is called the
+<select class="webex-select"><option value="blank"></option><option value>Reduced
+form</option><option value="answer">First
+stage</option><option value>LATE estimate</option></select>.</li>
 </ol>
 <div class="webex-solution">
 <button>
 R solution -&gt; dont&#39; peak to early ;) !
 </button>
-<p>. In IV language, this is the
-<select class="webex-select"><option value="blank"></option><option value>Reduced
-form</option><option value="answer">First
-stage</option><option value>LATE estimate</option></select>.</p>
-<pre class="r"><code># Make a table of absolute frequencies
-(sesam_tab &lt;- sesame %&gt;% 
-   select(&#39;watched&#39;,&#39;encouraged&#39;) %&gt;% 
-   table())
-#        encouraged
-# watched   0   1
-#       0  40  14
-#       1  48 138
-# Compliers are the encouraged who watched + the non-encouraged who didn&#39;t watch:
-138 + 40
-# [1] 178
-ols3 &lt;- lm_robust(watched ~ encouraged, data = sesame)
-screenreg(ols3, include.ci = FALSE, digits = 3)
-# 
-# ========================
-#              Model 1    
-# ------------------------
-# (Intercept)    0.545 ***
-#               (0.053)   
-# encouraged     0.362 ***
-#               (0.058)   
-# ------------------------
-# R^2            0.175    
-# Adj. R^2       0.171    
-# Num. obs.    240        
-# RMSE           0.381    
-# ========================
-# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05</code></pre>
 </div>
 <ol start="5" style="list-style-type: decimal">
-<li>Based on the above information, what is the IV estimate of the local
-average causal effect among complying kids? It is:
-<input class="webex-solveme nospaces" size="4" data-answer="[&quot;7.94&quot;]"></input>
-(two digits).</li>
+<li><p>According to Sherman and Berk (1984, see also Angrist and
+Pischke&#39;s &quot;Mastering Metrics&quot;), the probability that a subject would
+repeat to assault their partner at home was <strong>0.114</strong>
+higher when the police officers were <em>randomly</em> told to cuddle,
+as compared to when they were told to arrest (regardless of what they
+actually did at the scene). In IV language, this is called the
+<select class="webex-select"><option value="blank"></option><option value="answer">Reduced
+form</option><option value>First stage</option><option value>LATE
+estimate</option></select>.</p></li>
+<li><p>Based on the above information, what is the IV estimate of the
+local average causal effect of coddling subjects who are accused of
+domestic violence on the probability that they repeat to assault their
+partner? It is:
+<input class="webex-solveme nospaces" size="4" data-answer="[&quot;0.14&quot;,&quot;.14&quot;]"></input>
+(two decimals).</p></li>
 </ol>
 <div class="webex-solution">
 <button>
 R solution -&gt; dont&#39; peak to early ;) !
 </button>
 <pre class="r"><code># The IV estimate is:
-2.876  / 0.362
-# [1] 7.9</code></pre>
-</div>
-<ol start="6" style="list-style-type: decimal">
-<li>Install the following package:
-<code>install.packages(&quot;ivreg&quot;, dependencies = TRUE)</code>. Your can
-read about it here: <a href="https://cran.r-project.org/web/packages/ivreg/vignettes/ivreg.html">ivreg
-homepage</a>. Use the command <code>ivreg()</code> to estimate the IV
-Local Average Treatment Effect. Does watching Sesame Street make Kids
-better at XYZ?
-<select class="webex-select"><option value="blank"></option><option value="answer">No,
-the LATE is not statistically significant</option><option value>Yes,
-the effect is positive</option></select></li>
-</ol>
-<div class="webex-solution">
-<button>
-R solution -&gt; dont&#39; peak to early ;) !
-</button>
-<pre class="r"><code>pacman::p_load(ivreg)
-twosls &lt;- ivreg(postlet ~ watched | encouraged, data = sesame)
-screenreg(twosls)
-# 
-# =======================
-#              Model 1   
-# -----------------------
-# (Intercept)   20.59 ***
-#               (3.66)   
-# watched        7.93    
-#               (4.61)   
-# -----------------------
-# R^2            0.14    
-# Adj. R^2       0.13    
-# Num. obs.    240       
-# =======================
-# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05</code></pre>
+0.114  / 0.79
+# [1] 0.14</code></pre>
 </div>
 
 <script>
