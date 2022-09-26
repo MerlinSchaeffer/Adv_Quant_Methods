@@ -1082,7 +1082,9 @@ knitr::include_graphics('https://media.istockphoto.com/vectors/politician-and-ma
 .right-column[
 .panelset[
 .panel[.panel-name[Regression table]
-```{r ref.label = "ols"}
+```{r}
+ols_goal <- lm_robust(psppsgva ~ eduyrs, data = ESS)
+summary(ols_goal, include.ci = FALSE, digits = 3)
 ```
 ]
 .panel[.panel-name[Scatterplot]

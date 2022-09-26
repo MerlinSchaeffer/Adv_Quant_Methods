@@ -615,6 +615,27 @@ class: inverse middle center
 # Binary outcomes
 
 ---
+# LPM versus logistic regression
+
+.left-column[
+Using OLS to predict a binary outcome (0 = "No" / 1 = "Yes") yields the so-called *Linear Probability Model (LPM)*. 
+
+LPMs predict the probability that the outcome equals 1 $\hat{\text{Pr}}(y_i = 1|x_{i})$.
+
+LPMs violate the linearity assumption and can thus predict $\hat{\text{Pr}}(y_i = 1|x_{i}) < 0$, or $\hat{\text{Pr}}(y_i = 1|x_{i}) >1$. This is controvertial!
+
+But we accept that problem, because the alternative (i.e. logistic regression) comes with many other problems `r Citep(myBib, "breen_interpreting_2018")`.
+]
+
+
+.right-column[
+```{r, echo = FALSE, out.width='100%'}
+knitr::include_graphics('http://res.cloudinary.com/dyd911kmh/image/upload/f_auto,q_auto:best/v1523361626/linear_vs_logistic_regression_h8voek.jpg')
+```
+.center[.backgrnote[*Source*: [datacamp: Logistic Regression in R Tutorial](https://www.datacamp.com/community/tutorials/logistic-regression-R)]]
+]
+
+
 ---
 class: inverse middle center
 # Visualizing regression models
@@ -797,3 +818,11 @@ class: inverse
 - `tidy()` Turns OLS regression results into a tibble.
 - `predict()` Can be applied to fictional data to predict $\hat{Y}$ based on your estimated OLS regression. 
 
+---
+# References
+
+.font80[
+```{r ref1, results = 'asis', echo = FALSE}
+PrintBibliography(myBib)
+```
+]

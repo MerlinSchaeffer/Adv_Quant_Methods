@@ -4,7 +4,7 @@
     <title>3. Randomness!</title>
     <meta charset="utf-8" />
     <meta name="author" content="Merlin Schaeffer  Department of Sociology" />
-    <meta name="date" content="2022-09-16" />
+    <meta name="date" content="2022-09-21" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
     <script src="libs/tile-view/tile-view.js"></script>
@@ -27,7 +27,7 @@ class: center, middle, inverse, title-slide
 ### Merlin Schaeffer<br> Department of Sociology
 ]
 .date[
-### 2022-09-16
+### 2022-09-21
 ]
 
 ---
@@ -1047,21 +1047,21 @@ summary(ols, include.ci = FALSE, digits = 3)
 .panel[.panel-name[Regression table]
 
 ```r
-ols &lt;- lm_robust(psppsgva ~ eduyrs, data = ESS_sample)
-summary(ols, include.ci = FALSE, digits = 3)
+ols_goal &lt;- lm_robust(psppsgva ~ eduyrs, data = ESS)
+summary(ols_goal, include.ci = FALSE, digits = 3)
 # 
 # Call:
-# lm_robust(formula = psppsgva ~ eduyrs, data = ESS_sample)
+# lm_robust(formula = psppsgva ~ eduyrs, data = ESS)
 # 
 # Standard error type:  HC2 
 # 
 # Coefficients:
-#             Estimate Std. Error t value Pr(&gt;|t|) CI Lower CI Upper DF
-# (Intercept)    1.965      0.635   3.096  0.00327   0.6889    3.242 48
-# eduyrs         0.042      0.043   0.976  0.33405  -0.0445    0.128 48
+#             Estimate Std. Error t value  Pr(&gt;|t|) CI Lower CI Upper   DF
+# (Intercept)   2.1994    0.09466   23.24 2.41e-102   2.0137   2.3850 1509
+# eduyrs        0.0391    0.00645    6.06  1.74e-09   0.0264   0.0517 1509
 # 
-# Multiple R-squared:  0.0274 ,	Adjusted R-squared:  0.00713 
-# F-statistic: 0.952 on 1 and 48 DF,  p-value: 0.334
+# Multiple R-squared:  0.0256 ,	Adjusted R-squared:  0.0249 
+# F-statistic: 36.7 on 1 and 1509 DF,  p-value: 1.74e-09
 ```
 ]
 .panel[.panel-name[Scatterplot]
@@ -1114,6 +1114,9 @@ class: inverse
 # References
 
 .font80[
+Llaudet, E. and K. Imai (2022). _Data Analysis for Social Science. A Friendly and Practical
+Introduction_. Princeton: Princeton University Press.
+
 Veaux, D., Velleman, and Bock (2021). _Stats: Data and Models, Global Edition_. Pearson Higher Ed.
 ]
     </textarea>
