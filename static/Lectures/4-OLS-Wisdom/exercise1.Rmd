@@ -123,14 +123,14 @@ Dat <- inner_join(Dat, Dat_citi_rights, by = c("country", "date"))
 ```
 `r unhide()`
 
-4. Make a scatterplot with citizenship rights as outcome on the Y-axis and the years since independence as predictor on the X-axis. Make sure to add a regression line with 95% confidence interval to it.
+4. Make a scatter plot with citizenship rights as outcome on the Y-axis and the years since independence as predictor on the X-axis. Make sure to add a regression line with 95% confidence interval to it.
 `r hide("R solution -> dont' peak to early ;) !")`
 ```{r out.width='100%', fig.height = 4, fig.width = 7.5, results = FALSE, echo = TRUE}
 ggplot(data = Dat, aes(y = citizen_rights, x = years_indep)) +
   geom_smooth(method = "lm") +
   geom_text(aes(label = country)) +
-  labs(y = "% population with less than 5.50$ a day", 
-       x = "Freedom House index of citizenship rights") +
+  labs(y = "Freedom House index of citizenship rights", 
+       x = "Years since idependence from colonialism") +
   theme_minimal() +
   guides(color = "none")
 ```
