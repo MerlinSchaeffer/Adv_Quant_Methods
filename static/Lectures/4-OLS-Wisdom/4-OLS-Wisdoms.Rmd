@@ -712,7 +712,8 @@ class: clear
        term == "colonizerSpain" ~ "Spain",
        term == "colonizerBelgium" ~ "Belgium",
        term == "colonizerPortugal" ~ "Portugal",
-       term == "(Intercept)" ~ "Intercept \n (Britain)")))
+       term == "(Intercept)" ~ "Intercept \n (Britain)")) %>%
+   filter(term != "Intercept \n (Britain)"))
 ```
 ]
 
@@ -729,7 +730,7 @@ ggplot(data = plotdata, aes(y = estimate,
     title = "Regression of extreme poverty",
     x = "Colonizer",
     # Write Greek beta into axis title.
-    y = expression("Estimate of"~beta)) +
+    y = "Difference in extreme poverty compared to countries colonized by Britain") +
   theme_minimal()
 ```
 ]

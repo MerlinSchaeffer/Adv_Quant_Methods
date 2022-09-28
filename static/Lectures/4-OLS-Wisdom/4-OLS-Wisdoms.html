@@ -752,13 +752,13 @@ class: clear
        term == "colonizerSpain" ~ "Spain",
        term == "colonizerBelgium" ~ "Belgium",
        term == "colonizerPortugal" ~ "Portugal",
-       term == "(Intercept)" ~ "Intercept \n (Britain)")))
-#                     term estimate std.error statistic  p.value conf.low conf.high df outcome
-# 1 Intercept \n (Britain)    17.05      3.64     4.678 1.28e-05     9.79     24.31 74 poverty
-# 2                 France     5.93      5.72     1.035 3.04e-01    -5.48     17.33 74 poverty
-# 3                  Spain   -12.87      3.77    -3.419 1.03e-03   -20.37     -5.37 74 poverty
-# 4                Belgium    45.22      6.43     7.028 8.71e-10    32.40     58.04 74 poverty
-# 5               Portugal    15.48     18.48     0.838 4.05e-01   -21.33     52.30 74 poverty
+       term == "(Intercept)" ~ "Intercept \n (Britain)")) %&gt;%
+   filter(term != "Intercept \n (Britain)"))
+#       term estimate std.error statistic  p.value conf.low conf.high df outcome
+# 1   France     5.93      5.72     1.035 3.04e-01    -5.48     17.33 74 poverty
+# 2    Spain   -12.87      3.77    -3.419 1.03e-03   -20.37     -5.37 74 poverty
+# 3  Belgium    45.22      6.43     7.028 8.71e-10    32.40     58.04 74 poverty
+# 4 Portugal    15.48     18.48     0.838 4.05e-01   -21.33     52.30 74 poverty
 ```
 ]
 
@@ -776,7 +776,7 @@ ggplot(data = plotdata, aes(y = estimate,
     title = "Regression of extreme poverty",
     x = "Colonizer",
     # Write Greek beta into axis title.
-    y = expression("Estimate of"~beta)) +
+    y = "Difference in extreme poverty compared to countries colonized by Britain") +
   theme_minimal()
 ```
 ]
