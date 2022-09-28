@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Multiple OLS regression</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Merlin Schaeffer  Department of Sociology" />
+    <meta name="date" content="2022-09-27" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
+    <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
+    <script src="libs/tile-view/tile-view.js"></script>
+    <link href="libs/tachyons/tachyons.min.css" rel="stylesheet" />
+    <link href="libs/panelset/panelset.css" rel="stylesheet" />
+    <script src="libs/panelset/panelset.js"></script>
+    <link rel="stylesheet" href="../template/Merlin169.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+.title[
+# Multiple OLS regression
+]
+.subtitle[
+## Controlling for <em>observed</em> confounders
+]
+.author[
+### Merlin Schaeffer<br> Department of Sociology
+]
+.date[
+### 2022-09-27
+]
+
+---
+
+
+# The goal of social science research
+
+.font140[.center[.alert[Use data to discover patterns ("social facts" in Durkheim's terms), &lt;br&gt; and **the social mechanisms that bring them about**.]]]
+
+&lt;img src="https://liu.se/-/media/istock-501261958.jpg?mw=1120&amp;mh=1120&amp;hash=DA8977CCE6A6E600AE80A40CFEE771C9" width="70%" style="display: block; margin: auto;" /&gt;
+
+---
+class: inverse middle
+# Today's schedule
+
+1. **Application 1**: Terrorist attacks and xenophobia re-visited.
+
+2. **Multiple OLS**
+  + Frisch-Waugh-Lovell Theorem
+  + Estimation
+  
+3. **(Natural) RCTs &amp; Multiple OLS** 
+
+4. **Application 2**: Zero-tolerance for domestic violence re-visited.
+
+5. **IV &amp; Multiple OLS**
+
+---
+class: inverse middle center
+# Research question 1 of the day
+
+.right-column[
+&lt;img src="https://api.time.com/wp-content/uploads/2019/07/gettyimages-1064896696.jpg" width="60%" style="display: block; margin: auto;" /&gt;&lt;img src="https://www.brookings.edu/wp-content/uploads/2019/07/Denmark.jpg?w=1200&amp;h=630&amp;crop=1" width="60%" style="display: block; margin: auto;" /&gt;
+]
+
+.left-column[
+.font130[
+**What is the** 
+
+**average causal effect**
+
+**of terrorist attacks on xenophobia?**
+]]
+
+---
+# We need an RCT!
+
+.push-left[
+&lt;img src="./img/randomization2.png" width="60%" style="display: block; margin: auto;" /&gt;
+
+- If we *randomly* divide subjects into treatment and control groups: They come from the same underlying population. 
+  &lt;br&gt; &lt;br&gt; `\(\rightarrow\)` Similar .alert[on average], *in every way*,&lt;br&gt; **including their `\(Y_{0}\)` **!
+  &lt;br&gt; &lt;br&gt; `\(\rightarrow E[Y_{0i}|D=1] = E[Y_{0i}|D=0]\)`!
+]
+
+.push-right[
+&lt;img src="8-Multiple-OLS_files/figure-html/DAG_RCT-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+layout: true
+# My friend Joscha had an idea
+
+.left-column[
+&lt;br&gt;
+
+&lt;img src="https://jlegewie.com/files/joscha.jpg" width="100%" style="display: block; margin: auto;" /&gt;
+
+]
+
+---
+
+.right-column[
+&lt;img src="./img/Joscha2.png" width="100%" style="display: block; margin: auto;" /&gt;
+.center[.backgrnote[*Source:* Legewie (2013)]]
+]
+
+---
+
+.right-column[
+&lt;img src="./img/Joscha2.png" width="100%" style="display: block; margin: auto;" /&gt;
+.center[.backgrnote[*Source:* Legewie (2013)]]
+
+.alert[Assumption 1]: The European Social Survey is based on random sampling. .alert[The day of] `\(i\)`.alert['s interview is also random!]
+
+- *Reachability bias*: Respondents who are easier to contact tend to be interviewed earlier during the survey period.
+
+.alert[Assumption 2]: No other event had a causal effect on `\(Y_{i}\)`.
+]
+
+---
+layout: false
+# Balance?
+
+.left-column[
+`$$E[Y_{0i}|D=1] = E[Y_{0i}|D=0]?$$`
+
+&lt;img src="8-Multiple-OLS_files/figure-html/DAG_NatExp-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+]
+
+.right-column[
+&lt;img src="./img/Joscha3.png" width="100%" style="display: block; margin: auto;" /&gt;
+.center[.backgrnote[*Source:* Legewie (2013)]]
+]
+
+
+---
+# Natural experiments .font70[How to?!]
+
+.left-column[.content-box-blue[
+Analyzing a natural experiment does not necessarily involve much statistical sophistication; often simple OLS suffices.
+
+*But finding one is as tough as finding truffles; you got to be lucky!*
+
+.center[**_Are you such a &lt;br&gt;lucky truffle pig?_**]
+]]
+
+.right-column[
+&lt;img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Cochon_truffier.JPG" width="80%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+class: clear
+# Learning goal 1 .font60[Terror attacks can increase xenophobia]
+
+.right-column[
+&lt;img src="./img/Joscha4.png" width="100%" style="display: block; margin: auto;" /&gt;
+.center[.backgrnote[*Source:* Legewie (2013)]]
+]
+
+--
+
+.left-column[.content-box-green[.center[
+My friend Joscha &lt;br&gt; is a truffle pig ;)
+
+Based on the idea that the day of a survey interview is random, he could estimate the causal effect of the Bali 2002 terror attack.
+
+Do you want to learn what Joscha has to say about:
+
+*Why was there an effect in Portugal, but not in the UK?* 
+
+Read his article ;)
+]]]
+
+---
+class: inverse middle center
+# Break
+
+&lt;iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+
+---
+class: middle clear
+
+.left-column[
+&lt;img src="https://www.latentview.com/wp-content/uploads/2016/04/LatentView-Turns-Ten-A-decade-of-data-science.jpg" width="100%" style="display: block; margin: auto;" /&gt;
+
+&lt;iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+]
+
+.right-column[
+&lt;br&gt;
+&lt;iframe src='exercise1.html' width='1000' height='600' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+]
+
+---
+class: inverse middle center
+# Break
+
+&lt;iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+
+
+---
+layout: true
+# Zero-tolerance for domestic violence?
+
+.push-right[
+&lt;img src="https://images.theconversation.com/files/325865/original/file-20200406-6044-hao5gp.jpg?ixlib=rb-1.1.0&amp;q=45&amp;auto=format&amp;w=1200&amp;h=675.0&amp;fit=crop" width="80%" style="display: block; margin: auto;" /&gt;&lt;img src="https://minbynyt.dk/wp-content/uploads/2021/01/Politi-Betjent-ligger-anholdt-i-ha%CC%8AndjernFoto-Lars-Aarjpg1-780x470.jpg" width="80%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
+.push-left[
+&lt;iframe src='https://www.jstor.org/stable/2095575#metadata_info_tab_contents' width='600' height='550' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+]
+
+---
+
+.push-left[
+&gt; [...] the pains of punishment deter people from repeating the crimes for which they are punished, especially when punishment is certain, swift and severe. 
+
+.center[versus]
+
+&gt; [...] punishment often makes individuals more likely to commit crimes because of altered interactional structures, foreclosed legal opportunities and secondary deviance
+&gt; -- .center[.backgrnote[*Source:* Sherman and Berk (1984)]]
+
+.center[**Does punishment increase repeat domestic abuse?**]
+]
+
+---
+layout: false
+class: middle clear
+
+.left-column[
+&lt;img src="https://www.latentview.com/wp-content/uploads/2016/04/LatentView-Turns-Ten-A-decade-of-data-science.jpg" width="100%" style="display: block; margin: auto;" /&gt;
+
+&lt;iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+]
+
+.right-column[
+&lt;br&gt;
+&lt;iframe src='exercise2.html' width='1000' height='600' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+]
+
+---
+class: inverse
+# Today's general lessons
+
+1. *Natural Experiment*: Sometimes nature or other forces randomly exposure people to treatment or control conditions. Compared to RCTs we have less control that exposure was truly random, but we can often study more interesting - real - events.
+
+2. *Intention to Treat*: Some people do not comply with the experimental group we assign them to. In that case we estimate an average causal intention to treat effect, if we focus on the randomly assigned treatment alone.
+
+3. *Instrument Variables (IV) Estimation*: Instrument variable regression allows us to recover the causal effect of the treatment (not the intention) in such situations.
+
+4. *LATE (Local average treatment effect:* IV only estimates the treatment effect among compliers; we cannot know how people who did not comply to the intended treatment would have been affected by the treatment.
+
+---
+# References
+
+.font80[
+Chetty, R., N. Hendren, and L. F. Katz (2016). "The Effects of Exposure to Better Neighborhoods on
+Children: New Evidence from the Moving to Opportunity Experiment". In: _The American Economic Review_,
+pp. 855-902.
+
+Legewie, J. (2013). "Terrorist Events and Attitudes toward Immigrants: A Natural Experiment". In:
+_American Journal of Sociology_, pp. 1199-1245.
+
+Sherman, L. W. and R. A. Berk (1984). "The Specific Deterrent Effects of Arrest for Domestic Assault".
+In: _American Sociological Review_, pp. 261-272.
+
+Snow, J. (1856). "On the Mode of Communication of Cholera". In: _Edinburgh Medical Journal_, pp.
+668-670.
+]
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="../template/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightLanguage": "r",
+"highlightStyle": "zenburn",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"ratio": "16:9"
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

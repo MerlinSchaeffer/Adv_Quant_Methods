@@ -4,7 +4,7 @@
     <title>4 OLS Wisdom</title>
     <meta charset="utf-8" />
     <meta name="author" content="Merlin Schaeffer  Department of Sociology" />
-    <meta name="date" content="2022-09-26" />
+    <meta name="date" content="2022-09-28" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
     <script src="libs/tile-view/tile-view.js"></script>
@@ -27,7 +27,7 @@ class: center, middle, inverse, title-slide
 ### Merlin Schaeffer<br> Department of Sociology
 ]
 .date[
-### 2022-09-26
+### 2022-09-28
 ]
 
 ---
@@ -113,27 +113,6 @@ class: clear
 # Worldbank Data .font70[On extreme poverty across the World]
 
 .panelset[
-.panel[.panel-name[Searching Wb archive]
-- With `wbstats::wb_search()`, you can search the Wb archive for any keyword! Here I use "poverty":
-
-```r
-(wb_poverty_archive &lt;- wb_search("poverty"))
-# # A tibble: 702 × 3
-#    indicator_id         indicator                               indicator_desc                                     
-#    &lt;chr&gt;                &lt;chr&gt;                                   &lt;chr&gt;                                              
-#  1 1.0.HCount.1.90usd   Poverty Headcount ($1.90 a day)         The poverty headcount index measures the proportio…
-#  2 1.0.HCount.2.5usd    Poverty Headcount ($2.50 a day)         The poverty headcount index measures the proportio…
-#  3 1.0.HCount.Mid10to50 Middle Class ($10-50 a day) Headcount   The poverty headcount index measures the proportio…
-#  4 1.0.HCount.Ofcl      Official Moderate Poverty Rate-National The poverty headcount index measures the proportio…
-#  5 1.0.HCount.Poor4uds  Poverty Headcount ($4 a day)            The poverty headcount index measures the proportio…
-#  6 1.0.HCount.Vul4to10  Vulnerable ($4-10 a day) Headcount      The poverty headcount index measures the proportio…
-#  7 1.0.PGap.1.90usd     Poverty Gap ($1.90 a day)               The poverty gap captures the mean aggregate income…
-#  8 1.0.PGap.2.5usd      Poverty Gap ($2.50 a day)               The poverty gap captures the mean aggregate income…
-#  9 1.0.PGap.Poor4uds    Poverty Gap ($4 a day)                  The poverty gap captures the mean aggregate income…
-# 10 1.0.PSev.1.90usd     Poverty Severity ($1.90 a day)          The poverty severity index combines information on…
-# # … with 692 more rows
-```
-]
 .panel[.panel-name[Get Wb data]
 
 ```r
@@ -349,16 +328,15 @@ class: clear
 
 ```r
 # Re-estimate model using lm(),
-ols &lt;- lm(poverty ~ years_indep, 
-          data = Dat)
-
-# The best outlier plot.
-plot(ols, which = 5) 
+lm(poverty ~ years_indep, 
+   data = Dat) %&gt;%
+  # The best outlier plot.
+  plot(., which = 5) 
 ```
 ]
 
 .right-column[
-&lt;img src="4-OLS-Wisdoms_files/figure-html/unnamed-chunk-15-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+&lt;img src="4-OLS-Wisdoms_files/figure-html/unnamed-chunk-14-1.png" width="80%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -382,11 +360,13 @@ Dat_outl &lt;- Dat %&gt;%
 .left-column[
 
 ```r
-ols_outl &lt;- lm_robust( # Estimation
+# Estimation
+ols_outl &lt;- lm_robust( 
   poverty ~ years_indep, 
   data = Dat_outl)
 
-screenreg(ols_outl, # Regression table
+# Regression table
+screenreg(ols_outl,
           include.ci = FALSE, 
           digits = 3)
 # 
@@ -420,16 +400,15 @@ screenreg(ols_outl, # Regression table
 
 ```r
 # Re-estimate model using lm(),
-ols_outl &lt;- lm(poverty ~ years_indep, 
-          data = Dat_outl)
-
-# The best outlier plot.
-plot(ols_outl, which = 5) 
+lm(poverty ~ years_indep, 
+   data = Dat_outl) %&gt;%
+  # The best outlier plot.
+  plot(., which = 5) 
 ```
 ]
 
 .right-column[
-&lt;img src="4-OLS-Wisdoms_files/figure-html/unnamed-chunk-18-1.png" width="75%" style="display: block; margin: auto;" /&gt;
+&lt;img src="4-OLS-Wisdoms_files/figure-html/unnamed-chunk-17-1.png" width="75%" style="display: block; margin: auto;" /&gt;
 ]
 ]]
 
@@ -444,13 +423,16 @@ plot(ols_outl, which = 5)
 
 
 ```r
-# The best outlier plot.
-plot(ols, which = 1)
+# Re-estimate model using lm(),
+lm(poverty ~ years_indep, 
+   data = Dat) %&gt;%
+  # The best linearity plot.
+  plot(., which = 1)
 ```
 ]
 
 .right-column[
-&lt;img src="4-OLS-Wisdoms_files/figure-html/unnamed-chunk-19-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+&lt;img src="4-OLS-Wisdoms_files/figure-html/unnamed-chunk-18-1.png" width="80%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -463,13 +445,16 @@ plot(ols, which = 1)
 
 
 ```r
-# The best outlier plot.
-plot(ols_outl, which = 1)
+# Re-estimate model using lm(),
+lm(poverty ~ years_indep, 
+   data = Dat_outl) %&gt;%
+  # The best linearity plot.
+  plot(., which = 1)
 ```
 ]
 
 .right-column[
-&lt;img src="4-OLS-Wisdoms_files/figure-html/unnamed-chunk-20-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+&lt;img src="4-OLS-Wisdoms_files/figure-html/unnamed-chunk-19-1.png" width="80%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -484,8 +469,8 @@ class: inverse middle center
 
 .left-column[
 .content-box-green[
-1. Where does the regression line pass through the cloud of countries without a socialist past?
-2. Where does the regression line pass through the cloud of countries with a socialist past?
+1. At which `\(\hat{Y}\)` does the regression line pass through the cloud of countries colonized by Britain?
+2. At which `\(\hat{Y}\)` does the regression line pass through the cloud of countries colonized by Belgium?
 3. What does this suggest about the slope `\(\hat{\beta}\)`?
 ]]
 .right-column[
@@ -520,17 +505,19 @@ Reference &lt;br&gt; .backgrnote[(Britain)] | 0  | 0  | 0
 .push-left[
 
 ```r
-# R recognizes categorical variables automatically.
+# R recognizes categorical variables automatically,
+# if they are factor or character vectors.
 ols_2 &lt;- lm_robust(poverty ~ colonizer, data = Dat)
 
 htmlreg(ols_2, # Nicely-formatted table.
-        include.ci = FALSE, digits = 3, single.row = TRUE,
+        include.ci = FALSE, digits = 3, 
+        single.row = TRUE,
         custom.coef.names = c("Intercept", "France",
                               "Spain", "Belgium",
                               "Portugal"))
 ```
 
-&lt;img src="4-OLS-Wisdoms_files/figure-html/unnamed-chunk-21-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+&lt;img src="4-OLS-Wisdoms_files/figure-html/unnamed-chunk-20-1.png" width="80%" style="display: block; margin: auto;" /&gt;
 ]
 .push-right[
 &lt;table class="texreg" style="margin: 10px auto;border-collapse: collapse;border-spacing: 0px;caption-side: bottom;color: #000000;border-top: 2px solid #000000;"&gt;
@@ -686,16 +673,15 @@ class: inverse middle center
 # Binary outcomes
 
 ---
-# LPM versus logistic regression
+class: clear
+# LPM versus Generalized Linear Models (GLM)
 
 .left-column[
 Using OLS to predict a binary outcome (0 = "No" / 1 = "Yes") yields the so-called *Linear Probability Model (LPM)*. 
 
 LPMs predict the probability that the outcome equals 1 `\(\hat{\text{Pr}}(y_i = 1|x_{i})\)`.
 
-LPMs violate the linearity assumption and can thus predict `\(\hat{\text{Pr}}(y_i = 1|x_{i}) &lt; 0\)`, or `\(\hat{\text{Pr}}(y_i = 1|x_{i}) &gt;1\)`. This is controvertial!
-
-But we accept that problem, because the alternative (i.e. logistic regression) comes with many other problems (Breen, Karlson, and Holm, 2018).
+LPMs violate the linearity assumption and can thus predict `\(\hat{\text{Pr}}(y_i = 1|x_{i}) &lt; 0\)`, or `\(\hat{\text{Pr}}(y_i = 1|x_{i}) &gt;1\)`. This is controversial!
 ]
 
 
@@ -704,6 +690,47 @@ But we accept that problem, because the alternative (i.e. logistic regression) c
 .center[.backgrnote[*Source*: [datacamp: Logistic Regression in R Tutorial](https://www.datacamp.com/community/tutorials/logistic-regression-R)]]
 ]
 
+---
+# Logistic regression .font70[GLM for binary outcomes]
+
+.push-left[
+`$$\begin{align*}
+\text{logit}(y_{i}) &amp;= \alpha + \beta x, \\
+y_{i} &amp;= \text{logit}^{-1}(\alpha + \beta x) \\
+&amp; = \text{logistic}(\alpha + \beta x) \\
+&amp;= \frac{1}{1+e^{-(\alpha + \beta x)}}.
+\end{align*}$$`
+
+
+
+.font90[
+| `\(\alpha + \beta x\)`  | `\(e^{(\alpha + \beta x)}\)` | `\(\frac{1}{e^{(\alpha + \beta x)}} \color{gray}{= e^{-(\alpha + \beta x)}}\)` | `\(\frac{1}{1 + e^{(\alpha + \beta x)}}\)` | `\(\frac{1}{1 +e^{-(\alpha + \beta x)}}\)` | 
+|--------------------:|-------------------------:|-------------------------------------------------------------:|---------------------------------------:|---------------------------------------:|
+|        -2           | 0.135                    | 7.389                                                        | 0.881                                  | 0.119                                  | 
+|        -1           | 0.368                    | 2.718                                                        | 0.731                                  | 0.269                                  | 
+|         0           | 1                        | 1                                                            | 0.5                                    | 0.5                                    | 
+|         1           | 2.718                    | 0.368                                                        | 0.269                                  | 0.731                                  | 
+|         2           | 7.389                    | 0.135                                                        | 0.119                                  | 0.881                                  |
+
+]]
+
+.push-right[
+We need a link function `\(g^{-1}\)` that maps/projects the results of our linear model to the range 0 to 1. One option is the sigmoid (i.e., s-shaped) *logistic* function, with its inverse the *logit* (logged odds):
+
+&lt;img src="4-OLS-Wisdoms_files/figure-html/Logit-fun-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+.backgrnote[
+Alternatives are the probit or cloglog link functions; results compared to logit hardly ever differ in meaningful ways.]
+]
+
+---
+class: middle center
+
+We accept the linearity problem of LPMs, because GLMs (e.g. logistic regression) come with many other problems (Breen, Karlson, and Holm, 2018).
+
+.alert[We use Linear Probability Models to predict binary outcomes.]
+
+If you have a categorical outcome, make sure to code it 0/1.
 
 ---
 class: inverse middle center

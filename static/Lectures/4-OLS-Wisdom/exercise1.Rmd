@@ -14,7 +14,7 @@ knitr::opts_chunk$set(
 library(webexercises)
 ```
 
-1. Start a new R-Script and copy the lines of R code from my slides that generate 'Dat'. Alter the code such that former Danish colonies are identified. Unfortunately, we only have two countries in the Worldbank data that can be somewhat considered as former Danish colonies according to [Wikipedia](https://en.wikipedia.org/wiki/Danish_overseas_colonies): Iceland and Estonia. Check Wikipedia to see when they became independent from Denmark. Then download and join/merge the Freedom House data.
+1. Start a new R-Script and copy the lines of R code from my slides that generate 'Dat'. Alter the code such that former Danish colonies are identified. Unfortunately, we only have two countries in the Worldbank data that can be somewhat considered as former Danish colonies according to [Wikipedia](https://en.wikipedia.org/wiki/Danish_overseas_colonies): Iceland and Estonia. Check Wikipedia to see when they became independent from Denmark.
   
 `r hide("R solution -> dont' peak to early ;) !")`
 ```{r}
@@ -96,20 +96,34 @@ Dat <- Dat %>%
       str_detect(country, "Angola|Mozambigue|Papua New Guinea") ~ date - 1975,
       country == "Djibouti" ~ date - 1977, 
       country == "Namibia" ~ date - 1990))
+```
+`r unhide()`
 
-# 4. Download Freedom House data for all countries since 1972,
+2. How does the Danish colonial legacy compare to that of other countries in terms of extreme poverty? `r mcq(c("Not significantly different", "Worse than in the reference (Belgium)", answer = "Significantly better than in the reference (Belgium)"))` Can this be intepreted as a causal effect of Danish colonial rule and legacy? `r mcq(c("Yes, it is statistically significant", "Yes, the slope is sizable and statistically significant.", answer = "No, this is only a descriptive difference. Many things differ between countries colonialized by Belgium or Denmark."))`
+`r hide("R solution -> dont' peak to early ;) !")`
+```{r}
+ols2 <- lm_robust(poverty ~  colonizer, data = Dat)
+screenreg(ols2, include.ci = FALSE, digits = 3)
+```
+`r unhide()`
+
+
+3. Download and join/merge the Freedom House data.
+`r hide("R solution -> dont' peak to early ;) !")`
+```{r}
+# 1. Download Freedom House data for all countries since 1972,
 Dat_citi_rights <- download_fh(verbose = FALSE) %>% 
    rename(country = fh_country, # rename country ID,
           citizen_rights = fh_total_reversed, # rename Citizenship rights indicator,
           date = year) %>% # rename year,
    select(country, date, citizen_rights) # Keep only these 3 variables.
 
-# 3. Join Dat and Freedom House data
+# 2. Join Dat and Freedom House data
 Dat <- inner_join(Dat, Dat_citi_rights, by = c("country", "date"))
 ```
 `r unhide()`
 
-2. Make a scatterplot with citizenship rights as outcome on the Y-axis and the years since independence as predictor on the X-axis. Make sure to add a regression line with 95% confidence interval to it.
+4. Make a scatterplot with citizenship rights as outcome on the Y-axis and the years since independence as predictor on the X-axis. Make sure to add a regression line with 95% confidence interval to it.
 `r hide("R solution -> dont' peak to early ;) !")`
 ```{r out.width='100%', fig.height = 4, fig.width = 7.5, results = FALSE, echo = TRUE}
 ggplot(data = Dat, aes(y = citizen_rights, x = years_indep)) +
@@ -122,27 +136,19 @@ ggplot(data = Dat, aes(y = citizen_rights, x = years_indep)) +
 ```
 `r unhide()`
 
-3. Run an OLS regression with citizenship rights as outcome and the years since independence as predictor. Is the association statistically significant? `r mcq(c(answer = "Yes, the SE is < 1/2 the coefficient", "No"))` 
+5. Run an OLS regression with citizenship rights as outcome and the years since independence as predictor. Is the association statistically significant? `r mcq(c(answer = "Yes, the SE is < 1/2 the coefficient", "No"))` 
 `r hide("R solution -> dont' peak to early ;) !")`
-```{r out.width='100%', fig.height = 4, fig.width = 7.5, results = FALSE, echo = TRUE}
+```{r}
 ols <- lm_robust(citizen_rights ~  years_indep, data = Dat)
 screenreg(ols, include.ci = FALSE, digits = 3)
 ```
 `r unhide()`
 
-4. Re-run the model using `lm()` and check whether Estonia is an outlier and whether the linearity assumption is strongly violated. `r mcq(c("Yes, Estonia is an outlier with a large Cook's D", "Yes, the association is clearly not linear", answer = "No, Estonia is no outlier and the association is roughly linear"))` 
+6. Re-run the model using `lm()` and check whether Estonia is an outlier and whether the linearity assumption is strongly violated. `r mcq(c("Yes, Estonia is an outlier with a large Cook's D", "Yes, the association is clearly not linear", answer = "No, Estonia is no outlier and the association is roughly linear"))` 
 `r hide("R solution -> dont' peak to early ;) !")`
 ```{r out.width='100%', fig.height = 4, fig.width = 7.5, results = FALSE, echo = TRUE}
 ols <- lm(citizen_rights ~  years_indep, data = Dat)
 plot(ols, which = 5) # Outlier
 plot(ols, which = 1) #Linearity
-```
-`r unhide()`
-
-4. How does the Danish colonial legacy compare to that of other countries in terms of extreme poverty? `r mcq(c("Not significantly different", "Worse than in the reference (Belgium)", answer = "Significantly better than in the reference (Belgium)"))`
-`r hide("R solution -> dont' peak to early ;) !")`
-```{r out.width='100%', fig.height = 4, fig.width = 7.5, results = FALSE, echo = TRUE}
-ols2 <- lm_robust(poverty ~  colonizer, data = Dat)
-screenreg(ols2, include.ci = FALSE, digits = 3)
 ```
 `r unhide()`

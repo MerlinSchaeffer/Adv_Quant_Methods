@@ -1,0 +1,344 @@
+---
+title: "Multiple OLS regression"
+subtitle: "Controlling for *observed* confounders"
+author: "Merlin Schaeffer<br> Department of Sociology"
+date: "`r Sys.Date()`"
+output: 
+  xaringan::moon_reader:
+    chakra: "../template/remark-latest.min.js"
+    css: ["../template/Merlin169.css"]
+    lib_dir: libs
+    # self_contained: true
+    nature:
+      highlightLanguage: r
+      highlightStyle: zenburn
+      highlightLines: true
+      countIncrementalSlides: false
+      ratio: '16:9'
+---
+```{r setup, include = FALSE}
+library(RefManageR)
+library(knitr)
+library(ggrepel) # Nicely placed labels in figures.
+library(modelr)
+library(webexercises) # Small web-based answer scales.
+library(equatiomatic) # Regression equations from model objects.
+library(essentials)
+
+options(htmltools.preserve.raw = FALSE, tikzDefaultEngine = "xetex",
+        htmltools.dir.version = FALSE, servr.interval = 0.5, width = 115, digits = 3)
+knitr::opts_chunk$set(
+  collapse = TRUE, message = FALSE, fig.retina = 3, error = TRUE,
+  warning = FALSE, cache = TRUE, fig.align = 'center',
+  comment = "#", strip.white = TRUE, tidy = FALSE)
+
+BibOptions(check.entries = FALSE, 
+           bib.style = "authoryear", 
+           style = "markdown",
+           hyperlink = FALSE,
+           no.print.fields = c("doi", "url", "ISSN", "urldate", "language", "note", "isbn", "volume"))
+myBib <- ReadBib("./../../../Stats_II.bib", check = FALSE)
+
+xaringanExtra::use_xaringan_extra(c("tile_view", "tachyons"))
+xaringanExtra::use_panelset()
+```
+# The goal of social science research
+
+.font140[.center[.alert[Use data to discover patterns ("social facts" in Durkheim's terms), <br> and **the social mechanisms that bring them about**.]]]
+
+```{r, echo = FALSE, out.width='70%', fig.align='center'}
+knitr::include_graphics('https://liu.se/-/media/istock-501261958.jpg?mw=1120&mh=1120&hash=DA8977CCE6A6E600AE80A40CFEE771C9')
+```
+
+---
+class: inverse middle
+# Today's schedule
+
+1. **Application 1**: Terrorist attacks and xenophobia re-visited.
+
+2. **Multiple OLS**
+  + Frisch-Waugh-Lovell Theorem
+  + Estimation
+  
+3. **(Natural) RCTs & Multiple OLS** 
+
+4. **Application 2**: Zero-tolerance for domestic violence re-visited.
+
+5. **IV & Multiple OLS**
+
+---
+class: inverse middle center
+# Research question 1 of the day
+
+.right-column[
+```{r, echo = FALSE, out.width='60%'}
+knitr::include_graphics('https://api.time.com/wp-content/uploads/2019/07/gettyimages-1064896696.jpg')
+knitr::include_graphics('https://www.brookings.edu/wp-content/uploads/2019/07/Denmark.jpg?w=1200&h=630&crop=1')
+```
+]
+
+.left-column[
+.font130[
+**What is the** 
+
+**average causal effect**
+
+**of terrorist attacks on xenophobia?**
+]]
+
+---
+# We need an RCT!
+
+.push-left[
+```{r, echo = FALSE, out.width='60%', fig.align='center'}
+knitr::include_graphics('./img/randomization2.png')
+```
+
+- If we *randomly* divide subjects into treatment and control groups: They come from the same underlying population. 
+  <br> <br> $\rightarrow$ Similar .alert[on average], *in every way*,<br> **including their $Y_{0}$ **!
+  <br> <br> $\rightarrow E[Y_{0i}|D=1] = E[Y_{0i}|D=0]$!
+]
+
+.push-right[
+```{tikz, DAG_RCT, echo = FALSE, out.width='70%'}
+\usetikzlibrary{shapes,decorations,arrows,calc,arrows.meta,fit,positioning,quotes}
+\tikzset{
+  -Latex,auto,node distance =1 cm and 1 cm,semithick,
+  state/.style ={ellipse, draw, minimum width = 0.7 cm},
+  point/.style = {circle, draw, inner sep=0.04cm,fill,node contents={}},
+  bidirected/.style={Latex-Latex,dashed},
+  el/.style = {inner sep=2pt, align=left, sloped}
+}
+
+\begin{tikzpicture}
+\sffamily
+\node[state] (1) [red] at (0,0) {$I$};
+\node[state] (2) [right = of 1] {$D$};
+\node[state] (3) [above = of 2] {$C$};
+\node[state] (4) [right = of 2] {$Y$};
+
+\path (1) [red] edge ["$|r|=1$"] (2);
+\path (2) edge (4);
+\path (3) edge [dashed] (4);
+\path (3) edge [dashed] (2);
+\end{tikzpicture}
+```
+]
+
+---
+layout: true
+# My friend Joscha had an idea
+
+.left-column[
+<br>
+
+```{r, echo = FALSE, out.width='100%'}
+knitr::include_graphics('https://jlegewie.com/files/joscha.jpg')
+```
+
+]
+
+---
+
+.right-column[
+```{r, echo = FALSE, out.width='100%'}
+knitr::include_graphics('./img/Joscha2.png')
+```
+.center[.backgrnote[*Source:* `r Citet(myBib, "legewie_terrorist_2013")`]]
+]
+
+---
+
+.right-column[
+```{r, echo = FALSE, out.width='100%'}
+knitr::include_graphics('./img/Joscha2.png')
+```
+.center[.backgrnote[*Source:* `r Citet(myBib, "legewie_terrorist_2013")`]]
+
+.alert[Assumption 1]: The European Social Survey is based on random sampling. .alert[The day of] $i$.alert['s interview is also random!]
+
+- *Reachability bias*: Respondents who are easier to contact tend to be interviewed earlier during the survey period.
+
+.alert[Assumption 2]: No other event had a causal effect on $Y_{i}$.
+]
+
+---
+layout: false
+# Balance?
+
+.left-column[
+$$E[Y_{0i}|D=1] = E[Y_{0i}|D=0]?$$
+
+```{tikz, DAG_NatExp, echo = FALSE, out.width='70%'}
+\usetikzlibrary{shapes,decorations,arrows,calc,arrows.meta,fit,positioning,quotes}
+\tikzset{
+  -Latex,auto,node distance =1 cm and 1 cm,semithick,
+  state/.style ={ellipse, draw, minimum width = 0.7 cm},
+  point/.style = {circle, draw, inner sep=0.04cm,fill,node contents={}},
+  bidirected/.style={Latex-Latex,dashed},
+  el/.style = {inner sep=2pt, align=left, sloped}
+}
+
+\begin{tikzpicture}
+\sffamily
+\node[state] (1) [red] at (0,0) {$E$};
+\node[state] (2) [right = of 1] {$D$};
+\node[state] (3) [above = of 2] {$C$};
+\node[state] (4) [right = of 2] {$Y$};
+
+\path (1) [red] edge (2);
+\path (1) [red, bidirected] edge ["?"] (3);
+\path (2) edge (4);
+\path (3) edge [dashed] (4);
+\path (3) edge [dashed] (2);
+\end{tikzpicture}
+```
+]
+
+.right-column[
+```{r, echo = FALSE, out.width='100%'}
+knitr::include_graphics('./img/Joscha3.png')
+```
+.center[.backgrnote[*Source:* `r Citet(myBib, "legewie_terrorist_2013")`]]
+]
+
+
+---
+# Natural experiments .font70[How to?!]
+
+.left-column[.content-box-blue[
+Analyzing a natural experiment does not necessarily involve much statistical sophistication; often simple OLS suffices.
+
+*But finding one is as tough as finding truffles; you got to be lucky!*
+
+.center[**_Are you such a <br>lucky truffle pig?_**]
+]]
+
+.right-column[
+```{r, echo = FALSE, out.width='80%'}
+knitr::include_graphics('https://upload.wikimedia.org/wikipedia/commons/5/5e/Cochon_truffier.JPG')
+```
+]
+
+---
+class: clear
+# Learning goal 1 .font60[Terror attacks can increase xenophobia]
+
+.right-column[
+```{r, echo = FALSE, out.width='100%'}
+knitr::include_graphics('./img/Joscha4.png')
+```
+.center[.backgrnote[*Source:* `r Citet(myBib, "legewie_terrorist_2013")`]]
+]
+
+--
+
+.left-column[.content-box-green[.center[
+My friend Joscha <br> is a truffle pig ;)
+
+Based on the idea that the day of a survey interview is random, he could estimate the causal effect of the Bali 2002 terror attack.
+
+Do you want to learn what Joscha has to say about:
+
+*Why was there an effect in Portugal, but not in the UK?* 
+
+Read his article ;)
+]]]
+
+---
+class: inverse middle center
+# Break
+
+<iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'></iframe>
+
+---
+class: middle clear
+
+.left-column[
+```{r, echo = FALSE, out.width='100%'}
+knitr::include_graphics('https://www.latentview.com/wp-content/uploads/2016/04/LatentView-Turns-Ten-A-decade-of-data-science.jpg')
+```
+
+<iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'></iframe>
+]
+
+.right-column[
+<br>
+<iframe src='exercise1.html' width='1000' height='600' frameborder='0' scrolling='yes'></iframe>
+]
+
+---
+class: inverse middle center
+# Break
+
+<iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'></iframe>
+
+
+---
+layout: true
+# Zero-tolerance for domestic violence?
+
+.push-right[
+```{r, echo = FALSE, out.width='80%'}
+knitr::include_graphics('https://images.theconversation.com/files/325865/original/file-20200406-6044-hao5gp.jpg?ixlib=rb-1.1.0&q=45&auto=format&w=1200&h=675.0&fit=crop')
+knitr::include_graphics('https://minbynyt.dk/wp-content/uploads/2021/01/Politi-Betjent-ligger-anholdt-i-ha%CC%8AndjernFoto-Lars-Aarjpg1-780x470.jpg')
+```
+]
+
+---
+
+.push-left[
+<iframe src='https://www.jstor.org/stable/2095575#metadata_info_tab_contents' width='600' height='550' frameborder='0' scrolling='yes'></iframe>
+]
+
+---
+
+.push-left[
+> [...] the pains of punishment deter people from repeating the crimes for which they are punished, especially when punishment is certain, swift and severe. 
+
+.center[versus]
+
+> [...] punishment often makes individuals more likely to commit crimes because of altered interactional structures, foreclosed legal opportunities and secondary deviance
+> -- .center[.backgrnote[*Source:* `r Citet(myBib, "sherman_specific_1984")`]]
+
+.center[**Does punishment increase repeat domestic abuse?**]
+]
+
+---
+layout: false
+class: middle clear
+
+.left-column[
+```{r, echo = FALSE, out.width='100%'}
+knitr::include_graphics('https://www.latentview.com/wp-content/uploads/2016/04/LatentView-Turns-Ten-A-decade-of-data-science.jpg')
+```
+
+<iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'></iframe>
+]
+
+.right-column[
+<br>
+<iframe src='exercise2.html' width='1000' height='600' frameborder='0' scrolling='yes'></iframe>
+]
+
+---
+class: inverse
+# Today's general lessons
+
+1. *Natural Experiment*: Sometimes nature or other forces randomly exposure people to treatment or control conditions. Compared to RCTs we have less control that exposure was truly random, but we can often study more interesting - real - events.
+
+2. *Intention to Treat*: Some people do not comply with the experimental group we assign them to. In that case we estimate an average causal intention to treat effect, if we focus on the randomly assigned treatment alone.
+
+3. *Instrument Variables (IV) Estimation*: Instrument variable regression allows us to recover the causal effect of the treatment (not the intention) in such situations.
+
+4. *LATE (Local average treatment effect:* IV only estimates the treatment effect among compliers; we cannot know how people who did not comply to the intended treatment would have been affected by the treatment.
+
+---
+# References
+
+.font80[
+```{r ref1, results = 'asis', echo = FALSE}
+PrintBibliography(myBib)
+```
+]
+

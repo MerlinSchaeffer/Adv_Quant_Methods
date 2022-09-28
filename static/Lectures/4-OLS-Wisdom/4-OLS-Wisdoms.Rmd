@@ -130,12 +130,6 @@ class: clear
 # Worldbank Data .font70[On extreme poverty across the World]
 
 .panelset[
-.panel[.panel-name[Searching Wb archive]
-- With `wbstats::wb_search()`, you can search the Wb archive for any keyword! Here I use "poverty":
-```{r}
-(wb_poverty_archive <- wb_search("poverty"))
-```
-]
 .panel[.panel-name[Get Wb data]
 ```{r}
 (Dat <- wb_data("SI.POV.DDAY", # Download poverty data: <1.90$ per day,
@@ -357,11 +351,10 @@ $\rightarrow$ Scatter plots!
 
 ```{r outlier, results = FALSE, fig.show='hide'}
 # Re-estimate model using lm(),
-ols <- lm(poverty ~ years_indep, 
-          data = Dat)
-
-# The best outlier plot.
-plot(ols, which = 5) 
+lm(poverty ~ years_indep, 
+   data = Dat) %>%
+  # The best outlier plot.
+  plot(., which = 5) 
 ```
 ]
 
@@ -389,11 +382,13 @@ Dat_outl <- Dat %>%
 .panel[.panel-name[OLS]
 .left-column[
 ```{r}
-ols_outl <- lm_robust( # Estimation
+# Estimation
+ols_outl <- lm_robust( 
   poverty ~ years_indep, 
   data = Dat_outl)
 
-screenreg(ols_outl, # Regression table
+# Regression table
+screenreg(ols_outl,
           include.ci = FALSE, 
           digits = 3)
 ```
@@ -419,11 +414,10 @@ ggplot(data = Dat_outl, # Make coord system for data,
 
 ```{r outlier2, results = FALSE, fig.show='hide'}
 # Re-estimate model using lm(),
-ols_outl <- lm(poverty ~ years_indep, 
-          data = Dat_outl)
-
-# The best outlier plot.
-plot(ols_outl, which = 5) 
+lm(poverty ~ years_indep, 
+   data = Dat_outl) %>%
+  # The best outlier plot.
+  plot(., which = 5) 
 ```
 ]
 
@@ -443,8 +437,11 @@ plot(ols_outl, which = 5)
   + .alert[Here the linearity assumption doesn't perfectly hold, but seems overall OK.]
 
 ```{r linearity, results = FALSE, fig.show = 'hide'}
-# The best outlier plot.
-plot(ols, which = 1)
+# Re-estimate model using lm(),
+lm(poverty ~ years_indep, 
+   data = Dat) %>%
+  # The best linearity plot.
+  plot(., which = 1)
 ```
 ]
 
@@ -462,8 +459,11 @@ plot(ols, which = 1)
 - The red line should ideally be the same.
 
 ```{r linearity2, results = FALSE, fig.show = 'hide'}
-# The best outlier plot.
-plot(ols_outl, which = 1)
+# Re-estimate model using lm(),
+lm(poverty ~ years_indep, 
+   data = Dat_outl) %>%
+  # The best linearity plot.
+  plot(., which = 1)
 ```
 ]
 
@@ -484,8 +484,8 @@ class: inverse middle center
 
 .left-column[
 .content-box-green[
-1. Where does the regression line pass through the cloud of countries without a socialist past?
-2. Where does the regression line pass through the cloud of countries with a socialist past?
+1. At which $\hat{Y}$ does the regression line pass through the cloud of countries colonized by Britain?
+2. At which $\hat{Y}$ does the regression line pass through the cloud of countries colonized by Belgium?
 3. What does this suggest about the slope $\hat{\beta}$?
 ]]
 .right-column[
@@ -550,11 +550,13 @@ ggplot(data = Dat_bi, aes(y = poverty, x = colonizer_bi)) +
 .panel[.panel-name[How it's done in R]
 .push-left[
 ```{r ols_2, eval = FALSE}
-# R recognizes categorical variables automatically.
+# R recognizes categorical variables automatically,
+# if they are factor or character vectors.
 ols_2 <- lm_robust(poverty ~ colonizer, data = Dat)
 
 htmlreg(ols_2, # Nicely-formatted table.
-        include.ci = FALSE, digits = 3, single.row = TRUE,
+        include.ci = FALSE, digits = 3, 
+        single.row = TRUE,
         custom.coef.names = c("Intercept", "France",
                               "Spain", "Belgium",
                               "Portugal"))
@@ -615,16 +617,15 @@ class: inverse middle center
 # Binary outcomes
 
 ---
-# LPM versus logistic regression
+class: clear
+# LPM versus Generalized Linear Models (GLM)
 
 .left-column[
 Using OLS to predict a binary outcome (0 = "No" / 1 = "Yes") yields the so-called *Linear Probability Model (LPM)*. 
 
 LPMs predict the probability that the outcome equals 1 $\hat{\text{Pr}}(y_i = 1|x_{i})$.
 
-LPMs violate the linearity assumption and can thus predict $\hat{\text{Pr}}(y_i = 1|x_{i}) < 0$, or $\hat{\text{Pr}}(y_i = 1|x_{i}) >1$. This is controvertial!
-
-But we accept that problem, because the alternative (i.e. logistic regression) comes with many other problems `r Citep(myBib, "breen_interpreting_2018")`.
+LPMs violate the linearity assumption and can thus predict $\hat{\text{Pr}}(y_i = 1|x_{i}) < 0$, or $\hat{\text{Pr}}(y_i = 1|x_{i}) >1$. This is controversial!
 ]
 
 
@@ -635,6 +636,62 @@ knitr::include_graphics('http://res.cloudinary.com/dyd911kmh/image/upload/f_auto
 .center[.backgrnote[*Source*: [datacamp: Logistic Regression in R Tutorial](https://www.datacamp.com/community/tutorials/logistic-regression-R)]]
 ]
 
+---
+# Logistic regression .font70[GLM for binary outcomes]
+
+.push-left[
+$$\begin{align*}
+\text{logit}(y_{i}) &= \alpha + \beta x, \\
+y_{i} &= \text{logit}^{-1}(\alpha + \beta x) \\
+& = \text{logistic}(\alpha + \beta x) \\
+&= \frac{1}{1+e^{-(\alpha + \beta x)}}.
+\end{align*}$$
+
+```{r include = FALSE}
+library(knitr)
+logistic <- function(x) {1 / (1 + exp(-x))}
+df <- data.frame(x <- -2:2)
+df$exp <- exp(-x)
+df$logistic <- logistic(x)
+kable(df)
+```
+
+.font90[
+| $\alpha + \beta x$  | $e^{(\alpha + \beta x)}$ | $\frac{1}{e^{(\alpha + \beta x)}} \color{gray}{= e^{-(\alpha + \beta x)}}$ | $\frac{1}{1 + e^{(\alpha + \beta x)}}$ | $\frac{1}{1 +e^{-(\alpha + \beta x)}}$ | 
+|--------------------:|-------------------------:|-------------------------------------------------------------:|---------------------------------------:|---------------------------------------:|
+|        -2           | 0.135                    | 7.389                                                        | 0.881                                  | 0.119                                  | 
+|        -1           | 0.368                    | 2.718                                                        | 0.731                                  | 0.269                                  | 
+|         0           | 1                        | 1                                                            | 0.5                                    | 0.5                                    | 
+|         1           | 2.718                    | 0.368                                                        | 0.269                                  | 0.731                                  | 
+|         2           | 7.389                    | 0.135                                                        | 0.119                                  | 0.881                                  |
+
+]]
+
+.push-right[
+We need a link function $g^{-1}$ that maps/projects the results of our linear model to the range 0 to 1. One option is the sigmoid (i.e., s-shaped) *logistic* function, with its inverse the *logit* (logged odds):
+
+```{r Logit-fun, out.width='80%', fig.height = 3, fig.width = 4, echo = FALSE}
+df <- data.frame(x = rnorm(mean = 0, sd = 1, n = 1000))
+x <- df$x
+ggplot(data = df, mapping = aes(x = x)) +
+  stat_function(fun = logistic, geom = "line") +
+  labs(x = expression(alpha + beta * x)) +
+  scale_y_continuous(name = expression(over(1, 1+e^-(alpha + beta * x) ))) +
+  theme_minimal() + xlim(-6, 6)
+```
+
+.backgrnote[
+Alternatives are the probit or cloglog link functions; results compared to logit hardly ever differ in meaningful ways.]
+]
+
+---
+class: middle center
+
+We accept the linearity problem of LPMs, because GLMs (e.g. logistic regression) come with many other problems `r Citep(myBib, "breen_interpreting_2018")`.
+
+.alert[We use Linear Probability Models to predict binary outcomes.]
+
+If you have a categorical outcome, make sure to code it 0/1.
 
 ---
 class: inverse middle center
