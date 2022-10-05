@@ -166,9 +166,9 @@ class: clear
 
 $$\downarrow$$
 
-- $0 < Avg_{n}[\text{Discrimination}|\text{Read news} = 1] - Avg_{n}[\text{Discrimination}|\text{Read news} = 0]$
+- $H_{1}: 0 < Avg_{n}[\text{Discrimination}|\text{Read news} = 1] - Avg_{n}[\text{Discrimination}|\text{Read news} = 0]$
  + .backgrnote[ 
- $0 = Avg_{n}[\text{Discrimination}|\text{Read news} = 1] - Avg_{n}[\text{Discrimination}|\text{Read news} = 0]$
+ $H_{0}: 0 = Avg_{n}[\text{Discrimination}|\text{Read news} = 1] - Avg_{n}[\text{Discrimination}|\text{Read news} = 0]$
  ]
  
 --
@@ -230,8 +230,8 @@ APAX <- APAX %>% mutate(
   # News in minutes,
   news = news_hrs*60 + news_mins, 
   news_yn = case_when( # News Yes/No,
-    news < 10 ~ 0, # Less than 15  minutes,
-    news > 14 ~ 1, # More than 15  minutes,
+    news < 15 ~ 0, # Less than 15  minutes,
+    news >= 15 ~ 1, # 15  minutes and more,
     TRUE ~ as.numeric(NA)),
   # Average discrimination index across domains,
   dis_index = rowmeans( #<<
@@ -397,11 +397,7 @@ $$Avg_{n}[Y_{1i}-Y_{0i}] = \frac{1}{n} \displaystyle\sum_{i=1}^{n}Y_{1i} - \frac
 
 .left[
 .push-left[
-- The average causal effect is the average of all personal causal effects in your sample!
-
-- Unlike personal causal effects, we can sometimes estimate average causal effects.
-  + Next week you learn how.
-  + This week you learn why it's difficult ;)
+The average causal effect is the average of all personal causal effects in your sample!
 ]
 
 .push-right[
@@ -528,7 +524,7 @@ Differences in observed group means are (most of the time) a comparison of apple
 # Why? Selection bias!
 
 $$\begin{equation} \begin{split}
-\underbrace{Avg_{n}[Y_{1i}|D_{i} = 1] - Avg_{n}[Y_{0i}|D_{i} = 0]}_{\text{Difference in observed group means}} = \underbrace{Avg_{n}[Y_{1i}|D_{i} = 1] -  Avg_{n}[Y_{0i}|D_{i} = 1]}_{\text{Average causal effect } among \text{ } the \text{ } treated} + \underbrace{Avg_{n}[Y_{0i}|D_{i} = 1] -  Avg_{n}[Y_{0i}|D_{i} = 0]}_{\text{Selection bias}}.
+\underbrace{Avg_{n}[Y_{1i}|D_{i} = 1] - Avg_{n}[Y_{0i}|D_{i} = 0]}_{\text{Difference in observed group means}} = \underbrace{Avg_{n}[Y_{1i}|D_{i} = 1] \color{gray}{(-  Avg_{n}[Y_{0i}|D_{i} = 1]}}_{\text{Average causal effect } among \text{ } the \text{ } treated} \color{gray}{+} \underbrace{\color{gray}{Avg_{n}[Y_{0i}|D_{i} = 1])} -  Avg_{n}[Y_{0i}|D_{i} = 0]}_{\text{Selection bias}}.
 \end{split} \end{equation}$$
 
 
@@ -581,19 +577,16 @@ layout: true
 
 .push-left[
 - **Nodes** represent variables, **Arrows\edges** represent causal effects `r Citep(myBib, "pearl_causal_2016")`.
-  + there cannot by a cycle: Follow paths until one re-arrives at the origin.
+  + There must not by a cycle: Follow paths until one re-arrives at the origin.
 
 
 - DAGs are theoretical models and can contain observed *and unobserved* variables.
 
 
-- A DAG should capture the social processes by which $X$ comes to be associated with $Y$ in your data.
-
-
 - **Backdoor paths**: All paths linking $X$ and $Y$ that start with an arrow into $X$ `r Citep(myBib, c("pearl_causal_2016", "gerxhani_causal_2022"))`.
 
 
-- **Confounder \ Backdoor bias** = Selection bias.
+- **Confounder \ Backdoor path bias** = Selection bias.
 ]
 
 ---
@@ -667,7 +660,7 @@ layout: false
 .content-box-red[
 Correlation ≠ causation,
 
-because the baseline of the outcome $Y_{0i}$ likely differs between the groups we compare. This is, because certain other variables (i.e. confounders) make us select into / out of $D_{i}$. This is called selection, confounder, or backdoor bias.
+because the baseline of the outcome $Y_{0i}$ likely differs between the groups we compare. This is, because certain other variables (i.e. confounders) make us select into / out of $D_{i}$. This is called selection, confounder, or backdoor path bias.
 ]]]
 
 ---

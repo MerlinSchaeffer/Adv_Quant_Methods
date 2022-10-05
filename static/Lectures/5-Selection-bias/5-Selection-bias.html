@@ -4,7 +4,7 @@
     <title>5. Selection Bias</title>
     <meta charset="utf-8" />
     <meta name="author" content="Merlin Schaeffer  Department of Sociology" />
-    <meta name="date" content="2022-09-14" />
+    <meta name="date" content="2022-10-05" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
     <script src="libs/tile-view/tile-view.js"></script>
@@ -29,7 +29,7 @@ class: center, middle, inverse, title-slide
 ### Merlin Schaeffer<br> Department of Sociology
 ]
 .date[
-### 2022-09-14
+### 2022-10-05
 ]
 
 ---
@@ -144,9 +144,9 @@ class: clear
 
 `$$\downarrow$$`
 
-- `\(0 &lt; Avg_{n}[\text{Discrimination}|\text{Read news} = 1] - Avg_{n}[\text{Discrimination}|\text{Read news} = 0]\)`
+- `\(H_{1}: 0 &lt; Avg_{n}[\text{Discrimination}|\text{Read news} = 1] - Avg_{n}[\text{Discrimination}|\text{Read news} = 0]\)`
  + .backgrnote[ 
- `\(0 = Avg_{n}[\text{Discrimination}|\text{Read news} = 1] - Avg_{n}[\text{Discrimination}|\text{Read news} = 0]\)`
+ `\(H_{0}: 0 = Avg_{n}[\text{Discrimination}|\text{Read news} = 1] - Avg_{n}[\text{Discrimination}|\text{Read news} = 0]\)`
  ]
  
 --
@@ -210,8 +210,8 @@ APAX &lt;- APAX %&gt;% mutate(
   # News in minutes,
   news = news_hrs*60 + news_mins, 
   news_yn = case_when( # News Yes/No,
-    news &lt; 10 ~ 0, # Less than 15  minutes,
-    news &gt; 14 ~ 1, # More than 15  minutes,
+    news &lt; 15 ~ 0, # Less than 15  minutes,
+    news &gt;= 15 ~ 1, # 15  minutes and more,
     TRUE ~ as.numeric(NA)),
   # Average discrimination index across domains,
 * dis_index = rowmeans(
@@ -274,15 +274,15 @@ screenreg(ols, include.ci = FALSE, digits = 3)
 # =========================
 #              Model 1     
 # -------------------------
-# (Intercept)     2.266 ***
-#                (0.133)   
-# news_yn        -0.172    
-#                (0.144)   
+# (Intercept)     2.187 ***
+#                (0.116)   
+# news_yn        -0.093    
+#                (0.129)   
 # -------------------------
-# R^2             0.005    
-# Adj. R^2        0.004    
-# Num. obs.    1025        
-# RMSE            0.745    
+# R^2             0.002    
+# Adj. R^2        0.001    
+# Num. obs.    1085        
+# RMSE            0.746    
 # =========================
 # *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
 ```
@@ -303,24 +303,24 @@ screenreg(ols, include.ci = FALSE, digits = 3)
 # =========================
 #              Model 1     
 # -------------------------
-# (Intercept)     2.266 ***
-#                (0.133)   
-# news_yn        -0.172    
-#                (0.144)   
+# (Intercept)     2.187 ***
+#                (0.116)   
+# news_yn        -0.093    
+#                (0.129)   
 # -------------------------
-# R^2             0.005    
-# Adj. R^2        0.004    
-# Num. obs.    1025        
-# RMSE            0.745    
+# R^2             0.002    
+# Adj. R^2        0.001    
+# Num. obs.    1085        
+# RMSE            0.746    
 # =========================
 # *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
 ```
 ]
 
 .right-column[.font80[
-`\(-0.172 = Avg_{n}[\text{Discrimination}|\text{Read news} = 1] - Avg_{n}[\text{Discrimination}|\text{Read news} = 0]\)`
+`\(-0.093 = Avg_{n}[\text{Discrimination}|\text{Read news} = 1] - Avg_{n}[\text{Discrimination}|\text{Read news} = 0]\)`
 
-`\(-0.172 \ngtr 0\)`
+`\(-0.093 \ngtr 0\)`
 ]
 
 .mini-left[
@@ -385,11 +385,7 @@ class: center inverse
 
 .left[
 .push-left[
-- The average causal effect is the average of all personal causal effects in your sample!
-
-- Unlike personal causal effects, we can sometimes estimate average causal effects.
-  + Next week you learn how.
-  + This week you learn why it's difficult ;)
+The average causal effect is the average of all personal causal effects in your sample!
 ]
 
 .push-right[
@@ -510,7 +506,7 @@ Differences in observed group means are (most of the time) a comparison of apple
 # Why? Selection bias!
 
 `$$\begin{equation} \begin{split}
-\underbrace{Avg_{n}[Y_{1i}|D_{i} = 1] - Avg_{n}[Y_{0i}|D_{i} = 0]}_{\text{Difference in observed group means}} = \underbrace{Avg_{n}[Y_{1i}|D_{i} = 1] -  Avg_{n}[Y_{0i}|D_{i} = 1]}_{\text{Average causal effect } among \text{ } the \text{ } treated} + \underbrace{Avg_{n}[Y_{0i}|D_{i} = 1] -  Avg_{n}[Y_{0i}|D_{i} = 0]}_{\text{Selection bias}}.
+\underbrace{Avg_{n}[Y_{1i}|D_{i} = 1] - Avg_{n}[Y_{0i}|D_{i} = 0]}_{\text{Difference in observed group means}} = \underbrace{Avg_{n}[Y_{1i}|D_{i} = 1] \color{gray}{(-  Avg_{n}[Y_{0i}|D_{i} = 1]}}_{\text{Average causal effect } among \text{ } the \text{ } treated} \color{gray}{+} \underbrace{\color{gray}{Avg_{n}[Y_{0i}|D_{i} = 1])} -  Avg_{n}[Y_{0i}|D_{i} = 0]}_{\text{Selection bias}}.
 \end{split} \end{equation}$$`
 
 
@@ -574,22 +570,22 @@ APAX %&gt;%
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; dis_index &lt;/td&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 2.3 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2.2 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 0.9 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 2.1 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 0.9 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; -0.2 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -0.1 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 0.1 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; age &lt;/td&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 37.2 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 13.0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 36.7 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 12.3 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 43.8 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 15.4 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 6.6 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 2.7 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 7.1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2.2 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;box-shadow: 0px 1px"&gt; nbh_exposed &lt;/td&gt;
@@ -614,8 +610,8 @@ APAX %&gt;%
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; imor &lt;/td&gt;
    &lt;td style="text-align:left;"&gt; Child of immigrant &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 47 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 30.1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 64 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 29.4 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 399 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 45.6 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt;  &lt;/td&gt;
@@ -624,8 +620,8 @@ APAX %&gt;%
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
    &lt;td style="text-align:left;"&gt; Immigrant &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 109 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 69.9 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 154 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 70.6 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 476 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 54.4 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt;  &lt;/td&gt;
@@ -634,8 +630,8 @@ APAX %&gt;%
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; german &lt;/td&gt;
    &lt;td style="text-align:left;"&gt; Ja &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 64 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 41.0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 89 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 40.8 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 561 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 64.1 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt;  &lt;/td&gt;
@@ -644,8 +640,8 @@ APAX %&gt;%
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
    &lt;td style="text-align:left;"&gt; Nein &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 92 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 59.0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 129 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 59.2 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 314 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 35.9 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt;  &lt;/td&gt;
@@ -665,19 +661,16 @@ layout: true
 
 .push-left[
 - **Nodes** represent variables, **Arrows\edges** represent causal effects (Pearl, Glymour, and Jewell, 2016).
-  + there cannot by a cycle: Follow paths until one re-arrives at the origin.
+  + There must not by a cycle: Follow paths until one re-arrives at the origin.
 
 
 - DAGs are theoretical models and can contain observed *and unobserved* variables.
 
 
-- A DAG should capture the social processes by which `\(X\)` comes to be associated with `\(Y\)` in your data.
-
-
 - **Backdoor paths**: All paths linking `\(X\)` and `\(Y\)` that start with an arrow into `\(X\)` (Pearl, Glymour, and Jewell, 2016; Breen, 2022).
 
 
-- **Confounder \ Backdoor bias** = Selection bias.
+- **Confounder \ Backdoor path bias** = Selection bias.
 ]
 
 ---
@@ -709,7 +702,7 @@ layout: false
 .content-box-red[
 Correlation ≠ causation,
 
-because the baseline of the outcome `\(Y_{0i}\)` likely differs between the groups we compare. This is, because certain other variables (i.e. confounders) make us select into / out of `\(D_{i}\)`. This is called selection, confounder, or backdoor bias.
+because the baseline of the outcome `\(Y_{0i}\)` likely differs between the groups we compare. This is, because certain other variables (i.e. confounders) make us select into / out of `\(D_{i}\)`. This is called selection, confounder, or backdoor path bias.
 ]]]
 
 ---

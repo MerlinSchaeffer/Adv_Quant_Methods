@@ -35,8 +35,8 @@ APAX <- APAX %>% mutate(
   # News in minutes,
   news = news_hrs*60 + news_mins, 
   news_yn = case_when( # News Yes/No,
-    news < 10 ~ 0, # Less than 15  minutes,
-    news > 14 ~ 1, # More than 15  minutes,
+    news < 15 ~ 0, # Less than 15  minutes,
+    news >= 15 ~ 1, # 15  minutes and more,
     TRUE ~ as.numeric(NA)),
   # Average discrimination index across domains,
   dis_index = rowmeans( #<<
@@ -97,7 +97,7 @@ se <- vcov(ols) %>% diag()
 se <- se["news_yn"] %>% sqrt() %>% round(., 3) %>% as.scalar()
 ```
 
-4. Use the binary news consumption variable and run a OLS regression. How much does a year-increase in education go along with a change in trust in politicians? `r fitb(coef, width = "5")` What is the estimated standard error of this $\hat{\beta}$? `r fitb(se, width = "5")`. *What do these two statistics suggest about the naïv comparison?*
+4. Use the binary news consumption variable and run a OLS regression. How much more or less do news readers support a law against ethnic discrimination? `r fitb(coef, width = "5")` What is the estimated standard error of this $\hat{\beta}$? `r fitb(se, width = "5")`. *What do these two statistics suggest about the naïv comparison?*
 `r hide("R solution -> dont' peak to early ;) !")`
 ```{r ref.label="naiv_OLS"}
 ```
