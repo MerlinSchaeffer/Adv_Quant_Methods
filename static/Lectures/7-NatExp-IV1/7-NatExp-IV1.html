@@ -4,7 +4,7 @@
     <title>Natural Experiments &amp;    Instrument Variables (IV)</title>
     <meta charset="utf-8" />
     <meta name="author" content="Merlin Schaeffer  Department of Sociology" />
-    <meta name="date" content="2022-09-26" />
+    <meta name="date" content="2022-10-26" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
     <script src="libs/tile-view/tile-view.js"></script>
@@ -27,7 +27,7 @@ class: center, middle, inverse, title-slide
 ### Merlin Schaeffer<br> Department of Sociology
 ]
 .date[
-### 2022-09-26
+### 2022-10-26
 ]
 
 ---
@@ -385,7 +385,7 @@ layout: true
 
 .left-column[.content-box-red[
 .center[**3 Requirements**]
-1. *First stage*: Instrument has causal effect on outcome `\(Y_{i}\)`.
+1. *First stage*: Instrument has causal effect on outcome `\(D_{i}\)`.
 
 2. *Randomization*: Instrument is randomly assigned (RCT or natural experiment).
 
@@ -410,7 +410,7 @@ layout: true
 .right-column[
 &lt;img src="7-NatExp-IV1_files/figure-html/DAG7-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 
-`$$\underbrace{\kappa_{\text{Support}\rightarrow\text{Income}}}_{1624\text{ Dollar}} = \underbrace{\kappa_{\text{Support}\rightarrow\text{Moving}}}_{0.4766} \times \underbrace{\kappa_{\text{Moving}\rightarrow\text{Income}}}_{?}$$`
+`$$\underbrace{\kappa_{\text{Win lottery}\rightarrow\text{Income}}}_{1624\text{ Dollar}} = \underbrace{\kappa_{\text{Support}\rightarrow\text{Moving}}}_{0.4766} \times \underbrace{\kappa_{\text{Moving}\rightarrow\text{Income}}}_{?}$$`
 
 ]
 
@@ -441,9 +441,9 @@ layout: false
 .center[**The exclusion restriction matters!**&lt;br&gt;(but we can never test it)]
 &lt;img src="7-NatExp-IV1_files/figure-html/unnamed-chunk-25-1.png" width="65%" style="display: block; margin: auto;" /&gt;
 
-`$$\frac{1624}{0.4766} = \frac{\rho \color{red}{+ ?}}{\phi}\neq \lambda$$`
+`$$\frac{1624}{0.4766} = \frac{\rho}{\phi} = \lambda \color{red}{+ ?}$$`
 .center[.alert[
-If the exclusion restriction does not hold, &lt;br&gt; we weigh-up other causal effects than `\(D\)` by `\(\frac{1}{\phi}\)`
+If the exclusion restriction does not hold, &lt;br&gt; we additionally weigh-up other causal effects than `\(D\)` by `\(\frac{1}{\phi}\)`
 ]]]]
 
 ---

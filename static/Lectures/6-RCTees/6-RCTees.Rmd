@@ -511,13 +511,13 @@ ols <- lm_robust(dis_index ~ article,
 zols <- lm_robust(z_dis_index ~ article, 
                   weight = gewFAKT, data = APAX)
 
-# Make a nice regression table of results.
-htmlreg(
+
+htmlreg( # Make a nice regression table of results.
   list(ols, zols), include.ci = FALSE, digits = 3,
   custom.model.names = c("OLS", "Z-OLS"),
   custom.coef.names = c("Intercept (Venus control)", 
                         "Article on discrimination", 
-                        "Article on integration"))
+                        "Article on integration"), file = "For-Mads.doc")
 ```
 ]
 
@@ -550,10 +550,12 @@ ggplot(data = plotdata,  aes(y = estimate, x = term)) +
   labs(title = "Causal effect of news articles", 
        x = "Article on",
        y = "Comparison to control group (article on Venus) 
-    in standard deviations") + 
+    in standard deviations",
+    caption = "Note: Resultaterne er baseret på en vægtet OLS-regression med robuste standardfejl. N = 1085, og R2= 0.012.") + 
   theme_minimal()
 ```
 ]
+
 
 .panel[.panel-name[Plot]
 ```{r ref.label = "Coefplot", out.width='65%', fig.height = 3, fig.width = 6, echo = FALSE, results = FALSE}
