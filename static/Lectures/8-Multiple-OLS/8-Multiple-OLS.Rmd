@@ -187,7 +187,7 @@ $$E[Y_{0i}|D=1] = E[Y_{0i}|D=0]?$$
 \node[state] (4) [right = of 2] {$Y$};
 
 \path (1) [red] edge (2);
-\path (1) [red, bidirected] edge ["?"] (3);
+\path (3) [red] edge [dashed, "?"] (1);
 \path (2) edge (4);
 \path (3) edge [dashed] (4);
 \path (3) edge [dashed] (2);
@@ -201,8 +201,46 @@ knitr::include_graphics('./img/Joscha3.png')
 ```
 .center[.backgrnote[*Source:* `r Citet(myBib, "legewie_terrorist_2013")`]]
 
-> The treatment group is on average slightly younger, and the proportion of people who are retired and who work from home is lower `r Citet(myBib, "legewie_terrorist_2013", after = "page 1211")`.
+> The treatment group is on average slightly younger, and the proportion of people who are retired and who work from home is lower. 
 
+> -- `r Citet(myBib, "legewie_terrorist_2013", after = "page 1211")`.
+
+]
+
+---
+# Age as confounder?
+
+.left-column[
+- On average, xenophobia increases with age.
+
+- The older, the more likely to be in the control group (i.e., not exposed to Bali attack).
+
+$\Rightarrow E[Y_{0i}|D=0] \color{red}{>} E[Y_{0i}|D=1]$ 
+]
+.right-column[
+```{tikz, DAG_Age, echo = FALSE, out.width='80%'}
+\usetikzlibrary{shapes,decorations,arrows,calc,arrows.meta,fit,positioning,quotes}
+\tikzset{
+  -Latex,auto,node distance =1 cm and 1 cm,semithick,
+  state/.style ={ellipse, draw, minimum width = 0.7 cm},
+  point/.style = {circle, draw, inner sep=0.04cm,fill,node contents={}},
+  bidirected/.style={Latex-Latex,dashed},
+  el/.style = {inner sep=2pt, align=left, sloped}
+}
+
+\begin{tikzpicture}
+\sffamily
+\node[state, align = center] (1) at (0,0) {Day of \\ interview};
+\node[state, align = center] (2) [right = of 1] {Exp. to \\ terror};
+\node[state] (3) [red, above = of 2] {Age};
+\node[state] (4) [right = of 2] {Xeno};
+
+\path (1) edge (2);
+\path (3) edge [red, "(-)"] (1);
+\path (2) edge (4);
+\path (3) edge [red, "(+)"] (4);
+\end{tikzpicture}
+```
 ]
 
 ---
@@ -210,7 +248,103 @@ class: inverse middle center
 # Multiple OLS Regression
 
 ---
+# Setup and toy data
 
+.panelset[
+.panel[.panel-name[Packages]
+```{r libraries}
+pacman::p_load(
+  tidyverse, # Data manipulation,
+  furniture, # For row-means,
+  ggplot2, # beautiful figures,
+  estimatr, # Regression for weighted data,
+  modelr, # Turn results of lm() into a tibble,
+  modelsummary, # for balance tables,
+  texreg) # regression tables with nice layout.
+```
+]
+.panel[.panel-name[Simulated: Age]
+.push-left[
+```{r}
+toydat <- tibble(
+  age = rnorm(n = 500, mean = 45, sd = 10))
+```
+]
+
+.push-right[
+```{r echo = FALSE, out.width = "80%"}
+ggplot(data = toydat) +
+  geom_histogram(aes(x = age)) +
+  theme_minimal()
+```
+]]
+.panel[.panel-name[Exposure to terror]
+.push-left[
+```{r}
+toydat <- toydat %>%
+  mutate(terror = -0.05 * age + rnorm(n = 500, 
+                                 mean = 7.5, 
+                                 sd = 1))
+
+lm_robust(age ~ terror, data = toydat) %>%
+  screenreg(include.ci = FALSE, digits = 3)
+```
+]
+.push-right[
+```{r echo = FALSE, out.width = "80%"}
+ggplot(data = toydat, aes(y = terror, x = age)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  theme_minimal()
+```
+]
+]
+.panel[.panel-name[Xenophobia]
+.push-left[
+```{r}
+# Because I simulate these data,
+# I define and thus KNOW the truth!!
+toydat <- toydat %>%
+  mutate(
+    xeno = (0.3*terror) + (0.2*age) + rnorm(n = 500, #<<
+                                          mean = 5, 
+                                          sd = 1))
+```
+]
+.push-right[
+```{r echo = FALSE, out.width = "80%"}
+ggplot(data = toydat, aes(x = xeno)) +
+  geom_histogram() +
+  theme_minimal()
+```
+]]]
+
+---
+# What's going one here?
+
+.push-left[
+```{r OLS, eval  = FALSE}
+# Bivariate OLS
+ols_bi <- lm_robust(xeno ~ terror, 
+                    data = toydat)
+
+# Multiple OLS
+ols_mult <- lm_robust(xeno ~ terror + age, 
+                      data = toydat)
+
+# Regression table of both results
+htmlreg(list(ols_bi, ols_mult), 
+        include.ci = FALSE, digits = 3,
+        custom.model.names = c("Bivariate", "Multiple"))
+```
+]
+
+.push-right[
+```{r ref.label = "OLS", echo  = FALSE, results = 'asis'}
+```
+]
+
+---
 ---
 class: clear
 # Learning goal 1 .font60[Terror attacks can increase xenophobia]

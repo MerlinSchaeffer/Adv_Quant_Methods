@@ -4,11 +4,8 @@
     <title>Multiple OLS regression</title>
     <meta charset="utf-8" />
     <meta name="author" content="Merlin Schaeffer  Department of Sociology" />
-    <meta name="date" content="2022-09-30" />
+    <meta name="date" content="2022-10-27" />
     <script src="libs/header-attrs/header-attrs.js"></script>
-    <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
-    <script src="libs/tile-view/tile-view.js"></script>
-    <link href="libs/tachyons/tachyons.min.css" rel="stylesheet" />
     <link href="libs/panelset/panelset.css" rel="stylesheet" />
     <script src="libs/panelset/panelset.js"></script>
     <link rel="stylesheet" href="../template/Merlin169.css" type="text/css" />
@@ -27,7 +24,7 @@ class: center, middle, inverse, title-slide
 ### Merlin Schaeffer<br> Department of Sociology
 ]
 .date[
-### 2022-09-30
+### 2022-10-27
 ]
 
 ---
@@ -132,8 +129,24 @@ layout: false
 &lt;img src="./img/Joscha3.png" width="100%" style="display: block; margin: auto;" /&gt;
 .center[.backgrnote[*Source:* Legewie (2013)]]
 
-&gt; The treatment group is on average slightly younger, and the proportion of people who are retired and who work from home is lower Legewie (2013page 1211).
+&gt; The treatment group is on average slightly younger, and the proportion of people who are retired and who work from home is lower. 
 
+&gt; -- Legewie (2013page 1211).
+
+]
+
+---
+# Age as confounder?
+
+.left-column[
+- On average, xenophobia increases with age.
+
+- The older, the more likely to be in the control group (i.e., not exposed to Bali attack).
+
+`\(\Rightarrow E[Y_{0i}|D=0] \color{red}{&gt;} E[Y_{0i}|D=1]\)` 
+]
+.right-column[
+&lt;img src="8-Multiple-OLS_files/figure-html/DAG_Age-1.png" width="80%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -141,7 +154,175 @@ class: inverse middle center
 # Multiple OLS Regression
 
 ---
+# Setup and toy data
 
+.panelset[
+.panel[.panel-name[Packages]
+
+```r
+pacman::p_load(
+  tidyverse, # Data manipulation,
+  furniture, # For row-means,
+  ggplot2, # beautiful figures,
+  estimatr, # Regression for weighted data,
+  modelr, # Turn results of lm() into a tibble,
+  modelsummary, # for balance tables,
+  texreg) # regression tables with nice layout.
+```
+]
+.panel[.panel-name[Simulated: Age]
+.push-left[
+
+```r
+toydat &lt;- tibble(
+  age = rnorm(n = 500, mean = 45, sd = 10))
+```
+]
+
+.push-right[
+&lt;img src="8-Multiple-OLS_files/figure-html/unnamed-chunk-10-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+]]
+.panel[.panel-name[Exposure to terror]
+.push-left[
+
+```r
+toydat &lt;- toydat %&gt;%
+  mutate(terror = -0.05 * age + rnorm(n = 500, 
+                                 mean = 7.5, 
+                                 sd = 1))
+
+lm_robust(age ~ terror, data = toydat) %&gt;%
+  screenreg(include.ci = FALSE, digits = 3)
+# 
+# ========================
+#              Model 1    
+# ------------------------
+# (Intercept)   68.045 ***
+#               (1.994)   
+# terror        -4.227 ***
+#               (0.370)   
+# ------------------------
+# R^2            0.192    
+# Adj. R^2       0.190    
+# Num. obs.    500        
+# RMSE           9.315    
+# ========================
+# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
+```
+]
+.push-right[
+&lt;img src="8-Multiple-OLS_files/figure-html/unnamed-chunk-12-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+]
+]
+.panel[.panel-name[Xenophobia]
+.push-left[
+
+```r
+# Because I simulate these data,
+# I define and thus KNOW the truth!!
+toydat &lt;- toydat %&gt;%
+  mutate(
+*   xeno = (0.3*terror) + (0.2*age) + rnorm(n = 500,
+                                          mean = 5, 
+                                          sd = 1))
+```
+]
+.push-right[
+&lt;img src="8-Multiple-OLS_files/figure-html/unnamed-chunk-14-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+]]]
+
+---
+# What's going one here?
+
+.push-left[
+
+```r
+# Bivariate OLS
+ols_bi &lt;- lm_robust(xeno ~ terror, 
+                    data = toydat)
+
+# Multiple OLS
+ols_mult &lt;- lm_robust(xeno ~ terror + age, 
+                      data = toydat)
+
+# Regression table of both results
+htmlreg(list(ols_bi, ols_mult), 
+        include.ci = FALSE, digits = 3,
+        custom.model.names = c("Bivariate", "Multiple"))
+```
+]
+
+.push-right[
+&lt;table class="texreg" style="margin: 10px auto;border-collapse: collapse;border-spacing: 0px;caption-side: bottom;color: #000000;border-top: 2px solid #000000;"&gt;
+&lt;caption&gt;Statistical models&lt;/caption&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/th&gt;
+&lt;th style="padding-left: 5px;padding-right: 5px;"&gt;Bivariate&lt;/th&gt;
+&lt;th style="padding-left: 5px;padding-right: 5px;"&gt;Multiple&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr style="border-top: 1px solid #000000;"&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(Intercept)&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;18.114&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;4.332&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.458)&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.387)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;terror&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;-0.470&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.386&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.087)&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.043)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;age&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.203&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.005)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr style="border-top: 1px solid #000000;"&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;R&lt;sup&gt;2&lt;/sup&gt;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.052&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.785&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Adj. R&lt;sup&gt;2&lt;/sup&gt;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.050&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.784&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Num. obs.&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;500&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;500&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr style="border-bottom: 2px solid #000000;"&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;RMSE&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;2.146&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;1.024&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;tfoot&gt;
+&lt;tr&gt;
+&lt;td style="font-size: 0.8em;" colspan="3"&gt;&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;p &amp;lt; 0.001; &lt;sup&gt;&amp;#42;&amp;#42;&lt;/sup&gt;p &amp;lt; 0.01; &lt;sup&gt;&amp;#42;&lt;/sup&gt;p &amp;lt; 0.05&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tfoot&gt;
+&lt;/table&gt;
+]
+
+---
 ---
 class: clear
 # Learning goal 1 .font60[Terror attacks can increase xenophobia]
@@ -250,18 +431,13 @@ class: inverse
 # References
 
 .font80[
-Chetty, R., N. Hendren, and L. F. Katz (2016). "The Effects of Exposure to Better Neighborhoods on
-Children: New Evidence from the Moving to Opportunity Experiment". In: _The American Economic Review_,
-pp. 855-902.
+Legewie, J. (2013). "Terrorist Events and Attitudes toward
+Immigrants: A Natural Experiment". In: _American Journal of
+Sociology_, pp. 1199-1245.
 
-Legewie, J. (2013). "Terrorist Events and Attitudes toward Immigrants: A Natural Experiment". In:
-_American Journal of Sociology_, pp. 1199-1245.
-
-Sherman, L. W. and R. A. Berk (1984). "The Specific Deterrent Effects of Arrest for Domestic Assault".
-In: _American Sociological Review_, pp. 261-272.
-
-Snow, J. (1856). "On the Mode of Communication of Cholera". In: _Edinburgh Medical Journal_, pp.
-668-670.
+Sherman, L. W. and R. A. Berk (1984). "The Specific Deterrent
+Effects of Arrest for Domestic Assault". In: _American
+Sociological Review_, pp. 261-272.
 ]
 
     </textarea>

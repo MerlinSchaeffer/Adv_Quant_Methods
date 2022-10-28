@@ -1085,6 +1085,29 @@ stage</option><option value>LATE estimate</option></select>.</li>
 <button>
 R solution -&gt; dont&#39; peak to early ;) !
 </button>
+<pre class="r"><code>mdve &lt;- mdve %&gt;%
+  mutate(
+    T_FINAL_01 = case_when(
+      T_FINAL == &quot;Arrested&quot; ~ 0,
+      T_FINAL == &quot;Coddled&quot; ~ 1))
+
+ols &lt;- lm_robust(T_FINAL_01 ~ T_RANDOM, data = mdve)
+screenreg(ols, digits = 3)
+# 
+# ================================
+#                  Model 1        
+# --------------------------------
+# (Intercept)        0.011        
+#                  [-0.011; 0.032]
+# T_RANDOMCoddle!    0.786 *      
+#                  [ 0.729; 0.844]
+# --------------------------------
+# R^2                0.522        
+# Adj. R^2           0.520        
+# Num. obs.        314            
+# RMSE               0.344        
+# ================================
+# * 0 outside the confidence interval.</code></pre>
 </div>
 <ol start="5" style="list-style-type: decimal">
 <li><p>According to Sherman and Berk (1984, see also Angrist and
