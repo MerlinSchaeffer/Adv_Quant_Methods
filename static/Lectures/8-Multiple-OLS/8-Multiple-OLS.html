@@ -4,8 +4,11 @@
     <title>Multiple OLS regression</title>
     <meta charset="utf-8" />
     <meta name="author" content="Merlin Schaeffer  Department of Sociology" />
-    <meta name="date" content="2022-10-27" />
+    <meta name="date" content="2022-10-29" />
     <script src="libs/header-attrs/header-attrs.js"></script>
+    <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
+    <script src="libs/tile-view/tile-view.js"></script>
+    <link href="libs/tachyons/tachyons.min.css" rel="stylesheet" />
     <link href="libs/panelset/panelset.css" rel="stylesheet" />
     <script src="libs/panelset/panelset.js"></script>
     <link rel="stylesheet" href="../template/Merlin169.css" type="text/css" />
@@ -24,7 +27,7 @@ class: center, middle, inverse, title-slide
 ### Merlin Schaeffer<br> Department of Sociology
 ]
 .date[
-### 2022-10-27
+### 2022-10-29
 ]
 
 ---
@@ -43,7 +46,9 @@ class: inverse middle
 1. **Application 1**: Terrorist attacks and xenophobia re-visited.
 
 2. **Multiple OLS**
-  + Frisch-Waugh-Lovell Theorem
+
+  + Omitted variable bias
+  + Frisch-Waugh Theorem
   + Estimation
   
 3. **(Natural) RCTs &amp; Multiple OLS** 
@@ -131,19 +136,20 @@ layout: false
 
 &gt; The treatment group is on average slightly younger, and the proportion of people who are retired and who work from home is lower. 
 
-&gt; -- Legewie (2013page 1211).
+&gt; -- Legewie (2013, page 1211).
 
 ]
 
 ---
-# Age as confounder?
+class: clear
+# Age as confounder? .font70[(i.e., Age-based selection into treatment?)]
 
 .left-column[
 - On average, xenophobia increases with age.
 
-- The older, the more likely to be in the control group (i.e., not exposed to Bali attack).
+- The older a respondent, the more likely they are part of the control group (i.e., not exposed to Bali attack).
 
-`\(\Rightarrow E[Y_{0i}|D=0] \color{red}{&gt;} E[Y_{0i}|D=1]\)` 
+`\(\rightarrow E[Y_{0i}|D=0] \color{red}{&gt;} E[Y_{0i}|D=1]\)` 
 ]
 .right-column[
 &lt;img src="8-Multiple-OLS_files/figure-html/DAG_Age-1.png" width="80%" style="display: block; margin: auto;" /&gt;
@@ -154,7 +160,7 @@ class: inverse middle center
 # Multiple OLS Regression
 
 ---
-# Setup and toy data
+# Setup and simulated toy data
 
 .panelset[
 .panel[.panel-name[Packages]
@@ -162,6 +168,7 @@ class: inverse middle center
 ```r
 pacman::p_load(
   tidyverse, # Data manipulation,
+  haven, # Read Stata data,
   furniture, # For row-means,
   ggplot2, # beautiful figures,
   estimatr, # Regression for weighted data,
@@ -173,8 +180,11 @@ pacman::p_load(
 .panel[.panel-name[Simulated: Age]
 .push-left[
 
+
+
 ```r
-toydat &lt;- tibble(
+# Simulate random normally/gauss-distributed age.
+toydat &lt;- tibble( 
   age = rnorm(n = 500, mean = 45, sd = 10))
 ```
 ]
@@ -183,33 +193,36 @@ toydat &lt;- tibble(
 &lt;img src="8-Multiple-OLS_files/figure-html/unnamed-chunk-10-1.png" width="80%" style="display: block; margin: auto;" /&gt;
 ]]
 .panel[.panel-name[Exposure to terror]
-.push-left[
+.push-left[.font90[
 
 ```r
-toydat &lt;- toydat %&gt;%
-  mutate(terror = -0.05 * age + rnorm(n = 500, 
-                                 mean = 7.5, 
-                                 sd = 1))
+toydat &lt;- toydat %&gt;% 
+  mutate( # Day of interview: Age + random.
+    int_day = (-0.05*age) + rnorm(n = 500, mean = 0, sd = 1),
+    # Bali: After mean survey period.
+    bali = case_when(
+      int_day &lt; mean(int_day) ~ 0,
+      int_day &gt;= mean(int_day) ~ 1))
 
-lm_robust(age ~ terror, data = toydat) %&gt;%
+lm_robust(bali ~ age, data = toydat) %&gt;%
   screenreg(include.ci = FALSE, digits = 3)
 # 
 # ========================
 #              Model 1    
 # ------------------------
-# (Intercept)   68.045 ***
-#               (1.994)   
-# terror        -4.227 ***
-#               (0.370)   
+# (Intercept)    1.299 ***
+#               (0.090)   
+# age           -0.018 ***
+#               (0.002)   
 # ------------------------
-# R^2            0.192    
-# Adj. R^2       0.190    
+# R^2            0.108    
+# Adj. R^2       0.107    
 # Num. obs.    500        
-# RMSE           9.315    
+# RMSE           0.473    
 # ========================
 # *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
 ```
-]
+]]
 .push-right[
 &lt;img src="8-Multiple-OLS_files/figure-html/unnamed-chunk-12-1.png" width="80%" style="display: block; margin: auto;" /&gt;
 ]
@@ -219,12 +232,13 @@ lm_robust(age ~ terror, data = toydat) %&gt;%
 
 ```r
 # Because I simulate these data,
-# I define and thus KNOW the truth!!
+# I define and thus KNOW the truth!! 
+# Xenophobia is a linear function of:
+# exposure to Bali, and age, and a random part.
 toydat &lt;- toydat %&gt;%
   mutate(
-*   xeno = (0.3*terror) + (0.2*age) + rnorm(n = 500,
-                                          mean = 5, 
-                                          sd = 1))
+*   xeno = (0.3 * bali) + (0.05 * age) +
+*     rnorm(n = 500, mean = 0, sd = 1))
 ```
 ]
 .push-right[
@@ -238,18 +252,21 @@ toydat &lt;- toydat %&gt;%
 
 ```r
 # Bivariate OLS
-ols_bi &lt;- lm_robust(xeno ~ terror, 
-                    data = toydat)
+ols_bi &lt;- lm_robust(xeno ~ bali, data = toydat)
 
 # Multiple OLS
-ols_mult &lt;- lm_robust(xeno ~ terror + age, 
-                      data = toydat)
+ols_mult &lt;- lm_robust(xeno ~ bali + age, data = toydat)
 
 # Regression table of both results
 htmlreg(list(ols_bi, ols_mult), 
         include.ci = FALSE, digits = 3,
-        custom.model.names = c("Bivariate", "Multiple"))
+        custom.model.names = c("Bivariate OLS", 
+                               "Multiple OLS"))
 ```
+
+.content-box-green[
+Which one of the two models is correct?
+]
 ]
 
 .push-right[
@@ -258,35 +275,35 @@ htmlreg(list(ols_bi, ols_mult),
 &lt;thead&gt;
 &lt;tr&gt;
 &lt;th style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/th&gt;
-&lt;th style="padding-left: 5px;padding-right: 5px;"&gt;Bivariate&lt;/th&gt;
-&lt;th style="padding-left: 5px;padding-right: 5px;"&gt;Multiple&lt;/th&gt;
+&lt;th style="padding-left: 5px;padding-right: 5px;"&gt;Bivariate OLS&lt;/th&gt;
+&lt;th style="padding-left: 5px;padding-right: 5px;"&gt;Multiple OLS&lt;/th&gt;
 &lt;/tr&gt;
 &lt;/thead&gt;
 &lt;tbody&gt;
 &lt;tr style="border-top: 1px solid #000000;"&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(Intercept)&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;18.114&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;4.332&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;2.436&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.663&lt;sup&gt;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.458)&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.387)&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.070)&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.264)&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;terror&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;-0.470&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.386&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;bali&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.099&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.325&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.087)&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.043)&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.095)&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.096)&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;age&lt;/td&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.203&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.037&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
@@ -295,13 +312,13 @@ htmlreg(list(ols_bi, ols_mult),
 &lt;/tr&gt;
 &lt;tr style="border-top: 1px solid #000000;"&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;R&lt;sup&gt;2&lt;/sup&gt;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.052&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.785&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.002&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.096&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Adj. R&lt;sup&gt;2&lt;/sup&gt;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.050&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.784&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.000&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.092&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Num. obs.&lt;/td&gt;
@@ -310,8 +327,8 @@ htmlreg(list(ols_bi, ols_mult),
 &lt;/tr&gt;
 &lt;tr style="border-bottom: 2px solid #000000;"&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;RMSE&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;2.146&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;1.024&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;1.063&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;1.013&lt;/td&gt;
 &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;tfoot&gt;
@@ -323,7 +340,399 @@ htmlreg(list(ols_bi, ols_mult),
 ]
 
 ---
+class: clear
+# Omitted variable bias .font60[aka selection/confounder bias]
+
+.push-right[
+&lt;img src="8-Multiple-OLS_files/figure-html/unnamed-chunk-16-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+]
+
+
+.push-left[
+.center[When we compare Xenophobia between those with Bali = 0 to those with Bali = 1:]
+
+1. We .alert[know] that one part of the difference is the causal effect `\(\beta_{\text{sample}} = 0.3 + \sigma_{\text{sample}} = 0.325\)`.
+
+.content-box-green[
+- Why do we .alert[know] that in this specific case?
+
+- What else is different between those with Bali = 0 compared to those with &lt;br&gt; Bali = 1?
+]]
+
 ---
+class: clear
+# Omitted variable bias .font60[aka selection/confounder bias]
+
+.push-right[
+&lt;img src="8-Multiple-OLS_files/figure-html/unnamed-chunk-17-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+.font90[
+
+```r
+ols_age &lt;- lm_robust(age ~ bali, data = toydat)
+screenreg(ols_age, include.ci = FALSE, digits = 3)
+# 
+# ========================
+#              Model 1    
+# ------------------------
+# (Intercept)   48.092 ***
+#               (0.579)   
+# bali          -6.141 ***
+#               (0.790)   
+# ------------------------
+# R^2            0.108    
+# Adj. R^2       0.107    
+# Num. obs.    500        
+# RMSE           8.827    
+# ========================
+# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
+```
+]]
+
+.push-left[
+.center[When we compare Xenophobia between those with Bali = 0 to those with Bali = 1:]
+
+1. We .alert[know] that one part of the difference is the causal effect `\(\beta_{\text{sample}} = 0.3 + \sigma_{\text{sample}} = 0.325\)`.
+
+2. We compare between people who have an average age difference of -6.141 years.
+
+.content-box-green[
+To how much Xenophobia do -6.141 years of age amount?
+]
+]
+
+---
+class: clear
+# Omitted variable bias .font60[aka selection/confounder bias]
+
+.push-right[
+&lt;img src="8-Multiple-OLS_files/figure-html/unnamed-chunk-19-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+]
+
+.push-left[
+.center[When we compare Xenophobia between those with Bali = 0 to those with Bali = 1:]
+
+1. We .alert[know] that one part of the difference is the causal effect `\(\beta_{\text{sample}} = 0.3 + \sigma_{\text{sample}} = 0.325\)`.
+
+2. We compare between people who have an average age difference of -6.141 years.
+   + Because of this age difference, Xenophobia should additionally differ by:
+
+`\(\begin{equation}\begin{split} &amp; -6.141 \times (0.05+\sigma_{\text{Sample}}) \\ = &amp; -6.141 \times 0.037, \\ = &amp; -0.226. \end{split}\end{equation}\)`
+
+.content-box-green[
+What is the result if we take 1. and 2. together?
+]
+]
+
+---
+# Omitted variable bias
+
+.push-left[
+.content-box-red[
+&lt;img src="8-Multiple-OLS_files/figure-html/DAG_OMV-1.png" width="40%" style="display: block; margin: auto;" /&gt;
+
+`$$\tilde{\beta}_{Y \leftarrow D} = \beta_{Y \leftarrow D} + \underbrace{(\beta_{Y \leftarrow C} \times \beta_{C \leftarrow D})}_{\text{Omitted Variable Bias}}$$`
+]]
+
+--
+
+.push-right[
+.font90[
+&lt;table class="texreg" style="margin: 10px auto;border-collapse: collapse;border-spacing: 0px;caption-side: bottom;color: #000000;border-top: 2px solid #000000;"&gt;
+&lt;caption&gt;Statistical models&lt;/caption&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/th&gt;
+&lt;th style="padding-left: 5px;padding-right: 5px;"&gt;Bivariate OLS&lt;/th&gt;
+&lt;th style="padding-left: 5px;padding-right: 5px;"&gt;Multiple OLS&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr style="border-top: 1px solid #000000;"&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(Intercept)&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;2.436&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.663&lt;sup&gt;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.070)&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.264)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;bali&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.099&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.325&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.095)&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.096)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;age&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.037&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.005)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr style="border-top: 1px solid #000000;"&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;R&lt;sup&gt;2&lt;/sup&gt;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.002&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.096&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Adj. R&lt;sup&gt;2&lt;/sup&gt;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.000&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.092&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Num. obs.&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;500&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;500&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr style="border-bottom: 2px solid #000000;"&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;RMSE&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;1.063&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;1.013&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;tfoot&gt;
+&lt;tr&gt;
+&lt;td style="font-size: 0.8em;" colspan="3"&gt;&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;p &amp;lt; 0.001; &lt;sup&gt;&amp;#42;&amp;#42;&lt;/sup&gt;p &amp;lt; 0.01; &lt;sup&gt;&amp;#42;&lt;/sup&gt;p &amp;lt; 0.05&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tfoot&gt;
+&lt;/table&gt;
+]
+`$$0.099 = 0.325 + \underbrace{(0.037 \times -6.141)}_{-0.226}$$`
+]
+
+---
+class: inverse middle
+
+.push-left[
+&lt;img src="https://st.depositphotos.com/1654249/2526/i/600/depositphotos_25269433-stock-photo-3d-man-with-red-question.jpg
+" width="80%" style="display: block; margin: auto;" /&gt;
+]
+
+.push-right[
+OK great, but how does multiple OLS get the correct `\(\beta_{Y \leftarrow D}\)` that is not biased by omitted `\(C\)`?
+]
+
+---
+layout: true
+# Frisch-Waugh Theorem
+
+.left-column[
+It partials out/controlls for:
+  1. `\(\beta_{Y \leftarrow C}\)`
+  2. `\(\beta_{D \leftarrow C}\)`
+  
+Frisch and Waugh (1933) proved that the way multiple OLS achieves this is mathematically equivalent to the following three steps:
+]
+
+---
+
+---
+
+.right-column[
+.center[
+**Step 1: Regress `\(Y\)` on `\(C\)`, then keep residuals.**
+]
+.push-left[
+.font80[
+
+```r
+# Regress xeno on age,
+(toydat &lt;- lm_robust(xeno ~ age, data = toydat) %&gt;%
+   # Get residuals,
+   add_residuals(toydat, model = .) %&gt;% 
+   # Rename residuals.
+   rename(e_xeno = resid)) 
+# # A tibble: 500 × 5
+#      age int_day  bali   xeno e_xeno
+#    &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;
+#  1  50.0  -2.15      1  2.48  -0.157
+#  2  55.6  -3.35      0  1.77  -1.05 
+#  3  50.4  -1.14      1  3.49   0.839
+#  4  39.1  -2.65      0  1.71  -0.590
+#  5  59.9  -4.05      0  1.58  -1.37 
+#  6  58.9  -2.53      0  3.40   0.483
+#  7  38.4  -1.89      1  2.16  -0.119
+#  8  53.3  -2.80      0 -0.285 -3.03 
+#  9  28.4  -0.373     1  1.21  -0.756
+# 10  37.9  -1.06      1  2.60   0.330
+# # … with 490 more rows
+```
+]]
+.push-right[
+&lt;img src="8-Multiple-OLS_files/figure-html/residuals-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]]
+
+---
+
+.right-column[
+.center[
+**Step 2: Regress `\(D\)` on `\(C\)`, then keep residuals.**
+]
+.push-left[
+.font80[
+
+```r
+# Regress xeno on age,
+(toydat &lt;- lm_robust(bali ~ age, data = toydat) %&gt;%
+   # Get residuals,
+   add_residuals(toydat, model = .) %&gt;%
+   # Rename residuals.
+   rename(e_bali = resid))
+# # A tibble: 500 × 6
+#      age int_day  bali   xeno e_xeno e_bali
+#    &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;
+#  1  50.0  -2.15      1  2.48  -0.157  0.582
+#  2  55.6  -3.35      0  1.77  -1.05  -0.318
+#  3  50.4  -1.14      1  3.49   0.839  0.590
+#  4  39.1  -2.65      0  1.71  -0.590 -0.609
+#  5  59.9  -4.05      0  1.58  -1.37  -0.243
+#  6  58.9  -2.53      0  3.40   0.483 -0.261
+#  7  38.4  -1.89      1  2.16  -0.119  0.378
+#  8  53.3  -2.80      0 -0.285 -3.03  -0.360
+#  9  28.4  -0.373     1  1.21  -0.756  0.201
+# 10  37.9  -1.06      1  2.60   0.330  0.369
+# # … with 490 more rows
+```
+]]
+.push-right[
+&lt;img src="8-Multiple-OLS_files/figure-html/residuals2-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]]
+
+---
+
+.right-column[
+.center[
+**Step 3: Regress `\(e_{D}\)` on `\(e_{C}\)`.**
+]
+.push-left[
+.font80[
+
+```r
+# Regress xeno on age,
+ols_e &lt;- lm_robust(e_xeno ~ e_bali, data = toydat)
+
+screenreg(list(ols_mult, ols_e),
+          include.ci = FALSE, digits = 3)
+# 
+# =====================================
+#              Model 1      Model 2    
+# -------------------------------------
+# (Intercept)    0.663 *      0.000    
+#               (0.264)      (0.045)   
+# bali           0.325 ***             
+#               (0.096)                
+# age            0.037 ***             
+#               (0.005)                
+# e_bali                      0.325 ***
+#                            (0.096)   
+# -------------------------------------
+# R^2            0.096        0.023    
+# Adj. R^2       0.092        0.021    
+# Num. obs.    500          500        
+# RMSE           1.013        1.012    
+# =====================================
+# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
+```
+]]
+.push-right[
+&lt;img src="8-Multiple-OLS_files/figure-html/residuals3-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]]
+
+---
+layout: false
+class: inverse center
+
+# Why multiple OLS
+
+.push-left[.left[
+- Allows us to estimate `\(\beta_{Y \leftarrow D}\)`, partialling out/controlling for **_observed_** confounding variables.
+
+- **_If all confounders are observed without measurement error_**, multiple OLS can thus identify the average causal effect `\(\kappa_{Y \leftarrow D}\)`.
+
+&lt;img src="8-Multiple-OLS_files/figure-html/unnamed-chunk-25-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+]]
+
+--
+
+.push-right[.left[
+- You can think of multiple OLS as down-weighting typical cases (e.g. young people exposed to Bali) and up-weighting untypical cases (older people exposed to Bali)
+
+- Because of this weighting, multiple OLS increases the random variation in `\(D\)`.
+]
+
+&lt;img src="8-Multiple-OLS_files/figure-html/residuals2-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+# Estimation: Still OLS
+
+The best (now multidimensional) "line" is defined by an overall intercept `\(\alpha\)` (i.e. `\(\bar{Y}\)` when all predictors are zero) and multiple slope coefficients `\(\beta_{1} \ldots \beta_{k}\)`.
+
+`$$\begin{align*}
+      \min \text{RSS} &amp;= \min \sum_{i=1}^{n} e_{i}^{2} \\
+      &amp;= \min \sum_{i=1}^{n} y_{i} - \hat{y_{i}} \\
+      &amp;= \min \sum_{i=1}^{n} (y_{i} - (\color{orange}{\alpha} + \color{orange}{\beta_{1}} x_{1i} + \ldots + \color{orange}{\beta_{k}} x_{ki})^{2}
+    \end{align*}$$`
+
+---
+# Back to Bali
+
+&lt;img src="./img/Joscha5.png" width="80%" style="display: block; margin: auto;" /&gt;
+.center[.backgrnote[*Source:* Legewie (2013, page 1210).]]
+
+---
+class: clear
+# Learning goal 1 .font60[Terror attacks can increase xenophobia]
+
+.push-left[
+
+
+.font90[
+
+```r
+# Estimate the treatment effect with OLS
+ols_pt_bi &lt;- lm_robust(anti_immi ~ treat, 
+                       data = ESS, weights = pspwght)
+ols_pt_mult &lt;- lm_robust(anti_immi ~ treat + age, 
+                         data = ESS, weights = pspwght)
+
+# Report results in a nicely-formatted table
+screenreg(list(ols_pt_bi, ols_pt_mult), 
+          include.ci = FALSE, digits = 3)
+# 
+# =========================================
+#                  Model 1      Model 2    
+# -----------------------------------------
+# (Intercept)        3.621 ***    3.328 ***
+#                   (0.082)      (0.175)   
+# treatAfter Bali    0.330 **     0.313 ** 
+#                   (0.116)      (0.118)   
+# age                             0.006    
+#                                (0.003)   
+# -----------------------------------------
+# R^2                0.032        0.050    
+# Adj. R^2           0.029        0.044    
+# Num. obs.        291          291        
+# RMSE               0.601        0.596    
+# =========================================
+# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
+```
+]]
+
+.push-right[
+&lt;img src="8-Multiple-OLS_files/figure-html/coefplotPT-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+layout: false
 class: clear
 # Learning goal 1 .font60[Terror attacks can increase xenophobia]
 
@@ -332,19 +741,9 @@ class: clear
 .center[.backgrnote[*Source:* Legewie (2013)]]
 ]
 
---
-
-.left-column[.content-box-green[.center[
-My friend Joscha &lt;br&gt; is a truffle pig ;)
-
-Based on the idea that the day of a survey interview is random, he could estimate the causal effect of the Bali 2002 terror attack.
-
-Do you want to learn what Joscha has to say about:
-
-*Why was there an effect in Portugal, but not in the UK?* 
-
-Read his article ;)
-]]]
+.left-column[
+These results are adjusted for several further variables. After the break, it's your turn to repliacte that.
+]
 
 ---
 class: inverse middle center
@@ -431,13 +830,14 @@ class: inverse
 # References
 
 .font80[
-Legewie, J. (2013). "Terrorist Events and Attitudes toward
-Immigrants: A Natural Experiment". In: _American Journal of
-Sociology_, pp. 1199-1245.
+Frisch, R. and F. V. Waugh (1933). "Partial Time Regressions as Compared with Individual Trends". In:
+_Econometrica_, pp. 387-401.
 
-Sherman, L. W. and R. A. Berk (1984). "The Specific Deterrent
-Effects of Arrest for Domestic Assault". In: _American
-Sociological Review_, pp. 261-272.
+Legewie, J. (2013). "Terrorist Events and Attitudes toward Immigrants: A Natural Experiment". In:
+_American Journal of Sociology_, pp. 1199-1245.
+
+Sherman, L. W. and R. A. Berk (1984). "The Specific Deterrent Effects of Arrest for Domestic Assault".
+In: _American Sociological Review_, pp. 261-272.
 ]
 
     </textarea>
