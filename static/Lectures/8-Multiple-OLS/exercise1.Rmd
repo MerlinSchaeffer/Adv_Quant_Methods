@@ -15,7 +15,8 @@ library(webexercises)
 library(essentials)
 ```
 
-1. Download "Legewie_ESS_02.dta" from Absalon. Run the code below to prepare the data for analysis.
+1. We take another look at "Legewie_ESS_02.dta". Adapt the preparation of the data from last week: Add the following variables to the data: Age (in years, based on `int_year` and `yrbrn`), gender (based on `gndr`), employment status (with categories "employed", "unemployed", "retired", "other",  based on `pdwrk`, `uempla`, and `rtrd`). Also keep data for Finnland, Sweden, and Portugal.
+`r hide("R solution -> dont' peak to early ;) !")`
 ```{r results = FALSE}
 pacman::p_load(
   tidyverse, # Data manipulation,
@@ -53,137 +54,105 @@ ESS <- read_dta("../../../assets/Legewie_ESS_02.dta") %>%
     brncntr = as_factor(brncntr),
     mocntr = as_factor(mocntr),
     facntr = as_factor(facntr),
+    #######################################
+    # Age
+    age = int_year - yrbrn, #<<
+    # Gender
+    gndr = as_factor(gndr) %>% fct_drop(),
+    # Employment status
+    empl_stat = case_when(
+      pdwrk == 1 ~ "Working",
+      uempla == 1 ~ "Unemployed",
+      rtrd == 1 ~ "Retired",
+      TRUE ~ "Other"),
+    ########################################
     # Weights
     pspwght = pweight * dweight) %>%
   # Sample restriction        
-  filter(str_detect(cntry, "PT") & # Countries
+  filter(str_detect(cntry, "PT|SE|FI") & # Countries
            # Mainstream members (i.e. immigrant origin)
            brncntr == "yes" & mocntr == "yes" &  facntr == "yes") %>%
   # Keep only a minimum set of variables we need today,
-  select(treat, anti_immi, cntry, int_date, pspwght) %>%
+  select(treat, anti_immi, cntry, int_date, pspwght,
+         age, gndr, eduyrs, empl_stat) %>%
   drop_na() # Delete cases with missing values.
 ```
+`r unhide()`
+
 
 ```{r olsPT, include = FALSE}
-# Estimate the treatment effect with OLS
-ols_pt <- lm_robust(anti_immi ~ treat, data = ESS, weights = pspwght)
+# Estimate the controlled treatment effect with multiple OLS
+ols_pt_adj <- lm_robust(anti_immi ~ treat + age + gndr + empl_stat, 
+                        data = ESS %>% filter(cntry == "PT"), 
+                        weights = pspwght)
 
 # Report results in a nicely-formatted table
-screenreg(ols_pt, include.ci = FALSE, digits = 3)
+screenreg(ols_pt_adj, 
+          include.ci = FALSE, digits = 3)
 ```
 
 ```{r echo = FALSE}
-coefPT <- coef(ols_pt)["treatAfter the attack"] %>% round(., 3) %>% as.scalar()
-se <- vcov(ols_pt) %>% diag()
+coefPT <- coef(ols_pt_adj)["treatAfter the attack"] %>% round(., 3) %>% as.scalar()
+se <- vcov(ols_pt_adj) %>% diag()
 se <- se["treatAfter the attack"] %>% sqrt() %>% round(., 3) %>% as.scalar()
 ```
 
-2. What is the average causal effect of the Bali 2002 terror attack among the Portuguese? It is `r fitb(coefPT, width = "5")` standard deviations.
+2. What is the average causal effect of the Bali 2002 terror attack among the Portuguese, controlled for age, gender, years of education, and employment status? It is `r fitb(coefPT, width = "5")` standard deviations.
 `r hide("R solution -> dont' peak to early ;) !")`
 ```{r ref.label = "olsPT"}
 ```
 `r unhide()`
 
-3. Is the effects statistically significant? Yes, the standard error is `r fitb(se, width = "5")` and thus less than half the size of the estimated causal effect. This implies the *t*-value is larger than the conventional theshold of `r fitb(1.96, width = "4")`.
+3. Is the effects statistically significant? Yes, the standard error is `r fitb(se, width = "5")` and thus less than half the size of the estimated causal effect. This implies the *t*-value is larger than the conventional threshold of `r fitb(1.96, width = "4")`.
 
-4. Make a coefficient plot of the result; don't report the intercept.
+4. Also estimate the bivariate unadjusted effect and make a coefficient plot of the two results; don't report the intercept. Use `bind_rows(..., .id = "controlled")` to combine both into one tibble. What do we learn by comparing the two estimates? `r mcq(c("Bot much, both effects are significant.", answer = "The bivariate effect is a bit too large; there was some selection into treatment that introduced omitted variable bias", "The result from multiple OLS is more uncertain and hence less trustworthy"))`.
+
 `r hide("R solution -> dont' peak to early ;) !")`
 ```{r}
-plotdata_PT <- ols_pt %>%
-  tidy() %>% # Turn into tibble
-  filter(term != "(Intercept)") %>% # Delete intercept from data
-  mutate(
-    term = case_when(
-      term == "treatAfter the attack" ~ "After the attack"))
+# Estimate the bivariate treatment effect with OLS
+ols_pt_biv <- lm_robust(anti_immi ~ treat, 
+                        data = ESS %>% filter(cntry == "PT"), 
+                        weights = pspwght)
 
-ggplot(data = plotdata_PT, aes(y = estimate, x = term, ymin = conf.low, ymax = conf.high)) +
+# Add estimation results in to tibble
+plotdata <- bind_rows(
+  tidy(ols_pt_biv), 
+  tidy(ols_pt_adj), 
+  .id = "adjusted") %>%
+  mutate(
+    adjusted = case_when(
+      adjusted == 1 ~ "Bivariate",
+      adjusted == 2 ~ "Adjusted")) %>%
+  filter(term == "treatAfter the attack")
+
+ggplot(data = plotdata, aes(y = estimate, x = adjusted, ymin = conf.low, ymax = conf.high)) +
   geom_hline(yintercept = 0, color = "red", lty = "dashed") + 
   geom_pointrange() + 
   coord_flip() +
   theme_minimal() + 
-  labs(title = "Causal effect of Bali 2002 terror attack",
+  labs(title = "Causal effect of Bali 2002 terror attack among the Portuguese",
     x = "", y =  "Difference in xenophobia compared to before the attack
     (in standard deviations)")
 ```
 `r unhide()`
 
 ```{r olsSE, include = FALSE}
-# Read the ESS 2002 data and prepare for analysis
-ESS <- read_dta("../../../assets/Legewie_ESS_02.dta") %>%
-  mutate(
-    # Day and time of the survey interview,
-    int_year = inwyr,
-    int_mon  = inwmm,
-    int_day  = inwdd,
-    int_date = sprintf("%s-%s-%s", int_year, int_mon, int_day) %>% as.Date(),
-    # Treatment indicator,
-    treat = case_when(
-      int_date > event_date & int_date <= event_date_end ~ "After the attack",
-      int_date < event_date & int_date > event_date_begin ~ "Before the attack",
-      TRUE ~ as.character(NA)) %>% fct_relevel("Before the attack", "After the attack"),
-    # Attitudes towards immigrants
-    anti_immi = rowmeans(
-      imtcjob, imbleco, imbgeco, imueclt,
-      imwbcnt, imwbcrm, imbghct, na.rm = TRUE) %>% scale() %>% as.numeric(),
-    # Subtract from max to make larger values more xenophobic.
-    anti_immi = max(anti_immi, na.rm = TRUE) - anti_immi,
-    # Immigrant origin
-    brncntr = as_factor(brncntr),
-    mocntr = as_factor(mocntr),
-    facntr = as_factor(facntr),
-    # Weights
-    pspwght = pweight * dweight) %>%
-  # Sample restriction        
-  filter(str_detect(cntry, "PT|SE") & # Countries
-           # Mainstream members (i.e. immigrant origin)
-           brncntr == "yes" & mocntr == "yes" &  facntr == "yes") %>%
-  # Keep only a minimum set of variables we need today,
-  select(treat, anti_immi, cntry, int_date, pspwght) %>%
-  drop_na() # Delete cases with missing values.
-
-# Estimate the treatment effect with OLS
-ols_se <- lm_robust(anti_immi ~ treat, 
-                    data = ESS %>% filter(cntry == "SE"), 
-                    weights = pspwght)
+# Estimate the controlled treatment effect with multiple OLS
+ols_fi_adj <- lm_robust(anti_immi ~ treat + age + gndr + empl_stat, 
+                        data = ESS %>% filter(cntry == "FI"), 
+                        weights = pspwght)
 
 # Report results in a nicely-formatted table
-screenreg(ols_se, include.ci = FALSE, digits = 3)
+screenreg(ols_fi_adj, 
+          include.ci = FALSE, digits = 3)
 ```
 
 ```{r echo = FALSE}
-coefSE <- coef(ols_se)["treatAfter the attack"] %>% round(., 3) %>% as.scalar()
+coefFI <- coef(ols_fi_adj)["treatAfter the attack"] %>% round(., 3) %>% as.scalar()
 ```
 
-4. Adapt the data preparation code so that the sample also entails Swedes in addition to Portuguese respondents. The causal effect of the Bali 2002 terror attack among Swedes is `r fitb(coefSE, width = "5")` and `r mcq(c("Significant", "Statistically significant", answer = "Not statistically significant"))`.
+5. The adjusted causal effect of the Bali 2002 terror attack among Finns is `r fitb(coefFI, width = "5")` and `r mcq(c("Significant", "Statistically significant", answer = "Not statistically significant"))`.
 `r hide("R solution -> dont' peak to early ;) !")`
 ```{r ref.label = "olsSE"}
-```
-`r unhide()`
-
-5. Generate "plotdata" for the Swedish and Portuguese results. Use `bind_rows(plotdata_SE, plotdata_PT, .id = "cntry")` to combine both into one tibble. Then make a coefficient plot of both effects. *Look at you, you have learned to conduct analysis like sociologists who publish in the American Journal of Sociology!*
-`r hide("R solution -> dont' peak to early ;) !")`
-```{r}
-plotdata_SE <- ols_se %>%
-  tidy() %>% # Turn into tibble
-  filter(term != "(Intercept)") %>% # Delete intercept from data
-  mutate(
-    term = case_when(
-      term == "treatAfter the attack" ~ "After the attack"))
-
-plotdata <- bind_rows(plotdata_SE, plotdata_PT, .id = "cntry") %>%
-  mutate(
-    cntry = case_when(
-      cntry == 1 ~ "Sweden",
-      cntry == 2 ~ "Portugal"))
-
-ggplot(data = plotdata, aes(y = estimate, x = reorder(cntry, estimate), 
-                            ymin = conf.low, ymax = conf.high)) +
-  geom_hline(yintercept = 0, color = "red", lty = "dashed") + 
-  geom_pointrange() + 
-  coord_flip() +
-  theme_minimal() + 
-  labs(title = "Causal effect of Bali 2002 terror attack",
-    x = "", y =  "Difference in xenophobia compared to before the attack
-    (in standard deviations)")
 ```
 `r unhide()`

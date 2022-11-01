@@ -4,13 +4,15 @@
     <title>Multiple OLS regression</title>
     <meta charset="utf-8" />
     <meta name="author" content="Merlin Schaeffer  Department of Sociology" />
-    <meta name="date" content="2022-10-29" />
+    <meta name="date" content="2022-11-01" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
     <script src="libs/tile-view/tile-view.js"></script>
     <link href="libs/tachyons/tachyons.min.css" rel="stylesheet" />
     <link href="libs/panelset/panelset.css" rel="stylesheet" />
     <script src="libs/panelset/panelset.js"></script>
+    <script src="libs/kePrint/kePrint.js"></script>
+    <link href="libs/lightable/lightable.css" rel="stylesheet" />
     <link rel="stylesheet" href="../template/Merlin169.css" type="text/css" />
   </head>
   <body>
@@ -21,13 +23,13 @@ class: center, middle, inverse, title-slide
 # Multiple OLS regression
 ]
 .subtitle[
-## Controlling for <em>observed</em> confounders
+## Adjusting randomized interventions <br><br> for <em>observed</em> confounders
 ]
 .author[
 ### Merlin Schaeffer<br> Department of Sociology
 ]
 .date[
-### 2022-10-29
+### 2022-11-01
 ]
 
 ---
@@ -40,22 +42,35 @@ class: center, middle, inverse, title-slide
 &lt;img src="https://liu.se/-/media/istock-501261958.jpg?mw=1120&amp;mh=1120&amp;hash=DA8977CCE6A6E600AE80A40CFEE771C9" width="70%" style="display: block; margin: auto;" /&gt;
 
 ---
+class: clear
+# Causal research designs and statistical estimation
+
+.left-column[
+&lt;img src="8-Multiple-OLS_files/figure-html/DAG_1-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
+
+.right-column[
+&lt;img src="8-Multiple-OLS_files/figure-html/Tree1-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
+
+---
 class: inverse middle
 # Today's schedule
 
-1. **Application 1**: Terrorist attacks and xenophobia re-visited.
+1. **(Natural) Experiments &amp; Multiple OLS** 
 
-2. **Multiple OLS**
+2. **Application 1**: Terrorist attacks and xenophobia re-visited.
+
+3. **Multiple OLS**
 
   + Omitted variable bias
   + Frisch-Waugh Theorem
   + Estimation
-  
-3. **(Natural) RCTs &amp; Multiple OLS** 
-
-4. **Application 2**: Zero-tolerance for domestic violence re-visited.
 
 5. **IV &amp; Multiple OLS**
+
+4. **Application 2**: Zero-tolerance for domestic violence re-visited.
+  + Multiple OLS to the rescue
 
 ---
 class: inverse middle center
@@ -134,7 +149,7 @@ layout: false
 &lt;img src="./img/Joscha3.png" width="100%" style="display: block; margin: auto;" /&gt;
 .center[.backgrnote[*Source:* Legewie (2013)]]
 
-&gt; The treatment group is on average slightly younger, and the proportion of people who are retired and who work from home is lower. 
+&gt; [Across all countries] The treatment group is on average slightly younger, and the proportion of people who are retired and who work from home is lower. 
 
 &gt; -- Legewie (2013, page 1211).
 
@@ -150,7 +165,12 @@ class: clear
 - The older a respondent, the more likely they are part of the control group (i.e., not exposed to Bali attack).
 
 `\(\rightarrow E[Y_{0i}|D=0] \color{red}{&gt;} E[Y_{0i}|D=1]\)` 
-]
+
+.backgrnote[
+- Note that in Portugal, older respondents were more likely to be in the treatment group.
+`\(\rightarrow E[Y_{0i}|D=0] \color{red}{&lt;} E[Y_{0i}|D=1]\)` 
+]]
+
 .right-column[
 &lt;img src="8-Multiple-OLS_files/figure-html/DAG_Age-1.png" width="80%" style="display: block; margin: auto;" /&gt;
 ]
@@ -530,6 +550,8 @@ It partials out/controlls for:
   2. `\(\beta_{D \leftarrow C}\)`
   
 Frisch and Waugh (1933) proved that the way multiple OLS achieves this is mathematically equivalent to the following three steps:
+
+&lt;img src="8-Multiple-OLS_files/figure-html/DAG_FrischWaugh-1.png" width="70%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -674,6 +696,7 @@ class: inverse center
 ---
 # Estimation: Still OLS
 
+.push-left[
 The best (now multidimensional) "line" is defined by an overall intercept `\(\alpha\)` (i.e. `\(\bar{Y}\)` when all predictors are zero) and multiple slope coefficients `\(\beta_{1} \ldots \beta_{k}\)`.
 
 `$$\begin{align*}
@@ -682,27 +705,122 @@ The best (now multidimensional) "line" is defined by an overall intercept `\(\al
       &amp;= \min \sum_{i=1}^{n} (y_{i} - (\color{orange}{\alpha} + \color{orange}{\beta_{1}} x_{1i} + \ldots + \color{orange}{\beta_{k}} x_{ki})^{2}
     \end{align*}$$`
 
----
-# Back to Bali
+.content-box-red[
+- Multiple OLS assumes linear relations between all variables.
 
-&lt;img src="./img/Joscha5.png" width="80%" style="display: block; margin: auto;" /&gt;
+- Multiple OLS adjusts *all* variables for each other.
+]
+]
+
+.push-right[
+.center[**Frisch-Waugh as DAG**]
+
+&lt;img src="8-Multiple-OLS_files/figure-html/unnamed-chunk-26-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+
+]
+
+---
+# Back to Bali .font70[The Portuguese subsample]
+
+
+
+.panelset[
+.panel[.panel-name[Balance table]
+.left-column[
+.content-box-green[
+- What do we learn from this balance table?
+
+- What does it suggest about the direction of the omitted age bias among Portuguese? (Assuming that xenophobia also increases with age in Portugal?)
+]]
+.right-panel[
+&lt;table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;"&gt;
+&lt;caption&gt;Xeno and age by those who were (not) exposed to Bali&lt;/caption&gt;
+ &lt;thead&gt;
+&lt;tr&gt;
+&lt;th style="empty-cells: hide;border-bottom:hidden;" colspan="1"&gt;&lt;/th&gt;
+&lt;th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="2"&gt;&lt;div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; "&gt;Before Bali (N=187)&lt;/div&gt;&lt;/th&gt;
+&lt;th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="2"&gt;&lt;div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; "&gt;After Bali (N=104)&lt;/div&gt;&lt;/th&gt;
+&lt;th style="empty-cells: hide;border-bottom:hidden;" colspan="2"&gt;&lt;/th&gt;
+&lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Mean &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Std. Dev. &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Mean &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Std. Dev. &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Diff. in Means &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Std. Error &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; age &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 45.8 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 19.4 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 48.5 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 17.6 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2.6 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 3.0 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; anti_immi &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 3.6 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.9 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 4.0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.8 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.3 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.1 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+]]
+.panel[.panel-name[R code]
+
+```r
+ESS %&gt;%
+  # Focus on Portuguese respondents
+  filter(cntry == "PT") %&gt;%
+  # Select variables for which I want my balance test,
+  select(age, anti_immi, treat, pspwght) %&gt;%
+* rename(weights = pspwght) %&gt;% # Rename the weights variable!
+* datasummary_balance( # Make a balance table,
+*   formula = ~ treat, # by exposure to Bali
+*   data = . ,
+*   title = "Xeno and age by those who were (not) exposed to Bali")
+```
+]]
+
+---
+class: clear
+# Controlling for *observed* confounders
+
+.left-column[
+- Alternative names for "controlling for `\(X\)`": 
+  + Partialling out `\(X\)`,
+  + Adjusted for `\(X\)`,
+  + Conditional on `\(X\)`.
+]
+
+.right-column[
+&lt;img src="./img/Joscha5.png" width="100%" style="display: block; margin: auto;" /&gt;
 .center[.backgrnote[*Source:* Legewie (2013, page 1210).]]
+]
 
 ---
 class: clear
 # Learning goal 1 .font60[Terror attacks can increase xenophobia]
 
 .push-left[
-
-
 .font90[
 
 ```r
 # Estimate the treatment effect with OLS
 ols_pt_bi &lt;- lm_robust(anti_immi ~ treat, 
-                       data = ESS, weights = pspwght)
+                       data = ESS %&gt;% filter(cntry == "PT"), 
+                       weights = pspwght)
 ols_pt_mult &lt;- lm_robust(anti_immi ~ treat + age, 
-                         data = ESS, weights = pspwght)
+                         data = ESS %&gt;% filter(cntry == "PT"), 
+                         weights = pspwght)
 
 # Report results in a nicely-formatted table
 screenreg(list(ols_pt_bi, ols_pt_mult), 
@@ -728,8 +846,38 @@ screenreg(list(ols_pt_bi, ols_pt_mult),
 ]]
 
 .push-right[
+.panelset[
+.panel[.panel-name[Coefficient plot]
 &lt;img src="8-Multiple-OLS_files/figure-html/coefplotPT-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+
+
+`$$\tilde{\beta}_{y \leftarrow D} = \underbrace{0.313}_{\beta_{y \leftarrow D}} + \underbrace{(2.6 \times 0.006)}_{\text{OVB}} = 0.33$$`
 ]
+.panel[.panel-name[R code]
+
+```r
+bind_rows(ols_pt_bi %&gt;% tidy(),
+          ols_pt_mult %&gt;% tidy(),
+          .id = "model") %&gt;%
+  filter(term == "treatAfter Bali") %&gt;%
+  mutate(model = case_when(
+    model == 1 ~ "Bivariate",
+    model == 2 ~ "Adjusted for age")) %&gt;%
+  ggplot(aes(y = estimate, x = model, 
+             ymin = conf.low, ymax = conf.high)) +
+  geom_hline(yintercept = 0, 
+             color = "orange", lty = "dashed") +
+  geom_pointrange() +
+  coord_flip() +
+  labs(
+    title = "Causal effect of Bali 2002 terror attack among the Portugese",
+    y = "Standardized difference in xenophobia
+    compared to respondents interviewed before the attack",
+    x = "") +
+  theme_minimal()
+```
+]]]
 
 ---
 layout: false
@@ -766,29 +914,22 @@ class: middle clear
 ]
 
 ---
-class: inverse middle center
-# Break
-
-&lt;iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
-
-
----
 layout: true
 # Zero-tolerance for domestic violence?
 
-.push-right[
+.left-column[
 &lt;img src="https://images.theconversation.com/files/325865/original/file-20200406-6044-hao5gp.jpg?ixlib=rb-1.1.0&amp;q=45&amp;auto=format&amp;w=1200&amp;h=675.0&amp;fit=crop" width="80%" style="display: block; margin: auto;" /&gt;&lt;img src="https://minbynyt.dk/wp-content/uploads/2021/01/Politi-Betjent-ligger-anholdt-i-ha%CC%8AndjernFoto-Lars-Aarjpg1-780x470.jpg" width="80%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
 
-.push-left[
-&lt;iframe src='https://www.jstor.org/stable/2095575#metadata_info_tab_contents' width='600' height='550' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+.right-column[
+&lt;iframe src='https://en.wikipedia.org/wiki/Minneapolis_Domestic_Violence_Experiment' width='700' height='550' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
 ]
 
 ---
 
-.push-left[
+.right-column[
 &gt; [...] the pains of punishment deter people from repeating the crimes for which they are punished, especially when punishment is certain, swift and severe. 
 
 .center[versus]
@@ -801,30 +942,436 @@ layout: true
 
 ---
 layout: false
-class: middle clear
+# Compliance among police officers
 
-.left-column[
-&lt;img src="https://www.latentview.com/wp-content/uploads/2016/04/LatentView-Turns-Ten-A-decade-of-data-science.jpg" width="100%" style="display: block; margin: auto;" /&gt;
+.panelset[
+.panel[.panel-name[Intention to treat]
+.push-left[
+&lt;br&gt;
+&lt;br&gt;
 
-&lt;iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Arrested &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Coddled &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Arrest! &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 91 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Coddle! &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 45 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 177 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
 ]
+.push-right[
+&lt;img src="https://s.abcnews.com/images/US/minneapolis-police-department-chief-search-medaria-arradondo-04-gty-llr-220621_1655836848859_hpMain_16x9_992.jpg" width="80%" style="display: block; margin: auto;" /&gt;
+]
+]
+.panel[.panel-name[R code]
+
+```r
+# Load the data from the Minneapolis Domestic Violence Experiment
+data("mdve", package = "masteringmetrics")
+
+mdve &lt;- mdve %&gt;%
+  # Recode intention and actual treatment 
+  # into factor variables with two categories
+  mutate( 
+    T_RANDOM = case_when(
+      T_RANDOM == 2 | T_RANDOM == 3 ~ "Coddle!",
+      T_RANDOM == 1 ~ "Arrest!",
+      TRUE ~ as.character(NA)) %&gt;% fct_relevel("Arrest!"),
+    T_FINAL = case_when(
+      T_FINAL == 2 | T_FINAL == 3 ~ "Coddled",
+      T_FINAL == 1 ~ "Arrested",
+      TRUE ~ as.character(NA)) %&gt;% fct_relevel("Arrested"))
+
+# Make frequency table
+mdve %&gt;%
+  select(T_RANDOM, T_FINAL) %&gt;%
+  table() %&gt;% kable()
+```
+]]
+
+---
+# RCTs vs ITTs
+
+.push-left[.content-box-red[
+.font120[.center[**RCT**]]
+
+`$$\begin{equation}\begin{split} &amp; |r_{I,D}| = 1 \\ &amp;\rightarrow I = D! \end{split}\end{equation}$$`
+
+That is, the absolute correlation between intervention `\(I\)` and predictor of interest `\(D\)` is 1, making them practically the same thing.
+&lt;br&gt;
+&lt;br&gt;
+
+&lt;img src="8-Multiple-OLS_files/figure-html/DAG4-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+]]
+
+--
+
+.push-left[.content-box-blue[
+.font120[.center[**ITT**]]
+
+`$$\begin{equation}\begin{split} &amp; |r_{Z, D}| &lt; 1 \\ &amp;\rightarrow Z \neq D! \end{split}\end{equation}$$`
+
+That is, the absolute correlation between intervention `\(Z\)` and predictor of interest `\(D\)` is smaller than 1, inducing some portion of random variation into `\(D\)`.
+
+
+&lt;img src="8-Multiple-OLS_files/figure-html/DAG5-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+]]
+
+---
+layout: false
+# IV .font60[to the rescue]
+
+.left-column[.content-box-red[
+.center[**3 Requirements**]
+1. *First stage*: Instrument has causal effect on outcome `\(D_{i}\)`.
+
+2. *Randomization*: Instrument is randomly assigned (RCT or natural experiment).
+
+3. *Exclusion restriction*: Instrument affects outcome `\(Y_{i}\)` **_only_** through its effect on `\(D\)`.
+  + In practice very difficult to test
+]]
 
 .right-column[
-&lt;br&gt;
-&lt;iframe src='exercise2.html' width='1000' height='600' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+&lt;img src="8-Multiple-OLS_files/figure-html/DAG8-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+
+**First Stage:** `\(E[D_{i}|Z_{i}=1]-E[D_{i}|Z_{i}=0]; \text{call this }\phi.\)`
+
+**Reduced Form:** `\(E[Y_{i}|Z_{i}=1]-E[Y_{i}|Z_{i}=0]; \text{call this }\rho.\)`
+
+**IV Estimator of LATE:** `\(\lambda = \frac{\rho}{\phi} = \frac{E[Y_{i}|Z_{i}=1]-E[Y_{i}|Z_{i}=0]}{E[D_{i}|Z_{i}=1]-E[D_{i}|Z_{i}=0]} \color{red}{= E[Y_{1i}-Y_{0i}|\text{Complier}_{i}=1]}.\)`
 ]
+
+---
+# IV .font60[to the rescue]
+
+.push-right[
+.panelset[
+.panel[.panel-name[First Stage].font90[
+&lt;table class="texreg" style="margin: 10px auto;border-collapse: collapse;border-spacing: 0px;caption-side: bottom;color: #000000;border-top: 2px solid #000000;"&gt;
+&lt;caption&gt;Statistical models&lt;/caption&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/th&gt;
+&lt;th style="padding-left: 5px;padding-right: 5px;"&gt;Model 1&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr style="border-top: 1px solid #000000;"&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Intercept&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.011&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.011)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Coddle!&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.786&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.029)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr style="border-top: 1px solid #000000;"&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;R&lt;sup&gt;2&lt;/sup&gt;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.522&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr style="border-bottom: 2px solid #000000;"&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Num. obs.&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;314&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;tfoot&gt;
+&lt;tr&gt;
+&lt;td style="font-size: 0.8em;" colspan="2"&gt;&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;p &amp;lt; 0.001; &lt;sup&gt;&amp;#42;&amp;#42;&lt;/sup&gt;p &amp;lt; 0.01; &lt;sup&gt;&amp;#42;&lt;/sup&gt;p &amp;lt; 0.05&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tfoot&gt;
+&lt;/table&gt;
+]]
+.panel[.panel-name[R code]
+
+```r
+mdve &lt;- mdve %&gt;%
+  mutate( # Prepare binary outcome.
+    T_FINAL_01 = case_when(
+      T_FINAL == "Arrested" ~ 0,
+      T_FINAL == "Coddled" ~ 1))
+
+# First stage OLS (i.e., linear probability model)
+first_stg &lt;- lm_robust(T_FINAL_01 ~ T_RANDOM, 
+                       data = mdve)
+
+# Regression table
+htmlreg(first_stg, include.ci = FALSE, digits = 3,
+        include.adjrs = FALSE, include.rmse = FALSE,
+        custom.coef.names = c("Intercept", "Coddle!"))
+```
+]]]
+
+.push-left[
+&lt;img src="8-Multiple-OLS_files/figure-html/unnamed-chunk-37-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+
+**First Stage:** `\(0.786; \text{call this }\phi.\)`
+
+**Reduced Form:** `\(0.114; \text{call this }\rho.\)`&lt;br&gt;.backgrnote[According to Sherman and Berk (1984).]
+
+**IV Estimator of LATE:** `\(\lambda = \frac{\rho}{\phi} = \frac{E[Y_{i}|Z_{i}=1]-E[Y_{i}|Z_{i}=0]}{E[D_{i}|Z_{i}=1]-E[D_{i}|Z_{i}=0]} = \underline{\underline{0.145}} \color{red}{|\text{Complier}_{i}=1}.\)`
+]
+
+---
+layout: true
+# What if .font70[the instrument wasn't radom?]
+
+.push-right[
+.panelset[
+.panel[.panel-name[Confounded first stage?]
+&lt;table class="texreg" style="margin: 10px auto;border-collapse: collapse;border-spacing: 0px;caption-side: bottom;color: #000000;border-top: 2px solid #000000;"&gt;
+&lt;caption&gt;Statistical models&lt;/caption&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/th&gt;
+&lt;th style="padding-left: 5px;padding-right: 5px;"&gt;Z&lt;/th&gt;
+&lt;th style="padding-left: 5px;padding-right: 5px;"&gt;D&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr style="border-top: 1px solid #000000;"&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Intercept&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.741 (0.036)&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.004 (0.024)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Asian&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.259 (0.036)&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.211 (0.034)&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Black&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;-0.032 (0.056)&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.010 (0.044)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Hisp.&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.134 (0.130)&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.009 (0.166)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Indian&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;-0.114 (0.077)&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.005 (0.055)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Other&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.059 (0.203)&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.157 (0.062)&lt;sup&gt;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Z&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.785 (0.030)&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr style="border-top: 1px solid #000000;"&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;R&lt;sup&gt;2&lt;/sup&gt;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.013&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.524&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr style="border-bottom: 2px solid #000000;"&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Num. obs.&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;330&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;314&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;tfoot&gt;
+&lt;tr&gt;
+&lt;td style="font-size: 0.8em;" colspan="3"&gt;&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;p &amp;lt; 0.001; &lt;sup&gt;&amp;#42;&amp;#42;&lt;/sup&gt;p &amp;lt; 0.01; &lt;sup&gt;&amp;#42;&lt;/sup&gt;p &amp;lt; 0.05&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tfoot&gt;
+&lt;/table&gt;
+]
+
+.panel[.panel-name[R code]
+.font90[
+
+```r
+mdve &lt;- mdve %&gt;%
+  mutate( # Prepare binary outcome.
+    T_RANDOM_01 = case_when(
+      T_RANDOM == "Arrest!" ~ 0,
+      T_RANDOM == "Coddle!" ~ 1),
+    # Recode race variable
+    S_RACE = case_when(
+      S_RACE == 1 ~ "White",
+      S_RACE == 2 ~ "Black",
+      S_RACE == 3 ~ "Indian",
+      S_RACE == 4 ~ "Asian",
+      S_RACE == 5 ~ "Hispanic",
+      TRUE ~ "Other") %&gt;% fct_relevel("White"))
+
+# Randomization violated?
+ols_zc &lt;- lm_robust(T_RANDOM_01 ~ S_RACE, data = mdve)
+ols_dc &lt;- lm_robust(T_FINAL_01 ~ S_RACE + T_RANDOM_01, data = mdve)
+
+# Regression table
+htmlreg(list(ols_zc, ols_dc), include.ci = FALSE, digits = 3, single.row = TRUE,
+        include.adjrs = FALSE, include.rmse = FALSE,
+        custom.model.names = c("Z", "D"),
+        custom.coef.names = c("Intercept", "Asian", "Black", "Hisp.", "Indian", "Other", "Z"))
+```
+]
+]]]
+
+---
+
+.push-left[
+&lt;img src="8-Multiple-OLS_files/figure-html/DAG9-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+
+.content-box-green[
+- What do the two regression suggest?
+
+- Why did I adjust the differences in `\(D\)` across ethnic groups for `\(Z\)`?
+
+- Could the differences across groups be a problem?
+]]
+
+---
+
+.push-left[
+&lt;img src="8-Multiple-OLS_files/figure-html/unnamed-chunk-39-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+
+.content-box-red[
+- Because randomization failed for Asian suspects, and officers were more likely to coddle Asian suspects (ignoring the intervention): **Ethnicity introduces OVB to `\(\phi\)`.**
+
+
+- **Ethnicity may also introduce OMV to `\(\lambda\)`**, if Asian suspects have different repeat domestic violence rates. Unfortunately, the accessible data do not entail `\(Y\)`, so we cannot check and correct for this.
+]]
+
+---
+layout: false
+# Multiple OLS .font70[to the rescue!]
+
+.push-right[
+.center[Adjusted first stage .alert[and reduced form!]]
+&lt;table class="texreg" style="margin: 10px auto;border-collapse: collapse;border-spacing: 0px;caption-side: bottom;color: #000000;border-top: 2px solid #000000;"&gt;
+&lt;caption&gt;Statistical models&lt;/caption&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/th&gt;
+&lt;th style="padding-left: 5px;padding-right: 5px;"&gt;Z&lt;/th&gt;
+&lt;th style="padding-left: 5px;padding-right: 5px;"&gt;D&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr style="border-top: 1px solid #000000;"&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Intercept&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.741 (0.036)&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.004 (0.024)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Asian&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.259 (0.036)&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.211 (0.034)&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Black&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;-0.032 (0.056)&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.010 (0.044)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Hisp.&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.134 (0.130)&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.009 (0.166)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Indian&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;-0.114 (0.077)&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.005 (0.055)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Other&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.059 (0.203)&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.157 (0.062)&lt;sup&gt;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Z&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.785 (0.030)&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr style="border-top: 1px solid #000000;"&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;R&lt;sup&gt;2&lt;/sup&gt;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.013&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.524&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr style="border-bottom: 2px solid #000000;"&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Num. obs.&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;330&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;314&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;tfoot&gt;
+&lt;tr&gt;
+&lt;td style="font-size: 0.8em;" colspan="3"&gt;&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;p &amp;lt; 0.001; &lt;sup&gt;&amp;#42;&amp;#42;&lt;/sup&gt;p &amp;lt; 0.01; &lt;sup&gt;&amp;#42;&lt;/sup&gt;p &amp;lt; 0.05&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tfoot&gt;
+&lt;/table&gt;
+]
+
+.push-left[
+&lt;img src="8-Multiple-OLS_files/figure-html/DAG10-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+
+.alert[Adjusted] **First Stage:** `\(0.785; \text{call this }\phi|C.\)`
+
+.alert[Adjusted] **Reduced Form:** `\(\color{red}{?}; \text{call this }\rho|C.\)`&lt;br&gt;.backgrnote[According to Sherman and Berk (1984).]
+
+**Adjusted IV Estimator of LATE:** `\(\lambda = \frac{\rho|C}{\phi|C} = \frac{\color{red}{?}}{0.785} \color{red}{|\text{Complier}_{i}=1}.\)`
+]
+
+---
+class: clear
+# Can multiple OLS fix broken interventions?
+
+.push-left[.content-box-green[
+
+&lt;img src="8-Multiple-OLS_files/figure-html/unnamed-chunk-40-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+
+- OLS can statistically balance **_observed_** confounders after the data has been collected.
+]]
+
+.push-right[.content-box-red[
+
+&lt;img src="8-Multiple-OLS_files/figure-html/DAG_FrischWaugh2-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+
+- If **_observed_** confounders are imbalanced, *maybe more is broken that we have not observed?*
+]]
 
 ---
 class: inverse
 # Today's general lessons
 
-1. *Natural Experiment*: Sometimes nature or other forces randomly exposure people to treatment or control conditions. Compared to RCTs we have less control that exposure was truly random, but we can often study more interesting - real - events.
+1. *Omitted variable bias*: Confounder variables introduce omitted variable bias, which can be calculated if the confounder is observed in the data. Omitted variable bias is basically the same as selection/confounder bias. But OMV usually refers to a specific variable and the latter refers to the problem in general.
 
-2. *Intention to Treat*: Some people do not comply with the experimental group we assign them to. In that case we estimate an average causal intention to treat effect, if we focus on the randomly assigned treatment alone.
+2. *Controlling for*: Multiple OLS allows us to partial out the selection biases stemming from observed confounding variables.
 
-3. *Instrument Variables (IV) Estimation*: Instrument variable regression allows us to recover the causal effect of the treatment (not the intention) in such situations.
+3. *Frisch-Waugh Theorem*: We can think of controlling for as working with the residuals (leftovers) after the correlations between the confounders and both `\(Y\)` and `\(D\)` have been partialled out.
 
-4. *LATE (Local average treatment effect:* IV only estimates the treatment effect among compliers; we cannot know how people who did not comply to the intended treatment would have been affected by the treatment.
+4. *Multiple OLS*: OLS allows us to consider multiple predictor variables. In line with Frisch-Waugh, they are all controlled for each other.
+
+5. Multiple OLS can thus alleviate unbalanced confounders and thereby "repair" broken randomization. However, OLS can only consider **_observed_** confounders and hence it remains unclear whether a failed randomized is truly fixed.
+
+6. We can also control for confounders in an IV setting. In this case, *we need to control both the First Stage and the Reduced form for confounders.*
+
 
 ---
 # References
