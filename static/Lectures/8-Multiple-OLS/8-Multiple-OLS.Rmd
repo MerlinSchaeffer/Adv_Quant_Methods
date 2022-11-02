@@ -1309,16 +1309,16 @@ class: clear
 
 .push-left[.content-box-green[
 
-```{tikz, ref.label = "DAG_FrischWaugh", echo = FALSE, out.width = '60%'}
+```{tikz, ref.label = "DAG_FrischWaugh", echo = FALSE, out.width = '40%'}
 
 ```
 
-- OLS can statistically balance **_observed_** confounders after the data has been collected.
+- OLS can statistically balance **_observed_** confounders, even after the data has been finally collected.
 ]]
 
 .push-right[.content-box-red[
 
-```{tikz, DAG_FrischWaugh2, echo = FALSE, out.width = '60%'}
+```{tikz, DAG_FrischWaugh2, echo = FALSE, out.width = '40%'}
 \usetikzlibrary{shapes,decorations,arrows,calc,arrows.meta,fit,positioning,quotes}
 \tikzset{
   -Latex,auto,node distance =1 cm and 1 cm,semithick,
@@ -1345,6 +1345,57 @@ class: clear
 
 - If **_observed_** confounders are imbalanced, *maybe more is broken that we have not observed?*
 ]]
+
+---
+# Pre- versus post-treatment controls
+
+.center.alert[Time of measurement helps to decide whether a variable is a confounder or a mechanism/mediator.<br> But generally, you can only rely on sound logical reasoning!]
+
+.push-left[.content-box-green[
+.center[**Pre-treatment**]
+```{tikz, ref.label = "DAG_FrischWaugh", echo = FALSE, out.width = '40%'}
+
+```
+
+- *Potential confounders*: Variables that are **_causally prior to the treatment_**.
+]]
+
+.push-left[.content-box-red[
+.center[**Post-treatment**]
+```{tikz, DAG_mediator, echo = FALSE, out.width = '40%'}
+\usetikzlibrary{shapes,decorations,arrows,calc,arrows.meta,fit,positioning,quotes}
+\tikzset{
+  -Latex,auto,node distance =1 cm and 1 cm,semithick,
+  state/.style ={ellipse, draw, minimum width = 0.7 cm},
+  point/.style = {circle, draw, inner sep=0.04cm,fill,node contents={}},
+  bidirected/.style={Latex-Latex,dashed},
+  el/.style = {inner sep=2pt, align=left, sloped}
+}
+
+\begin{tikzpicture}
+\sffamily
+\node[state, align = center] (1) at (0,0) {$D$};
+\node[state] (2) [right = of 1] {$Y$};
+\node[state] (3) [gray, double, above = of 2] {$M$};
+
+\path (1) edge (2);
+\path (1) edge (3);
+\path (3) edge (2);
+\end{tikzpicture}
+```
+- *Potential mechanisms/mediators*: Variables that are potentially **_a result of the treatment_**.
+]]
+
+---
+# Group work
+
+.content-box-green[
+1. Download "Sesame-variables.doc" from Absalon. Remember that our outcome was "postlet", "encouraged" was the randomized intervention, and "watched" was the treatment of interest. 
+
+2. Identify variables that should ideally be balanced and if not should be controlled for as pre-treatment confounders.
+
+3. identify variables that we should definitly not control for because they are post-treatment mechanisms, or even alternative measures of the outcome we are interested in.
+]
 
 ---
 class: inverse

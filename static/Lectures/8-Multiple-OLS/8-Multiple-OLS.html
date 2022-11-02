@@ -4,7 +4,7 @@
     <title>Multiple OLS regression</title>
     <meta charset="utf-8" />
     <meta name="author" content="Merlin Schaeffer  Department of Sociology" />
-    <meta name="date" content="2022-11-01" />
+    <meta name="date" content="2022-11-02" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
     <script src="libs/tile-view/tile-view.js"></script>
@@ -29,7 +29,7 @@ class: center, middle, inverse, title-slide
 ### Merlin Schaeffer<br> Department of Sociology
 ]
 .date[
-### 2022-11-01
+### 2022-11-02
 ]
 
 ---
@@ -1344,17 +1344,46 @@ class: clear
 
 .push-left[.content-box-green[
 
-&lt;img src="8-Multiple-OLS_files/figure-html/unnamed-chunk-40-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+&lt;img src="8-Multiple-OLS_files/figure-html/unnamed-chunk-40-1.png" width="40%" style="display: block; margin: auto;" /&gt;
 
-- OLS can statistically balance **_observed_** confounders after the data has been collected.
+- OLS can statistically balance **_observed_** confounders, even after the data has been finally collected.
 ]]
 
 .push-right[.content-box-red[
 
-&lt;img src="8-Multiple-OLS_files/figure-html/DAG_FrischWaugh2-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+&lt;img src="8-Multiple-OLS_files/figure-html/DAG_FrischWaugh2-1.png" width="40%" style="display: block; margin: auto;" /&gt;
 
 - If **_observed_** confounders are imbalanced, *maybe more is broken that we have not observed?*
 ]]
+
+---
+# Pre- versus post-treatment controls
+
+.center.alert[Time of measurement helps to decide whether a variable is a confounder or a mechanism/mediator.&lt;br&gt; But generally, you can only rely on sound logical reasoning!]
+
+.push-left[.content-box-green[
+.center[**Pre-treatment**]
+&lt;img src="8-Multiple-OLS_files/figure-html/unnamed-chunk-41-1.png" width="40%" style="display: block; margin: auto;" /&gt;
+
+- *Potential confounders*: Variables that are **_causally prior to the treatment_**.
+]]
+
+.push-left[.content-box-red[
+.center[**Post-treatment**]
+&lt;img src="8-Multiple-OLS_files/figure-html/DAG_mediator-1.png" width="40%" style="display: block; margin: auto;" /&gt;
+- *Potential mechanisms/mediators*: Variables that are potentially **_a result of the treatment_**.
+]]
+
+---
+# Group work
+
+.content-box-green[
+1. Download "Sesame-variables.doc" from Absalon. Remember that our outcome was "postlet", "encouraged" was the randomized intervention, and "watched" was the treatment of interest. 
+
+2. Identify variables that should ideally be balanced and if not should be controlled for as pre-treatment confounders.
+
+3. identify variables that we should definitly not control for because they are post-treatment mechanisms, or even alternative measures of the outcome we are interested in.
+]
 
 ---
 class: inverse
