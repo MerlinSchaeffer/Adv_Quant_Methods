@@ -4,7 +4,7 @@
     <title>2. Recap: Correlation &amp; OLS Regression</title>
     <meta charset="utf-8" />
     <meta name="author" content="Merlin Schaeffer  Department of Sociology" />
-    <meta name="date" content="2022-09-16" />
+    <meta name="date" content="2022-11-03" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
     <script src="libs/tile-view/tile-view.js"></script>
@@ -27,7 +27,7 @@ class: center, middle, inverse, title-slide
 ### Merlin Schaeffer<br> Department of Sociology
 ]
 .date[
-### 2022-09-16
+### 2022-11-03
 ]
 
 ---
@@ -76,7 +76,7 @@ class: inverse middle
 
 ---
 class: inverse
-# Research question of the day
+# Application of the day
 
 .center[.font140[
 **Is there a freedom-equality trade-off?**
@@ -347,7 +347,7 @@ Dat_poverty
 
 ```r
 *(Dat &lt;- inner_join(Dat_poverty, Dat_citi_rights, by = c("country", "date")))
-# # A tibble: 147 × 4
+# # A tibble: 146 × 4
 #    country     date poverty citizen_rights
 #    &lt;chr&gt;      &lt;dbl&gt;   &lt;dbl&gt;          &lt;dbl&gt;
 #  1 Albania     2019    10.9              8
@@ -360,7 +360,7 @@ Dat_poverty
 #  8 Azerbaijan  2005    31.3              3
 #  9 Bangladesh  2016    86.9              6
 # 10 Belarus     2020     1.3              1
-# # … with 137 more rows
+# # … with 136 more rows
 ```
 
 ---
@@ -421,7 +421,7 @@ Dat &lt;- Dat %&gt;% mutate(socialist = case_when( # Years socialist minus years
 
 ```r
 Dat
-# # A tibble: 147 × 5
+# # A tibble: 146 × 5
 #    country     date poverty citizen_rights socialist
 #    &lt;chr&gt;      &lt;dbl&gt;   &lt;dbl&gt;          &lt;dbl&gt;     &lt;dbl&gt;
 #  1 Albania     2019    10.9              8        21
@@ -434,7 +434,7 @@ Dat
 #  8 Azerbaijan  2005    31.3              3         0
 #  9 Bangladesh  2016    86.9              6        44
 # 10 Belarus     2020     1.3              1        14
-# # … with 137 more rows
+# # … with 136 more rows
 ```
 ]
 .panel[.panel-name[Plot socialism years across the world]
@@ -492,20 +492,20 @@ class: clear
    mutate( # Z-Standardize variables.
 *    z_socialist = scale(socialist) %&gt;% as.numeric(),
 *    z_poverty = scale(poverty) %&gt;% as.numeric()))
-# # A tibble: 147 × 7
+# # A tibble: 146 × 7
 #    country     date poverty citizen_rights socialist z_socialist z_poverty
 #    &lt;chr&gt;      &lt;dbl&gt;   &lt;dbl&gt;          &lt;dbl&gt;     &lt;dbl&gt;       &lt;dbl&gt;     &lt;dbl&gt;
-#  1 Albania     2019    10.9              8        21       0.983    -0.864
-#  2 Algeria     2011    36.6              3        49       2.91     -0.140
-#  3 Angola      2018    78                3         5      -0.119     1.03 
-#  4 Argentina   2020    14.1             10         0      -0.463    -0.774
-#  5 Armenia     2020    53.5              6         0      -0.463     0.336
-#  6 Australia   2018     1               12         0      -0.463    -1.14 
-#  7 Austria     2019     0.8             12         0      -0.463    -1.15 
-#  8 Azerbaijan  2005    31.3              3         0      -0.463    -0.289
-#  9 Bangladesh  2016    86.9              6        44       2.57      1.28 
-# 10 Belarus     2020     1.3              1        14       0.501    -1.14 
-# # … with 137 more rows
+#  1 Albania     2019    10.9              8        21       0.983    -0.874
+#  2 Algeria     2011    36.6              3        49       2.91     -0.148
+#  3 Angola      2018    78                3         5      -0.116     1.02 
+#  4 Argentina   2020    14.1             10         0      -0.459    -0.783
+#  5 Armenia     2020    53.5              6         0      -0.459     0.329
+#  6 Australia   2018     1               12         0      -0.459    -1.15 
+#  7 Austria     2019     0.8             12         0      -0.459    -1.16 
+#  8 Azerbaijan  2005    31.3              3         0      -0.459    -0.298
+#  9 Bangladesh  2016    86.9              6        44       2.56      1.27 
+# 10 Belarus     2020     1.3              1        14       0.502    -1.14 
+# # … with 136 more rows
 ```
 ]
 .panel[.panel-name[Illustration]
@@ -567,8 +567,8 @@ Dat %&gt;% # Use our data,
   select(poverty, socialist) %&gt;% # Select vars for analysis,
 * cor() # Estimate correlation.
 #           poverty socialist
-# poverty    1.0000   -0.0383
-# socialist -0.0383    1.0000
+# poverty     1.000    -0.035
+# socialist  -0.035     1.000
 ```
 ]]]
 
@@ -647,7 +647,7 @@ Models should not be driven by few singular cases, like in this example.]
 - **Residuals**, `\(e_{i} =y_{i} - \hat{y}\)`
   + the differences between what our model predicts and the actual data.
 
-`\(e_{\text{Denmark}} = 0.4\% - 42.2\%=-41.8\%\)`
+`\(e_{\text{Denmark}} = 0.4\% - 42.4\%=-42\%\)`
 ]
 .right-column[
 &lt;img src="2-Corr-n-Reg_files/figure-html/residuals-1.png" width="100%" style="display: block; margin: auto;" /&gt;
@@ -737,7 +737,7 @@ htmlreg(list(ols, zols), # Nicely-formatted table.
 &lt;tbody&gt;
 &lt;tr style="border-top: 1px solid #000000;"&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(Intercept)&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;42.20&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;42.42&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;-0.00&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
@@ -777,8 +777,8 @@ htmlreg(list(ols, zols), # Nicely-formatted table.
 &lt;/tr&gt;
 &lt;tr style="border-bottom: 2px solid #000000;"&gt;
 &lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Num. obs.&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;147&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;147&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;146&lt;/td&gt;
+&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;146&lt;/td&gt;
 &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;tfoot&gt;
@@ -796,16 +796,16 @@ htmlreg(list(ols, zols), # Nicely-formatted table.
 
 .push-right[
 $$
-\operatorname{\widehat{poverty}} = 42.2 - 0.09(\operatorname{socialist})
+\operatorname{\widehat{poverty}} = 42.42 - 0.09(\operatorname{socialist})
 $$
  `\(\rightarrow\)` the best-fitting line that `\(\min \sum_{i=1}^{n} e_{i}^{2}\)`.
 
-- Among countries without a socialist past, poverty is on average 42.2%.
-  + `\((\hat{y}|\text{Socialism = 0}) = 42.2\%\)`.
+- Among countries without a socialist past, poverty is on average 42.42%.
+  + `\((\hat{y}|\text{Socialism = 0}) = 42.42\%\)`.
   
 - With every year of socialism, the average level of poverty -0.09% lower.
 
-- This model accounts for 0* 100 % more of the variation of poverty across the world, than simply using the mean as best guess `\(\bar{y} = 41.57\%\)`.
+- This model accounts for 0* 100 % more of the variation of poverty across the world, than simply using the mean as best guess `\(\bar{y} = 41.85\%\)`.
 ]]]
 
 ---

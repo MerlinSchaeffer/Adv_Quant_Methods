@@ -97,7 +97,7 @@ se <- vcov(ols_pt_adj) %>% diag()
 se <- se["treatAfter the attack"] %>% sqrt() %>% round(., 3) %>% as.scalar()
 ```
 
-2. What is the average causal effect of the Bali 2002 terror attack among the Portuguese, controlled for age, gender, years of education, and employment status? It is `r fitb(coefPT, width = "5")` standard deviations.
+2. What is the average causal effect of the Bali 2002 terror attack among the Portuguese, controlled for age, gender, and employment status? It is `r fitb(coefPT, width = "5")` standard deviations.
 `r hide("R solution -> dont' peak to early ;) !")`
 ```{r ref.label = "olsPT"}
 ```
