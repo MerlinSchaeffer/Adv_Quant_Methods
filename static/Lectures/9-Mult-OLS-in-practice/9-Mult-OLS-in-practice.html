@@ -49,292 +49,10 @@ class: inverse middle center
 &lt;img src="9-Mult-OLS-in-practice_files/figure-html/Tree1-1.png" width="70%" style="display: block; margin: auto;" /&gt;
 
 ---
-class: inverse
-# Revisit our research question from Lecture 2
-
-.center[.font140[
-**Is there a freedom-equality trade-off?**
-]
-.font110[
-In other words:&lt;br&gt;
-**Are socialist countries good at reducing poverty**,&lt;br&gt; at the cost of offering less freedom?
-]]
-
-&lt;br&gt;
-.push-left[
-&lt;img src="https://miro.medium.com/max/1280/1*8Y_EPw2a67TRRos3b24YlA.jpeg" width="90%" style="display: block; margin: auto;" /&gt;
-]
-
-.push-right[
-&lt;img src="https://almayasabdam.com/wp-content/uploads/2020/09/1496441134_communists.png" width="96%" style="display: block; margin: auto;" /&gt;
-]
-
----
-# Poverty and socialism
-
-
-
-
-
-.left-column[
-
-```r
-# Bivariate OLS
-ols_soc &lt;- lm_robust(poverty ~ socialist, 
-                     data = Dat)
-# Regression table
-screenreg(ols_soc, 
-          include.ci = FALSE, digits = 3)
-# 
-# ========================
-#              Model 1    
-# ------------------------
-# (Intercept)   42.419 ***
-#               (3.253)   
-# socialist     -0.085    
-#               (0.181)   
-# ------------------------
-# R^2            0.001    
-# Adj. R^2      -0.006    
-# Num. obs.    146        
-# RMSE          35.531    
-# ========================
-# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
-```
-.alert[P.S.: Same data preparations as for Lecture 2]
-]
-
-.right-column[
-&lt;img src="9-Mult-OLS-in-practice_files/figure-html/socialism-corr1-1.png" width="100%" style="display: block; margin: auto;" /&gt;
-]
-
----
-# Poverty and citizenship rights
-
-.left-column[
-
-```r
-# Bivariate OLS
-ols_fh &lt;- lm_robust(poverty ~ citizen_rights, 
-                    data = Dat)
-# Regression table
-screenreg(ols_fh,
-          include.ci = FALSE, digits = 3)
-# 
-# ===========================
-#                 Model 1    
-# ---------------------------
-# (Intercept)      80.562 ***
-#                  (6.827)   
-# citizen_rights   -5.083 ***
-#                  (0.735)   
-# ---------------------------
-# R^2               0.264    
-# Adj. R^2          0.259    
-# Num. obs.       146        
-# RMSE             30.500    
-# ===========================
-# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
-```
-]
-
-.right-column[
-&lt;img src="9-Mult-OLS-in-practice_files/figure-html/citizen-corr1-1.png" width="100%" style="display: block; margin: auto;" /&gt;
-]
-
----
-class: inverse middle center
-# 1. Ruling out alternatives
-
----
-class: inverse
-# Revised research question
-
-.center[.font140[
-Would socialist countries be better at reducing poverty than capitalist democracies,&lt;br&gt;&lt;br&gt; **if there was no difference &lt;br&gt;&lt;br&gt; in terms of the citizenship rights they offer to their citizens**
-]]
-
-&lt;br&gt;
-.push-left[
-&lt;img src="https://miro.medium.com/max/1280/1*8Y_EPw2a67TRRos3b24YlA.jpeg" width="90%" style="display: block; margin: auto;" /&gt;
-]
-
-.push-right[
-&lt;img src="https://almayasabdam.com/wp-content/uploads/2020/09/1496441134_communists.png" width="96%" style="display: block; margin: auto;" /&gt;
-]
-
----
-# Multiple OLS
-
-.right-column[
-
-```r
-# Multiple OLS
-ols_mult &lt;- lm_robust(poverty ~ socialist + citizen_rights,
-                      data = Dat)
-# Regression table
-screenreg(list(ols_soc, ols_fh, ols_mult),
-          include.ci = FALSE, digits = 3)
-# 
-# =====================================================
-#                 Model 1      Model 2      Model 3    
-# -----------------------------------------------------
-# (Intercept)      42.419 ***   80.562 ***   84.652 ***
-#                  (3.253)      (6.827)      (7.063)   
-# socialist        -0.085                    -0.329    
-#                  (0.181)                   (0.202)   
-# citizen_rights                -5.083 ***   -5.331 ***
-#                               (0.735)      (0.735)   
-# -----------------------------------------------------
-# R^2               0.001        0.264        0.282    
-# Adj. R^2         -0.006        0.259        0.272    
-# Num. obs.       146          146          146        
-# RMSE             35.531       30.500       30.237    
-# =====================================================
-# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
-```
-]
-
-.left-column[
-.content-box-green[
-Multiple OLS doesn't give give a final answer!
-
-But how does it bring us quite a bit closer to answering the research question that we just asked?
-]]
-
----
-layout: true
-# Recap: Frisch-Waugh
-
-.left-column[
-It partials out/controlls for:
-  1. `\(\beta_{Y \leftarrow C}\)`
-  2. `\(\beta_{D \leftarrow C}\)`
-  
-Frisch and Waugh (1933) proved that the way multiple OLS achieves this is mathematically equivalent to the following three steps:
-
-&lt;img src="9-Mult-OLS-in-practice_files/figure-html/DAG_FrischWaugh-1.png" width="70%" style="display: block; margin: auto;" /&gt;
-]
-
----
-
-.right-column[
-.center[
-**Step 1: Regress `\(Y\)` on `\(C\)`, then keep residuals.**
-]
-.push-left[
-.font80[
-
-```r
-# Regress xeno on age,
-(Dat &lt;- lm_robust(poverty ~ citizen_rights, 
-                  data = Dat) %&gt;%
-   # Get residuals,
-   add_residuals(Dat, model = .) %&gt;% 
-   # Rename residuals.
-   rename(e_poverty = resid)) 
-# # A tibble: 146 × 6
-#    country     date poverty citizen_rights socialist e_poverty
-#    &lt;chr&gt;      &lt;dbl&gt;   &lt;dbl&gt;          &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;
-#  1 Albania     2019    10.9              8        21    -29.0 
-#  2 Algeria     2011    36.6              3        49    -28.7 
-#  3 Angola      2018    78                3         5     12.7 
-#  4 Argentina   2020    14.1             10         0    -15.6 
-#  5 Armenia     2020    53.5              6         0      3.44
-#  6 Australia   2018     1               12         0    -18.6 
-#  7 Austria     2019     0.8             12         0    -18.8 
-#  8 Azerbaijan  2005    31.3              3         0    -34.0 
-#  9 Bangladesh  2016    86.9              6        44     36.8 
-# 10 Belarus     2020     1.3              1        14    -74.2 
-# # … with 136 more rows
-```
-]]
-.push-right[
-&lt;img src="9-Mult-OLS-in-practice_files/figure-html/residuals-1.png" width="100%" style="display: block; margin: auto;" /&gt;
-]]
-
----
-
-.right-column[
-.center[
-**Step 2: Regress `\(D\)` on `\(C\)`, then keep residuals.**
-]
-.push-left[
-.font80[
-
-```r
-# Regress xeno on age,
-(Dat &lt;- lm_robust(socialist ~ citizen_rights, 
-                  data = Dat) %&gt;%
-   # Get residuals,
-   add_residuals(Dat, model = .) %&gt;% 
-   # Rename residuals.
-   rename(e_socialist = resid)) 
-# # A tibble: 146 × 7
-#    country     date poverty citizen_rights socialist e_poverty e_socialist
-#    &lt;chr&gt;      &lt;dbl&gt;   &lt;dbl&gt;          &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;       &lt;dbl&gt;
-#  1 Albania     2019    10.9              8        21    -29.0        14.6 
-#  2 Algeria     2011    36.6              3        49    -28.7        38.8 
-#  3 Angola      2018    78                3         5     12.7        -5.17
-#  4 Argentina   2020    14.1             10         0    -15.6        -4.89
-#  5 Armenia     2020    53.5              6         0      3.44       -7.91
-#  6 Australia   2018     1               12         0    -18.6        -3.38
-#  7 Austria     2019     0.8             12         0    -18.8        -3.38
-#  8 Azerbaijan  2005    31.3              3         0    -34.0       -10.2 
-#  9 Bangladesh  2016    86.9              6        44     36.8        36.1 
-# 10 Belarus     2020     1.3              1        14    -74.2         2.32
-# # … with 136 more rows
-```
-]]
-.push-right[
-&lt;img src="9-Mult-OLS-in-practice_files/figure-html/residuals2-1.png" width="100%" style="display: block; margin: auto;" /&gt;
-]]
-
----
-.right-column[
-.center[
-**Step 3: Regress `\(Y_{e}\)` on `\(D_{e}\)`.**
-]
-.push-left[
-.font80[
-
-```r
-# Regress xeno on age,
-ols_e &lt;- lm_robust(e_poverty ~ e_socialist, 
-                   data = Dat)
-# Regression table
-screenreg(list(ols_mult, ols_e),
-          include.ci = FALSE, digits = 3)
-# 
-# =====================================
-#                 Model 1      Model 2 
-# -------------------------------------
-# (Intercept)      84.652 ***   -0.000 
-#                  (7.063)      (2.496)
-# socialist        -0.329              
-#                  (0.202)             
-# citizen_rights   -5.331 ***          
-#                  (0.735)             
-# e_socialist                   -0.329 
-#                               (0.201)
-# -------------------------------------
-# R^2               0.282        0.024 
-# Adj. R^2          0.272        0.017 
-# Num. obs.       146          146     
-# RMSE             30.237       30.132 
-# =====================================
-# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
-```
-]]
-.push-right[
-&lt;img src="9-Mult-OLS-in-practice_files/figure-html/residuals3-1.png" width="100%" style="display: block; margin: auto;" /&gt;
-]]
-
----
 layout: false
 class: inverse middle center
 
-# 2. Fix broken Interventions
+# 1. Fix broken Interventions
 
 ---
 # My friend Joscha had an idea
@@ -553,7 +271,7 @@ class: clear
 
 .push-left[.content-box-green[
 
-&lt;img src="9-Mult-OLS-in-practice_files/figure-html/unnamed-chunk-19-1.png" width="40%" style="display: block; margin: auto;" /&gt;
+&lt;img src="9-Mult-OLS-in-practice_files/figure-html/unnamed-chunk-8-1.png" width="40%" style="display: block; margin: auto;" /&gt;
 
 - OLS can statistically balance **_observed_** confounders, even after the data has been finally collected.
 ]]
@@ -564,6 +282,316 @@ class: clear
 
 - If **_observed_** confounders are imbalanced, *maybe more is broken that we have not observed?*
 ]]
+
+---
+class: inverse middle center
+# 2. Ruling out alternatives
+
+---
+class: inverse
+# Revisit our research question from Lecture 2
+
+.center[.font140[
+**Is there a freedom-equality trade-off?**
+]
+.font110[
+In other words:&lt;br&gt;
+**Are socialist countries good at reducing poverty**,&lt;br&gt; at the cost of offering less freedom?
+]]
+
+&lt;br&gt;
+.push-left[
+&lt;img src="https://miro.medium.com/max/1280/1*8Y_EPw2a67TRRos3b24YlA.jpeg" width="90%" style="display: block; margin: auto;" /&gt;
+]
+
+.push-right[
+&lt;img src="https://almayasabdam.com/wp-content/uploads/2020/09/1496441134_communists.png" width="96%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+# Poverty and socialism
+
+
+
+
+
+.left-column[
+
+```r
+# Bivariate OLS
+ols_soc &lt;- lm_robust(poverty ~ socialist, 
+                     data = Dat)
+# Regression table
+screenreg(ols_soc, 
+          include.ci = FALSE, digits = 3)
+# 
+# ========================
+#              Model 1    
+# ------------------------
+# (Intercept)   42.419 ***
+#               (3.253)   
+# socialist     -0.085    
+#               (0.181)   
+# ------------------------
+# R^2            0.001    
+# Adj. R^2      -0.006    
+# Num. obs.    146        
+# RMSE          35.531    
+# ========================
+# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
+```
+.alert[P.S.: Same data preparations as for Lecture 2]
+]
+
+.right-column[
+&lt;img src="9-Mult-OLS-in-practice_files/figure-html/socialism-corr1-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+# Poverty and citizenship rights
+
+.left-column[
+
+```r
+# Bivariate OLS
+ols_fh &lt;- lm_robust(poverty ~ citizen_rights, 
+                    data = Dat)
+# Regression table
+screenreg(ols_fh,
+          include.ci = FALSE, digits = 3)
+# 
+# ===========================
+#                 Model 1    
+# ---------------------------
+# (Intercept)      80.562 ***
+#                  (6.827)   
+# citizen_rights   -5.083 ***
+#                  (0.735)   
+# ---------------------------
+# R^2               0.264    
+# Adj. R^2          0.259    
+# Num. obs.       146        
+# RMSE             30.500    
+# ===========================
+# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
+```
+]
+
+.right-column[
+&lt;img src="9-Mult-OLS-in-practice_files/figure-html/citizen-corr1-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+class: inverse
+# Revised research question
+
+.center[.font140[
+Would socialist countries be better at reducing poverty than capitalist democracies,&lt;br&gt;&lt;br&gt; **if there was no difference &lt;br&gt;&lt;br&gt; in terms of the citizenship rights they offer to their citizens**
+]]
+
+&lt;br&gt;
+.push-left[
+&lt;img src="https://miro.medium.com/max/1280/1*8Y_EPw2a67TRRos3b24YlA.jpeg" width="90%" style="display: block; margin: auto;" /&gt;
+]
+
+.push-right[
+&lt;img src="https://almayasabdam.com/wp-content/uploads/2020/09/1496441134_communists.png" width="96%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+# Multiple OLS
+
+.right-column[
+
+```r
+# Multiple OLS
+ols_mult &lt;- lm_robust(poverty ~ socialist + citizen_rights,
+                      data = Dat)
+# Regression table
+screenreg(list(ols_soc, ols_fh, ols_mult),
+          include.ci = FALSE, digits = 3)
+# 
+# =====================================================
+#                 Model 1      Model 2      Model 3    
+# -----------------------------------------------------
+# (Intercept)      42.419 ***   80.562 ***   84.652 ***
+#                  (3.253)      (6.827)      (7.063)   
+# socialist        -0.085                    -0.329    
+#                  (0.181)                   (0.202)   
+# citizen_rights                -5.083 ***   -5.331 ***
+#                               (0.735)      (0.735)   
+# -----------------------------------------------------
+# R^2               0.001        0.264        0.282    
+# Adj. R^2         -0.006        0.259        0.272    
+# Num. obs.       146          146          146        
+# RMSE             35.531       30.500       30.237    
+# =====================================================
+# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
+```
+]
+
+.left-column[
+.content-box-green[
+Multiple OLS doesn't give give a final answer!
+
+But how does it bring us quite a bit closer to answering the research question that we just asked?
+]]
+
+---
+layout: true
+# Recap: Frisch-Waugh
+
+.left-column[
+It partials out/controlls for:
+  1. `\(\beta_{Y \leftarrow C}\)`
+  2. `\(\beta_{D \leftarrow C}\)`
+  
+Frisch and Waugh (1933) proved that the way multiple OLS achieves this is mathematically equivalent to the following three steps:
+
+&lt;img src="9-Mult-OLS-in-practice_files/figure-html/DAG_FrischWaugh-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
+.right-column[
+.center[
+**Step 1: Regress `\(Y\)` on `\(C\)`, then keep residuals.**
+]
+.push-left[
+.font80[
+
+```r
+# Regress xeno on age,
+(Dat &lt;- lm_robust(poverty ~ citizen_rights, 
+                  data = Dat) %&gt;%
+   # Get residuals,
+   add_residuals(Dat, model = .) %&gt;% 
+   # Rename residuals.
+   rename(e_poverty = resid)) 
+# # A tibble: 146 × 6
+#    country     date poverty citizen_rights socialist e_poverty
+#    &lt;chr&gt;      &lt;dbl&gt;   &lt;dbl&gt;          &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;
+#  1 Albania     2019    10.9              8        21    -29.0 
+#  2 Algeria     2011    36.6              3        49    -28.7 
+#  3 Angola      2018    78                3         5     12.7 
+#  4 Argentina   2020    14.1             10         0    -15.6 
+#  5 Armenia     2020    53.5              6         0      3.44
+#  6 Australia   2018     1               12         0    -18.6 
+#  7 Austria     2019     0.8             12         0    -18.8 
+#  8 Azerbaijan  2005    31.3              3         0    -34.0 
+#  9 Bangladesh  2016    86.9              6        44     36.8 
+# 10 Belarus     2020     1.3              1        14    -74.2 
+# # … with 136 more rows
+```
+]]
+.push-right[
+&lt;img src="9-Mult-OLS-in-practice_files/figure-html/residuals-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]]
+
+---
+
+.right-column[
+.center[
+**Step 2: Regress `\(D\)` on `\(C\)`, then keep residuals.**
+]
+.push-left[
+.font80[
+
+```r
+# Regress xeno on age,
+(Dat &lt;- lm_robust(socialist ~ citizen_rights, 
+                  data = Dat) %&gt;%
+   # Get residuals,
+   add_residuals(Dat, model = .) %&gt;% 
+   # Rename residuals.
+   rename(e_socialist = resid)) 
+# # A tibble: 146 × 7
+#    country     date poverty citizen_rights socialist e_poverty e_socialist
+#    &lt;chr&gt;      &lt;dbl&gt;   &lt;dbl&gt;          &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;       &lt;dbl&gt;
+#  1 Albania     2019    10.9              8        21    -29.0        14.6 
+#  2 Algeria     2011    36.6              3        49    -28.7        38.8 
+#  3 Angola      2018    78                3         5     12.7        -5.17
+#  4 Argentina   2020    14.1             10         0    -15.6        -4.89
+#  5 Armenia     2020    53.5              6         0      3.44       -7.91
+#  6 Australia   2018     1               12         0    -18.6        -3.38
+#  7 Austria     2019     0.8             12         0    -18.8        -3.38
+#  8 Azerbaijan  2005    31.3              3         0    -34.0       -10.2 
+#  9 Bangladesh  2016    86.9              6        44     36.8        36.1 
+# 10 Belarus     2020     1.3              1        14    -74.2         2.32
+# # … with 136 more rows
+```
+]]
+.push-right[
+&lt;img src="9-Mult-OLS-in-practice_files/figure-html/residuals2-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]]
+
+---
+layout: false
+# Recap: Frisch-Waugh
+
+.left-column[
+.center[
+**Step 3: Regress `\(Y_{e}\)` on `\(D_{e}\)`.**
+]
+.font80[
+
+```r
+# Regress xeno on age,
+ols_e &lt;- lm_robust(e_poverty ~ e_socialist, 
+                   data = Dat)
+# Regression table
+screenreg(list(ols_mult, ols_e),
+          include.ci = FALSE, digits = 3)
+# 
+# =====================================
+#                 Model 1      Model 2 
+# -------------------------------------
+# (Intercept)      84.652 ***   -0.000 
+#                  (7.063)      (2.496)
+# socialist        -0.329              
+#                  (0.202)             
+# citizen_rights   -5.331 ***          
+#                  (0.735)             
+# e_socialist                   -0.329 
+#                               (0.201)
+# -------------------------------------
+# R^2               0.282        0.024 
+# Adj. R^2          0.272        0.017 
+# Num. obs.       146          146     
+# RMSE             30.237       30.132 
+# =====================================
+# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
+```
+]]
+
+.right-column[
+.push-right[
+&lt;img src="9-Mult-OLS-in-practice_files/figure-html/unnamed-chunk-20-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
+
+.push-left[
+&lt;img src="9-Mult-OLS-in-practice_files/figure-html/residuals3-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]]
+
+---
+class: inverse middle center
+# Break
+
+&lt;iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+
+---
+class: middle clear
+
+.left-column[
+&lt;img src="https://d1rytvr7gmk1sx.cloudfront.net/wp-content/uploads/2022/08/learn-coding-automation-just.jpeg?x27457" width="100%" style="display: block; margin: auto;" /&gt;
+
+&lt;iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+]
+
+.right-column[
+&lt;br&gt;
+&lt;iframe src='exercise1.html' width='1000' height='600' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+]
 
 ---
 class: inverse middle center
@@ -607,7 +635,7 @@ What else could be `\(C?\)` That is, which other confounders would we need to co
 ---
 
 .push-left[
-&lt;img src="9-Mult-OLS-in-practice_files/figure-html/unnamed-chunk-21-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="9-Mult-OLS-in-practice_files/figure-html/unnamed-chunk-23-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]
 
 .push-right[
@@ -631,7 +659,7 @@ layout: false
 class: clear
 
 .push-left[
-&lt;img src="9-Mult-OLS-in-practice_files/figure-html/unnamed-chunk-24-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="9-Mult-OLS-in-practice_files/figure-html/unnamed-chunk-26-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]
 
 .push-right[
@@ -695,6 +723,16 @@ Another look at the APAX data and the effect of news consumption on perceived di
 # References
 
 .font80[
+Angrist, J. D. and J. Pischke (2014). _Mastering 'Metrics: The Path from Cause to Effect_. Princeton
+University Press.
+
+Dale, S. B. and A. B. Krueger (2002). "Estimating the Payoff to Attending a More Selective College: An
+Application of Selection on Observables and Unobservables*". In: _The Quarterly Journal of Economics_,
+pp. 1491-1527.
+
+Frisch, R. and F. V. Waugh (1933). "Partial Time Regressions as Compared with Individual Trends". In:
+_Econometrica_, pp. 387-401.
+
 Legewie, J. (2013). "Terrorist Events and Attitudes toward Immigrants: A Natural Experiment". In:
 _American Journal of Sociology_, pp. 1199-1245.
 ]
