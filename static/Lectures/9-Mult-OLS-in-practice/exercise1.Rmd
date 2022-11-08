@@ -15,6 +15,188 @@ library(webexercises)
 library(essentials)
 ```
 
-1. Let's take another look at our research question on the legacy of colonialism. Use the same setup as in lecture 4 to answer the following question: To which degree do differences in the number of years since independence from colonialism explain why we saw significant differences between countries colonized by different colonial powers?
+1. Let's take another look at our research question on the legacy of colonialism. Use the same setup as in lecture 4 and make Denmark the reference category. Then answer the following question: To which degree do differences in the number of years since independence from colonialism explain why we saw significant differences between countries colonized by different colonial powers? `r mcq(c("It does not explain much", "Many of the stars are gone.", answer = "The years since indepence explain a large share of the different poverty legacies of the various colonializers"))`. What does this say about a causal colonializer effect? `r mcq(c("It's much smaller than the bivariate result suggests.", "Correlation isn't causation", answer = "It is unclear whether the years since independence are not themselves an outcome of the colonializer and thus whether it is a good control if we are interested in a causal effect", "It's larger than the bivariate result suggests."))`
+```{r}
+pacman::p_load(
+  tidyverse, # Data manipulation,
+  ggplot2, # beautiful figures,
+  democracyData, # download democracy datasets used in the scholarly literature.
+  wbstats, # download data from Worldbank. Tremendous source of global socio-economic data.
+  estimatr, # OLS with robust SE,
+  texreg) # regression tables with nice layout,
 
-2. Let's take another look at education and political efficacy. Use the same setup as in lecture 4 to answer the following question: Is immigrant origin confounding (i.e. introducing selection bias) into the association between education and political efficacy? Define immigrant origin as a factor variable with three levels: "Mainsteam" (born in DK and both parents born in DK), "Immigrant" (born abroad), "Descendant of immigrant (at least one parent born abroad). First discuss whether immigrant origin is a confounding variable or not.
+# 1. The worldbank data
+Dat <- wb_data("SI.POV.DDAY", # Download poverty data: <1.90$ per day,
+               start_date = 2002, end_date = 2022) %>%
+  rename(poverty = SI.POV.DDAY) %>% # rename poverty variable,
+  select(country, date, poverty) %>% # Keep only 3 variables
+  drop_na(poverty) %>% # Drop cases with missing data,
+  group_by(country) %>% # Group by country,
+  filter(date == max(date)) %>% # Keep the most recent data per country.
+  mutate(date = as.numeric(date)) %>% ungroup()
+
+# 2. Colonizer data
+Dat <- Dat %>% 
+  mutate(
+    colonizer = case_when(
+      str_detect(country, "Algeria|Benin|Burkina Faso|Cambodia|Central African Republic|Chad") |
+        str_detect(country, "Djibouti|Gabon|Guinea|Haiti|Laos|Lebanon|Madagascar|Mali|Congo, Rep.|Cote D'Ivoire") | 
+        str_detect(country, "Mauritania|Niger|Senegal|Syria|Togo|Tunisia|Vietnam") ~ "France", # France
+      str_detect(country, "Angola|Brazil|Mozambique|Guinea-Bissau") ~ "Portugal", # Portugal
+      str_detect(country, "Argentina|Bolivia|Chile|Colombia|Costa Rica|Cuba|Dominican Republic|Ecuador") |
+        str_detect(country, "El Salvador|Guatemala|Honduras|Mexico|Nicaragua|Panama|Paraguay|Peru") |
+        str_detect(country, "Uruguay|Venezuela") ~ "Spain", # Spain
+      str_detect(country, "Australia|Bahrain|Bangladesh|Botswana|Canada|Cyprus|Egypt|Fiji") |
+        str_detect(country, "Gambia|Ghana|Guyana|India|Iraq|Israel|Jamaica|Jordan|Kenya|Kuwait") |
+        str_detect(country, "Lesotho|Malawi|Malaysia|Mauritius|Myanmar|New Zealand|Nigeria|Oman") | 
+        str_detect(country, "Pakistan|Qatar|Sierra Leone|Singapore|South Africa") | 
+        str_detect(country, "Sri Lanka|Sudan|Swaziland|Tanzania|Trinidad/Tobago|Uganda") | 
+        str_detect(country, "United Arab Emirates|United States|Yemen|Zambia|Zimbabwe") ~ "Britain", # Britain
+      str_detect(country, "Burundi|Congo, Dem. Rep.|Rwanda") ~ "Belgium",
+    str_detect(country, "Iceland|Estonia") ~ "Denmark")) # Denmark
+
+# 3. Independence from colonialism data
+Dat <- Dat %>% 
+  mutate(
+    years_indep = case_when(
+      is.na(colonizer) ~ as.numeric(NA),
+      country == "Estonia" ~ date - 1645,
+      country == "United States" ~ date - 1783, country == "Haiti" ~ date - 1804, 
+      country == "Paraguay" ~ date - 1811, country == "Chile" ~ date - 1818,
+      str_detect(country, "Argentina|Bolivia|Colombia") ~ date - 1819,
+      str_detect(country, "Costa Rica|Dominican Republic|Mexico|Nicaragua|Panama|El Salvador|Guatemala|Honduras|Venezuela") ~ date - 1821,
+      str_detect(country, "Brazil|Ecuador") ~ date - 1822,
+      country == "Peru" ~ date - 1824, country == "Uruguay" ~ date - 1828,
+      country == "Cuba" ~ date - 1899, country == "Australia" ~ date - 1901,
+      country == "New Zealand" ~ date - 1907, country == "South Africa" ~ date - 1910,
+      country == "Egypt" ~ date - 1922, country == "Iraq" ~ date - 1932,
+      str_detect(country, "Iceland") ~ date - 1944,
+      str_detect(country, "Korea|Taiwan|Vietnam") ~ date - 1945,
+      str_detect(country, "Lebanon|Philippines|Syria") ~ date - 1946,
+      str_detect(country, "Bangladesh|Pakistan|India|Liberia") ~ date - 1947,
+      str_detect(country, "Myanmar|Israel|Jordan|Sri Lanka") ~ date - 1948,
+      country == "Indonesia" ~ date - 1949, country == "Libya" ~ date - 1951,
+      str_detect(country, "Cambodia|Loas") ~ date - 1954,
+      str_detect(country, "Morocco|Sudan|Tunisia") ~ date - 1956,
+      str_detect(country, "Malaysia|Ghana") ~ date - 1957,
+      country == "Guinea" ~ date - 1958, country == "Singapore" ~ date - 1959,
+      str_detect(country, "Benin|Burkina Faso|Central African Republic|Chad|Congo, Dem. Rep.|Congo, Rep.|Code D'Ivoire|Mali|Mauritania|Niger|Nigeria|Senegal|Gabon|Somalia|Togo") ~ date - 1960,
+      str_detect(country, "Kuwait|Sierra Leone|Tanzania") ~ date - 1961,
+      str_detect(country, "Algeria|Burundi|Rwanda|Jamaica|Trinidad/ Tobago|Uganda") ~ date - 1962,
+      country == "Kenya" ~ date - 1963,
+      str_detect(country, "Malawi|Zambia") ~ date - 1964,
+      str_detect(country, "Gambia|Zimbabwe") ~ date - 1965,
+      str_detect(country, "Botswana|Lesotho|Guyana") ~ date - 1966,
+      str_detect(country, "Canada|Yemen") ~ date - 1967,
+      str_detect(country, "Mauritius|Swaziland") ~ date - 1968,
+      country == "Fiji" ~ date - 1970,
+      str_detect(country, "Bahrain|Oman|Qatar|United Arab Emirates") ~ date - 1971,
+      country == "Guinea-Bissau" ~ date - 1974,
+      str_detect(country, "Angola|Mozambigue|Papua New Guinea") ~ date - 1975,
+      country == "Djibouti" ~ date - 1977, 
+      country == "Namibia" ~ date - 1990))
+```
+
+`r hide("R solution -> dont' peak to early ;) !")`
+```{r}
+Dat <- Dat %>%
+  mutate( # Make Denmark the reference
+    colonizer = colonizer %>% fct_relevel("Denmark"))
+
+# Bivariate model
+ols_bi <- lm_robust(poverty ~  colonizer, data = Dat)
+# Controlling for years since independence
+ols_mult <- lm_robust(poverty ~  colonizer + years_indep, data = Dat)
+
+screenreg(list(ols_bi, ols_mult), # regression table.
+          include.ci = FALSE, digits = 3)
+```
+`r unhide()`
+
+2. Make a coefficient plot that visualizes the country differences (compared to Denmark as reference) before and after adjusting for the years since independence.
+`r hide("R solution -> dont' peak to early ;) !")`
+```{r Coefplot2, out.width='100%', fig.height = 4, fig.width = 6, eval = FALSE}
+plotdata_1 <- ols_bi %>%
+  tidy() %>% # Turn results into a tibble,
+  mutate( # Rename variables for the plot.
+    term = case_when(
+      term == "colonizerBelgium" ~ "Belgium",
+      term == "colonizerBritain" ~ "Britain",
+      term == "colonizerFrance" ~ "France",
+      term == "colonizerPortugal" ~ "Portugal",
+      term == "colonizerSpain" ~ "Spain")) %>%
+      filter(term != "(Intercept)")
+
+plotdata_2 <- ols_mult %>%
+  tidy() %>% # Turn results into a tibble,
+  mutate( # Rename variables for the plot.
+    term = case_when(
+      term == "colonizerBelgium" ~ "Belgium",
+      term == "colonizerBritain" ~ "Britain",
+      term == "colonizerFrance" ~ "France",
+      term == "colonizerPortugal" ~ "Portugal",
+      term == "colonizerSpain" ~ "Spain")) %>%
+      filter(term != "(Intercept)" & term != "years_indep")
+
+plotdata <- bind_rows(
+  plotdata_1, plotdata_2, .id = "model") %>%
+  mutate(
+    model = case_when(
+      model == 1 ~ "Bivariate",
+      model == 2 ~ "Adjusted for years since independence"))
+
+ggplot(data = plotdata, 
+       aes(y = estimate, 
+           # Order by effect size
+           x = reorder(term, estimate),
+           color = model)) +
+  geom_hline(yintercept = 0, color = "red", lty = "dashed") +
+  # Point with error-bars,
+  geom_pointrange(aes(min = conf.low, max = conf.high),
+                  position = position_dodge(width=0.5)) +
+  coord_flip() + # Flip Y- & X-Axis,
+  labs(
+    title = "Multiple OLS of extreme poverty",
+    x = "",
+    color = "",
+    # Write Greek beta into axis title.
+    y = "Difference in extreme poverty 
+    compared to countries colonized by Denmark") +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+```
+`r unhide()`
+```{r ref.label = "Coefplot2", out.width='100%', fig.height = 4, fig.width = 6, echo = FALSE}
+```
+
+3. Visualize model predictions that show the association of years since independence (from 0 to 300 years) and extreme poverty controlled for colonializer.
+`r hide("R solution -> dont' peak to early ;) !")`
+```{r predplot2, out.width='100%', fig.height = 4, fig.width = 6, eval = FALSE}
+# Make fictional data
+fict_dat <- tibble(
+  years_indep = 0:300,
+  colonizer = "Britain")
+
+# Get predictions
+fict_dat <- predict(
+  ols_mult, newdata = fict_dat,
+  interval = "confidence", level = 0.95)$fit %>%
+  as_tibble() %>% # Turn into a tibble, then
+  bind_cols(fict_dat, .) # Add to the synthetic data.
+
+ggplot(data = fict_dat, aes(y = fit, x = years_indep)) +
+geom_vline(xintercept = c(34, 236), color = "red", lty = "dashed") +
+  geom_ribbon(aes(ymin = lwr, ymax = upr), alpha = 0.5) +
+  geom_line() +
+  labs(
+    title = "Predictions based on multiple OLS of extreme poverty",
+    x = "By years since independence from colonialism
+    (Colonializer set to: Denmark)",
+    # Write Greek beta into axis title.
+    y = "Predicted average of extreme poverty",
+    caption = "") +
+  theme_minimal()
+```
+`r unhide()`
+```{r ref.label = "predplot2", out.width='100%', fig.height = 4, fig.width = 6, echo = FALSE}
+```

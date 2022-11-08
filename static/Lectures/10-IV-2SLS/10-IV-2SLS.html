@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Instrument Variables II</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Merlin Schaeffer  Department of Sociology" />
+    <meta name="date" content="2022-11-07" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
+    <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
+    <script src="libs/tile-view/tile-view.js"></script>
+    <link href="libs/tachyons/tachyons.min.css" rel="stylesheet" />
+    <link href="libs/panelset/panelset.css" rel="stylesheet" />
+    <script src="libs/panelset/panelset.js"></script>
+    <link rel="stylesheet" href="../template/Merlin169.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+.title[
+# Instrument Variables II
+]
+.subtitle[
+## Two Stage Least Squares (2SLS)
+]
+.author[
+### Merlin Schaeffer<br> Department of Sociology
+]
+.date[
+### 2022-11-07
+]
+
+---
+
+
+# The goal of social science research
+
+.font140[.center[.alert[Use data to discover patterns ("social facts" in Durkheim's terms), &lt;br&gt; and **the social mechanisms that bring them about**.]]]
+
+&lt;img src="https://liu.se/-/media/istock-501261958.jpg?mw=1120&amp;mh=1120&amp;hash=DA8977CCE6A6E600AE80A40CFEE771C9" width="70%" style="display: block; margin: auto;" /&gt;
+
+---
+class: inverse middle center
+# Today's schedule
+
+1. Application of the day: Does education pay off?
+
+---
+class: inverse
+# Application of the day
+
+.push-left[.center[.font130[
+**_Returns to education_:&lt;br&gt;&lt;br&gt; Does education really pay off?**
+]]]
+
+.push-right[
+&lt;img src="https://c8.alamy.com/zooms/9/bfa9df51a3cd4e3199eaf06327d83679/e3r26y.jpg" width="65%" style="display: block; margin: auto;" /&gt;&lt;img src="https://uniavisen.dk/wp-content/uploads/2019/09/customcustomsizeimmatrikulationuniavisenheddarysstad031.jpg" width="65%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+# Isn't the answer obvious?
+
+.left-column[
+&lt;img src="10-IV-2SLS_files/figure-html/DAG_1-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
+
+.right-column[
+&lt;img src="./img/Karlson_1.png" width="100%" style="display: block; margin: auto;" /&gt;
+.backgrnote[.center[*Source:* Karlson and Landersø (2021)]]
+]
+
+---
+# No, there are confounders!
+
+.left-column[
+&lt;img src="10-IV-2SLS_files/figure-html/DAG_2-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+
+&lt;img src="https://www.learnliberty.org/wp-content/uploads/2017/09/Sni%CC%81mek-obrazovky-2021-11-09-v-21.24.45.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
+
+.right-column[
+&lt;img src="./img/Karlson_2.png" width="100%" style="display: block; margin: auto;" /&gt;
+.backgrnote[.center[*Source:* Karlson and Landersø (2021)]]
+]
+
+---
+# No, there are confounders!
+
+.left-column[
+&lt;img src="10-IV-2SLS_files/figure-html/DAG_3-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
+
+.right-column[
+&lt;img src="./img/Karlson_3.png" width="100%" style="display: block; margin: auto;" /&gt;
+.backgrnote[.center[*Source:* Karlson and Landersø (2021)]]
+]
+
+---
+# We need an RCT!
+
+.push-left[
+&lt;img src="./img/randomization2.png" width="60%" style="display: block; margin: auto;" /&gt;
+
+- If we *randomly* divide subjects into treatment and control groups: They come from the same underlying population. 
+  &lt;br&gt; &lt;br&gt; `\(\rightarrow\)` Similar .alert[on average], *in every way*,&lt;br&gt; **including their `\(Y_{0}\)` **!
+  &lt;br&gt; &lt;br&gt; `\(\rightarrow E[Y_{0i}|D=1] = E[Y_{0i}|D=0]\)`!
+]
+
+.push-right[
+&lt;img src="10-IV-2SLS_files/figure-html/DAG_RCT-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+# Angrist and Krueger (1991) had an idea
+
+.left-column[
+&lt;img src="10-IV-2SLS_files/figure-html/DAG_4-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
+
+.right-column[
+- In the US, the school year starts 1 June.
+- Kids enter school in the year in which they turn 6.
+- Attending school is mandatory until one turns 16.
+
+.center[
+
+`\(\rightarrow\)` Dropouts' born in the 4th quarter of a year, will have one more year of education compared to those born in the first one!
+
+]
+
+.push-right[
+**Carl**: Born 1 January 1930, enters school aged 6.5 in June 1936. He drops out on the day of his 16th birthday with 9 years of schooling.
+]
+.push-left[
+**Luis**: Born 31 December 1930, enters school aged 5.5 in June 1936. He drops out on the day of his 16th birthday with 10 years of schooling.
+]
+
+.content-box-green[
+Under which assumptions is the quarter of birth a valid instrument for years of schooling?
+]]
+
+---
+# Replication
+
+.panelset[
+.panel[.panel-name[The data]
+
+```r
+pacman::p_load(
+  tidyverse, # Data manipulation,
+  ggplot2, # beautiful figures,
+  texreg, # regression tables with nice layout,
+  estimatr, # Regression for weighted data,
+  modelr, # Turn results of lm() into a tibble,
+  ivreg, # IV 2SLS,
+  masteringmetrics) # Data and examples from Mastering Metrics
+
+# Load the data from the Quarter of Birth IV study
+data("ak91", package = "masteringmetrics")
+ak91 &lt;- ak91 %&gt;%
+  mutate(
+    ln_wage = lnw, # Wage as adult,
+    age = age, # Age
+    yrs_educ = s, # Years of education,
+    qrt_birth = qob) # Quarter of birth.
+```
+]
+.panel[.panel-name[Naïv comparison]
+.push-left[
+
+```r
+# Multiple OLS
+mult_OLS = lm_robust(ln_wage ~ yrs_educ + age,
+                     data = ak91)
+# Regression table
+screenreg(mult_OLS, include.ci = FALSE, digits = 3)
+# 
+# ===========================
+#              Model 1       
+# ---------------------------
+# (Intercept)       4.776 ***
+#                  (0.018)   
+# yrs_educ          0.071 ***
+#                  (0.000)   
+# age               0.005 ***
+#                  (0.000)   
+# ---------------------------
+# R^2               0.118    
+# Adj. R^2          0.118    
+# Num. obs.    329509        
+# RMSE              0.638    
+# ===========================
+# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
+```
+]]
+.panel[.panel-name[The first stage]
+.push-left[
+
+```r
+# Bivariate OLS
+frst_stage &lt;- lm_robust(yrs_educ ~ qrt_birth, 
+                       data = ak91)
+# Regression table
+screenreg(frst_stage, include.ci = FALSE, digits = 3)
+# 
+# ===========================
+#              Model 1       
+# ---------------------------
+# (Intercept)      12.641 ***
+#                  (0.014)   
+# qrt_birth         0.052 ***
+#                  (0.005)   
+# ---------------------------
+# R^2               0.000    
+# Adj. R^2          0.000    
+# Num. obs.    329509        
+# RMSE              3.281    
+# ===========================
+# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
+```
+]
+.push-right[
+&lt;img src="10-IV-2SLS_files/figure-html/first-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]]
+.panel[.panel-name[The reduced form]
+.push-left[
+
+```r
+# Bivariate OLS
+reduced_frm &lt;- lm_robust(ln_wage ~ qrt_birth, 
+                       data = ak91)
+# Regression table
+screenreg(reduced_frm, include.ci = FALSE, digits = 3)
+# 
+# ===========================
+#              Model 1       
+# ---------------------------
+# (Intercept)       5.887 ***
+#                  (0.003)   
+# qrt_birth         0.005 ***
+#                  (0.001)   
+# ---------------------------
+# R^2               0.000    
+# Adj. R^2          0.000    
+# Num. obs.    329509        
+# RMSE              0.679    
+# ===========================
+# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
+```
+]]
+.panel[.panel-name[IV]
+.left-column[
+
+```r
+iv &lt;- ivreg( # IV regression
+  ln_wage ~ yrs_educ | qrt_birth, 
+  data = ak91)
+
+screenreg( # Regression table
+  list(mult_OLS, frst_stage, 
+       reduced_frm, iv), 
+  include.ci = FALSE, digits = 3,
+  custom.model.names = 
+    c("OLS", "1st Stage", 
+      "Reduced Form", "IV"))
+```
+]
+.right-column[.font90[
+
+```
+# 
+# ===========================================================================
+#              OLS             1st Stage       Reduced Form    IV            
+# ---------------------------------------------------------------------------
+# (Intercept)       4.776 ***      12.641 ***       5.887 ***       4.633 ***
+#                  (0.018)         (0.014)         (0.003)         (0.250)   
+# yrs_educ          0.071 ***                                       0.099 ***
+#                  (0.000)                                         (0.020)   
+# age               0.005 ***                                                
+#                  (0.000)                                                   
+# qrt_birth                         0.052 ***       0.005 ***                
+#                                  (0.005)         (0.001)                   
+# ---------------------------------------------------------------------------
+# R^2               0.118           0.000           0.000           0.098    
+# Adj. R^2          0.118           0.000           0.000           0.098    
+# Num. obs.    329509          329509          329509          329509        
+# RMSE              0.638           3.281           0.679                    
+# ===========================================================================
+# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
+```
+`$$\text{IV} = \frac{\rho}{\phi} = \frac{0.005}{0.052} = 0.099$$`
+]]]]
+
+---
+class: inverse middle center
+
+# Two-stage Least Squares (2SLS)
+
+---
+
+---
+
+```r
+mod8 &lt;- ivreg(ln_wage ~ yrs_educ | qob, data = ak91)
+summary(mod8)
+# 
+# Call:
+# ivreg(formula = ln_wage ~ yrs_educ | qob, data = ak91)
+# 
+# Residuals:
+#     Min      1Q  Median      3Q     Max 
+# -8.9591 -0.2512  0.0702  0.3520  4.7994 
+# 
+# Coefficients:
+#             Estimate Std. Error t value Pr(&gt;|t|)    
+# (Intercept)   4.6329     0.2501   18.53   &lt;2e-16 ***
+# yrs_educ      0.0992     0.0196    5.07    4e-07 ***
+# 
+# Diagnostic tests:
+#                     df1    df2 statistic p-value    
+# Weak instruments      1 329507    100.65  &lt;2e-16 ***
+# Wu-Hausman            1 329506      2.14    0.14    
+# Sargan                0     NA        NA      NA    
+# ---
+# Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+# 
+# Residual standard error: 0.645 on 329507 degrees of freedom
+# Multiple R-Squared: 0.0985,	Adjusted R-squared: 0.0985 
+# Wald test: 25.7 on 1 and 329507 DF,  p-value: 4.05e-07
+```
+
+---
+# References
+
+.font80[
+Angrist, J. D. and A. B. Krueger (1991). "Does Compulsory School Attendance Affect Schooling and
+Earnings?*". In: _The Quarterly Journal of Economics_, pp. 979-1014.
+
+Karlson, K. and R. Landersø (2021). "The Making and Unmaking of Opportunity: Educational Mobility in
+20th Century-Denmark". In: _SSRN Electronic Journal_.
+]
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="../template/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightLanguage": "r",
+"highlightStyle": "zenburn",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"ratio": "16:9"
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
