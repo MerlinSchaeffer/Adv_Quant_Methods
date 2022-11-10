@@ -4,7 +4,7 @@
     <title>Instrument Variables II</title>
     <meta charset="utf-8" />
     <meta name="author" content="Merlin Schaeffer  Department of Sociology" />
-    <meta name="date" content="2022-11-07" />
+    <meta name="date" content="2022-11-10" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
     <script src="libs/tile-view/tile-view.js"></script>
@@ -27,7 +27,7 @@ class: center, middle, inverse, title-slide
 ### Merlin Schaeffer<br> Department of Sociology
 ]
 .date[
-### 2022-11-07
+### 2022-11-10
 ]
 
 ---
@@ -144,6 +144,7 @@ Under which assumptions is the quarter of birth a valid instrument for years of 
 
 .panelset[
 .panel[.panel-name[The data]
+.font80[
 
 ```r
 pacman::p_load(
@@ -157,21 +158,29 @@ pacman::p_load(
 
 # Load the data from the Quarter of Birth IV study
 data("ak91", package = "masteringmetrics")
-ak91 &lt;- ak91 %&gt;%
-  mutate(
-    ln_wage = lnw, # Wage as adult,
-    age = age, # Age
-    yrs_educ = s, # Years of education,
-    qrt_birth = qob) # Quarter of birth.
+ak91
+# # A tibble: 329,509 × 6
+#      lnw     s   yob   qob   sob   age
+#    &lt;dbl&gt; &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;int&gt; &lt;dbl&gt;
+#  1  5.79    12  1930     1    45    50
+#  2  5.95    11  1930     1    45    50
+#  3  5.32    12  1930     1    45    50
+#  4  5.60    12  1930     1    45    50
+#  5  6.07    12  1930     1    37    50
+#  6  5.79    11  1930     1    45    50
+#  7  6.39    11  1930     1    36    50
+#  8  6.05    12  1930     1    51    50
+#  9  5.35    11  1930     1    45    50
+# 10  5.26     7  1930     1    45    50
+# # … with 329,499 more rows
 ```
-]
+]]
 .panel[.panel-name[Naïv comparison]
 .push-left[
 
 ```r
 # Multiple OLS
-mult_OLS = lm_robust(ln_wage ~ yrs_educ + age,
-                     data = ak91)
+mult_OLS = lm_robust(lnw ~ s + age, data = ak91)
 # Regression table
 screenreg(mult_OLS, include.ci = FALSE, digits = 3)
 # 
@@ -180,7 +189,7 @@ screenreg(mult_OLS, include.ci = FALSE, digits = 3)
 # ---------------------------
 # (Intercept)       4.776 ***
 #                  (0.018)   
-# yrs_educ          0.071 ***
+# s                 0.071 ***
 #                  (0.000)   
 # age               0.005 ***
 #                  (0.000)   
@@ -192,14 +201,50 @@ screenreg(mult_OLS, include.ci = FALSE, digits = 3)
 # ===========================
 # *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
 ```
+]
+.push-right[
+&lt;img src="10-IV-2SLS_files/figure-html/naiv-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]]
+.panel[.panel-name[The reduced form/ITT]
+.push-left[
+
+```r
+# Bivariate OLS
+reduced_frm &lt;- lm_robust(lnw ~ qob, data = ak91)
+# Regression table
+screenreg(reduced_frm, include.ci = FALSE, digits = 3)
+# 
+# ===========================
+#              Model 1       
+# ---------------------------
+# (Intercept)       5.887 ***
+#                  (0.003)   
+# qob               0.005 ***
+#                  (0.001)   
+# ---------------------------
+# R^2               0.000    
+# Adj. R^2          0.000    
+# Num. obs.    329509        
+# RMSE              0.679    
+# ===========================
+# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
+```
+]
+.push-right[
+
+.push-left[
+&lt;img src="10-IV-2SLS_files/figure-html/reduced1-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
+.push-right[
+&lt;img src="10-IV-2SLS_files/figure-html/reduced2-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]]
+]
 .panel[.panel-name[The first stage]
 .push-left[
 
 ```r
 # Bivariate OLS
-frst_stage &lt;- lm_robust(yrs_educ ~ qrt_birth, 
-                       data = ak91)
+frst_stage &lt;- lm_robust(s ~ qob, data = ak91)
 # Regression table
 screenreg(frst_stage, include.ci = FALSE, digits = 3)
 # 
@@ -208,7 +253,7 @@ screenreg(frst_stage, include.ci = FALSE, digits = 3)
 # ---------------------------
 # (Intercept)      12.641 ***
 #                  (0.014)   
-# qrt_birth         0.052 ***
+# qob               0.052 ***
 #                  (0.005)   
 # ---------------------------
 # R^2               0.000    
@@ -220,41 +265,20 @@ screenreg(frst_stage, include.ci = FALSE, digits = 3)
 ```
 ]
 .push-right[
-&lt;img src="10-IV-2SLS_files/figure-html/first-1.png" width="100%" style="display: block; margin: auto;" /&gt;
-]]
-.panel[.panel-name[The reduced form]
-.push-left[
 
-```r
-# Bivariate OLS
-reduced_frm &lt;- lm_robust(ln_wage ~ qrt_birth, 
-                       data = ak91)
-# Regression table
-screenreg(reduced_frm, include.ci = FALSE, digits = 3)
-# 
-# ===========================
-#              Model 1       
-# ---------------------------
-# (Intercept)       5.887 ***
-#                  (0.003)   
-# qrt_birth         0.005 ***
-#                  (0.001)   
-# ---------------------------
-# R^2               0.000    
-# Adj. R^2          0.000    
-# Num. obs.    329509        
-# RMSE              0.679    
-# ===========================
-# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
-```
-]]
+.push-left[
+&lt;img src="10-IV-2SLS_files/figure-html/first1-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
+.push-right[
+&lt;img src="10-IV-2SLS_files/figure-html/first2-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]]]
 .panel[.panel-name[IV]
 .left-column[
 
 ```r
-iv &lt;- ivreg( # IV regression
-  ln_wage ~ yrs_educ | qrt_birth, 
-  data = ak91)
+*iv &lt;- ivreg( # IV (2SLS)
+* lnw ~ s | qob,
+* data = ak91)
 
 screenreg( # Regression table
   list(mult_OLS, frst_stage, 
@@ -274,11 +298,11 @@ screenreg( # Regression table
 # ---------------------------------------------------------------------------
 # (Intercept)       4.776 ***      12.641 ***       5.887 ***       4.633 ***
 #                  (0.018)         (0.014)         (0.003)         (0.250)   
-# yrs_educ          0.071 ***                                       0.099 ***
+# s                 0.071 ***                                       0.099 ***
 #                  (0.000)                                         (0.020)   
 # age               0.005 ***                                                
 #                  (0.000)                                                   
-# qrt_birth                         0.052 ***       0.005 ***                
+# qob                               0.052 ***       0.005 ***                
 #                                  (0.005)         (0.001)                   
 # ---------------------------------------------------------------------------
 # R^2               0.118           0.000           0.000           0.098    
@@ -296,38 +320,365 @@ class: inverse middle center
 
 # Two-stage Least Squares (2SLS)
 
----
+The Frisch-Waugh perspective on IV
 
 ---
+# The *first* stage
+
+.left-column[
+&lt;img src="10-IV-2SLS_files/figure-html/unnamed-chunk-13-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+
+&lt;img src="10-IV-2SLS_files/figure-html/unnamed-chunk-14-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
+
+.right-column[
 
 ```r
-mod8 &lt;- ivreg(ln_wage ~ yrs_educ | qob, data = ak91)
-summary(mod8)
-# 
-# Call:
-# ivreg(formula = ln_wage ~ yrs_educ | qob, data = ak91)
-# 
-# Residuals:
-#     Min      1Q  Median      3Q     Max 
-# -8.9591 -0.2512  0.0702  0.3520  4.7994 
-# 
-# Coefficients:
-#             Estimate Std. Error t value Pr(&gt;|t|)    
-# (Intercept)   4.6329     0.2501   18.53   &lt;2e-16 ***
-# yrs_educ      0.0992     0.0196    5.07    4e-07 ***
-# 
-# Diagnostic tests:
-#                     df1    df2 statistic p-value    
-# Weak instruments      1 329507    100.65  &lt;2e-16 ***
-# Wu-Hausman            1 329506      2.14    0.14    
-# Sargan                0     NA        NA      NA    
-# ---
-# Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-# 
-# Residual standard error: 0.645 on 329507 degrees of freedom
-# Multiple R-Squared: 0.0985,	Adjusted R-squared: 0.0985 
-# Wald test: 25.7 on 1 and 329507 DF,  p-value: 4.05e-07
+frst_stage &lt;- lm_robust(s ~ qob, data = ak91) # Bivariate OLS
+
+(ak91 &lt;- ak91 %&gt;% # Add predictions and residuals
+  add_predictions(frst_stage, data = .) %&gt;%
+  add_residuals(frst_stage, data = .) %&gt;%
+  rename(pred_s = pred, e_s = resid))
+# # A tibble: 329,509 × 8
+#      lnw     s   yob   qob   sob   age pred_s    e_s
+#    &lt;dbl&gt; &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;int&gt; &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;
+#  1  5.79    12  1930     1    45    50   12.7 -0.692
+#  2  5.95    11  1930     1    45    50   12.7 -1.69 
+#  3  5.32    12  1930     1    45    50   12.7 -0.692
+#  4  5.60    12  1930     1    45    50   12.7 -0.692
+#  5  6.07    12  1930     1    37    50   12.7 -0.692
+#  6  5.79    11  1930     1    45    50   12.7 -1.69 
+#  7  6.39    11  1930     1    36    50   12.7 -1.69 
+#  8  6.05    12  1930     1    51    50   12.7 -0.692
+#  9  5.35    11  1930     1    45    50   12.7 -1.69 
+# 10  5.26     7  1930     1    45    50   12.7 -5.69 
+# # … with 329,499 more rows
 ```
+
+.content-box-green[.font80[
+Which is unconfounded, the predicted education `pred_s` or the residuals `e_s`?
+]]]
+
+---
+# The *second* stage
+
+.push-left[
+&lt;img src="10-IV-2SLS_files/figure-html/unnamed-chunk-16-1.png" width="50%" style="display: block; margin: auto;" /&gt;
+
+- An instrument `\(Z_{i}\)` induces random variation into the treatment `\(D\)`. 
+- We can measure that random variation, by taking the predictions `\(\hat{D}_{i}\)` from the first stage:
+  `$$D_{i} = \alpha_1 + \phi Z_{i} + e_{i}.$$`
+- We then use `\(\hat{D}_{i}\)` as predictor in the second stage:
+`$$Y_{i} = \alpha_2 + \lambda_{\text{2SLS}}\hat{D}_{i} + e_{i}.$$`
+]
+
+.push-right[
+
+```r
+# Bivariate OLS
+scnd_stage &lt;- lm_robust(lnw ~ pred_s, data = ak91) 
+
+*iv &lt;- ivreg(lnw ~ s | qob, data = ak91) # IV (2SLS)
+
+screenreg(list(scnd_stage, iv), # Regression table
+  include.ci = FALSE, digits = 3,
+  custom.model.names = c("2nd Stage","IV"))
+# 
+# ===========================================
+#              2nd Stage       IV            
+# -------------------------------------------
+# (Intercept)       4.633 ***       4.633 ***
+#                  (0.263)         (0.250)   
+# pred_s            0.099 ***                
+#                  (0.021)                   
+# s                                 0.099 ***
+#                                  (0.020)   
+# -------------------------------------------
+# R^2               0.000           0.098    
+# Adj. R^2          0.000           0.098    
+# Num. obs.    329509          329509        
+# RMSE              0.679                    
+# ===========================================
+# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
+```
+]
+
+---
+# Two perspectives on IV
+
+.push-left[
+.content-box-blue[
+.center[**Wald IV estimator**]
+
+`$$\lambda_{\text{Wald}} = \frac{\rho}{\phi}$$`
+&lt;br&gt;
+*Conceptually*: Weigh-up the ITT `\(\rho\)` on `\(Y\)` to get the causal effect of `\(D\)` among those who actually received `\(D\)`.
+]]
+
+.push-right[
+.content-box-green[
+.center[**2SLS IV estimator**]
+
+`$$Y_{i} = \alpha + \lambda_{\text{2SLS}}\hat{D}_{i} + e_{i}$$`
+&lt;br&gt;
+&lt;br&gt;
+*Conceptually*: Use (first stage) OLS to identify random variation in `\(D\)`. Use that random variation in a second (stage) OLS to estimate the causal effect of `\(D\)` on `\(Y\)`.
+
+*Advantage*: We can use several instruments to identify as much random variation in `\(D\)` as possible!
+]]
+
+---
+# Remember the exclusion restriction!
+
+.left-column[
+&lt;img src="10-IV-2SLS_files/figure-html/DAG_5-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
+
+.right-column[
+&lt;img src="./img/Buckles1.png" width="100%" style="display: block; margin: auto;" /&gt;
+.backgrnote[.center[*Source:* Buckles and Hungerman (2013)]]
+]
+
+---
+# Remember the exclusion restriction!
+
+.left-column[
+&lt;img src="10-IV-2SLS_files/figure-html/unnamed-chunk-19-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
+
+.right-column[
+&lt;img src="./img/Buckles2.png" width="100%" style="display: block; margin: auto;" /&gt;
+.backgrnote[.center[*Source:* Buckles and Hungerman (2013)]]
+]
+
+---
+class: inverse middle center
+# Break
+
+&lt;iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+
+---
+class: middle clear
+
+.left-column[
+&lt;img src="https://d1rytvr7gmk1sx.cloudfront.net/wp-content/uploads/2022/08/learn-coding-automation-just.jpeg?x27457" width="100%" style="display: block; margin: auto;" /&gt;
+
+&lt;iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+]
+
+.right-column[
+&lt;br&gt;
+&lt;iframe src='exercise1.html' width='1000' height='600' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+]
+
+---
+class: inverse
+# Does reading improve kids school performance?
+
+.push-left[
+&lt;img src="https://ak.picdn.net/shutterstock/videos/1053393338/thumb/4.jpg?ip=x480" width="80%" style="display: block; margin: auto;" /&gt;&lt;img src="https://images.pond5.com/siblings-reading-book-flashlight-footage-193332935_iconl.jpeg" width="80%" style="display: block; margin: auto;" /&gt;
+]
+
+.push-right[
+&lt;img src="10-IV-2SLS_files/figure-html/DAG_Ea1-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+layout: true
+# Ea Blaabæk (2020) had an idea
+
+.push-left[
+&lt;img src="./img/Ea1.png" width="70%" style="display: block; margin: auto;" /&gt;
+
+&lt;img src="10-IV-2SLS_files/figure-html/DAG_Ea2-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
+.push-right[
+&lt;iframe src='https://www.sciencedirect.com/science/article/pii/S0276562420300159' width='600' height='500' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+]
+
+---
+
+.push-right[
+&lt;img src="./img/Ea2.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
+.push-right[
+&lt;img src="./img/Ea3.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+layout: false
+class: inverse middle center
+# Does State Repression and Surveillance Spark Resistance?
+
+&lt;iframe width="560" height="315" src="https://www.youtube.com/embed/YsShZNHmpGE" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen&gt;&lt;/iframe&gt;
+
+---
+layout: true
+# The end of communism in Poland
+
+---
+
+.left-column[
+&lt;img src="https://wandanowicka.pl/wp-content/uploads/2020/08/upadek-solidarnosci.jpg" width="85%" style="display: block; margin: auto;" /&gt;&lt;img src="https://dzieje.pl/sites/default/files/styles/open_article_750x0_/public/201204/solidarnosc_tkk2.jpg?itok=YpPQeO8f" width="85%" style="display: block; margin: auto;" /&gt;&lt;img src="https://edupolis.pl/wp-content/uploads/2021/05/Solidarnosc.jpg" width="85%" style="display: block; margin: auto;" /&gt;
+
+
+]
+
+.right-column[.font80[
+&gt; Following World War II, in 1947 the Soviet Union imposed a Marxist–Leninist government in Poland, called the Polish People’s Republic (henceforth, PPR). [...] 
+
+&gt; To avert open resistance, the PPR established the Department of Security (Urzad Bezpieczeństwa, UB; since 1956 Służba Bezpieczeństwa, SB), a secret police and espionage agency. [..] 
+
+&gt; By the early 1980s, protests organized by workers of state firms led to the creation of the Independent and Self-Governing Trade Union Solidarity (henceforth, Solidarność), the first independent trade union in Communist Poland. Solidarność created a broad, nonviolent, anticommunist social movement. The following years saw bitter fights, and the PPR was ultimately forced to hold (semi-)free elections in 1989.
+
+&gt; Hager and Krakowski (2022, page 567)
+]]
+---
+
+.left-column[
+&lt;img src="10-IV-2SLS_files/figure-html/DAG_Hager-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+&lt;img src="https://wandanowicka.pl/wp-content/uploads/2020/08/upadek-solidarnosci.jpg" width="85%" style="display: block; margin: auto;" /&gt;&lt;img src="https://edupolis.pl/wp-content/uploads/2021/05/Solidarnosc.jpg" width="85%" style="display: block; margin: auto;" /&gt;
+]
+
+.right-column[
+&lt;img src="https://static.cambridge.org/binary/version/id/urn:cambridge.org:id:binary:20220425072255995-0362:S0003055421000770:S0003055421000770_fig1.png" width="40%" style="display: block; margin: auto;" /&gt;
+
+.font70[
+&gt; To obtain these data, we digitized archival sources from the Institute of National Remembrance (IPN, Polish acronym), which lists all secret police officers who operated in the region. [...] The resulting variable, *Surveillance*, indicates the number of officers per year and municipality from 1945 to 1989. 
+
+&gt; Hager and Krakowski (2022, page 567)
+]]
+
+---
+
+.left-column[
+&lt;img src="10-IV-2SLS_files/figure-html/unnamed-chunk-29-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+&lt;img src="https://wandanowicka.pl/wp-content/uploads/2020/08/upadek-solidarnosci.jpg" width="85%" style="display: block; margin: auto;" /&gt;&lt;img src="https://edupolis.pl/wp-content/uploads/2021/05/Solidarnosc.jpg" width="85%" style="display: block; margin: auto;" /&gt;
+]
+
+.right-column[
+&lt;img src="https://static.cambridge.org/binary/version/id/urn:cambridge.org:id:binary-alt:20220425072512-79013-optimisedImage-S0003055421000770_fig2.jpg" width="40%" style="display: block; margin: auto;" /&gt;
+
+.font70[
+&gt; We measure antiregime protests by geocoding all Solidarność strikes from 1980 to 1986 (Table A.1). Four reasons make the strikes a particularly relevant outcome. First and most important, Solidarność ultimately led to the toppling of the PPR. [...] To measure Solidarność strikes, we consulted archival sources by Niezależny Samorządny Zwiazek Zawodowy (NSZZ) Solidarność 1980–1989.
+
+&gt; Hager and Krakowski (2022, page 568)
+
+]]
+
+---
+
+.left-column[
+&lt;img src="10-IV-2SLS_files/figure-html/unnamed-chunk-32-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+&lt;img src="https://wandanowicka.pl/wp-content/uploads/2020/08/upadek-solidarnosci.jpg" width="85%" style="display: block; margin: auto;" /&gt;&lt;img src="https://edupolis.pl/wp-content/uploads/2021/05/Solidarnosc.jpg" width="85%" style="display: block; margin: auto;" /&gt;
+]
+
+.right-column[
+.center[Multiple OLS]
+&lt;img src="./img/Hager1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
+.left-column[
+&lt;img src="10-IV-2SLS_files/figure-html/DAG_Hager2-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+&lt;img src="https://wandanowicka.pl/wp-content/uploads/2020/08/upadek-solidarnosci.jpg" width="70%" style="display: block; margin: auto;" /&gt;&lt;img src="https://edupolis.pl/wp-content/uploads/2021/05/Solidarnosc.jpg" width="70%" style="display: block; margin: auto;" /&gt;
+
+.content-box-green[
+Why might these results not be causal?
+]
+]
+
+.right-column[
+.center[Multiple OLS]
+&lt;img src="./img/Hager1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
+.left-column[
+&lt;img src="10-IV-2SLS_files/figure-html/unnamed-chunk-37-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+&lt;img src="https://wandanowicka.pl/wp-content/uploads/2020/08/upadek-solidarnosci.jpg" width="70%" style="display: block; margin: auto;" /&gt;&lt;img src="https://edupolis.pl/wp-content/uploads/2021/05/Solidarnosc.jpg" width="70%" style="display: block; margin: auto;" /&gt;
+
+.content-box-green[
+Why might these results not be causal?
+]
+]
+
+.right-column[
+.center[Multiple OLS]
+&lt;img src="./img/Hager3.png" width="23%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+layout: true
+class: clear
+# Hager and Krakowski (2022) had an idea
+
+---
+
+.push-left[
+&lt;img src="https://images.fineartamerica.com/images/artworkimages/mediumlarge/2/the-confession-1838-detail-giuseppe-molteni.jpg" width="70%" style="display: block; margin: auto;" /&gt;
+
+.font70[
+&gt; Beginning in 1946, the Polish People’s Republic made a concerted effort to turn Catholic priests into agents of the secret police. [...] Important for our case, corrupted priests were crucial in the regime’s attempt to recruit additional spies and agents. The priests used confessions to collect compromising information on parishioners (Żurek Reference Żurek2009, 22, 66, 68).
+
+&gt; Hager and Krakowski (2022, page 571)
+
+]]
+
+--
+
+.push-right[
+&lt;img src="./img/Hager2.png" width="100%" style="display: block; margin: auto;" /&gt;
+
+.font70[
+&gt; we exploit the fact that the placement of Catholic priests—who were then turned into spies—is arguably exogenous. To use corrupted priests as an instrumental variable for surveillance, we must invoke five assumptions. Below, we focus on two particularly important assumptions: exogeneity and excludability.
+
+&gt; Hager and Krakowski (2022, page 571)
+]]
+
+---
+
+.push-right[
+&lt;img src="./img/Hager2.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
+
+.push-left[
+&lt;img src="./img/Hager4.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+.font70[
+&gt; Important for our case, corrupted priests were crucial in the regime’s attempt to recruit additional spies and agents.
+
+&gt; Hager and Krakowski (2022, page 571)
+
+]]
+
+---
+
+.push-right[
+&lt;img src="./img/Hager2.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
+
+.push-left[
+.center[IV / Second stage]
+&lt;img src="./img/Hager5.png" width="80%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+layout: false
 
 ---
 # References
@@ -335,6 +686,15 @@ summary(mod8)
 .font80[
 Angrist, J. D. and A. B. Krueger (1991). "Does Compulsory School Attendance Affect Schooling and
 Earnings?*". In: _The Quarterly Journal of Economics_, pp. 979-1014.
+
+Blaabæk, E. H. (2020). "Reading when the sun does not shine: The effect of reading on children’s
+academic performance". In: _Research in Social Stratification and Mobility_, p. 100485.
+
+Buckles, K. S. and D. M. Hungerman (2013). "Season of Birth and Later Outcomes: Old Questions, New
+Answers". In: _The Review of Economics and Statistics_, pp. 711-724.
+
+Hager, A. and K. Krakowski (2022). "Does State Repression Spark Protests? Evidence from Secret Police
+Surveillance in Communist Poland". In: _American Political Science Review_, pp. 564-579.
 
 Karlson, K. and R. Landersø (2021). "The Making and Unmaking of Opportunity: Educational Mobility in
 20th Century-Denmark". In: _SSRN Electronic Journal_.

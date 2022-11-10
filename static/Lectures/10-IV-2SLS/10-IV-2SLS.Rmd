@@ -275,6 +275,7 @@ Under which assumptions is the quarter of birth a valid instrument for years of 
 
 .panelset[
 .panel[.panel-name[The data]
+.font80[
 ```{r}
 pacman::p_load(
   tidyverse, # Data manipulation,
@@ -287,58 +288,85 @@ pacman::p_load(
 
 # Load the data from the Quarter of Birth IV study
 data("ak91", package = "masteringmetrics")
-ak91 <- ak91 %>%
-  mutate(
-    ln_wage = lnw, # Wage as adult,
-    age = age, # Age
-    yrs_educ = s, # Years of education,
-    qrt_birth = qob) # Quarter of birth.
+ak91
 ```
-]
+]]
 .panel[.panel-name[Naïv comparison]
 .push-left[
 ```{r}
 # Multiple OLS
-mult_OLS = lm_robust(ln_wage ~ yrs_educ + age,
-                     data = ak91)
+mult_OLS = lm_robust(lnw ~ s + age, data = ak91)
 # Regression table
 screenreg(mult_OLS, include.ci = FALSE, digits = 3)
 ```
+]
+.push-right[
+```{r naiv, out.width='100%', fig.height = 4, fig.width = 5, results = FALSE, echo = FALSE}
+ggplot(data = ak91, aes(y = lnw, x = s)) +
+  geom_jitter(alpha = 1/10, width = 0.1, height = 0) +
+  geom_smooth(method = "lm", SE = FALSE) +
+  theme_minimal()
+```
 ]]
+.panel[.panel-name[The reduced form/ITT]
+.push-left[
+```{r}
+# Bivariate OLS
+reduced_frm <- lm_robust(lnw ~ qob, data = ak91)
+# Regression table
+screenreg(reduced_frm, include.ci = FALSE, digits = 3)
+```
+]
+.push-right[
+
+.push-left[
+```{r reduced1, out.width='100%', fig.height = 4, fig.width = 5, results = FALSE, echo = FALSE}
+ggplot(data = ak91, aes(y = lnw, x = qob)) +
+  geom_jitter(alpha = 1/10, width = 0.1, height = 0.2) +
+  geom_smooth(method = "lm", SE = FALSE) +
+  theme_minimal()
+```
+]
+.push-right[
+```{r reduced2, out.width='100%', fig.height = 4, fig.width = 5, results = FALSE, echo = FALSE}
+ggplot(data = ak91, aes(y = lnw, x = qob)) +
+  geom_smooth(method = "lm") +
+  theme_minimal()
+```
+]]
+]
 .panel[.panel-name[The first stage]
 .push-left[
 ```{r}
 # Bivariate OLS
-frst_stage <- lm_robust(yrs_educ ~ qrt_birth, 
-                       data = ak91)
+frst_stage <- lm_robust(s ~ qob, data = ak91)
 # Regression table
 screenreg(frst_stage, include.ci = FALSE, digits = 3)
 ```
 ]
 .push-right[
-```{r first, out.width='100%', fig.height = 4, fig.width = 5, results = FALSE, echo = FALSE}
-ggplot(data = ak91, aes( y = yrs_educ, x = qrt_birth)) +
+
+.push-left[
+```{r first1, out.width='100%', fig.height = 4, fig.width = 5, results = FALSE, echo = FALSE}
+ggplot(data = ak91, aes(y = s, x = qob)) +
   geom_jitter(alpha = 1/10, width = 0.1, height = 0.2) +
   geom_smooth(method = "lm", SE = FALSE) +
   theme_minimal()
 ```
-]]
-.panel[.panel-name[The reduced form]
-.push-left[
-```{r}
-# Bivariate OLS
-reduced_frm <- lm_robust(ln_wage ~ qrt_birth, 
-                       data = ak91)
-# Regression table
-screenreg(reduced_frm, include.ci = FALSE, digits = 3)
+]
+.push-right[
+```{r first2, out.width='100%', fig.height = 4, fig.width = 5, results = FALSE, echo = FALSE}
+ggplot(data = ak91, aes(y = s, x = qob)) +
+  geom_smooth(method = "lm", SE = FALSE) +
+  theme_minimal()
 ```
-]]
+]]]
 .panel[.panel-name[IV]
 .left-column[
 ```{r iv, eval  = FALSE}
-iv <- ivreg( # IV regression
-  ln_wage ~ yrs_educ | qrt_birth, 
-  data = ak91)
+iv <- ivreg( # IV (2SLS) #<<
+  lnw ~ s | qob, #<<
+  data = ak91) #<<
 
 screenreg( # Regression table
   list(mult_OLS, frst_stage, 
@@ -353,7 +381,7 @@ screenreg( # Regression table
 ```{r ref.label = "iv", echo = FALSE}
 
 ```
-$$\text{IV} = \frac{\rho}{\phi} = \frac{`r coef(reduced_frm)["qrt_birth"]`}{`r coef(frst_stage)["qrt_birth"]`} = `r coef(reduced_frm)["qrt_birth"] / coef(frst_stage)["qrt_birth"]`$$
+$$\text{IV} = \frac{\rho}{\phi} = \frac{`r coef(reduced_frm)["qob"]`}{`r coef(frst_stage)["qob"]`} = `r coef(reduced_frm)["qob"] / coef(frst_stage)["qob"]`$$
 ]]]]
 
 ---
@@ -361,13 +389,517 @@ class: inverse middle center
 
 # Two-stage Least Squares (2SLS)
 
----
+The Frisch-Waugh perspective on IV
 
 ---
-```{r}
-mod8 <- ivreg(ln_wage ~ yrs_educ | qob, data = ak91)
-summary(mod8)
+# The *first* stage
+
+.left-column[
+```{tikz, ref.label = "DAG_4", echo = FALSE, out.width='100%'}
 ```
+
+```{r ref.label = "first1", out.width='100%', fig.height = 4, fig.width = 5, results = FALSE, echo = FALSE}
+
+```
+]
+
+.right-column[
+```{r}
+frst_stage <- lm_robust(s ~ qob, data = ak91) # Bivariate OLS
+
+(ak91 <- ak91 %>% # Add predictions and residuals
+  add_predictions(frst_stage, data = .) %>%
+  add_residuals(frst_stage, data = .) %>%
+  rename(pred_s = pred, e_s = resid))
+```
+
+.content-box-green[.font80[
+Which is unconfounded, the predicted education `pred_s` or the residuals `e_s`?
+]]]
+
+---
+# The *second* stage
+
+.push-left[
+```{tikz, ref.label = "DAG_4", echo = FALSE, out.width='50%'}
+```
+
+- An instrument $Z_{i}$ induces random variation into the treatment $D$. 
+- We can measure that random variation, by taking the predictions $\hat{D}_{i}$ from the first stage:
+  $$D_{i} = \alpha_1 + \phi Z_{i} + e_{i}.$$
+- We then use $\hat{D}_{i}$ as predictor in the second stage:
+$$Y_{i} = \alpha_2 + \lambda_{\text{2SLS}}\hat{D}_{i} + e_{i}.$$
+]
+
+.push-right[
+```{r}
+# Bivariate OLS
+scnd_stage <- lm_robust(lnw ~ pred_s, data = ak91) 
+
+iv <- ivreg(lnw ~ s | qob, data = ak91) # IV (2SLS) #<< 
+
+screenreg(list(scnd_stage, iv), # Regression table
+  include.ci = FALSE, digits = 3,
+  custom.model.names = c("2nd Stage","IV"))
+```
+]
+
+---
+# Two perspectives on IV
+
+.push-left[
+.content-box-blue[
+.center[**Wald IV estimator**]
+
+$$\lambda_{\text{Wald}} = \frac{\rho}{\phi}$$
+<br>
+*Conceptually*: Weigh-up the ITT $\rho$ on $Y$ to get the causal effect of $D$ among those who actually received $D$.
+]]
+
+.push-right[
+.content-box-green[
+.center[**2SLS IV estimator**]
+
+$$Y_{i} = \alpha + \lambda_{\text{2SLS}}\hat{D}_{i} + e_{i}$$
+<br>
+<br>
+*Conceptually*: Use (first stage) OLS to identify random variation in $D$. Use that random variation in a second (stage) OLS to estimate the causal effect of $D$ on $Y$.
+
+*Advantage*: We can use several instruments to identify as much random variation in $D$ as possible!
+]]
+
+---
+# Remember the exclusion restriction!
+
+.left-column[
+```{tikz, DAG_5, echo = FALSE, out.width='100%'}
+\usetikzlibrary{shapes,decorations,arrows,calc,arrows.meta,fit,positioning,quotes}
+\tikzset{
+  -Latex,auto,node distance =1 cm and 1 cm,semithick,
+  state/.style ={ellipse, draw, minimum width = 0.7 cm},
+  point/.style = {circle, draw, inner sep=0.04cm,fill,node contents={}},
+  bidirected/.style={Latex-Latex,dashed},
+  el/.style = {inner sep=2pt, align=left, sloped}
+}
+
+\begin{tikzpicture}
+\sffamily
+\node[state, align = center] (1) at (0,0) {Education};
+\node[state, align = center] (2) [right = of 1] {\$};
+\node[state, align = center] (3) [dashed, red, above = of 1] {Parental \\ education};
+\node[state, align = center] (4) [dashed, gray, below = of 1] {Cognitive \\ ability};
+\node[state, align = center] (5) [red, left = of 1] {Quarter of \\ birth};
+
+\path (1) edge (2);
+\path (3) edge [dashed, red] (2);
+\path (3) edge [dashed, red] (5);
+\path (4) edge [dashed, gray] (2);
+\path (3) edge [dashed, red] (1);
+\path (4) edge [dashed, gray] (1);
+\path (5) edge [red] (1);
+\end{tikzpicture}
+```
+]
+
+.right-column[
+```{r, echo = FALSE, out.width='100%', fig.align='center'}
+knitr::include_graphics('./img/Buckles1.png')
+```
+.backgrnote[.center[*Source:* `r Citet(myBib, "buckles_season_2013")`]]
+]
+
+---
+# Remember the exclusion restriction!
+
+.left-column[
+```{tikz, ref.label = "DAG_5", echo = FALSE, out.width='100%'}
+
+```
+]
+
+.right-column[
+```{r, echo = FALSE, out.width='100%', fig.align='center'}
+knitr::include_graphics('./img/Buckles2.png')
+```
+.backgrnote[.center[*Source:* `r Citet(myBib, "buckles_season_2013")`]]
+]
+
+---
+class: inverse middle center
+# Break
+
+<iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'></iframe>
+
+---
+class: middle clear
+
+.left-column[
+```{r, echo = FALSE, out.width='100%'}
+knitr::include_graphics('https://d1rytvr7gmk1sx.cloudfront.net/wp-content/uploads/2022/08/learn-coding-automation-just.jpeg?x27457')
+```
+
+<iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'></iframe>
+]
+
+.right-column[
+<br>
+<iframe src='exercise1.html' width='1000' height='600' frameborder='0' scrolling='yes'></iframe>
+]
+
+---
+class: inverse
+# Does reading improve kids school performance?
+
+.push-left[
+```{r, echo = FALSE, out.width='80%'}
+knitr::include_graphics('https://ak.picdn.net/shutterstock/videos/1053393338/thumb/4.jpg?ip=x480')
+knitr::include_graphics('https://images.pond5.com/siblings-reading-book-flashlight-footage-193332935_iconl.jpeg')
+```
+]
+
+.push-right[
+```{tikz, DAG_Ea1, echo = FALSE, out.width='100%'}
+\usetikzlibrary{shapes,decorations,arrows,calc,arrows.meta,fit,positioning,quotes}
+\tikzset{
+  -Latex,auto,node distance =1 cm and 1 cm,semithick,
+  state/.style ={ellipse, draw, minimum width = 0.7 cm},
+  point/.style = {circle, draw, inner sep=0.04cm,fill,node contents={}},
+  bidirected/.style={Latex-Latex,dashed},
+  el/.style = {inner sep=2pt, align=left, sloped}
+}
+
+\begin{tikzpicture}
+\sffamily
+\node[state, align = center] (1) at (0,0) {Reading};
+\node[state, align = center] (2) [right = of 1] {School \\ performance};
+\node[state, align = center] (3) [dashed, red, above = of 1] {Parental \\ background};
+\node[state, align = center] (4) [dashed, red, below = of 1] {Cognitive \\ ability};
+\node[state, align = center] (5) [dashed, red, left = of 3] {$C?$};
+
+\path (1) edge (2);
+\path (3) edge [dashed, red] (2);
+\path (4) edge [dashed, red] (2);
+\path (3) edge [dashed, red] (1);
+\path (4) edge [dashed, red] (1);
+\path (5) edge [dashed, red] (1);
+\path (5) edge [dashed, red] (2);
+\end{tikzpicture}
+```
+]
+
+---
+layout: true
+# Ea `r Citet(myBib, "blaabaek_reading_2020")` had an idea
+
+.push-left[
+```{r, echo = FALSE, out.width='70%'}
+knitr::include_graphics('./img/Ea1.png')
+```
+
+```{tikz, DAG_Ea2, echo = FALSE, out.width='80%'}
+\usetikzlibrary{shapes,decorations,arrows,calc,arrows.meta,fit,positioning,quotes}
+\tikzset{
+  -Latex,auto,node distance =1 cm and 1 cm,semithick,
+  state/.style ={ellipse, draw, minimum width = 0.7 cm},
+  point/.style = {circle, draw, inner sep=0.04cm,fill,node contents={}},
+  bidirected/.style={Latex-Latex,dashed},
+  el/.style = {inner sep=2pt, align=left, sloped}
+}
+
+\begin{tikzpicture}
+\sffamily
+\node[state, align = center] (1) at (0,0) {Reading \\ on day x};
+\node[state, align = center] (2) [right = of 1] {School \\ performance};
+\node[state, align = center] (3) [dashed, gray, above = of 1] {Parental \\ background};
+\node[state, align = center] (4) [dashed, gray, below = of 1] {Cognitive \\ ability};
+\node[state, align = center] (5) [dashed, gray, left = of 3] {$C?$};
+\node[state, align = center] (6) [red, left = of 1] {Weather \\ on day x};
+
+\path (1) edge (2);
+\path (3) edge [dashed, gray] (2);
+\path (4) edge [dashed, gray] (2);
+\path (3) edge [dashed, gray] (1);
+\path (4) edge [dashed, gray] (1);
+\path (5) edge [dashed, gray] (1);
+\path (5) edge [dashed, gray] (2);
+\path (6) edge [red] (1);
+\end{tikzpicture}
+```
+]
+
+---
+
+.push-right[
+<iframe src='https://www.sciencedirect.com/science/article/pii/S0276562420300159' width='600' height='500' frameborder='0' scrolling='yes'></iframe>
+]
+
+---
+
+.push-right[
+```{r, echo = FALSE, out.width='100%'}
+knitr::include_graphics('./img/Ea2.png')
+```
+]
+
+---
+
+.push-right[
+```{r, echo = FALSE, out.width='100%'}
+knitr::include_graphics('./img/Ea3.png')
+```
+]
+
+---
+layout: false
+class: inverse middle center
+# Does State Repression and Surveillance Spark Resistance?
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/YsShZNHmpGE" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+---
+layout: true
+# The end of communism in Poland
+
+---
+
+.left-column[
+```{r, echo = FALSE, out.width='85%'}
+knitr::include_graphics('https://wandanowicka.pl/wp-content/uploads/2020/08/upadek-solidarnosci.jpg')
+knitr::include_graphics('https://dzieje.pl/sites/default/files/styles/open_article_750x0_/public/201204/solidarnosc_tkk2.jpg?itok=YpPQeO8f')
+knitr::include_graphics('https://edupolis.pl/wp-content/uploads/2021/05/Solidarnosc.jpg')
+```
+
+
+]
+
+.right-column[.font80[
+> Following World War II, in 1947 the Soviet Union imposed a Marxist–Leninist government in Poland, called the Polish People’s Republic (henceforth, PPR). [...] 
+
+> To avert open resistance, the PPR established the Department of Security (Urzad Bezpieczeństwa, UB; since 1956 Służba Bezpieczeństwa, SB), a secret police and espionage agency. [..] 
+
+> By the early 1980s, protests organized by workers of state firms led to the creation of the Independent and Self-Governing Trade Union Solidarity (henceforth, Solidarność), the first independent trade union in Communist Poland. Solidarność created a broad, nonviolent, anticommunist social movement. The following years saw bitter fights, and the PPR was ultimately forced to hold (semi-)free elections in 1989.
+
+> `r Citet(myBib, "hager_does_2022", after = ", page 567")`
+]]
+---
+
+.left-column[
+```{tikz, DAG_Hager, echo = FALSE, out.width='80%'}
+\usetikzlibrary{shapes,decorations,arrows,calc,arrows.meta,fit,positioning,quotes}
+\tikzset{
+  -Latex,auto,node distance =1 cm and 1 cm,semithick,
+  state/.style ={ellipse, draw, minimum width = 0.7 cm},
+  point/.style = {circle, draw, inner sep=0.04cm,fill,node contents={}},
+  bidirected/.style={Latex-Latex,dashed},
+  el/.style = {inner sep=2pt, align=left, sloped}
+}
+
+\begin{tikzpicture}
+\sffamily
+\node[state, align = center] (1) at (0,0) {Surveillance};
+\node[state, align = center] (2) [right = of 1] {Resistance};
+
+\path (1) edge (2);
+\end{tikzpicture}
+```
+
+```{r, echo = FALSE, out.width='85%'}
+knitr::include_graphics('https://wandanowicka.pl/wp-content/uploads/2020/08/upadek-solidarnosci.jpg')
+knitr::include_graphics('https://edupolis.pl/wp-content/uploads/2021/05/Solidarnosc.jpg')
+```
+]
+
+.right-column[
+```{r, echo = FALSE, out.width='40%'}
+knitr::include_graphics('https://static.cambridge.org/binary/version/id/urn:cambridge.org:id:binary:20220425072255995-0362:S0003055421000770:S0003055421000770_fig1.png')
+```
+
+.font70[
+> To obtain these data, we digitized archival sources from the Institute of National Remembrance (IPN, Polish acronym), which lists all secret police officers who operated in the region. [...] The resulting variable, *Surveillance*, indicates the number of officers per year and municipality from 1945 to 1989. 
+
+> `r Citet(myBib, "hager_does_2022", after = ", page 567")`
+]]
+
+---
+
+.left-column[
+```{tikz, ref.label = "DAG_Hager", echo = FALSE, out.width='80%'}
+
+```
+
+```{r, echo = FALSE, out.width='85%'}
+knitr::include_graphics('https://wandanowicka.pl/wp-content/uploads/2020/08/upadek-solidarnosci.jpg')
+knitr::include_graphics('https://edupolis.pl/wp-content/uploads/2021/05/Solidarnosc.jpg')
+```
+]
+
+.right-column[
+```{r, echo = FALSE, out.width='40%'}
+knitr::include_graphics('https://static.cambridge.org/binary/version/id/urn:cambridge.org:id:binary-alt:20220425072512-79013-optimisedImage-S0003055421000770_fig2.jpg')
+```
+
+.font70[
+> We measure antiregime protests by geocoding all Solidarność strikes from 1980 to 1986 (Table A.1). Four reasons make the strikes a particularly relevant outcome. First and most important, Solidarność ultimately led to the toppling of the PPR. [...] To measure Solidarność strikes, we consulted archival sources by Niezależny Samorządny Zwiazek Zawodowy (NSZZ) Solidarność 1980–1989.
+
+> `r Citet(myBib, "hager_does_2022", after = ", page 568")`
+
+]]
+
+---
+
+.left-column[
+```{tikz, ref.label = "DAG_Hager", echo = FALSE, out.width='80%'}
+
+```
+
+```{r, echo = FALSE, out.width='85%'}
+knitr::include_graphics('https://wandanowicka.pl/wp-content/uploads/2020/08/upadek-solidarnosci.jpg')
+knitr::include_graphics('https://edupolis.pl/wp-content/uploads/2021/05/Solidarnosc.jpg')
+```
+]
+
+.right-column[
+.center[Multiple OLS]
+```{r, echo = FALSE, out.width='100%'}
+knitr::include_graphics('./img/Hager1.png')
+```
+]
+
+---
+
+.left-column[
+```{tikz, DAG_Hager2, echo = FALSE, out.width='80%'}
+\usetikzlibrary{shapes,decorations,arrows,calc,arrows.meta,fit,positioning,quotes}
+\tikzset{
+  -Latex,auto,node distance =1 cm and 1 cm,semithick,
+  state/.style ={ellipse, draw, minimum width = 0.7 cm},
+  point/.style = {circle, draw, inner sep=0.04cm,fill,node contents={}},
+  bidirected/.style={Latex-Latex,dashed},
+  el/.style = {inner sep=2pt, align=left, sloped}
+}
+
+\begin{tikzpicture}
+\sffamily
+\node[state, align = center] (1) at (0,0) {Surveillance};
+\node[state, align = center] (2) [right = of 1] {Resistance};
+\node[state, align = center] (3) [red, dashed, above = of 1] {$C?$};
+
+\path (1) edge (2);
+\path (3) edge [red, dashed] (1);
+\path (3) edge [red, dashed] (2);
+\end{tikzpicture}
+```
+
+```{r, echo = FALSE, out.width='70%'}
+knitr::include_graphics('https://wandanowicka.pl/wp-content/uploads/2020/08/upadek-solidarnosci.jpg')
+knitr::include_graphics('https://edupolis.pl/wp-content/uploads/2021/05/Solidarnosc.jpg')
+```
+
+.content-box-green[
+Why might these results not be causal?
+]
+]
+
+.right-column[
+.center[Multiple OLS]
+```{r, echo = FALSE, out.width='100%'}
+knitr::include_graphics('./img/Hager1.png')
+```
+]
+
+---
+
+.left-column[
+```{tikz, ref.label = "DAG_Hager2", echo = FALSE, out.width='80%'}
+
+```
+
+```{r, echo = FALSE, out.width='70%'}
+knitr::include_graphics('https://wandanowicka.pl/wp-content/uploads/2020/08/upadek-solidarnosci.jpg')
+knitr::include_graphics('https://edupolis.pl/wp-content/uploads/2021/05/Solidarnosc.jpg')
+```
+
+.content-box-green[
+Why might these results not be causal?
+]
+]
+
+.right-column[
+.center[Multiple OLS]
+```{r, echo = FALSE, out.width='23%'}
+knitr::include_graphics('./img/Hager3.png')
+```
+]
+
+---
+layout: true
+class: clear
+# `r Citet(myBib, "hager_does_2022")` had an idea
+
+---
+
+.push-left[
+```{r, echo = FALSE, out.width='70%'}
+knitr::include_graphics('https://images.fineartamerica.com/images/artworkimages/mediumlarge/2/the-confession-1838-detail-giuseppe-molteni.jpg')
+```
+
+.font70[
+> Beginning in 1946, the Polish People’s Republic made a concerted effort to turn Catholic priests into agents of the secret police. [...] Important for our case, corrupted priests were crucial in the regime’s attempt to recruit additional spies and agents. The priests used confessions to collect compromising information on parishioners (Żurek Reference Żurek2009, 22, 66, 68).
+
+> `r Citet(myBib, "hager_does_2022", after = ", page 571")`
+
+]]
+
+--
+
+.push-right[
+```{r, echo = FALSE, out.width='100%'}
+knitr::include_graphics('./img/Hager2.png')
+```
+
+.font70[
+> we exploit the fact that the placement of Catholic priests—who were then turned into spies—is arguably exogenous. To use corrupted priests as an instrumental variable for surveillance, we must invoke five assumptions. Below, we focus on two particularly important assumptions: exogeneity and excludability.
+
+> `r Citet(myBib, "hager_does_2022", after = ", page 571")`
+]]
+
+---
+
+.push-right[
+```{r, echo = FALSE, out.width='100%'}
+knitr::include_graphics('./img/Hager2.png')
+```
+]
+
+.push-left[
+```{r, echo = FALSE, out.width='80%'}
+knitr::include_graphics('./img/Hager4.png')
+```
+
+.font70[
+> Important for our case, corrupted priests were crucial in the regime’s attempt to recruit additional spies and agents.
+
+> `r Citet(myBib, "hager_does_2022", after = ", page 571")`
+
+]]
+
+---
+
+.push-right[
+```{r, echo = FALSE, out.width='100%'}
+knitr::include_graphics('./img/Hager2.png')
+```
+]
+
+.push-left[
+.center[IV / Second stage]
+```{r, echo = FALSE, out.width='80%'}
+knitr::include_graphics('./img/Hager5.png')
+```
+]
+
+---
+layout: false
 
 ---
 # References
