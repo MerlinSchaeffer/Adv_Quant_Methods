@@ -4,7 +4,7 @@
     <title>Instrument Variables II</title>
     <meta charset="utf-8" />
     <meta name="author" content="Merlin Schaeffer  Department of Sociology" />
-    <meta name="date" content="2022-11-10" />
+    <meta name="date" content="2022-11-14" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
     <script src="libs/tile-view/tile-view.js"></script>
@@ -27,7 +27,7 @@ class: center, middle, inverse, title-slide
 ### Merlin Schaeffer<br> Department of Sociology
 ]
 .date[
-### 2022-11-10
+### 2022-11-14
 ]
 
 ---
@@ -40,10 +40,17 @@ class: center, middle, inverse, title-slide
 &lt;img src="https://liu.se/-/media/istock-501261958.jpg?mw=1120&amp;mh=1120&amp;hash=DA8977CCE6A6E600AE80A40CFEE771C9" width="70%" style="display: block; margin: auto;" /&gt;
 
 ---
-class: inverse middle center
+class: inverse middle
 # Today's schedule
 
 1. Application of the day: Does education pay off?
+  + Recapitulation of IV.
+  + Two-stage least Squares (2SLS).
+  + Wald IV versus 2SLS IV Estimator.
+
+2. Two more IV applications:
+  1. Does reading improve Kids' school performance?
+  2. Does state surveillance spark resistance?
 
 ---
 class: inverse
@@ -407,12 +414,13 @@ screenreg(list(scnd_stage, iv), # Regression table
 ---
 # Two perspectives on IV
 
+&lt;img src="10-IV-2SLS_files/figure-html/DAG_IV-1.png" width="25%" style="display: block; margin: auto;" /&gt;
+
 .push-left[
 .content-box-blue[
 .center[**Wald IV estimator**]
 
 `$$\lambda_{\text{Wald}} = \frac{\rho}{\phi}$$`
-&lt;br&gt;
 *Conceptually*: Weigh-up the ITT `\(\rho\)` on `\(Y\)` to get the causal effect of `\(D\)` among those who actually received `\(D\)`.
 ]]
 
@@ -421,11 +429,28 @@ screenreg(list(scnd_stage, iv), # Regression table
 .center[**2SLS IV estimator**]
 
 `$$Y_{i} = \alpha + \lambda_{\text{2SLS}}\hat{D}_{i} + e_{i}$$`
-&lt;br&gt;
-&lt;br&gt;
 *Conceptually*: Use (first stage) OLS to identify random variation in `\(D\)`. Use that random variation in a second (stage) OLS to estimate the causal effect of `\(D\)` on `\(Y\)`.
 
 *Advantage*: We can use several instruments to identify as much random variation in `\(D\)` as possible!
+]]
+
+---
+# Instrument vs control variables
+
+.push-right[.content-box-blue[
+&lt;img src="10-IV-2SLS_files/figure-html/unnamed-chunk-18-1.png" width="50%" style="display: block; margin: auto;" /&gt;
+
+An instrument variable `\(Z\)` induces unconfounded random variation into `\(D\)`. 
+
+By using IV, we only keep that part of `\(D\)` that **_correlates_** with `\(Z\)`.
+]]
+
+.push-left[.content-box-red[
+&lt;img src="10-IV-2SLS_files/figure-html/DAG_FrischWaugh-1.png" width="29%" style="display: block; margin: auto;" /&gt;
+
+A confounder `\(C\)` induces omitted variable/selection bias into `\(D\)`. 
+
+By controlling for `\(C\)`, we only keep that part of `\(D\)` that **_does not correlate_** with `\(C\)`.
 ]]
 
 ---
@@ -444,13 +469,27 @@ screenreg(list(scnd_stage, iv), # Regression table
 # Remember the exclusion restriction!
 
 .left-column[
-&lt;img src="10-IV-2SLS_files/figure-html/unnamed-chunk-19-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="10-IV-2SLS_files/figure-html/unnamed-chunk-20-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]
 
 .right-column[
 &lt;img src="./img/Buckles2.png" width="100%" style="display: block; margin: auto;" /&gt;
 .backgrnote[.center[*Source:* Buckles and Hungerman (2013)]]
 ]
+
+---
+# Remember the exclusion restriction!
+
+.content-box-blue[
+&lt;img src="10-IV-2SLS_files/figure-html/DAG_IV2-1.png" width="25%" style="display: block; margin: auto;" /&gt;
+
+If the exclusion restriction does not hold, an instrument basically turns into a confounder. This has two implications:
+
+1. The instrument does not induce random variation but omitted variable bias (OVB) into `\(D\)`. Remember, a backdoor path is any path from `\(D\)` to `\(Y\)` that starts with an arrow into `\(D\)`.
+
+2. By using IV, we weigh up it's OVB by `\(\frac{1}{\phi}\)`!
+]
+
 
 ---
 class: inverse middle center
@@ -503,8 +542,11 @@ layout: true
 ---
 
 .push-right[
-&lt;img src="./img/Ea2.png" width="100%" style="display: block; margin: auto;" /&gt;
-]
+&lt;img src="./img/Ea2.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+.content-box-green[
+Exclusion assumption: Do you think the weather affects school performance *only* through it's effect on how much kids read?
+]]
 
 ---
 
@@ -515,7 +557,14 @@ layout: true
 ---
 layout: false
 class: inverse middle center
-# Does State Repression and Surveillance Spark Resistance?
+# Break
+
+&lt;iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+
+---
+layout: false
+class: inverse middle center
+# Does state surveillance spark resistance?
 
 &lt;iframe width="560" height="315" src="https://www.youtube.com/embed/YsShZNHmpGE" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen&gt;&lt;/iframe&gt;
 
@@ -560,7 +609,7 @@ layout: true
 ---
 
 .left-column[
-&lt;img src="10-IV-2SLS_files/figure-html/unnamed-chunk-29-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+&lt;img src="10-IV-2SLS_files/figure-html/unnamed-chunk-30-1.png" width="80%" style="display: block; margin: auto;" /&gt;
 
 &lt;img src="https://wandanowicka.pl/wp-content/uploads/2020/08/upadek-solidarnosci.jpg" width="85%" style="display: block; margin: auto;" /&gt;&lt;img src="https://edupolis.pl/wp-content/uploads/2021/05/Solidarnosc.jpg" width="85%" style="display: block; margin: auto;" /&gt;
 ]
@@ -578,7 +627,7 @@ layout: true
 ---
 
 .left-column[
-&lt;img src="10-IV-2SLS_files/figure-html/unnamed-chunk-32-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+&lt;img src="10-IV-2SLS_files/figure-html/unnamed-chunk-33-1.png" width="80%" style="display: block; margin: auto;" /&gt;
 
 &lt;img src="https://wandanowicka.pl/wp-content/uploads/2020/08/upadek-solidarnosci.jpg" width="85%" style="display: block; margin: auto;" /&gt;&lt;img src="https://edupolis.pl/wp-content/uploads/2021/05/Solidarnosc.jpg" width="85%" style="display: block; margin: auto;" /&gt;
 ]
@@ -608,7 +657,7 @@ Why might these results not be causal?
 ---
 
 .left-column[
-&lt;img src="10-IV-2SLS_files/figure-html/unnamed-chunk-37-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+&lt;img src="10-IV-2SLS_files/figure-html/unnamed-chunk-38-1.png" width="80%" style="display: block; margin: auto;" /&gt;
 
 &lt;img src="https://wandanowicka.pl/wp-content/uploads/2020/08/upadek-solidarnosci.jpg" width="70%" style="display: block; margin: auto;" /&gt;&lt;img src="https://edupolis.pl/wp-content/uploads/2021/05/Solidarnosc.jpg" width="70%" style="display: block; margin: auto;" /&gt;
 
@@ -630,18 +679,30 @@ class: clear
 ---
 
 .push-left[
-&lt;img src="https://images.fineartamerica.com/images/artworkimages/mediumlarge/2/the-confession-1838-detail-giuseppe-molteni.jpg" width="70%" style="display: block; margin: auto;" /&gt;
+&lt;img src="https://images.fineartamerica.com/images/artworkimages/mediumlarge/2/the-confession-1838-detail-giuseppe-molteni.jpg" width="60%" style="display: block; margin: auto;" /&gt;
 
 .font70[
-&gt; Beginning in 1946, the Polish People’s Republic made a concerted effort to turn Catholic priests into agents of the secret police. [...] Important for our case, corrupted priests were crucial in the regime’s attempt to recruit additional spies and agents. The priests used confessions to collect compromising information on parishioners (Żurek Reference Żurek2009, 22, 66, 68).
+&gt; Beginning in 1946, the Polish People’s Republic made a concerted effort to turn Catholic priests into agents of the secret police. [...] 
+
+&gt; Important for our case, corrupted priests were crucial in the regime’s attempt to recruit additional spies and agents. The priests used confessions to collect compromising information on parishioners (Żurek Reference Żurek2009, 22, 66, 68).
 
 &gt; Hager and Krakowski (2022, page 571)
 
 ]]
 
---
+---
 
-.push-right[
+.left-column[
+&lt;img src="https://images.fineartamerica.com/images/artworkimages/mediumlarge/2/the-confession-1838-detail-giuseppe-molteni.jpg" width="100%" style="display: block; margin: auto;" /&gt;
+
+.font70[
+&gt; Important for our case, corrupted priests were crucial in the regime’s attempt to recruit additional spies and agents.
+
+&gt; Hager and Krakowski (2022, page 571)
+
+]]
+
+.right-column[
 &lt;img src="./img/Hager2.png" width="100%" style="display: block; margin: auto;" /&gt;
 
 .font70[
@@ -652,19 +713,33 @@ class: clear
 
 ---
 
-.push-right[
+.right-column[
 &lt;img src="./img/Hager2.png" width="100%" style="display: block; margin: auto;" /&gt;
+
+.font70[
+&gt; we exploit the fact that the placement of Catholic priests—who were then turned into spies—is arguably exogenous. To use corrupted priests as an instrumental variable for surveillance, we must invoke five assumptions. Below, we focus on two particularly important assumptions: exogeneity and excludability.
+
+&gt; Hager and Krakowski (2022, page 571)
+]]
+
+.left-column[
+&lt;img src="https://static.cambridge.org/binary/version/id/urn:cambridge.org:id:binary-alt:20220425072512-26492-optimisedImage-S0003055421000770_tab2.jpg" width="70%" style="display: block; margin: auto;" /&gt;
 ]
 
-.push-left[
-&lt;img src="./img/Hager4.png" width="80%" style="display: block; margin: auto;" /&gt;
+---
 
+.push-right[
+&lt;img src="./img/Hager2.png" width="100%" style="display: block; margin: auto;" /&gt;
 .font70[
 &gt; Important for our case, corrupted priests were crucial in the regime’s attempt to recruit additional spies and agents.
 
 &gt; Hager and Krakowski (2022, page 571)
-
 ]]
+
+.push-left[
+&lt;img src="./img/Hager4.png" width="100%" style="display: block; margin: auto;" /&gt;
+
+]
 
 ---
 
@@ -673,12 +748,23 @@ class: clear
 ]
 
 .push-left[
-.center[IV / Second stage]
-&lt;img src="./img/Hager5.png" width="80%" style="display: block; margin: auto;" /&gt;
+&lt;img src="./img/Hager5.png" width="90%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
 layout: false
+class: inverse
+# Today's general lessons
+
+1. 2SLS first predicts that part of the treatment `\(D\)` that correlates with the instrument. Then it uses this part to predict the outcome of interest `\(Y\)`.
+2. Instrument variables and control variables both use multiple OLS and it's Frisch-Waugh logic. However, they use it in exactly the opposite way. An instrument identifies unconfounded random variation in the treatment `\(D\)`; IV only keeps that part of `\(D\)` that *correlates* with the instrument. A confounder induces selection bias into `\(D\)`. By controlling for it, we only use that part of `\(D\)` that *does not correlate* with it.
+3. If the exclusion restriction does not hold, an instrument basically turns into a confounder!
+
+---
+class: inverse
+# Today's (important) functions
+
+1. `ivreg()`: Estimate 2SLS regression.
 
 ---
 # References
@@ -699,6 +785,8 @@ Surveillance in Communist Poland". In: _American Political Science Review_, pp. 
 Karlson, K. and R. Landersø (2021). "The Making and Unmaking of Opportunity: Educational Mobility in
 20th Century-Denmark". In: _SSRN Electronic Journal_.
 ]
+
+
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="../template/remark-latest.min.js"></script>

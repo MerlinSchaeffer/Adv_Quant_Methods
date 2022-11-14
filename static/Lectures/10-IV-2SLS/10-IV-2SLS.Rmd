@@ -51,10 +51,17 @@ knitr::include_graphics('https://liu.se/-/media/istock-501261958.jpg?mw=1120&mh=
 ```
 
 ---
-class: inverse middle center
+class: inverse middle
 # Today's schedule
 
 1. Application of the day: Does education pay off?
+  + Recapitulation of IV.
+  + Two-stage least Squares (2SLS).
+  + Wald IV versus 2SLS IV Estimator.
+
+2. Two more IV applications:
+  1. Does reading improve Kids' school performance?
+  2. Does state surveillance spark resistance?
 
 ---
 class: inverse
@@ -447,12 +454,35 @@ screenreg(list(scnd_stage, iv), # Regression table
 ---
 # Two perspectives on IV
 
+```{tikz, DAG_IV, echo = FALSE, out.width='25%'}
+\usetikzlibrary{shapes,decorations,arrows,calc,arrows.meta,fit,positioning,quotes}
+\tikzset{
+  -Latex,auto,node distance =1 cm and 1 cm,semithick,
+  state/.style ={ellipse, draw, minimum width = 0.7 cm},
+  point/.style = {circle, draw, inner sep=0.04cm,fill,node contents={}},
+  bidirected/.style={Latex-Latex, dashed},
+  el/.style = {inner sep=2pt, align=left, sloped}
+}
+
+\begin{tikzpicture}
+\sffamily
+\node[state] (1) [red] at (0,0) {$Z$};
+\node[state] (2) [right = of 1] {$D$};
+\node[state] (3) [dashed, gray, above = of 2] {$C$};
+\node[state] (4) [right = of 2] {$Y$};
+
+\path (1) [red] edge ["$\phi$"] (2);
+\path (2) edge ["$\lambda$"](4);
+\path (3) edge [dashed, gray] (4);
+\path (3) edge [dashed, gray] (2);
+\end{tikzpicture}
+```
+
 .push-left[
 .content-box-blue[
 .center[**Wald IV estimator**]
 
 $$\lambda_{\text{Wald}} = \frac{\rho}{\phi}$$
-<br>
 *Conceptually*: Weigh-up the ITT $\rho$ on $Y$ to get the causal effect of $D$ among those who actually received $D$.
 ]]
 
@@ -461,11 +491,50 @@ $$\lambda_{\text{Wald}} = \frac{\rho}{\phi}$$
 .center[**2SLS IV estimator**]
 
 $$Y_{i} = \alpha + \lambda_{\text{2SLS}}\hat{D}_{i} + e_{i}$$
-<br>
-<br>
 *Conceptually*: Use (first stage) OLS to identify random variation in $D$. Use that random variation in a second (stage) OLS to estimate the causal effect of $D$ on $Y$.
 
 *Advantage*: We can use several instruments to identify as much random variation in $D$ as possible!
+]]
+
+---
+# Instrument vs control variables
+
+.push-right[.content-box-blue[
+```{tikz, ref.label = "DAG_IV", echo = FALSE, out.width='50%'}
+
+```
+
+An instrument variable $Z$ induces unconfounded random variation into $D$. 
+
+By using IV, we only keep that part of $D$ that **_correlates_** with $Z$.
+]]
+
+.push-left[.content-box-red[
+```{tikz, DAG_FrischWaugh, echo = FALSE, out.width='29%'}
+\usetikzlibrary{shapes,decorations,arrows,calc,arrows.meta,fit,positioning,quotes}
+\tikzset{
+  -Latex,auto,node distance =1 cm and 1 cm,semithick,
+  state/.style ={ellipse, draw, minimum width = 0.7 cm},
+  point/.style = {circle, draw, inner sep=0.04cm,fill,node contents={}},
+  bidirected/.style={Latex-Latex,dashed},
+  el/.style = {inner sep=2pt, align=left, sloped}
+}
+
+\begin{tikzpicture}
+\sffamily
+\node[state, align = center] (1) at (0,0) {$D$};
+\node[state] (2) [gray, double, above = of 1] {$C$};
+\node[state] (3) [right = of 1] {$Y$};
+
+\path (1) edge (3);
+\path (2) edge [gray, dashed] (1);
+\path (2) edge [gray, dashed] (3);
+\end{tikzpicture}
+```
+
+A confounder $C$ induces omitted variable/selection bias into $D$. 
+
+By controlling for $C$, we only keep that part of $D$ that **_does not correlate_** with $C$.
 ]]
 
 ---
@@ -523,6 +592,44 @@ knitr::include_graphics('./img/Buckles2.png')
 ```
 .backgrnote[.center[*Source:* `r Citet(myBib, "buckles_season_2013")`]]
 ]
+
+---
+# Remember the exclusion restriction!
+
+.content-box-blue[
+```{tikz, DAG_IV2, echo = FALSE, out.width='25%'}
+\usetikzlibrary{shapes,decorations,arrows,calc,arrows.meta,fit,positioning,quotes}
+\tikzset{
+  -Latex,auto,node distance =1 cm and 1 cm,semithick,
+  state/.style ={ellipse, draw, minimum width = 0.7 cm},
+  point/.style = {circle, draw, inner sep=0.04cm,fill,node contents={}},
+  bidirected/.style={Latex-Latex, dashed},
+  el/.style = {inner sep=2pt, align=left, sloped}
+}
+
+\begin{tikzpicture}
+\sffamily
+\node[state] (1) [red] at (0,0) {$Z$};
+\node[state] (2) [right = of 1] {$D$};
+\node[state] (3) [dashed, gray, above = of 2] {$C$};
+\node[state] (4) [right = of 2] {$Y$};
+
+\path (1) [red] edge ["$\phi$"] (2);
+\path (2) edge ["$\lambda$"](4);
+\path (3) edge [dashed, red] (4);
+\path (3) edge [dashed, red] (2);
+\path (1) edge [dashed, red] (3);
+\path (3) edge [dashed, red] (1);
+\end{tikzpicture}
+```
+
+If the exclusion restriction does not hold, an instrument basically turns into a confounder. This has two implications:
+
+1. The instrument does not induce random variation but omitted variable bias (OVB) into $D$. Remember, a backdoor path is any path from $D$ to $Y$ that starts with an arrow into $D$.
+
+2. By using IV, we weigh up it's OVB by $\frac{1}{\phi}$!
+]
+
 
 ---
 class: inverse middle center
@@ -636,10 +743,13 @@ knitr::include_graphics('./img/Ea1.png')
 ---
 
 .push-right[
-```{r, echo = FALSE, out.width='100%'}
+```{r, echo = FALSE, out.width='80%'}
 knitr::include_graphics('./img/Ea2.png')
 ```
-]
+
+.content-box-green[
+Exclusion assumption: Do you think the weather affects school performance *only* through it's effect on how much kids read?
+]]
 
 ---
 
@@ -652,7 +762,14 @@ knitr::include_graphics('./img/Ea3.png')
 ---
 layout: false
 class: inverse middle center
-# Does State Repression and Surveillance Spark Resistance?
+# Break
+
+<iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'></iframe>
+
+---
+layout: false
+class: inverse middle center
+# Does state surveillance spark resistance?
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/YsShZNHmpGE" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
@@ -839,20 +956,34 @@ class: clear
 ---
 
 .push-left[
-```{r, echo = FALSE, out.width='70%'}
+```{r, echo = FALSE, out.width='60%'}
 knitr::include_graphics('https://images.fineartamerica.com/images/artworkimages/mediumlarge/2/the-confession-1838-detail-giuseppe-molteni.jpg')
 ```
 
 .font70[
-> Beginning in 1946, the Polish People’s Republic made a concerted effort to turn Catholic priests into agents of the secret police. [...] Important for our case, corrupted priests were crucial in the regime’s attempt to recruit additional spies and agents. The priests used confessions to collect compromising information on parishioners (Żurek Reference Żurek2009, 22, 66, 68).
+> Beginning in 1946, the Polish People’s Republic made a concerted effort to turn Catholic priests into agents of the secret police. [...] 
+
+> Important for our case, corrupted priests were crucial in the regime’s attempt to recruit additional spies and agents. The priests used confessions to collect compromising information on parishioners (Żurek Reference Żurek2009, 22, 66, 68).
 
 > `r Citet(myBib, "hager_does_2022", after = ", page 571")`
 
 ]]
 
---
+---
 
-.push-right[
+.left-column[
+```{r, echo = FALSE, out.width='100%'}
+knitr::include_graphics('https://images.fineartamerica.com/images/artworkimages/mediumlarge/2/the-confession-1838-detail-giuseppe-molteni.jpg')
+```
+
+.font70[
+> Important for our case, corrupted priests were crucial in the regime’s attempt to recruit additional spies and agents.
+
+> `r Citet(myBib, "hager_does_2022", after = ", page 571")`
+
+]]
+
+.right-column[
 ```{r, echo = FALSE, out.width='100%'}
 knitr::include_graphics('./img/Hager2.png')
 ```
@@ -865,23 +996,41 @@ knitr::include_graphics('./img/Hager2.png')
 
 ---
 
+.right-column[
+```{r, echo = FALSE, out.width='100%'}
+knitr::include_graphics('./img/Hager2.png')
+```
+
+.font70[
+> we exploit the fact that the placement of Catholic priests—who were then turned into spies—is arguably exogenous. To use corrupted priests as an instrumental variable for surveillance, we must invoke five assumptions. Below, we focus on two particularly important assumptions: exogeneity and excludability.
+
+> `r Citet(myBib, "hager_does_2022", after = ", page 571")`
+]]
+
+.left-column[
+```{r, echo = FALSE, out.width='70%'}
+knitr::include_graphics('https://static.cambridge.org/binary/version/id/urn:cambridge.org:id:binary-alt:20220425072512-26492-optimisedImage-S0003055421000770_tab2.jpg')
+```
+]
+
+---
+
 .push-right[
 ```{r, echo = FALSE, out.width='100%'}
 knitr::include_graphics('./img/Hager2.png')
 ```
-]
-
-.push-left[
-```{r, echo = FALSE, out.width='80%'}
-knitr::include_graphics('./img/Hager4.png')
-```
-
 .font70[
 > Important for our case, corrupted priests were crucial in the regime’s attempt to recruit additional spies and agents.
 
 > `r Citet(myBib, "hager_does_2022", after = ", page 571")`
-
 ]]
+
+.push-left[
+```{r, echo = FALSE, out.width='100%'}
+knitr::include_graphics('./img/Hager4.png')
+```
+
+]
 
 ---
 
@@ -892,14 +1041,25 @@ knitr::include_graphics('./img/Hager2.png')
 ]
 
 .push-left[
-.center[IV / Second stage]
-```{r, echo = FALSE, out.width='80%'}
+```{r, echo = FALSE, out.width='90%'}
 knitr::include_graphics('./img/Hager5.png')
 ```
 ]
 
 ---
 layout: false
+class: inverse
+# Today's general lessons
+
+1. 2SLS first predicts that part of the treatment $D$ that correlates with the instrument. Then it uses this part to predict the outcome of interest $Y$.
+2. Instrument variables and control variables both use multiple OLS and it's Frisch-Waugh logic. However, they use it in exactly the opposite way. An instrument identifies unconfounded random variation in the treatment $D$; IV only keeps that part of $D$ that *correlates* with the instrument. A confounder induces selection bias into $D$. By controlling for it, we only use that part of $D$ that *does not correlate* with it.
+3. If the exclusion restriction does not hold, an instrument basically turns into a confounder!
+
+---
+class: inverse
+# Today's (important) functions
+
+1. `ivreg()`: Estimate 2SLS regression.
 
 ---
 # References
@@ -909,3 +1069,5 @@ layout: false
 PrintBibliography(myBib)
 ```
 ]
+
+

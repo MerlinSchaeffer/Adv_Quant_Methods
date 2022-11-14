@@ -5,7 +5,7 @@ output: webexercises::webexercises_default
 ---
 
 ```{r setup, include = FALSE}
-options(htmltools.dir.version = FALSE, servr.interval = 0.5, width = 115, digits = 2)
+options(htmltools.dir.version = FALSE, servr.interval = 0.5, width = 115, digits = 3)
 knitr::opts_chunk$set(
   collapse = TRUE, message = FALSE, 
   warning = FALSE, cache = FALSE,
@@ -15,6 +15,134 @@ library(webexercises)
 library(essentials)
 ```
 
-1. Let's take another look at our research question on the legacy of colonialism. Use the same setup as in lecture 4 to answer the following question: To which degree do differences in the number of years since independence from colonialism explain why we saw significant differences between countries colonized by different colonial powers?
+```{tikz, DAG_3, echo = FALSE, out.width='50%'}
+\usetikzlibrary{shapes,decorations,arrows,calc,arrows.meta,fit,positioning,quotes}
+\tikzset{
+  -Latex,auto,node distance =1 cm and 1 cm,semithick,
+  state/.style ={ellipse, draw, minimum width = 0.7 cm},
+  point/.style = {circle, draw, inner sep=0.04cm,fill,node contents={}},
+  bidirected/.style={Latex-Latex,dashed},
+  el/.style = {inner sep=2pt, align=left, sloped}
+}
 
-2. Let's take another look at education and political efficacy. Use the same setup as in lecture 4 to answer the following question: Is immigrant origin confounding (i.e. introducing selection bias) into the association between education and political efficacy? Define immigrant origin as a factor variable with three levels: "Mainsteam" (born in DK and both parents born in DK), "Immigrant" (born abroad), "Descendant of immigrant (at least one parent born abroad). First discuss whether immigrant origin is a confounding variable or not.
+\begin{tikzpicture}
+\sffamily
+\node[state, align = center] (1) at (0,0) {Education};
+\node[state, align = center] (2) [right = of 1] {\$};
+\node[state, align = center] (3) [dashed, gray, above = of 1] {Parental \\ education};
+\node[state, align = center] (4) [dashed, gray, below = of 1] {Cognitive \\ ability};
+\node[state, align = center] (5) [dashed, gray, left = of 3] {$C?$};
+\node[state, align = center] (6) [red, left = of 1] {Child labor \\ laws};
+
+\path (1) edge (2);
+\path (3) edge [dashed, gray] (2);
+\path (4) edge [dashed, gray] (2);
+\path (3) edge [dashed, gray] (1);
+\path (4) edge [dashed, gray] (1);
+\path (5) edge [dashed, gray] (1);
+\path (5) edge [dashed, gray] (2);
+\path (6) edge [red] (1);
+\end{tikzpicture}
+```
+
+In 2000. Acemoglu and Angrist (2000) had an idea: Could child labor laws of the early 21st century be used as an instrument variable? They recognized that child labor laws in the different US federal states required that children had a minimum education before they were allowed to work. However, how many years of schooling that required differed across the various US federal states and also across time. They argued it was basically random in which year a certain federal state would reform its child labor laws. Thus by comparing persons who were subject to different child labor laws in different states and at different times, one could study the causal effect of compulsory education on wages.
+
+```{r}
+pacman::p_load(
+  tidyverse, # Data manipulation,
+  texreg, # regression tables with nice layout,
+  estimatr, # Regression for weighted data,
+  modelr, # Turn results of lm() into a tibble,
+  ivreg, # IV 2SLS,
+  masteringmetrics) # Data and examples from Mastering Metrics
+
+data("child_labor", package = "masteringmetrics")
+```
+
+1. The data set contains information from several US censuses (1950 to 1990). Importantly, it contains three categorical dummy variables for child labor law: `cl7`, `cl8`, and `cl9`. These three dummy variable identify people who lived in a US state where at the given time when they were children, the law required 7, 8, or 9 years of schooling before they were allowed to work. The data also contain information on respondents' US State of Birth `sob`, their year of birth `yob`, and the year in which the census data was collected `year`. Recode the three child labor law variables into on continuous predictor, and define the US state and the census year variables as categorical.
+
+`r hide("R solution -> dont' peak to early ;) !")`
+```{r}
+child_labor <- child_labor %>%
+  mutate(
+    # Generate continuous child labor law variable,
+    chld_lb_lw = case_when(
+      cl7 == 1 ~ 7, 
+      cl8 == 1 ~ 8,
+      cl9 == 1 ~ 9),
+    # US State of birth as categorical,
+    sob = factor(sob),
+    # Census year as categorical.
+    year = factor(year))
+```
+`r unhide()`
+
+```{r q1, include = FALSE}
+# Estimate the first stage
+frst_stage <- lm_robust(indEduc ~ chld_lb_lw + yob + year + sob, data = child_labor)
+
+screenreg(frst_stage, # Regression table
+          include.ci = FALSE, digits = 3)
+```
+
+```{r include = FALSE}
+coef_frst <- coef(frst_stage)["chld_lb_lw"] %>% round(., 3) %>% as.scalar()
+```
+
+2. What is the first stage estimate of child labor laws, controlling for US state of birth, year of birth, and year of census? One more year of compulsory education translates into `r fitb(coef_frst, width = "5")` years of more education among US Americans.
+
+`r hide("R solution -> dont' peak to early ;) !")`
+```{r ref.label = "q1"}
+
+```
+`r unhide()`
+
+```{r reduced, include = FALSE}
+# Estimate the reduced stage
+rdcd_stage <- lm_robust(lnwkwage ~ chld_lb_lw + yob + year + sob, data = child_labor)
+
+screenreg(rdcd_stage, # Regression table
+          include.ci = FALSE, digits = 3)
+```
+
+```{r include = FALSE}
+coef_rdcd <- coef(rdcd_stage)["chld_lb_lw"] %>% round(., 3) %>% as.scalar()
+```
+3. `lnwkwage` contains the logged wages. Estimate the reduced form using the same control variables. A year of compulsory education increases logged wages by: `r fitb(coef_rdcd, width = "5")`. According to Acemoglu and Angrist, this is `r mcq(c("Not a causal effect!", answer = "the causal effect of child labor law, if their assumption is true that differences bewteen states and years are random", "The causal effect of education"))`.
+
+`r hide("R solution -> dont' peak to early ;) !")`
+```{r ref.label = "reduced"}
+
+```
+`r unhide()`
+
+4. Use the Wald-IV estimator to get the LATE of education.
+`r hide("R solution -> dont' peak to early ;) !")`
+$\frac{`r coef_rdcd`}{`r coef_frst`}=`r coef_rdcd / coef_frst`$
+`r unhide()`
+
+5. Drop all observations from the US Federal States 4 and 8. Then get the predicted values after the first stage. That is, get that part of education that correlates with the child labor laws. Use the predicted values to explain logged wage using the same control variables as before. Compare the your Wald-IV estimate.
+`r hide("R solution -> dont' peak to early ;) !")`
+```{r}
+child_labor <- child_labor %>%
+  filter(sob != 4 & sob != 8) %>%
+  add_predictions(frst_stage) %>%
+  rename(pred_indEduc = pred)
+
+# Estimate the first stage
+scnd_stage <- lm_robust(lnwkwage ~ pred_indEduc + yob + year + sob, data = child_labor)
+
+screenreg(scnd_stage, # Regression table
+          include.ci = FALSE, digits = 3)
+```
+`r unhide()`
+
+6. Use `ivreg()` to perform all steps in one simple 2SLS estimation. Compare to your Wald-IV estimate and your second stage!
+`r hide("R solution -> dont' peak to early ;) !")`
+```{r}
+twosls <- ivreg(lnwkwage ~ indEduc + yob + year + sob | chld_lb_lw + yob + year + sob, data = child_labor)
+
+screenreg(twosls, # Regression table
+          include.ci = FALSE, digits = 3)
+```
+`r unhide()`
