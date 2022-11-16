@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Interaction/Conditional effects</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Merlin Schaeffer  Department of Sociology" />
+    <meta name="date" content="2022-11-16" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
+    <link href="libs/panelset/panelset.css" rel="stylesheet" />
+    <script src="libs/panelset/panelset.js"></script>
+    <link rel="stylesheet" href="../template/Merlin169.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+.title[
+# Interaction/Conditional effects
+]
+.subtitle[
+## When the relation between y and x1<br> depends on x2
+]
+.author[
+### Merlin Schaeffer<br> Department of Sociology
+]
+.date[
+### 2022-11-16
+]
+
+---
+
+
+# The goal of social science research
+
+.font140[.center[.alert[Use data to **discover patterns** ("social facts" in Durkheim's terms), &lt;br&gt; and the social mechanisms that bring them about.]]]
+
+&lt;img src="https://liu.se/-/media/istock-501261958.jpg?mw=1120&amp;mh=1120&amp;hash=DA8977CCE6A6E600AE80A40CFEE771C9" width="70%" style="display: block; margin: auto;" /&gt;
+
+---
+class: inverse middle
+# Today's schedule
+
+1. Application of the day: Xenophobia and education in Denmark and Bulgaria
+
+2. Two more IV applications: 
+
+---
+class: inverse 
+
+&lt;img src="./img/xeno_quest.png" width="70%" style="display: block; margin: auto;" /&gt;
+
+.push-left[
+&lt;iframe src='https://www.dw.com/en/denmark-tells-syrian-refugees-to-return-to-damascus/a-57174584' width='700' height='450' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+]
+
+.push-right[
+&lt;iframe src='https://www.dw.com/en/why-do-so-many-refugees-avoid-bulgaria/a-18707897' width='700' height='450' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+]
+---
+# Preparations
+
+.panelset[
+.panel[.panel-name[Get the ESS data]
+.left-column[
+Download the "ESS9e03_1.sav" data from Absalon. Place them into the folder for this course and where you have your R-project.
+]
+.right-column[
+.font90[
+
+```r
+pacman::p_load(
+  tidyverse, # Data manipulation,
+  haven, # Handle labelled data.
+  ggplot2, # beautiful figures,
+  estimatr, # Regression for weighted data,
+  texreg) # regression tables with nice layout.
+
+# Read the ESS round 9 data
+ESS &lt;- read_spss("../../../assets/ESS9e03_1.sav") %&gt;%
+  # Keep only Danes and Bulgarians
+  filter(cntry == "DK" | cntry == "BG") %&gt;% 
+  mutate( # Define variables as categorical and continuous
+    cntry = as_factor(cntry) %&gt;% fct_relevel("Denmark"),
+    gndr = as_factor(gndr),
+    eduyrs = case_when( # Recode education to sensible levels
+      eduyrs &lt; 9 ~ 9,
+      eduyrs &gt; 21 ~ 21,
+      TRUE ~zap_labels(eduyrs)),
+    agea = zap_labels(agea),
+    # Outcome: Subtract from maximum to turn the scale around
+    imwbcnt = 10 - zap_labels(imwbcnt)) %&gt;%
+  # Keep only a minimum set of variables we need today,
+  select(idno, cntry, pspwght, gndr, eduyrs, agea, imwbcnt) %&gt;%
+  drop_na() # Delete cases with missing values.
+```
+]]]
+.panel[.panel-name[The resulting data]
+
+```r
+ESS
+# # A tibble: 3,330 × 7
+#     idno cntry    pspwght gndr   eduyrs  agea imwbcnt
+#    &lt;dbl&gt; &lt;fct&gt;      &lt;dbl&gt; &lt;fct&gt;   &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;
+#  1     2 Bulgaria   0.933 Female     12    72       9
+#  2    27 Bulgaria   0.455 Male       17    63       8
+#  3    37 Bulgaria   1.02  Male        9    74       8
+#  4    50 Bulgaria   0.845 Female     12    39       7
+#  5    70 Bulgaria   0.740 Female     12    70       5
+#  6    76 Bulgaria   0.704 Female     12    52       3
+#  7   137 Bulgaria   1.86  Male        9    24       5
+#  8   182 Bulgaria   0.503 Male       17    58       4
+#  9   208 Bulgaria   1.32  Male       12    52       1
+# 10   234 Bulgaria   1.49  Male       17    76       7
+# # … with 3,320 more rows
+```
+]]
+
+---
+# Multiple OLS
+
+.panelset[
+.panel[.panel-name[Denmark vis-á-vis Bulgaria]
+
+.push-right[
+.font90[
+
+```
+# 
+# =======================================================
+#                Model 1       Model 2       Model 3     
+# -------------------------------------------------------
+# (Intercept)       4.326 ***     4.909 ***     4.206 ***
+#                  (0.071)       (0.213)       (0.237)   
+# cntryBulgaria     1.680 ***     1.635 ***     1.608 ***
+#                  (0.098)       (0.100)       (0.100)   
+# eduyrs                         -0.043 **     -0.040 ** 
+#                                (0.014)       (0.014)   
+# agea                                          0.014 ***
+#                                              (0.003)   
+# -------------------------------------------------------
+# R^2               0.113         0.116         0.128    
+# Adj. R^2          0.113         0.116         0.127    
+# Num. obs.      3330          3330          3330        
+# RMSE              2.348         2.344         2.329    
+# =======================================================
+# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
+```
+]]
+
+.push-left[
+&lt;img src="11-Conditionals_files/figure-html/Coefplot-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]]
+.panel[.panel-name[Code]
+.push-left[
+.font90[
+
+```r
+bind_rows( # Combine estimate results into one tibble,
+  ols_bi %&gt;% tidy(),
+  ols_mult_1 %&gt;% tidy(),
+  ols_mult_2 %&gt;% tidy(),
+  .id = "model") %&gt;%
+  filter(term == "cntryBulgaria") %&gt;% # Keep country estimates,
+  mutate( # Rename the model variable,
+    term = case_when(
+      model == 1 ~ "Bivariate",
+      model == 2 ~ "Adjusted for education",
+      model == 3 ~ "Adjusted for education and age") %&gt;%
+      fct_relevel("Adjusted for education and age", 
+                  "Adjusted for education",
+                  "Bivariate")) %&gt;%
+  ggplot(aes(y = estimate, x = term, # Plot the results,
+             ymin = conf.low, ymax = conf.high)) +
+  geom_pointrange() +
+  geom_hline(yintercept = 0, lty = "dashed", color = "red") +
+  coord_flip() +
+  labs(y = "Difference in xenophobia between
+       Bulgaria and Denmark
+       (10-point Likert Scale)",
+       x = "") +
+  theme_minimal()
+```
+]]
+..push-right[
+.font90[
+
+```r
+ols_bi &lt;- lm_robust(imwbcnt ~ cntry, data = ESS, 
+                    weights = pspwght)
+ols_mult_1 &lt;- lm_robust(imwbcnt ~ cntry + eduyrs, 
+                        data = ESS, weights = pspwght)
+ols_mult_2 &lt;- lm_robust(imwbcnt ~ cntry + eduyrs + agea, 
+                        data = ESS, weights = pspwght)
+# Report results in a regression table
+screenreg(list(ols_bi, ols_mult_1, ols_mult_2), 
+          include.ci = FALSE, digits = 3)
+```
+]]]
+.panel[.panel-name[Multiple OLS is additive!]
+.left-column[
+**Multiple OLS, so far:** Allows us to express an outcome as linear function of several continuous and categorical predictor variables. The predictors are adjusted/controlled for each other .alert[and additive].
+]
+.right-column[
+
+```
+# 
+# =======================================================
+#                Model 1       Model 2       Model 3     
+# -------------------------------------------------------
+# (Intercept)       4.326 ***     4.909 ***     4.206 ***
+#                  (0.071)       (0.213)       (0.237)   
+# cntryBulgaria     1.680 ***     1.635 ***     1.608 ***
+#                  (0.098)       (0.100)       (0.100)   
+# eduyrs                         -0.043 **     -0.040 ** 
+#                                (0.014)       (0.014)   
+# agea                                          0.014 ***
+#                                              (0.003)   
+# -------------------------------------------------------
+# R^2               0.113         0.116         0.128    
+# Adj. R^2          0.113         0.116         0.127    
+# Num. obs.      3330          3330          3330        
+# RMSE              2.348         2.344         2.329    
+# =======================================================
+# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
+```
+]]]
+
+---
+# But what if relations are conditional?
+
+.panelset[
+.panel[.panel-name[Plot]
+&lt;img src="11-Conditionals_files/figure-html/conditional1-1.png" width="57%" style="display: block; margin: auto;" /&gt;
+]
+.panel[.panel-name[Code]
+
+```r
+ggplot(data = ESS, aes(y = imwbcnt, x = eduyrs, color = cntry)) +
+  geom_jitter(aes(size = pspwght), alpha = 1/8) +
+  geom_smooth(method = "lm") +
+  labs(y = "Immigration makes DK/BG \n a worse place to live",
+       x = "Years of education") +
+  theme_minimal() +
+  theme(legend.position = "bottom") +
+  guides(size = FALSE)
+```
+]]
+
+---
+# Then specify them as *multiplicative*
+
+.push-left[
+.font90[
+
+```r
+ols_mult_1 &lt;- lm_robust(imwbcnt ~ cntry + eduyrs, 
+                        data = ESS, weights = pspwght)
+*ols_inter &lt;- lm_robust(imwbcnt ~ cntry*eduyrs,
+                       data = ESS, weights = pspwght)
+# Report results in a regression table
+screenreg(list(ols_mult_1, ols_inter), 
+          include.ci = FALSE, digits = 3)
+# 
+# ================================================
+#                       Model 1       Model 2     
+# ------------------------------------------------
+# (Intercept)              4.909 ***     5.873 ***
+#                         (0.213)       (0.279)   
+# cntryBulgaria            1.635 ***    -0.375    
+#                         (0.100)       (0.385)   
+# eduyrs                  -0.043 **     -0.113 ***
+#                         (0.014)       (0.019)   
+# cntryBulgaria:eduyrs                   0.153 ***
+#                                       (0.027)   
+# ------------------------------------------------
+# R^2                      0.116         0.127    
+# Adj. R^2                 0.116         0.126    
+# Num. obs.             3330          3330        
+# RMSE                     2.344         2.330    
+# ================================================
+# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
+```
+]]
+
+--
+
+.push-right[
+&lt;img src="11-Conditionals_files/figure-html/unnamed-chunk-8-1.png" width="75%" style="display: block; margin: auto;" /&gt;
+- R *adds* an "interaction term", technically the product of the two interacted variables (i.e. `\(\text{Bulgaria} \times \text{Education}\)`).
+- Thereby, multiple OLS processes the conditional relation in an additive way (aka "linearization").
+]
+
+---
+# Then specify them as *multiplicative*
+
+.push-left[
+
+```r
+ESS &lt;- ESS %&gt;% mutate(
+    cntry_num = case_when(
+      cntry == "Denmark" ~ 0,
+      cntry == "Bulgaria" ~ 1),
+    intr_trm = cntry_num * eduyrs)
+
+ESS %&gt;% select(idno, cntry, cntry_num, eduyrs, intr_trm)
+# # A tibble: 3,330 × 5
+#     idno cntry    cntry_num eduyrs intr_trm
+#    &lt;dbl&gt; &lt;fct&gt;        &lt;dbl&gt;  &lt;dbl&gt;    &lt;dbl&gt;
+#  1     2 Bulgaria         1     12       12
+#  2    27 Bulgaria         1     17       17
+#  3    37 Bulgaria         1      9        9
+#  4    50 Bulgaria         1     12       12
+#  5    70 Bulgaria         1     12       12
+#  6    76 Bulgaria         1     12       12
+#  7   137 Bulgaria         1      9        9
+#  8   182 Bulgaria         1     17       17
+#  9   208 Bulgaria         1     12       12
+# 10   234 Bulgaria         1     17       17
+# # … with 3,320 more rows
+```
+]
+
+.push-right[
+&lt;img src="11-Conditionals_files/figure-html/unnamed-chunk-10-1.png" width="75%" style="display: block; margin: auto;" /&gt;
+- R *adds* an "interaction term", technically the product of the two interacted variables (i.e. `\(\text{Bulgaria} \times \text{Education}\)`).
+- Thereby, multiple OLS processes the conditional relation in an additive way (aka "linearization").
+]
+
+---
+# Then specify them as *multiplicative*
+
+.push-left[
+.font90[
+
+```r
+ols_inter2 &lt;- lm_robust(imwbcnt ~ cntry + eduyrs + intr_trm,
+                       data = ESS, weights = pspwght)
+# Report results in a regression table
+screenreg(list(ols_inter, ols_inter2), 
+          include.ci = FALSE, digits = 3)
+# 
+# ================================================
+#                       Model 1       Model 2     
+# ------------------------------------------------
+# (Intercept)              5.873 ***     5.873 ***
+#                         (0.279)       (0.279)   
+# cntryBulgaria           -0.375        -0.375    
+#                         (0.385)       (0.385)   
+# eduyrs                  -0.113 ***    -0.113 ***
+#                         (0.019)       (0.019)   
+# cntryBulgaria:eduyrs     0.153 ***              
+#                         (0.027)                 
+# intr_trm                               0.153 ***
+#                                       (0.027)   
+# ------------------------------------------------
+# R^2                      0.127         0.127    
+# Adj. R^2                 0.126         0.126    
+# Num. obs.             3330          3330        
+# RMSE                     2.330         2.330    
+# ================================================
+# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
+```
+]]
+
+.push-right[
+&lt;img src="11-Conditionals_files/figure-html/unnamed-chunk-12-1.png" width="75%" style="display: block; margin: auto;" /&gt;
+- R *adds* an "interaction term", technically the product of the two interacted variables (i.e. `\(\text{Bulgaria} \times \text{Education}\)`).
+- Thereby, multiple OLS processes the conditional relation in an additive way (aka "linearization").
+]
+
+---
+# Interpretation
+
+.push-left[
+.font90[
+
+```
+# 
+# ================================================
+#                       Model 1       Model 2     
+# ------------------------------------------------
+# (Intercept)              4.909 ***     5.873 ***
+#                         (0.213)       (0.279)   
+# cntryBulgaria            1.635 ***    -0.375    
+#                         (0.100)       (0.385)   
+# eduyrs                  -0.043 **     -0.113 ***
+#                         (0.014)       (0.019)   
+# cntryBulgaria:eduyrs                   0.153 ***
+#                                       (0.027)   
+# ------------------------------------------------
+# R^2                      0.116         0.127    
+# Adj. R^2                 0.116         0.126    
+# Num. obs.             3330          3330        
+# RMSE                     2.344         2.330    
+# ================================================
+# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
+```
+]]
+
+.push-right[
+&lt;img src="11-Conditionals_files/figure-html/unnamed-chunk-14-1.png" width="75%" style="display: block; margin: auto;" /&gt;
+
+]
+
+---
+layout: false
+class: inverse
+# Today's general lessons
+
+1. 2SLS first predicts that part of the treatment `\(D\)` that correlates with the instrument. Then it uses this part to predict the outcome of interest `\(Y\)`.
+2. Instrument variables and control variables both use multiple OLS and it's Frisch-Waugh logic. However, they use it in exactly the opposite way. An instrument identifies unconfounded random variation in the treatment `\(D\)`; IV only keeps that part of `\(D\)` that *correlates* with the instrument. A confounder induces selection bias into `\(D\)`. By controlling for it, we only use that part of `\(D\)` that *does not correlate* with it.
+3. If the exclusion restriction does not hold, an instrument basically turns into a confounder!
+
+---
+class: inverse
+# Today's (important) functions
+
+1. `ivreg()`: Estimate 2SLS regression.
+
+---
+# References
+
+.font80[
+NULL
+]
+
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="../template/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightLanguage": "r",
+"highlightStyle": "zenburn",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"ratio": "16:9"
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

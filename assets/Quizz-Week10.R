@@ -10,8 +10,11 @@ data("SchoolingReturns", package = "ivreg")
 
 SchoolingReturns <- SchoolingReturns %>%
   transmute(
-    # Logged wage
-    log_wage = log(wage),
+    # Log to the power of 2 wage. 
+      # That is, an increase in 1 implies a doubling!
+      # Accordingly, OLS coefficients can be interpreted as
+      # as % change with 1 meaning a 100% increase.
+    log_wage = log2(wage),
     # Years of eucation
     education = as.numeric(education),
     # Black
@@ -57,8 +60,8 @@ screenreg(rdcd_frm, # Regression table
           include.ci = FALSE, digits = 3)
 
 # 6. Wald-IV estimates
-0.129 / 0.629
-0.067 / 0.345
+0.186 / 0.629
+0.097 / 0.345
 
 # 7. Second stage
 SchoolingReturns <- SchoolingReturns %>%

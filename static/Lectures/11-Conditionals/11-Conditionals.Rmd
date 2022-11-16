@@ -1,0 +1,322 @@
+---
+title: "Interaction/Conditional effects"
+subtitle: "When the relation between y and x1<br> depends on x2"
+author: "Merlin Schaeffer<br> Department of Sociology"
+date: "`r Sys.Date()`"
+output: 
+  xaringan::moon_reader:
+    chakra: "../template/remark-latest.min.js"
+    css: ["../template/Merlin169.css"]
+    lib_dir: libs
+    # self_contained: true
+    nature:
+      highlightLanguage: r
+      highlightStyle: zenburn
+      highlightLines: true
+      countIncrementalSlides: false
+      ratio: '16:9'
+---
+```{r setup, include = FALSE}
+library(RefManageR)
+library(knitr)
+library(ggrepel) # Nicely placed labels in figures.
+library(modelr)
+library(webexercises) # Small web-based answer scales.
+library(equatiomatic) # Regression equations from model objects.
+library(essentials)
+
+options(htmltools.preserve.raw = FALSE, tikzDefaultEngine = "xetex",
+        htmltools.dir.version = FALSE, servr.interval = 0.5, width = 115, digits = 3)
+knitr::opts_chunk$set(
+  collapse = TRUE, message = FALSE, fig.retina = 3, error = TRUE,
+  warning = FALSE, cache = TRUE, fig.align = 'center',
+  comment = "#", strip.white = TRUE, tidy = FALSE)
+
+BibOptions(check.entries = FALSE, 
+           bib.style = "authoryear", 
+           style = "markdown",
+           hyperlink = FALSE,
+           no.print.fields = c("doi", "url", "ISSN", "urldate", "language", "note", "isbn", "volume"))
+myBib <- ReadBib("./../../../Stats_II.bib", check = FALSE)
+
+xaringanExtra::use_xaringan_extra(c("tile_view", "tachyons"))
+xaringanExtra::use_panelset()
+```
+# The goal of social science research
+
+.font140[.center[.alert[Use data to **discover patterns** ("social facts" in Durkheim's terms), <br> and the social mechanisms that bring them about.]]]
+
+```{r, echo = FALSE, out.width='70%', fig.align='center'}
+knitr::include_graphics('https://liu.se/-/media/istock-501261958.jpg?mw=1120&mh=1120&hash=DA8977CCE6A6E600AE80A40CFEE771C9')
+```
+
+---
+class: inverse middle
+# Today's schedule
+
+1. Application of the day: Xenophobia and education in Denmark and Bulgaria
+
+2. Two more IV applications: 
+
+---
+class: inverse 
+
+```{r, echo = FALSE, out.width='70%', fig.align='center'}
+knitr::include_graphics('./img/xeno_quest.png')
+```
+
+.push-left[
+<iframe src='https://www.dw.com/en/denmark-tells-syrian-refugees-to-return-to-damascus/a-57174584' width='700' height='450' frameborder='0' scrolling='yes'></iframe>
+]
+
+.push-right[
+<iframe src='https://www.dw.com/en/why-do-so-many-refugees-avoid-bulgaria/a-18707897' width='700' height='450' frameborder='0' scrolling='yes'></iframe>
+]
+---
+# Preparations
+
+.panelset[
+.panel[.panel-name[Get the ESS data]
+.left-column[
+Download the "ESS9e03_1.sav" data from Absalon. Place them into the folder for this course and where you have your R-project.
+]
+.right-column[
+.font90[
+```{r ESS}
+pacman::p_load(
+  tidyverse, # Data manipulation,
+  haven, # Handle labelled data.
+  ggplot2, # beautiful figures,
+  estimatr, # Regression for weighted data,
+  texreg) # regression tables with nice layout.
+
+# Read the ESS round 9 data
+ESS <- read_spss("../../../assets/ESS9e03_1.sav") %>%
+  # Keep only Danes and Bulgarians
+  filter(cntry == "DK" | cntry == "BG") %>% 
+  mutate( # Define variables as categorical and continuous
+    cntry = as_factor(cntry) %>% fct_relevel("Denmark"),
+    gndr = as_factor(gndr),
+    eduyrs = case_when( # Recode education to sensible levels
+      eduyrs < 9 ~ 9,
+      eduyrs > 21 ~ 21,
+      TRUE ~zap_labels(eduyrs)),
+    agea = zap_labels(agea),
+    # Outcome: Subtract from maximum to turn the scale around
+    imwbcnt = 10 - zap_labels(imwbcnt)) %>%
+  # Keep only a minimum set of variables we need today,
+  select(idno, cntry, pspwght, gndr, eduyrs, agea, imwbcnt) %>%
+  drop_na() # Delete cases with missing values.
+```
+]]]
+.panel[.panel-name[The resulting data]
+```{r}
+ESS
+```
+]]
+
+---
+# Multiple OLS
+
+.panelset[
+.panel[.panel-name[Denmark vis-á-vis Bulgaria]
+
+.push-right[
+.font90[
+```{r OLS, echo = FALSE}
+ols_bi <- lm_robust(imwbcnt ~ cntry, data = ESS, 
+                    weights = pspwght)
+ols_mult_1 <- lm_robust(imwbcnt ~ cntry + eduyrs, 
+                        data = ESS, weights = pspwght)
+ols_mult_2 <- lm_robust(imwbcnt ~ cntry + eduyrs + agea, 
+                        data = ESS, weights = pspwght)
+# Report results in a regression table
+screenreg(list(ols_bi, ols_mult_1, ols_mult_2), 
+          include.ci = FALSE, digits = 3)
+```
+]]
+
+.push-left[
+```{r Coefplot, fig.height = 3.5, fig.width = 5, echo = FALSE, out.width='100%'}
+bind_rows( # Combine estimate results into one tibble,
+  ols_bi %>% tidy(),
+  ols_mult_1 %>% tidy(),
+  ols_mult_2 %>% tidy(),
+  .id = "model") %>%
+  filter(term == "cntryBulgaria") %>% # Keep country estimates,
+  mutate( # Rename the model variable,
+    term = case_when(
+      model == 1 ~ "Bivariate",
+      model == 2 ~ "Adjusted for education",
+      model == 3 ~ "Adjusted for education and age") %>%
+      fct_relevel("Adjusted for education and age", 
+                  "Adjusted for education",
+                  "Bivariate")) %>%
+  ggplot(aes(y = estimate, x = term, # Plot the results,
+             ymin = conf.low, ymax = conf.high)) +
+  geom_pointrange() +
+  geom_hline(yintercept = 0, lty = "dashed", color = "red") +
+  coord_flip() +
+  labs(y = "Difference in xenophobia between
+       Bulgaria and Denmark
+       (10-point Likert Scale)",
+       x = "") +
+  theme_minimal()
+```
+]]
+.panel[.panel-name[Code]
+.push-left[
+.font90[
+```{r ref.label = "Coefplot", fig.show = 'hide'}
+```
+]]
+..push-right[
+.font90[
+```{r ref.label = "OLS", results = FALSE}
+
+```
+]]]
+.panel[.panel-name[Multiple OLS is additive!]
+.left-column[
+**Multiple OLS, so far:** Allows us to express an outcome as linear function of several continuous and categorical predictor variables. The predictors are adjusted/controlled for each other .alert[and additive].
+]
+.right-column[
+```{r ref.label = "OLS", echo = FALSE}
+
+```
+]]]
+
+---
+# But what if relations are conditional?
+
+.panelset[
+.panel[.panel-name[Plot]
+```{r conditional1, fig.height = 4, fig.width = 6, echo = FALSE, out.width='57%'}
+ggplot(data = ESS, aes(y = imwbcnt, x = eduyrs, color = cntry)) +
+  geom_jitter(aes(size = pspwght), alpha = 1/8) +
+  geom_smooth(method = "lm") +
+  labs(y = "Immigration makes DK/BG \n a worse place to live",
+       x = "Years of education") +
+  theme_minimal() +
+  theme(legend.position = "bottom") +
+  guides(size = FALSE)
+```
+]
+.panel[.panel-name[Code]
+```{r ref.label = "conditional1", eval = FALSE}
+
+```
+]]
+
+---
+# Then specify them as *multiplicative*
+
+.push-left[
+.font90[
+```{r inter}
+ols_mult_1 <- lm_robust(imwbcnt ~ cntry + eduyrs, 
+                        data = ESS, weights = pspwght)
+ols_inter <- lm_robust(imwbcnt ~ cntry*eduyrs, #<<
+                       data = ESS, weights = pspwght)
+# Report results in a regression table
+screenreg(list(ols_mult_1, ols_inter), 
+          include.ci = FALSE, digits = 3)
+```
+]]
+
+--
+
+.push-right[
+```{r ref.label = "conditional1", fig.height = 4, fig.width = 6, echo = FALSE, out.width='75%'}
+
+```
+- R *adds* an "interaction term", technically the product of the two interacted variables (i.e. $\text{Bulgaria} \times \text{Education}$).
+- Thereby, multiple OLS processes the conditional relation in an additive way (aka "linearization").
+]
+
+---
+# Then specify them as *multiplicative*
+
+.push-left[
+```{r}
+ESS <- ESS %>% mutate(
+    cntry_num = case_when(
+      cntry == "Denmark" ~ 0,
+      cntry == "Bulgaria" ~ 1),
+    intr_trm = cntry_num * eduyrs)
+
+ESS %>% select(idno, cntry, cntry_num, eduyrs, intr_trm)
+```
+]
+
+.push-right[
+```{r ref.label = "conditional1", fig.height = 4, fig.width = 6, echo = FALSE, out.width='75%'}
+
+```
+- R *adds* an "interaction term", technically the product of the two interacted variables (i.e. $\text{Bulgaria} \times \text{Education}$).
+- Thereby, multiple OLS processes the conditional relation in an additive way (aka "linearization").
+]
+
+---
+# Then specify them as *multiplicative*
+
+.push-left[
+.font90[
+```{r}
+ols_inter2 <- lm_robust(imwbcnt ~ cntry + eduyrs + intr_trm,
+                       data = ESS, weights = pspwght)
+# Report results in a regression table
+screenreg(list(ols_inter, ols_inter2), 
+          include.ci = FALSE, digits = 3)
+```
+]]
+
+.push-right[
+```{r ref.label = "conditional1", fig.height = 4, fig.width = 6, echo = FALSE, out.width='75%'}
+
+```
+- R *adds* an "interaction term", technically the product of the two interacted variables (i.e. $\text{Bulgaria} \times \text{Education}$).
+- Thereby, multiple OLS processes the conditional relation in an additive way (aka "linearization").
+]
+
+---
+# Interpretation
+
+.push-left[
+.font90[
+```{r ref.label = "inter", echo = FALSE}
+```
+]]
+
+.push-right[
+```{r ref.label = "conditional1", fig.height = 4, fig.width = 6, echo = FALSE, out.width='75%'}
+
+```
+
+]
+
+---
+layout: false
+class: inverse
+# Today's general lessons
+
+1. 2SLS first predicts that part of the treatment $D$ that correlates with the instrument. Then it uses this part to predict the outcome of interest $Y$.
+2. Instrument variables and control variables both use multiple OLS and it's Frisch-Waugh logic. However, they use it in exactly the opposite way. An instrument identifies unconfounded random variation in the treatment $D$; IV only keeps that part of $D$ that *correlates* with the instrument. A confounder induces selection bias into $D$. By controlling for it, we only use that part of $D$ that *does not correlate* with it.
+3. If the exclusion restriction does not hold, an instrument basically turns into a confounder!
+
+---
+class: inverse
+# Today's (important) functions
+
+1. `ivreg()`: Estimate 2SLS regression.
+
+---
+# References
+
+.font80[
+```{r ref1, results = 'asis', echo = FALSE}
+PrintBibliography(myBib)
+```
+]
+
+
