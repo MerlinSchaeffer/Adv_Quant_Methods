@@ -1,6 +1,6 @@
 ---
 title: "Interaction/Conditional effects"
-subtitle: "When the relation between y and x1<br> depends on x2"
+subtitle: "When the relation between $y$ and $x_1$ <br> depends on $x_2$"
 author: "Merlin Schaeffer<br> Department of Sociology"
 date: "`r Sys.Date()`"
 output: 
@@ -29,7 +29,7 @@ options(htmltools.preserve.raw = FALSE, tikzDefaultEngine = "xetex",
         htmltools.dir.version = FALSE, servr.interval = 0.5, width = 115, digits = 3)
 knitr::opts_chunk$set(
   collapse = TRUE, message = FALSE, fig.retina = 3, error = TRUE,
-  warning = FALSE, cache = TRUE, fig.align = 'center',
+  warning = FALSE, cache = FALSE, fig.align = 'center',
   comment = "#", strip.white = TRUE, tidy = FALSE)
 
 BibOptions(check.entries = FALSE, 
@@ -44,7 +44,7 @@ xaringanExtra::use_panelset()
 ```
 # The goal of social science research
 
-.font140[.center[.alert[Use data to **discover patterns** ("social facts" in Durkheim's terms), <br> and the social mechanisms that bring them about.]]]
+.font140[.center[.alert[Use data to <ins>discover patterns</ins> ("social facts" in Durkheim's terms), <br> and the social mechanisms that bring them about.]]]
 
 ```{r, echo = FALSE, out.width='70%', fig.align='center'}
 knitr::include_graphics('https://liu.se/-/media/istock-501261958.jpg?mw=1120&mh=1120&hash=DA8977CCE6A6E600AE80A40CFEE771C9')
@@ -64,13 +64,14 @@ class: inverse
 ```{r, echo = FALSE, out.width='70%', fig.align='center'}
 knitr::include_graphics('./img/xeno_quest.png')
 ```
+<br>
 
 .push-left[
-<iframe src='https://www.dw.com/en/denmark-tells-syrian-refugees-to-return-to-damascus/a-57174584' width='700' height='450' frameborder='0' scrolling='yes'></iframe>
+<iframe src='https://www.dw.com/en/denmark-tells-syrian-refugees-to-return-to-damascus/a-57174584' width='700' height='430' frameborder='0' scrolling='yes'></iframe>
 ]
 
 .push-right[
-<iframe src='https://www.dw.com/en/why-do-so-many-refugees-avoid-bulgaria/a-18707897' width='700' height='450' frameborder='0' scrolling='yes'></iframe>
+<iframe src='https://www.dw.com/en/why-do-so-many-refugees-avoid-bulgaria/a-18707897' width='700' height='430' frameborder='0' scrolling='yes'></iframe>
 ]
 ---
 # Preparations
@@ -179,19 +180,47 @@ bind_rows( # Combine estimate results into one tibble,
 .panel[.panel-name[Multiple OLS is additive!]
 .left-column[
 **Multiple OLS, so far:** Allows us to express an outcome as linear function of several continuous and categorical predictor variables. The predictors are adjusted/controlled for each other .alert[and additive].
-]
+
+.font70[
+$\rightarrow$ For a Bulgarian who is 20 and has 10 years of education, Model 3 predicts: 
+$4.21 + 1.61 + (10\times -0.04) + (20 \times 0.01) = 5.62 \text{ Xeno}$
+
+]]
 .right-column[
+.font90[
+```{r echo = FALSE}
+ols_equa <- lm(imwbcnt ~ cntry + eduyrs + agea, 
+                        data = ESS, weights = pspwght)
+```
+
 ```{r ref.label = "OLS", echo = FALSE}
 
 ```
-]]]
+
+`r extract_eq(ols_equa, use_coefs = TRUE)`
+
+]]]]
 
 ---
 # But what if relations are conditional?
 
 .panelset[
 .panel[.panel-name[Plot]
-```{r conditional1, fig.height = 4, fig.width = 6, echo = FALSE, out.width='57%'}
+.push-left[
+
+.content-box-blue[
+Two predictors $X_{1i}$ and $X_{2i}$ are **"conditional on each other"** or **"interact"**, when the association between the outcome $Y_{i}$ and one of the predictors depends on values of the other.
+]
+
+- Education is a more negative predictor of xenophobia in Denmark than in Bulgaria. 
+  + .backgrnote[That is, the association between education and xenophobia depends on the country people live in.]
+
+
+- The difference in average xenophobia between Danes and Bulgarians is larger among better educated people.
+  + .backgrnote[That is, the association between country and xenophobia depends on people's level of education.]
+]
+.push-right[
+```{r conditional1, fig.height = 4, fig.width = 6, echo = FALSE, out.width='90%'}
 ggplot(data = ESS, aes(y = imwbcnt, x = eduyrs, color = cntry)) +
   geom_jitter(aes(size = pspwght), alpha = 1/8) +
   geom_smooth(method = "lm") +
@@ -201,7 +230,8 @@ ggplot(data = ESS, aes(y = imwbcnt, x = eduyrs, color = cntry)) +
   theme(legend.position = "bottom") +
   guides(size = FALSE)
 ```
-]
+]]
+
 .panel[.panel-name[Code]
 ```{r ref.label = "conditional1", eval = FALSE}
 
@@ -210,6 +240,8 @@ ggplot(data = ESS, aes(y = imwbcnt, x = eduyrs, color = cntry)) +
 
 ---
 # Then specify them as *multiplicative*
+
+$$Y_{i} = \alpha + \beta_{1} X_{1} + \beta_{2}X_{2} + \color{red}{\beta_{3}(X_{1}\times X_{2})} + e_{i}$$
 
 .push-left[
 .font90[
@@ -241,11 +273,14 @@ screenreg(list(ols_mult_1, ols_inter),
 ```{r}
 ESS <- ESS %>% mutate(
     cntry_num = case_when(
+      # Numerical cntry dummy variable,
       cntry == "Denmark" ~ 0,
       cntry == "Bulgaria" ~ 1),
+    # Generate interaction term by hand
     intr_trm = cntry_num * eduyrs)
 
-ESS %>% select(idno, cntry, cntry_num, eduyrs, intr_trm)
+ESS %>% 
+  select(idno, cntry, cntry_num, eduyrs, intr_trm)
 ```
 ]
 
@@ -280,7 +315,31 @@ screenreg(list(ols_inter, ols_inter2),
 ]
 
 ---
-# Interpretation
+layout: true
+class: clear
+# Tricky interpretation .font70[The two conditional "Main terms"]
+
+---
+.push-left[
+.font90[
+```{r ref.label = "inter", echo = FALSE}
+```
+]]
+
+.push-right[
+```{r ref.label = "conditional1", fig.height = 4, fig.width = 6, echo = FALSE, out.width='75%'}
+
+```
+<br>
+
+$$\beta_1\color{red}{|x_2=0} \text{ & } \beta_2\color{red}{|x_1=0}$$
+
+$\rightarrow \beta_{\text{eduyrs}}\color{red}{|\text{Bulgaria} = 0},$
+
+$\rightarrow \beta_{\text{Bulgaria}}\color{red}{|\text{eduyrs} = 0}.$
+]
+
+---
 
 .push-left[
 .font90[
@@ -292,31 +351,547 @@ screenreg(list(ols_inter, ols_inter2),
 ```{r ref.label = "conditional1", fig.height = 4, fig.width = 6, echo = FALSE, out.width='75%'}
 
 ```
+<br>
+
+$$\beta_1\color{red}{|x_2=0} \text{ & } \beta_2\color{red}{|x_1=0}$$
+
+$\rightarrow \beta_{\text{eduyrs}}\color{red}{|\text{Bulgaria} = 0}$: A year increase in education goes along with a decline of xenophobia by `r coef(ols_inter)["eduyrs"]` scale points, .alert[if Bulgaria = 0]. $\rightarrow$ .alert[In Denmark], a year increase in education ...
+
+$\rightarrow \beta_{\text{Bulgaria}}\color{red}{|\text{eduyrs} = 0}.$
+]
+
+---
+
+.push-left[
+.font90[
+```{r ref.label = "inter", echo = FALSE}
+```
+]]
+
+.push-right[
+```{r conditional2, fig.height = 4, fig.width = 6, echo = FALSE, out.width='75%'}
+ggplot(data = ESS, aes(y = imwbcnt, x = eduyrs, color = cntry)) +
+  geom_jitter(aes(size = pspwght), alpha = 1/8) +
+  geom_vline(xintercept = 0, color = "red") +
+  geom_smooth(method = "lm", fullrange=TRUE) +
+  labs(y = "Immigration makes DK/BG \n a worse place to live",
+       x = "Years of education") +
+  theme_minimal() +
+  scale_x_continuous(limits = c(0, 21)) +
+  theme(legend.position = "bottom") +
+  guides(size = FALSE)
+```
+<br>
+
+$$\beta_1\color{red}{|x_2=0} \text{ & } \beta_2\color{red}{|x_1=0}$$
+
+$\rightarrow \beta_{\text{eduyrs}}\color{red}{|\text{Bulgaria} = 0}$: A year increase in education goes along with a decline of xenophobia by `r coef(ols_inter)["eduyrs"]` scale points, .alert[if Bulgaria = 0]. $\rightarrow$ .alert[In Denmark], a year increase in education ...
+
+$\rightarrow \beta_{\text{Bulgaria}}\color{red}{|\text{eduyrs} = 0}.$
+]
+
+---
+layout: false
+class: clear
+# Solution: Rescale .font70[(e.g. mean center, or z-standardize)]
+
+.push-left[
+```{r}
+ESS <- ESS %>% mutate(
+    # Center education around the mean of education.
+    mc_eduyrs = eduyrs - mean(eduyrs, na.rm = TRUE))
+
+summary(ESS$mc_eduyrs)
+```
+]
+.push-right[
+```{r conditional3, fig.height = 4, fig.width = 6, echo = FALSE, out.width='100%'}
+ggplot(data = ESS, aes(y = imwbcnt, x = mc_eduyrs, color = cntry)) +
+  geom_jitter(aes(size = pspwght), alpha = 1/8) +
+  geom_vline(xintercept = 0, color = "red") +
+  geom_smooth(method = "lm", fullrange=TRUE) +
+  labs(y = "Immigration makes DK/BG \n a worse place to live",
+       x = "Years of education \n (centered around the mean)") +
+  theme_minimal() +
+  scale_x_continuous(limits = c(-5, 8), breaks = c(-4, -2, 0, 2, 4, 6, 8)) +
+  theme(legend.position = "bottom") +
+  guides(size = FALSE)
+```
+]
+
+---
+layout: true
+class: clear
+# Improved interpretation .font70[The two conditional "Main terms"]
+
+---
+
+.push-left[
+```{r inter2, echo = FALSE}
+ols_inter3 <- lm_robust(imwbcnt ~ cntry*mc_eduyrs,
+                       data = ESS, weights = pspwght)
+# Report results in a regression table
+screenreg(list(ols_inter, ols_inter3), 
+          include.ci = FALSE, digits = 3)
+```
+]
+
+.push-right[
+```{r ref.label = "conditional3", fig.height = 4, fig.width = 6, echo = FALSE, out.width='75%'}
+```
+<br>
+
+$$\beta_1\color{red}{|x_2=0} \text{ & } \beta_2\color{red}{|x_1=0}$$
+
+$\rightarrow \beta_{\text{eduyrs}}\color{red}{|\text{Bulgaria} = 0}$: A year increase in education goes along with a decline of xenophobia by `r coef(ols_inter)["eduyrs"]` scale points, .alert[if Bulgaria = 0]. $\rightarrow$ .alert[In Denmark], a year increase in education ...
+
+$\rightarrow \beta_{\text{Bulgaria}}\color{red}{|\text{eduyrs} = 0}.$
+]
+
+---
+
+.push-left[
+
+```{r ref.label = "inter2", echo = FALSE}
+
+```
+]
+
+.push-right[
+```{r ref.label = "conditional3", fig.height = 4, fig.width = 6, echo = FALSE, out.width='50%'}
+```
+<br>
+
+$$\beta_1\color{red}{|x_2=0} \text{ & } \beta_2\color{red}{|x_1=0}$$
+
+$\rightarrow \beta_{\text{eduyrs}}\color{red}{|\text{Bulgaria} = 0}$: A year increase in education goes along with a decline of xenophobia by `r coef(ols_inter)["eduyrs"]` scale points, .alert[if Bulgaria = 0]. $\rightarrow$ .alert[In Denmark], a year increase in education ...
+
+$\rightarrow \beta_{\text{Bulgaria}}\color{red}{|\text{eduyrs} = 0}$: Bulgarians are, on average, `r coef(ols_inter3)["cntryBulgaria"]` scale points more xenophobic than Danes, .alert[if education = 0]. $\rightarrow$ .alert[Among persons with an average level of education], Bulgarians are ...
 
 ]
+
+---
+layout: true
+class: clear
+# Interpretation .font70[The "Interaction term" *alters* the main terms]
+
+.push-left[
+The interaction term, $\beta_3(X_{1i}\times X_{2i})$, can be interpreted in two ways
+```{r inter3, echo = FALSE}
+# Report results in a regression table
+screenreg(ols_inter3, include.ci = FALSE, digits = 3)
+```
+]
+
+---
+
+.push-right[
+```{r ref.label = "conditional3", fig.height = 4, fig.width = 6, echo = FALSE, out.width='66%'}
+```
+<br>
+
+1) When the variable `cntryBulgaria` increases by one unit, $\beta_{\text{Educ}}$ increases by $\beta_{3}$. 
+  + In Bulgaria, the association between education and xenophobia is $`r coef(ols_inter3)["mc_eduyrs"]` + `r coef(ols_inter3)["cntryBulgaria:mc_eduyrs"]` = `r coef(ols_inter3)["mc_eduyrs"] + coef(ols_inter3)["cntryBulgaria:mc_eduyrs"]`$.
+  + The difference in $\beta_{\text{Educ}}$ between Denmark and Bulgaria is `r coef(ols_inter3)["cntryBulgaria:mc_eduyrs"]`.
+
+]
+
+---
+
+.push-right[
+```{r ref.label = "conditional3", fig.height = 4, fig.width = 6, echo = FALSE, out.width='66%'}
+```
+<br>
+
+2) When the variable `mc_eduyrs` increases by one unit, $\beta_{\text{cntryBulgaria}}$ increases by $\beta_{3}$.
+  + Among the best educated (i.e. 8 years more than the average), the xenophobia gap between Danes and Bulgarians is $`r coef(ols_inter3)["mc_eduyrs"]` + 8 \times `r coef(ols_inter3)["cntryBulgaria:mc_eduyrs"]` = `r coef(ols_inter3)["mc_eduyrs"] + (8 * coef(ols_inter3)["cntryBulgaria:mc_eduyrs"])`$
+  + With every year of education, the average xenophobia gap between Danes and Bulgarians changes by `r coef(ols_inter3)["cntryBulgaria:mc_eduyrs"]`.
+
+]
+
+---
+layout: false
+# Another example
+
+.panelset[
+.panel[.panel-name[Age and gender]
+.left-column[
+.font90[
+```{r inter_another, echo = FALSE}
+ols_inter <- lm_robust(imwbcnt ~ mc_eduyrs*gndr,
+                       data = ESS, weights = pspwght)
+# Report results in a regression table
+screenreg(list(ols_inter), 
+          include.ci = FALSE, digits = 3)
+```
+]]
+.right-column[
+```{r conditional4, fig.height = 4, fig.width = 6, echo = FALSE, out.width='90%'}
+ggplot(data = ESS, aes(y = imwbcnt, x = mc_eduyrs, color = gndr)) +
+  geom_jitter(aes(size = pspwght), alpha = 1/8) +
+  geom_vline(xintercept = 0, color = "red") +
+  geom_smooth(method = "lm", fullrange=TRUE) +
+  labs(y = "Immigration makes DK/BG \n a worse place to live",
+       x = "Years of education \n (centered around the mean)") +
+  theme_minimal() +
+  scale_x_continuous(limits = c(-5, 8), breaks = c(-4, -2, 0, 2, 4, 6, 8)) +
+  theme(legend.position = "bottom") +
+  guides(size = FALSE)
+```
+]]
+.panel[.panel-name[Interpretation Main terms]
+
+.left-column[
+.font90[
+```{r ref.label = "inter_another", echo = FALSE}
+
+```
+]]
+.right-column[
+```{r ref.label = "conditional4", fig.height = 4, fig.width = 6, echo = FALSE, out.width='45%'}
+```
+$\rightarrow \beta_{Educ}|\text{Female}=0$: Among men, an additional year of education is significantly associated with `r coef(ols_inter)["mc_eduyrs"]` scale points less xenophobia.
+
+$\rightarrow \beta_{Female}|\text{Educ}=0$: At average levels of education, the gender gap in xenophobia is `r coef(ols_inter)["gndrFemale"]` but insignificant.
+]]
+.panel[.panel-name[Interpretation Interaction term]
+
+.left-column[
+.font90[
+```{r ref.label = "inter_another", echo = FALSE}
+
+```
+]]
+.right-column[
+```{r ref.label = "conditional4", fig.height = 4, fig.width = 6, echo = FALSE, out.width='45%'}
+```
+
+1) The association between education and xenophobia among women is $`r coef(ols_inter)["mc_eduyrs"]` + `r coef(ols_inter)["mc_eduyrs:gndrFemale"]`= `r coef(ols_inter)["mc_eduyrs"] + coef(ols_inter)["mc_eduyrs:gndrFemale"]`$. This is `r coef(ols_inter)["mc_eduyrs:gndrFemale"]` more negative than the association among men, but this different in slopes is not significant.
+
+2) With every year increase of education, the gender gap in xenophobia declines by `r coef(ols_inter)["mc_eduyrs:gndrFemale"]`. At two years more education than the average citizen, the gender gap is $`r coef(ols_inter)["mc_eduyrs"]` + 2\times `r coef(ols_inter)["mc_eduyrs:gndrFemale"]`= `r coef(ols_inter)["mc_eduyrs"] + (2 * coef(ols_inter)["mc_eduyrs:gndrFemale"])`$ scale points, but (probably) insignificant.
+
+
+]]
+.panel[.panel-name[Code]
+.push-left[
+```{r ref.label = "inter_another", results = FALSE}
+
+```
+]
+
+.push-right[
+```{r ref.label = "conditional4", fig.show='hide'}
+```
+]]]
+
+---
+
+BREAK
+
+---
+# Control for potential confounders .font70[Easy ...]
+
+.push-left[
+```{r inter4, echo = FALSE}
+ols_inter4 <- lm_robust(imwbcnt ~ cntry*mc_eduyrs + gndr + agea,
+                       data = ESS, weights = pspwght)
+# Report results in a regression table
+screenreg(list(ols_inter3, ols_inter4), 
+          include.ci = FALSE, digits = 3)
+```
+]
+
+---
+# Visualize!
+
+.push-left[
+```{r ref.label = "inter4", echo = FALSE}
+
+```
+]
+
+.push-right[
+.panelset[
+.panel[.panel-name[Fictional data]
+.font90[
+```{r}
+(fict_dat <- tibble(
+  # Repeat the vector -5:8, each element twice #<<
+  mc_eduyrs = rep(-5:8, each = 2), #<<
+  # Repeat DK/BG 14 times #<<
+  cntry = rep(c("Denmark", "Bulgaria"), 14), #<<
+  # Set controls to constant value
+  gndr = "Female",
+  agea = mean(ESS$agea, na.rm = TRUE)))
+```
+]]
+.panel[.panel-name[Predictions]
+.font90[
+```{r}
+(fict_dat <- predict( #<<
+  ols_inter4, newdata = fict_dat, #<<
+  interval = "confidence", level = 0.95)$fit %>% #<<
+   as_tibble() %>% # Turn into a tibble, then
+   bind_cols(fict_dat, .)) # Add to the synthetic data.
+```
+]]
+.panel[.panel-name[Plot]
+```{r predictions, fig.height = 4, fig.width = 5, echo = FALSE, out.width='90%'}
+ggplot(data = fict_dat, aes(y = fit, x = mc_eduyrs)) +
+  geom_ribbon(aes(ymin = lwr, ymax = upr, fill = cntry), alpha = 0.5) +
+  geom_line(aes(color = cntry)) +
+  labs(
+    fill = "Country:", color = "Country:",
+    title = "Predictions based on multiple OLS",
+    x = "By mean-centered years of education
+    (At average age and gender set to women)",
+    y = "Predicted xenophobia") +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+```
+]
+.panel[.panel-name[Code]
+```{r ref.label = "predictions", fig.show = 'hide'}
+```
+]]]
+
+---
+
+Exercise
+
+---
+class: inverse
+# Revised research question
+
+.center[.font140[
+Is socialism good at reducing poverty if combined with citizenship rights,<br><br> but not good at it if under autocratic rule?
+]]
+
+<br>
+.push-left[
+```{r, echo = FALSE, out.width='90%'}
+knitr::include_graphics('https://miro.medium.com/max/1280/1*8Y_EPw2a67TRRos3b24YlA.jpeg')
+```
+]
+
+.push-right[
+```{r, echo = FALSE, out.width='96%'}
+knitr::include_graphics('https://almayasabdam.com/wp-content/uploads/2020/09/1496441134_communists.png')
+```
+]
+
+```{r include = FALSE}
+pacman::p_load(
+  tidyverse, # Data manipulation,
+  ggplot2, # beautiful figures,
+  wbstats, # download data from Worldbank. Tremendous source of global socio-economic data.
+  # democracyData, # download democracy data used in the scholarly literature.
+  texreg, # regression tables with nice layout,
+  countrycode, # Easy recodings of country names,
+  democracyData, # download democracy data used in the scholarly literature.
+  remotes) # Install beta version packages from GitHub.
+
+
+Dat_citi_rights <- download_fh(verbose = FALSE) %>% # Download Freedom House data for all countries since 1972, #<<
+  rename(country = fh_country, # rename country ID,
+         citizen_rights = fh_total_reversed, # rename Citizenship rights indicator,
+         date = year) %>% # rename year,
+  select(country, date, citizen_rights) # Keep only these 3 variables.
+
+Dat_poverty <- wb_data("SI.POV.UMIC", # Download poverty data: <5.50$ per day,
+                       start_date = 2002, end_date = 2022) %>% #<<
+  rename(poverty = SI.POV.UMIC) %>% # rename poverty variable,
+  select(country, date, poverty) %>% # Keep only 3 variables
+  drop_na(poverty) %>% # Drop cases with missing data,
+  group_by(country) %>% # Group by country,
+  filter(date == max(date)) %>% # Keep the most recent data per country.
+  ungroup()
+
+
+Dat <- inner_join(Dat_poverty, Dat_citi_rights, by = c("country", "date")) %>%
+  mutate(socialist = case_when( # Years socialist minus years since,
+    country == "China" ~ date - 1949,
+    country == "Vietnam" ~ date - 1945,
+    country == "Algeria" ~ date - 1962,
+    str_detect(country,"Portugal|Bangladesh") ~ date - 1972,
+    country == "Guinea-Bissau" ~ date - 1973,
+    country == "India" ~ date - 1976,
+    country == "Nicaragua" ~ date - 1979,
+    country == "Sri Lanka" ~ date - 1978,
+    country == "Tanzania" ~ date - 1964,
+    country == "Albania" ~ (1992 - 1944) - (date - 1992),
+    str_detect(country, "Angola|Cabo Verde|Madagascar") ~ (1992 - 1975) - (date - 1992),
+    str_detect(country,"Belarus|Bulgaria") ~ (1990 - 1946) - (date - 1990),
+    str_detect(country, "Benin|Mozambique") ~ (1990 - 1975) - (date - 1990),
+    country == "Chad" ~ (1975 - 1962) - (date - 1975), country == "Congo, Rep." ~ (1992 - 1970) - (date - 1992),
+    country == "Czech Republic" ~ (1990 - 1948) - (date - 1990), country == "Djibouti" ~ (1992 - 1981) - (date - 1992),
+    country == "Ethiopia" ~ (1991 - 1974) - (date - 1991), country == "Ghana" ~ (1966 - 1960) - (date - 1966),
+    country == "Guinea" ~ (1984 - 1958) - (date - 1984), country == "Hungary" ~ (1989 - 1949) - (date - 1989),
+    country == "Iraq" ~ (2005 - 1958) - (date - 2005), country == "Mali" ~ (1991 - 1960) - (date - 1991),
+    country == "Mauritania" ~ (1978 - 1961) - (date - 1978), country == "Mongolia" ~ (1992 - 1924) - (date - 1992),
+    country == "Myanmar" ~ (1988 - 1962) - (date - 1988), country == "Poland" ~ (1989 - 1945) - (date - 1989),
+    country == "Romania" ~ (1989 - 1947) - (date - 1989), country == "Russian Federation" ~ (1991 - 1922) - (date - 1991),
+    country == "Seychelles" ~ (1991 - 1977) - (date - 1991), country == "Senegal" ~ (1981 - 1960) - (date - 1981),
+    country == "Sierra Leone" ~ (1991 - 1978) - (date - 1991), country == "Somalia" ~ (1991 - 1969) - (date - 1991),
+    country == "Sudan" ~ (1985 - 1969) - (date - 1985), country == "Syria" ~ (2012 - 1963) - (date - 2012),
+    country == "Tunisia" ~ (1988 - 1964) - (date - 1988), country == "Ukraine" ~ (1991 - 1919) - (date - 1991),
+    country == "Yemen, Rep." ~ (1991 - 1967) - (date - 1991), country == "Zambia" ~ (1991 - 1973) - (date - 1991),
+    str_detect(country,"Slovenia|Croatia|Serbia|Montenegro|Bosnia and Herzegovina|North Macedonia|Kosovo") ~ (1992 - 1943) - (date - 1992),
+    TRUE ~ 0),
+    socialist = case_when( # Min. 5 years given socialist history,
+      (socialist < 5 & socialist > 0) | socialist < 0 ~ 5,
+      TRUE ~ socialist)) %>% drop_na() # Drop countries with missing values.
+```
+
+---
+class: clear
+layout: true
+# Interaction of two continuous variables
+
+---
+
+.panelset[
+.panel[.panel-name[OLS results]
+.push-left[
+```{r socialism, echo = FALSE}
+# Same data as Lecture 2 
+Dat <- Dat %>% mutate( # Mean-center predictors
+  mc_socialist = socialist - mean(socialist, na.rm = TRUE),
+  mc_citizen_rights = citizen_rights - mean(citizen_rights, na.rm = TRUE))
+
+# Multiple OLS
+ols_inter <- lm_robust(poverty ~ mc_socialist*mc_citizen_rights, data = Dat)
+
+# Regression table
+screenreg(list(ols_inter), include.ci = FALSE, digits = 3)
+```
+]]
+.panel[.panel-name[Code]
+```{r ref.label = "socialism", eval = FALSE}
+```
+]]
+
+---
+
+.panelset[
+.panel[.panel-name[OLS results]
+.push-left[
+```{r ref.label = "socialism", echo = FALSE}
+
+```
+]
+.push-right[
+$\beta_{\text{Socialism}}|\text{Citizen Rights}=0$: At average levels of citizenship rights, socialism is not significantly related to declines in poverty.
+
+$\beta_{\text{Citizen Rights}}|\text{Socialism}=0$: At average levels of socialism, a unit increase in citizenship rights is significantly related to a `r coef(ols_inter)["mc_citizen_rights"]` percentage point decline in poverty.
+
+$$\beta_{\text{Socialism} \times \text{Citizen Rights}}$$
+1) With every unit more citizenship rights, socialism gets `r coef(ols_inter)["mc_socialist:mc_citizen_rights"]` percentage points worse at being related to declines in poverty.
+
+2) With every additional year of socialism, citizenship rights are `r coef(ols_inter)["mc_socialist:mc_citizen_rights"]` percentage points less associated with declines in poverty.
+
+]]
+.panel[.panel-name[Code]
+```{r ref.label = "socialism", eval = FALSE}
+```
+]
+.panel[.panel-name[Predictions]
+.push-left[
+.font90[
+```{r}
+summary(Dat$mc_socialist)
+summary(Dat$mc_citizen_rights)
+
+(fict_dat <- tibble( # Choose "representative" values of #<<
+  # x1 and x2 at which you wish to predict #<<
+  # Repeat min, mean, and max each four times,
+  mc_socialist = rep(c(-6, 0, 60), each = 3),
+  # Repeat min, mean max four times.
+  mc_citizen_rights = rep(c(-7, 0, 4), 3)))
+```
+]]
+.push-right[
+.font90[
+```{r}
+(fict_dat <- predict(
+  ols_inter, newdata = fict_dat,
+  interval = "confidence", level = 0.95)$fit %>%
+   as_tibble() %>% # Turn into a tibble, then
+   bind_cols(fict_dat, .)) # Add to the synthetic data.
+```
+]]
+.panel[.panel-name[Plots]
+.push-left[
+```{r predictions2, fig.height = 4, fig.width = 5, echo = FALSE, out.width='100%'}
+ggplot(data = fict_dat, aes(y = fit, x = mc_socialist)) +
+  geom_ribbon(aes(ymin = lwr, ymax = upr, 
+                  fill = factor(mc_citizen_rights)), alpha = 0.5) +
+  geom_line(aes(color = factor(mc_citizen_rights))) +
+  labs(
+    fill = "Mean-centered citizenship rights:", 
+    color = "Mean-centered citizenship rights:",
+    title = "Predictions based on multiple OLS",
+    x = "By mean-centered years of socialist history",
+    y = "Predicted Extreme poverty 
+    among population") +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+```
+]
+.push-right[
+```{r predictions3, fig.height = 4, fig.width = 5, echo = FALSE, out.width='100%'}
+ggplot(data = fict_dat, aes(y = fit, x = mc_citizen_rights)) +
+  geom_ribbon(aes(ymin = lwr, ymax = upr, 
+                  fill = factor(mc_socialist)), alpha = 0.5) +
+  geom_line(aes(color = factor(mc_socialist))) +
+  labs(
+    fill = "Mean-centered socialist history:", 
+    color = "Mean-centered socialist history:",
+    title = "Predictions based on multiple OLS",
+    x = "By mean-centered citizenship rights",
+    y = "Predicted Extreme poverty 
+    among population") +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+```
+]]
+.panel[.panel-name[Code]
+.push-left[
+.font90[
+```{r ref.label = "predictions2", fig.show = 'hide'}
+
+```
+]]
+.push-right[
+.font90[
+```{r ref.label = "predictions3", fig.show = 'hide'}
+
+```
+]]]
+.panel[.panel-name[Potential theory]
+
+.left-column[
+```{r, echo = FALSE, out.width='100%', fig.align='center'}
+knitr::include_graphics('https://www.aljazeera.com/wp-content/uploads/2022/11/000_32MK2ZL.jpg?resize=770%2C513')
+```
+]
+.right-column[
+- Among the autocrats, better catch a socialist.
+
+- Among the democrats, socialists aren't performing significantly different in termsw of fighting extreme poverty.
+
+$\rightarrow$ Most importantly: .alert[Be democratic!]
+
+]]]]
 
 ---
 layout: false
 class: inverse
 # Today's general lessons
 
-1. 2SLS first predicts that part of the treatment $D$ that correlates with the instrument. Then it uses this part to predict the outcome of interest $Y$.
-2. Instrument variables and control variables both use multiple OLS and it's Frisch-Waugh logic. However, they use it in exactly the opposite way. An instrument identifies unconfounded random variation in the treatment $D$; IV only keeps that part of $D$ that *correlates* with the instrument. A confounder induces selection bias into $D$. By controlling for it, we only use that part of $D$ that *does not correlate* with it.
-3. If the exclusion restriction does not hold, an instrument basically turns into a confounder!
+1. 
 
----
-class: inverse
-# Today's (important) functions
 
-1. `ivreg()`: Estimate 2SLS regression.
 
----
-# References
-
-.font80[
-```{r ref1, results = 'asis', echo = FALSE}
-PrintBibliography(myBib)
-```
-]
 
 

@@ -4,8 +4,11 @@
     <title>Interaction/Conditional effects</title>
     <meta charset="utf-8" />
     <meta name="author" content="Merlin Schaeffer  Department of Sociology" />
-    <meta name="date" content="2022-11-16" />
+    <meta name="date" content="2022-11-17" />
     <script src="libs/header-attrs/header-attrs.js"></script>
+    <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
+    <script src="libs/tile-view/tile-view.js"></script>
+    <link href="libs/tachyons/tachyons.min.css" rel="stylesheet" />
     <link href="libs/panelset/panelset.css" rel="stylesheet" />
     <script src="libs/panelset/panelset.js"></script>
     <link rel="stylesheet" href="../template/Merlin169.css" type="text/css" />
@@ -18,13 +21,13 @@ class: center, middle, inverse, title-slide
 # Interaction/Conditional effects
 ]
 .subtitle[
-## When the relation between y and x1<br> depends on x2
+## When the relation between <span class="math inline"><em>y</em></span> and <span class="math inline"><em>x</em><sub>1</sub></span> <br> depends on <span class="math inline"><em>x</em><sub>2</sub></span>
 ]
 .author[
 ### Merlin Schaeffer<br> Department of Sociology
 ]
 .date[
-### 2022-11-16
+### 2022-11-17
 ]
 
 ---
@@ -32,7 +35,7 @@ class: center, middle, inverse, title-slide
 
 # The goal of social science research
 
-.font140[.center[.alert[Use data to **discover patterns** ("social facts" in Durkheim's terms), &lt;br&gt; and the social mechanisms that bring them about.]]]
+.font140[.center[.alert[Use data to &lt;ins&gt;discover patterns&lt;/ins&gt; ("social facts" in Durkheim's terms), &lt;br&gt; and the social mechanisms that bring them about.]]]
 
 &lt;img src="https://liu.se/-/media/istock-501261958.jpg?mw=1120&amp;mh=1120&amp;hash=DA8977CCE6A6E600AE80A40CFEE771C9" width="70%" style="display: block; margin: auto;" /&gt;
 
@@ -48,13 +51,14 @@ class: inverse middle
 class: inverse 
 
 &lt;img src="./img/xeno_quest.png" width="70%" style="display: block; margin: auto;" /&gt;
+&lt;br&gt;
 
 .push-left[
-&lt;iframe src='https://www.dw.com/en/denmark-tells-syrian-refugees-to-return-to-damascus/a-57174584' width='700' height='450' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+&lt;iframe src='https://www.dw.com/en/denmark-tells-syrian-refugees-to-return-to-damascus/a-57174584' width='700' height='430' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
 ]
 
 .push-right[
-&lt;iframe src='https://www.dw.com/en/why-do-so-many-refugees-avoid-bulgaria/a-18707897' width='700' height='450' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+&lt;iframe src='https://www.dw.com/en/why-do-so-many-refugees-avoid-bulgaria/a-18707897' width='700' height='430' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
 ]
 ---
 # Preparations
@@ -199,8 +203,16 @@ screenreg(list(ols_bi, ols_mult_1, ols_mult_2),
 .panel[.panel-name[Multiple OLS is additive!]
 .left-column[
 **Multiple OLS, so far:** Allows us to express an outcome as linear function of several continuous and categorical predictor variables. The predictors are adjusted/controlled for each other .alert[and additive].
-]
+
+.font70[
+`\(\rightarrow\)` For a Bulgarian who is 20 and has 10 years of education, Model 3 predicts: 
+`\(4.21 + 1.61 + (10\times -0.04) + (20 \times 0.01) = 5.62 \text{ Xeno}\)`
+
+]]
 .right-column[
+.font90[
+
+
 
 ```
 # 
@@ -223,15 +235,36 @@ screenreg(list(ols_bi, ols_mult_1, ols_mult_2),
 # =======================================================
 # *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
 ```
-]]]
+
+$$
+\operatorname{\widehat{imwbcnt}} = 4.21 + 1.61(\operatorname{cntry}_{\operatorname{Bulgaria}}) - 0.04(\operatorname{eduyrs}) + 0.01(\operatorname{agea})
+$$
+
+
+]]]]
 
 ---
 # But what if relations are conditional?
 
 .panelset[
 .panel[.panel-name[Plot]
-&lt;img src="11-Conditionals_files/figure-html/conditional1-1.png" width="57%" style="display: block; margin: auto;" /&gt;
+.push-left[
+
+.content-box-blue[
+Two predictors `\(X_{1i}\)` and `\(X_{2i}\)` are **"conditional on each other"** or **"interact"**, when the association between the outcome `\(Y_{i}\)` and one of the predictors depends on values of the other.
 ]
+
+- Education is a more negative predictor of xenophobia in Denmark than in Bulgaria. 
+  + .backgrnote[That is, the association between education and xenophobia depends on the country people live in.]
+
+
+- The difference in average xenophobia between Danes and Bulgarians is larger among better educated people.
+  + .backgrnote[That is, the association between country and xenophobia depends on people's level of education.]
+]
+.push-right[
+&lt;img src="11-Conditionals_files/figure-html/conditional1-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+]]
+
 .panel[.panel-name[Code]
 
 ```r
@@ -248,6 +281,8 @@ ggplot(data = ESS, aes(y = imwbcnt, x = eduyrs, color = cntry)) +
 
 ---
 # Then specify them as *multiplicative*
+
+`$$Y_{i} = \alpha + \beta_{1} X_{1} + \beta_{2}X_{2} + \color{red}{\beta_{3}(X_{1}\times X_{2})} + e_{i}$$`
 
 .push-left[
 .font90[
@@ -285,7 +320,7 @@ screenreg(list(ols_mult_1, ols_inter),
 --
 
 .push-right[
-&lt;img src="11-Conditionals_files/figure-html/unnamed-chunk-8-1.png" width="75%" style="display: block; margin: auto;" /&gt;
+&lt;img src="11-Conditionals_files/figure-html/unnamed-chunk-9-1.png" width="75%" style="display: block; margin: auto;" /&gt;
 - R *adds* an "interaction term", technically the product of the two interacted variables (i.e. `\(\text{Bulgaria} \times \text{Education}\)`).
 - Thereby, multiple OLS processes the conditional relation in an additive way (aka "linearization").
 ]
@@ -298,11 +333,14 @@ screenreg(list(ols_mult_1, ols_inter),
 ```r
 ESS &lt;- ESS %&gt;% mutate(
     cntry_num = case_when(
+      # Numerical cntry dummy variable,
       cntry == "Denmark" ~ 0,
       cntry == "Bulgaria" ~ 1),
+    # Generate interaction term by hand
     intr_trm = cntry_num * eduyrs)
 
-ESS %&gt;% select(idno, cntry, cntry_num, eduyrs, intr_trm)
+ESS %&gt;% 
+  select(idno, cntry, cntry_num, eduyrs, intr_trm)
 # # A tibble: 3,330 × 5
 #     idno cntry    cntry_num eduyrs intr_trm
 #    &lt;dbl&gt; &lt;fct&gt;        &lt;dbl&gt;  &lt;dbl&gt;    &lt;dbl&gt;
@@ -321,7 +359,7 @@ ESS %&gt;% select(idno, cntry, cntry_num, eduyrs, intr_trm)
 ]
 
 .push-right[
-&lt;img src="11-Conditionals_files/figure-html/unnamed-chunk-10-1.png" width="75%" style="display: block; margin: auto;" /&gt;
+&lt;img src="11-Conditionals_files/figure-html/unnamed-chunk-11-1.png" width="75%" style="display: block; margin: auto;" /&gt;
 - R *adds* an "interaction term", technically the product of the two interacted variables (i.e. `\(\text{Bulgaria} \times \text{Education}\)`).
 - Thereby, multiple OLS processes the conditional relation in an additive way (aka "linearization").
 ]
@@ -363,13 +401,55 @@ screenreg(list(ols_inter, ols_inter2),
 ]]
 
 .push-right[
-&lt;img src="11-Conditionals_files/figure-html/unnamed-chunk-12-1.png" width="75%" style="display: block; margin: auto;" /&gt;
+&lt;img src="11-Conditionals_files/figure-html/unnamed-chunk-13-1.png" width="75%" style="display: block; margin: auto;" /&gt;
 - R *adds* an "interaction term", technically the product of the two interacted variables (i.e. `\(\text{Bulgaria} \times \text{Education}\)`).
 - Thereby, multiple OLS processes the conditional relation in an additive way (aka "linearization").
 ]
 
 ---
-# Interpretation
+layout: true
+class: clear
+# Tricky interpretation .font70[The two conditional "Main terms"]
+
+---
+.push-left[
+.font90[
+
+```
+# 
+# ================================================
+#                       Model 1       Model 2     
+# ------------------------------------------------
+# (Intercept)              4.909 ***     5.873 ***
+#                         (0.213)       (0.279)   
+# cntryBulgaria            1.635 ***    -0.375    
+#                         (0.100)       (0.385)   
+# eduyrs                  -0.043 **     -0.113 ***
+#                         (0.014)       (0.019)   
+# cntryBulgaria:eduyrs                   0.153 ***
+#                                       (0.027)   
+# ------------------------------------------------
+# R^2                      0.116         0.127    
+# Adj. R^2                 0.116         0.126    
+# Num. obs.             3330          3330        
+# RMSE                     2.344         2.330    
+# ================================================
+# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
+```
+]]
+
+.push-right[
+&lt;img src="11-Conditionals_files/figure-html/unnamed-chunk-15-1.png" width="75%" style="display: block; margin: auto;" /&gt;
+&lt;br&gt;
+
+`$$\beta_1\color{red}{|x_2=0} \text{ &amp; } \beta_2\color{red}{|x_1=0}$$`
+
+`\(\rightarrow \beta_{\text{eduyrs}}\color{red}{|\text{Bulgaria} = 0},\)`
+
+`\(\rightarrow \beta_{\text{Bulgaria}}\color{red}{|\text{eduyrs} = 0}.\)`
+]
+
+---
 
 .push-left[
 .font90[
@@ -398,31 +478,745 @@ screenreg(list(ols_inter, ols_inter2),
 ]]
 
 .push-right[
-&lt;img src="11-Conditionals_files/figure-html/unnamed-chunk-14-1.png" width="75%" style="display: block; margin: auto;" /&gt;
+&lt;img src="11-Conditionals_files/figure-html/unnamed-chunk-17-1.png" width="75%" style="display: block; margin: auto;" /&gt;
+&lt;br&gt;
+
+`$$\beta_1\color{red}{|x_2=0} \text{ &amp; } \beta_2\color{red}{|x_1=0}$$`
+
+`\(\rightarrow \beta_{\text{eduyrs}}\color{red}{|\text{Bulgaria} = 0}\)`: A year increase in education goes along with a decline of xenophobia by -0.113 scale points, .alert[if Bulgaria = 0]. `\(\rightarrow\)` .alert[In Denmark], a year increase in education ...
+
+`\(\rightarrow \beta_{\text{Bulgaria}}\color{red}{|\text{eduyrs} = 0}.\)`
+]
+
+---
+
+.push-left[
+.font90[
+
+```
+# 
+# ================================================
+#                       Model 1       Model 2     
+# ------------------------------------------------
+# (Intercept)              4.909 ***     5.873 ***
+#                         (0.213)       (0.279)   
+# cntryBulgaria            1.635 ***    -0.375    
+#                         (0.100)       (0.385)   
+# eduyrs                  -0.043 **     -0.113 ***
+#                         (0.014)       (0.019)   
+# cntryBulgaria:eduyrs                   0.153 ***
+#                                       (0.027)   
+# ------------------------------------------------
+# R^2                      0.116         0.127    
+# Adj. R^2                 0.116         0.126    
+# Num. obs.             3330          3330        
+# RMSE                     2.344         2.330    
+# ================================================
+# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
+```
+]]
+
+.push-right[
+&lt;img src="11-Conditionals_files/figure-html/conditional2-1.png" width="75%" style="display: block; margin: auto;" /&gt;
+&lt;br&gt;
+
+`$$\beta_1\color{red}{|x_2=0} \text{ &amp; } \beta_2\color{red}{|x_1=0}$$`
+
+`\(\rightarrow \beta_{\text{eduyrs}}\color{red}{|\text{Bulgaria} = 0}\)`: A year increase in education goes along with a decline of xenophobia by -0.113 scale points, .alert[if Bulgaria = 0]. `\(\rightarrow\)` .alert[In Denmark], a year increase in education ...
+
+`\(\rightarrow \beta_{\text{Bulgaria}}\color{red}{|\text{eduyrs} = 0}.\)`
+]
+
+---
+layout: false
+class: clear
+# Solution: Rescale .font70[(e.g. mean center, or z-standardize)]
+
+.push-left[
+
+```r
+ESS &lt;- ESS %&gt;% mutate(
+    # Center education around the mean of education.
+    mc_eduyrs = eduyrs - mean(eduyrs, na.rm = TRUE))
+
+summary(ESS$mc_eduyrs)
+#    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+#   -4.24   -2.24   -1.24    0.00    2.76    7.76
+```
+]
+.push-right[
+&lt;img src="11-Conditionals_files/figure-html/conditional3-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+layout: true
+class: clear
+# Improved interpretation .font70[The two conditional "Main terms"]
+
+---
+
+.push-left[
+
+```
+# 
+# ===================================================
+#                          Model 1       Model 2     
+# ---------------------------------------------------
+# (Intercept)                 5.873 ***     4.378 ***
+#                            (0.279)       (0.072)   
+# cntryBulgaria              -0.375         1.650 ***
+#                            (0.385)       (0.099)   
+# eduyrs                     -0.113 ***              
+#                            (0.019)                 
+# cntryBulgaria:eduyrs        0.153 ***              
+#                            (0.027)                 
+# mc_eduyrs                                -0.113 ***
+#                                          (0.019)   
+# cntryBulgaria:mc_eduyrs                   0.153 ***
+#                                          (0.027)   
+# ---------------------------------------------------
+# R^2                         0.127         0.127    
+# Adj. R^2                    0.126         0.126    
+# Num. obs.                3330          3330        
+# RMSE                        2.330         2.330    
+# ===================================================
+# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
+```
+]
+
+.push-right[
+&lt;img src="11-Conditionals_files/figure-html/unnamed-chunk-20-1.png" width="75%" style="display: block; margin: auto;" /&gt;
+&lt;br&gt;
+
+`$$\beta_1\color{red}{|x_2=0} \text{ &amp; } \beta_2\color{red}{|x_1=0}$$`
+
+`\(\rightarrow \beta_{\text{eduyrs}}\color{red}{|\text{Bulgaria} = 0}\)`: A year increase in education goes along with a decline of xenophobia by -0.113 scale points, .alert[if Bulgaria = 0]. `\(\rightarrow\)` .alert[In Denmark], a year increase in education ...
+
+`\(\rightarrow \beta_{\text{Bulgaria}}\color{red}{|\text{eduyrs} = 0}.\)`
+]
+
+---
+
+.push-left[
+
+
+```
+# 
+# ===================================================
+#                          Model 1       Model 2     
+# ---------------------------------------------------
+# (Intercept)                 5.873 ***     4.378 ***
+#                            (0.279)       (0.072)   
+# cntryBulgaria              -0.375         1.650 ***
+#                            (0.385)       (0.099)   
+# eduyrs                     -0.113 ***              
+#                            (0.019)                 
+# cntryBulgaria:eduyrs        0.153 ***              
+#                            (0.027)                 
+# mc_eduyrs                                -0.113 ***
+#                                          (0.019)   
+# cntryBulgaria:mc_eduyrs                   0.153 ***
+#                                          (0.027)   
+# ---------------------------------------------------
+# R^2                         0.127         0.127    
+# Adj. R^2                    0.126         0.126    
+# Num. obs.                3330          3330        
+# RMSE                        2.330         2.330    
+# ===================================================
+# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
+```
+]
+
+.push-right[
+&lt;img src="11-Conditionals_files/figure-html/unnamed-chunk-22-1.png" width="50%" style="display: block; margin: auto;" /&gt;
+&lt;br&gt;
+
+`$$\beta_1\color{red}{|x_2=0} \text{ &amp; } \beta_2\color{red}{|x_1=0}$$`
+
+`\(\rightarrow \beta_{\text{eduyrs}}\color{red}{|\text{Bulgaria} = 0}\)`: A year increase in education goes along with a decline of xenophobia by -0.113 scale points, .alert[if Bulgaria = 0]. `\(\rightarrow\)` .alert[In Denmark], a year increase in education ...
+
+`\(\rightarrow \beta_{\text{Bulgaria}}\color{red}{|\text{eduyrs} = 0}\)`: Bulgarians are, on average, 1.65 scale points more xenophobic than Danes, .alert[if education = 0]. `\(\rightarrow\)` .alert[Among persons with an average level of education], Bulgarians are ...
 
 ]
+
+---
+layout: true
+class: clear
+# Interpretation .font70[The "Interaction term" *alters* the main terms]
+
+.push-left[
+The interaction term, `\(\beta_3(X_{1i}\times X_{2i})\)`, can be interpreted in two ways
+
+```
+# 
+# =====================================
+#                          Model 1     
+# -------------------------------------
+# (Intercept)                 4.378 ***
+#                            (0.072)   
+# cntryBulgaria               1.650 ***
+#                            (0.099)   
+# mc_eduyrs                  -0.113 ***
+#                            (0.019)   
+# cntryBulgaria:mc_eduyrs     0.153 ***
+#                            (0.027)   
+# -------------------------------------
+# R^2                         0.127    
+# Adj. R^2                    0.126    
+# Num. obs.                3330        
+# RMSE                        2.330    
+# =====================================
+# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
+```
+]
+
+---
+
+.push-right[
+&lt;img src="11-Conditionals_files/figure-html/unnamed-chunk-23-1.png" width="66%" style="display: block; margin: auto;" /&gt;
+&lt;br&gt;
+
+1) When the variable `cntryBulgaria` increases by one unit, `\(\beta_{\text{Educ}}\)` increases by `\(\beta_{3}\)`. 
+  + In Bulgaria, the association between education and xenophobia is `\(-0.113 + 0.153 = 0.04\)`.
+  + The difference in `\(\beta_{\text{Educ}}\)` between Denmark and Bulgaria is 0.153.
+
+]
+
+---
+
+.push-right[
+&lt;img src="11-Conditionals_files/figure-html/unnamed-chunk-24-1.png" width="66%" style="display: block; margin: auto;" /&gt;
+&lt;br&gt;
+
+2) When the variable `mc_eduyrs` increases by one unit, `\(\beta_{\text{cntryBulgaria}}\)` increases by `\(\beta_{3}\)`.
+  + Among the best educated (i.e. 8 years more than the average), the xenophobia gap between Danes and Bulgarians is `\(-0.113 + 8 \times 0.153 = 1.111\)`
+  + With every year of education, the average xenophobia gap between Danes and Bulgarians changes by 0.153.
+
+]
+
+---
+layout: false
+# Another example
+
+.panelset[
+.panel[.panel-name[Age and gender]
+.left-column[
+.font90[
+
+```
+# 
+# ==================================
+#                       Model 1     
+# ----------------------------------
+# (Intercept)              5.278 ***
+#                         (0.075)   
+# mc_eduyrs               -0.060 ** 
+#                         (0.021)   
+# gndrFemale              -0.097    
+#                         (0.102)   
+# mc_eduyrs:gndrFemale    -0.037    
+#                         (0.029)   
+# ----------------------------------
+# R^2                      0.013    
+# Adj. R^2                 0.012    
+# Num. obs.             3330        
+# RMSE                     2.478    
+# ==================================
+# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
+```
+]]
+.right-column[
+&lt;img src="11-Conditionals_files/figure-html/conditional4-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+]]
+.panel[.panel-name[Interpretation Main terms]
+
+.left-column[
+.font90[
+
+```
+# 
+# ==================================
+#                       Model 1     
+# ----------------------------------
+# (Intercept)              5.278 ***
+#                         (0.075)   
+# mc_eduyrs               -0.060 ** 
+#                         (0.021)   
+# gndrFemale              -0.097    
+#                         (0.102)   
+# mc_eduyrs:gndrFemale    -0.037    
+#                         (0.029)   
+# ----------------------------------
+# R^2                      0.013    
+# Adj. R^2                 0.012    
+# Num. obs.             3330        
+# RMSE                     2.478    
+# ==================================
+# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
+```
+]]
+.right-column[
+&lt;img src="11-Conditionals_files/figure-html/unnamed-chunk-26-1.png" width="45%" style="display: block; margin: auto;" /&gt;
+`\(\rightarrow \beta_{Educ}|\text{Female}=0\)`: Among men, an additional year of education is significantly associated with -0.06 scale points less xenophobia.
+
+`\(\rightarrow \beta_{Female}|\text{Educ}=0\)`: At average levels of education, the gender gap in xenophobia is -0.097 but insignificant.
+]]
+.panel[.panel-name[Interpretation Interaction term]
+
+.left-column[
+.font90[
+
+```
+# 
+# ==================================
+#                       Model 1     
+# ----------------------------------
+# (Intercept)              5.278 ***
+#                         (0.075)   
+# mc_eduyrs               -0.060 ** 
+#                         (0.021)   
+# gndrFemale              -0.097    
+#                         (0.102)   
+# mc_eduyrs:gndrFemale    -0.037    
+#                         (0.029)   
+# ----------------------------------
+# R^2                      0.013    
+# Adj. R^2                 0.012    
+# Num. obs.             3330        
+# RMSE                     2.478    
+# ==================================
+# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
+```
+]]
+.right-column[
+&lt;img src="11-Conditionals_files/figure-html/unnamed-chunk-28-1.png" width="45%" style="display: block; margin: auto;" /&gt;
+
+1) The association between education and xenophobia among women is `\(-0.06 + -0.037= -0.097\)`. This is -0.037 more negative than the association among men, but this different in slopes is not significant.
+
+2) With every year increase of education, the gender gap in xenophobia declines by -0.037. At two years more education than the average citizen, the gender gap is `\(-0.06 + 2\times -0.037= -0.134\)` scale points, but (probably) insignificant.
+
+
+]]
+.panel[.panel-name[Code]
+.push-left[
+
+```r
+ols_inter &lt;- lm_robust(imwbcnt ~ mc_eduyrs*gndr,
+                       data = ESS, weights = pspwght)
+# Report results in a regression table
+screenreg(list(ols_inter), 
+          include.ci = FALSE, digits = 3)
+```
+]
+
+.push-right[
+
+```r
+ggplot(data = ESS, aes(y = imwbcnt, x = mc_eduyrs, color = gndr)) +
+  geom_jitter(aes(size = pspwght), alpha = 1/8) +
+  geom_vline(xintercept = 0, color = "red") +
+  geom_smooth(method = "lm", fullrange=TRUE) +
+  labs(y = "Immigration makes DK/BG \n a worse place to live",
+       x = "Years of education \n (centered around the mean)") +
+  theme_minimal() +
+  scale_x_continuous(limits = c(-5, 8), breaks = c(-4, -2, 0, 2, 4, 6, 8)) +
+  theme(legend.position = "bottom") +
+  guides(size = FALSE)
+```
+]]]
+
+---
+
+BREAK
+
+---
+# Control for potential confounders .font70[Easy ...]
+
+.push-left[
+
+```
+# 
+# ===================================================
+#                          Model 1       Model 2     
+# ---------------------------------------------------
+# (Intercept)                 4.378 ***     3.789 ***
+#                            (0.072)       (0.150)   
+# cntryBulgaria               1.650 ***     1.625 ***
+#                            (0.099)       (0.099)   
+# mc_eduyrs                  -0.113 ***    -0.108 ***
+#                            (0.019)       (0.018)   
+# cntryBulgaria:mc_eduyrs     0.153 ***     0.150 ***
+#                            (0.027)       (0.027)   
+# gndrFemale                               -0.135    
+#                                          (0.096)   
+# agea                                      0.014 ***
+#                                          (0.003)   
+# ---------------------------------------------------
+# R^2                         0.127         0.139    
+# Adj. R^2                    0.126         0.137    
+# Num. obs.                3330          3330        
+# RMSE                        2.330         2.315    
+# ===================================================
+# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
+```
+]
+
+---
+# Visualize!
+
+.push-left[
+
+```
+# 
+# ===================================================
+#                          Model 1       Model 2     
+# ---------------------------------------------------
+# (Intercept)                 4.378 ***     3.789 ***
+#                            (0.072)       (0.150)   
+# cntryBulgaria               1.650 ***     1.625 ***
+#                            (0.099)       (0.099)   
+# mc_eduyrs                  -0.113 ***    -0.108 ***
+#                            (0.019)       (0.018)   
+# cntryBulgaria:mc_eduyrs     0.153 ***     0.150 ***
+#                            (0.027)       (0.027)   
+# gndrFemale                               -0.135    
+#                                          (0.096)   
+# agea                                      0.014 ***
+#                                          (0.003)   
+# ---------------------------------------------------
+# R^2                         0.127         0.139    
+# Adj. R^2                    0.126         0.137    
+# Num. obs.                3330          3330        
+# RMSE                        2.330         2.315    
+# ===================================================
+# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
+```
+]
+
+.push-right[
+.panelset[
+.panel[.panel-name[Fictional data]
+.font90[
+
+```r
+(fict_dat &lt;- tibble(
+* # Repeat the vector -5:8, each element twice
+* mc_eduyrs = rep(-5:8, each = 2),
+* # Repeat DK/BG 14 times
+* cntry = rep(c("Denmark", "Bulgaria"), 14),
+  # Set controls to constant value
+  gndr = "Female",
+  agea = mean(ESS$agea, na.rm = TRUE)))
+# # A tibble: 28 × 4
+#    mc_eduyrs cntry    gndr    agea
+#        &lt;int&gt; &lt;chr&gt;    &lt;chr&gt;  &lt;dbl&gt;
+#  1        -5 Denmark  Female  52.2
+#  2        -5 Bulgaria Female  52.2
+#  3        -4 Denmark  Female  52.2
+#  4        -4 Bulgaria Female  52.2
+#  5        -3 Denmark  Female  52.2
+#  6        -3 Bulgaria Female  52.2
+#  7        -2 Denmark  Female  52.2
+#  8        -2 Bulgaria Female  52.2
+#  9        -1 Denmark  Female  52.2
+# 10        -1 Bulgaria Female  52.2
+# # … with 18 more rows
+```
+]]
+.panel[.panel-name[Predictions]
+.font90[
+
+```r
+*(fict_dat &lt;- predict(
+* ols_inter4, newdata = fict_dat,
+* interval = "confidence", level = 0.95)$fit %&gt;%
+   as_tibble() %&gt;% # Turn into a tibble, then
+   bind_cols(fict_dat, .)) # Add to the synthetic data.
+# # A tibble: 28 × 7
+#    mc_eduyrs cntry    gndr    agea   fit   lwr   upr
+#        &lt;int&gt; &lt;chr&gt;    &lt;chr&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+#  1        -5 Denmark  Female  52.2  4.91  4.64  5.19
+#  2        -5 Bulgaria Female  52.2  5.79  5.55  6.02
+#  3        -4 Denmark  Female  52.2  4.81  4.56  5.05
+#  4        -4 Bulgaria Female  52.2  5.83  5.63  6.04
+#  5        -3 Denmark  Female  52.2  4.70  4.48  4.92
+#  6        -3 Bulgaria Female  52.2  5.87  5.69  6.06
+#  7        -2 Denmark  Female  52.2  4.59  4.39  4.79
+#  8        -2 Bulgaria Female  52.2  5.92  5.75  6.08
+#  9        -1 Denmark  Female  52.2  4.48  4.30  4.66
+# 10        -1 Bulgaria Female  52.2  5.96  5.80  6.11
+# # … with 18 more rows
+```
+]]
+.panel[.panel-name[Plot]
+&lt;img src="11-Conditionals_files/figure-html/predictions-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+]
+.panel[.panel-name[Code]
+
+```r
+ggplot(data = fict_dat, aes(y = fit, x = mc_eduyrs)) +
+  geom_ribbon(aes(ymin = lwr, ymax = upr, fill = cntry), alpha = 0.5) +
+  geom_line(aes(color = cntry)) +
+  labs(
+    fill = "Country:", color = "Country:",
+    title = "Predictions based on multiple OLS",
+    x = "By mean-centered years of education
+    (At average age and gender set to women)",
+    y = "Predicted xenophobia") +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+```
+]]]
+
+---
+
+Exercise
+
+---
+class: inverse
+# Revised research question
+
+.center[.font140[
+Is socialism good at reducing poverty if combined with citizenship rights,&lt;br&gt;&lt;br&gt; but not good at it if under autocratic rule?
+]]
+
+&lt;br&gt;
+.push-left[
+&lt;img src="https://miro.medium.com/max/1280/1*8Y_EPw2a67TRRos3b24YlA.jpeg" width="90%" style="display: block; margin: auto;" /&gt;
+]
+
+.push-right[
+&lt;img src="https://almayasabdam.com/wp-content/uploads/2020/09/1496441134_communists.png" width="96%" style="display: block; margin: auto;" /&gt;
+]
+
+
+
+---
+class: clear
+layout: true
+# Interaction of two continuous variables
+
+---
+
+.panelset[
+.panel[.panel-name[OLS results]
+.push-left[
+
+```
+# 
+# ===========================================
+#                                 Model 1    
+# -------------------------------------------
+# (Intercept)                      42.609 ***
+#                                  (2.585)   
+# mc_socialist                     -0.163    
+#                                  (0.216)   
+# mc_citizen_rights                -5.242 ***
+#                                  (0.733)   
+# mc_socialist:mc_citizen_rights    0.079 *  
+#                                  (0.039)   
+# -------------------------------------------
+# R^2                               0.295    
+# Adj. R^2                          0.280    
+# Num. obs.                       146        
+# RMSE                             30.061    
+# ===========================================
+# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
+```
+]]
+.panel[.panel-name[Code]
+
+```r
+# Same data as Lecture 2 
+Dat &lt;- Dat %&gt;% mutate( # Mean-center predictors
+  mc_socialist = socialist - mean(socialist, na.rm = TRUE),
+  mc_citizen_rights = citizen_rights - mean(citizen_rights, na.rm = TRUE))
+
+# Multiple OLS
+ols_inter &lt;- lm_robust(poverty ~ mc_socialist*mc_citizen_rights, data = Dat)
+
+# Regression table
+screenreg(list(ols_inter), include.ci = FALSE, digits = 3)
+```
+]]
+
+---
+
+.panelset[
+.panel[.panel-name[OLS results]
+.push-left[
+
+```
+# 
+# ===========================================
+#                                 Model 1    
+# -------------------------------------------
+# (Intercept)                      42.609 ***
+#                                  (2.585)   
+# mc_socialist                     -0.163    
+#                                  (0.216)   
+# mc_citizen_rights                -5.242 ***
+#                                  (0.733)   
+# mc_socialist:mc_citizen_rights    0.079 *  
+#                                  (0.039)   
+# -------------------------------------------
+# R^2                               0.295    
+# Adj. R^2                          0.280    
+# Num. obs.                       146        
+# RMSE                             30.061    
+# ===========================================
+# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
+```
+]
+.push-right[
+`\(\beta_{\text{Socialism}}|\text{Citizen Rights}=0\)`: At average levels of citizenship rights, socialism is not significantly related to declines in poverty.
+
+`\(\beta_{\text{Citizen Rights}}|\text{Socialism}=0\)`: At average levels of socialism, a unit increase in citizenship rights is significantly related to a -5.242 percentage point decline in poverty.
+
+`$$\beta_{\text{Socialism} \times \text{Citizen Rights}}$$`
+1) With every unit more citizenship rights, socialism gets 0.079 percentage points worse at being related to declines in poverty.
+
+2) With every additional year of socialism, citizenship rights are 0.079 percentage points less associated with declines in poverty.
+
+]]
+.panel[.panel-name[Code]
+
+```r
+# Same data as Lecture 2 
+Dat &lt;- Dat %&gt;% mutate( # Mean-center predictors
+  mc_socialist = socialist - mean(socialist, na.rm = TRUE),
+  mc_citizen_rights = citizen_rights - mean(citizen_rights, na.rm = TRUE))
+
+# Multiple OLS
+ols_inter &lt;- lm_robust(poverty ~ mc_socialist*mc_citizen_rights, data = Dat)
+
+# Regression table
+screenreg(list(ols_inter), include.ci = FALSE, digits = 3)
+```
+]
+.panel[.panel-name[Predictions]
+.push-left[
+.font90[
+
+```r
+summary(Dat$mc_socialist)
+#    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+#    -6.7    -6.7    -6.7     0.0    -1.7    66.3
+summary(Dat$mc_citizen_rights)
+#    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+#   -7.62   -2.62    0.38    0.00    3.38    4.38
+*(fict_dat &lt;- tibble( # Choose "representative" values of
+* # x1 and x2 at which you wish to predict
+  # Repeat min, mean, and max each four times,
+  mc_socialist = rep(c(-6, 0, 60), each = 3),
+  # Repeat min, mean max four times.
+  mc_citizen_rights = rep(c(-7, 0, 4), 3)))
+# # A tibble: 9 × 2
+#   mc_socialist mc_citizen_rights
+#          &lt;dbl&gt;             &lt;dbl&gt;
+# 1           -6                -7
+# 2           -6                 0
+# 3           -6                 4
+# 4            0                -7
+# 5            0                 0
+# 6            0                 4
+# 7           60                -7
+# 8           60                 0
+# 9           60                 4
+```
+]]
+.push-right[
+.font90[
+
+```r
+(fict_dat &lt;- predict(
+  ols_inter, newdata = fict_dat,
+  interval = "confidence", level = 0.95)$fit %&gt;%
+   as_tibble() %&gt;% # Turn into a tibble, then
+   bind_cols(fict_dat, .)) # Add to the synthetic data.
+# # A tibble: 9 × 5
+#   mc_socialist mc_citizen_rights   fit    lwr   upr
+#          &lt;dbl&gt;             &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;
+# 1           -6                -7  83.6  70.1   97.1
+# 2           -6                 0  43.6  38.2   48.9
+# 3           -6                 4  20.7  14.3   27.2
+# 4            0                -7  79.3  66.9   91.7
+# 5            0                 0  42.6  37.5   47.7
+# 6            0                 4  21.6  14.9   28.4
+# 7           60                -7  36.4  10.5   62.3
+# 8           60                 0  32.8   5.95  59.7
+# 9           60                 4  30.8 -11.4   73.1
+```
+]]
+.panel[.panel-name[Plots]
+.push-left[
+&lt;img src="11-Conditionals_files/figure-html/predictions2-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
+.push-right[
+&lt;img src="11-Conditionals_files/figure-html/predictions3-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]]
+.panel[.panel-name[Code]
+.push-left[
+.font90[
+
+```r
+ggplot(data = fict_dat, aes(y = fit, x = mc_socialist)) +
+  geom_ribbon(aes(ymin = lwr, ymax = upr, 
+                  fill = factor(mc_citizen_rights)), alpha = 0.5) +
+  geom_line(aes(color = factor(mc_citizen_rights))) +
+  labs(
+    fill = "Mean-centered citizenship rights:", 
+    color = "Mean-centered citizenship rights:",
+    title = "Predictions based on multiple OLS",
+    x = "By mean-centered years of socialist history",
+    y = "Predicted Extreme poverty 
+    among population") +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+```
+]]
+.push-right[
+.font90[
+
+```r
+ggplot(data = fict_dat, aes(y = fit, x = mc_citizen_rights)) +
+  geom_ribbon(aes(ymin = lwr, ymax = upr, 
+                  fill = factor(mc_socialist)), alpha = 0.5) +
+  geom_line(aes(color = factor(mc_socialist))) +
+  labs(
+    fill = "Mean-centered socialist history:", 
+    color = "Mean-centered socialist history:",
+    title = "Predictions based on multiple OLS",
+    x = "By mean-centered citizenship rights",
+    y = "Predicted Extreme poverty 
+    among population") +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+```
+]]]
+.panel[.panel-name[Potential theory]
+
+.left-column[
+&lt;img src="https://www.aljazeera.com/wp-content/uploads/2022/11/000_32MK2ZL.jpg?resize=770%2C513" width="100%" style="display: block; margin: auto;" /&gt;
+]
+.right-column[
+- Among the autocrats, better catch a socialist.
+
+- Among the democrats, socialists aren't performing significantly different in termsw of fighting extreme poverty.
+
+`\(\rightarrow\)` Most importantly: .alert[Be democratic!]
+
+]]]]
 
 ---
 layout: false
 class: inverse
 # Today's general lessons
 
-1. 2SLS first predicts that part of the treatment `\(D\)` that correlates with the instrument. Then it uses this part to predict the outcome of interest `\(Y\)`.
-2. Instrument variables and control variables both use multiple OLS and it's Frisch-Waugh logic. However, they use it in exactly the opposite way. An instrument identifies unconfounded random variation in the treatment `\(D\)`; IV only keeps that part of `\(D\)` that *correlates* with the instrument. A confounder induces selection bias into `\(D\)`. By controlling for it, we only use that part of `\(D\)` that *does not correlate* with it.
-3. If the exclusion restriction does not hold, an instrument basically turns into a confounder!
+1. 
 
----
-class: inverse
-# Today's (important) functions
 
-1. `ivreg()`: Estimate 2SLS regression.
 
----
-# References
-
-.font80[
-NULL
-]
 
 
     </textarea>
