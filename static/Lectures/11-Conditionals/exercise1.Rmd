@@ -15,134 +15,104 @@ library(webexercises)
 library(essentials)
 ```
 
-```{tikz, DAG_3, echo = FALSE, out.width='50%'}
-\usetikzlibrary{shapes,decorations,arrows,calc,arrows.meta,fit,positioning,quotes}
-\tikzset{
-  -Latex,auto,node distance =1 cm and 1 cm,semithick,
-  state/.style ={ellipse, draw, minimum width = 0.7 cm},
-  point/.style = {circle, draw, inner sep=0.04cm,fill,node contents={}},
-  bidirected/.style={Latex-Latex,dashed},
-  el/.style = {inner sep=2pt, align=left, sloped}
-}
+Let's take another look at the Legewie, terrorist attack data. As before, run the code below to prepare the data for our analysis.
 
-\begin{tikzpicture}
-\sffamily
-\node[state, align = center] (1) at (0,0) {Education};
-\node[state, align = center] (2) [right = of 1] {\$};
-\node[state, align = center] (3) [dashed, gray, above = of 1] {Parental \\ education};
-\node[state, align = center] (4) [dashed, gray, below = of 1] {Cognitive \\ ability};
-\node[state, align = center] (5) [dashed, gray, left = of 3] {$C?$};
-\node[state, align = center] (6) [red, left = of 1] {Child labor \\ laws};
-
-\path (1) edge (2);
-\path (3) edge [dashed, gray] (2);
-\path (4) edge [dashed, gray] (2);
-\path (3) edge [dashed, gray] (1);
-\path (4) edge [dashed, gray] (1);
-\path (5) edge [dashed, gray] (1);
-\path (5) edge [dashed, gray] (2);
-\path (6) edge [red] (1);
-\end{tikzpicture}
-```
-
-In 2000. Acemoglu and Angrist (2000) had an idea: Could child labor laws of the early 21st century be used as an instrument variable? They recognized that child labor laws in the different US federal states required that children had a minimum education before they were allowed to work. However, how many years of schooling that required differed across the various US federal states and also across time. They argued it was basically random in which year a certain federal state would reform its child labor laws. Thus by comparing persons who were subject to different child labor laws in different states and at different times, one could study the causal effect of compulsory education on wages.
-
-```{r}
+```{r results = FALSE}
 pacman::p_load(
   tidyverse, # Data manipulation,
-  texreg, # regression tables with nice layout,
+  haven, # Handle Stata data.
+  ggplot2, # beautiful figures,
   estimatr, # Regression for weighted data,
-  modelr, # Turn results of lm() into a tibble,
-  ivreg, # IV 2SLS,
-  masteringmetrics) # Data and examples from Mastering Metrics
+  furniture, # For row-means,
+  texreg) # regression tables with nice layout.
 
-data("child_labor", package = "masteringmetrics")
-```
+# Bali terror attack
+event_date_begin <- as.Date("2002-09-14")
+event_date       <- as.Date("2002-10-13")
+event_date_end   <- as.Date("2002-10-20")
 
-1. The data set contains information from several US censuses (1950 to 1990). Importantly, it contains three categorical dummy variables for child labor law: `cl7`, `cl8`, and `cl9`. These three dummy variable identify people who lived in a US state where at the given time when they were children, the law required 7, 8, or 9 years of schooling before they were allowed to work. The data also contain information on respondents' US State of Birth `sob`, their year of birth `yob`, and the year in which the census data was collected `year`. Recode the three child labor law variables into on continuous predictor, and define the US state and the census year variables as categorical.
-
-`r hide("R solution -> dont' peak to early ;) !")`
-```{r}
-child_labor <- child_labor %>%
+# Read the ESS 2002 data and prepare for analysis
+ESS <- read_dta("../../../assets/Legewie_ESS_02.dta") %>%
   mutate(
-    # Generate continuous child labor law variable,
-    chld_lb_lw = case_when(
-      cl7 == 1 ~ 7, 
-      cl8 == 1 ~ 8,
-      cl9 == 1 ~ 9),
-    # US State of birth as categorical,
-    sob = factor(sob),
-    # Census year as categorical.
-    year = factor(year))
+    # Day and time of the survey interview,
+    int_year = inwyr,
+    int_mon  = inwmm,
+    int_day  = inwdd,
+    int_date = sprintf("%s-%s-%s", int_year, int_mon, int_day) %>% as.Date(),
+    # Treatment indicator,
+    treat = case_when(
+      int_date > event_date & int_date <= event_date_end ~ "After the attack",
+      int_date < event_date & int_date > event_date_begin ~ "Before the attack",
+      TRUE ~ as.character(NA)) %>% fct_relevel("Before the attack", "After the attack"),
+    # Attitudes towards immigrants
+    anti_immi = rowmeans(
+      imtcjob, imbleco, imbgeco, imueclt,
+      imwbcnt, imwbcrm, imbghct, na.rm = TRUE) %>% scale() %>% as.numeric(),
+    # Subtract from max to make larger values more xenophobic.
+    anti_immi = max(anti_immi, na.rm = TRUE) - anti_immi,
+    # Immigrant origin
+    brncntr = as_factor(brncntr),
+    mocntr = as_factor(mocntr),
+    facntr = as_factor(facntr),
+    #######################################
+    # Age
+    age = int_year - yrbrn, #<<
+    # Gender
+    gndr = as_factor(gndr) %>% fct_drop(),
+    # Employment status
+    empl_stat = case_when(
+      pdwrk == 1 ~ "Working",
+      uempla == 1 ~ "Unemployed",
+      rtrd == 1 ~ "Retired",
+      TRUE ~ "Other"),
+    ########################################
+    # Weights
+    pspwght = pweight * dweight) %>%
+  # Sample restriction        
+  filter(cntry != "DK" & cntry != "IL" & cntry != "HU" & 
+    # Mainstream members (i.e. immigrant origin)
+    brncntr == "yes" & mocntr == "yes" &  facntr == "yes") %>%
+  # Keep only a minimum set of variables we need today,
+  select(treat, anti_immi, cntry, int_date, pspwght, age, empl_stat) %>%
+  drop_na() # Delete cases with missing values.
 ```
-`r unhide()`
 
-```{r q1, include = FALSE}
-# Estimate the first stage
-frst_stage <- lm_robust(indEduc ~ chld_lb_lw + yob + year + sob, data = child_labor)
+1. This time, the data set contains interviews from people living in 10 different countries. Compared to Portugal as reference, are the terror effects significantly weaker or stronger in some countries? `r mcq(c("No they are not significantly different", answer = "Most are significantly smaller", "Most are significantly larger", "Only Slovenia differs"))`
 
-screenreg(frst_stage, # Regression table
-          include.ci = FALSE, digits = 3)
-```
-
-```{r include = FALSE}
-coef_frst <- coef(frst_stage)["chld_lb_lw"] %>% round(., 3) %>% as.scalar()
-```
-
-2. What is the first stage estimate of child labor laws, controlling for US state of birth, year of birth, and year of census? One more year of compulsory education translates into `r fitb(coef_frst, width = "5")` years of more education among US Americans.
-
-`r hide("R solution -> dont' peak to early ;) !")`
-```{r ref.label = "q1"}
-
-```
-`r unhide()`
-
-```{r reduced, include = FALSE}
-# Estimate the reduced stage
-rdcd_stage <- lm_robust(lnwkwage ~ chld_lb_lw + yob + year + sob, data = child_labor)
-
-screenreg(rdcd_stage, # Regression table
-          include.ci = FALSE, digits = 3)
-```
-
-```{r include = FALSE}
-coef_rdcd <- coef(rdcd_stage)["chld_lb_lw"] %>% round(., 3) %>% as.scalar()
-```
-3. `lnwkwage` contains the logged wages. Estimate the reduced form using the same control variables. A year of compulsory education increases logged wages by: `r fitb(coef_rdcd, width = "5")`. According to Acemoglu and Angrist, this is `r mcq(c("Not a causal effect!", answer = "the causal effect of child labor law, if their assumption is true that differences bewteen states and years are random", "The causal effect of education"))`.
-
-`r hide("R solution -> dont' peak to early ;) !")`
-```{r ref.label = "reduced"}
-
-```
-`r unhide()`
-
-4. Use the Wald-IV estimator to get the LATE of education.
-`r hide("R solution -> dont' peak to early ;) !")`
-$\frac{`r coef_rdcd`}{`r coef_frst`}=`r coef_rdcd / coef_frst`$
-`r unhide()`
-
-5. Drop all observations from the US Federal States 4 and 8. Then get the predicted values after the first stage. That is, get that part of education that correlates with the child labor laws. Use the predicted values to explain logged wage using the same control variables as before. Compare the your Wald-IV estimate.
 `r hide("R solution -> dont' peak to early ;) !")`
 ```{r}
-child_labor <- child_labor %>%
-  filter(sob != 4 & sob != 8) %>%
-  add_predictions(frst_stage) %>%
-  rename(pred_indEduc = pred)
+ESS <- ESS %>%
+  mutate( # Make Portugal the reference
+    cntry = cntry %>% fct_relevel("PT"))
 
-# Estimate the first stage
-scnd_stage <- lm_robust(lnwkwage ~ pred_indEduc + yob + year + sob, data = child_labor)
+ols_inter <- lm_robust(anti_immi ~ treat*cntry, data = ESS, weights = pspwght)
 
-screenreg(scnd_stage, # Regression table
-          include.ci = FALSE, digits = 3)
+# Report results in a nicely-formatted table
+screenreg(ols_inter, include.ci = FALSE, digits = 3)
 ```
 `r unhide()`
 
-6. Use `ivreg()` to perform all steps in one simple 2SLS estimation. Compare to your Wald-IV estimate and your second stage!
+```{r echo = FALSE}
+coefPT <- coef(ols_inter)["treatAfter the attack"] %>% round(., 3) %>% as.scalar()
+```
+2. According to this regression model, what was the effect of the Bali terror attack in Portugal? `r fitb(coefPT, width = "5")`
+
+```{r echo = FALSE}
+coefSI <- coef(ols_inter)["treatAfter the attack"] + coef(ols_inter)["treatAfter the attack:cntrySI"] %>% round(., 3) %>% as.scalar()
+```
+3. According to this regression model, what was the effect of the Bali terror attack in Slovenia? `r fitb(coefSI, width = "5")`
 `r hide("R solution -> dont' peak to early ;) !")`
 ```{r}
-twosls <- ivreg(lnwkwage ~ indEduc + yob + year + sob | chld_lb_lw + yob + year + sob, data = child_labor)
+coef(ols_inter)["treatAfter the attack"] + coef(ols_inter)["treatAfter the attack:cntrySI"]
+```
+`r unhide()`
 
-screenreg(twosls, # Regression table
-          include.ci = FALSE, digits = 3)
+4. Control for age and employment status. Are the results robust? `r mcq(c("No, there are several differences", answer = "Yes, and some countries are even not significantly different from Portugal anylonger"))`
+`r hide("R solution -> dont' peak to early ;) !")`
+```{r}
+ols_inter2 <- lm_robust(anti_immi ~ treat*cntry + age + empl_stat, data = ESS, weights = pspwght)
+
+# Report results in a nicely-formatted table
+screenreg(list(ols_inter, ols_inter2), include.ci = FALSE, digits = 3)
 ```
 `r unhide()`
