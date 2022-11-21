@@ -54,9 +54,13 @@ knitr::include_graphics('https://liu.se/-/media/istock-501261958.jpg?mw=1120&mh=
 class: inverse middle
 # Today's schedule
 
-1. Application of the day: Xenophobia and education in Denmark and Bulgaria
+1. Application of the day: Xenophobia and education in Denmark and Bulgaria.
+  + OLS is additive.
+  + Conditional relationships are multiplicative.
+  + Interaction terms between a continuous and a categorical variable.
 
-2. Two more IV applications: 
+2. Application 2: Do socialism and citizenship rights interact?
+  + Interaction terms between two continuous variables.
 
 ---
 class: inverse 
@@ -177,7 +181,7 @@ bind_rows( # Combine estimate results into one tibble,
 
 ```
 ]]]
-.panel[.panel-name[Multiple OLS is additive!]
+.panel[.panel-name[Multiple OLS is additive]
 .left-column[
 **Multiple OLS, so far:** Allows us to express an outcome as linear function of several continuous and categorical predictor variables. The predictors are adjusted/controlled for each other .alert[and additive].
 
@@ -199,7 +203,41 @@ ols_equa <- lm(imwbcnt ~ cntry + eduyrs + agea,
 
 `r extract_eq(ols_equa, use_coefs = TRUE)`
 
-]]]]
+]]]
+.panel[.panel-name[Additive implies linear]
+
+.push-left[
+.font90[
+```{r ref.label = "OLS", echo = FALSE}
+
+```
+]]
+
+.push-right[
+```{r fig.height = 6, fig.width = 5, echo = FALSE, out.width='100%'}
+library(plotly)
+### Estimation of the regression plane
+mod <- lm(imwbcnt ~ eduyrs + agea, 
+                        data = ESS, weights = pspwght)
+cf.mod <- coef(mod)
+
+### Calculate z on a grid of x-y values
+x1.seq <- seq(min(ESS$eduyrs),max(ESS$eduyrs),length.out=25)
+x2.seq <- seq(min(ESS$agea),max(ESS$agea),length.out=25)
+z <- t(outer(x1.seq, x2.seq, function(x,y) cf.mod[1]+cf.mod[2]*x+cf.mod[3]*y))
+
+ESS_plot <- ESS %>% filter(imwbcnt > 3 & imwbcnt < 7) %>% sample_n(200)
+
+#### Draw the plane with "plot_ly" and add points with "add_trace"
+plot_ly(x=~x1.seq, y=~x2.seq, z=~z, type="surface") %>%
+  add_trace(data=ESS_plot, x=ESS_plot$eduyrs, y=ESS_plot$agea, z=ESS_plot$imwbcnt, mode="markers", type="scatter3d",
+  marker = list(color="#a6a6a6", opacity=0.7, symbol=105)) %>%
+  layout(scene = list(
+    xaxis = list(title = "Eduyrs"),
+    yaxis = list(title = "Age"),
+    zaxis = list(title = "Xeno")))
+```
+]]]
 
 ---
 # But what if relations are conditional?
@@ -695,6 +733,14 @@ knitr::include_graphics('https://almayasabdam.com/wp-content/uploads/2020/09/149
 ```
 ]
 
+---
+class: inverse
+# Revised research question
+
+.center[.font140[
+Is socialism good at reducing poverty if combined with citizenship rights,<br><br> but not good at it if under autocratic rule?
+]]
+
 ```{r include = FALSE}
 pacman::p_load(
   tidyverse, # Data manipulation,
@@ -758,17 +804,74 @@ Dat <- inner_join(Dat_poverty, Dat_citi_rights, by = c("country", "date")) %>%
       TRUE ~ socialist)) %>% drop_na() # Drop countries with missing values.
 ```
 
+<br>
+.push-left[
+```{r socialism-corr1, out.width='90%', fig.height = 5, fig.width = 7, results = FALSE, echo = FALSE}
+ggplot(data = Dat, 
+       aes(y = poverty, x = socialist, label = country)) +
+  geom_smooth(method = "lm") +
+  geom_text() +
+  geom_label_repel(data = Dat %>% filter(country == "Denmark"), 
+                   show.legend = FALSE, color = "#901A1E",
+                   alpha = 0.8, segment.curvature = -0.1,
+                   segment.ncp = 4, segment.angle = 10,
+                   size = 5, box.padding = 1.5,
+                   point.padding = 0.5, force = 100,
+                   segment.size  = 1) +
+  labs(y = "% population with less than 5.50$ a day", 
+       x = "Our Socialism index") +
+  theme_minimal()
+```
+]
+
+.push-right[
+```{r citizen-corr1, out.width='90%', fig.height = 5, fig.width = 7, results = FALSE, echo = FALSE}
+ggplot(data = Dat, 
+       aes(y = poverty, x = citizen_rights, label = country)) +
+  geom_smooth(method = "lm") +
+  geom_text() +
+  geom_label_repel(data = Dat %>% filter(country == "Denmark"), 
+                   show.legend = FALSE, color = "#901A1E",
+                   alpha = 0.8, segment.curvature = -0.1,
+                   segment.ncp = 4, segment.angle = 10,
+                   size = 5, box.padding = 1.5,
+                   point.padding = 0.5, force = 100,
+                   segment.size  = 1) +
+  labs(y = "% population with less than 5.50$ a day", 
+       x = "Freedom House Index of Citizenship Rights") +
+  theme_minimal()
+```
+]
+
 ---
 class: clear
-layout: true
 # Interaction of two continuous variables
 
----
-
 .panelset[
-.panel[.panel-name[OLS results]
+.panel[.panel-name[Additive multiple OLS]
 .push-left[
-```{r socialism, echo = FALSE}
+```{r socialism1, echo = FALSE}
+# Same data as Lecture 2 
+Dat <- Dat %>% mutate( # Mean-center predictors
+  mc_socialist = socialist - mean(socialist, na.rm = TRUE),
+  mc_citizen_rights = citizen_rights - mean(citizen_rights, na.rm = TRUE))
+
+# Multiple OLS
+ols_add <- lm_robust(poverty ~ mc_socialist + mc_citizen_rights, data = Dat)
+
+# Regression table
+screenreg(list(ols_add), include.ci = FALSE, digits = 3)
+```
+]
+.push-right[
+```{r fig.height = 5, fig.width = 5, echo = FALSE, out.width='80%'}
+library(rockchalk)
+plotPlane(ols_add, "mc_citizen_rights", "mc_socialist", pch=16, alty=1,alwd=1, theta=35, phi=20)
+```
+]]
+.panel[.panel-name[Interactions imply non-linearity!]
+.push-left[
+```{r socialism2, echo = FALSE, .fig.show = 'hide'}
 # Same data as Lecture 2 
 Dat <- Dat %>% mutate( # Mean-center predictors
   mc_socialist = socialist - mean(socialist, na.rm = TRUE),
@@ -779,6 +882,15 @@ ols_inter <- lm_robust(poverty ~ mc_socialist*mc_citizen_rights, data = Dat)
 
 # Regression table
 screenreg(list(ols_inter), include.ci = FALSE, digits = 3)
+
+library(rockchalk)
+plotPlane(ols_inter, "mc_citizen_rights", "mc_socialist", pch=16, alty=1,alwd=1, theta=35, phi=20)
+```
+]
+
+.push-right[
+```{r fig.height = 5, fig.width = 5, echo = FALSE, out.width='80%'}
+plotPlane(ols_inter, "mc_citizen_rights", "mc_socialist", pch=16, alty=1,alwd=1, theta=35, phi=20)
 ```
 ]]
 .panel[.panel-name[Code]
@@ -787,11 +899,13 @@ screenreg(list(ols_inter), include.ci = FALSE, digits = 3)
 ]]
 
 ---
+class: clear
+# Interaction of two continuous variables
 
 .panelset[
 .panel[.panel-name[OLS results]
 .push-left[
-```{r ref.label = "socialism", echo = FALSE}
+```{r ref.label = "socialism2", echo = FALSE}
 
 ```
 ]
@@ -806,10 +920,6 @@ $$\beta_{\text{Socialism} \times \text{Citizen Rights}}$$
 2) With every additional year of socialism, citizenship rights are `r coef(ols_inter)["mc_socialist:mc_citizen_rights"]` percentage points less associated with declines in poverty.
 
 ]]
-.panel[.panel-name[Code]
-```{r ref.label = "socialism", eval = FALSE}
-```
-]
 .panel[.panel-name[Predictions]
 .push-left[
 .font90[
@@ -882,22 +992,7 @@ ggplot(data = fict_dat, aes(y = fit, x = mc_citizen_rights)) +
 ```{r ref.label = "predictions3", fig.show = 'hide'}
 
 ```
-]]]
-.panel[.panel-name[Potential theory]
-
-.left-column[
-```{r, echo = FALSE, out.width='100%', fig.align='center'}
-knitr::include_graphics('https://www.aljazeera.com/wp-content/uploads/2022/11/000_32MK2ZL.jpg?resize=770%2C513')
-```
-]
-.right-column[
-- Among the autocrats, better catch a socialist.
-
-- Among the democrats, socialists aren't performing significantly different in termsw of fighting extreme poverty.
-
-$\rightarrow$ Most importantly: .alert[Be democratic!]
-
-]]]]
+]]]]]
 
 ---
 layout: false

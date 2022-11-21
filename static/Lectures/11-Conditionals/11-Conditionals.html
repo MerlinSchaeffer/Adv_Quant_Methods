@@ -4,13 +4,21 @@
     <title>Interaction/Conditional effects</title>
     <meta charset="utf-8" />
     <meta name="author" content="Merlin Schaeffer  Department of Sociology" />
-    <meta name="date" content="2022-11-17" />
+    <meta name="date" content="2022-11-21" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
     <script src="libs/tile-view/tile-view.js"></script>
     <link href="libs/tachyons/tachyons.min.css" rel="stylesheet" />
     <link href="libs/panelset/panelset.css" rel="stylesheet" />
     <script src="libs/panelset/panelset.js"></script>
+    <script src="libs/htmlwidgets/htmlwidgets.js"></script>
+    <script src="libs/plotly-binding/plotly.js"></script>
+    <script src="libs/typedarray/typedarray.min.js"></script>
+    <script src="libs/jquery/jquery.min.js"></script>
+    <link href="libs/crosstalk/css/crosstalk.min.css" rel="stylesheet" />
+    <script src="libs/crosstalk/js/crosstalk.min.js"></script>
+    <link href="libs/plotly-htmlwidgets-css/plotly-htmlwidgets.css" rel="stylesheet" />
+    <script src="libs/plotly-main/plotly-latest.min.js"></script>
     <link rel="stylesheet" href="../template/Merlin169.css" type="text/css" />
   </head>
   <body>
@@ -27,7 +35,7 @@ class: center, middle, inverse, title-slide
 ### Merlin Schaeffer<br> Department of Sociology
 ]
 .date[
-### 2022-11-17
+### 2022-11-21
 ]
 
 ---
@@ -43,9 +51,13 @@ class: center, middle, inverse, title-slide
 class: inverse middle
 # Today's schedule
 
-1. Application of the day: Xenophobia and education in Denmark and Bulgaria
+1. Application of the day: Xenophobia and education in Denmark and Bulgaria.
+  + OLS is additive.
+  + Conditional relationships are multiplicative.
+  + Interaction terms between a continuous and a categorical variable.
 
-2. Two more IV applications: 
+2. Application 2: Do socialism and citizenship rights interact?
+  + Interaction terms between two continuous variables.
 
 ---
 class: inverse 
@@ -200,7 +212,7 @@ screenreg(list(ols_bi, ols_mult_1, ols_mult_2),
           include.ci = FALSE, digits = 3)
 ```
 ]]]
-.panel[.panel-name[Multiple OLS is additive!]
+.panel[.panel-name[Multiple OLS is additive]
 .left-column[
 **Multiple OLS, so far:** Allows us to express an outcome as linear function of several continuous and categorical predictor variables. The predictors are adjusted/controlled for each other .alert[and additive].
 
@@ -241,7 +253,39 @@ $$
 $$
 
 
-]]]]
+]]]
+.panel[.panel-name[Additive implies linear]
+
+.push-left[
+.font90[
+
+```
+# 
+# =======================================================
+#                Model 1       Model 2       Model 3     
+# -------------------------------------------------------
+# (Intercept)       4.326 ***     4.909 ***     4.206 ***
+#                  (0.071)       (0.213)       (0.237)   
+# cntryBulgaria     1.680 ***     1.635 ***     1.608 ***
+#                  (0.098)       (0.100)       (0.100)   
+# eduyrs                         -0.043 **     -0.040 ** 
+#                                (0.014)       (0.014)   
+# agea                                          0.014 ***
+#                                              (0.003)   
+# -------------------------------------------------------
+# R^2               0.113         0.116         0.128    
+# Adj. R^2          0.113         0.116         0.127    
+# Num. obs.      3330          3330          3330        
+# RMSE              2.348         2.344         2.329    
+# =======================================================
+# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
+```
+]]
+
+.push-right[
+<div id="htmlwidget-1651e0577eb459109e35" style="width:100%;height:432px;" class="plotly html-widget"></div>
+<script type="application/json" data-for="htmlwidget-1651e0577eb459109e35">{"x":{"visdat":{"d173e0f7be1":["function () ","plotlyVisDat"],"d176a8e109b":["function () ","data"]},"cur_data":"d176a8e109b","attrs":{"d173e0f7be1":{"x":{},"y":{},"z":{},"alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"surface"},"d176a8e109b":{"x":[17,11,16,9,15,21,11,9,13,11,9,9,17,9,11,21,14,16,9,12,20,9,13,15,17,12,18,9,17,9,12,15,15,12,15,11,10,12,18,13,9,20,14,16,15,14,16,19,13,11,17,20,12,15,10,9,12,12,12,11,10,9,12,17,12,13,12,12,18,14,18,9,21,9,12,9,10,17,11,11,9,11,12,14,9,21,9,12,12,14,12,12,14,9,15,18,17,9,15,19,12,12,9,19,15,12,14,21,20,9,9,11,20,9,19,12,11,16,19,9,9,12,12,11,13,14,16,17,9,17,12,9,16,16,17,9,11,9,12,9,12,13,16,11,9,12,17,19,21,9,20,9,12,13,18,15,12,9,17,15,13,18,11,9,17,9,17,11,14,9,11,9,16,10,12,16,9,19,15,11,9,9,9,16,17,15,9,13,13,11,16,9,11,19,13,11,9,9,18,21],"y":[29,49,43,75,22,85,46,73,36,44,71,56,39,73,44,48,72,61,88,67,45,46,71,50,50,55,36,50,40,17,67,72,53,19,44,54,19,84,55,49,60,45,20,63,68,67,29,32,26,75,26,50,22,63,68,65,44,44,68,33,90,56,61,43,60,23,69,44,61,23,49,77,42,70,54,23,72,31,64,42,38,45,66,65,65,55,27,31,89,53,56,77,71,59,70,76,48,70,66,70,49,48,84,29,44,54,21,74,77,17,80,39,43,68,39,33,51,38,30,31,18,75,23,45,77,69,41,33,52,59,31,51,50,55,64,59,49,90,64,16,66,44,77,62,66,50,64,55,61,79,58,88,62,86,45,64,29,76,55,22,66,63,71,58,48,87,48,80,43,45,79,70,49,19,42,32,47,32,60,50,76,18,32,23,32,43,62,57,77,17,43,51,67,63,52,35,46,33,38,71],"z":[5,4,6,4,6,5,6,4,5,6,5,5,5,6,6,5,5,5,6,5,5,5,4,4,5,4,5,4,5,4,5,6,5,4,6,5,6,6,4,5,5,5,6,5,4,5,4,5,5,6,5,5,4,5,6,4,5,5,5,5,5,5,5,4,5,4,5,6,6,5,5,6,4,5,5,5,5,5,5,5,4,4,6,4,5,6,6,4,5,6,4,5,5,5,4,6,6,5,4,6,5,5,5,5,6,5,5,5,5,5,5,5,4,5,5,6,5,5,5,5,5,4,4,5,5,5,5,4,5,4,5,6,6,5,6,6,5,5,6,5,5,4,5,5,6,4,6,4,5,5,4,5,5,5,5,5,5,6,5,5,5,6,4,5,5,5,5,5,6,4,5,6,6,5,6,6,5,5,4,5,5,5,4,4,5,6,6,5,5,5,5,4,6,4,4,4,6,5,4,5],"alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"scatter3d","mode":"markers","marker":{"color":"#a6a6a6","opacity":0.7,"symbol":105},"inherit":true}},"layout":{"margin":{"b":40,"l":60,"t":25,"r":10},"scene":{"xaxis":{"title":"Eduyrs"},"yaxis":{"title":"Age"},"zaxis":{"title":"Xeno"}},"hovermode":"closest","showlegend":false,"legend":{"yanchor":"top","y":0.5}},"source":"A","config":{"modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"data":[{"colorbar":{"title":"z","ticklen":2,"len":0.5,"lenmode":"fraction","y":1,"yanchor":"top"},"colorscale":[["0","rgba(68,1,84,1)"],["0.0416666666666669","rgba(70,19,97,1)"],["0.0833333333333333","rgba(72,32,111,1)"],["0.125","rgba(71,45,122,1)"],["0.166666666666667","rgba(68,58,128,1)"],["0.208333333333334","rgba(64,70,135,1)"],["0.25","rgba(60,82,138,1)"],["0.291666666666666","rgba(56,93,140,1)"],["0.333333333333333","rgba(49,104,142,1)"],["0.375","rgba(46,114,142,1)"],["0.416666666666667","rgba(42,123,142,1)"],["0.458333333333333","rgba(38,133,141,1)"],["0.5","rgba(37,144,140,1)"],["0.541666666666667","rgba(33,154,138,1)"],["0.583333333333333","rgba(39,164,133,1)"],["0.625","rgba(47,174,127,1)"],["0.666666666666667","rgba(53,183,121,1)"],["0.708333333333334","rgba(79,191,110,1)"],["0.75","rgba(98,199,98,1)"],["0.791666666666666","rgba(119,207,85,1)"],["0.833333333333333","rgba(147,214,70,1)"],["0.875","rgba(172,220,52,1)"],["0.916666666666667","rgba(199,225,42,1)"],["0.958333333333333","rgba(226,228,40,1)"],["1","rgba(253,231,37,1)"]],"showscale":true,"x":[9,9.5,10,10.5,11,11.5,12,12.5,13,13.5,14,14.5,15,15.5,16,16.5,17,17.5,18,18.5,19,19.5,20,20.5,21],"y":[15,18.125,21.25,24.375,27.5,30.625,33.75,36.875,40,43.125,46.25,49.375,52.5,55.625,58.75,61.875,65,68.125,71.25,74.375,77.5,80.625,83.75,86.875,90],"z":[[5.00812066445599,4.97047587010215,4.93283107574831,4.89518628139448,4.85754148704064,4.8198966926868,4.78225189833296,4.74460710397913,4.70696230962529,4.66931751527145,4.63167272091761,4.59402792656378,4.55638313220994,4.5187383378561,4.48109354350227,4.44344874914843,4.40580395479459,4.36815916044075,4.33051436608692,4.29286957173308,4.25522477737924,4.2175799830254,4.17993518867157,4.14229039431773,4.10464559996389],[5.05812816259167,5.02048336823783,4.98283857388399,4.94519377953015,4.90754898517632,4.86990419082248,4.83225939646864,4.7946146021148,4.75696980776097,4.71932501340713,4.68168021905329,4.64403542469945,4.60639063034562,4.56874583599178,4.53110104163794,4.49345624728411,4.45581145293027,4.41816665857643,4.38052186422259,4.34287706986876,4.30523227551492,4.26758748116108,4.22994268680724,4.19229789245341,4.15465309809957],[5.10813566072734,5.07049086637351,5.03284607201967,4.99520127766583,4.95755648331199,4.91991168895816,4.88226689460432,4.84462210025048,4.80697730589664,4.76933251154281,4.73168771718897,4.69404292283513,4.6563981284813,4.61875333412746,4.58110853977362,4.54346374541978,4.50581895106595,4.46817415671211,4.43052936235827,4.39288456800443,4.3552397736506,4.31759497929676,4.27995018494292,4.24230539058908,4.20466059623525],[5.15814315886302,5.12049836450918,5.08285357015535,5.04520877580151,5.00756398144767,4.96991918709383,4.93227439274,4.89462959838616,4.85698480403232,4.81934000967849,4.78169521532465,4.74405042097081,4.70640562661697,4.66876083226314,4.6311160379093,4.59347124355546,4.55582644920162,4.51818165484779,4.48053686049395,4.44289206614011,4.40524727178627,4.36760247743244,4.3299576830786,4.29231288872476,4.25466809437092],[5.2081506569987,5.17050586264486,5.13286106829102,5.09521627393719,5.05757147958335,5.01992668522951,4.98228189087567,4.94463709652184,4.906992302168,4.86934750781416,4.83170271346033,4.79405791910649,4.75641312475265,4.71876833039881,4.68112353604498,4.64347874169114,4.6058339473373,4.56818915298346,4.53054435862963,4.49289956427579,4.45525476992195,4.41760997556811,4.37996518121428,4.34232038686044,4.3046755925066],[5.25815815513438,5.22051336078054,5.1828685664267,5.14522377207286,5.10757897771903,5.06993418336519,5.03228938901135,4.99464459465752,4.95699980030368,4.91935500594984,4.881710211596,4.84406541724217,4.80642062288833,4.76877582853449,4.73113103418065,4.69348623982682,4.65584144547298,4.61819665111914,4.5805518567653,4.54290706241147,4.50526226805763,4.46761747370379,4.42997267934996,4.39232788499612,4.35468309064228],[5.30816565327005,5.27052085891622,5.23287606456238,5.19523127020854,5.15758647585471,5.11994168150087,5.08229688714703,5.04465209279319,5.00700729843936,4.96936250408552,4.93171770973168,4.89407291537784,4.85642812102401,4.81878332667017,4.78113853231633,4.74349373796249,4.70584894360866,4.66820414925482,4.63055935490098,4.59291456054715,4.55526976619331,4.51762497183947,4.47998017748563,4.4423353831318,4.40469058877796],[5.35817315140573,5.3205283570519,5.28288356269806,5.24523876834422,5.20759397399038,5.16994917963655,5.13230438528271,5.09465959092887,5.05701479657503,5.0193700022212,4.98172520786736,4.94408041351352,4.90643561915968,4.86879082480585,4.83114603045201,4.79350123609817,4.75585644174433,4.7182116473905,4.68056685303666,4.64292205868282,4.60527726432899,4.56763246997515,4.52998767562131,4.49234288126747,4.45469808691364],[5.40818064954141,5.37053585518757,5.33289106083374,5.2952462664799,5.25760147212606,5.21995667777222,5.18231188341839,5.14466708906455,5.10702229471071,5.06937750035687,5.03173270600304,4.9940879116492,4.95644311729536,4.91879832294152,4.88115352858769,4.84350873423385,4.80586393988001,4.76821914552618,4.73057435117234,4.6929295568185,4.65528476246466,4.61763996811083,4.57999517375699,4.54235037940315,4.50470558504931],[5.45818814767709,5.42054335332325,5.38289855896941,5.34525376461558,5.30760897026174,5.2699641759079,5.23231938155406,5.19467458720023,5.15702979284639,5.11938499849255,5.08174020413871,5.04409540978488,5.00645061543104,4.9688058210772,4.93116102672337,4.89351623236953,4.85587143801569,4.81822664366185,4.78058184930802,4.74293705495418,4.70529226060034,4.6676474662465,4.63000267189267,4.59235787753883,4.55471308318499],[5.50819564581277,5.47055085145893,5.43290605710509,5.39526126275125,5.35761646839742,5.31997167404358,5.28232687968974,5.2446820853359,5.20703729098207,5.16939249662823,5.13174770227439,5.09410290792056,5.05645811356672,5.01881331921288,4.98116852485904,4.94352373050521,4.90587893615137,4.86823414179753,4.83058934744369,4.79294455308986,4.75529975873602,4.71765496438218,4.68001017002834,4.64236537567451,4.60472058132067],[5.55820314394844,5.52055834959461,5.48291355524077,5.44526876088693,5.40762396653309,5.36997917217926,5.33233437782542,5.29468958347158,5.25704478911774,5.21939999476391,5.18175520041007,5.14411040605623,5.1064656117024,5.06882081734856,5.03117602299472,4.99353122864088,4.95588643428705,4.91824163993321,4.88059684557937,4.84295205122553,4.8053072568717,4.76766246251786,4.73001766816402,4.69237287381018,4.65472807945635],[5.60821064208412,5.57056584773028,5.53292105337645,5.49527625902261,5.45763146466877,5.41998667031493,5.3823418759611,5.34469708160726,5.30705228725342,5.26940749289959,5.23176269854575,5.19411790419191,5.15647310983807,5.11882831548424,5.0811835211304,5.04353872677656,5.00589393242272,4.96824913806889,4.93060434371505,4.89295954936121,4.85531475500737,4.81766996065354,4.7800251662997,4.74238037194586,4.70473557759203],[5.6582181402198,5.62057334586596,5.58292855151212,5.54528375715829,5.50763896280445,5.46999416845061,5.43234937409678,5.39470457974294,5.3570597853891,5.31941499103526,5.28177019668142,5.24412540232759,5.20648060797375,5.16883581361991,5.13119101926608,5.09354622491224,5.0559014305584,5.01825663620456,4.98061184185073,4.94296704749689,4.90532225314305,4.86767745878922,4.83003266443538,4.79238787008154,4.7547430757277],[5.70822563835548,5.67058084400164,5.6329360496478,5.59529125529397,5.55764646094013,5.52000166658629,5.48235687223245,5.44471207787862,5.40706728352478,5.36942248917094,5.3317776948171,5.29413290046327,5.25648810610943,5.21884331175559,5.18119851740175,5.14355372304792,5.10590892869408,5.06826413434024,5.0306193399864,4.99297454563257,4.95532975127873,4.91768495692489,4.88004016257106,4.84239536821722,4.80475057386338],[5.75823313649115,5.72058834213732,5.68294354778348,5.64529875342964,5.60765395907581,5.57000916472197,5.53236437036813,5.49471957601429,5.45707478166046,5.41942998730662,5.38178519295278,5.34414039859894,5.30649560424511,5.26885080989127,5.23120601553743,5.19356122118359,5.15591642682976,5.11827163247592,5.08062683812208,5.04298204376825,5.00533724941441,4.96769245506057,4.93004766070673,4.8924028663529,4.85475807199906],[5.80824063462683,5.77059584027299,5.73295104591916,5.69530625156532,5.65766145721148,5.62001666285764,5.58237186850381,5.54472707414997,5.50708227979613,5.4694374854423,5.43179269108846,5.39414789673462,5.35650310238078,5.31885830802695,5.28121351367311,5.24356871931927,5.20592392496543,5.1682791306116,5.13063433625776,5.09298954190392,5.05534474755008,5.01769995319625,4.98005515884241,4.94241036448857,4.90476557013474],[5.85824813276251,5.82060333840867,5.78295854405484,5.745313749701,5.70766895534716,5.67002416099332,5.63237936663949,5.59473457228565,5.55708977793181,5.51944498357797,5.48180018922414,5.4441553948703,5.40651060051646,5.36886580616262,5.33122101180879,5.29357621745495,5.25593142310111,5.21828662874728,5.18064183439344,5.1429970400396,5.10535224568576,5.06770745133193,5.03006265697809,4.99241786262425,4.95477306827041],[5.90825563089819,5.87061083654435,5.83296604219051,5.79532124783668,5.75767645348284,5.720031659129,5.68238686477516,5.64474207042133,5.60709727606749,5.56945248171365,5.53180768735981,5.49416289300598,5.45651809865214,5.4188733042983,5.38122850994447,5.34358371559063,5.30593892123679,5.26829412688295,5.23064933252912,5.19300453817528,5.15535974382144,5.1177149494676,5.08007015511377,5.04242536075993,5.00478056640609],[5.95826312903387,5.92061833468003,5.88297354032619,5.84532874597235,5.80768395161852,5.77003915726468,5.73239436291084,5.694749568557,5.65710477420317,5.61945997984933,5.58181518549549,5.54417039114165,5.50652559678782,5.46888080243398,5.43123600808014,5.3935912137263,5.35594641937247,5.31830162501863,5.28065683066479,5.24301203631096,5.20536724195712,5.16772244760328,5.13007765324944,5.09243285889561,5.05478806454177],[6.00827062716954,5.97062583281571,5.93298103846187,5.89533624410803,5.85769144975419,5.82004665540036,5.78240186104652,5.74475706669268,5.70711227233884,5.66946747798501,5.63182268363117,5.59417788927733,5.55653309492349,5.51888830056966,5.48124350621582,5.44359871186198,5.40595391750815,5.36830912315431,5.33066432880047,5.29301953444663,5.2553747400928,5.21772994573896,5.18008515138512,5.14244035703128,5.10479556267745],[6.05827812530522,6.02063333095138,5.98298853659755,5.94534374224371,5.90769894788987,5.87005415353603,5.8324093591822,5.79476456482836,5.75711977047452,5.71947497612069,5.68183018176685,5.64418538741301,5.60654059305917,5.56889579870534,5.5312510043515,5.49360620999766,5.45596141564382,5.41831662128999,5.38067182693615,5.34302703258231,5.30538223822847,5.26773744387464,5.2300926495208,5.19244785516696,5.15480306081312],[6.1082856234409,6.07064082908706,6.03299603473322,5.99535124037939,5.95770644602555,5.92006165167171,5.88241685731787,5.84477206296404,5.8071272686102,5.76948247425636,5.73183767990253,5.69419288554869,5.65654809119485,5.61890329684101,5.58125850248718,5.54361370813334,5.5059689137795,5.46832411942566,5.43067932507183,5.39303453071799,5.35538973636415,5.31774494201031,5.28010014765648,5.24245535330264,5.2048105589488],[6.15829312157658,6.12064832722274,6.0830035328689,6.04535873851506,6.00771394416123,5.97006914980739,5.93242435545355,5.89477956109971,5.85713476674588,5.81948997239204,5.7818451780382,5.74420038368437,5.70655558933053,5.66891079497669,5.63126600062285,5.59362120626902,5.55597641191518,5.51833161756134,5.4806868232075,5.44304202885367,5.40539723449983,5.36775244014599,5.33010764579215,5.29246285143832,5.25481805708448],[6.20830061971225,6.17065582535842,6.13301103100458,6.09536623665074,6.05772144229691,6.02007664794307,5.98243185358923,5.94478705923539,5.90714226488156,5.86949747052772,5.83185267617388,5.79420788182004,5.75656308746621,5.71891829311237,5.68127349875853,5.64362870440469,5.60598391005086,5.56833911569702,5.53069432134318,5.49304952698935,5.45540473263551,5.41775993828167,5.38011514392783,5.342470349574,5.30482555522016]],"type":"surface","frame":null},{"x":[17,11,16,9,15,21,11,9,13,11,9,9,17,9,11,21,14,16,9,12,20,9,13,15,17,12,18,9,17,9,12,15,15,12,15,11,10,12,18,13,9,20,14,16,15,14,16,19,13,11,17,20,12,15,10,9,12,12,12,11,10,9,12,17,12,13,12,12,18,14,18,9,21,9,12,9,10,17,11,11,9,11,12,14,9,21,9,12,12,14,12,12,14,9,15,18,17,9,15,19,12,12,9,19,15,12,14,21,20,9,9,11,20,9,19,12,11,16,19,9,9,12,12,11,13,14,16,17,9,17,12,9,16,16,17,9,11,9,12,9,12,13,16,11,9,12,17,19,21,9,20,9,12,13,18,15,12,9,17,15,13,18,11,9,17,9,17,11,14,9,11,9,16,10,12,16,9,19,15,11,9,9,9,16,17,15,9,13,13,11,16,9,11,19,13,11,9,9,18,21],"y":[29,49,43,75,22,85,46,73,36,44,71,56,39,73,44,48,72,61,88,67,45,46,71,50,50,55,36,50,40,17,67,72,53,19,44,54,19,84,55,49,60,45,20,63,68,67,29,32,26,75,26,50,22,63,68,65,44,44,68,33,90,56,61,43,60,23,69,44,61,23,49,77,42,70,54,23,72,31,64,42,38,45,66,65,65,55,27,31,89,53,56,77,71,59,70,76,48,70,66,70,49,48,84,29,44,54,21,74,77,17,80,39,43,68,39,33,51,38,30,31,18,75,23,45,77,69,41,33,52,59,31,51,50,55,64,59,49,90,64,16,66,44,77,62,66,50,64,55,61,79,58,88,62,86,45,64,29,76,55,22,66,63,71,58,48,87,48,80,43,45,79,70,49,19,42,32,47,32,60,50,76,18,32,23,32,43,62,57,77,17,43,51,67,63,52,35,46,33,38,71],"z":[5,4,6,4,6,5,6,4,5,6,5,5,5,6,6,5,5,5,6,5,5,5,4,4,5,4,5,4,5,4,5,6,5,4,6,5,6,6,4,5,5,5,6,5,4,5,4,5,5,6,5,5,4,5,6,4,5,5,5,5,5,5,5,4,5,4,5,6,6,5,5,6,4,5,5,5,5,5,5,5,4,4,6,4,5,6,6,4,5,6,4,5,5,5,4,6,6,5,4,6,5,5,5,5,6,5,5,5,5,5,5,5,4,5,5,6,5,5,5,5,5,4,4,5,5,5,5,4,5,4,5,6,6,5,6,6,5,5,6,5,5,4,5,5,6,4,6,4,5,5,4,5,5,5,5,5,5,6,5,5,5,6,4,5,5,5,5,5,6,4,5,6,6,5,6,6,5,5,4,5,5,5,4,4,5,6,6,5,5,5,5,4,6,4,4,4,6,5,4,5],"type":"scatter3d","mode":"markers","marker":{"color":"#a6a6a6","opacity":0.7,"symbol":105,"line":{"color":"rgba(255,127,14,1)"}},"error_y":{"color":"rgba(255,127,14,1)"},"error_x":{"color":"rgba(255,127,14,1)"},"line":{"color":"rgba(255,127,14,1)"},"frame":null}],"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.2,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+]]]
 
 ---
 # But what if relations are conditional?
@@ -320,7 +364,7 @@ screenreg(list(ols_mult_1, ols_inter),
 --
 
 .push-right[
-&lt;img src="11-Conditionals_files/figure-html/unnamed-chunk-9-1.png" width="75%" style="display: block; margin: auto;" /&gt;
+&lt;img src="11-Conditionals_files/figure-html/unnamed-chunk-11-1.png" width="75%" style="display: block; margin: auto;" /&gt;
 - R *adds* an "interaction term", technically the product of the two interacted variables (i.e. `\(\text{Bulgaria} \times \text{Education}\)`).
 - Thereby, multiple OLS processes the conditional relation in an additive way (aka "linearization").
 ]
@@ -359,7 +403,7 @@ ESS %&gt;%
 ]
 
 .push-right[
-&lt;img src="11-Conditionals_files/figure-html/unnamed-chunk-11-1.png" width="75%" style="display: block; margin: auto;" /&gt;
+&lt;img src="11-Conditionals_files/figure-html/unnamed-chunk-13-1.png" width="75%" style="display: block; margin: auto;" /&gt;
 - R *adds* an "interaction term", technically the product of the two interacted variables (i.e. `\(\text{Bulgaria} \times \text{Education}\)`).
 - Thereby, multiple OLS processes the conditional relation in an additive way (aka "linearization").
 ]
@@ -401,7 +445,7 @@ screenreg(list(ols_inter, ols_inter2),
 ]]
 
 .push-right[
-&lt;img src="11-Conditionals_files/figure-html/unnamed-chunk-13-1.png" width="75%" style="display: block; margin: auto;" /&gt;
+&lt;img src="11-Conditionals_files/figure-html/unnamed-chunk-15-1.png" width="75%" style="display: block; margin: auto;" /&gt;
 - R *adds* an "interaction term", technically the product of the two interacted variables (i.e. `\(\text{Bulgaria} \times \text{Education}\)`).
 - Thereby, multiple OLS processes the conditional relation in an additive way (aka "linearization").
 ]
@@ -439,7 +483,7 @@ class: clear
 ]]
 
 .push-right[
-&lt;img src="11-Conditionals_files/figure-html/unnamed-chunk-15-1.png" width="75%" style="display: block; margin: auto;" /&gt;
+&lt;img src="11-Conditionals_files/figure-html/unnamed-chunk-17-1.png" width="75%" style="display: block; margin: auto;" /&gt;
 &lt;br&gt;
 
 `$$\beta_1\color{red}{|x_2=0} \text{ &amp; } \beta_2\color{red}{|x_1=0}$$`
@@ -478,7 +522,7 @@ class: clear
 ]]
 
 .push-right[
-&lt;img src="11-Conditionals_files/figure-html/unnamed-chunk-17-1.png" width="75%" style="display: block; margin: auto;" /&gt;
+&lt;img src="11-Conditionals_files/figure-html/unnamed-chunk-19-1.png" width="75%" style="display: block; margin: auto;" /&gt;
 &lt;br&gt;
 
 `$$\beta_1\color{red}{|x_2=0} \text{ &amp; } \beta_2\color{red}{|x_1=0}$$`
@@ -585,7 +629,7 @@ class: clear
 ]
 
 .push-right[
-&lt;img src="11-Conditionals_files/figure-html/unnamed-chunk-20-1.png" width="75%" style="display: block; margin: auto;" /&gt;
+&lt;img src="11-Conditionals_files/figure-html/unnamed-chunk-22-1.png" width="75%" style="display: block; margin: auto;" /&gt;
 &lt;br&gt;
 
 `$$\beta_1\color{red}{|x_2=0} \text{ &amp; } \beta_2\color{red}{|x_1=0}$$`
@@ -628,7 +672,7 @@ class: clear
 ]
 
 .push-right[
-&lt;img src="11-Conditionals_files/figure-html/unnamed-chunk-22-1.png" width="50%" style="display: block; margin: auto;" /&gt;
+&lt;img src="11-Conditionals_files/figure-html/unnamed-chunk-24-1.png" width="50%" style="display: block; margin: auto;" /&gt;
 &lt;br&gt;
 
 `$$\beta_1\color{red}{|x_2=0} \text{ &amp; } \beta_2\color{red}{|x_1=0}$$`
@@ -673,7 +717,7 @@ The interaction term, `\(\beta_3(X_{1i}\times X_{2i})\)`, can be interpreted in 
 ---
 
 .push-right[
-&lt;img src="11-Conditionals_files/figure-html/unnamed-chunk-23-1.png" width="66%" style="display: block; margin: auto;" /&gt;
+&lt;img src="11-Conditionals_files/figure-html/unnamed-chunk-25-1.png" width="66%" style="display: block; margin: auto;" /&gt;
 &lt;br&gt;
 
 1) When the variable `cntryBulgaria` increases by one unit, `\(\beta_{\text{Educ}}\)` increases by `\(\beta_{3}\)`. 
@@ -685,7 +729,7 @@ The interaction term, `\(\beta_3(X_{1i}\times X_{2i})\)`, can be interpreted in 
 ---
 
 .push-right[
-&lt;img src="11-Conditionals_files/figure-html/unnamed-chunk-24-1.png" width="66%" style="display: block; margin: auto;" /&gt;
+&lt;img src="11-Conditionals_files/figure-html/unnamed-chunk-26-1.png" width="66%" style="display: block; margin: auto;" /&gt;
 &lt;br&gt;
 
 2) When the variable `mc_eduyrs` increases by one unit, `\(\beta_{\text{cntryBulgaria}}\)` increases by `\(\beta_{3}\)`.
@@ -756,7 +800,7 @@ layout: false
 ```
 ]]
 .right-column[
-&lt;img src="11-Conditionals_files/figure-html/unnamed-chunk-26-1.png" width="45%" style="display: block; margin: auto;" /&gt;
+&lt;img src="11-Conditionals_files/figure-html/unnamed-chunk-28-1.png" width="45%" style="display: block; margin: auto;" /&gt;
 `\(\rightarrow \beta_{Educ}|\text{Female}=0\)`: Among men, an additional year of education is significantly associated with -0.06 scale points less xenophobia.
 
 `\(\rightarrow \beta_{Female}|\text{Educ}=0\)`: At average levels of education, the gender gap in xenophobia is -0.097 but insignificant.
@@ -789,7 +833,7 @@ layout: false
 ```
 ]]
 .right-column[
-&lt;img src="11-Conditionals_files/figure-html/unnamed-chunk-28-1.png" width="45%" style="display: block; margin: auto;" /&gt;
+&lt;img src="11-Conditionals_files/figure-html/unnamed-chunk-30-1.png" width="45%" style="display: block; margin: auto;" /&gt;
 
 1) The association between education and xenophobia among women is `\(-0.06 + -0.037= -0.097\)`. This is -0.037 more negative than the association among men, but this different in slopes is not significant.
 
@@ -1002,17 +1046,57 @@ Is socialism good at reducing poverty if combined with citizenship rights,&lt;br
 &lt;img src="https://almayasabdam.com/wp-content/uploads/2020/09/1496441134_communists.png" width="96%" style="display: block; margin: auto;" /&gt;
 ]
 
+---
+class: inverse
+# Revised research question
 
+.center[.font140[
+Is socialism good at reducing poverty if combined with citizenship rights,&lt;br&gt;&lt;br&gt; but not good at it if under autocratic rule?
+]]
+
+
+
+&lt;br&gt;
+.push-left[
+&lt;img src="11-Conditionals_files/figure-html/socialism-corr1-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+]
+
+.push-right[
+&lt;img src="11-Conditionals_files/figure-html/citizen-corr1-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+]
 
 ---
 class: clear
-layout: true
 # Interaction of two continuous variables
 
----
-
 .panelset[
-.panel[.panel-name[OLS results]
+.panel[.panel-name[Additive multiple OLS]
+.push-left[
+
+```
+# 
+# ==============================
+#                    Model 1    
+# ------------------------------
+# (Intercept)         41.849 ***
+#                     (2.506)   
+# mc_socialist        -0.329    
+#                     (0.202)   
+# mc_citizen_rights   -5.331 ***
+#                     (0.735)   
+# ------------------------------
+# R^2                  0.282    
+# Adj. R^2             0.272    
+# Num. obs.          146        
+# RMSE                30.237    
+# ==============================
+# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
+```
+]
+.push-right[
+&lt;img src="11-Conditionals_files/figure-html/unnamed-chunk-41-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+]]
+.panel[.panel-name[Interactions imply non-linearity!]
 .push-left[
 
 ```
@@ -1036,24 +1120,20 @@ layout: true
 # ===========================================
 # *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
 ```
+
+&lt;img src="11-Conditionals_files/figure-html/socialism2-1.png" width="504" style="display: block; margin: auto;" /&gt;
+]
+
+.push-right[
+&lt;img src="11-Conditionals_files/figure-html/unnamed-chunk-42-1.png" width="80%" style="display: block; margin: auto;" /&gt;
 ]]
 .panel[.panel-name[Code]
 
-```r
-# Same data as Lecture 2 
-Dat &lt;- Dat %&gt;% mutate( # Mean-center predictors
-  mc_socialist = socialist - mean(socialist, na.rm = TRUE),
-  mc_citizen_rights = citizen_rights - mean(citizen_rights, na.rm = TRUE))
-
-# Multiple OLS
-ols_inter &lt;- lm_robust(poverty ~ mc_socialist*mc_citizen_rights, data = Dat)
-
-# Regression table
-screenreg(list(ols_inter), include.ci = FALSE, digits = 3)
-```
 ]]
 
 ---
+class: clear
+# Interaction of two continuous variables
 
 .panelset[
 .panel[.panel-name[OLS results]
@@ -1080,6 +1160,8 @@ screenreg(list(ols_inter), include.ci = FALSE, digits = 3)
 # ===========================================
 # *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
 ```
+
+&lt;img src="11-Conditionals_files/figure-html/unnamed-chunk-44-1.png" width="504" style="display: block; margin: auto;" /&gt;
 ]
 .push-right[
 `\(\beta_{\text{Socialism}}|\text{Citizen Rights}=0\)`: At average levels of citizenship rights, socialism is not significantly related to declines in poverty.
@@ -1092,21 +1174,6 @@ screenreg(list(ols_inter), include.ci = FALSE, digits = 3)
 2) With every additional year of socialism, citizenship rights are 0.079 percentage points less associated with declines in poverty.
 
 ]]
-.panel[.panel-name[Code]
-
-```r
-# Same data as Lecture 2 
-Dat &lt;- Dat %&gt;% mutate( # Mean-center predictors
-  mc_socialist = socialist - mean(socialist, na.rm = TRUE),
-  mc_citizen_rights = citizen_rights - mean(citizen_rights, na.rm = TRUE))
-
-# Multiple OLS
-ols_inter &lt;- lm_robust(poverty ~ mc_socialist*mc_citizen_rights, data = Dat)
-
-# Regression table
-screenreg(list(ols_inter), include.ci = FALSE, digits = 3)
-```
-]
 .panel[.panel-name[Predictions]
 .push-left[
 .font90[
@@ -1206,20 +1273,7 @@ ggplot(data = fict_dat, aes(y = fit, x = mc_citizen_rights)) +
   theme_minimal() +
   theme(legend.position = "bottom")
 ```
-]]]
-.panel[.panel-name[Potential theory]
-
-.left-column[
-&lt;img src="https://www.aljazeera.com/wp-content/uploads/2022/11/000_32MK2ZL.jpg?resize=770%2C513" width="100%" style="display: block; margin: auto;" /&gt;
-]
-.right-column[
-- Among the autocrats, better catch a socialist.
-
-- Among the democrats, socialists aren't performing significantly different in termsw of fighting extreme poverty.
-
-`\(\rightarrow\)` Most importantly: .alert[Be democratic!]
-
-]]]]
+]]]]]
 
 ---
 layout: false
