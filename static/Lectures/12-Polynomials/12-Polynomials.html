@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Polynomials and transformations</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Merlin Schaeffer  Department of Sociology" />
+    <meta name="date" content="2022-11-22" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
+    <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
+    <script src="libs/tile-view/tile-view.js"></script>
+    <link href="libs/tachyons/tachyons.min.css" rel="stylesheet" />
+    <link href="libs/panelset/panelset.css" rel="stylesheet" />
+    <script src="libs/panelset/panelset.js"></script>
+    <link rel="stylesheet" href="../template/Merlin169.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+.title[
+# Polynomials and transformations
+]
+.subtitle[
+## Modeling non-linear relationships
+]
+.author[
+### Merlin Schaeffer<br> Department of Sociology
+]
+.date[
+### 2022-11-22
+]
+
+---
+
+
+# The goal of social science research
+
+.font140[.center[.alert[Use data to &lt;ins&gt;discover patterns&lt;/ins&gt; ("social facts" in Durkheim's terms), &lt;br&gt; and the social mechanisms that bring them about.]]]
+
+&lt;img src="https://liu.se/-/media/istock-501261958.jpg?mw=1120&amp;mh=1120&amp;hash=DA8977CCE6A6E600AE80A40CFEE771C9" width="70%" style="display: block; margin: auto;" /&gt;
+
+---
+class: inverse middle
+# Today's schedule
+
+Application of the day: Life expectancy at birth!
+1. Recap: Interaction terms.
+2. Polynomials
+  + Polynomials as interaction terms
+  + Higher order polynomials
+3. Data transformations
+  + `\(\log_2\)`
+
+---
+class: inverse 
+# Life expectancy at birth
+
+.push-left[
+&lt;img src="https://wp2.solidstarts.com/wp-content/uploads/Faces-Babies-Make-When-Eating_Kalani-1024x819.jpg" width="65%" style="display: block; margin: auto;" /&gt;&lt;img src="https://ychef.files.bbci.co.uk/976x549/p086k2k4.jpg" width="65%" style="display: block; margin: auto;" /&gt;
+]
+
+.push-right[
+&lt;iframe src="https://ourworldindata.org/grapher/life-expectancy?tab=chart&amp;time=1770..2019&amp;country=Africa~Asia~Europe~OWID_WRL~Americas~Oceania" loading="lazy" style="width: 100%; height: 500px; border: 0px none;"&gt;&lt;/iframe&gt;
+]
+---
+class: inverse 
+# Is life expectacy simply a (linear) function of&lt;br&gt; how much money we spend on health?
+
+&lt;iframe src="https://ourworldindata.org/grapher/total-healthcare-expenditure-gdp" loading="lazy" style="width: 90%; height: 450px; border: 0px none;"&gt;&lt;/iframe&gt;
+
+---
+# Preparations
+
+.panelset[
+.panel[.panel-name[Woldbank health data]
+
+```r
+pacman::p_load(
+  tidyverse, # Data manipulation,
+  ggplot2, # beautiful figures,
+  wbstats, # download data from Worldbank. Tremendous source of global socio-economic data.
+  estimatr, # OLS with robust SE
+  texreg, # regression tables with nice layout,
+  directlabels, # Labels addded to ggplot2 lines,
+  rockchalk, # 3d plots of interaction effects,
+  democracyData) # download democracy data used in the scholarly literature.
+
+Dat_life &lt;- wb_data(
+  # Download Life expectancy and healthcare expenditures data.
+* c("SP.DYN.LE00.IN", "SH.XPD.CHEX.PP.CD"),
+  start_date = 2002, end_date = 2022) %&gt;%
+* rename(LifeExpect = SP.DYN.LE00.IN, # rename health variables,
+*        HealthExp = SH.XPD.CHEX.PP.CD) %&gt;%
+  select(country, date, LifeExpect, HealthExp) %&gt;% # Keep only 4 variables
+  drop_na(LifeExpect, HealthExp) # Drop cases with missing data
+```
+]
+.panel[.panel-name[Join citizenship rights]
+
+```r
+Dat_citi_rights &lt;- download_fh(verbose = FALSE) %&gt;% # Download Freedom House data for all countries since 1972,
+  rename(country = fh_country, # rename variables,
+         citizen_rights = fh_total_reversed,
+         date = year) %&gt;%
+  # Keep only 3 variables.
+  select(country, date, citizen_rights)
+
+# Join Worldbank Health and Citizeship rights data
+Dat &lt;- inner_join(Dat_life, Dat_citi_rights, by = c("country", "date"))
+```
+]
+.panel[.panel-name[Add socialism]
+.font60[
+
+```r
+Dat &lt;- Dat %&gt;%
+  mutate(socialist = case_when( # Years socialist minus years since,
+    country == "China" ~ date - 1949,
+    country == "Vietnam" ~ date - 1945,
+    country == "Algeria" ~ date - 1962,
+    str_detect(country,"Portugal|Bangladesh") ~ date - 1972,
+    country == "Guinea-Bissau" ~ date - 1973,
+    country == "India" ~ date - 1976,
+    country == "Nicaragua" ~ date - 1979,
+    country == "Sri Lanka" ~ date - 1978,
+    country == "Tanzania" ~ date - 1964,
+    country == "Albania" ~ (1992 - 1944) - (date - 1992),
+    str_detect(country, "Angola|Cabo Verde|Madagascar") ~ (1992 - 1975) - (date - 1992),
+    str_detect(country,"Belarus|Bulgaria") ~ (1990 - 1946) - (date - 1990),
+    str_detect(country, "Benin|Mozambique") ~ (1990 - 1975) - (date - 1990),
+    country == "Chad" ~ (1975 - 1962) - (date - 1975), country == "Congo, Rep." ~ (1992 - 1970) - (date - 1992),
+    country == "Czech Republic" ~ (1990 - 1948) - (date - 1990), country == "Djibouti" ~ (1992 - 1981) - (date - 1992),
+    country == "Ethiopia" ~ (1991 - 1974) - (date - 1991), country == "Ghana" ~ (1966 - 1960) - (date - 1966),
+    country == "Guinea" ~ (1984 - 1958) - (date - 1984), country == "Hungary" ~ (1989 - 1949) - (date - 1989),
+    country == "Iraq" ~ (2005 - 1958) - (date - 2005), country == "Mali" ~ (1991 - 1960) - (date - 1991),
+    country == "Mauritania" ~ (1978 - 1961) - (date - 1978), country == "Mongolia" ~ (1992 - 1924) - (date - 1992),
+    country == "Myanmar" ~ (1988 - 1962) - (date - 1988), country == "Poland" ~ (1989 - 1945) - (date - 1989),
+    country == "Romania" ~ (1989 - 1947) - (date - 1989), country == "Russian Federation" ~ (1991 - 1922) - (date - 1991),
+    country == "Seychelles" ~ (1991 - 1977) - (date - 1991), country == "Senegal" ~ (1981 - 1960) - (date - 1981),
+    country == "Sierra Leone" ~ (1991 - 1978) - (date - 1991), country == "Somalia" ~ (1991 - 1969) - (date - 1991),
+    country == "Sudan" ~ (1985 - 1969) - (date - 1985), country == "Syria" ~ (2012 - 1963) - (date - 2012),
+    country == "Tunisia" ~ (1988 - 1964) - (date - 1988), country == "Ukraine" ~ (1991 - 1919) - (date - 1991),
+    country == "Yemen, Rep." ~ (1991 - 1967) - (date - 1991), country == "Zambia" ~ (1991 - 1973) - (date - 1991),
+    str_detect(country,"Slovenia|Croatia|Serbia|Montenegro|Bosnia and Herzegovina|North Macedonia|Kosovo") ~ (1992 - 1943) - (date - 1992),
+    TRUE ~ 0),
+    socialist = case_when( # Min. 5 years given socialist history,
+      (socialist &lt; 5 &amp; socialist &gt; 0) | socialist &lt; 0 ~ 5,
+      TRUE ~ socialist)) %&gt;% 
+  drop_na() # Drop countries with missing values.
+```
+]]
+.panel[.panel-name[The resulting data]
+
+```r
+Dat
+# # A tibble: 2,890 × 6
+#    country      date LifeExpect HealthExp citizen_rights socialist
+#    &lt;chr&gt;       &lt;dbl&gt;      &lt;dbl&gt;     &lt;dbl&gt;          &lt;dbl&gt;     &lt;dbl&gt;
+#  1 Afghanistan  2002       56.8      81.3              2         0
+#  2 Afghanistan  2003       57.3      82.5              2         0
+#  3 Afghanistan  2004       57.8      89.5              3         0
+#  4 Afghanistan  2005       58.3     101.               4         0
+#  5 Afghanistan  2006       58.8     114.               4         0
+#  6 Afghanistan  2007       59.4     107.               4         0
+#  7 Afghanistan  2008       59.9     131.               3         0
+#  8 Afghanistan  2009       60.5     148.               2         0
+#  9 Afghanistan  2010       61.0     144.               2         0
+# 10 Afghanistan  2011       61.6     143.               2         0
+# # … with 2,880 more rows
+```
+]]
+
+---
+class: clear
+# Development of life expectancy at birth
+
+.panelset[
+.panel[.panel-name[Some country trends]
+&lt;img src="12-Polynomials_files/figure-html/LifeExp1-1.png" width="55%" style="display: block; margin: auto;" /&gt;
+]
+.panel[.panel-name[Code]
+
+```r
+ggplot(data = Dat %&gt;% 
+         filter(country == "Denmark" | country == "Switzerland" | country == "Germany" | country == "Sweden"), 
+       aes(y = LifeExpect, x = HealthExp, color = country)) +
+  geom_line(alpha = 0.5) +
+  geom_text(aes(label = date), size = 2.3) +
+  guides(color = FALSE) +
+  scale_x_continuous(expand=c(0, 1300)) +
+  geom_dl(aes(label = country), method = list(dl.combine("last.points"))) +
+  labs(y = "Life expectacy at birth",
+       x = "Health expenditure per capita in $") +
+  theme_minimal()
+```
+]]
+---
+# Recap: Interaction effects
+
+.push-left[
+.font80[
+
+```r
+ols_1 &lt;- lm_robust(
+  LifeExpect ~ date + socialist*citizen_rights, data = Dat,
+* clusters = country) # Note that we need to specify this argument,
+*# because the observations are not independent!
+*# They are repeated observations of the same countries.
+
+screenreg(ols_1, include.ci = FALSE, digits = 3)
+# 
+# ======================================
+#                           Model 1     
+# --------------------------------------
+# (Intercept)               -619.499 ***
+#                            (51.181)   
+# date                         0.338 ***
+#                             (0.025)   
+# socialist                    0.188 *  
+#                             (0.055)   
+# citizen_rights               1.257 ***
+#                             (0.169)   
+# socialist:citizen_rights    -0.022 *  
+#                             (0.008)   
+# --------------------------------------
+# R^2                          0.276    
+# Adj. R^2                     0.275    
+# Num. obs.                 2890        
+# RMSE                         7.737    
+# N Clusters                 166        
+# ======================================
+# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
+```
+]]
+
+.push-right[
+.font90[
+
+```r
+# 3D plot of interaction. Controls set to their mean.
+plotPlane(ols_1, "citizen_rights", "socialist", 
+          theta = 85, phi = 10)
+```
+
+&lt;img src="12-Polynomials_files/figure-html/LifeExp2-1.png" width="75%" style="display: block; margin: auto;" /&gt;
+]]
+
+---
+# Health expenditures
+
+.push-left[
+.font80[
+
+```r
+ols_2 &lt;- lm_robust(
+  LifeExpect ~ date + socialist*citizen_rights + 
+*   # I() allows to transform x within model.
+*   I(HealthExp / 1000), # 1 unit increase = $1000
+  data = Dat, clusters = country)
+
+screenreg(list(ols_1, ols_2), include.ci = FALSE, digits = 3)
+# 
+# ====================================================
+#                           Model 1       Model 2     
+# ----------------------------------------------------
+# (Intercept)               -619.499 ***  -308.632 ***
+#                            (51.181)      (63.214)   
+# date                         0.338 ***     0.184 ***
+#                             (0.025)       (0.031)   
+# socialist                    0.188 *       0.164 *  
+#                             (0.055)       (0.043)   
+# citizen_rights               1.257 ***     0.619 ***
+#                             (0.169)       (0.165)   
+# socialist:citizen_rights    -0.022 *      -0.013 *  
+#                             (0.008)       (0.005)   
+# HealthExp/1000                             3.149 ***
+#                                           (0.522)   
+# ----------------------------------------------------
+# R^2                          0.276         0.473    
+# Adj. R^2                     0.275         0.472    
+# Num. obs.                 2890          2890        
+# RMSE                         7.737         6.602    
+# N Clusters                 166           166        
+# ====================================================
+# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
+```
+]]
+
+--
+
+.push-right[
+.font90[
+&lt;img src="12-Polynomials_files/figure-html/LifeExp3-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+
+.center[.alert[This clearly violates OLS' linearity assumption!]]
+]]
+
+---
+# Health expenditures
+
+.left-column[
+- We need a non-linear model:
+  + Here: An initial steep increase, which progressively flattens out.]
+.right-column[
+&lt;img src="12-Polynomials_files/figure-html/LifeExp4-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+class: inverse center middle
+
+# Modeling non-linear relations &lt;br&gt;&lt;br&gt; Possibility 1:&lt;br&gt; *Polynomials*
+
+---
+layout: true
+# Polynomials
+
+.push-left[
+.font80[
+
+```r
+ols_3 &lt;- lm_robust(LifeExpect ~ date + socialist*citizen_rights + 
+*                    I(HealthExp/1000) + I((HealthExp/1000)^2),
+                   data = Dat, clusters = country)
+
+screenreg(ols_3, include.ci = FALSE, digits = 3)
+# 
+# ======================================
+#                           Model 1     
+# --------------------------------------
+# (Intercept)               -303.440 ***
+#                            (54.180)   
+# date                         0.181 ***
+#                             (0.027)   
+# socialist                    0.181 ** 
+#                             (0.035)   
+# citizen_rights               0.462 ** 
+#                             (0.134)   
+# HealthExp/1000               8.127 ***
+#                             (1.099)   
+# (HealthExp/1000)^2          -0.862 *  
+#                             (0.226)   
+# socialist:citizen_rights    -0.015 ** 
+#                             (0.004)   
+# --------------------------------------
+# R^2                          0.591    
+# Adj. R^2                     0.590    
+# Num. obs.                 2890        
+# RMSE                         5.820    
+# N Clusters                 166        
+# ======================================
+# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
+```
+]]
+
+---
+
+.push-right[
+- We need a non-linear model:
+  + Here: An initial steep increase, which progressively flattens out.
+  
+`$$Y_{i} = \alpha + \beta_{1}X_{1} + \beta_{2}X_{1}^2 + \ldots + e_{i}$$`
+.content-box-green[.center[
+Do you see any similarity to the logic of an interaction term?
+]]]
+
+---
+
+.push-right[
+
+`$$Y_{i} = \alpha + \beta_{1}X_{1} + \beta_{2}X_{1}^2 + \ldots + e_{i}$$`
+
+.center[Interpretation:]
+
+`\(\beta_{\text{HealthExp}}\)`: At $0, a $1000 increase in `HealthExp` is associated with an increase in life expectancy at birth of 8.127 years.
+
+`\(\beta_{\text{HealthExp}^2}\)`: With every $1000 increase in `HealthExp`, this association declines by -0.862 years.
+ - For example, the increase from $1000 to $2000 is associated with an increase in life expectancy at birth of `\(8.127 + ( 2 \times -0.862 ) = 6.403\)` years.
+]
+
+---
+layout: true
+# Polynomials
+
+.push-left[
+.font80[
+
+```r
+ols_4 &lt;- lm_robust(LifeExpect ~ date + socialist*citizen_rights + 
+*                    # poly() is better to specify polynomials
+*                    poly(I(HealthExp/1000), degree = 2, raw = TRUE),
+                   data = Dat, clusters = country)
+
+screenreg(ols_4, include.ci = FALSE, digits = 3)
+# 
+# ===========================================================
+#                                                Model 1     
+# -----------------------------------------------------------
+# (Intercept)                                    -303.440 ***
+#                                                 (54.180)   
+# date                                              0.181 ***
+#                                                  (0.027)   
+# socialist                                         0.181 ** 
+#                                                  (0.035)   
+# citizen_rights                                    0.462 ** 
+#                                                  (0.134)   
+# poly(HealthExp/1000), degree = 2, raw = TRUE1     8.127 ***
+#                                                  (1.099)   
+# poly(HealthExp/1000), degree = 2, raw = TRUE2    -0.862 *  
+#                                                  (0.226)   
+# socialist:citizen_rights                         -0.015 ** 
+#                                                  (0.004)   
+# -----------------------------------------------------------
+# R^2                                               0.591    
+# Adj. R^2                                          0.590    
+# Num. obs.                                      2890        
+# RMSE                                              5.820    
+# N Clusters                                      166        
+# ===========================================================
+# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
+```
+]]
+
+---
+
+.push-right[
+
+`$$Y_{i} = \alpha + \beta_{1}X_{1} + \beta_{2}X_{1}^2 + \ldots + e_{i}$$`
+
+.center[Interpretation:]
+
+`\(\beta_{\text{HealthExp}}\)`: At $0, a $1000 increase in `HealthExp` is associated with an increase in life expectancy at birth of 8.127 years.
+
+`\(\beta_{\text{HealthExp}^2}\)`: With every $1000 increase in `HealthExp`, this association declines by -0.862 years.
+ - For example, the increase from $1000 to $2000 is associated with an increase in life expectancy at birth of `\(8.127 + ( 2 \times -0.862 ) = 6.403\)` years.
+
+.center[.alert[This is complex; so plot it!]]
+]
+
+---
+
+.push-right[
+.panelset[
+.panel[.panel-name[Fictional data]
+.font90[
+
+```r
+(fict_dat &lt;- tibble( # 1. Make fictional data
+  # Realistic variation in x: Min to max
+  HealthExp = min(Dat$HealthExp):max(Dat$HealthExp), 
+  # Hold other variables constant.
+  socialist = 0, # Non-socialist
+  citizen_rights = 12, # Max democracy
+  date = 2019)) # most recent date
+# # A tibble: 10,903 × 4
+#    HealthExp socialist citizen_rights  date
+#        &lt;dbl&gt;     &lt;dbl&gt;          &lt;dbl&gt; &lt;dbl&gt;
+#  1      19.0         0             12  2019
+#  2      20.0         0             12  2019
+#  3      21.0         0             12  2019
+#  4      22.0         0             12  2019
+#  5      23.0         0             12  2019
+#  6      24.0         0             12  2019
+#  7      25.0         0             12  2019
+#  8      26.0         0             12  2019
+#  9      27.0         0             12  2019
+# 10      28.0         0             12  2019
+# # … with 10,893 more rows
+```
+]]
+.panel[.panel-name[Predict]
+.font90[
+
+```r
+(fict_dat &lt;- predict( # 2. Add predctions based on the model
+  ols_4, newdata = fict_dat,
+  interval = "confidence", level = 0.95)$fit %&gt;%
+   as_tibble() %&gt;% # Turn into a tibble, then
+   bind_cols(fict_dat, .)) # Add to the synthetic data.
+# # A tibble: 10,903 × 7
+#    HealthExp socialist citizen_rights  date   fit   lwr   upr
+#        &lt;dbl&gt;     &lt;dbl&gt;          &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+#  1      19.0         0             12  2019  67.1  64.8  69.3
+#  2      20.0         0             12  2019  67.1  64.8  69.3
+#  3      21.0         0             12  2019  67.1  64.8  69.4
+#  4      22.0         0             12  2019  67.1  64.8  69.4
+#  5      23.0         0             12  2019  67.1  64.9  69.4
+#  6      24.0         0             12  2019  67.1  64.9  69.4
+#  7      25.0         0             12  2019  67.1  64.9  69.4
+#  8      26.0         0             12  2019  67.1  64.9  69.4
+#  9      27.0         0             12  2019  67.1  64.9  69.4
+# 10      28.0         0             12  2019  67.1  64.9  69.4
+# # … with 10,893 more rows
+```
+]]
+.panel[.panel-name[Plot]
+&lt;img src="12-Polynomials_files/figure-html/predictions2-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
+.panel[.panel-name[Plot code]
+.font90[
+
+```r
+# 3. plot the predictions
+ggplot(data = fict_dat, aes(y = fit, x = HealthExp)) +
+  geom_ribbon(aes(ymin = lwr, ymax = upr), alpha = 0.5) +
+  geom_line() +
+  geom_text(data = Dat %&gt;% # Add some exemplary countries
+              filter(date == 2019 &amp; 
+                       (country == "Mali" | country == "Nepal" |
+                          country == "Morocco" | country == "Mexico" | 
+                          country == "Poland" | country == "Japan" |
+                          country == "Denmark" | country == "Switzerland" |
+                          country == "United States")), 
+            aes(y = LifeExpect, HealthExp, label = country)) +
+  labs(title = "Predictions based on multiple OLS",
+       x = "By Healthcare Expenditures in $
+    (Socialism, Citizenship rights, and time held constant)",
+    y = "Predicted Life expectancy at birth") +
+  theme_minimal()
+```
+]]]]
+
+
+---
+layout: true
+class: clear
+# Higher order Polynomials .font70[Beware of overfitting!]
+
+.push-left[
+.font80[
+
+```r
+ols_5 &lt;- lm_robust(LifeExpect ~ date + socialist*citizen_rights + 
+*                    poly(I(HealthExp/1000), degree = 4, raw = TRUE),
+                   data = Dat, clusters = country)
+screenreg(ols_5, include.ci = FALSE, digits = 3)
+# 
+# ===========================================================
+#                                                Model 1     
+# -----------------------------------------------------------
+# (Intercept)                                    -236.565 ***
+#                                                 (59.322)   
+# date                                              0.146 ***
+#                                                  (0.029)   
+# socialist                                         0.186 ** 
+#                                                  (0.032)   
+# citizen_rights                                    0.426 ** 
+#                                                  (0.128)   
+# poly(HealthExp/1000), degree = 4, raw = TRUE1    18.524 ***
+#                                                  (2.093)   
+# poly(HealthExp/1000), degree = 4, raw = TRUE2    -6.291 ***
+#                                                  (1.210)   
+# poly(HealthExp/1000), degree = 4, raw = TRUE3     0.855 ** 
+#                                                  (0.240)   
+# poly(HealthExp/1000), degree = 4, raw = TRUE4    -0.039 *  
+#                                                  (0.015)   
+# socialist:citizen_rights                         -0.018 ***
+#                                                  (0.004)   
+# -----------------------------------------------------------
+# R^2                                               0.655    
+# Adj. R^2                                          0.654    
+# Num. obs.                                      2890        
+# RMSE                                              5.347    
+# N Clusters                                      166        
+# ===========================================================
+# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
+```
+]]
+
+---
+
+.push-right[
+.panelset[
+.panel[.panel-name[Fictional data]
+.font90[
+
+```r
+(fict_dat &lt;- tibble( # 1. Make fictional data
+  # Realistic variation in x: Min to max
+  HealthExp = min(Dat$HealthExp):max(Dat$HealthExp), 
+  # Hold other variables constant.
+  socialist = 0, # Non-socialist
+  citizen_rights = 12, # Max democracy
+  date = 2019)) # most recent date
+# # A tibble: 10,903 × 4
+#    HealthExp socialist citizen_rights  date
+#        &lt;dbl&gt;     &lt;dbl&gt;          &lt;dbl&gt; &lt;dbl&gt;
+#  1      19.0         0             12  2019
+#  2      20.0         0             12  2019
+#  3      21.0         0             12  2019
+#  4      22.0         0             12  2019
+#  5      23.0         0             12  2019
+#  6      24.0         0             12  2019
+#  7      25.0         0             12  2019
+#  8      26.0         0             12  2019
+#  9      27.0         0             12  2019
+# 10      28.0         0             12  2019
+# # … with 10,893 more rows
+```
+]]
+.panel[.panel-name[Predict]
+.font90[
+
+```r
+(fict_dat &lt;- predict( # 2. Get predictions
+  ols_5, newdata = fict_dat,
+  interval = "confidence", level = 0.95)$fit %&gt;%
+   as_tibble() %&gt;% # Turn into a tibble, then
+   bind_cols(fict_dat, .)) # Add to the synthetic data.
+# # A tibble: 10,903 × 7
+#    HealthExp socialist citizen_rights  date   fit   lwr   upr
+#        &lt;dbl&gt;     &lt;dbl&gt;          &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+#  1      19.0         0             12  2019  63.9  61.5  66.3
+#  2      20.0         0             12  2019  64.0  61.6  66.4
+#  3      21.0         0             12  2019  64.0  61.6  66.4
+#  4      22.0         0             12  2019  64.0  61.6  66.4
+#  5      23.0         0             12  2019  64.0  61.6  66.4
+#  6      24.0         0             12  2019  64.0  61.6  66.4
+#  7      25.0         0             12  2019  64.0  61.7  66.4
+#  8      26.0         0             12  2019  64.1  61.7  66.4
+#  9      27.0         0             12  2019  64.1  61.7  66.5
+# 10      28.0         0             12  2019  64.1  61.7  66.5
+# # … with 10,893 more rows
+```
+]]
+.panel[.panel-name[Plot]
+&lt;img src="12-Polynomials_files/figure-html/predictions3-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
+.panel[.panel-name[Plot code]
+.font90[
+
+```r
+# 3. Plot the predictions
+ggplot(data = fict_dat, aes(y = fit, x = HealthExp)) +
+  geom_ribbon(aes(ymin = lwr, ymax = upr), alpha = 0.5) +
+  geom_line() +
+  geom_text(data = Dat %&gt;% # Add some exemplary countries
+              filter(date == 2019 &amp; 
+                       (country == "Mali" | country == "Nepal" |
+                          country == "Morocco" | country == "Mexico" | 
+                          country == "Poland" | country == "Japan" |
+                          country == "Denmark" | country == "Switzerland" |
+                          country == "United States")), 
+            aes(y = LifeExpect, HealthExp, label = country)) +
+  labs(title = "Predictions based on multiple OLS",
+       x = "By Healthcare Expenditures in $
+        (Socialism, Citizenship rights, and time held constant)",
+       y = "Predicted Life expectancy at birth") +
+  theme_minimal()
+```
+]]]]
+
+---
+
+.push-right[
+With a unit increase in `\(X\)`, each polynomial always alters the one before it:
+
+`\(\beta_{\text{HealthExp}}\)`: At $0, a $1000 increase in `HealthExp` is associated with an increase in life expectancy at birth of 18.524 years.
+
+`\(\beta_{\text{HealthExp}^2}\)`: With every $1000 increase in `HealthExp`, `\(\beta_{\text{HealthExp}}\)` changes by -6.291.
+
+`\(\beta_{\text{HealthExp}^3}\)`: With every $1000 increase in `HealthExp`, `\(\beta_{\text{HealthExp}^2}\)` changes by `\(0.855\)`.
+
+`\(\beta_{\text{HealthExp}^4}\)`: With every $1000 increase in `HealthExp`, `\(\beta_{\text{HealthExp}^3}\)` changes by `\(-0.039\)`.
+
+.center[.alert[It gets super abstract; so always plot the implied association!]]
+]
+
+---
+layout: false
+# Polynomials .font70[in a nutshell]
+`$$Y_{i} = \alpha + \beta_{1}X_{1} + \beta_{2}X_{1}^2 + \ldots + e_{i}$$`
+.push-left[
+.content-box-blue[
+- You can best think of a polynomial as an interaction of a variable with itself.
+  + Polynomials "linearize" non-linear relations.
+
+
+- The more polynomials, the more complex and "wobbly" the non-linear relation.
+  + Beware to not overfit the model to the particular data. .alert[In Sociology, it rarely makes sense to use higher order polynomials]
+
+
+- In a multiple OLS framework, we can control for other variables.
+]]
+
+.push-right[
+&lt;img src="12-Polynomials_files/figure-html/unnamed-chunk-16-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
+
+exercise
+
+---
+class: inverse center middle
+
+# Modeling non-linear relations &lt;br&gt;&lt;br&gt; Possibility 2:&lt;br&gt; *Data transformation*
+
+---
+layout: true
+# Transform `\(Y\)` or `\(X\)` .font70[Our favorite: The logarithm]
+
+.push-left[
+- Sometimes it helps to transform `\(Y\)` and/or `\(X\)`. Textbooks discuss many transformations. .alert[The most common and useful is log2.]
+
+&lt;img src="https://helpingwithmath.com/wp-content/uploads/2021/10/Logarithms-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+
+`$$\text{Example 1: }\log_2(32)=5 \leftrightarrow 2^5 = 32$$`
+`$$\text{Example 1: }\log_2(16)=4 \leftrightarrow 2^4 = 16$$`
+- When we use log to the base 2, an increase of the exponent by 1 implies a doubling of the original value/argument!
+]
+
+---
+.push-right[
+`$$Y_{i} = \alpha + \beta \log_2(X_{i}) + e_{i}$$`
+&lt;img src="12-Polynomials_files/figure-html/LifeExp5-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
+.push-right[
+`$$Y_{i} = \alpha + \beta \log_2(X_{i}) + e_{i}$$`
+&lt;img src="12-Polynomials_files/figure-html/LifeExp6-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
+.push-right[
+`$$Y_{i} = \alpha + \beta \log_2(X_{i}) + e_{i}$$`
+&lt;img src="12-Polynomials_files/figure-html/LifeExp7-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+layout: true
+# `\(\log_2\)` transformed `\(X\)`
+
+.push-left[
+.font80[
+
+```r
+ols_6 &lt;- lm_robust(LifeExpect ~ date + socialist*citizen_rights + 
+*                    I(log2(HealthExp)),
+                   data = Dat, clusters = country)
+screenreg(ols_6, include.ci = FALSE, digits = 3)
+# 
+# ======================================
+#                           Model 1     
+# --------------------------------------
+# (Intercept)               -162.305 ** 
+#                            (52.484)   
+# date                         0.098 ***
+#                             (0.026)   
+# socialist                    0.148 ** 
+#                             (0.033)   
+# citizen_rights               0.310 *  
+#                             (0.133)   
+# log2(HealthExp)              3.521 ***
+#                             (0.216)   
+# socialist:citizen_rights    -0.013 ** 
+#                             (0.004)   
+# --------------------------------------
+# R^2                          0.686    
+# Adj. R^2                     0.686    
+# Num. obs.                 2890        
+# RMSE                         5.093    
+# N Clusters                 166        
+# ======================================
+# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
+```
+]]
+
+---
+
+.push-right[
+.content-box-green[
+How can we interpret the coefficient of 3.521?
+]]
+
+---
+
+.push-right[
+.panelset[
+.panel[.panel-name[Fictional data]
+.font90[
+
+```r
+(fict_dat &lt;- tibble( # 1. Make fictional data
+  # Realistic variation in x: Min to max
+  HealthExp = min(Dat$HealthExp):max(Dat$HealthExp), 
+  # Hold other variables constant.
+  socialist = 0, # Non-socialist
+  citizen_rights = 12, # Max democracy
+  date = 2019)) # most recent date
+# # A tibble: 10,903 × 4
+#    HealthExp socialist citizen_rights  date
+#        &lt;dbl&gt;     &lt;dbl&gt;          &lt;dbl&gt; &lt;dbl&gt;
+#  1      19.0         0             12  2019
+#  2      20.0         0             12  2019
+#  3      21.0         0             12  2019
+#  4      22.0         0             12  2019
+#  5      23.0         0             12  2019
+#  6      24.0         0             12  2019
+#  7      25.0         0             12  2019
+#  8      26.0         0             12  2019
+#  9      27.0         0             12  2019
+# 10      28.0         0             12  2019
+# # … with 10,893 more rows
+```
+]]
+.panel[.panel-name[Predict]
+.font90[
+
+```r
+(fict_dat &lt;- predict( # 2. Get predictions
+  ols_6, newdata = fict_dat,
+  interval = "confidence", level = 0.95)$fit %&gt;%
+   as_tibble() %&gt;% # Turn into a tibble, then
+   bind_cols(fict_dat, .)) # Add to the synthetic data.
+# # A tibble: 10,903 × 7
+#    HealthExp socialist citizen_rights  date   fit   lwr   upr
+#        &lt;dbl&gt;     &lt;dbl&gt;          &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+#  1      19.0         0             12  2019  55.2  51.9  58.4
+#  2      20.0         0             12  2019  55.4  52.2  58.7
+#  3      21.0         0             12  2019  55.7  52.5  58.9
+#  4      22.0         0             12  2019  55.9  52.7  59.1
+#  5      23.0         0             12  2019  56.1  53.0  59.3
+#  6      24.0         0             12  2019  56.4  53.2  59.5
+#  7      25.0         0             12  2019  56.6  53.5  59.7
+#  8      26.0         0             12  2019  56.8  53.7  59.8
+#  9      27.0         0             12  2019  57.0  53.9  60.0
+# 10      28.0         0             12  2019  57.1  54.1  60.2
+# # … with 10,893 more rows
+```
+]]
+.panel[.panel-name[Plot]
+&lt;img src="12-Polynomials_files/figure-html/predictions4-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
+.panel[.panel-name[Plot code]
+.font90[
+
+```r
+# 3. Plot the predictions
+ggplot(data = fict_dat, aes(y = fit, x = HealthExp)) +
+  geom_ribbon(aes(ymin = lwr, ymax = upr), alpha = 0.5) +
+  geom_line() +
+  geom_text(data = Dat %&gt;% # Add some exemplary countries
+              filter(date == 2019 &amp; 
+                       (country == "Mali" | country == "Nepal" |
+                          country == "Morocco" | country == "Mexico" | 
+                          country == "Poland" | country == "Japan" |
+                          country == "Denmark" | country == "Switzerland" |
+                          country == "United States")), 
+            aes(y = LifeExpect, HealthExp, label = country)) +
+  labs(title = "Predictions based on multiple OLS",
+       x = "By Healthcare Expenditures in $100
+        (Socialism, Citizenship rights, and time held constant)",
+       y = "Predicted Life expectancy at birth") +
+  theme_minimal()
+```
+]]]]
+
+---
+layout: false
+class: clear
+# Which is better polynomials or `\(\log_2(X)\)`?
+
+.right-column[
+.font80[
+
+```
+# 
+# =========================================================================
+#                                                Model 1       Model 2     
+# -------------------------------------------------------------------------
+# (Intercept)                                    -236.565 ***  -162.305 ** 
+#                                                 (59.322)      (52.484)   
+# date                                              0.146 ***     0.098 ***
+#                                                  (0.029)       (0.026)   
+# socialist                                         0.186 **      0.148 ** 
+#                                                  (0.032)       (0.033)   
+# citizen_rights                                    0.426 **      0.310 *  
+#                                                  (0.128)       (0.133)   
+# poly(HealthExp/1000), degree = 4, raw = TRUE1    18.524 ***              
+#                                                  (2.093)                 
+# poly(HealthExp/1000), degree = 4, raw = TRUE2    -6.291 ***              
+#                                                  (1.210)                 
+# poly(HealthExp/1000), degree = 4, raw = TRUE3     0.855 **               
+#                                                  (0.240)                 
+# poly(HealthExp/1000), degree = 4, raw = TRUE4    -0.039 *                
+#                                                  (0.015)                 
+# socialist:citizen_rights                         -0.018 ***    -0.013 ** 
+#                                                  (0.004)       (0.004)   
+# log2(HealthExp)                                                 3.521 ***
+#                                                                (0.216)   
+# -------------------------------------------------------------------------
+# R^2                                               0.655         0.686    
+# Adj. R^2                                          0.654         0.686    
+# Num. obs.                                      2890          2890        
+# RMSE                                              5.347         5.093    
+# N Clusters                                      166           166        
+# =========================================================================
+# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
+```
+]]
+
+--
+
+.left-column[
+- In this case, the `\(R^{2}\)` and the Adjusted `\(R^{2}\)` (which penalizes additional predictors, that is, overtly complex models) both suggest: `\(\log_2(X)\)` describes the relationship better.
+]
+
+---
+layout: false
+class: inverse center middle
+
+# Modeling non-linear relations &lt;br&gt;&lt;br&gt; Possibility 3:&lt;br&gt; *Generalized Linear Models with link functions*
+
+`$$Y_{i} = g^{-1}(\alpha + \beta_{1}X_{i1} + \ldots)$$`
+
+---
+layout: false
+class: inverse
+# Today's general lessons
+
+1. Two predictors are "conditional on each other" or "interact", when the association between the outcome and one of the predictors depends on values of the other.
+2. Such conditional relations are modeling by the including of an "interaction term", which is the product of the two variables involved in the interaction.
+3. The interpretation of interaction terms is complex. The so called "main terms" are the relation between the respective variable and the outcome, when the other variable involved in the interaction is 0, and vice versa. The interaction term captures how the relation between a predictor and the outcome changes if the oother vairbale involved in the interaction increases by one unit, and vice versa.
+4. Because interaction terms are complex, it is best to visualize them using predictions.
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="../template/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightLanguage": "r",
+"highlightStyle": "zenburn",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"ratio": "16:9"
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

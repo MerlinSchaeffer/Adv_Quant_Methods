@@ -1,0 +1,118 @@
+---
+title: "Exercise 1 (20 minutes)"
+subtitle: "When you're done, assist some of the others ..."
+output: webexercises::webexercises_default
+---
+
+```{r setup, include = FALSE}
+options(htmltools.dir.version = FALSE, servr.interval = 0.5, width = 115, digits = 3)
+knitr::opts_chunk$set(
+  collapse = TRUE, message = FALSE, 
+  warning = FALSE, cache = FALSE,
+  comment = "#", strip.white = TRUE)
+
+library(webexercises)
+library(essentials)
+```
+
+Let's take another look at the Legewie, terrorist attack data. As before, run the code below to prepare the data for our analysis.
+
+```{r results = FALSE}
+pacman::p_load(
+  tidyverse, # Data manipulation,
+  haven, # Handle Stata data.
+  ggplot2, # beautiful figures,
+  estimatr, # Regression for weighted data,
+  furniture, # For row-means,
+  texreg) # regression tables with nice layout.
+
+# Bali terror attack
+event_date_begin <- as.Date("2002-09-14")
+event_date       <- as.Date("2002-10-13")
+event_date_end   <- as.Date("2002-10-20")
+
+# Read the ESS 2002 data and prepare for analysis
+ESS <- read_dta("../../../assets/Legewie_ESS_02.dta") %>%
+  mutate(
+    # Day and time of the survey interview,
+    int_year = inwyr,
+    int_mon  = inwmm,
+    int_day  = inwdd,
+    int_date = sprintf("%s-%s-%s", int_year, int_mon, int_day) %>% as.Date(),
+    # Treatment indicator,
+    treat = case_when(
+      int_date > event_date & int_date <= event_date_end ~ "After the attack",
+      int_date < event_date & int_date > event_date_begin ~ "Before the attack",
+      TRUE ~ as.character(NA)) %>% fct_relevel("Before the attack", "After the attack"),
+    # Attitudes towards immigrants
+    anti_immi = rowmeans(
+      imtcjob, imbleco, imbgeco, imueclt,
+      imwbcnt, imwbcrm, imbghct, na.rm = TRUE) %>% scale() %>% as.numeric(),
+    # Subtract from max to make larger values more xenophobic.
+    anti_immi = max(anti_immi, na.rm = TRUE) - anti_immi,
+    # Immigrant origin
+    brncntr = as_factor(brncntr),
+    mocntr = as_factor(mocntr),
+    facntr = as_factor(facntr),
+    #######################################
+    # Age
+    age = int_year - yrbrn, #<<
+    # Gender
+    gndr = as_factor(gndr) %>% fct_drop(),
+    # Employment status
+    empl_stat = case_when(
+      pdwrk == 1 ~ "Working",
+      uempla == 1 ~ "Unemployed",
+      rtrd == 1 ~ "Retired",
+      TRUE ~ "Other"),
+    ########################################
+    # Weights
+    pspwght = pweight * dweight) %>%
+  # Sample restriction        
+  filter(cntry != "DK" & cntry != "IL" & cntry != "HU" & 
+    # Mainstream members (i.e. immigrant origin)
+    brncntr == "yes" & mocntr == "yes" &  facntr == "yes") %>%
+  # Keep only a minimum set of variables we need today,
+  select(treat, anti_immi, cntry, int_date, pspwght, age, empl_stat) %>%
+  drop_na() # Delete cases with missing values.
+```
+
+1. This time, the data set contains interviews from people living in 10 different countries. Compared to Portugal as reference, are the terror effects significantly weaker or stronger in some countries? `r mcq(c("No they are not significantly different", answer = "Most are significantly smaller", "Most are significantly larger", "Only Slovenia differs"))`
+
+`r hide("R solution -> dont' peak to early ;) !")`
+```{r}
+ESS <- ESS %>%
+  mutate( # Make Portugal the reference
+    cntry = cntry %>% fct_relevel("PT"))
+
+ols_inter <- lm_robust(anti_immi ~ treat*cntry, data = ESS, weights = pspwght)
+
+# Report results in a nicely-formatted table
+screenreg(ols_inter, include.ci = FALSE, digits = 3)
+```
+`r unhide()`
+
+```{r echo = FALSE}
+coefPT <- coef(ols_inter)["treatAfter the attack"] %>% round(., 3) %>% as.scalar()
+```
+2. According to this regression model, what was the effect of the Bali terror attack in Portugal? `r fitb(coefPT, width = "5")`
+
+```{r echo = FALSE}
+coefSI <- coef(ols_inter)["treatAfter the attack"] + coef(ols_inter)["treatAfter the attack:cntrySI"] %>% round(., 3) %>% as.scalar()
+```
+3. According to this regression model, what was the effect of the Bali terror attack in Slovenia? `r fitb(coefSI, width = "5")`
+`r hide("R solution -> dont' peak to early ;) !")`
+```{r}
+coef(ols_inter)["treatAfter the attack"] + coef(ols_inter)["treatAfter the attack:cntrySI"]
+```
+`r unhide()`
+
+4. Control for age and employment status. Are the results robust? `r mcq(c("No, there are several differences", answer = "Yes, and some countries are even not significantly different from Portugal anylonger"))`
+`r hide("R solution -> dont' peak to early ;) !")`
+```{r}
+ols_inter2 <- lm_robust(anti_immi ~ treat*cntry + age + empl_stat, data = ESS, weights = pspwght)
+
+# Report results in a nicely-formatted table
+screenreg(list(ols_inter, ols_inter2), include.ci = FALSE, digits = 3)
+```
+`r unhide()`
