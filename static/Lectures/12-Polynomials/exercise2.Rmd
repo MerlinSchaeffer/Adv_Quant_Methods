@@ -15,9 +15,7 @@ library(webexercises)
 library(essentials)
 ```
 
-Let's take another look at xenophobia and the ESS. Use the setup below.
-
-```{r results = FALSE}
+```{r include= FALSE}
 pacman::p_load(
   tidyverse, # Data manipulation,
   haven, # Handle labelled data.
@@ -45,44 +43,31 @@ ESS <- read_spss("../../../assets/ESS9e03_1.sav") %>%
 ```
 
 ```{r ols1, include = FALSE}
-ols <- lm_robust(imwbcnt ~ cntry + gndr + eduyrs + I(agea / 10), data = ESS, weights = pspwght)
+ols_log <- lm_robust(imwbcnt ~ cntry + gndr + eduyrs + I(log2(agea)), data = ESS, weights = pspwght)
 
 # Report results in a nicely-formatted table
-screenreg(ols, include.ci = FALSE, digits = 3)
+screenreg(ols_log, include.ci = FALSE, digits = 3)
 ```
 
 ```{r echo = FALSE}
-coef <- coef(ols)["I(agea/10)"] %>% round(., 3) %>% as.scalar()
-se <- vcov(ols) %>% diag()
-se <- se["I(agea/10)"] %>% sqrt() %>% round(., 3) %>% as.scalar()
+coef <- coef(ols_log)["log2(agea)"] %>% round(., 3) %>% as.scalar()
+se <- vcov(ols_log) %>% diag()
+se <- se["log2(agea)"] %>% sqrt() %>% round(., 3) %>% as.scalar()
 ```
+1. Let's continue with xenophobia and the ESS. Instead of a polynomial, use the $\log_2$ transformation. A doubling of age, is associated with an inclease in xenophobia of `r fitb(coef, width = "5")` scale points.
 
-1. Estimate a simple additive multiple OLS, predicting `imwbcnt` based on `cntry`, `gndr`, `eduyrs`, and `agea`. For every 10 years of age, xenophobia change on average `r fitb(coef, width = "5")` units. The standard error is `r fitb(se, width = "5")`, and thus the association is `r mcq(c("Not significant", answer = "Statistically significant", "worrysome"))`.
-
-`r hide("R solution -> dont' peak to early ;) !")`
-```{r ref.label = "ols1"}
-
-```
-`r unhide()`
-
-2. Test whether there is non-linear relationship between xenophobia and age. Which is the largest significant polynomial? `r mcq(c("x^1", answer = "x^2", "x^3", "x^4"))`
+2. Which model fits better, the one with the polynomials or the logged one? According to the $R^2$ and $\text{Adj.}R^2$, `r mcq(c("The logged is better.", "The polynomial is better", answer = "They are equally good."))` 
 `r hide("R solution -> dont' peak to early ;) !")`
 ```{r}
 ols_poly2 <- lm_robust(imwbcnt ~ cntry + gndr + eduyrs + poly(I(agea / 10), 2, raw = TRUE), 
                        data = ESS, weights = pspwght)
-ols_poly3 <- lm_robust(imwbcnt ~ cntry + gndr + eduyrs + poly(I(agea / 10), 3, raw = TRUE), 
-                       data = ESS, weights = pspwght)
-ols_poly4 <- lm_robust(imwbcnt ~ cntry + gndr + eduyrs + poly(I(agea / 10), 4, raw = TRUE), 
-                       data = ESS, weights = pspwght)
 
 # Report results in a nicely-formatted table
-screenreg(list(ols_poly2, ols_poly3, ols_poly4), include.ci = FALSE, digits = 3)
+screenreg(list(ols_log, ols_poly2), include.ci = FALSE, digits = 3)
 ```
 `r unhide()`
 
-3. What does the polynomial imply? `r mcq(c("Age increasingly predicts more xenophobia.", "Xenophobia is high among the young, and lower among the oder.", answer = "Xenophobia increases with age, but this relationship flattens out with every additional year of age,"))`
-
-4. Visualize the predictions.
+3. Visualize the implied relationship between age and xenophobia.
 `r hide("R solution -> dont' peak to early ;) !")`
 ```{r}
 (fict_dat <- tibble( # 1. Make fictional data
@@ -94,7 +79,7 @@ screenreg(list(ols_poly2, ols_poly3, ols_poly4), include.ci = FALSE, digits = 3)
   cntry = "Germany")) # most recent date
 
 (fict_dat <- predict( # 2. Get predictions
-  ols_poly2, newdata = fict_dat,
+  ols_log, newdata = fict_dat,
   interval = "confidence", level = 0.95)$fit %>%
    as_tibble() %>% # Turn into a tibble, then
    bind_cols(fict_dat, .)) # Add to the synthetic data.
@@ -110,3 +95,6 @@ ggplot(data = fict_dat, aes(y = fit, x = agea)) +
   theme_minimal()
 ```
 `r unhide()`
+
+
+

@@ -194,6 +194,12 @@ ggplot(data = Dat %&gt;%
   theme_minimal()
 ```
 ]]
+
+---
+class: inverse center middle
+
+# Recap: Interaction effects
+
 ---
 # Recap: Interaction effects
 
@@ -244,6 +250,11 @@ plotPlane(ols_1, "citizen_rights", "socialist",
 
 &lt;img src="12-Polys_files/figure-html/LifeExp2-1.png" width="75%" style="display: block; margin: auto;" /&gt;
 ]]
+
+---
+class: inverse center middle
+
+# The problem: Non-linear relationships
 
 ---
 # Health expenditures
@@ -687,9 +698,26 @@ layout: false
 ]
 
 ---
+class: inverse middle center
+# Break
+
+&lt;iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+
+---
+class: middle clear
+
+.left-column[
+&lt;img src="https://d1rytvr7gmk1sx.cloudfront.net/wp-content/uploads/2022/08/learn-coding-automation-just.jpeg?x27457" width="100%" style="display: block; margin: auto;" /&gt;
+
+&lt;iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+]
+
+.right-column[
+&lt;br&gt;
+&lt;iframe src='exercise1.html' width='1000' height='600' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+]
 
 
-exercise
 
 ---
 class: inverse center middle
@@ -701,7 +729,7 @@ layout: true
 # Transform `\(Y\)` or `\(X\)` .font70[Our favorite: The logarithm]
 
 .push-left[
-- Sometimes it helps to transform `\(Y\)` and/or `\(X\)`. Textbooks discuss many transformations. .alert[The most common and useful is log2.]
+- Sometimes it helps to transform `\(Y\)` and/or `\(X\)`. Textbooks discuss many transformations. .alert[The most common and useful is log/ln.]
 
 &lt;img src="https://helpingwithmath.com/wp-content/uploads/2021/10/Logarithms-1.png" width="60%" style="display: block; margin: auto;" /&gt;
 
@@ -907,6 +935,7 @@ class: clear
 
 .left-column[
 - In this case, the `\(R^{2}\)` and the Adjusted `\(R^{2}\)` (which penalizes additional predictors, that is, overtly complex models) both suggest: `\(\log_2(X)\)` describes the relationship better.
+- It also better fits our theoretical intuition of the process.
 ]
 
 ---
@@ -916,16 +945,40 @@ class: inverse center middle
 # Modeling non-linear relations &lt;br&gt;&lt;br&gt; Possibility 3:&lt;br&gt; *Generalized Linear Models with link functions*
 
 `$$Y_{i} = g^{-1}(\alpha + \beta_{1}X_{i1} + \ldots)$$`
+## Later in your studies
+
+---
+class: inverse middle center
+# Break
+
+&lt;iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+
+---
+class: middle clear
+
+.left-column[
+&lt;img src="https://d1rytvr7gmk1sx.cloudfront.net/wp-content/uploads/2022/08/learn-coding-automation-just.jpeg?x27457" width="100%" style="display: block; margin: auto;" /&gt;
+
+&lt;iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+]
+
+.right-column[
+&lt;br&gt;
+&lt;iframe src='exercise2.html' width='1000' height='600' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+]
+
 
 ---
 layout: false
 class: inverse
 # Today's general lessons
 
-1. Two predictors are "conditional on each other" or "interact", when the association between the outcome and one of the predictors depends on values of the other.
-2. Such conditional relations are modeling by the including of an "interaction term", which is the product of the two variables involved in the interaction.
-3. The interpretation of interaction terms is complex. The so called "main terms" are the relation between the respective variable and the outcome, when the other variable involved in the interaction is 0, and vice versa. The interaction term captures how the relation between a predictor and the outcome changes if the oother vairbale involved in the interaction increases by one unit, and vice versa.
-4. Because interaction terms are complex, it is best to visualize them using predictions.
+1. Although OLS estimates linear models, we can "linearize" non-linear relationships. We can do so in two ways: by using polynomials, or by transforming `\(Y\)` or `\(X\)`.
+2. Polynomials are basically interaction terms of a variable with itself. By introducing `\(X^2\)`, or even higher order polynomials to our model, we let `\(\beta_{x}\)` change with a change in `\(X\)`. Importantly, every polynomial moderates/aletrs the one before it with a unit increase in `\(X\)`. 
+3. Polynomials allow us to model very complex relationships. But we should be careful to not overfit the model to our particular data. Usually, a simple polynomial (i.e. `\(x\)` and `\(X^2\)` are enough).
+4. An alternative to polynomials is to transform `\(Y\)` and/or `\(X\)`. Many algebraic transformations are possible. But one of the most useful is the logarithm, which allows us to express `\(Y\)` or `\(X\)` in terms of rates of change instead of absolute unit increases.
+
+
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="../template/remark-latest.min.js"></script>
