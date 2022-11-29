@@ -56,10 +56,11 @@ class: inverse middle
 
 Application of the day: Life expectancy at birth!
 1. Recap: Interaction terms.
-2. Polynomials
+2. LOESS (locally estimated scatterplot smoothing)
+3. Polynomials
   + Polynomials as interaction terms
   + Higher order polynomials
-3. Data transformations
+4. Data transformations
   + $\log_2$
 
 ---
@@ -117,7 +118,7 @@ Dat_citi_rights <- download_fh(verbose = FALSE) %>% # Download Freedom House dat
   # Keep only 3 variables.
   select(country, date, citizen_rights)
 
-# Join Worldbank Health and Citizeship rights data
+# Join Worldbank Health and Citizenship rights data
 Dat <- inner_join(Dat_life, Dat_citi_rights, by = c("country", "date"))
 ```
 ]
@@ -262,7 +263,7 @@ ggplot(data = Dat, aes(y = LifeExpect, x = HealthExp)) +
 ]]
 
 ---
-# Health expenditures
+# Health expenditures .font70[The goal]
 
 .left-column[
 - We need a non-linear model:
@@ -281,6 +282,44 @@ ggplot(data = Dat, aes(y = LifeExpect, x = HealthExp)) +
   guides(color = FALSE)
 ```
 ]
+
+---
+class: inverse center middle
+
+# Step 1 <br> <br> .font80[Get a first impression using LOESS (locally estimated scatterplot smoothing)]
+
+---
+class: clear
+# LOESS (locally estimated scatterplot smoothing)
+
+.left-column[
+- LOESS is basically a "local" regression for every observation plus the (e.g. 6) nearest observations to the left and right.
+- It then combines all those regression lines into a "smoothed" "non-parametric" line.
+- Beware, LOESS tends to overfit to the particular data.
+]
+
+.right-column[
+.panelset[
+.panel[.panel-name[LOESS fit]
+```{r LifeExp4a, out.width='90%', fig.height = 5, fig.width = 7, echo = FALSE}
+ggplot(data = Dat, aes(y = LifeExpect, x = HealthExp)) +
+  geom_point(aes(color = country), alpha = 0.5) +
+  geom_line(aes(color = country), alpha = 0.3) +
+  geom_dl(data = Dat %>% filter(country == "Switzerland" | country == "Denmark"), 
+          aes(label = country, color = country), method = list(dl.combine("last.points"))) +
+  # By default geom_smooth() estimates LOESS! #<<
+  geom_smooth(color = "black") + #<<
+  labs(y = "Life expectacy at birth",
+       x = "Health expenditure per capita in $") +
+  theme_minimal() +
+  guides(color = FALSE)
+```
+]
+.panel[.panel-name[Code]
+```{r ref.label = "LifeExp4a", out.width='90%', fig.height = 5, fig.width = 7, fig.show = "hide"}
+
+```
+]]]
 
 ---
 class: inverse center middle

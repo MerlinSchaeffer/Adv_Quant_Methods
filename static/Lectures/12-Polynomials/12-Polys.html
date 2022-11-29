@@ -4,7 +4,7 @@
     <title>Polynomials and transformations</title>
     <meta charset="utf-8" />
     <meta name="author" content="Merlin Schaeffer  Department of Sociology" />
-    <meta name="date" content="2022-11-28" />
+    <meta name="date" content="2022-11-29" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
     <script src="libs/tile-view/tile-view.js"></script>
@@ -27,7 +27,7 @@ class: center, middle, inverse, title-slide
 ### Merlin Schaeffer<br> Department of Sociology
 ]
 .date[
-### 2022-11-28
+### 2022-11-29
 ]
 
 ---
@@ -45,10 +45,11 @@ class: inverse middle
 
 Application of the day: Life expectancy at birth!
 1. Recap: Interaction terms.
-2. Polynomials
+2. LOESS (locally estimated scatterplot smoothing)
+3. Polynomials
   + Polynomials as interaction terms
   + Higher order polynomials
-3. Data transformations
+4. Data transformations
   + `\(\log_2\)`
 
 ---
@@ -105,7 +106,7 @@ Dat_citi_rights &lt;- download_fh(verbose = FALSE) %&gt;% # Download Freedom Hou
   # Keep only 3 variables.
   select(country, date, citizen_rights)
 
-# Join Worldbank Health and Citizeship rights data
+# Join Worldbank Health and Citizenship rights data
 Dat &lt;- inner_join(Dat_life, Dat_citi_rights, by = c("country", "date"))
 ```
 ]
@@ -307,7 +308,7 @@ screenreg(list(ols_1, ols_2), include.ci = FALSE, digits = 3)
 ]]
 
 ---
-# Health expenditures
+# Health expenditures .font70[The goal]
 
 .left-column[
 - We need a non-linear model:
@@ -315,6 +316,43 @@ screenreg(list(ols_1, ols_2), include.ci = FALSE, digits = 3)
 .right-column[
 &lt;img src="12-Polys_files/figure-html/LifeExp4-1.png" width="90%" style="display: block; margin: auto;" /&gt;
 ]
+
+---
+class: inverse center middle
+
+# Step 1 &lt;br&gt; &lt;br&gt; .font80[Get a first impression using LOESS (locally estimated scatterplot smoothing)]
+
+---
+class: clear
+# LOESS (locally estimated scatterplot smoothing)
+
+.left-column[
+- LOESS is basically a "local" regression for every observation plus the (e.g. 6) nearest observations to the left and right.
+- It then combines all those regression lines into a "smoothed" "non-parametric" line.
+- Beware, LOESS tends to overfit to the particular data.
+]
+
+.right-column[
+.panelset[
+.panel[.panel-name[LOESS fit]
+&lt;img src="12-Polys_files/figure-html/LifeExp4a-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+]
+.panel[.panel-name[Code]
+
+```r
+ggplot(data = Dat, aes(y = LifeExpect, x = HealthExp)) +
+  geom_point(aes(color = country), alpha = 0.5) +
+  geom_line(aes(color = country), alpha = 0.3) +
+  geom_dl(data = Dat %&gt;% filter(country == "Switzerland" | country == "Denmark"), 
+          aes(label = country, color = country), method = list(dl.combine("last.points"))) +
+* # By default geom_smooth() estimates LOESS!
+* geom_smooth(color = "black") +
+  labs(y = "Life expectacy at birth",
+       x = "Health expenditure per capita in $") +
+  theme_minimal() +
+  guides(color = FALSE)
+```
+]]]
 
 ---
 class: inverse center middle
@@ -694,7 +732,7 @@ layout: false
 ]]
 
 .push-right[
-&lt;img src="12-Polys_files/figure-html/unnamed-chunk-16-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="12-Polys_files/figure-html/unnamed-chunk-17-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---

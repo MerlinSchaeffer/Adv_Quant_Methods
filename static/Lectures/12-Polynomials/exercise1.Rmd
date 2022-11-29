@@ -65,7 +65,20 @@ se <- se["I(agea/10)"] %>% sqrt() %>% round(., 3) %>% as.scalar()
 ```
 `r unhide()`
 
-2. Test whether there is non-linear relationship between xenophobia and age. Which is the largest significant polynomial? `r mcq(c("x^1", answer = "x^2", "x^3", "x^4"))`
+2. Make a scatter plot of xenophobia and age and add a LOESS.
+`r hide("R solution -> dont' peak to early ;) !")`
+```{r}
+ggplot(data = ESS, aes(y = imwbcnt, x = agea)) +
+  geom_jitter(alpha = 0.5) +
+  # By default geom_smooth() estimates LOESS! #<<
+  geom_smooth() + #<<
+  labs(y = "Xenophobia",
+       x = "Age in years") +
+  theme_minimal()
+```
+`r unhide()`
+
+3. Test whether there is non-linear relationship between xenophobia and age. Which is the largest significant polynomial? `r mcq(c("x^1", answer = "x^2", "x^3", "x^4"))`
 `r hide("R solution -> dont' peak to early ;) !")`
 ```{r}
 ols_poly2 <- lm_robust(imwbcnt ~ cntry + gndr + eduyrs + poly(I(agea / 10), 2, raw = TRUE), 
@@ -80,9 +93,9 @@ screenreg(list(ols_poly2, ols_poly3, ols_poly4), include.ci = FALSE, digits = 3)
 ```
 `r unhide()`
 
-3. What does the polynomial imply? `r mcq(c("Age increasingly predicts more xenophobia.", "Xenophobia is high among the young, and lower among the oder.", answer = "Xenophobia increases with age, but this relationship flattens out with every additional year of age,"))`
+4. What does the polynomial imply? `r mcq(c("Age increasingly predicts more xenophobia.", "Xenophobia is high among the young, and lower among the oder.", answer = "Xenophobia increases with age, but this relationship flattens out with every additional year of age,"))`
 
-4. Visualize the predictions.
+5. Visualize the predictions.
 `r hide("R solution -> dont' peak to early ;) !")`
 ```{r}
 (fict_dat <- tibble( # 1. Make fictional data
