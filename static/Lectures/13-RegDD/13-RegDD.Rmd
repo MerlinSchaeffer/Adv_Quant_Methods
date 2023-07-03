@@ -1,0 +1,215 @@
+---
+title: "Regression Discontinuity Designs"
+subtitle: "The causal effect of rules"
+author: "Merlin Schaeffer<br> Department of Sociology"
+date: "`r Sys.Date()`"
+output: 
+  xaringan::moon_reader:
+    chakra: "../template/remark-latest.min.js"
+    css: ["../template/Merlin169.css"]
+    lib_dir: libs
+    # self_contained: true
+    nature:
+      highlightLanguage: r
+      highlightStyle: zenburn
+      highlightLines: true
+      countIncrementalSlides: false
+      ratio: '16:9'
+---
+```{r setup, include = FALSE}
+library(RefManageR)
+library(knitr)
+library(ggrepel) # Nicely placed labels in figures.
+library(modelr)
+library(webexercises) # Small web-based answer scales.
+library(equatiomatic) # Regression equations from model objects.
+library(essentials)
+
+options(htmltools.preserve.raw = FALSE, tikzDefaultEngine = "xetex",
+        htmltools.dir.version = FALSE, servr.interval = 0.5, width = 115, digits = 3)
+knitr::opts_chunk$set(
+  collapse = TRUE, message = FALSE, fig.retina = 3, error = TRUE,
+  warning = FALSE, cache = FALSE, fig.align = 'center',
+  comment = "#", strip.white = TRUE, tidy = FALSE)
+
+BibOptions(check.entries = FALSE, 
+           bib.style = "authoryear", 
+           style = "markdown",
+           hyperlink = FALSE,
+           no.print.fields = c("doi", "url", "ISSN", "urldate", "language", "note", "isbn", "volume"))
+myBib <- ReadBib("./../../../Stats_II.bib", check = FALSE)
+
+xaringanExtra::use_xaringan_extra(c("tile_view", "tachyons"))
+xaringanExtra::use_panelset()
+```
+# The goal of social science research
+
+.font140[.center[.alert[Use data to discover patterns ("social facts" in Durkheim's terms), <br> and the <ins>social mechanisms that bring them about</ins>.]]]
+
+```{r, echo = FALSE, out.width='70%', fig.align='center'}
+knitr::include_graphics('https://liu.se/-/media/istock-501261958.jpg?mw=1120&mh=1120&hash=DA8977CCE6A6E600AE80A40CFEE771C9')
+```
+
+---
+class: inverse middle
+# Today's schedule
+
+Application 1: Drinking + Driving = Death
+1. Simple RDD.
+2. RDD with different slopes.
+3. Polynomial RDD.
+5. Non-parametric RDD.
+
+Application 2: Does Electing Women Reduce Corruption?
+
+Application 3: Ethnic discrimination in Access to healthcare and far-right mayors.
+
+---
+class: inverse center middle
+
+.push-right[
+```{r, echo = FALSE, out.width='100%', fig.align='center'}
+knitr::include_graphics('https://dam-p-dfi.pqcloud.eu/preview/6XAlSpTzaLfBqzdLvpQ4nU/previews/cropOffsetX_0_cropOffsetY_0_maxWidth_1280_cropWidth_7212_cropHeight_4056.jpg/*/landscape169L.jpg?authcred=R3Vlc3Q6R3Vlc3Q=')
+```
+]
+
+--
+
+.push-left[
+.font120[**What is the causal effect of <br><br> making alcohol consumption legal <br><br> on mortality?**]
+]
+
+---
+# We need an RCT!
+
+.push-left[
+```{r, echo = FALSE, out.width='60%', fig.align='center'}
+knitr::include_graphics('./img/randomization2.png')
+```
+
+- If we *randomly* divide subjects into treatment and control groups: They come from the same underlying population. 
+  <br> <br> $\rightarrow$ Similar .alert[on average], *in every way*,<br> **including their $Y_{0}$ **!
+  <br> <br> $\rightarrow E[Y_{0i}|D=1] = E[Y_{0i}|D=0]$!
+]
+
+.push-right[
+
+$$\begin{equation}\begin{split} E & [Y_{1i}|D=1] - E[Y_{0i}|D=0] \\  \\ & = E[\color{red}{Y_{0i} + \kappa} |D=1] - E[Y_{0i}|D=0], \\ \\ &= \color{red}{\kappa} + \underbrace{E[Y_{0i} |D=1] - E[Y_{0i}|D=0]}_{\underbrace{0}_{\text{(if randomization has worked)}}}, \\ \\ & = \underbrace{\color{red}{\kappa}.}_{\text{The average causal effect}} \end{split}\end{equation}$$
+]
+
+---
+# had an idea!
+
+.left-column[
+.content-box-green[
+Can't we compare those who are legally too youn to drink (>21) to those who may?
+]]
+
+.right-column[
+.panelset[
+.panel[.panel-name[MLDA data]
+.font80[
+```{r}
+pacman::p_load(
+  tidyverse, # Data manipulation,
+  ggplot2, # beautiful figures,
+  estimatr, # OLS with robust SE
+  texreg, # regression tables with nice layout,
+  rdrobust) # Non-parametric regression.
+
+# Get the Minimum legal drinking age data!
+data("mlda", package = "masteringmetrics")
+mlda # print the tibble.
+```
+]]
+.panel[.panel-name[Plot]
+```{r RDD1, out.width='90%', fig.height = 5, fig.width = 8, echo = FALSE}
+mlda <- mlda %>% mutate(
+  # Define those who are allowed to drink
+  over21 = case_when( 
+    agecell >= 21 ~ "Yes",
+    TRUE ~ "No"))
+
+ggplot(data = mlda, aes(y = all, x = agecell, color = over21)) +
+  geom_point() +
+  theme_minimal() + 
+  scale_color_manual(values = c("red", "blue")) +
+  labs(y = "Nr of deaths among US Americans \n aged 20-22 (1997-2003)",
+       x = "Age in months") +
+  guides(color = "none")
+```
+]
+.panel[.panel-name[Code]
+```{r ref.label = "RDD1", out.width='90%', fig.height = 5, fig.width = 8, fig.show = "hide"}
+
+```
+]
+.panel[.panel-name[Plot 2]
+```{r RDD2, out.width='90%', fig.height = 5, fig.width = 8, echo = FALSE}
+mlda <- mlda %>% mutate(
+  # Define those who are allowed to drink
+  close = case_when( 
+    agecell >= 20.9 & agecell < 21 ~ "low",
+    agecell >= 21 & agecell < 21.1 ~ "high",
+    TRUE ~ "No"))
+
+ggplot(data = mlda, aes(y = all, x = agecell, color = close)) +
+  geom_point() +
+  theme_minimal() + 
+    scale_color_manual(values = c("blue", "red", "black")) +
+  labs(y = "Nr of deaths among US Americans \n aged 20-22 (1997-2003)",
+       x = "Age in months") +
+  guides(color = "none")
+```
+]
+.panel[.panel-name[Plot 3]
+```{r RDD3, out.width='90%', fig.height = 5, fig.width = 8, echo = FALSE}
+mlda <- mlda %>% mutate(
+  # Define those who are allowed to drink
+  close = case_when( 
+    agecell >= 20.7 & agecell < 21 ~ "low",
+    agecell >= 21 & agecell < 21.3 ~ "high",
+    TRUE ~ "No"))
+
+ggplot(data = mlda, aes(y = all, x = agecell, color = close)) +
+  geom_point() +
+  theme_minimal() + 
+    scale_color_manual(values = c("blue", "red", "black")) +
+  labs(y = "Nr of deaths among US Americans \n aged 20-22 (1997-2003)",
+       x = "Age in months") +
+  guides(color = "none")
+```
+]]]
+
+---
+# had an idea!
+
+.left-column[
+1. We need to get as close to the threshold as possible.
+2. We need to use as much as the data to gain statistical power as possible.
+]
+
+.right-column[
+```{r RDD4, out.width='90%', fig.height = 5, fig.width = 8, echo = FALSE}
+ggplot(data = mlda, aes(y = all, x = agecell, )) +
+  geom_point(color = over21) +
+  geom_smooth(method = "lm", formula) +
+  theme_minimal() + 
+  scale_color_manual(values = c("red", "blue")) +
+  labs(y = "Nr of deaths among US Americans \n aged 20-22 (1997-2003)",
+       x = "Age in months") +
+  guides(color = "none")
+```
+]
+
+---
+layout: false
+class: inverse
+# Today's general lessons
+
+1. Although OLS estimates linear models, we can "linearize" non-linear relationships. We can do so in two ways: by using polynomials, or by transforming $Y$ or $X$.
+2. Polynomials are basically interaction terms of a variable with itself. By introducing $X^2$, or even higher order polynomials to our model, we let $\beta_{x}$ change with a change in $X$. Importantly, every polynomial moderates/alerts the one before it with a unit increase in $X$. 
+3. Polynomials allow us to model very complex relationships. But we should be careful to not overfit the model to our particular data. Usually, a simple polynomial (i.e. $x$ and $X^2$ are enough).
+4. An alternative to polynomials is to transform $Y$ and/or $X$. Many algebraic transformations are possible. But one of the most useful is the logarithm, which allows us to express $Y$ or $X$ in terms of rates of change instead of absolute unit increases.
+
+

@@ -8,17 +8,19 @@ view: 2
 
 
 
-<p>This course introduces you to advanced regression analysis and its application in sociological research with a special focus on causal analysis. It builds on your Intro to R course a yar ago and your Basic Statistics course last semester.</p>
-<p>The course progression starts with a recapitulation of ordinary least squares regression as the workhorse of
-contemporary quantitative sociology. From there it advances your knowledge of OLS regression and introduces applications of OLS that allow you to investigate complex relationships and causal effects.</p>
+<p>This advanced statistics course in sociology, titled “Multiple Regression and Fundamentals of Causal Inference,” offers a comprehensive understanding of both the theory and application of multiple regression analysis. Throughout the course, you will learn how to effectively interpret regression coefficients and utilize regression analysis to test hypotheses and make accurate predictions.</p>
+<p>In addition to mastering multiple regression analysis, this course will equip you with a solid grasp of the fundamental principles underlying causal inference. You will gain the ability to differentiate between correlation and causation, identify the influence of confounding variables, and employ techniques to establish causal relationships. Appreciating the pivotal role of multiple regression as a core statistical tool in causal inference will be emphasized.</p>
+<p>A key aspect of this course is the exploration of various research designs, including randomized controlled trials, quasi-experimental designs, and observational studies. You will acquire the skills necessary to select the appropriate design based on specific research inquiries. Hands-on experience will be gained through the use of R to conduct multiple regression analysis and apply causal inference techniques.</p>
+<p>Throughout the course, sociological research questions will be addressed, such as investigating the impact of news media consumption on the awareness of ethno-racial discrimination, or assessing the effects of office interventions on domestic repeat violence. By delving into these topics, you will understand how multiple regression analysis and causal inference can be effectively employed within sociological research.</p>
+<p>Ultimately, this course aims to establish a strong foundation in statistical analysis and causal inference, which are indispensable skills for conducting rigorous sociological research.</p>
 <div id="before-the-first-session" class="section level1">
 <h1>Before the first session!</h1>
 <p>Before the first session, I would like you to please follow these steps in exactly this order, regardless of whether you have worked with R and RStudio before.</p>
 <ol style="list-style-type: decimal">
-<li><p><a href="https://mirrors.dotsrc.org/cran/">Get a recent version of R (&gt;= 4.2.0)</a>.</p></li>
-<li><p><a href="https://rstudio.com/products/rstudio/download/#download">Install RStudio</a>. Check also <a href="https://psyteachr.github.io/msc-data-skills/installingr.html#installing-base-r">this homepage</a>.</p></li>
+<li><p><a href="https://mirrors.dotsrc.org/cran/">Get a recent version of R (&gt;= 4.3.0)</a>.</p></li>
+<li><p><a href="https://rstudio.com/products/rstudio/download/#download">Install RStudio</a>, or update to the most recent version. Also check <a href="https://psyteachr.github.io/msc-data-skills/installingr.html#installing-base-r">this homepage</a>.</p></li>
 <li><p>Open RStudio and follow these <a href="/Lectures/0-Prep/0-Prep.html">instructions to setup a Project</a> for this class.</p></li>
-<li><p>As a third step, run the lines of code below in the Console of your RStudio. Note that this can take a while. If you are asked whether you want to “Do you want to install from sources the package which needs compilation?” answer: “no”. Make sure to wait until the courser blinks behind a <code>&gt;</code> again. Press enter again two times to produce two more <code>&gt;</code>.</p></li>
+<li><p>As a final step, run the lines of code below in the Console of your RStudio. Note that this can take a while. If you are asked whether you want to “Do you want to install from sources the package which needs compilation?” answer: “no”. Make sure to wait until the courser blinks behind a <code>&gt;</code> again. Press enter again two times to produce two more <code>&gt;</code>.</p></li>
 </ol>
 <pre class="r"><code>update.packages(ask = FALSE)
 
@@ -28,11 +30,10 @@ pacman::p_load(
   tidyverse, # Data manipulation,
   ggplot2, # beautiful figures,
   wbstats, # download data from Worldbank. Tremendous source of global socio-economic data.
-  texreg, # regression tables with nice layout,
   estimatr, # Regression for weighted data,
   modelr, # Turn results of lm() into a tibble,
   furniture, # For row-means,
-  modelsummary, # for balance tables,
+  modelsummary, # for regression and balance tables,
   ivreg, # IV 2SLS,
   countrycode, # Easy recodings of country names,
   remotes) # Install beta version packages from GitHub.
@@ -46,7 +47,7 @@ pacman::p_load(
   masteringmetrics, # Data and examples from Mastering Metrics
   democracyData) # download democracy data used in the scholarly literature.</code></pre>
 <ol start="5" style="list-style-type: decimal">
-<li>Now type <code>sessionInfo()</code> into your console and check whether all of the following are mentioned under “other attached packages”: tidyverse, ggplot2, wbstats, texreg, estimatr, modelr, furniture, modelsummary, ivreg, countrycode, remotes, rosdata, masteringmetrics, and finally democracyData. <strong>If any package is missing. Contact a tutor to help you set everything up properly.</strong></li>
+<li>Now type <code>sessionInfo()</code> into your console and check whether all of the following are mentioned under “other attached packages”: tidyverse, ggplot2, wbstats, estimatr, modelr, furniture, modelsummary, ivreg, countrycode, remotes, rosdata, masteringmetrics, and finally democracyData. <strong>If any package is missing. Contact a tutor to help you set everything up properly.</strong></li>
 </ol>
 <ul>
 <li>Please always make sure to bring your laptop to class.</li>
@@ -54,39 +55,30 @@ pacman::p_load(
 </div>
 <div id="course-components-and-expectations" class="section level1">
 <h1>Course Components and Expectations</h1>
-<p>This course is comprised of methodological and substantive lectures introducing important
-concepts, statistical methods, and their broader relevance, on the one hand, and exercise classes in
-which students will gain first-hand experience in using and discussing them, on the other. For successful participation in this course there are three expectations:</p>
+<p>This course consists of a combination of methodological and substantive lectures that introduce crucial concepts, statistical methods, and their broader implications. Additionally, exercise classes will provide students with practical experience in applying and discussing these concepts. To fully benefit from this course, four expectations are set:</p>
 <ol style="list-style-type: decimal">
-<li>Thoroughly prepare for each class with the assigned readings.</li>
-<li>Actively follow lectures asking questions were relevant and engage in discussion and posed tasks in exercise classes.</li>
-<li>Solve the exercises in class, and the weekly Online Quizzes on Absalon.</li>
-<li>Prepare and submit a portfolio exam, which is an integrated exam with Mads’ Jæger’s course.</li>
+<li>Thoroughly prepare for each class by completing the assigned readings.</li>
+<li>Actively engage in lectures by asking relevant questions, participating in discussions, and completing assigned tasks during exercise classes.</li>
+<li>Solve the weekly Online Quizzes on Absalon (at least 10 to qualify for the exam!).</li>
+<li>Complete and submit the integrated exam shared with Mads’ Jæger’s course “Velfærd, ulighed og mobilitet”.</li>
 </ol>
 </div>
 <div id="course-structure" class="section level1">
 <h1>Course structure</h1>
-<p>We meet once a week, every Wednesday at 10am. Every session lasts three hours and consists of two iterations of lecture, 15 minutes break, and small exercise. In addition, you have a tutoring session every week where you can work in a smaller setting, ask questions, and properly work with R on stats problems.</p>
+<p>The course schedule includes weekly meetings every Wednesday at 10am. Each session has a duration of three hours and comprises two lecture iterations, small exercises, and a 15-minute break. Additionally, a tutoring session is scheduled every Friday to provide a smaller group setting for working on stats problems, asking questions, and gaining hands-on experience with R.</p>
 <p><img src="Lectures/1-Intro/img/Structure.png" /></p>
 </div>
 <div id="course-schedule-and-team" class="section level1">
 <h1>Course Schedule and Team</h1>
 <p>Wednesdays, kl. 10-13: Lecture @ CSS 35-01-06 (Merlin Schaeffer)</p>
-<p>Friday, kl. 13-15, Exercise group 1 @ CSS 2-2-12 (Jonas Strøyberg Jensen)</p>
-<p>Friday, kl. 13-15, Exercise group 2 @ CSS 35-0-12 (Rasmus Henriksen Klokker)</p>
-<p>Thursday, kl. 8-10, Exercise group 3 @ CSS 2-1-49 (Rasmus Henriksen Klokker)</p>
-<p>Friday, kl. 13-15, Exercise group 4 @ CSS 2-1-18 (Tobias Schjødt Kjær)</p>
+<p>Friday, kl. 13-15, Exercise group 1 @ CSS 2-2-12 (NN)</p>
+<p>Friday, kl. 13-15, Exercise group 2 @ CSS 35-0-12 (NN)</p>
+<p>Thursday, kl. 8-10, Exercise group 3 @ CSS 2-1-49 (NN)</p>
+<p>Friday, kl. 13-15, Exercise group 4 @ CSS 2-1-18 (NN)</p>
 </div>
 <div id="course-literature" class="section level1">
 <h1>Course Literature</h1>
-<p>In this course we use two text books. To recap on OLs regression and statistical inference, we continue to use the textbook from last semester:</p>
-<ul>
-<li>Veaux, De, Velleman, and Bock. 2021. Stats: Data and Models, Global Edition. Pearson Higher Ed.</li>
-</ul>
-<p>In addition, we will make heavy use of another book to understand, how regression analysis can be used to identify causal effects:</p>
-<ul>
-<li>Angrist, Joshua D., and Jörn-Steffen Pischke. 2014. Mastering ’Metrics: The Path from Cause to Effect. Princeton University Press.</li>
-</ul>
-<p>Both books are available from Academic Books on the City Campus as well as on the term
-shelves at the university library.</p>
+<p>This course uses two textbooks. The first textbook carried over from last semester, “Stats: Data and Models, Global Edition” by Veaux, De, Velleman, and Bock (2021), serves as a reference for regression and statistical inference.</p>
+<p>To deepen our understanding of how regression analysis can be applied to identify causal effects, we will heavily rely on the book “Mastering ’Metrics: The Path from Cause to Effect” by Angrist, Joshua D., and Jörn-Steffen Pischke (2014).</p>
+<p>Both textbooks are accessible at Academic Books on the City Campus and are also available on the term shelves at the university library.</p>
 </div>
