@@ -50,7 +50,7 @@ background-size: cover
 **My research agenda**
 ]
 .font200[
-**Conceptual and theory-driven empirical analysis of <br><br>immigration-based ethnic diversity and stratification,<br><br> including their contentious political consequences.**
+**Theory-driven empirical analysis of <br><br>immigration-based ethnic diversity and stratification,<br><br> including their contentious political consequences.**
 ]
 
 
@@ -106,139 +106,124 @@ knitr::include_graphics('./img/Wiedner.png')
 
 ---
 layout: false
-class: inverse middle center
+class: middle center
 
-.push-left[.font200[
-Did you do the
-
-**pre-work setup**?
-]]
-
-
-.push-right[
-<iframe src='https://merlin-advanced-stats.netlify.app/about/' width='1000' height='600' frameborder='0' scrolling='yes'></iframe>
+.font200[
+Did you the [**setup**](https://merlin-ols.netlify.app/about/) <br><br> and are you ready to go?
 ]
 
 ---
 layout: false
-class: inverse middle
+class: inverse
 # I assume
 
-- You know how to use R and RStudio.
-
+1. You have basic R coding skills and know how to use RStudio.
 
 --
 
-
-- You know basic statistics:
+2. You know basic statistics:
   + Descriptive statistics: $\%$, $\bar{x}$, $\text{SD}(x)$.
-  + Associations: Correlation $r_{y,x}$, OLS regression $y_{i} = \alpha + \beta x_{i} + \epsilon_{i}$.
+  + Associations: Correlation $r_{y,x}$ & OLS regression $y_{i} = \alpha + \beta x_{i} + \epsilon_{i}$.
   + Inference: Confidence intervals, $t$-values & $p$-values.
 
---
-
-
-- *You want to do professional analyses and communicate your results with appealing visualizations.*
-
 ---
-class: inverse middle
+class: inverse
 # Today's schedule
 
 1. Explanatory sociology
 
-
-2. Learning goals
-  + Advanced OLS regression
-  + Visualization of regression results
-  + Causal inference
-  
+2. Three learning goals
+  1. Advanced OLS regression
+  2. Visualization of regression results
+  3. Causal inference
   
 3. Course organization
 
 ---
 class: inverse middle center
-# Explanatory sociology
+# Explanatory Sociology
 
 ---
 # 4 Types of research questions
 
 .push-left[
-- **Ontological**: What is the nature of X?
+**(1) Ontological**: What is the nature of .alert[X]?
   + What is power?
   + What is gender; how is it different from race?
-  + What defines a state? .backgrnote[
+  + What is a state? .backgrnote[
 > A human community that (successfully) claims the monopoly of the legitimate use of physical force within a given territory
 
-> --- Max Weber, “Politics as a Vocation” 1918]
+> -- Max Weber, "Politics as a Vocation" 1918]
 
 
-- **Critical**: Is X (un-)just?
+
+**(2) Critical**: Is .alert[X] (un-)just?
   + Is home office exploitation?
-  + Is color-blind ideology a new form of racism?
+  + Is the color-blind ideology a new form of racism?
 ]
 
 --
 
 .push-right[
-- **Descriptive**: What is the case?
+**(3) Descriptive**: What types of .alert[X] exist<br> and how frequent are they?
   + What are the survival strategies of the poor?
   + How did Danes structure their days during the COVID-19 lockdowns?
 
 
-- **Explanatory**: Why is X the case?
-  - Why does the suicide rate vary across societies?
-  - How does capitalism affect human beings?
-  - How does urbanization change our psyche?
-  - Why do people obey power?
-  - How does a state gain legitimacy over the use of physical force? 
+
+**(4) Explanatory**: What is the effect of .alert[X]? <br> .backgrnote[(Vice versa: How does .alert[Y] come about?)]
+  - What are the consequences of anomie? <br> .backgrnote[Why does the suicide rate vary across societies?]
+  - How does capitalism affect us?
+  - How does urbanization affect us?
+  - .backgrnote[Why do people obey power?]
+  - .backgrnote[How does a state gain legitimacy over the use of physical force?]
 ]
 
 --
 
 .content-box-green[
 .center[
-What type of research question do my three examples try to answer?
-
-What are you interested in?
+Think of the last exam you wrote. What type of research question did it enage with?
 ]]
 
 ---
 # 4 Types of research questions
 
 .push-left[
-- **Ontological**: What is the nature of X?
+**(1) Ontological**: What is the nature of .alert[X]?
   + What is power?
   + What is gender; how is it different from race?
-  + What defines a state? .backgrnote[
+  + What is a state? .backgrnote[
 > A human community that (successfully) claims the monopoly of the legitimate use of physical force within a given territory
 
-> --- Max Weber, “Politics as a Vocation” 1918]
+> -- Max Weber, "Politics as a Vocation" 1918]
 
 
-- **Critical**: Is X (un-)just?
+
+**(2) Critical**: Is .alert[X] (un-)just?
   + Is home office exploitation?
-  + Is color-blind ideology a new form of racism?
+  + Is the color-blind ideology a new form of racism?
 ]
 
 .push-right[
-- **Descriptive**: What is the case?
+**(3) Descriptive**: What types of .alert[X] exist<br> and how frequent are they?
   + What are the survival strategies of the poor?
   + How did Danes structure their days during the COVID-19 lockdowns?
 
 
 .content-box-red[
-- **Explanatory**: Why is X the case?
-  - Why does the suicide rate vary across societies?
-  - How does capitalism affect human beings?
-  - How does urbanization change our psyche?
-  - Why do people obey power?
-  - How does a state gain legitimacy over the use of physical force? 
+**(4) Explanatory**: What is the effect of $X$? <br> .backgrnote[(Vice versa: How does .alert[Y] come about?)]
+  - What are the consequences of anomie? <br> .backgrnote[Why does the suicide rate vary across societies?]
+  - How does capitalism affect us?
+  - How does urbanization affect us?
+  - .backgrnote[Why do people obey power?]
+  - .backgrnote[How does a state gain legitimacy over the use of physical force?]
 ]]
 
 ---
-# The goal of empirical social science
+# Goal of empirical sociology
 
-.font140[.center[.alert[Use data to discover patterns ("social facts" in Durkheim's terms), <br> and the **social mechanisms that bring them about**.]]]
+.font140[.center[.alert[Use data to discover patterns, <br> and the **social mechanisms that bring them about**.]]]
 
 ```{r, echo = FALSE, out.width='70%', fig.align='center'}
 knitr::include_graphics('https://liu.se/-/media/istock-501261958.jpg?mw=1120&mh=1120&hash=DA8977CCE6A6E600AE80A40CFEE771C9')
@@ -246,20 +231,24 @@ knitr::include_graphics('https://liu.se/-/media/istock-501261958.jpg?mw=1120&mh=
 
 ---
 class: inverse middle center
-# Learning goals
+# Three learning goals
 
 ---
-# This semester / Learning goals
+# Three learning goals
 
 .push-left[
-- More flexible OLS regression:
-  + Multiple regression,
+**(1) Multiple OLS regression**
+  + Multiple predictors & confounder adjustment,
   + Interaction effects,
   + Polynomials.
-- Visualization of regression results.
-- Work with various data.
 
-```{r, echo = FALSE, out.width='80%', fig.align='center'}
+
+
+**(2) Visualization of regression results**
+  + Model predictions,
+  + Coefficient plots.
+
+```{r, echo = FALSE, out.width='65%', fig.align='center'}
 knitr::include_graphics('https://www.journals.uchicago.edu/cms/10.1086/686942/asset/images/medium/fg3.gif')
 ```
 .backgrnote[.center[*Source:* `r Citet(myBib, "legewie_contested_2016")`]]
@@ -269,13 +258,15 @@ knitr::include_graphics('https://www.journals.uchicago.edu/cms/10.1086/686942/as
 --
 
 .push-right[
-- .alert[Causal Inference]:
-  1. Randomized Controlled Trials (RCTs),
-  2. Multiple Regression,
-  3. Instrument Variable Regression,
-  4. Regression Discontinuity Design.
+**(3) Fundamentals of causal inference**
+  + Potential outcomes and directed acyclical graphs,
+  + Randomized Controlled Trials,
+  + Intention to treat & instrument variable regression,
+  + Multiple regression,
+  + 2-SLS instrument variable regression,
+  + Regression discontinuity designs.
 
-```{tikz, DAG1,  echo = FALSE, out.width='50%'}
+```{tikz, DAG1,  echo = FALSE, out.width='45%'}
 \usetikzlibrary{shapes,decorations,arrows,calc,arrows.meta,fit,positioning}
 \tikzset{
     -Latex,auto,node distance =1 cm and 1 cm,semithick,
@@ -299,80 +290,9 @@ knitr::include_graphics('https://www.journals.uchicago.edu/cms/10.1086/686942/as
 ]
 
 ---
-layout: true
-# Example 1: Multiple regression
-
----
-.push-left[
-```{tikz, ref.label = "DAG1",  echo = FALSE, out.width='40%'}
-```
-.backgrnote[
-The red bi-directed arrow is officially not part of the DAG, but helps you see that the correlation between $X$ and $Y$ is spurious because of $C$.
-]]
-
----
-
-.push-left[
-```{tikz, DAG2,  echo = FALSE, out.width='100%'}
-\usetikzlibrary{shapes,decorations,arrows,calc,arrows.meta,fit,positioning}
-\tikzset{
-    -Latex,auto,node distance =1 cm and 1 cm,semithick,
-    state/.style ={ellipse, draw, minimum width = 0.7 cm},
-    point/.style = {circle, draw, inner sep=0.04cm,fill,node contents={}},
-    bidirected/.style={Latex-Latex,dashed},
-    el/.style = {inner sep=2pt, align=left, sloped}
-}
-
-\begin{tikzpicture}
-\sffamily
-    \node[state] (1) at (0,0) {Poor team};
-    \node[state] (2) at (2,0) {C?};
-    \node[state] (3) [below = of 1] {Sports bet};
-    \node[state] (4) [below = of 3] {Lost football game};
-    \node[state] (5) [right = of 4] {Domestic violence};
-
-    \path (1) edge  (3);
-    \path (2) edge  (3);
-    \path (3) edge  (4);
-    \path (4) edge (5);
-    \path (1) edge (5);
-    \path (2) edge (5);
-\end{tikzpicture}
-```
-
-.backgrnote[
-The red bi-directed arrow is officially not part of the DAG, but helps you see that the correlation between read news and perceived discrimination is biased because immigrant minorities who obtained German citizenship read news more often than those who are foreign citizens.]
-
-```{r, echo = FALSE, out.width='60%', fig.align='center'}
-knitr::include_graphics('https://wpr-public.s3.amazonaws.com/wprorg/styles/facebook/s3/field/image/ap20296067506098.jpg?itok=hZu82HBq')
-```
-
-]
-
----
-
-.left-column[
-```{tikz, ref.label = "DAG2",  echo = FALSE, out.width='100%'}
-```
-.backgrnote[
-The red bi-directed arrow is officially not part of the DAG, but helps you see that the correlation between read news and perceived discrimination is biased because immigrant minorities who obtained German citizenship read news more often than those who are foreign citizens.]
-
-```{r, echo = FALSE, out.width='100%', fig.align='center'}
-knitr::include_graphics('https://wpr-public.s3.amazonaws.com/wprorg/styles/facebook/s3/field/image/ap20296067506098.jpg?itok=hZu82HBq')
-```
-]
-
-.right-column[
-```{r, echo = FALSE, out.width='100%', fig.align='center'}
-knitr::include_graphics('./img/Card_n_Dahl.png')
-```
-.backgrnote[.center[*Source:* `r Citet(myBib, "card_family_2011")`]]
-]
-
----
 layout: false
 class: clear
-# Example 2: Regression discontinuity design
+# Example: Regression discontinuity design
 
 .push-left[
 ```{r, echo = FALSE, out.width='62%', fig.align='center'}
@@ -388,7 +308,7 @@ knitr::include_graphics('https://pbs.twimg.com/media/FZIn0ymXgAAOopA.jpg:large')
 
 ---
 class: clear
-# Example 2: Regression discontinuity design
+# Example: Regression discontinuity design
 
 .push-left[
 ```{r, echo = FALSE, out.width='62%', fig.align='center'}
@@ -408,12 +328,22 @@ knitr::include_graphics('./img/Map_Italy.png')
 
 ---
 class: clear
-# Example 2: Regression discontinuity design
+# Example: Regression discontinuity design
 
 ```{r, echo = FALSE, out.width='50%', fig.align='center'}
 knitr::include_graphics('./img/Romarri.png')
 ```
 .backgrnote[.center[*Source:* `r Citet(myBib, "romarri_far-right_2020")`]]
+
+---
+class: clear
+# Example: Regression discontinuity design
+
+```{r, echo = FALSE, out.width='90%', fig.align='center'}
+knitr::include_graphics('./img/Right_Wing5-1.png')
+```
+.backgrnote[.center[*Source:* `r Citet(myBib, "krakowski_populist_2022")`]]
+
 
 ---
 class: inverse middle center
@@ -430,28 +360,69 @@ class: inverse middle center
 ---
 # Weekly course elements
 
+.left-column[
+.center[**Recommendations**]
+- Activate email notifications on Absalon.
+- Regularly check your KU email or forward it to your personal email.
+- Ask and answer questions in the [t-R-ouble forum](https://absalon.ku.dk/courses/70545/discussion_topics/563046?module_item_id=2037268) on Absalon.
+]
+
+.right-column[
 ```{r, echo = FALSE, out.width='100%', fig.align='center'}
 knitr::include_graphics('./img/Structure.png')
 ```  
+]
+
+---
+class: clear
+
+```{r, echo = FALSE, out.width='70%', fig.align='center'}
+knitr::include_graphics('./img/Quizz.png')
+```  
+---
+# Weekly Absalon Online Quizzes
+
+.left-column[
+- 14 Online Quizzes on Absalon designed by Thorkil and Emil from [Epinion](https://epinionglobal.com/).
+- Quizzes are based on real data Epinion collects for the municipality of Copenhagen, DR, Skat, and many more.
+- You need to .alert[submit at least 10 completed quizzes] to qualify for the integrated exam with "Velfærd, ulighed og mobilitet".
+- Quizzes must be submitted .alert[within two weeks] after they are made available online (i.e., Wednesdays after the lecture).
+]
+
+.right-column[
+```{r, echo = FALSE, out.width='90%', fig.align='center'}
+knitr::include_graphics('./img/Quizz.png')
+```  
+]
+
+---
+class: clear
+# AI & Large Language Models like ChatGPT
+
+.push-left[
+1. **Privacy**: Everything gets sent to OpenAI's servers. .alert[Don't use AI/LLMs to process sensitive information!]
+2. **Learning**: Use AI/LLMs to *explain, comment, debug, and improve* R code that you drafted.
+3. **Generation**: Don't use AI/LLMs to *generate, draft, and write* your R code. .alert[You need to learn how to code to assess whether ChatGPT coded what you asked for.]
+4. **Citation**: You can use AI/LLMs but you need to explain how you used which AI/LLMs at the outset of your exam.
+]
+
+.push-right[
+```{r, echo = FALSE, out.width='100%', fig.align='center'}
+knitr::include_graphics('https://media1.giphy.com/media/iiSb58oATiANL65Dd2/giphy.gif?cid=ecf05e470i00dk1kq5bvalzh4irqygm4pieeqkdyz9vk76ht&ep=v1_gifs_search&rid=giphy.gif&ct=g')
+```  
+]
 
 ---
 layout: true
-# Working with data
+# Working with various data sources
 
 .left-column[
-```{r, echo = FALSE, out.width='50%', fig.align='center'}
-knitr::include_graphics('https://www.rstudio.com/wp-content/uploads/2018/10/RStudio-Logo-Flat.png')
-```  
-- We presume that you are familiar with using R.
-
-- You will learn to work with various different types of data in this course.
-
-- Become as fluent in working with data as you are in Danish/English ;)
+Throughout the lectures, holds, and weekly Absalon online quizzes, you will work with various different data sources.
 ]
 
 ---
 .right-column[
-.center[Data collected by the Worldbank]
+.center[Data collected by the World Bank]
 ```{r, echo = FALSE, out.width='90%', fig.align='center'}
 knitr::include_graphics('./../2-Correlation-n-Regression/2-Corr-n-Reg_files/figure-html/socialism-corr1-1.png')
 ```  
@@ -461,17 +432,7 @@ knitr::include_graphics('./../2-Correlation-n-Regression/2-Corr-n-Reg_files/figu
 ---
 
 .right-column[
-.center[European Social Survey]
-```{r, echo = FALSE, out.width='90%', fig.align='center'}
-knitr::include_graphics('./../3-Random/3-Random_files/figure-html/true_ols-1.png')
-```  
-
-]
-
----
-
-.right-column[
-.center[APAX survey]
+.center[APAX survey of immigrants and their descendants in Germany]
 ```{r, echo = FALSE, out.width='90%', fig.align='center'}
 knitr::include_graphics('./../5-Selection-bias/5-Selection-bias_files/figure-html/naiv-1.png')
 ```  
@@ -480,10 +441,12 @@ knitr::include_graphics('./../5-Selection-bias/5-Selection-bias_files/figure-htm
 
 ---
 layout: false
-# Textbooks
+# Two textbooks
+
+$\rightarrow$ Both textbooks are accessible at Academic Books and are available at the university library.
 
 .push-left[
-.center[We continue to use the book from last semester]
+.center[The first textbook, carried over from last semester, serves as a reference for regression and statistical inference.]
 
 ```{r, echo = FALSE, out.width='40%', fig.align='center'}
 knitr::include_graphics('https://imgcdn.saxo.com/_9781292362328')
@@ -492,34 +455,12 @@ knitr::include_graphics('https://imgcdn.saxo.com/_9781292362328')
 ]
 
 .push-right[
-.center[Additionally, we will use Angrist and Pischke's excellent introduction to causal inference.]
+.center[To deepen our understanding of how regression analysis can be applied to identify causal effects, we will heavily rely on Angrist and Pischke's textbook]
 
-```{r, echo = FALSE, out.width='40%', fig.align='center'}
+```{r, echo = FALSE, out.width='35%', fig.align='center'}
 knitr::include_graphics('https://imgcdn.saxo.com/_9780691152844')
 ```
 .backgrnote[.center[`r Citet(myBib, "angrist_mastering_2014")`]]
-]
-
----
-# Recommendations
-
-.push-left[
-- Take notes!
-  + I will use the blackboard.
-  + The slides are visualizations, not a textbook written in bullet points.
-  + Many things I say are not on the slides.
- 
-  
-- Activate email notifications on Absalon.
-
-
-- Regularly check your KU email or forward it to your personal email.
-]
-
-.push-right[
-```{r, echo = FALSE, out.width='80%', fig.align='center'}
-knitr::include_graphics('https://media.istockphoto.com/vectors/school-children-vector-id513534403?s=170667a')
-```
 ]
 
 ---
