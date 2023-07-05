@@ -1,6 +1,6 @@
 ---
-title: "2. Recap: Correlation & OLS Regression"
-subtitle: "Same same but different ..."
+title: "Multiple Regression & <br><br> Fundamentals of Causal Inference"
+subtitle: "<br>2. Recap: Correlation & OLS Regression"
 author: "Merlin Schaeffer<br> Department of Sociology"
 date: "`r Sys.Date()`"
 output: 
@@ -42,35 +42,37 @@ xaringanExtra::use_xaringan_extra(c("tile_view", "tachyons"))
 xaringanExtra::use_panelset()
 ```
 
-# The goal of social science research
+# Goal of empirical sociology
 
-.font140[.center[.alert[Use data to **discover patterns** ("social facts" in Durkheim's terms), <br> and the social mechanisms that bring them about.]]]
+.font130[.center[Use data to .alert[discover patterns], <br> and the social mechanisms that bring them about.]]
 
 ```{r, echo = FALSE, out.width='70%', fig.align='center'}
 knitr::include_graphics('https://liu.se/-/media/istock-501261958.jpg?mw=1120&mh=1120&hash=DA8977CCE6A6E600AE80A40CFEE771C9')
 ```
 ---
-class: inverse middle
+class: inverse
 # Today's schedule
 
-1. **Application**: Socialism, citizenship rights, & poverty
-  + Worldbank API
-  + Freedom house API
-  + Join/merge different data sources
+1. **Application**: Socialism, citizenship rights, and poverty.
+  + Application Programming Interfaces (API)
+  + World Bank API
+  + Democracy data API
+  + Join different data sources
   
-2. **Scatter plots**
-
-3. **Correlation**
-  + Z-standardization
-  + $r_{y,x}$
+2. **Recap**
   
-4. **OLS regression**
-  + Estimation
-  + Interpretation
-  + Causal & descriptive interpretation.
+  2.1 *Scatter plots*
+  2.2 *Correlation*
+    + Z-standardization
+    + $r_{y,x}$
+  
+  2.3 *Bivariate OLS regression*
+  + OLS estimation
+  + Causal versus descriptive interpretation
   
 ---
-# Remember? .font70[Citizenship across the world]
+class: clear
+# Remember? .font70[Civic and political Citizenship rights across the world]
 
 .right-column[
 [Freedom House World Map 2021](https://freedomhouse.org/explore-the-map?type=fiw&year=2020)
@@ -83,7 +85,7 @@ knitr::include_graphics('img/FreedomHouse.png')
 --
 
 .left-column[
-- Some of you criticized:<br><br> *But aren't socialist countries good at providing work and equality?*
+Some of you criticized:<br> *But aren't socialist countries better at providing* **social** *citizenship rights, like affordable housing, healthcare, work, and minimum quality of life?*
 ]
 
 ---
@@ -121,97 +123,112 @@ pacman::p_load(
   tidyverse, # Data manipulation,
   ggplot2, # beautiful figures,
   wbstats, # download data from Worldbank. Tremendous source of global socio-economic data.
-  # democracyData, # download democracy data used in the scholarly literature.
-  texreg, # regression tables with nice layout,
+  estimatr, # OLS with robust SE,
+  modelsummary, # regression tables with nice layout,
+  democracyData, # Use democracy data APIs,
   countrycode, # Easy recodings of country names,
   remotes) # Install beta version packages from GitHub.
-
-# Make sure to run the two lines of code below only once, to delete them afterwards, 
-# and to un-comment "democracyData" in the pacman::p_load() above afterwards.
-remotes::install_github("xmarquez/democracyData")
-pacman::p_load(democracyData) # download democracy data used in the scholarly literature.
 ```
 ]]
 
 ---
+class:c clear
+# Application Programming Interfaces (API)
+
+```{r, echo = FALSE, out.width='80%'}
+knitr::include_graphics('https://rapidapi.com/blog/wp-content/uploads/2023/03/What-is-an-API-definition.webp')
+```
+
+---
 class: clear
-# Freedom House Data .font70[on (civic and political) citizenship rights]
+# (1) Freedom House Data .font70[Civic and political citizenship rights]
 
 .panelset[
 .panel[.panel-name[The data]
 
 .left-column[
-- Since 1972, Freedom House publishes an annual report on the the current state of civil and political rights around the world on a scale from 1 (most free) to 7 (least free). .backgrnote[
-For more background, see [Wikipedia](https://en.wikipedia.org/wiki/Freedom_House) and my [lecture on citizenship rights](https://merlin-guest-lectures.netlify.app/2022/05/05/gep-citizenship-rights-for-immigrants/).
-]
-
-- We add civil and political rights and reverse the scale: higher values = more citizenship rights.
+- Since 1972, Freedom House codes civil and political citizenship rights around the world on a scale from 7 (most free) to 1 (least free).
 ]
 
 .right-column[
-<iframe src='https://en.wikipedia.org/wiki/Freedom_House' width='1200' height='670' frameborder='0' scrolling='yes'></iframe>
+<iframe src='https://en.wikipedia.org/wiki/Freedom_House' width='1200' height='480' frameborder='0' scrolling='yes'></iframe>
 ]]
-.panel[.panel-name[Get the data]
+.panel[.panel-name[Use API to get the data]
 ```{r}
-(Dat_citi_rights <- download_fh(verbose = FALSE) %>% # Download Freedom House data for all countries since 1972, #<<
+(Dat_citi_rights <- download_fh(verbose = FALSE) %>% # Use API to download FH data for all countries since 1972, #<<
    rename(country = fh_country, # rename country ID,
           citizen_rights = fh_total_reversed, # rename Citizenship rights indicator,
-          date = year) %>% # rename year,
+          date = year) %>% # rename year variable,
    select(country, date, citizen_rights)) # Keep only these 3 variables.
 ```
 ]
 
 .panel[.panel-name[Plot code] 
 ```{r citiz-world, fig.show = 'hide', echo = TRUE}
-ggplot(data = Dat_citi_rights %>% filter(date == 2020), # Make coord system for data from 2020,
+ggplot(data = Dat_citi_rights %>% filter(date == 2022), # Make coordinate system for data from 2022,
        aes(y = citizen_rights, # Y- and X-axis of plot,
            x = reorder(country, citizen_rights))) +
   geom_bar(stat = "identity") + # plot data as is in a bar chart,
-  labs(y = "Citizenship rights", x = "") + # Axis labels,
+  labs(y = "Citizenship rights", x = "", cap = "Source: Freedom House data for 2022") + # Axis labels,
   theme_minimal() + # Simple background layout,
   theme(axis.text.x = element_text(angle = 60, hjust = 1)) # Write country names in a 60 degree angle.
 ```
 ]
-.panel[.panel-name[Citizenship rights in 2020 across the world]
+.panel[.panel-name[Civic and political citizenship rights across the world]
 ```{r ref.label = "citiz-world", out.width='100%', fig.height = 8, fig.width = 20, results = FALSE, echo = FALSE}
 ```
 ]]
 
 ---
 class: clear
-# Worldbank Data .font70[On poverty across the World]
+# (2) World Bank Data .font70[Poverty across the world]
 
 .panelset[
-.panel[.panel-name[Searching Wb archive]
+.panel[.panel-name[Searching WB archive]
 - With `wbstats::wb_search()`, you can search the Wb archive for any keyword! Here I use "poverty":
 ```{r}
-(wb_poverty_archive <- wb_search("poverty")) #<<
+(wb_poverty_archive <- wb_search("Poverty")) #<<
 ```
 ]
-.panel[.panel-name[Get Wb data]
+.panel[.panel-name[Use WB API]
 ```{r}
-(Dat_poverty <- wb_data("SI.POV.UMIC", # Download poverty data: <5.50$ per day, #<<
-                        start_date = 2002, end_date = 2022) %>% #<<
-   rename(poverty = SI.POV.UMIC) %>% # rename poverty variable,
+(Dat_poverty <- wb_data("SI.POV.DDAY", # Download poverty data: <$2.15 per day, #<<
+                        start_date = 2002, end_date = 2023) %>% #<<
+   rename(poverty = SI.POV.DDAY) %>% # rename poverty variable,
    select(country, date, poverty) %>% # Keep only 3 variables
    drop_na(poverty) %>% # Drop cases with missing data,
    group_by(country) %>% # Group by country,
-   filter(date == max(date)) %>% # Keep the most recent data per country.
-   ungroup())
+   filter(date == max(date)) %>% ungroup()) # Keep the most recent poverty statistic per country.
 ```
 ]
-.panel[.panel-name[Purchasing power parity]
-```{r, echo = FALSE, out.width='60%'}
-knitr::include_graphics('https://images.ctfassets.net/lnmc2aao6j57/5ARQpAg9LHPbNsKCMCkkGs/01af3346041c007104c9ca091c307a78/info-purchasing_power_parity-mobile.png')
+.panel[.panel-name[Purchasing power parity (PPP)]
+```{r, echo = FALSE, out.width='100%'}
+# knitr::include_graphics('https://images.ctfassets.net/lnmc2aao6j57/5ARQpAg9LHPbNsKCMCkkGs/01af3346041c007104c9ca091c307a78/info-purchasing_power_parity-mobile.png')
+knitr::include_graphics('./img/PPP2.png')
+```
+.push-left[
+```{r, echo = FALSE, out.width='75%'}
+# knitr::include_graphics('https://images.ctfassets.net/lnmc2aao6j57/5ARQpAg9LHPbNsKCMCkkGs/01af3346041c007104c9ca091c307a78/info-purchasing_power_parity-mobile.png')
+knitr::include_graphics('./img/PPP.png')
 ```
 ]
+.push-right[
+<br>
+.content-box-red[
+US$1 buys as much in the US, as DKK6.5 buy in Denmark.
+
+US$2.15 = DKK14 per day.
+
+$30\times\text{DKK}14 \approx \text{DKK}420$ to get by per month.
+]]]
+
 .panel[.panel-name[Poverty across the world]
 ```{r poverty-world, out.width='100%', fig.height = 8, fig.width = 20, results = FALSE, echo = FALSE}
 ggplot(data = Dat_poverty, # Make coord system for data,
        aes(y = poverty, # Y- and X-axis of plot,
            x = reorder(country, poverty))) +
   geom_bar(stat = "identity") + # plot data as is in a bar chart,
-  labs(y = "% population with less than 5.50$ a day", x = "") + # Axis labels,
+  labs(y = "% population with less than US$2.15 a day\n (less than DKK420 per month)", x = "") + # Axis labels,
   theme_minimal() + # Simple background layout,
   theme(axis.text.x = element_text(angle = 60, hjust = 1)) # Write country names in a 60 degree angle.
 ```
@@ -226,7 +243,7 @@ class: inverse
 <br>
 <br>
 <br>
-OK great, now I have two tibbles. But how can I combine them into one single tibble?
+OK great, now I have two tibbles. But how can I combine them?
 ]
 
 .push-right[
@@ -239,7 +256,7 @@ knitr::include_graphics('https://powietrze.malopolska.pl/wp-content/uploads/2020
 # Relational data
 
 .left-column[
-- If you work with multiple data frames, you work with relational data .alert[if they have one or more variable(s) in common].
+- If you work with multiple tibbles, you work with relational data .alert[if they have one or more variable(s) in common].
 ]
 
 .right-column[
@@ -251,7 +268,7 @@ knitr::include_graphics('https://d33wubrfki0l68.cloudfront.net/245292d1ea724f6c3
 ---
 # Relational data
 
-- Our two data frames are related, because both contain data for *countries* at various *dates*. Thus they contain (at least partly) the same observations. The combination of country and date are the **key** that allows us to relate both data frames.
+Our tibbles are related, because both contain *countries* at various *dates*. <br>The combination of country and date is the **key** that allows us to relate both tibbles.
 
 .push-left[
 ```{r}
@@ -266,7 +283,7 @@ Dat_poverty
 ]
 
 ---
-# **Join**/merge .font60[four different types]
+# **Join** .font60[Four types]
 
 .push-left[
 ```{r, echo = FALSE, out.width='90%'}
@@ -285,7 +302,7 @@ knitr::include_graphics('https://raw.githubusercontent.com/gadenbuie/tidyexplain
 ]
 
 ---
-# **Join**/merge .font60[four different types]
+# **Join** .font60[Four types]
 
 .push-left[
 ```{r, echo = FALSE, out.width='90%'}
@@ -304,61 +321,59 @@ knitr::include_graphics('https://raw.githubusercontent.com/gadenbuie/tidyexplain
 ]
 
 ---
-# Inner join/merge .font70[Poverty and citizenship rights]
+# Inner join .font70[Poverty and citizenship rights]
 
 ```{r}
 (Dat <- inner_join(Dat_poverty, Dat_citi_rights, by = c("country", "date"))) #<<
 ```
 
 ---
-# Socialism .font70[We need to make our own index ...]
+# (3) Socialism .font70[Construct our own index ...]
 
 .panelset[
 .panel[.panel-name[Socialist countries]
 .left-column[
 - Wikipedia has tables on self-declared socialist countries.
 - I suggest a simple index:
-  + Years socialist minus years since.
-  + Min. 5 years given socialist history.
+  + Years socialist minus years since not socialist anymore.
+  + Min. 5 years given any socialist history.
 ]
 
 .right-column[
-<iframe src='https://en.wikipedia.org/wiki/List_of_socialist_states' width='1200' height='670' frameborder='0' scrolling='yes'></iframe>
+<iframe src='https://en.wikipedia.org/wiki/List_of_socialist_states' width='1200' height='480' frameborder='0' scrolling='yes'></iframe>
 ]]
 
 .panel[.panel-name[Coding the index]
-.font60[
+.font70[
 ```{r}
-Dat <- Dat %>% mutate(socialist = case_when( # Years socialist minus years since,
-  country == "China" ~ date - 1949,
-  country == "Vietnam" ~ date - 1945,
-  country == "Algeria" ~ date - 1962,
-  str_detect(country,"Portugal|Bangladesh") ~ date - 1972,
-  country == "Guinea-Bissau" ~ date - 1973,
-  country == "India" ~ date - 1976,
-  country == "Nicaragua" ~ date - 1979,
-  country == "Sri Lanka" ~ date - 1978,
-  country == "Tanzania" ~ date - 1964,
-  country == "Albania" ~ (1992 - 1944) - (date - 1992),
-  str_detect(country, "Angola|Cabo Verde|Madagascar") ~ (1992 - 1975) - (date - 1992),
-  str_detect(country,"Belarus|Bulgaria") ~ (1990 - 1946) - (date - 1990),
-  str_detect(country, "Benin|Mozambique") ~ (1990 - 1975) - (date - 1990),
-  country == "Chad" ~ (1975 - 1962) - (date - 1975), country == "Congo, Rep." ~ (1992 - 1970) - (date - 1992),
-  country == "Czech Republic" ~ (1990 - 1948) - (date - 1990), country == "Djibouti" ~ (1992 - 1981) - (date - 1992),
-  country == "Ethiopia" ~ (1991 - 1974) - (date - 1991), country == "Ghana" ~ (1966 - 1960) - (date - 1966),
-  country == "Guinea" ~ (1984 - 1958) - (date - 1984), country == "Hungary" ~ (1989 - 1949) - (date - 1989),
-  country == "Iraq" ~ (2005 - 1958) - (date - 2005), country == "Mali" ~ (1991 - 1960) - (date - 1991),
-  country == "Mauritania" ~ (1978 - 1961) - (date - 1978), country == "Mongolia" ~ (1992 - 1924) - (date - 1992),
-  country == "Myanmar" ~ (1988 - 1962) - (date - 1988), country == "Poland" ~ (1989 - 1945) - (date - 1989),
-  country == "Romania" ~ (1989 - 1947) - (date - 1989), country == "Russian Federation" ~ (1991 - 1922) - (date - 1991),
-  country == "Seychelles" ~ (1991 - 1977) - (date - 1991), country == "Senegal" ~ (1981 - 1960) - (date - 1981),
-  country == "Sierra Leone" ~ (1991 - 1978) - (date - 1991), country == "Somalia" ~ (1991 - 1969) - (date - 1991),
-  country == "Sudan" ~ (1985 - 1969) - (date - 1985), country == "Syria" ~ (2012 - 1963) - (date - 2012),
-  country == "Tunisia" ~ (1988 - 1964) - (date - 1988), country == "Ukraine" ~ (1991 - 1919) - (date - 1991),
-  country == "Yemen, Rep." ~ (1991 - 1967) - (date - 1991), country == "Zambia" ~ (1991 - 1973) - (date - 1991),
-  str_detect(country,"Slovenia|Croatia|Serbia|Montenegro|Bosnia and Herzegovina|North Macedonia|Kosovo") ~ (1992 - 1943) - (date - 1992),
-  TRUE ~ 0),
-  socialist = case_when( # Min. 5 years given socialist history,
+Dat <- Dat %>% mutate(
+  socialist = case_when( # Years socialist minus years since not socialist anymore,
+    country == "China" ~ date - 1949,
+    country == "Vietnam" ~ date - 1945,
+    country == "Algeria" ~ date - 1962,
+    str_detect(country,"Portugal|Bangladesh") ~ date - 1972,
+    country == "Guinea-Bissau" ~ date - 1973, country == "India" ~ date - 1976, 
+    country == "Nicaragua" ~ date - 1979, country == "Sri Lanka" ~ date - 1978,
+    country == "Tanzania" ~ date - 1964, country == "Albania" ~ (1992 - 1944) - (date - 1992),
+    str_detect(country, "Angola|Cabo Verde|Madagascar") ~ (1992 - 1975) - (date - 1992),
+    str_detect(country,"Belarus|Bulgaria") ~ (1990 - 1946) - (date - 1990),
+    str_detect(country, "Benin|Mozambique") ~ (1990 - 1975) - (date - 1990),
+    country == "Chad" ~ (1975 - 1962) - (date - 1975), country == "Congo, Rep." ~ (1992 - 1970) - (date - 1992),
+    country == "Czech Republic" ~ (1990 - 1948) - (date - 1990), country == "Djibouti" ~ (1992 - 1981) - (date - 1992),
+    country == "Ethiopia" ~ (1991 - 1974) - (date - 1991), country == "Ghana" ~ (1966 - 1960) - (date - 1966),
+    country == "Guinea" ~ (1984 - 1958) - (date - 1984), country == "Hungary" ~ (1989 - 1949) - (date - 1989),
+    country == "Iraq" ~ (2005 - 1958) - (date - 2005), country == "Mali" ~ (1991 - 1960) - (date - 1991),
+    country == "Mauritania" ~ (1978 - 1961) - (date - 1978), country == "Mongolia" ~ (1992 - 1924) - (date - 1992),
+    country == "Myanmar" ~ (1988 - 1962) - (date - 1988), country == "Poland" ~ (1989 - 1945) - (date - 1989),
+    country == "Romania" ~ (1989 - 1947) - (date - 1989), country == "Russian Federation" ~ (1991 - 1922) - (date - 1991),
+    country == "Seychelles" ~ (1991 - 1977) - (date - 1991), country == "Senegal" ~ (1981 - 1960) - (date - 1981),
+    country == "Sierra Leone" ~ (1991 - 1978) - (date - 1991), country == "Somalia" ~ (1991 - 1969) - (date - 1991),
+    country == "Sudan" ~ (1985 - 1969) - (date - 1985), country == "Syria" ~ (2012 - 1963) - (date - 2012),
+    country == "Tunisia" ~ (1988 - 1964) - (date - 1988), country == "Ukraine" ~ (1991 - 1919) - (date - 1991),
+    country == "Yemen, Rep." ~ (1991 - 1967) - (date - 1991), country == "Zambia" ~ (1991 - 1973) - (date - 1991),
+    str_detect(country,"Slovenia|Croatia|Serbia|Montenegro|Bosnia and Herzegovina|North Macedonia|Kosovo") ~ (1992 - 1943) - (date - 1992),
+    TRUE ~ 0),
+  socialist = case_when( # Min. 5 years given any socialist history,
     (socialist < 5 & socialist > 0) | socialist < 0 ~ 5,
     TRUE ~ socialist)) %>% drop_na() # Drop countries with missing values.
 ```
@@ -368,7 +383,7 @@ Dat <- Dat %>% mutate(socialist = case_when( # Years socialist minus years since
 Dat
 ```
 ]
-.panel[.panel-name[Plot socialism years across the world]
+.panel[.panel-name[Socialist history across the world]
 ```{r socialism-world, out.width='100%', fig.height = 8, fig.width = 20, results = FALSE, echo = FALSE}
 ggplot(data = Dat, # Make coord system for data,
        aes(y = socialist, # Y- and X-axis of plot,
@@ -391,13 +406,16 @@ class: inverse middle center
 .left-column[
 .content-box-blue[
 .center[**4 questions for scatter plots**]
-1. What is the direction of the 
+1. What is the *direction* of the 
 relationship?
-2. What form does the relation 
+
+2. What *form* does the relation 
 have?
-3. How much spread is in the 
+
+3. How much *spread* is in the 
 data?
-4. Are there any outliers?
+
+4. Are there any *outliers*?
 ]]
 .right-column[
 ```{r socialism-corr1, out.width='100%', fig.height = 5, fig.width = 7, results = FALSE, echo = FALSE}
@@ -411,7 +429,7 @@ ggplot(data = Dat,
                    size = 5, box.padding = 1.5,
                    point.padding = 0.5, force = 100,
                    segment.size  = 1) +
-  labs(y = "% population with less than 5.50$ a day", 
+  labs(y = "% population with less than US$2.15 a day\n (less than DKK420 per month)", 
        x = "Our Socialism index") +
   theme_minimal()
 ```
@@ -423,15 +441,16 @@ class: inverse middle center
 
 ---
 class: clear
-# Z-standardization .font60[Giving two variables a comparable same unit]
+# Z-standardization .font60[Give two variables a comparable unit]
 
 .panelset[
 .panel[.panel-name[What is it?]
 
 .push-left[
 $$z(x) = \frac{x - \bar{x}}{\text{SD}(x)}$$
-- **We subtract the mean:** Values above 0 are above average, values below 0 are below average.
-- **We divide by the standard deviation:** Our variable now has standard deviations as unit.<br><br> $\rightarrow$ Intuitive understanding how common vis-á-vis extreme cases are.
+**We subtract the mean:** Values above 0 are above average, values below 0 are below average.
+
+**We divide by the standard deviation:** Our variable now has standard deviations as unit.<br><br> $\rightarrow$ Intuitive understanding how common vis-á-vis extreme cases are.
 ]
 
 .push-right[
@@ -493,7 +512,7 @@ knitr::include_graphics('https://thumbs.dreamstime.com/b/charakter-d-der-eine-lu
 <br>
 <br>
 <br>
-OK but this remains rather approximate. I mean eye-balling is hardly enough to count as scientific evidence, is it?
+OK but eye-balling is hardly enough to count as scientific evidence, is it?
 ]
 
 ---
@@ -511,14 +530,13 @@ knitr::include_graphics('img/Correlation.png')
 
 .push-right[
 .content-box-blue[
-.center[**A precise statistic in three steps**]
+.center[**A precise statistic**<br> in three steps]
 1. $z_y*z_x$
-  + positive for a green points, 0
-for blue ones, and negative for red ones. Larger products contribute more to the relationship.
+  + positive for a green points, zero for blue ones, and negative for red ones. Larger products contribute more to the association
 2. $\sum^{n}_{i=1}z_y*z_x$
-  + Is the relationship overall positive or negative.
+  + The general trend.
 3. $r = \frac{\sum^{n}_{i=1}z_y*z_x}{n-1}$
-  + We divide by $n - 1$, so that the resulting $r$ varies between -1 and 1.
+  + We divide by $n - 1$;<br> the resulting $r$ varies between -1 and 1.
 ]]]
 .panel[.panel-name[Poverty & Socialism]
 .left-column[
@@ -571,14 +589,14 @@ socialism_corr2 +
 ]
 
 .left-column[
-- **How can we directly calculate that trend line?** <br><br> Then we could state how much of a reduction in poverty we would expect for every year increase of socialism.
+- **How can we directly calculate that trend line?** <br><br> Then we could state how much of a reduction in poverty we would expect for a year increase of socialism.
 ]
 
 ---
 # Models
 
 .left-column[
-- **A model** is an attempt to give a reduced and simplified representation of reality. <br><br>Our models should capture the general answer to our research question. .backgrnote[
+- **Model**: attempt to give reduced representation of reality. <br><br>Model should capture answer to our research question. .backgrnote[
 Models should not be driven by few singular cases, like in this example.]
 ]
 
@@ -592,7 +610,7 @@ Models should not be driven by few singular cases, like in this example.]
 
 .left-column[
 .content-box-blue[
-.center[**Linear models are defined by two parameters**]
+.center[**Linear models**<br>defined by two parameters]
 
 $\color{orange}{\alpha}$ 'constant'/'intercept': The value of y at which the line intercepts the Y-axis $(\hat{Y}|X=0)$.
   
@@ -620,8 +638,8 @@ Dat_ols <- Dat %>%
 ```
 
 .left-column[
-- **Residuals**, $e_{i} =y_{i} - \hat{y}$
-  + the differences between what our model predicts and the actual data.
+**Residuals**, $e_{i} =y_{i} - \hat{y}$<br>
+differences between what model predicts and actual data.
 
 $e_{\text{Denmark}} = `r Dat_ols$poverty[Dat_ols$country == "Denmark"]`\% - `r round(Dat_ols$pred[Dat_ols$country == "Denmark"], 1)`\%=`r Dat_ols$poverty[Dat_ols$country == "Denmark"] - round(Dat_ols$pred[Dat_ols$country == "Denmark"], 1)`\%$
 ]
@@ -663,7 +681,7 @@ resid +
 .panel[.panel-name[Minimize 1]
 
 .left-column[
-- **The _best_ fitting line**:
+- **_Best_ fitting line**:
 $$\begin{align*}
       \min \text{RSS} &= \min \sum_{i=1}^{n} e_{i}^{2} \\
       &= \min \sum_{i=1}^{n} y_{i} - \hat{y_{i}} \\
@@ -686,21 +704,7 @@ resid +
 
 .panel[.panel-name[... 2]
 .left-column[
-- **The _best_ fitting line**:
-$$\begin{align*}
-      \min \text{RSS} &= \min \sum_{i=1}^{n} e_{i}^{2} \\
-      &= \min \sum_{i=1}^{n} y_{i} - \hat{y_{i}} \\
-      &= \min \sum_{i=1}^{n} (y_{i} - (\color{orange}{\alpha} + \color{orange}{\beta} x_{i})^{2}
-    \end{align*}$$
-]
-
-.right-column[
-<blockquote class="twitter-tweet"><p lang="es" dir="ltr">Tuve un ataque de artemanía es intenté replicar una recta de regresión. <a href="https://t.co/b7OXZrK26J">pic.twitter.com/b7OXZrK26J</a></p>&mdash; Jorge Pacheco Jara (@jorge_pacheco) <a href="https://twitter.com/jorge_pacheco/status/1327398681239314434?ref_src=twsrc%5Etfw">November 13, 2020</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
-]]
-
-.panel[.panel-name[... 3]
-.left-column[
-- **The _best_ fitting line**:
+- **_Best_ fitting line**:
 $$\begin{align*}
       \min \text{RSS} &= \min \sum_{i=1}^{n} e_{i}^{2} \\
       &= \min \sum_{i=1}^{n} y_{i} - \hat{y_{i}} \\
@@ -710,18 +714,18 @@ $$\begin{align*}
 
 .right-column[
 ```{r, echo = FALSE, out.width='50%'}
-knitr::include_graphics('https://mlfromscratch.com/content/images/size/w2000/2020/06/linear_regression_gif.gif')
+knitr::include_graphics('https://i.redd.it/gyw14y0tvak21.gif')
 ```
 .backgrnote[.center[
-*Source*: [Machine Learning From Scratch](https://mlfromscratch.com/linear-regression-from-scratch/#/)
+*Source*: [aftersox on Reddit](https://www.reddit.com/r/dataisbeautiful/comments/axl1jm/oc_ordinary_least_squares_ols_finding_the_line/)
 ]]]]
 
 .panel[.panel-name[R2 model fit]
 .left-column[
-- How much smaller are the residuals from our model (blue line), compared to simply using the mean $\bar{y}$ as best guess (orange line)?
+How much smaller are the residuals from our model (blue line), compared to simply using the average $\bar{y}$ (orange line)?
 $$\text{TSS}=\sum_{i=1}^{n}(y_i-\bar{y})^2$$
 $$\text{RSS}=\sum_{i=1}^{n}(y_i-\hat{y}_i)^2$$
-$R^2=\frac{\text{TSS} - \text{RSS}}{\text{TSS}}$
+$$R^2=\frac{\text{TSS} - \text{RSS}}{\text{TSS}}$$
 ]
 .right-column[
 ```{r R2, out.width='100%', fig.height = 4, fig.width = 6.5, results = FALSE, echo = FALSE}
@@ -742,21 +746,20 @@ resid +
 ]]
 
 .panel[.panel-name[Regression using R]
-.push-left[
+.right-column[
 ```{r ols, eval = FALSE}
-# Estimate regression models.
-ols <- lm(data = Dat, formula = poverty ~ socialist)
-zols <- lm(data = Dat, formula = z_poverty ~ z_socialist)
+ols <- lm_robust(data = Dat, formula = poverty ~ socialist)
+zols <- lm_robust(data = Dat, formula = z_poverty ~ z_socialist)
 
-htmlreg(list(ols, zols), # Nicely-formatted table.
-        custom.model.names = c("OLS", "Z-OLS"))
+modelsummary(list("OLS" = ols, "Std. OLS" = zols), # Nicely-formatted table
+             gof_map = c("nobs", "r.squared")) # Only 2 models fit stats
 ```
 
-```{r ref.label = "min_resid", out.width='90%', fig.height = 4, fig.width = 6.5, results = FALSE, echo = FALSE}
+```{r ref.label = "min_resid", out.width='70%', fig.height = 4, fig.width = 6.5, results = FALSE, echo = FALSE}
 ```
 ]
 
-.push-right[
+.left-column[
 ```{r ref.label = "ols", results = 'asis', echo = FALSE}
 ```
 ]]
@@ -768,14 +771,17 @@ htmlreg(list(ols, zols), # Nicely-formatted table.
 ]
 
 .push-right[
+```{r ols2, include = FALSE}
+ols <- lm(data = Dat, formula = poverty ~ socialist)
+```
 `r extract_eq(ols, use_coefs = TRUE)` $\rightarrow$ the best-fitting line that $\min \sum_{i=1}^{n} e_{i}^{2}$.
 
-- Among countries without a socialist past, poverty is on average `r round(coef(ols)[1], 2)`%.
+Among countries without a socialist past, poverty is on average `r round(coef(ols)[1], 2)`%.
   + $(\hat{y}|\text{Socialism = 0}) = `r round(coef(ols)[1], 2)`\%$.
   
-- With every year of socialism, the average level of poverty `r round(coef(ols)[2], 2)`% lower.
+With every year of socialism, the average level of poverty is `r round(coef(ols)[2], 2)` percentage points lower.
 
-- This model accounts for `r round(summary(ols)$r.squared, 2)`* 100 % more of the variation of poverty across the world, than simply using the mean as best guess $\bar{y} = `r round(mean(Dat$poverty), 2)`\%$.
+This model accounts for `r round(summary(ols)$r.squared, 2)`* 100% more of the variance of poverty across the world, than the average $\bar{y} = `r round(mean(Dat$poverty), 2)`\%$.
 ]]]
 
 ---
@@ -784,9 +790,11 @@ htmlreg(list(ols, zols), # Nicely-formatted table.
 .left-column[
 .center[**1. Causal**]
 
-With every additional year of socialism, poverty is expected to decline by `r round(coef(ols)[2], 2)`%. Thus, if China and Vietnam stay socialist, poverty will further decline.
+With every additional year of socialism, poverty is expected to decline by `r round(coef(ols)[2], 2)` percentage points. Thus, if China and Vietnam stay socialist, poverty will further decline.
 
-.alert[Beware, this interpretation only holds under some conditions. Fortunately, I will teach you how to estimate regressions that have a causal interpretation later this semester!]
+.alert[Beware, this interpretation only holds under some conditions.] 
+
+I will teach you how to estimate regressions that have a causal interpretation later this semester!
 ]
 
 --
@@ -796,9 +804,17 @@ With every additional year of socialism, poverty is expected to decline by `r ro
 **2. Descriptive: conditional means $\bar{y}|x$**
 ]
 
-With every year of socialism, the average level of poverty `r round(coef(ols)[2], 2)`% lower.
+With every year of socialism, the average level of poverty `r round(coef(ols)[2], 2)` percentage points lower.
 
 Here regression is a (linear) model that describes the average of the outcome for different values of the predictor.
+
+```{r, echo = FALSE, out.width='75%'}
+knitr::include_graphics('https://isem-cueb-ztian.github.io/Intro-Econometrics-2017/handouts/lecture_notes/lecture_6/figure/fig-4-4.png')
+```
+.backgrnote[.center[
+*Source*: [Zheng Tian](https://isem-cueb-ztian.github.io/Intro-Econometrics-2017/handouts/lecture_notes/lecture_6/lecture_6.html#org39dfbe6)
+]]
+
 ]
 
 ---
@@ -847,15 +863,15 @@ ggplot(data = Dat, aes(y = citizen_rights, x = socialist)) +
 class: inverse
 # Today's general lessons
 
-1. R allows you to easily download tons of interesting data.
-2. You can combine (i.e., join/merge) data than contain (at least party) the same observations, if they have some variables in common that uniquely identify them. This allows for a lot of fascinating analyses and great term papers!
-3. Always make a scatter plot of the variables you want to correlate.
-4. Z-standardization helps interpretation and gives a common unit to different variables.
-5. The correlation coefficient is an easy to understand statistic of a (undirected) association between two variables.
-6. As a linear model, regression expresses on outcome variable as a linear function of a predictor. It thus estimates a directed relation. 
-7. $\beta$ the slope, tells us how average levels of $\hat{y}$ chnage with a unit increase in $x$. 
-8. OLS finds the linear model that best fits the data.
-9. Regression should under normal circumstances not be interpreted in causal terms.
+1. R provides convenient access to a wide range of interesting data through APIs, allowing for easy downloading.
+2. When datasets share common variables that uniquely identify cases, you can join them together, enabling fascinating analyses and excellent term papers!
+3. It's always beneficial to create a scatter plot to visualize the relationship between the variables you wish to correlate.
+4. Z-standardization aids interpretation and provides a common unit for different variables.
+5. The correlation coefficient is a simple statistic that measures the strength of association between two variables.
+6. Bivariate OLS regression, being a linear model, expresses an outcome variable as a linear function of a predictor.
+7. The slope, denoted by β, indicates how average levels of the predicted variable (ŷ) change with a unit increase in the predictor (x).
+8. OLS determines the linear model that best fits the data.
+9. It is generally recommended not to interpret regression in causal terms, except under normal circumstances.
 
 ---
 class: inverse
@@ -865,7 +881,7 @@ class: inverse
 2. `lm()`: Estimate linear OLS regression.
 3. `plot(model_object)` to test regression assumptions.
 4. `inner_join()`, `left_join()`, `right_join()`, and `full_join()` allow you to join/merge different tibbles together than have common observations and a key that identifies them.
-5. `textreg::texreg()`, `textreg::htmlreg()`, and `textreg::screenreg()`: Create nicely-formatted (html, Word, ASCII, or Latex) tables of (one or several) regression models.
+5. `modelsummary()`: Create nicely-formatted (html, Word, ASCII, or Latex) tables of (one or several) regression models.
 6. `scale()` z-standardizes variables. But sometimes it returns a matrix rather than a vector. Therefore it makes sense to always code `scale(x) %>% as.numeric()` to ensure you get an numeric vector out of it.
 
 ---

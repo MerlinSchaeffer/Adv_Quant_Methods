@@ -14,7 +14,9 @@ knitr::opts_chunk$set(
 library(webexercises)
 ```
 
-1. Make a folder for this course and set up an RStudio project. then start a new R-Script and copy the lines of R code from my slides that generate 'Dat'. That is, download Freedom House and WB data, join them, and construct our socialism index.
+1. Do the [Setup](https://merlin-ols.netlify.app/about/), if you have not yet done so. 
+
+2. Start a new R-script and copy the lines of R code from my slides that generate 'Dat'. That is, get Freedom House and WB data via the APIs, join them, and construct our socialism index.
   
 `r hide("R solution -> dont' peak to early ;) !")`
 ```{r}
@@ -22,15 +24,11 @@ pacman::p_load(
   tidyverse, # Data manipulation,
   ggplot2, # beautiful figures,
   wbstats, # download data from Worldbank. Tremendous source of global socio-economic data.
-  # democracyData, # download democracy data used in the scholarly literature.
+  estimatr, # OLS with robust SE,
+  democracyData, # download democracy data used in the scholarly literature.
   texreg, # regression tables with nice layout,
   countrycode, # Easy recodings of country names,
   remotes) # Install beta version packages from GitHub.
-
-# Make sure to run the two lines of code below only once, to delete them afterwards, 
-# and to un-comment "democracyData" in the pacman::p_load() above afterwards.
-remotes::install_github("xmarquez/democracyData")
-pacman::p_load(democracyData) # download democracy data used in the scholarly literature.
 
 # 1. Download Freedom House data for all countries since 1972,
 Dat_citi_rights <- download_fh(verbose = FALSE) %>% 
@@ -39,10 +37,10 @@ Dat_citi_rights <- download_fh(verbose = FALSE) %>%
           date = year) %>% # rename year,
    select(country, date, citizen_rights) # Keep only these 3 variables.
 
-# 2. Download poverty data: <5.50$ per day
-Dat_poverty <- wb_data("SI.POV.UMIC", 
+# 2. Download poverty data: <US$2.15 per day
+Dat_poverty <- wb_data("SI.POV.DDAY", 
                         start_date = 2002, end_date = 2022) %>% #<<
-   rename(poverty = SI.POV.UMIC) %>% # rename poverty variable,
+   rename(poverty = SI.POV.DDAY) %>% # rename poverty variable,
    select(country, date, poverty) %>% # Keep only 3 variables
    drop_na(poverty) %>% # Drop cases with missing data,
    group_by(country) %>% # Group by country,
@@ -88,12 +86,12 @@ Dat <- Dat %>% mutate(socialist = case_when( # Years socialist minus years since
 ```
 `r unhide()`
 
-2. Make a scatterplot with poverty as outcome on the Y-axis and citizenship rights as predictor on the X-axis.
+3. Make a scatterplot with poverty as outcome on the Y-axis and civic and political citizenship rights as predictor on the X-axis.
 `r hide("R solution -> dont' peak to early ;) !")`
 ```{r out.width='100%', fig.height = 4, fig.width = 7.5, results = FALSE, echo = TRUE}
 ggplot(data = Dat, aes(y = poverty, x = citizen_rights)) +
   geom_text(aes(label = country)) +
-  labs(y = "% population with less than 5.50$ a day", 
+  labs(y = "% population with less than US$2.15 a day\n (less than DKK420 per month)", 
        x = "Freedom House index of citizenship rights") +
   theme_minimal() +
   guides(color = "none")
@@ -108,7 +106,7 @@ cor_povcitiz <- cor_povcitiz <- Dat %>%
 cor_povcitiz <- cor_povcitiz[1, 2]
 ```
 
-3. Estimate the correlation of poverty and citizenship rights (rounded to two digits): `r fitb(cor_povcitiz, width = "5")`
+4. Estimate the correlation between poverty and civic and political citizenship rights (rounded to two digits): `r fitb(cor_povcitiz, width = "5")`
 `r hide("R solution -> dont' peak to early ;) !")`
 ```{r}
 Dat %>% 
@@ -119,4 +117,4 @@ Dat %>%
 `r unhide()`
 
 4. What does the correlation suggest about whether there is a freedom-equality trade off?
-`r mcq(c(answer = "No, where people have rights there is also less poverty", "Yes, limited freedom is the price to pay for equality", "The result is inconclusive"))`
+`r mcq(c(answer = "No, where people have civic and political rights, there is also less poverty", "Yes, limited freedom is the price to pay for equality", "The result is inconclusive"))`

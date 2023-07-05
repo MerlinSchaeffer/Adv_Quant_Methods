@@ -17,9 +17,10 @@ library(essentials)
 pacman::p_load(
   tidyverse, # Data manipulation,
   ggplot2, # beautiful figures,
+  estimatr, # OLS with robust SE,
   democracyData, # download democracy datasets used in the scholarly literature.
   wbstats, # download data from Worldbank. Tremendous source of global socio-economic data.
-  texreg, # regression tables with nice layout,
+  modelsummary, # regression tables with nice layout,
   countrycode) # Easy recodings of country names.
 
 # 1. Download Freedom House data for all countries since 1972,
@@ -30,9 +31,9 @@ Dat_citi_rights <- download_fh(verbose = FALSE) %>%
    select(country, date, citizen_rights) # Keep only these 3 variables.
 
 # 2. Download poverty data: <5.50$ per day
-Dat_poverty <- wb_data("SI.POV.UMIC", 
-                        start_date = 2002, end_date = 2022) %>% #<<
-   rename(poverty = SI.POV.UMIC) %>% # rename poverty variable,
+Dat_poverty <- wb_data("SI.POV.DDAY", 
+                        start_date = 2002, end_date = 2023) %>% #<<
+   rename(poverty = SI.POV.DDAY) %>% # rename poverty variable,
    select(country, date, poverty) %>% # Keep only 3 variables
    drop_na(poverty) %>% # Drop cases with missing data,
    group_by(country) %>% # Group by country,
@@ -78,28 +79,59 @@ Dat <- Dat %>% mutate(socialist = case_when( # Years socialist minus years since
 ```
 
 ```{r echo = FALSE}
-ols <- lm(data = Dat, formula = poverty ~ citizen_rights)
+ols <- lm_robust(data = Dat, formula = poverty ~ citizen_rights)
 ```
-1. Regress poverty on citizenship rights. With a unit-increase in citizenship rights, poverty changes by: `r fitb(round(coef(ols)[2], 2), width = "5")`
+1. Regress poverty on our socialism index. With one more year of socialist history, poverty changes by: `r fitb(round(coef(ols)[2], 2), width = "5")` percentage points (two digits).
 `r hide("R solution -> dont' peak to early ;) !")`
 ```{r results = 'asis'}
 # Estimate regression models.
-ols_1 <- lm(data = Dat, formula = poverty ~ citizen_rights)
-htmlreg(ols_1) # Nicely-formatted table.
-# screenreg(ols_1) # Alternatively use this comment.
+ols_1 <- lm_robust(data = Dat, formula = poverty ~ socialist)
+modelsummary(list("Poverty" = ols_1), gof_map = c("nobs", "r.squared")) # Nicely-formatted table.
+```
+`r unhide()`
+
+2. Regress poverty on civic and political citizenship rights. With a one unit-increase in citizenship rights, poverty changes by: `r fitb(round(coef(ols)[2], 2), width = "5")` percentage points (two digits).
+`r hide("R solution -> dont' peak to early ;) !")`
+```{r results = 'asis'}
+# Estimate regression models.
+ols_2 <- lm_robust(data = Dat, formula = poverty ~ citizen_rights)
+modelsummary(list("Poverty" = ols_2), gof_map = c("nobs", "r.squared")) # Nicely-formatted table.
+```
+`r unhide()`
+
+3. Which of the two is a better model of the variance of poverty across the world?
+`r mcq(c("The one with socialism", answer = "The one with citizenship rights, as the R2 shows", "The one with citizenship rights, as the stronger beta coefficient shows"))`
+
+4. Make a scatterplot with civic and political citizenship rights on the Y-axis and socialism as predictor on the X-axis.
+`r hide("R solution -> dont' peak to early ;) !")`
+```{r out.width='100%', fig.height = 4, fig.width = 7.5, results = FALSE, echo = TRUE}
+ggplot(data = Dat, aes(y = citizen_rights, x = socialist)) +
+  geom_text(aes(label = country)) +
+  labs(x = "Our socialism index", 
+       y = "Freedom House index of citizenship rights") +
+  theme_minimal() +
+  guides(color = "none")
 ```
 `r unhide()`
 
 ```{r echo = FALSE}
-ols <- lm(data = Dat, formula = citizen_rights ~ socialist)
+ols <- lm_robust(data = Dat, formula = citizen_rights ~ socialist)
 ```
-2. Regress citizenship rights on socialism. With one more year of socialism, citizenship rights change by: `r fitb(round(coef(ols)[2], 2), width = "5")`
+
+5. Regress citizenship rights on socialism. With one more year of socialism, citizenship rights change by: `r fitb(round(coef(ols)[2], 2), width = "5")`
 `r hide("R solution -> dont' peak to early ;) !")`
 ```{r results = 'asis'}
 # Estimate regression models.
-ols_2 <- lm(data = Dat, formula = citizen_rights ~ socialist)
-htmlreg(list(ols_1, ols_2)) # Nicely-formatted table.
+ols_3 <- lm_robust(data = Dat, formula = citizen_rights ~ socialist)
+modelsummary(list("Citiz. Rights" = ols_3), # Nicely-formatted table.
+              gof_map = c("nobs", "r.squared")) 
 ```
 `r unhide()`
 
-3. **Discuss with your neighbor:** What do the results suggest about whether there is a freedom-equality trade off?
+6. Make a regression table that displays all three models. Based on the table, **discuss with your neighbor:** What do the results suggest about whether there is a freedom-equality trade off?
+`r hide("R solution -> dont' peak to early ;) !")`
+```{r results = 'asis'}
+modelsummary(list("Poverty" = ols_1, "Poverty" = ols_2, "Citiz. Rights" = ols_3), # Nicely-formatted table.
+              gof_map = c("nobs", "r.squared")) 
+```
+`r unhide()`
