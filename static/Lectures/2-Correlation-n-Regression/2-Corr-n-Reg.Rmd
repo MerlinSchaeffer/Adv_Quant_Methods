@@ -228,7 +228,7 @@ ggplot(data = Dat_poverty, # Make coord system for data,
        aes(y = poverty, # Y- and X-axis of plot,
            x = reorder(country, poverty))) +
   geom_bar(stat = "identity") + # plot data as is in a bar chart,
-  labs(y = "% population with less than US$2.15 a day\n (less than DKK420 per month)", x = "") + # Axis labels,
+  labs(y = "% population with less than US$2.15 a day\n (like living in Denmark with DKK420 per month)", x = "") + # Axis labels,
   theme_minimal() + # Simple background layout,
   theme(axis.text.x = element_text(angle = 60, hjust = 1)) # Write country names in a 60 degree angle.
 ```
@@ -429,7 +429,7 @@ ggplot(data = Dat,
                    size = 5, box.padding = 1.5,
                    point.padding = 0.5, force = 100,
                    segment.size  = 1) +
-  labs(y = "% population with less than US$2.15 a day\n (less than DKK420 per month)", 
+  labs(y = "% population with less than US$2.15 a day\n (like living in Denmark with DKK420 per month)", 
        x = "Our Socialism index") +
   theme_minimal()
 ```
@@ -488,7 +488,7 @@ socialism_corr2 <- Dat %>%
   scale_color_manual(values = c("#901A1E", "#425570")) +
   geom_hline(yintercept = 0, color = "#ffbd38", lty = "longdash", size = 1) +
   geom_vline(xintercept = 0, color = "#ffbd38", lty = "longdash", size = 1) +
-  labs(y = "% population with less than US$2.15 a day\n (less than DKK420 per month)", 
+  labs(y = "% population with less than US$2.15 a day\n (like living in Denmark with DKK420 per month)", 
        x = "Our socialism index") +
   theme_minimal() +
   guides(color = "none")
@@ -648,7 +648,7 @@ $e_{\text{Denmark}} = `r Dat_ols$poverty[Dat_ols$country == "Denmark"]`\% - `r r
 resid <- ggplot(data = Dat_ols, mapping = aes(y = poverty, x = socialist, label = country)) +
   geom_point() +
   geom_smooth(method = "lm", se = FALSE) +
-  labs(y = "% population with less than US$2.15 a day\n (less than DKK420 per month)", 
+  labs(y = "% population with less than US$2.15 a day\n (like living in Denmark with DKK420 per month)", 
        x = "Our socialism index") +
   theme_minimal()
 
@@ -836,7 +836,7 @@ knitr::include_graphics('https://cdn.dribbble.com/users/10549/screenshots/991614
 ggplot(data = Dat, aes(y = poverty, x = citizen_rights)) +
   geom_text(aes(label = country)) +
   geom_smooth(method = "lm", se = FALSE) +
-  labs(y = "% population with less than US$2.15 a day\n (less than DKK420 per month)", 
+  labs(y = "% population with less than US$2.15 a day\n (like living in Denmark with DKK420 per month)", 
        x = "Freedom House index of citizenship rights") +
   theme_minimal() +
   guides(color = "none")
@@ -846,7 +846,7 @@ ggplot(data = Dat, aes(y = poverty, x = citizen_rights)) +
 ggplot(data = Dat, aes(y = citizen_rights, x = socialist)) +
   geom_text(aes(label = country)) +
   geom_smooth(method = "lm", se = FALSE) +
-  labs(y = "% population with less than US$2.15 a day\n (less than DKK420 per month)", 
+  labs(y = "% population with less than US$2.15 a day\n (like living in Denmark with DKK420 per month)", 
        x = "Freedom House index of citizenship rights") +
   theme_minimal() +
   guides(color = "none")
