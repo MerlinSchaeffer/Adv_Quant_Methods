@@ -1,16 +1,18 @@
 <!DOCTYPE html>
 <html lang="" xml:lang="">
   <head>
-    <title>3. Randomness!</title>
+    <title>Multiple Regression &amp;    Fundamentals of Causal Inference</title>
     <meta charset="utf-8" />
     <meta name="author" content="Merlin Schaeffer  Department of Sociology" />
-    <meta name="date" content="2022-09-21" />
+    <meta name="date" content="2023-07-06" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
     <script src="libs/tile-view/tile-view.js"></script>
     <link href="libs/tachyons/tachyons.min.css" rel="stylesheet" />
     <link href="libs/panelset/panelset.css" rel="stylesheet" />
     <script src="libs/panelset/panelset.js"></script>
+    <script src="libs/kePrint/kePrint.js"></script>
+    <link href="libs/lightable/lightable.css" rel="stylesheet" />
     <link rel="stylesheet" href="../template/Merlin169.css" type="text/css" />
   </head>
   <body>
@@ -18,21 +20,63 @@
 class: center, middle, inverse, title-slide
 
 .title[
-# 3. Randomness!
+# Multiple Regression &amp; <br><br> Fundamentals of Causal Inference
 ]
 .subtitle[
-## &amp; its increadible importance for social science research
+## Randomness and empirical sociology
 ]
 .author[
 ### Merlin Schaeffer<br> Department of Sociology
 ]
 .date[
-### 2022-09-21
+### 2023-07-06
 ]
 
 ---
 
 
+# Goal of empirical sociology
+
+.font130[.center[Use data to .alert[discover patterns], &lt;br&gt; and the social mechanisms that bring them about.]]
+
+&lt;img src="https://liu.se/-/media/istock-501261958.jpg?mw=1120&amp;mh=1120&amp;hash=DA8977CCE6A6E600AE80A40CFEE771C9" width="70%" style="display: block; margin: auto;" /&gt;
+---
+class: inverse
+# Today's schedule
+
+1. **Today's research question**: Education and trust in the political system.
+  
+2. **Randomness**
+    + Samples
+    + Weights
+
+3. **Statistical inference**
+    + Sampling error `\(\sigma\)`
+    + Standard error `\(\hat{\sigma}\)`
+    + Confidence intervals
+    + Hypothesis tests
+        + `\(H_0\)`
+        + `\(t\)` and `\(p\)`-values
+
+---
+class: inverse
+# Today's research question
+
+.push-left[
+&lt;iframe src='https://en.wikipedia.org/wiki/Political_efficacy' width='1200' height='550' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+]
+
+
+--
+
+.push-right[
+.center[**Do better-educated individuals _generally_ exhibit a stronger belief in the political system's fairness and government responsiveness?**
+
+&lt;img src="https://media.istockphoto.com/vectors/politician-and-masks-vector-id1285284677?k=20&amp;m=1285284677&amp;s=612x612&amp;w=0&amp;h=pE_RkXIK8XaJBtuuHIsEbUo7pvtfu3yHEAQR5h8G-Jw=" width="90%" style="display: block; margin: auto;" /&gt;
+.center[.backgrnote[*Source*: [istockphoto.com](https://www.istockphoto.com/de)]]
+]]
+
+---
 # Preparations
 
 .panelset[
@@ -45,7 +89,7 @@ pacman::p_load(
   ggplot2, # beautiful figures,
   estimatr, # Regression for weighted data,
   modelr, # Turn results of lm() into a tibble,
-  texreg) # regression tables with nice layout.
+  modelsummary) # regression tables with nice layout.
 ```
 ]
 
@@ -67,30 +111,14 @@ ESS &lt;- read_spss("../../../assets/ESS9e03_1.sav") %&gt;%
 ]]]
 
 ---
-class: inverse
-# Research question of the day
-
-.push-left[
-&lt;iframe src='https://en.wikipedia.org/wiki/Political_efficacy' width='1200' height='670' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
-]
-
-
---
-
-.push-right[
-.center[**Is there a _general pattern_ that better educated people tend to have a stronger belief that the political system is democratic and that the government actually listens to the people?**
-
-&lt;img src="https://media.istockphoto.com/vectors/politician-and-masks-vector-id1285284677?k=20&amp;m=1285284677&amp;s=612x612&amp;w=0&amp;h=pE_RkXIK8XaJBtuuHIsEbUo7pvtfu3yHEAQR5h8G-Jw=" width="90%" style="display: block; margin: auto;" /&gt;
-.center[.backgrnote[*Source*: [istockphoto.com](https://www.istockphoto.com/de)]]
-]]
+class: inverse middle center
+# Randomness
 
 ---
 # General patterns
 
 .push-left[
-Our data at hand is a sample based on which we seek to generalize.
-
-Ideally, we generalize from .alert[random samples]!
+All data we use are samples based on which we seek to draw general insights.
 ]
 
 .push-right[
@@ -99,19 +127,57 @@ Ideally, we generalize from .alert[random samples]!
 ]
 
 ---
-# Why randomness?
+# Samples
+
+.center[**Research is based on samples for two reasons:**]
+
+--
+
+.push-left[
+(1) Populations are too large to study everyone.
+
+&lt;img src="https://optimise2.assets-servd.host/best-fit/production/images/Roskilde-2022-Orange-Stage-Post-Malone-FlemmingBoJensen.jpeg?w=600&amp;h=338&amp;q=100&amp;auto=format&amp;fit=crop&amp;dm=1669804307&amp;s=b60a3165c822d00e54be5f3b64a69a7d" width="90%" style="display: block; margin: auto;" /&gt;
+]
+
+--
+
+.push-right[
+(2) Even if we have (e.g., register) data on everyone, we are interested in .font120[.alert[general patterns and social mechanisms]]:
+  - There is less poverty in socialist countries?
+  - Do better educated have more political efficacy?
+  - Does anomie make people suicidal?
+    
+    
+  `\(\rightarrow\)` We generally want to know these things. .backgrnote[
+  (i.e. not only for the current population of Denmark, or for the currently existing countries in the world.)]
+  
+  .content-box-red[
+  `\(\rightarrow\)` We thus treat any data as a sample of an unobservable "super population".
+]]
+
+---
+# Convenience samples
+
+.left-column[
+Samples should be representative: accurately reflect the (unobservable super) population.
+
+.content-box-green[
+If you snowball sample starting with your best friend, what biases will that result in? Who would be underrepresented?
+]]
+
+.right-column[
+&lt;img src="img/Convenience_Sample.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
+---
+# Random samples!
 
 .push-left[.content-box-red[
 .center[**We rely on randomness to&lt;br&gt; draw _unbiased_ conclusions**]
 
-- Two types of conclusions:
-  1. Random sample `\(\rightarrow\)` Population.
-  2. Random `\(x \rightarrow\)` causal effect of `\(x\)` on `\(y\)`.
+Two types of conclusions:
+  1. Random sample `\(\rightarrow\)` Population
+  2. Random `\(x \rightarrow\)` causal effect of `\(x\)` on `\(y\)`
 ]]
-
-
-
-
 
 .push-right[
 &lt;img src="https://m.media-amazon.com/images/I/71jm22A7m9L._AC_SL1200_.jpg" width="80%" style="display: block; margin: auto;" /&gt;
@@ -120,24 +186,7 @@ Similar to certain mirrors,&lt;br&gt; data often lead to biased insights.]]
 ]
 
 ---
-class: inverse middle center
-
-.push-left[
-&lt;br&gt;
-&lt;br&gt;
-&lt;br&gt;
-&lt;br&gt;
-Excuse me?!
-
-**How can _randomness_ of all things lead to unbiased insights about the fundamental ways in which society works?**
-]
-
-.push-right[
-&lt;img src="https://www.wearekura.com/wp-content/uploads/2017/08/identity-struggle.jpg" width="60%" style="display: block; margin: auto;" /&gt;
-]
-
----
-# Think about it
+# Why randomness?
 
 .push-left[
 .content-box-green[
@@ -159,51 +208,6 @@ Why do many games have a random element?
 ]
 
 ---
-# Samples
-
-.center[**Research is based on samples for one of two reasons:**]
-
---
-
-.push-left[
-1) Populations are too large to study everyone.
-
-&lt;img src="https://pbs.twimg.com/media/FciuC51WYAQIv3D?format=png&amp;name=900x900" width="100%" style="display: block; margin: auto;" /&gt;
-.center[.backgrnote[*Source:* Llaudet and Imai (2022)]]
-]
-
---
-
-.push-right[
-2) Even if we have (e.g., register) data on everyone, we are interested in .font120[.alert[general patterns and social mechanisms]]:
-  - There is less poverty in socialist countries?
-  - Do better educated have more political efficacy?
-  - Does anomie make people suicidal?
-    
-    
-  `\(\rightarrow\)` We generally want to know these things. .backgrnote[
-  (i.e. not only for the current population of Denmark, or for the currently existing countries in the world.)]
-  
-  .content-box-red[
-  `\(\rightarrow\)` We thus treat any data as a sample of an unobservable "super population".
-]]
-
----
-# Convenience samples
-
-.left-column[
-Samples should be representative: They should accurately reflect the (unobservable super) population.
-
-.content-box-green[
-If you sampled among your friends and family, what biases would that result in? That is, who would be underrepresented?
-]
-]
-
-.right-column[
-&lt;img src="img/Convenience_Sample.png" width="100%" style="display: block; margin: auto;" /&gt;
-]
-
----
 layout: true
 # Random samples!
 
@@ -217,13 +221,6 @@ Random samples are "fair": &lt;br&gt;
 Everyone in the (unobservable super) population has the same probability to be part of the sample, .alert[regardless of who they are]!
 
 `\(\rightarrow\)` No group can be forgotten.
-]
-
----
-
-.push-right[
-&lt;img src="https://pbs.twimg.com/media/FciuC51WYAQIv3D?format=png&amp;name=900x900" width="100%" style="display: block; margin: auto;" /&gt;
-.center[.backgrnote[*Source:* Llaudet and Imai (2022)]]
 ]
 
 ---
@@ -250,9 +247,9 @@ Nice talk man.
 # Weights
 
 .push-left[
-- A *weight* tells you the probability that an observation should be in the sample. .backgrnote[
-For a true random sample, each case of the population has an equal probability to be sampled. Thus the weight would be 1 for every observation of a sample.]
--  Some populations tend to be over\under-sampled. Post-stratification weights try to counterbalance this.
+- A *weight* tells you the probability that a case should be in the sample. .backgrnote[
+In a true random sample, each case of the population has an equal probability to be sampled. Thus each sampled case has a weight of 1.]
+-  Some groups tend to be over\under-sampled. Post-stratification weights try to counterbalance this.
 &lt;br&gt;
 
 .content-box-green[.center[
@@ -278,12 +275,12 @@ ggplot(data = ESS,
 ]]]
 
 ---
-# Working with weights
+# How weights work
 
 - Statistically, we use weights by multiplication. 
 
 .push-left[
-- Imagine a patriarchal society, where men's votes count twice. Here we have a ballot on whether women should be allowed to drive:
+- Consider an example of a patriarchal society where the weight of men's votes is twice that of women's. In this context, we have a ballot on the topic of women's driving rights.
 
 &lt;table&gt;
  &lt;thead&gt;
@@ -334,6 +331,8 @@ ggplot(data = ESS,
 &lt;/tbody&gt;
 &lt;/table&gt;
 
+
+
 .center[
 .content-box-green[
 What is the patriarchy-weighted percent &lt;br&gt; of "Yes"-votes?
@@ -344,27 +343,27 @@ What is the patriarchy-weighted percent &lt;br&gt; of "Yes"-votes?
 --
 
 .push-right[
-- Three equivalent ways to the percent of patriarchy-weighted "Yes"-votes:
+- Three equivalent ways to calculate the percent of patriarchy-weighted "Yes"-votes:
 
 .panelset[
 .panel[.panel-name[1.]
 
 ```r
-((0*2 + 1*2 + 1 + 1 + 0) / 7) * 100 # 1
+((0*2 + 1*2 + 1 + 1 + 0) / 7) * 100 # (1)
 # [1] 57.1
 ```
 ]
 .panel[.panel-name[2.]
 
 ```r
-(sum(`Voted yes` * Weight) / sum(Weight)) * 100 # 2
+(sum(`Voted yes` * Weight) / sum(Weight)) * 100 # (2)
 # [1] 57.1
 ```
 ]
 .panel[.panel-name[3.]
 
 ```r
-weighted.mean(x = `Voted yes`, w = Weight) * 100 # 3
+weighted.mean(x = `Voted yes`, w = Weight) * 100 # (3)
 # [1] 57.1
 ```
 ]]]
@@ -384,14 +383,14 @@ weighted.mean(x = `Voted yes`, w = Weight) * 100 # 3
 
 
 ---
-# Working with weights
+# Using weights
 
 .left-column[
 - Most R commands have a weights argument.
 
-- With OLS regression you should use: `estimatr::lm_robust()`. 
+- For OLS regression use: `estimatr::lm_robust()`. 
 .backgrnote[
-Using weights results in heteroscedastic residuals, which violates an assumption of OLS. lm_robust() corrects for that (i.e., is robust to it).]
+Using weights results in heteroscedastic residuals, which violates an OLS assumption. lm_robust() corrects for that.]
 ]
 
 .right-column[
@@ -402,63 +401,39 @@ Using weights results in heteroscedastic residuals, which violates an assumption
 &lt;img src="3-Random_files/figure-html/ols_fig-1.png" width="90%" style="display: block; margin: auto;" /&gt;
 ]
 .panel[.panel-name[OLS Regression]
-&lt;table class="texreg" style="margin: 10px auto;border-collapse: collapse;border-spacing: 0px;caption-side: bottom;color: #000000;border-top: 2px solid #000000;"&gt;
-&lt;caption&gt;Statistical models&lt;/caption&gt;
-&lt;thead&gt;
-&lt;tr&gt;
-&lt;th style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/th&gt;
-&lt;th style="padding-left: 5px;padding-right: 5px;"&gt;Unweighted&lt;/th&gt;
-&lt;th style="padding-left: 5px;padding-right: 5px;"&gt;Weighted&lt;/th&gt;
-&lt;/tr&gt;
-&lt;/thead&gt;
+&lt;table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; Unweighted &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; Weighted &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
 &lt;tbody&gt;
-&lt;tr style="border-top: 1px solid #000000;"&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(Intercept)&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;2.199&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;2.378&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.095)&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.114)&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;eduyrs&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.039&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.025&lt;sup&gt;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.006)&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.008)&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr style="border-top: 1px solid #000000;"&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;R&lt;sup&gt;2&lt;/sup&gt;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.026&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.010&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Adj. R&lt;sup&gt;2&lt;/sup&gt;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.025&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.009&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Num. obs.&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;1511&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;1511&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr style="border-bottom: 2px solid #000000;"&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;RMSE&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.900&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.889&lt;/td&gt;
-&lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 2.199 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 2.378 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt; eduyrs &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; 0.039 &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; 0.025 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 1511 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 1511 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.026 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.010 &lt;/td&gt;
+  &lt;/tr&gt;
 &lt;/tbody&gt;
-&lt;tfoot&gt;
-&lt;tr&gt;
-&lt;td style="font-size: 0.8em;" colspan="3"&gt;&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;p &amp;lt; 0.001; &lt;sup&gt;&amp;#42;&amp;#42;&lt;/sup&gt;p &amp;lt; 0.01; &lt;sup&gt;&amp;#42;&lt;/sup&gt;p &amp;lt; 0.05&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tfoot&gt;
 &lt;/table&gt;
+
+
 ]
 .panel[.panel-name[Code]
 
@@ -478,10 +453,10 @@ mod1 &lt;- lm_robust(psppsgva ~ eduyrs, data = ESS) # Unweighted
 mod2 &lt;- lm_robust(psppsgva ~ eduyrs, data = ESS, # Weighted
 *                 weights = pspwght)
 
-# Make a nice table
-htmlreg(list(mod1, mod2), 
-        include.ci = FALSE, digits = 3,
-        custom.model.names = c("Unweighted", "Weighted"))
+# Nicely-formatted regression table
+modelsummary(list("Unweighted" = mod1, "Weighted" = mod2),
+             statistic = NULL, # Don't report stat. inference
+             gof_map = c("nobs", "r.squared")) # Only 2 models fit stats
 ```
 ]]]
 
@@ -503,6 +478,37 @@ OK, great: Randomness prohibits systematic biases and thus enables us to draw re
 
 **But doesn't this mean, I have randomness in my data** &lt;br&gt; (e.g., just by chance too many vegetarians or so) &lt;br&gt; **and thus still biased data?**
 ]
+
+---
+class: inverse middle center
+# Break
+
+&lt;iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+
+---
+class: middle clear
+
+.left-column[
+&lt;img src="https://cdn.dribbble.com/users/10549/screenshots/9916149/media/a9dbfea8e23e5b8e23db142528c3bc9f.png?compress=1&amp;resize=1200x900&amp;vertical=top" width="100%" style="display: block; margin: auto;" /&gt;
+
+&lt;iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+]
+
+.right-column[
+&lt;br&gt;
+
+&lt;iframe src='exercise1.html' width='1000' height='600' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+]
+
+---
+class: inverse middle center
+# Break
+
+&lt;iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+
+---
+class: inverse middle center
+# Statistical inference
 
 ---
 # Sampling error `\(\sigma\)` .font60[(aka sampling variability)]
@@ -531,13 +537,13 @@ OK, great: Randomness prohibits systematic biases and thus enables us to draw re
 
 .push-right[
 &lt;img src="https://ecampusontario.pressbooks.pub/app/uploads/sites/376/2019/02/70-959x1024.png" width="60%" style="display: block; margin: auto;" /&gt;
-.backgrnote[.center[Random sampling ensures validity (i.e. unbiased), but it results in some unreliability (i.e. sampling error). The question is: How unreliable is the data?]]
+.backgrnote[.center[Random sampling ensures validity (i.e. unbiased), but it results in some unreliability (i.e. sampling error). The question is: How unreliable are the data?]]
 ]
 ---
 # Sampling error `\(\sigma\)` .font60[(aka sampling variability)]
 
 .push-left[
-- **Lets assume, the Danish ESS with it's 1511 respondents was our (unobservable super) population of interest.** .backgrnote[I thus don't use weights in this example ;)]
+- **Let's assume, the Danish ESS with it's 1511 respondents was our (unobservable super) population of interest.** .backgrnote[Thus no weights in this example ;)]
 
 - That would mean, we can *calculate* the true OLS regression line (in blue): `\(\beta = 0.039\)`.
 ]
@@ -639,7 +645,7 @@ for (draw in 3:1000) {
 ]
 
 .panel[.panel-name[Histogram]
-&lt;img src="3-Random_files/figure-html/sample1000_ols4-1.gif" width="60%" style="display: block; margin: auto;" /&gt;
+&lt;img src="3-Random_files/figure-html/sample1000_ols4-1.png" width="60%" style="display: block; margin: auto;" /&gt;
 ]
 .panel[.panel-name[Normal distribution]
 .left-column[
@@ -671,8 +677,7 @@ mean(beta_hat) + 1.96 * sd(beta_hat)
 .left-column[
 .center[With small samples things are a bit more complex!]
 
-- Critical values depend on the degrees of freedom (df):
-  + Sample size `\(n\)` minus the number of estimated parameters.
+Critical values depend on the degrees of freedom (df): Sample size `\(n\)` minus the number of estimated parameters.
 
 .font80[
 
@@ -716,27 +721,6 @@ But if I can't sample the whole (unobservable super) population, then I surely c
 ]
 
 ---
-class: inverse middle center
-# Break
-
-&lt;iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
-
----
-class: middle clear
-
-.left-column[
-&lt;img src="https://cdn.dribbble.com/users/10549/screenshots/9916149/media/a9dbfea8e23e5b8e23db142528c3bc9f.png?compress=1&amp;resize=1200x900&amp;vertical=top" width="100%" style="display: block; margin: auto;" /&gt;
-
-&lt;iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
-]
-
-.right-column[
-&lt;br&gt;
-
-&lt;iframe src='exercise1.html' width='1000' height='600' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
-]
-
----
 class: clear
 layout: true
 # The standard error `\(\hat{\sigma}\)` .font70[(i.e., estimated sampling error)]
@@ -750,7 +734,7 @@ sd(beta_hat)
 # [1] 0.0359
 ```
 
-&lt;img src="3-Random_files/figure-html/unnamed-chunk-33-1.gif" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="3-Random_files/figure-html/unnamed-chunk-32-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -763,36 +747,64 @@ sd(beta_hat)
 .center[.backgrnote[Carl Friedrich Gauss (1777-1855)]]
 ]
 .push-right[
-Thanks to mathematicians, such as [Carl Friedrich Gauss](https://en.wikipedia.org/wiki/Carl_Friedrich_Gauss), we can *estimate* the sampling error of most statistics, if we simply have a single sample!
+Thanks to mathematician [Carl Friedrich Gauss](https://en.wikipedia.org/wiki/Carl_Friedrich_Gauss), we can *estimate* the sampling error of most statistics based on a single sample!
 ]]
 
 ---
 
 .right-column[
 .push-left[
-Estimated sampling error based on our initial 50-person sample using Gauss' formula for the standard error of an OLS regression coefficient, `\(\hat{\sigma}(\beta)=\sqrt{\frac{1}{n-2}\frac{\text{SD}(e)}{\text{SD}(x)}}\)`
+Estimated sampling error based on our initial 50-person sample using Gauss' formula for the standard error of an OLS regression coefficient: `$$\hat{\sigma}(\beta)=\sqrt{\frac{1}{n-2}\frac{\text{SD}(e)}{\text{SD}(x)}}$$`
 ]
 .push-right[
 
 ```r
-mod &lt;- lm(psppsgva ~ eduyrs, 
-*         data = ESS_sample)
-screenreg(mod, digits = 3)
-# 
-# =======================
-#              Model 1   
-# -----------------------
-# (Intercept)   1.965 ***
-#              (0.530)   
-# eduyrs        0.042    
-#              (0.036)   
-# -----------------------
-# R^2           0.027    
-# Adj. R^2      0.007    
-# Num. obs.    50        
-# =======================
-# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
+mod &lt;- lm_robust( # OLS regression
+  psppsgva ~ eduyrs, 
+* se_type = "classical", # Gauss
+* data = ESS_sample)
+
+modelsummary( # Regression table
+  list("Pol. efficacy" = mod),
+  gof_map = c("nobs", "r.squared"))
 ```
+
+&lt;table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; Pol. efficacy &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 1.965 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.530) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; eduyrs &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.042 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.036) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 50 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.027 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+
 ]]
 
 ---
@@ -804,24 +816,52 @@ Estimated sampling error based on our second 50-person sample using Gauss' formu
 .push-right[
 
 ```r
-mod &lt;- lm(psppsgva ~ eduyrs, 
-*         data = ESS_sample_2)
-screenreg(mod, digits = 3)
-# 
-# =======================
-#              Model 1   
-# -----------------------
-# (Intercept)   2.624 ***
-#              (0.634)   
-# eduyrs        0.012    
-#              (0.042)   
-# -----------------------
-# R^2           0.002    
-# Adj. R^2     -0.019    
-# Num. obs.    50        
-# =======================
-# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
+mod2 &lt;- lm_robust( # OLS regression
+  psppsgva ~ eduyrs, 
+* se_type = "classical", # Gauss
+* data = ESS_sample_2)
+
+modelsummary( # Regression table
+  list("Pol. efficacy" = mod2),
+  gof_map = c("nobs", "r.squared"))
 ```
+
+&lt;table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; Pol. efficacy &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 2.624 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.634) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; eduyrs &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.012 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.042) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 50 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.002 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+
 ]]
 
 ---
@@ -862,31 +902,12 @@ ggplot(data = ESS_sample, aes(y = psppsgva, x = eduyrs)) +
 ]
 .panel[.panel-name[Plot]
 .push-left[
-&lt;img src="3-Random_files/figure-html/unnamed-chunk-37-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+&lt;img src="3-Random_files/figure-html/unnamed-chunk-36-1.png" width="90%" style="display: block; margin: auto;" /&gt;
 ]
 
 .push-right[
-&lt;img src="3-Random_files/figure-html/unnamed-chunk-38-1.gif" width="90%" style="display: block; margin: auto;" /&gt;
+&lt;img src="3-Random_files/figure-html/unnamed-chunk-37-1.gif" width="90%" style="display: block; margin: auto;" /&gt;
 ]]]
-
----
-class: inverse middle center
-
-.push-left[
-&lt;br&gt;
-&lt;br&gt;
-&lt;br&gt;
-&lt;br&gt;
-&lt;br&gt;
-&lt;img src="https://www.business2community.com/wp-content/uploads/2013/03/Question1.jpg" width="60%" style="display: block; margin: auto;" /&gt;
-]
-
-.push-left[
-&lt;br&gt;
-Thanks, that also clarifies quite a bit of the R output we had ignored until now. But there is two more, we have not discussed yet: 
-
-The `\(t\)`-Statistic, the `\(p\)`-value, and these funny `\(*\)`.
-]
 
 ---
 layout: true
@@ -898,7 +919,7 @@ layout: true
 &lt;img src="https://upload.wikimedia.org/wikipedia/commons/5/59/The_Debate_Of_Socrates_And_Aspasia.jpg" width="100%" style="display: block; margin: auto;" /&gt;
 .center[.backgrnote[The debate of Socrates and Aspasia]]
 
-- Doing research is basically like having a debate with an opponent who does not believe your argument.
+Doing research is basically like having a debate with an opponent who does not believe your argument.
 ]
 
 ---
@@ -927,7 +948,7 @@ layout: true
 &lt;br&gt;
 
 .push-left[
-&lt;img src="https://www.convinceandconvert.com/wp-content/uploads/2014/07/bigstock-Portrait-of-a-senior-man-skept-12585803.jpg" width="54%" style="display: block; margin: auto;" /&gt;
+&lt;img src="https://www.convinceandconvert.com/wp-content/uploads/2014/07/bigstock-Portrait-of-a-senior-man-skept-12585803.jpg" width="60%" style="display: block; margin: auto;" /&gt;
 ]
 
 .push-right[
@@ -999,7 +1020,7 @@ Can you come up with another example?
 
 ```r
 ols &lt;- lm_robust(psppsgva ~ eduyrs, data = ESS_sample)
-summary(ols, include.ci = FALSE, digits = 3)
+summary(ols)
 # 
 # Call:
 # lm_robust(formula = psppsgva ~ eduyrs, data = ESS_sample)
@@ -1036,7 +1057,7 @@ summary(ols, include.ci = FALSE, digits = 3)
 # Learning goal achieved!
 
 .left-column[
-.center[**Is there a _general pattern_ that better educated people tend to have a stronger belief that the political system is democratic and that the government actually listens to the people?**
+.center[**Do better-educated individuals _generally_ exhibit a stronger belief in the political system's fairness and government responsiveness?**
 
 &lt;img src="https://media.istockphoto.com/vectors/politician-and-masks-vector-id1285284677?k=20&amp;m=1285284677&amp;s=612x612&amp;w=0&amp;h=pE_RkXIK8XaJBtuuHIsEbUo7pvtfu3yHEAQR5h8G-Jw=" width="90%" style="display: block; margin: auto;" /&gt;
 .center[.backgrnote[*Source*: [istockphoto.com](https://www.istockphoto.com/de)]]
@@ -1047,21 +1068,21 @@ summary(ols, include.ci = FALSE, digits = 3)
 .panel[.panel-name[Regression table]
 
 ```r
-ols_goal &lt;- lm_robust(psppsgva ~ eduyrs, data = ESS)
+ols_goal &lt;- lm_robust(psppsgva ~ eduyrs, weights = pspwght, data = ESS)
 summary(ols_goal, include.ci = FALSE, digits = 3)
 # 
 # Call:
-# lm_robust(formula = psppsgva ~ eduyrs, data = ESS)
+# lm_robust(formula = psppsgva ~ eduyrs, data = ESS, weights = pspwght)
 # 
-# Standard error type:  HC2 
+# Weighted, Standard error type:  HC2 
 # 
 # Coefficients:
-#             Estimate Std. Error t value  Pr(&gt;|t|) CI Lower CI Upper   DF
-# (Intercept)   2.1994    0.09466   23.24 2.41e-102   2.0137   2.3850 1509
-# eduyrs        0.0391    0.00645    6.06  1.74e-09   0.0264   0.0517 1509
+#             Estimate Std. Error t value Pr(&gt;|t|) CI Lower CI Upper   DF
+# (Intercept)   2.3781    0.11366   20.92 1.47e-85  2.15511   2.6010 1509
+# eduyrs        0.0246    0.00771    3.19 1.47e-03  0.00944   0.0397 1509
 # 
-# Multiple R-squared:  0.0256 ,	Adjusted R-squared:  0.0249 
-# F-statistic: 36.7 on 1 and 1509 DF,  p-value: 1.74e-09
+# Multiple R-squared:  0.00963 ,	Adjusted R-squared:  0.00897 
+# F-statistic: 10.2 on 1 and 1509 DF,  p-value: 0.00147
 ```
 ]
 .panel[.panel-name[Scatterplot]
@@ -1091,32 +1112,27 @@ class: middle clear
 ---
 class: inverse
 # Today's general lessons
-- Randomness prohibits systematic bias!
-  + Random samples are therefore representative (unless the sample msize `\(n\)` is very small).
-- Where random sampling fails, we use post-stratification weights o counterbalance bias.
-- Random sampling results in a loss of reliability, the so-called sampling error.
-- These errors are normally or t-distributed, depending on the size of our sample.
-- We can estimate the sampling error from our data: `\(\hat{\sigma}\)`, the standard error.
-- Because we know the Normal and the t-distribution, we can estimate 95% Confidence intervals to express uncertainty and conduct hypotheses tests to see how likely our finding is simply the result of happenstance.
-- Hypothesis tests test the `\(H_{0}\)`, which is usually the opposite of what you try to demonstrate. 
-  + They ask: What is the probability (i.e. the `\(p\)`-value, see below) that I observe these data, although in reality `\(H_{0}\)` is true?
-- `\(t\)`-value: How many standard erros is your estimate (e.g. `\(\beta\)`) away from the `\(H_{0}\)` (i.e. usually 0).
-- `\(p\)`-value: What area under the sampling distribution lies outside of `\(H_{0}\pm t\)`. By convention, the `\(p\)`-value should be `\(&lt;0.05\)`.
+- Randomness prevents systematic bias, ensuring that random samples are representative unless the sample size (n) is very small.
+- In cases where random sampling is not feasible, we utilize post-stratification weights to counterbalance bias.
+- Random sampling introduces sampling error, which reduces reliability.
+- These errors follow a normal or `\(t\)`-distribution, depending on the sample size.
+- We can estimate the sampling error from our data using the standard error `\((\hat{\sigma})\)`.
+- By leveraging our knowledge of the normal and `\(t\)`-distributions, we can estimate 95% confidence intervals to express uncertainty and conduct hypothesis tests to determine the likelihood of our findings being due to chance.
+- Hypothesis tests assess the null hypothesis ($H_0$), typically the opposite of what is being demonstrated.
+- They evaluate the probability ($p$-value) of observing the data when `\(H_0\)` is true.
+- The `\(t\)`-value represents the number of standard errors by which the estimate (e.g., `\(\beta\)`) deviates from the null hypothesis (usually 0).
+- The `\(p\)`-value indicates the area under the sampling distribution outside of `\(H_0 \pm t\)`. Conventionally, the `\(p\)`-value should be `\(&lt;0.05\)`.
 
 ---
 class: inverse
 # Today's (important) R functions
-- `estimatr::lm_robust()`: OLS with robust standard errors when using weights.
 - `geom_smooth(method = "lm")`: Add OLS lines to scatter plots.
-- `tidy()` and Coefficient plots (see slides above).
-
+- Most R functions have a `weights` argument.
+- `modelsummary()` allows you to design your regression tables in various ways.
 ---
 # References
 
 .font80[
-Llaudet, E. and K. Imai (2022). _Data Analysis for Social Science. A Friendly and Practical
-Introduction_. Princeton: Princeton University Press.
-
 Veaux, D., Velleman, and Bock (2021). _Stats: Data and Models, Global Edition_. Pearson Higher Ed.
 ]
     </textarea>

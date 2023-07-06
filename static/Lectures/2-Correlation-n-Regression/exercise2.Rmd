@@ -86,7 +86,9 @@ ols <- lm_robust(data = Dat, formula = poverty ~ citizen_rights)
 ```{r results = 'asis'}
 # Estimate regression models.
 ols_1 <- lm_robust(data = Dat, formula = poverty ~ socialist)
-modelsummary(list("Poverty" = ols_1), gof_map = c("nobs", "r.squared")) # Nicely-formatted table.
+modelsummary(list("Poverty" = ols_1), # Nicely-formatted table.
+             statistic = NULL, # Don't report stat. inference
+             gof_map = c("nobs", "r.squared"))
 ```
 `r unhide()`
 
@@ -95,7 +97,9 @@ modelsummary(list("Poverty" = ols_1), gof_map = c("nobs", "r.squared")) # Nicely
 ```{r results = 'asis'}
 # Estimate regression models.
 ols_2 <- lm_robust(data = Dat, formula = poverty ~ citizen_rights)
-modelsummary(list("Poverty" = ols_2), gof_map = c("nobs", "r.squared")) # Nicely-formatted table.
+modelsummary(list("Poverty" = ols_2), # Nicely-formatted table.
+             statistic = NULL, # Don't report stat. inference
+             gof_map = c("nobs", "r.squared")) 
 ```
 `r unhide()`
 
@@ -124,6 +128,7 @@ ols <- lm_robust(data = Dat, formula = citizen_rights ~ socialist)
 # Estimate regression models.
 ols_3 <- lm_robust(data = Dat, formula = citizen_rights ~ socialist)
 modelsummary(list("Citiz. Rights" = ols_3), # Nicely-formatted table.
+             statistic = NULL, # Don't report stat. inference
               gof_map = c("nobs", "r.squared")) 
 ```
 `r unhide()`

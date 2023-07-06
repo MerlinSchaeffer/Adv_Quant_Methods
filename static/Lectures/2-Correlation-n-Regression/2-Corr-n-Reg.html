@@ -4,7 +4,7 @@
     <title>Multiple Regression &amp;    Fundamentals of Causal Inference</title>
     <meta charset="utf-8" />
     <meta name="author" content="Merlin Schaeffer  Department of Sociology" />
-    <meta name="date" content="2023-07-05" />
+    <meta name="date" content="2023-07-06" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
     <script src="libs/tile-view/tile-view.js"></script>
@@ -29,7 +29,7 @@ class: center, middle, inverse, title-slide
 ### Merlin Schaeffer<br> Department of Sociology
 ]
 .date[
-### 2023-07-05
+### 2023-07-06
 ]
 
 ---
@@ -45,7 +45,7 @@ class: center, middle, inverse, title-slide
 class: inverse
 # Today's schedule
 
-1. **Application**: Socialism, citizenship rights, and poverty.
+1. **Today's research question**: Socialism, citizenship rights, and poverty.
   + Application Programming Interfaces (API)
   + World Bank API
   + Democracy data API
@@ -80,7 +80,7 @@ Some of you criticized:&lt;br&gt; *But aren't socialist countries better at prov
 
 ---
 class: inverse
-# Application of the day
+# Today's research question
 
 .center[.font140[
 **Is there a freedom-equality trade-off?**
@@ -609,6 +609,12 @@ class: middle clear
 
 ---
 class: inverse middle center
+# Break
+
+&lt;iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+
+---
+class: inverse middle center
 # OLS regression
 
 ---
@@ -717,6 +723,7 @@ ols &lt;- lm_robust(data = Dat, formula = poverty ~ socialist)
 zols &lt;- lm_robust(data = Dat, formula = z_poverty ~ z_socialist)
 
 modelsummary(list("OLS" = ols, "Std. OLS" = zols), # Nicely-formatted table
+             statistic = NULL, # Don't report stat. inference
              gof_map = c("nobs", "r.squared")) # Only 2 models fit stats
 ```
 
@@ -739,29 +746,14 @@ modelsummary(list("OLS" = ols, "Std. OLS" = zols), # Nicely-formatted table
    &lt;td style="text-align:center;"&gt; 0.000 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (1.746) &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (0.083) &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; socialist &lt;/td&gt;
    &lt;td style="text-align:center;"&gt; −0.128 &lt;/td&gt;
    &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (0.081) &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; z_socialist &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; −0.101 &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt; z_socialist &lt;/td&gt;
    &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.064) &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; −0.101 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
@@ -873,7 +865,7 @@ class: inverse
 # Today's (important) functions
 
 1. `cor()`: Estimate correlation coefficient.
-2. `lm()`: Estimate linear OLS regression.
+2. `estimatr::lm_robust()`: Estimate linear OLS regression (with robust standard errors, which matters when using weights).
 3. `plot(model_object)` to test regression assumptions.
 4. `inner_join()`, `left_join()`, `right_join()`, and `full_join()` allow you to join/merge different tibbles together than have common observations and a key that identifies them.
 5. `modelsummary()`: Create nicely-formatted (html, Word, ASCII, or Latex) tables of (one or several) regression models.

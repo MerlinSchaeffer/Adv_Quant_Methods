@@ -21,7 +21,7 @@ pacman::p_load(
   ggplot2, # beautiful figures,
   estimatr, # Regression for weighted data,
   essentials,
-  texreg) # regression tables with nice layout.
+  modelsummary) # regression tables with nice layout.
 
 # 1. read the ESS round 9 data
 ESS <- read_spss("../../../assets/ESS9e03_1.sav") %>%
@@ -54,7 +54,7 @@ pacman::p_load(
   haven, # Handle labelled data.
   ggplot2, # beautiful figures,
   estimatr, # Regression for weighted data,
-  texreg) # regression tables with nice layout.
+  modelsummary) # regression tables with nice layout.
 
 # 1. read the ESS round 9 data
 ESS <- read_spss("../../../assets/ESS9e03_1.sav") %>%
@@ -75,7 +75,7 @@ drop_na() # Delete cases with missing values.
 
 # Run the regression and make a regression table.
 mod1 <- lm_robust(trstplc ~ eduyrs, data = ESS)
-screenreg(mod1, include.ci = FALSE, digits = 3)
+modelsummary(list("Tr. police" = mod1), statistic = NULL, gof_map = c("nobs", "r.squared"))
 ```
 `r unhide()`
 
@@ -84,7 +84,7 @@ screenreg(mod1, include.ci = FALSE, digits = 3)
 ```{r}
 # Run the regression and make a regression table.
 mod2 <- lm_robust(trstplc ~ gndr, data = ESS)
-screenreg(mod2, include.ci = FALSE, digits = 3)
+modelsummary(list("Tr. police" = mod2), statistic = NULL, gof_map = c("nobs", "r.squared"))
 ```
 `r unhide()`
 
@@ -96,9 +96,8 @@ screenreg(mod2, include.ci = FALSE, digits = 3)
 mod1_weighted <- lm_robust(trstplc ~ eduyrs, data = ESS, weights = pspwght)
 mod2_weighted <- lm_robust(trstplc ~ gndr, data = ESS, weights = pspwght)
 # Make one regression table.
-screenreg(list(mod1, mod2, mod1_weighted, mod2_weighted), 
-          include.ci = FALSE, digits = 3,
-          custom.model.names = c("Unweighted", "Unweighted", 
-                                 "Weighted", "Weighted"))
+modelsummary(list("Unweighted" = mod1, "Unweighted" = mod2, 
+                  "Weighted" = mod1_weighted, "Weighted" = mod2_weighted),
+             statistic = NULL, gof_map = c("nobs", "r.squared"))
 ```
 `r unhide()`
