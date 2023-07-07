@@ -19,10 +19,10 @@ pacman::p_load(
   democracyData, # download democracy datasets used in the scholarly literature.
   wbstats, # download data from Worldbank. Tremendous source of global socio-economic data.
   estimatr, # OLS with robust SE,
-  texreg) # regression tables with nice layout,
+  modelsummary) # regression tables with nice layout,
 
 # 1. The worldbank data
-Dat <- wb_data("SI.POV.DDAY", # Download poverty data: <1.90$ per day,
+Dat <- wb_data("SI.POV.DDAY", # Download poverty data: <2.15$ per day,
                start_date = 2002, end_date = 2022) %>%
   rename(poverty = SI.POV.DDAY) %>% # rename poverty variable,
   select(country, date, poverty) %>% # Keep only 3 variables
@@ -42,12 +42,13 @@ Dat <- Dat %>%
       str_detect(country, "Argentina|Bolivia|Chile|Colombia|Costa Rica|Cuba|Dominican Republic|Ecuador") |
         str_detect(country, "El Salvador|Guatemala|Honduras|Mexico|Nicaragua|Panama|Paraguay|Peru") |
         str_detect(country, "Uruguay|Venezuela") ~ "Spain", # Spain
-      str_detect(country, "Australia|Bahrain|Bangladesh|Botswana|Canada|Cyprus|Egypt|Fiji") |
-        str_detect(country, "Gambia|Ghana|Guyana|India|Iraq|Israel|Jamaica|Jordan|Kenya|Kuwait") |
-        str_detect(country, "Lesotho|Malawi|Malaysia|Mauritius|Myanmar|New Zealand|Nigeria|Oman") | 
+      str_detect(country, "Bahrain|Bangladesh|Botswana|Cyprus|Egypt|Fiji") |
+        str_detect(country, "Gambia|Ghana|Guyana|India|Iraq|Jamaica|Jordan|Kenya|Kuwait") |
+        str_detect(country, "Lesotho|Malawi|Malaysia|Mauritius|Myanmar|Nigeria|Oman") | 
         str_detect(country, "Pakistan|Qatar|Sierra Leone|Singapore|South Africa") | 
         str_detect(country, "Sri Lanka|Sudan|Swaziland|Tanzania|Trinidad/Tobago|Uganda") | 
-        str_detect(country, "United Arab Emirates|United States|Yemen|Zambia|Zimbabwe") ~ "Britain", # Britain
+        str_detect(country, "United Arab Emirates|Yemen|Zambia|Zimbabwe") ~ "Britain", # Britain
+      # Australia, Canada, Israel, New Zealand, United States; left out as settler societies
       str_detect(country, "Burundi|Congo, Dem. Rep.|Rwanda") ~ "Belgium",
     str_detect(country, "Iceland|Estonia") ~ "Denmark")) # Denmark
 
@@ -141,7 +142,8 @@ ggplot(data = fict_dat, aes(y = fit, x = years_indep)) +
        term == "colonizerBritain" ~ "Britain",
        term == "colonizerPortugal" ~ "Portugal",
        term == "colonizerDenmark" ~ "Denmark",
-       term == "(Intercept)" ~ "Intercept \n (Belgium)")))
+       term == "(Intercept)" ~ "Intercept \n (Belgium)")) %>%
+  filter(term != "Intercept \n (Belgium)"))
 
 ggplot(data = plotdata, aes(y = estimate, 
                             # Order by effect size
@@ -151,10 +153,10 @@ ggplot(data = plotdata, aes(y = estimate,
   geom_pointrange(aes(min = conf.low, max = conf.high)) +
   coord_flip() + # Flip Y- & X-Axis,
   labs(
-    title = "Regression of extreme poverty",
+    title = "Regression of poverty",
     x = "Colonizer",
     # Write Greek beta into axis title.
-    y = expression("Estimate of"~beta)) +
+    y = expression("Estimate of"~beta~"(Difference to countries colonized by Belium)")) +
   theme_minimal()
 ```
 `r unhide()`

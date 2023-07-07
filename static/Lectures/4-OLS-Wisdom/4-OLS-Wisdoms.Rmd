@@ -1,6 +1,6 @@
 ---
-title: "4 OLS Wisdom"
-subtitle: "OLS Assumptions, categorical predictors, binary outcomes, and the basics of visualizing regression results"
+title: "Multiple Regression & <br><br> Fundamentals of Causal Inference"
+subtitle: "4 OLS from a assumptions to visualization"
 author: "Merlin Schaeffer<br> Department of Sociology"
 date: "`r Sys.Date()`"
 output: 
@@ -42,19 +42,18 @@ xaringanExtra::use_xaringan_extra(c("tile_view", "tachyons"))
 xaringanExtra::use_panelset()
 ```
 
-# The goal of social science research
+# Goal of empirical sociology
 
-.font140[.center[.alert[Use data to **discover patterns** ("social facts" in Durkheim's terms), <br> and the social mechanisms that bring them about.]]]
+.font130[.center[Use data to .alert[discover patterns], <br> and the social mechanisms that bring them about.]]
 
 ```{r, echo = FALSE, out.width='70%', fig.align='center'}
 knitr::include_graphics('https://liu.se/-/media/istock-501261958.jpg?mw=1120&mh=1120&hash=DA8977CCE6A6E600AE80A40CFEE771C9')
 ```
 ---
-class: inverse middle
+class: inverse
 # Today's schedule
 
-1. **Application**: Colonialism and poverty
-  + History of colonial rule data.
+1. **Today's research question**: Colonialism and poverty
   
 2. **OLS assumptions**
   + No outliers
@@ -94,12 +93,12 @@ knitr::include_graphics('https://ichef.bbci.co.uk/news/976/cpsprodpb/6E2E/produc
 
 ---
 class: inverse
-# Colonial legacy and extreme poverty
+# Today's research questions
 
 .left-column[
-- .font130[How much could former colonies reduce extreme poverty since independence?]
+.font130[Is poverty lower in countries that have been independent longer?]
 
-- .font130[How do different colonial legacies compare to one another <br> (former French vs British colonies) <br> in terms of contemporary extreme poverty?]
+.font130[How do different colonial legacies compare to one another?]
 ]
 
 .right-column[
@@ -121,36 +120,18 @@ pacman::p_load(
   democracyData, # download democracy datasets used in the scholarly literature.
   wbstats, # download data from Worldbank. Tremendous source of global socio-economic data.
   estimatr, # OLS with robust SE,
-  texreg) # regression tables with nice layout,
+  modelsummary) # regression tables with nice layout,
 ```
-]]
-
----
-class: clear
-# Worldbank Data .font70[On extreme poverty across the World]
-
-.panelset[
-.panel[.panel-name[Get Wb data]
+]
+.panel[.panel-name[Get WB data]
 ```{r}
-(Dat <- wb_data("SI.POV.DDAY", # Download poverty data: <1.90$ per day,
+(Dat <- wb_data("SI.POV.DDAY", # Download poverty data: <$2.15 per day,
                 start_date = 2002, end_date = 2022) %>%
    rename(poverty = SI.POV.DDAY) %>% # rename poverty variable,
    select(country, date, poverty) %>% # Keep only 3 variables
-   drop_na(poverty) %>% # Drop cases with missing data,
-   group_by(country) %>% # Group by country,
+   drop_na(poverty) %>% group_by(country) %>% # Group by country,
    filter(date == max(date)) %>% # Keep the most recent data per country.
    mutate(date = as.numeric(date)) %>% ungroup())
-```
-]
-.panel[.panel-name[Extreme poverty across the world]
-```{r poverty-world, out.width='100%', fig.height = 8, fig.width = 20, results = FALSE, echo = FALSE}
-ggplot(data = Dat, # Make coord system for data,
-       aes(y = poverty, # Y- and X-axis of plot,
-           x = reorder(country, poverty))) +
-  geom_bar(stat = "identity") + # plot data as is in a bar chart,
-  labs(y = "% population with less than 1.90$ a day", x = "") + # Axis labels,
-  theme_minimal() + # Simple background layout,
-  theme(axis.text.x = element_text(angle = 60, hjust = 1)) # Write country names in a 60 degree angle.
 ```
 ]]
 
@@ -161,7 +142,9 @@ ggplot(data = Dat, # Make coord system for data,
 .panel[.panel-name[A study]
 
 .push-left[
-<iframe src='https://academic.oup.com/sf/article/88/2/785/2235304' width='800' height='500' frameborder='0' scrolling='yes'></iframe>
+```{r, echo = FALSE, out.width='100%', fig.align='center'}
+knitr::include_graphics('./img/SocialForces.png')
+```
 ]
 
 .push-right[
@@ -200,12 +183,13 @@ Dat <- Dat %>%
       str_detect(country, "Argentina|Bolivia|Chile|Colombia|Costa Rica|Cuba|Dominican Republic|Ecuador") |
         str_detect(country, "El Salvador|Guatemala|Honduras|Mexico|Nicaragua|Panama|Paraguay|Peru") |
         str_detect(country, "Uruguay|Venezuela") ~ "Spain", # Spain
-      str_detect(country, "Australia|Bahrain|Bangladesh|Botswana|Canada|Cyprus|Egypt|Fiji") |
-        str_detect(country, "Gambia|Ghana|Guyana|India|Iraq|Israel|Jamaica|Jordan|Kenya|Kuwait") |
-        str_detect(country, "Lesotho|Malawi|Malaysia|Mauritius|Myanmar|New Zealand|Nigeria|Oman") | 
+      str_detect(country, "Bahrain|Bangladesh|Botswana|Cyprus|Egypt|Fiji") |
+        str_detect(country, "Gambia|Ghana|Guyana|India|Iraq|Jamaica|Jordan|Kenya|Kuwait") |
+        str_detect(country, "Lesotho|Malawi|Malaysia|Mauritius|Myanmar|Nigeria|Oman") | 
         str_detect(country, "Pakistan|Qatar|Sierra Leone|Singapore|South Africa") | 
         str_detect(country, "Sri Lanka|Sudan|Swaziland|Tanzania|Trinidad/Tobago|Uganda") | 
-        str_detect(country, "United Arab Emirates|United States|Yemen|Zambia|Zimbabwe") ~ "Britain", # Britain
+        str_detect(country, "United Arab Emirates|Yemen|Zambia|Zimbabwe") ~ "Britain", # Britain
+      # Australia, Canada, Israel, New Zealand, United States; left out as settler societies
       str_detect(country, "Burundi|Congo, Dem. Rep.|Rwanda") ~ "Belgium")) # Belgium
       # str_detect(country, "Liberia|Philippines") ~ "USA", # USA
       # str_detect(country, "Libya|Somalia") ~ "Italy", # Italy
@@ -290,13 +274,13 @@ ggplot(data = Dat %>% filter(!is.na(colonizer) & !is.na(years_indep)), # Make co
 .left-column[
 ```{r}
 # Estimate OLS regression
-ols <- lm_robust( 
+ols <- lm_robust(
   poverty ~ years_indep, 
   data = Dat)
-
 # Regression table
-screenreg(ols, include.ci = FALSE, 
-          digits = 3)
+modelsummary(
+  list("Poverty" = ols), stars = TRUE,
+  gof_map = c("nobs", "r.squared"))
 ```
 ]
 
@@ -321,33 +305,28 @@ class: clear
 # OLS Assumptions
 
 .left-column[
-.content-box-blue[.center[
-**Requirements for OLS to predict useful results:**
-]
-1. **No outliers.**
-2. **Linear relationship.**
-3. Homoscedasticity.
-  - If you use `lm_robust()`, don't worry.
- 
-4. Homogeneous trends across subpopulations.
-5. No unsupported extrapolation.
+.content-box-blue[
+1. **No outliers**
+2. **Linearity**
+3. Homoscedasticity; don't worry: `lm_robust()`.
+4. Independent observations.
 
 $\rightarrow$ Scatter plots!
 ]]
 
 .right-column[
-<iframe src='https://seeing-theory.brown.edu/regression-analysis/index.html#section1' width='700' height='670' frameborder='0' scrolling='yes'></iframe>
+<iframe src='https://seeing-theory.brown.edu/regression-analysis/index.html#section1' width='700' height='580' frameborder='0' scrolling='yes'></iframe>
 ]
 
 ---
 # Outlier 
 
 .left-column[
-- **Leverage:** case has strong influence on regression line.
+- **Leverage:** Case has strong influence on regression line.
   
 
 - **Z-standardized residuals:** case far from regression line.
-  + Somalia with extreme poverty of `r Dat$poverty[Dat$country == "Somalia"]`%.
+  + Haiti with poverty of `r Dat$poverty[Dat$country == "Haiti"]`%.
 
 ```{r outlier, results = FALSE, fig.show='hide'}
 # Re-estimate model using lm(),
@@ -374,23 +353,22 @@ Dat_outl <- Dat %>%
       country == "Sweden" ~ 500, # years of independence
       TRUE ~ years_indep),
     poverty = case_when(
-      country == "Sweden" ~ 99.99, # 99.99% poverty
+      country == "Sweden" ~ 99, # 99% poverty
       TRUE ~ poverty))
 ```
 ]
 
 .panel[.panel-name[OLS]
 .left-column[
-```{r}
+```{r, results = "asis"}
 # Estimation
 ols_outl <- lm_robust( 
   poverty ~ years_indep, 
   data = Dat_outl)
-
 # Regression table
-screenreg(ols_outl,
-          include.ci = FALSE, 
-          digits = 3)
+modelsummary(
+  list("Poverty" = ols_outl), stars = TRUE,
+  gof_map = c("nobs", "r.squared"))
 ```
 ]
 
@@ -431,10 +409,10 @@ lm(poverty ~ years_indep,
 # Linearity
 
 .left-column[
-- The gray dotted line is out regression model.
+- The gray dotted line is our regression model.
 
 - The red line should ideally be the same.
-  + .alert[Here the linearity assumption doesn't perfectly hold, but seems overall OK.]
+  + .alert[Linearity assumption doesn't perfectly hold, but seems overall OK.]
 
 ```{r linearity, results = FALSE, fig.show = 'hide'}
 # Re-estimate model using lm(),
@@ -451,10 +429,10 @@ lm(poverty ~ years_indep,
 ]
 
 ---
-# Linearity .font70[And our strange outlier ...]
+# Linearity .font70[And our outlier ...]
 
 .left-column[
-- The gray dotted line is out regression model.
+- The gray dotted line is our regression model.
 
 - The red line should ideally be the same.
 
@@ -553,16 +531,14 @@ ggplot(data = Dat_bi, aes(y = poverty, x = colonizer_bi)) +
 # R recognizes categorical variables automatically,
 # if they are factor or character vectors.
 ols_2 <- lm_robust(poverty ~ colonizer, data = Dat)
-
-htmlreg(ols_2, # Nicely-formatted table.
-        include.ci = FALSE, digits = 3, 
-        single.row = TRUE,
-        custom.coef.names = c("Intercept", "France",
-                              "Spain", "Belgium",
-                              "Portugal"))
+# Regression table
+modelsummary(list("Poverty" = ols_2), stars = TRUE,
+  coef_rename = c("colonizerFrance" = "France", "colonizerBelgium" = "Belgium",
+  "colonizerPortugal" = "Portugal", "colonizerSpain" = "Spain"),
+  gof_map = c("nobs", "r.squared"))
 ```
 
-```{r ref.label = "categorical", out.width='80%', fig.height = 4, fig.width = 6.5, results = FALSE, echo = FALSE}
+```{r ref.label = "categorical", out.width='75%', fig.height = 4, fig.width = 6.5, results = FALSE, echo = FALSE}
 ```
 ]
 .push-right[
@@ -614,6 +590,12 @@ knitr::include_graphics('https://cdn.dribbble.com/users/10549/screenshots/989079
 
 ---
 class: inverse middle center
+# Break
+
+<iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'></iframe>
+
+---
+class: inverse middle center
 # Binary outcomes
 
 ---
@@ -625,7 +607,7 @@ Using OLS to predict a binary outcome (0 = "No" / 1 = "Yes") yields the so-calle
 
 LPMs predict the probability that the outcome equals 1 $\hat{\text{Pr}}(y_i = 1|x_{i})$.
 
-LPMs violate the linearity assumption and can thus predict $\hat{\text{Pr}}(y_i = 1|x_{i}) < 0$, or $\hat{\text{Pr}}(y_i = 1|x_{i}) >1$. This is controversial!
+LPMs violate the linearity assumption and can thus predict $\hat{\text{Pr}}(y_i = 1|x_{i}) < 0$, or $\hat{\text{Pr}}(y_i = 1|x_{i}) >1$. <br> This is controversial!
 ]
 
 
@@ -699,10 +681,10 @@ class: inverse middle center
 
 ---
 class: clear
-# 1 Coefficient plots
+# (1) Coefficient plots
 
 .panelset[
-.panel[.panel-name[Preparation code]
+.panel[.panel-name[Preparation]
 ```{r}
 (plotdata <- lm_robust(poverty ~ colonizer, data = Dat) %>%
    tidy() %>% # Turn results into a tibble, #<<
@@ -717,20 +699,19 @@ class: clear
 ```
 ]
 
-.panel[.panel-name[R plotting]
+.panel[.panel-name[Plotting]
 ```{r Coefplotter, fig.show = 'hide'}
 ggplot(data = plotdata, aes(y = estimate, 
                             # Order by effect size
                             x = reorder(term, estimate))) +
   geom_hline(yintercept = 0, color = "red", lty = "dashed") +
-  # Point with error-bars,
+  # Point with confidence interval,
   geom_pointrange(aes(min = conf.low, max = conf.high)) +
   coord_flip() + # Flip Y- & X-Axis,
-  labs(
-    title = "Regression of extreme poverty",
-    x = "Colonizer",
-    # Write Greek beta into axis title.
-    y = "Difference in extreme poverty compared to countries colonized by Britain") +
+  labs(title = "Regression of poverty",
+       x = "Colonizer",
+       # Write Greek beta into axis title.
+       y = "Difference in poverty compared to countries colonized by Britain") +
   theme_minimal()
 ```
 ]
@@ -745,10 +726,10 @@ ggplot(data = plotdata, aes(y = estimate,
 ]]]
 
 ---
-# 2 Model predictions
+# (2) Model predictions
 
 .panelset[
-.panel[.panel-name[The OLS model]
+.panel[.panel-name[OLS model]
 .push-left[
 ```{r}
 (ols <- lm_robust(poverty ~ years_indep, data = Dat))
@@ -761,7 +742,8 @@ plotdata2 <- ols %>%
   mutate( # Rename variables for the plot.
     term = case_when(
       term == "years_indep" ~ "Years since independence",
-      term == "(Intercept)" ~ "Intercept"))
+      term == "(Intercept)" ~ "Intercept")) %>%
+  filter(term != "Intercept")
 
 ggplot(data = plotdata2, aes(y = estimate, 
                             # Order by effect size
@@ -771,7 +753,7 @@ ggplot(data = plotdata2, aes(y = estimate,
   geom_pointrange(aes(min = conf.low, max = conf.high)) +
   coord_flip() + # Flip Y- & X-Axis,
   labs(
-    title = "Regression of extreme poverty",
+    title = "Regression of poverty",
     x = "",
     # Write Greek beta into axis title.
     y = expression("Estimate of"~beta)) +
@@ -780,14 +762,14 @@ ggplot(data = plotdata2, aes(y = estimate,
 ]]
 .panel[.panel-name[Predictions]
 .push-left[
-**Step 1**: Generate fictional data of $x$ with theoretically-informative values.
+**Step 1**: Generate fictional data of $x$ with theoretically informative values.
 
 ```{r}
 (fict_dat <- tibble(years_indep = 1:500))
 ```
 ]
 .push-right[
-**Step 2**: Apply estimated model to fictional data. Given fictional data, what $\hat{y}$ does our model predict?
+**Step 2**: What $\hat{y}$ does our model predict for the fictional data?
 
 ```{r}
 (fict_dat <- predict( #<<
@@ -821,9 +803,9 @@ ggplot(data = fict_dat, aes(y = fit, x = years_indep)) +
 # Learning goal achieved!
 
 .left-column[
-- .font130[How much could former colonies reduce extreme poverty since independence?]
+.font130[Is poverty lower in countries that have been independent longer?]
 
-- .font130[How do different colonial legacies compare to one another <br> (former French vs British colonies) <br> in terms of contemporary extreme poverty?]
+.font130[How do different colonial legacies compare to one another?]
 ]
 
 .right-column[
@@ -861,12 +843,12 @@ knitr::include_graphics('https://cdn.dribbble.com/users/10549/screenshots/989079
 class: inverse
 # Today's general lessons
 
-1. Outliers may drive results of OLS regression.
-  + Cook's D helps us identify them.
-2. OLS assumes an approx. linear relationship between outcome and predictor, if the predictor is a continuous variable. Always check whether this holds in your case. If your predictor is categorical, you don't need to worry!
-3. If you want to use a categorical variable as a predictor in a regression analysis, it is (typically) dummy coded. That means, it's tells us the average difference in the outcome between a category to the reference group.
-4. R recognizes categorical/factor variables, and dummy-codes them automatically for your OLS regression. The first category is made the reference.
-5. OLS regression can be visualized as coefficient plots, but also by visualizing the predictions that the model makes for fictional data. The latter is better suited for a continuous predictor.
+1. Outliers can have a significant impact on the results of OLS regression. Cook's D statistic is a useful tool to identify these outliers.
+2. OLS assumes an approximately linear relationship between the outcome and predictor variables, specifically for continuous predictors. It is important to verify whether this assumption holds true in your specific case. However, if your predictor is categorical, you do not need to be concerned about this assumption.
+3. When using a categorical variable as a predictor in a regression analysis, it is typically dummy coded. This coding allows us to determine the average difference in the outcome between each category and a reference group.
+4. R automatically recognizes categorical or factor variables and performs dummy coding for OLS regression. The first category is assigned as the reference group.
+5. Coefficient plots are commonly used to visualize OLS regression results. 
+6. Additionally, it is beneficial to visualize the model's predictions for hypothetical data points, especially when dealing with a continuous predictor.
 
 ---
 # Today's (important) functions

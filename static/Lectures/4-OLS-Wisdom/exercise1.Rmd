@@ -14,7 +14,7 @@ knitr::opts_chunk$set(
 library(webexercises)
 ```
 
-1. Start a new R-Script and copy the lines of R code from my slides that generate 'Dat'. Alter the code such that former Danish colonies are identified. Unfortunately, we only have two countries in the Worldbank data that can be somewhat considered as former Danish colonies according to [Wikipedia](https://en.wikipedia.org/wiki/Danish_overseas_colonies): Iceland and Estonia. Check Wikipedia to see when they became independent from Denmark.
+1. Start a new R-Script and copy the lines of R code from my slides that generate 'Dat'. Alter the code such that former Danish colonies are identified. Unfortunately, we only have two countries in the World Bank data that can be somewhat considered as former Danish colonies according to [Wikipedia](https://en.wikipedia.org/wiki/Danish_overseas_colonies): Iceland and Estonia. Check Wikipedia to see when they became independent from Denmark.
   
 `r hide("R solution -> dont' peak to early ;) !")`
 ```{r}
@@ -24,10 +24,10 @@ pacman::p_load(
   democracyData, # download democracy datasets used in the scholarly literature.
   wbstats, # download data from Worldbank. Tremendous source of global socio-economic data.
   estimatr, # OLS with robust SE,
-  texreg) # regression tables with nice layout,
+  modelsummary) # regression tables with nice layout,
 
-# 1. The worldbank data
-Dat <- wb_data("SI.POV.DDAY", # Download poverty data: <1.90$ per day,
+# 1. The world Bank data
+Dat <- wb_data("SI.POV.DDAY", # Download poverty data: <2.15$ per day,
                start_date = 2002, end_date = 2022) %>%
   rename(poverty = SI.POV.DDAY) %>% # rename poverty variable,
   select(country, date, poverty) %>% # Keep only 3 variables
@@ -47,12 +47,13 @@ Dat <- Dat %>%
       str_detect(country, "Argentina|Bolivia|Chile|Colombia|Costa Rica|Cuba|Dominican Republic|Ecuador") |
         str_detect(country, "El Salvador|Guatemala|Honduras|Mexico|Nicaragua|Panama|Paraguay|Peru") |
         str_detect(country, "Uruguay|Venezuela") ~ "Spain", # Spain
-      str_detect(country, "Australia|Bahrain|Bangladesh|Botswana|Canada|Cyprus|Egypt|Fiji") |
-        str_detect(country, "Gambia|Ghana|Guyana|India|Iraq|Israel|Jamaica|Jordan|Kenya|Kuwait") |
-        str_detect(country, "Lesotho|Malawi|Malaysia|Mauritius|Myanmar|New Zealand|Nigeria|Oman") | 
+      str_detect(country, "Bahrain|Bangladesh|Botswana|Cyprus|Egypt|Fiji") |
+        str_detect(country, "Gambia|Ghana|Guyana|India|Iraq|Jamaica|Jordan|Kenya|Kuwait") |
+        str_detect(country, "Lesotho|Malawi|Malaysia|Mauritius|Myanmar|Nigeria|Oman") | 
         str_detect(country, "Pakistan|Qatar|Sierra Leone|Singapore|South Africa") | 
         str_detect(country, "Sri Lanka|Sudan|Swaziland|Tanzania|Trinidad/Tobago|Uganda") | 
-        str_detect(country, "United Arab Emirates|United States|Yemen|Zambia|Zimbabwe") ~ "Britain", # Britain
+        str_detect(country, "United Arab Emirates|Yemen|Zambia|Zimbabwe") ~ "Britain", # Britain
+      # Australia, Canada, Israel, New Zealand, United States; left out as settler societies
       str_detect(country, "Burundi|Congo, Dem. Rep.|Rwanda") ~ "Belgium",
     str_detect(country, "Iceland|Estonia") ~ "Denmark")) # Denmark
 
@@ -103,7 +104,11 @@ Dat <- Dat %>%
 `r hide("R solution -> dont' peak to early ;) !")`
 ```{r}
 ols2 <- lm_robust(poverty ~  colonizer, data = Dat)
-screenreg(ols2, include.ci = FALSE, digits = 3)
+modelsummary(list("Poverty" = ols2), stars = TRUE,
+             coef_rename = c("colonizerDenmark" = "Denmark",
+                             "colonizerFrance" = "France", "colonizerBelgium" = "Belgium",
+                             "colonizerPortugal" = "Portugal", "colonizerSpain" = "Spain"),
+             gof_map = c("nobs", "r.squared"))
 ```
 `r unhide()`
 
@@ -140,7 +145,8 @@ ggplot(data = Dat, aes(y = citizen_rights, x = years_indep)) +
 `r hide("R solution -> dont' peak to early ;) !")`
 ```{r}
 ols <- lm_robust(citizen_rights ~  years_indep, data = Dat)
-screenreg(ols, include.ci = FALSE, digits = 3)
+modelsummary(list("Citiz. Rights" = ols), stars = TRUE,
+             gof_map = c("nobs", "r.squared"))
 ```
 `r unhide()`
 
