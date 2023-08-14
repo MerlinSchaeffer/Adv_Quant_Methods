@@ -1,6 +1,6 @@
 ---
-title: "Randomized Controlled Trials (RCT)"
-subtitle: "The Gold Standard of Causal Inference"
+title: "Multiple Regression & <br><br> Fundamentals of Causal Inference"
+subtitle: "Randomized Controlled Trials (RCT) <br><br> The Gold Standard of Causal Inference"
 author: "Merlin Schaeffer<br> Department of Sociology"
 date: "`r Sys.Date()`"
 output: 
@@ -50,9 +50,9 @@ knitr::include_graphics('https://pbs.twimg.com/media/EouSsOKUUAM0P_y.jpg')
 .backgrnote[.center[*Source:* `r Citet(myBib, "polack_safety_2020")`]]
 
 ---
-# The goal of social science research
+# Goal of empirical sociology
 
-.font140[.center[.alert[Use data to discover patterns ("social facts" in Durkheim's terms), <br> and **the social mechanisms that bring them about**.]]]
+.font130[.center[Use data to discover patterns, <br> and the .alert[social mechanisms that bring them about.]]]
 
 ```{r, echo = FALSE, out.width='70%', fig.align='center'}
 knitr::include_graphics('https://liu.se/-/media/istock-501261958.jpg?mw=1120&mh=1120&hash=DA8977CCE6A6E600AE80A40CFEE771C9')
@@ -62,19 +62,11 @@ knitr::include_graphics('https://liu.se/-/media/istock-501261958.jpg?mw=1120&mh=
 class: inverse middle
 # Today's schedule
 
-1. **Application**: The Integration (or Discrimination) Paradox
+1. **Today's research question**: The Integration Paradox
 
-2. **Hypothesis $\rightarrow$ comparison**
-
-3. **Fruitless naïv comparison**
-
-4. **Potential outcomes**
-  + Average causal effect
-  + Selection bias
-
-5. **Directed Acycical Graphs (DAGs)**
-  + Backdoor paths
-  + Confounder bias (= selection bias)
+2. **Experiments**
+  + Randmozied Controlled Trials (RCTs)
+  + RCTs, potential outcomes, and DAGs
 
 ---
 class: inverse
@@ -97,11 +89,11 @@ knitr::include_graphics('img/Steinmann3.png')
 ]
 
 .left-column[.center[.font110[
-**Does news media consumption** <br><br> _**increase**_ <br><br> **immigrant minorities' perceptions that they are being discriminated?**
+**Does news media consumption** <br><br> _**increase**_ <br><br> **immigrant minorities' reports of discrimination?**
 ]]]
 
 ---
-# Preparations
+# Preparation
 
 .panelset[
 .panel[.panel-name[Packages for today's session]
@@ -112,8 +104,7 @@ pacman::p_load(
   ggplot2, # beautiful figures,
   estimatr, # Regression for weighted data,
   modelr, # Turn results of lm() into a tibble,
-  modelsummary, # for balance tables,
-  texreg) # regression tables with nice layout.
+  modelsummary) # for balance and regression tables.
 ```
 ]
 .panel[.panel-name[The APAX survey]
@@ -121,7 +112,7 @@ pacman::p_load(
 - PI: Merlin Schaeffer;<br> Postdoc: Judith Kas.
 - 1093 Immigrants and children of immigrants.
 - Berlin, Hamburg, Munich, Frankfurt, and Cologne.
-- Interviewed in August 2021
+- Interviewed in August 2021.
 - Financed by [German Research Council](https://gepris.dfg.de/gepris/projekt/428878477?language=en)
 ]
 
@@ -143,20 +134,21 @@ Discrimination means that a person is treated worse than others including specif
 .panel[.panel-name[Get the APAX data]
 .left-column[.font80[
 ```{r results = FALSE}
-load("../../../assets/APAX.RData") # Read APAX data,
+# Read APAX data,
+load("../../../assets/APAX.RData") 
 APAX <- APAX %>% mutate(
   # News in minutes,
   news = news_hrs*60 + news_mins, 
   news_yn = case_when( # News Yes/No,
-    news < 10 ~ 0, # Less than 15  minutes,
-    news > 14 ~ 1, # More than 15  minutes,
+    news < 15 ~ 0, # Less than 15  minutes,
+    news >= 15 ~ 1, # 15  minutes and more,
     TRUE ~ as.numeric(NA)),
-  # Average discrimination index across domains,
-  dis_index = rowmeans(
-    dis_trainee, dis_job, dis_school,
-    dis_house, dis_gov, dis_public,
-    na.rm = TRUE),
-  # Z-standardized discrimination index.
+  # Average discr. index across domains,
+  dis_index = rowmeans( #<<
+    dis_trainee, dis_job, dis_school, #<<
+    dis_house, dis_gov, dis_public, #<<
+    na.rm = TRUE), #<<
+  # Z-standardized discr. index.
   z_dis_index = scale(dis_index) %>% 
     as.numeric())
 ```
@@ -170,8 +162,9 @@ APAX
 
 ]]
 
+
 ---
-# Fruitless naïv comparison
+# Fruitless\naïv comparison
 
 .push-left[
 ```{r naiv, out.width = "98%", fig.height = 3.5, fig.width = 5, echo = FALSE}
@@ -185,40 +178,55 @@ ggplot(data = APAX, aes(y = dis_index, x = news)) +
 ```
 ]
 
+--
+
+.push-right[
 ```{r naiv_OLS}
 ols <- lm_robust(dis_index ~ news_yn, 
                  weight = gewFAKT, data = APAX)
-screenreg(ols, include.ci = FALSE, digits = 3)
+modelsummary(list("Discr." = ols), stars = TRUE,
+             gof_map = c("nobs", "r.squared"))
 ```
+]
 
 ---
 # Why? Selection bias!
 
 $$\begin{equation} \begin{split}
-\underbrace{Avg_{n}[Y_{1i}|D_{i} = 1] - Avg_{n}[Y_{0i}|D_{i} = 0]}_{\text{Difference in observed group means}} = \underbrace{Avg_{n}[Y_{1i}|D_{i} = 1] -  Avg_{n}[Y_{0i}|D_{i} = 1]}_{\text{Average causal effect } among \text{ } the \text{ } treated} + \underbrace{Avg_{n}[Y_{0i}|D_{i} = 1] -  Avg_{n}[Y_{0i}|D_{i} = 0]}_{\text{Selection bias}}.
+\underbrace{Avg_{n}[Y_{1i}|D_{i} = 1] - Avg_{n}[Y_{0i}|D_{i} = 0]}_{\text{Difference in observed group means}} = \underbrace{Avg_{n}[Y_{1i}|D_{i} = 1] \color{gray}{(-  Avg_{n}[Y_{0i}|D_{i} = 1]}}_{\text{Average causal effect } among \text{ } the \text{ } treated} \color{gray}{+} \underbrace{\color{gray}{Avg_{n}[Y_{0i}|D_{i} = 1])} -  Avg_{n}[Y_{0i}|D_{i} = 0]}_{\text{Selection bias}}.
 \end{split} \end{equation}$$
 
 
 .content-box-red[.center[
 $\text{Selection bias} = \underbrace{Avg_{n}[Y_{0i} | D_{i} = 1]}_{\text{Unobserved!}} - Avg_{n}[Y_{0i} | D_{i} = 0].$
 
-$\rightarrow$ The difference in $Avg_{n}(Y_{0i})$ (the baseline of the outcome) between the groups we compare.
+$\rightarrow$ The difference in $Avg_{n}(Y_{0i})$, the baseline of the outcome, between the groups we compare.
 ]]
 
 ---
 # (Im-)balance .font70[.alert[of oberserved variables!]]
 
-```{r balance1, echo = FALSE}
+.panelset[
+.panel[.panel-name[R code]
+```{r balance1, results = FALSE}
 APAX %>%
   # Select variables for which I want my balance test,
-  select(news_yn, dis_index, age, nbh_exposed, imor, german, gewFAKT) %>%
-  rename(weights = gewFAKT) %>% # Rename the weights variable!
-  datasummary_balance( # Make a balance table,
-    formula = ~ news_yn, # by Reading news Yes/No
-    data = . ,
-    title = "Socio-demographic characterisitcs of those who read news and those who don't"
-  )
+  select(news_yn, age, nbh_exposed, imor, german, gewFAKT) %>%
+  rename(weights = gewFAKT) %>% # Rename the weights variable! #<<
+  datasummary_balance( # Make a balance table, #<<
+    formula = ~ news_yn, # by Reading news Yes/No #<< 
+    data = . , # Pipe APAX data here #<<
+    title = "Socio-demographic characterisitcs of those who read news and those who do not" #<<
+  ) #<<
 ```
+
+- Note that I `rename(weights = gewFAKT)`
+  + Thereby `datasummary_balance()` automatically treats this variable as a weight.
+]
+.panel[.panel-name[Balance table]
+```{r ref.label = "balance1", echo = FALSE}
+```
+]]
 
 ---
 # Directed Acyclical Graphs (DAG)
@@ -252,7 +260,7 @@ The red bi-directed arrow is officially not part of the DAG, but helps you see t
 
 ---
 class: inverse middle center
-# Solution: Experiments
+# Experiments
 
 ---
 layout: true
@@ -304,7 +312,7 @@ knitr::include_graphics('./img/randomization1.png')
 ```
 
 .content-box-green[.center[
-How do we $\color{red}{I}$ntervene such that there will be no correlation to any confounder?
+How can we $\color{red}{I}$ntervene to ensure that there is no correlation between the treatment and any confounders?
 ]]]
 
 ---
@@ -339,6 +347,13 @@ knitr::include_graphics('https://www.laserfiche.com/wp-content/uploads/2014/10/f
 ]
 
 ---
+layout: false
+class: inverse middle center
+# Break
+
+<iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'></iframe>
+
+---
 layout: true
 # Randomized Controlled Trials (RCT)
 
@@ -364,7 +379,7 @@ knitr::include_graphics('./img/randomization2.png')
 knitr::include_graphics('https://lotterylab.s3.amazonaws.com/summernoteimages/606ffa6b3468c.gif')
 ```
 
-Randomization is "fair": Everyone has the same probability to be part of the treatment or control group, .alert[regardless of who they are]!
+Remember, randomization is "fair": Everyone has the same probability to be part of the treatment or control group, .alert[regardless of who they are]!
 
 .content-box-green[
 Why does this result in equal $Y_{0i}$ baselines?
@@ -373,14 +388,14 @@ $$Avg_{n}[Y_{0i}|\text{News} = 1] = Avg_{n}[Y_{0i}|\text{News} = 0]$$
 
 ---
 layout: false
-# Randomized Controlled Trials (RCT)
+# Randomized Controlled Trials (RCTs)
 
 .push-left[
 
-- If we *randomly* divide subjects into treatment and control groups: They come from the same underlying population. 
-  <br> <br> $\rightarrow$ Similar .alert[on average], *in every way*,<br> **including their $Y_{0}$ **!
+If we *randomly* divide subjects into treatment and control groups, .alert[they come from the same underlying population]. 
+  <br> <br> $\rightarrow$ They will be similar, on average, *in every way*;<br> **including their $Y_{0}$ **!
 
-- Beware, in practice randomization can fail, especially if your sample is small.
+**Beware**, in practice randomization can fail, especially if your sample is small.
 ]
 
 .push-right[
@@ -397,16 +412,16 @@ knitr::include_graphics('./img/randomization2.png')
 knitr::include_graphics('./img/randomization2.png')
 ```
 
-- If we *randomly* divide subjects into treatment and control groups: They come from the same underlying population. 
-  <br> <br> $\rightarrow$ Similar .alert[on average], *in every way*,<br> **including their $Y_{0}$ **!
-  <br> <br> $\rightarrow E[Y_{0i}|D=1] = E[Y_{0i}|D=0]$!
+If we *randomly* divide subjects into treatment and control groups, .alert[they come from the same underlying population]. 
+    <br> <br> $\rightarrow$ They will be similar, on average, *in every way*;<br> **including their $Y_{0}$ **!
+    <br> <br> $\rightarrow E[Y_{0i}|D=1] = E[Y_{0i}|D=0]$!
 ]
 
 --
 
 .push-right[
 
-$$\begin{equation}\begin{split} E & [Y_{1i}|D=1] - E[Y_{0i}|D=0] \\  \\ & = E[\color{red}{Y_{0i} + \kappa} |D=1] - E[Y_{0i}|D=0], \\ \\ &= \color{red}{\kappa} + \underbrace{E[Y_{0i} |D=1] - E[Y_{0i}|D=0]}_{\underbrace{0}_{\text{(if randomization has worked)}}}, \\ \\ & = \underbrace{\color{red}{\kappa}.}_{\text{The average causal effect}} \end{split}\end{equation}$$
+$$\begin{equation}\begin{split} &  \underbrace{E[Y_{1i}|D=1] - E[Y_{0i}|D=0]}_{\text{Comparison between treatment anc control group}} \\  \\ & = E[\color{red}{Y_{0i} + \kappa} |D=1] - E[Y_{0i}|D=0], \\ \\ &= \color{red}{\kappa} + \underbrace{E[Y_{0i} |D=1] - E[Y_{0i}|D=0]}_{\underbrace{0}_{\text{(if randomization has worked)}}}, \\ \\ & = \underbrace{\color{red}{\kappa}.}_{\text{The average causal effect}} \end{split}\end{equation}$$
 ]
 
 
@@ -414,9 +429,9 @@ $$\begin{equation}\begin{split} E & [Y_{1i}|D=1] - E[Y_{0i}|D=0] \\  \\ & = E[\c
 # RCTs and DAGs
 
 .left-column[
-- There is no backdoor path. <br> (no path from $I$ to $Y$ that starts with an arrow into $I$)
+Because of the randomization, there is no backdoor path. <br><br> $\rightarrow$ no path from $I$ to $Y$ that starts with an arrow into $I$.
 
-$\rightarrow$ No selection/collider bias!
+$\Rightarrow$ No selection/confounder bias!
 ]
 
 .right-column[
@@ -430,8 +445,9 @@ class: clear
 .push-left[
 <br>
 
-.font160[**APAX survey experiment**]
-- We asked APAX subjects to read a news article.
+.font160[.center[**APAX survey experiment**]]
+
+We asked APAX subjects to read a news article.
 
 ```{r, echo = FALSE, out.width='80%', fig.align='center'}
 knitr::include_graphics('./img/randomization2.png')
@@ -439,7 +455,7 @@ knitr::include_graphics('./img/randomization2.png')
 
 <br>
 
-- Survey app .alert[randomly] decided, who got:
+We.alert[randomly] decided, who got:
 
   + Venus $\rightarrow$ *control group*, 
   
@@ -489,7 +505,7 @@ APAX %>%
   rename(weights = gewFAKT) %>% # Rename the weights variable! 
   datasummary_balance( # Make a balance table,
     formula = ~ article, # by treatment/control #<< 
-    data = . ,
+    data = . , # pipe APAx data here #<<
     title = "Socio-demographic characterisitcs by treatment and control"
   )
 ```
@@ -503,7 +519,7 @@ APAX %>%
 ---
 # Causal effect of news articles
 
-.push-left[
+.push-left[.font90[
 ```{r OLS_causal, results = 'hide'}
 # Run OLS regression to analyze the survey RCT.
 ols <- lm_robust(dis_index ~ article, 
@@ -511,15 +527,14 @@ ols <- lm_robust(dis_index ~ article,
 zols <- lm_robust(z_dis_index ~ article, 
                   weight = gewFAKT, data = APAX)
 
-
-htmlreg( # Make a nice regression table of results.
-  list(ols, zols), include.ci = FALSE, digits = 3,
-  custom.model.names = c("OLS", "Z-OLS"),
-  custom.coef.names = c("Intercept (Venus control)", 
-                        "Article on discrimination", 
-                        "Article on integration"), file = "For-Mads.doc")
+modelsummary( # Regression table
+  list("Discr." = ols, "Z-Discr." = zols), stars = TRUE,
+  coef_map = c("(Intercept)" = "Intercept (Venus control)", 
+               "articleTreat_1" = "Article on discrimination", 
+               "articleTreat_2" = "Article on integration"),
+  gof_map = c("nobs", "r.squared"))
 ```
-]
+]]
 
 --
 
@@ -551,7 +566,8 @@ ggplot(data = plotdata,  aes(y = estimate, x = term)) +
        x = "Article on",
        y = "Comparison to control group (article on Venus) 
     in standard deviations",
-    caption = "Note: Resultaterne er baseret på en vægtet OLS-regression med robuste standardfejl. N = 1085, og R2= 0.012.") + 
+    caption = "Note: Resultaterne er baseret på en vægtet OLS-regression med robuste standardfejl.
+    N = 1085, og R2= 0.012.") + 
   theme_minimal()
 ```
 ]
@@ -566,9 +582,9 @@ ggplot(data = plotdata,  aes(y = estimate, x = term)) +
 # Learning goal achieved!
 
 .left-column[
-News media consumption *increases* immigrant minorities' perceptions that they are being discriminated! .backgrnote[
+News media consumption *increases* immigrant minorities' reports of discrimination! .backgrnote[
 
-  + If the news report about discrimination in society ...
+  + If the news report about ethno-racial discrimination ...
 ]]
 
 .right-column[
@@ -593,10 +609,13 @@ knitr::include_graphics('https://www.laserfiche.com/wp-content/uploads/2014/10/f
 class: inverse
 # Today's general lessons
 
-1. Experiment: An artificial environment controlled by the researcher. Allows researchers to control "treatment" assignment.
-2. Randomized Controlled Trials (RCT): An experiment with treatment and control group in which researchers assign treatment or control at random.
-3. Randomization: Random assignment of treatment and control ensures a balanced comparison (no selection/confounder bias). Randomization can fail, especially in small samples.
-4. RCTs can be analyzed with a simple OLS regression.
+1. **Experiment**: A study in which the researcher manipulates one or more variables (the "treatment") and then observes the effect of this manipulation on another variable (the "outcome").
+
+2. **Randomized Controlled Trial (RCT)**: A type of experiment in which participants are randomly assigned to either a treatment group or a control group. The treatment group receives the treatment, while the control group does not. This randomization ensures that the two groups are as similar as possible at the start of the experiment, except for the fact that the treatment group receives the treatment and the control group does not.
+
+3. **Randomization**: The process of randomly assigning participants to either the treatment group or the control group in an RCT. Randomization is important because it helps to ensure that the two groups are as similar as possible at the start of the experiment, which minimizes the risk of selection bias.
+
+4. **OLS regression**: A statistical technique that can be used to analyze the results of an RCT. OLS regression can be used to estimate the causal effect of the treatment on the outcome, while controlling for the effects of other variables that may be correlated with the treatment.
 
 ---
 # References

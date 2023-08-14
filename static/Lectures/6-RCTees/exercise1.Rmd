@@ -18,7 +18,7 @@ set.seed(831983)
 
 
 1. Use the APAX data and replicate my operationalization of the variables.
-`r hide("R solution -> dont' peak to early ;) !")`
+`r hide("R solution -> dont' peak too early ;) !")`
 ```{r}
 pacman::p_load(
   tidyverse, # Data manipulation,
@@ -26,8 +26,7 @@ pacman::p_load(
   ggplot2, # beautiful figures,
   estimatr, # Regression for weighted data,
   modelr, # Turn results of lm() into a tibble,
-  modelsummary, # for balance tables,
-  texreg) # regression tables with nice layout.
+  modelsummary) # for balance and regression tables.
 
 # 1. read the APAX data
 load("../../../assets/APAX.Rdata") # Read APAX data,
@@ -49,8 +48,8 @@ APAX <- APAX %>% mutate(
 ```
 `r unhide()`
 
-2. Make a new variable called `APAX$candy`, which randomly "gives" candy to half of the respondents. Use the `rbinom()` function to do so. Use the help function `?rbinom()` or google "R rbinom()" to learn what the function does and how it works.
-`r hide("R solution -> dont' peak to early ;) !")`
+2. Make a new variable called `APAX$candy`, which randomly "gives" candy to half of the respondents. Use the `rbinom()` function to do so. Use the help function `?rbinom()`, google "R rbinom()", or use an AI like ChatGPT or Google-Bard to learn what the function does and how it works.
+`r hide("R solution -> dont' peak too early ;) !")`
 ```{r}
 APAX <- APAX %>% mutate(
   candy = rbinom(nrow(APAX), size = 1, prob = 0.5))
@@ -58,7 +57,7 @@ APAX <- APAX %>% mutate(
 `r unhide()`
 
 3. In the APAX survey, we also asked respondents about their gender and how their physical appearance is typically described in Germany, with answers ranging from White, over Black, to Asian. Test whether APAX respondents got `candy` regardless of their gender and their racial appearance. That is, did people who appear Asian get candy more often than those who appear white etc.? *What do you conclude from the balance table*? *Also, which groups seem rather well, and which ones seem less well balanced*?
-`r hide("R solution -> dont' peak to early ;) !")`
+`r hide("R solution -> dont' peak too early ;) !")`
 ```{r}
 APAX %>%
   # Select variables for which I want my balance test,
@@ -66,7 +65,7 @@ APAX %>%
   rename(weights = gewFAKT) %>% # Rename the weights variable!
   datasummary_balance( # Make a balance table,
     formula = ~ candy, # by candy Yes/No
-    data = . ,
+    data = . , # Pipe the APAX data here #<<
     title = "Gender and physical appearance of those who got candy and those who didn't") 
 ```
 `r unhide()`

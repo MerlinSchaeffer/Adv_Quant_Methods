@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="" xml:lang="">
   <head>
-    <title>Randomized Controlled Trials (RCT)</title>
+    <title>Multiple Regression &amp;    Fundamentals of Causal Inference</title>
     <meta charset="utf-8" />
     <meta name="author" content="Merlin Schaeffer  Department of Sociology" />
-    <meta name="date" content="2022-10-12" />
+    <meta name="date" content="2023-08-14" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
     <script src="libs/tile-view/tile-view.js"></script>
@@ -20,16 +20,16 @@
 class: center, middle, inverse, title-slide
 
 .title[
-# Randomized Controlled Trials (RCT)
+# Multiple Regression &amp; <br><br> Fundamentals of Causal Inference
 ]
 .subtitle[
-## The Gold Standard of Causal Inference
+## Randomized Controlled Trials (RCT) <br><br> The Gold Standard of Causal Inference
 ]
 .author[
 ### Merlin Schaeffer<br> Department of Sociology
 ]
 .date[
-### 2022-10-12
+### 2023-08-14
 ]
 
 ---
@@ -41,9 +41,9 @@ class: clear
 .backgrnote[.center[*Source:* Polack, Thomas, Kitchin, Absalon, Gurtman, Lockhart, Perez, Pérez Marc, Moreira, Zerbini, Bailey, Swanson, Roychoudhury, Koury, Li, Kalina, Cooper, Frenck, Hammitt, Türeci, Nell, Schaefer, Ünal, Tresnan, Mather, Dormitzer, Şahin, Jansen, and Gruber (2020)]]
 
 ---
-# The goal of social science research
+# Goal of empirical sociology
 
-.font140[.center[.alert[Use data to discover patterns ("social facts" in Durkheim's terms), &lt;br&gt; and **the social mechanisms that bring them about**.]]]
+.font130[.center[Use data to discover patterns, &lt;br&gt; and the .alert[social mechanisms that bring them about.]]]
 
 &lt;img src="https://liu.se/-/media/istock-501261958.jpg?mw=1120&amp;mh=1120&amp;hash=DA8977CCE6A6E600AE80A40CFEE771C9" width="70%" style="display: block; margin: auto;" /&gt;
 
@@ -51,19 +51,11 @@ class: clear
 class: inverse middle
 # Today's schedule
 
-1. **Application**: The Integration (or Discrimination) Paradox
+1. **Today's research question**: The Integration Paradox
 
-2. **Hypothesis `\(\rightarrow\)` comparison**
-
-3. **Fruitless naïv comparison**
-
-4. **Potential outcomes**
-  + Average causal effect
-  + Selection bias
-
-5. **Directed Acycical Graphs (DAGs)**
-  + Backdoor paths
-  + Confounder bias (= selection bias)
+2. **Experiments**
+  + Randmozied Controlled Trials (RCTs)
+  + RCTs, potential outcomes, and DAGs
 
 ---
 class: inverse
@@ -79,11 +71,11 @@ class: inverse
 ]
 
 .left-column[.center[.font110[
-**Does news media consumption** &lt;br&gt;&lt;br&gt; _**increase**_ &lt;br&gt;&lt;br&gt; **immigrant minorities' perceptions that they are being discriminated?**
+**Does news media consumption** &lt;br&gt;&lt;br&gt; _**increase**_ &lt;br&gt;&lt;br&gt; **immigrant minorities' reports of discrimination?**
 ]]]
 
 ---
-# Preparations
+# Preparation
 
 .panelset[
 .panel[.panel-name[Packages for today's session]
@@ -95,8 +87,7 @@ pacman::p_load(
   ggplot2, # beautiful figures,
   estimatr, # Regression for weighted data,
   modelr, # Turn results of lm() into a tibble,
-  modelsummary, # for balance tables,
-  texreg) # regression tables with nice layout.
+  modelsummary) # for balance and regression tables.
 ```
 ]
 .panel[.panel-name[The APAX survey]
@@ -104,7 +95,7 @@ pacman::p_load(
 - PI: Merlin Schaeffer;&lt;br&gt; Postdoc: Judith Kas.
 - 1093 Immigrants and children of immigrants.
 - Berlin, Hamburg, Munich, Frankfurt, and Cologne.
-- Interviewed in August 2021
+- Interviewed in August 2021.
 - Financed by [German Research Council](https://gepris.dfg.de/gepris/projekt/428878477?language=en)
 ]
 
@@ -127,20 +118,21 @@ Discrimination means that a person is treated worse than others including specif
 .left-column[.font80[
 
 ```r
-load("../../../assets/APAX.RData") # Read APAX data,
+# Read APAX data,
+load("../../../assets/APAX.RData") 
 APAX &lt;- APAX %&gt;% mutate(
   # News in minutes,
   news = news_hrs*60 + news_mins, 
   news_yn = case_when( # News Yes/No,
-    news &lt; 10 ~ 0, # Less than 15  minutes,
-    news &gt; 14 ~ 1, # More than 15  minutes,
+    news &lt; 15 ~ 0, # Less than 15  minutes,
+    news &gt;= 15 ~ 1, # 15  minutes and more,
     TRUE ~ as.numeric(NA)),
-  # Average discrimination index across domains,
-  dis_index = rowmeans(
-    dis_trainee, dis_job, dis_school,
-    dis_house, dis_gov, dis_public,
-    na.rm = TRUE),
-  # Z-standardized discrimination index.
+  # Average discr. index across domains,
+* dis_index = rowmeans(
+*   dis_trainee, dis_job, dis_school,
+*   dis_house, dis_gov, dis_public,
+*   na.rm = TRUE),
+  # Z-standardized discr. index.
   z_dis_index = scale(dis_index) %&gt;% 
     as.numeric())
 ```
@@ -150,75 +142,124 @@ APAX &lt;- APAX %&gt;% mutate(
 
 ```
 # # A tibble: 1,093 × 24
-#    antidiscr_law dis_i…¹ news_…² news_…³ dis_t…⁴ dis_job dis_s…⁵ dis_h…⁶ dis_gov dis_p…⁷ gewFAKT gender   age imor 
-#            &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt; &lt;fct&gt;  &lt;dbl&gt; &lt;fct&gt;
-#  1             5    3.17       1       0       3       3       4       5       2       2   0.105 Männl…    35 Immi…
-#  2             4    1.8        1       1       5      NA       1       1       1       1   0.103 Männl…    30 Immi…
-#  3             3    2          0      30       1       2       1       3       3       2   0.802 Männl…    35 Immi…
-#  4             5    2.83       0      10       3       3       2       5       1       3   0.104 Männl…    28 Immi…
-#  5             4    3.2        0      30       2       3      NA       5       3       3   0.639 Weibl…    37 Immi…
-#  6             5    2.75       2       0      NA       2      NA       4       3       2   0.2   Männl…    51 Immi…
-#  7             2    1          3      58       1       1       1       1       1       1   2.42  Männl…    40 Immi…
-#  8             4    1.67       5       0       3       1       1       3       1       1   0.102 Männl…    31 Chil…
-#  9             5    4          1      15       4       4       4       4       4       4   6.19  Männl…    76 Immi…
-# 10             4    1.33       0      30       1       2       1       1       1       2   2.08  Männl…    32 Immi…
-# # … with 1,083 more rows, 10 more variables: german &lt;fct&gt;, nbh_exposed &lt;dbl&gt;, appearance &lt;fct&gt;, article &lt;chr&gt;,
-# #   ment_happy &lt;dbl&gt;, leftright &lt;dbl&gt;, gen_trust &lt;dbl&gt;, news &lt;dbl&gt;, news_yn &lt;dbl&gt;, z_dis_index &lt;dbl&gt;, and
-# #   abbreviated variable names ¹​dis_index, ²​news_hrs, ³​news_mins, ⁴​dis_trainee, ⁵​dis_school, ⁶​dis_house,
-# #   ⁷​dis_public
+#    antidiscr_law dis_index news_hrs news_mins dis_trainee dis_job dis_school dis_house dis_gov dis_public gewFAKT
+#            &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;       &lt;dbl&gt;   &lt;dbl&gt;      &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt;      &lt;dbl&gt;   &lt;dbl&gt;
+#  1             5      3.17        1         0           3       3          4         5       2          2   0.105
+#  2             4      1.8         1         1           5      NA          1         1       1          1   0.103
+#  3             3      2           0        30           1       2          1         3       3          2   0.802
+#  4             5      2.83        0        10           3       3          2         5       1          3   0.104
+#  5             4      3.2         0        30           2       3         NA         5       3          3   0.639
+#  6             5      2.75        2         0          NA       2         NA         4       3          2   0.2  
+#  7             2      1           3        58           1       1          1         1       1          1   2.42 
+#  8             4      1.67        5         0           3       1          1         3       1          1   0.102
+#  9             5      4           1        15           4       4          4         4       4          4   6.19 
+# 10             4      1.33        0        30           1       2          1         1       1          2   2.08 
+# # ℹ 1,083 more rows
+# # ℹ 13 more variables: gender &lt;fct&gt;, age &lt;dbl&gt;, imor &lt;fct&gt;, german &lt;fct&gt;, nbh_exposed &lt;dbl&gt;, appearance &lt;fct&gt;,
+# #   article &lt;chr&gt;, ment_happy &lt;dbl&gt;, leftright &lt;dbl&gt;, gen_trust &lt;dbl&gt;, news &lt;dbl&gt;, news_yn &lt;dbl&gt;,
+# #   z_dis_index &lt;dbl&gt;
 ```
 ]
 
 ]]
 
+
 ---
-# Fruitless naïv comparison
+# Fruitless\naïv comparison
 
 .push-left[
 &lt;img src="6-RCTees_files/figure-html/naiv-1.png" width="98%" style="display: block; margin: auto;" /&gt;
 ]
 
+--
+
+.push-right[
 
 ```r
 ols &lt;- lm_robust(dis_index ~ news_yn, 
                  weight = gewFAKT, data = APAX)
-screenreg(ols, include.ci = FALSE, digits = 3)
-# 
-# =========================
-#              Model 1     
-# -------------------------
-# (Intercept)     2.266 ***
-#                (0.133)   
-# news_yn        -0.172    
-#                (0.144)   
-# -------------------------
-# R^2             0.005    
-# Adj. R^2        0.004    
-# Num. obs.    1025        
-# RMSE            0.745    
-# =========================
-# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
+modelsummary(list("Discr." = ols), stars = TRUE,
+             gof_map = c("nobs", "r.squared"))
 ```
+
+&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; Discr. &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 2.187*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.116) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; news_yn &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −0.093 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.129) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 1085 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.002 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
+&lt;sup&gt;&lt;/sup&gt; + p &amp;lt; 0.1, * p &amp;lt; 0.05, ** p &amp;lt; 0.01, *** p &amp;lt; 0.001&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;
+&lt;/table&gt;
+
+
+]
 
 ---
 # Why? Selection bias!
 
 `$$\begin{equation} \begin{split}
-\underbrace{Avg_{n}[Y_{1i}|D_{i} = 1] - Avg_{n}[Y_{0i}|D_{i} = 0]}_{\text{Difference in observed group means}} = \underbrace{Avg_{n}[Y_{1i}|D_{i} = 1] -  Avg_{n}[Y_{0i}|D_{i} = 1]}_{\text{Average causal effect } among \text{ } the \text{ } treated} + \underbrace{Avg_{n}[Y_{0i}|D_{i} = 1] -  Avg_{n}[Y_{0i}|D_{i} = 0]}_{\text{Selection bias}}.
+\underbrace{Avg_{n}[Y_{1i}|D_{i} = 1] - Avg_{n}[Y_{0i}|D_{i} = 0]}_{\text{Difference in observed group means}} = \underbrace{Avg_{n}[Y_{1i}|D_{i} = 1] \color{gray}{(-  Avg_{n}[Y_{0i}|D_{i} = 1]}}_{\text{Average causal effect } among \text{ } the \text{ } treated} \color{gray}{+} \underbrace{\color{gray}{Avg_{n}[Y_{0i}|D_{i} = 1])} -  Avg_{n}[Y_{0i}|D_{i} = 0]}_{\text{Selection bias}}.
 \end{split} \end{equation}$$`
 
 
 .content-box-red[.center[
 `\(\text{Selection bias} = \underbrace{Avg_{n}[Y_{0i} | D_{i} = 1]}_{\text{Unobserved!}} - Avg_{n}[Y_{0i} | D_{i} = 0].\)`
 
-`\(\rightarrow\)` The difference in `\(Avg_{n}(Y_{0i})\)` (the baseline of the outcome) between the groups we compare.
+`\(\rightarrow\)` The difference in `\(Avg_{n}(Y_{0i})\)`, the baseline of the outcome, between the groups we compare.
 ]]
 
 ---
 # (Im-)balance .font70[.alert[of oberserved variables!]]
 
+.panelset[
+.panel[.panel-name[R code]
+
+```r
+APAX %&gt;%
+  # Select variables for which I want my balance test,
+  select(news_yn, age, nbh_exposed, imor, german, gewFAKT) %&gt;%
+* rename(weights = gewFAKT) %&gt;% # Rename the weights variable!
+* datasummary_balance( # Make a balance table,
+*   formula = ~ news_yn, # by Reading news Yes/No
+*   data = . , # Pipe APAX data here
+*   title = "Socio-demographic characterisitcs of those who read news and those who do not"
+* )
+```
+
+- Note that I `rename(weights = gewFAKT)`
+  + Thereby `datasummary_balance()` automatically treats this variable as a weight.
+]
+.panel[.panel-name[Balance table]
 &lt;table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;"&gt;
-&lt;caption&gt;Socio-demographic characterisitcs of those who read news and those who don't&lt;/caption&gt;
+&lt;caption&gt;Socio-demographic characterisitcs of those who read news and those who do not&lt;/caption&gt;
  &lt;thead&gt;
 &lt;tr&gt;
 &lt;th style="empty-cells: hide;border-bottom:hidden;" colspan="2"&gt;&lt;/th&gt;
@@ -239,34 +280,24 @@ screenreg(ols, include.ci = FALSE, digits = 3)
  &lt;/thead&gt;
 &lt;tbody&gt;
   &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; dis_index &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 2.3 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 0.9 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 2.1 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 0.9 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; -0.2 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 0.1 &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; age &lt;/td&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 37.2 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 13.0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 36.7 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 12.3 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 43.8 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 15.4 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 6.6 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 2.7 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 7.1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2.2 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
-   &lt;td style="text-align:left;box-shadow: 0px 1px"&gt; nbh_exposed &lt;/td&gt;
-   &lt;td style="text-align:left;box-shadow: 0px 1px"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:right;box-shadow: 0px 1px"&gt; 4.2 &lt;/td&gt;
-   &lt;td style="text-align:right;box-shadow: 0px 1px"&gt; 0.8 &lt;/td&gt;
-   &lt;td style="text-align:right;box-shadow: 0px 1px"&gt; 4.2 &lt;/td&gt;
-   &lt;td style="text-align:right;box-shadow: 0px 1px"&gt; 1.0 &lt;/td&gt;
-   &lt;td style="text-align:right;box-shadow: 0px 1px"&gt; 0.0 &lt;/td&gt;
-   &lt;td style="text-align:right;box-shadow: 0px 1px"&gt; 0.1 &lt;/td&gt;
+   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt; nbh_exposed &lt;/td&gt;
+   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:right;box-shadow: 0px 1.5px"&gt; 4.2 &lt;/td&gt;
+   &lt;td style="text-align:right;box-shadow: 0px 1.5px"&gt; 0.8 &lt;/td&gt;
+   &lt;td style="text-align:right;box-shadow: 0px 1.5px"&gt; 4.2 &lt;/td&gt;
+   &lt;td style="text-align:right;box-shadow: 0px 1.5px"&gt; 1.0 &lt;/td&gt;
+   &lt;td style="text-align:right;box-shadow: 0px 1.5px"&gt; 0.0 &lt;/td&gt;
+   &lt;td style="text-align:right;box-shadow: 0px 1.5px"&gt; 0.1 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
@@ -281,8 +312,8 @@ screenreg(ols, include.ci = FALSE, digits = 3)
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; imor &lt;/td&gt;
    &lt;td style="text-align:left;"&gt; Child of immigrant &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 47 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 30.1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 64 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 29.4 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 399 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 45.6 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt;  &lt;/td&gt;
@@ -291,8 +322,8 @@ screenreg(ols, include.ci = FALSE, digits = 3)
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
    &lt;td style="text-align:left;"&gt; Immigrant &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 109 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 69.9 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 154 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 70.6 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 476 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 54.4 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt;  &lt;/td&gt;
@@ -301,8 +332,8 @@ screenreg(ols, include.ci = FALSE, digits = 3)
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; german &lt;/td&gt;
    &lt;td style="text-align:left;"&gt; Ja &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 64 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 41.0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 89 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 40.8 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 561 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 64.1 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt;  &lt;/td&gt;
@@ -311,8 +342,8 @@ screenreg(ols, include.ci = FALSE, digits = 3)
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
    &lt;td style="text-align:left;"&gt; Nein &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 92 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 59.0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 129 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 59.2 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 314 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 35.9 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt;  &lt;/td&gt;
@@ -320,6 +351,9 @@ screenreg(ols, include.ci = FALSE, digits = 3)
   &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
+
+
+]]
 
 ---
 # Directed Acyclical Graphs (DAG)
@@ -332,7 +366,7 @@ The red bi-directed arrow is officially not part of the DAG, but helps you see t
 
 ---
 class: inverse middle center
-# Solution: Experiments
+# Experiments
 
 ---
 layout: true
@@ -356,10 +390,10 @@ layout: true
 
 
 .push-right[
-&lt;img src="6-RCTees_files/figure-html/unnamed-chunk-9-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+&lt;img src="6-RCTees_files/figure-html/unnamed-chunk-10-1.png" width="70%" style="display: block; margin: auto;" /&gt;
 
 .content-box-green[.center[
-How do we `\(\color{red}{I}\)`ntervene such that there will be no correlation to any confounder?
+How can we `\(\color{red}{I}\)`ntervene to ensure that there is no correlation between the treatment and any confounders?
 ]]]
 
 ---
@@ -392,6 +426,13 @@ class: middle clear
 ]
 
 ---
+layout: false
+class: inverse middle center
+# Break
+
+&lt;iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+
+---
 layout: true
 # Randomized Controlled Trials (RCT)
 
@@ -413,7 +454,7 @@ layout: true
 
 &lt;img src="https://lotterylab.s3.amazonaws.com/summernoteimages/606ffa6b3468c.gif" width="70%" style="display: block; margin: auto;" /&gt;
 
-Randomization is "fair": Everyone has the same probability to be part of the treatment or control group, .alert[regardless of who they are]!
+Remember, randomization is "fair": Everyone has the same probability to be part of the treatment or control group, .alert[regardless of who they are]!
 
 .content-box-green[
 Why does this result in equal `\(Y_{0i}\)` baselines?
@@ -422,14 +463,14 @@ Why does this result in equal `\(Y_{0i}\)` baselines?
 
 ---
 layout: false
-# Randomized Controlled Trials (RCT)
+# Randomized Controlled Trials (RCTs)
 
 .push-left[
 
-- If we *randomly* divide subjects into treatment and control groups: They come from the same underlying population. 
-  &lt;br&gt; &lt;br&gt; `\(\rightarrow\)` Similar .alert[on average], *in every way*,&lt;br&gt; **including their `\(Y_{0}\)` **!
+If we *randomly* divide subjects into treatment and control groups, .alert[they come from the same underlying population]. 
+  &lt;br&gt; &lt;br&gt; `\(\rightarrow\)` They will be similar, on average, *in every way*;&lt;br&gt; **including their `\(Y_{0}\)` **!
 
-- Beware, in practice randomization can fail, especially if your sample is small.
+**Beware**, in practice randomization can fail, especially if your sample is small.
 ]
 
 .push-right[
@@ -442,16 +483,16 @@ layout: false
 .push-left[
 &lt;img src="./img/randomization2.png" width="60%" style="display: block; margin: auto;" /&gt;
 
-- If we *randomly* divide subjects into treatment and control groups: They come from the same underlying population. 
-  &lt;br&gt; &lt;br&gt; `\(\rightarrow\)` Similar .alert[on average], *in every way*,&lt;br&gt; **including their `\(Y_{0}\)` **!
-  &lt;br&gt; &lt;br&gt; `\(\rightarrow E[Y_{0i}|D=1] = E[Y_{0i}|D=0]\)`!
+If we *randomly* divide subjects into treatment and control groups, .alert[they come from the same underlying population]. 
+    &lt;br&gt; &lt;br&gt; `\(\rightarrow\)` They will be similar, on average, *in every way*;&lt;br&gt; **including their `\(Y_{0}\)` **!
+    &lt;br&gt; &lt;br&gt; `\(\rightarrow E[Y_{0i}|D=1] = E[Y_{0i}|D=0]\)`!
 ]
 
 --
 
 .push-right[
 
-`$$\begin{equation}\begin{split} E &amp; [Y_{1i}|D=1] - E[Y_{0i}|D=0] \\  \\ &amp; = E[\color{red}{Y_{0i} + \kappa} |D=1] - E[Y_{0i}|D=0], \\ \\ &amp;= \color{red}{\kappa} + \underbrace{E[Y_{0i} |D=1] - E[Y_{0i}|D=0]}_{\underbrace{0}_{\text{(if randomization has worked)}}}, \\ \\ &amp; = \underbrace{\color{red}{\kappa}.}_{\text{The average causal effect}} \end{split}\end{equation}$$`
+`$$\begin{equation}\begin{split} &amp;  \underbrace{E[Y_{1i}|D=1] - E[Y_{0i}|D=0]}_{\text{Comparison between treatment anc control group}} \\  \\ &amp; = E[\color{red}{Y_{0i} + \kappa} |D=1] - E[Y_{0i}|D=0], \\ \\ &amp;= \color{red}{\kappa} + \underbrace{E[Y_{0i} |D=1] - E[Y_{0i}|D=0]}_{\underbrace{0}_{\text{(if randomization has worked)}}}, \\ \\ &amp; = \underbrace{\color{red}{\kappa}.}_{\text{The average causal effect}} \end{split}\end{equation}$$`
 ]
 
 
@@ -459,13 +500,13 @@ layout: false
 # RCTs and DAGs
 
 .left-column[
-- There is no backdoor path. &lt;br&gt; (no path from `\(I\)` to `\(Y\)` that starts with an arrow into `\(I\)`)
+Because of the randomization, there is no backdoor path. &lt;br&gt;&lt;br&gt; `\(\rightarrow\)` no path from `\(I\)` to `\(Y\)` that starts with an arrow into `\(I\)`.
 
-`\(\rightarrow\)` No selection/collider bias!
+`\(\Rightarrow\)` No selection/confounder bias!
 ]
 
 .right-column[
-&lt;img src="6-RCTees_files/figure-html/unnamed-chunk-15-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+&lt;img src="6-RCTees_files/figure-html/unnamed-chunk-16-1.png" width="70%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -474,14 +515,15 @@ class: clear
 .push-left[
 &lt;br&gt;
 
-.font160[**APAX survey experiment**]
-- We asked APAX subjects to read a news article.
+.font160[.center[**APAX survey experiment**]]
+
+We asked APAX subjects to read a news article.
 
 &lt;img src="./img/randomization2.png" width="80%" style="display: block; margin: auto;" /&gt;
 
 &lt;br&gt;
 
-- Survey app .alert[randomly] decided, who got:
+We.alert[randomly] decided, who got:
 
   + Venus `\(\rightarrow\)` *control group*, 
   
@@ -515,7 +557,7 @@ layout: false
 .panelset[
 .panel[.panel-name[Balance table (surveyed news reading)]
 &lt;table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;"&gt;
-&lt;caption&gt;Socio-demographic characterisitcs of those who read news and those who don't&lt;/caption&gt;
+&lt;caption&gt;Socio-demographic characterisitcs of those who read news and those who do not&lt;/caption&gt;
  &lt;thead&gt;
 &lt;tr&gt;
 &lt;th style="empty-cells: hide;border-bottom:hidden;" colspan="2"&gt;&lt;/th&gt;
@@ -536,34 +578,24 @@ layout: false
  &lt;/thead&gt;
 &lt;tbody&gt;
   &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; dis_index &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 2.3 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 0.9 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 2.1 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 0.9 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; -0.2 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 0.1 &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; age &lt;/td&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 37.2 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 13.0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 36.7 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 12.3 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 43.8 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 15.4 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 6.6 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 2.7 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 7.1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2.2 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
-   &lt;td style="text-align:left;box-shadow: 0px 1px"&gt; nbh_exposed &lt;/td&gt;
-   &lt;td style="text-align:left;box-shadow: 0px 1px"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:right;box-shadow: 0px 1px"&gt; 4.2 &lt;/td&gt;
-   &lt;td style="text-align:right;box-shadow: 0px 1px"&gt; 0.8 &lt;/td&gt;
-   &lt;td style="text-align:right;box-shadow: 0px 1px"&gt; 4.2 &lt;/td&gt;
-   &lt;td style="text-align:right;box-shadow: 0px 1px"&gt; 1.0 &lt;/td&gt;
-   &lt;td style="text-align:right;box-shadow: 0px 1px"&gt; 0.0 &lt;/td&gt;
-   &lt;td style="text-align:right;box-shadow: 0px 1px"&gt; 0.1 &lt;/td&gt;
+   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt; nbh_exposed &lt;/td&gt;
+   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:right;box-shadow: 0px 1.5px"&gt; 4.2 &lt;/td&gt;
+   &lt;td style="text-align:right;box-shadow: 0px 1.5px"&gt; 0.8 &lt;/td&gt;
+   &lt;td style="text-align:right;box-shadow: 0px 1.5px"&gt; 4.2 &lt;/td&gt;
+   &lt;td style="text-align:right;box-shadow: 0px 1.5px"&gt; 1.0 &lt;/td&gt;
+   &lt;td style="text-align:right;box-shadow: 0px 1.5px"&gt; 0.0 &lt;/td&gt;
+   &lt;td style="text-align:right;box-shadow: 0px 1.5px"&gt; 0.1 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
@@ -578,8 +610,8 @@ layout: false
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; imor &lt;/td&gt;
    &lt;td style="text-align:left;"&gt; Child of immigrant &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 47 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 30.1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 64 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 29.4 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 399 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 45.6 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt;  &lt;/td&gt;
@@ -588,8 +620,8 @@ layout: false
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
    &lt;td style="text-align:left;"&gt; Immigrant &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 109 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 69.9 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 154 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 70.6 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 476 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 54.4 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt;  &lt;/td&gt;
@@ -598,8 +630,8 @@ layout: false
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; german &lt;/td&gt;
    &lt;td style="text-align:left;"&gt; Ja &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 64 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 41.0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 89 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 40.8 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 561 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 64.1 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt;  &lt;/td&gt;
@@ -608,8 +640,8 @@ layout: false
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
    &lt;td style="text-align:left;"&gt; Nein &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 92 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 59.0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 129 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 59.2 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 314 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 35.9 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt;  &lt;/td&gt;
@@ -617,6 +649,8 @@ layout: false
   &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
+
+
 ]
 .panel[.panel-name[R code]
 
@@ -627,7 +661,7 @@ APAX %&gt;%
   rename(weights = gewFAKT) %&gt;% # Rename the weights variable! 
   datasummary_balance( # Make a balance table,
 *   formula = ~ article, # by treatment/control
-    data = . ,
+*   data = . , # pipe APAx data here
     title = "Socio-demographic characterisitcs by treatment and control"
   )
 ```
@@ -660,8 +694,8 @@ APAX %&gt;%
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 0.8 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 0.4 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 0.9 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 0.3 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.8 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.4 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 0.8 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 0.4 &lt;/td&gt;
   &lt;/tr&gt;
@@ -676,14 +710,14 @@ APAX %&gt;%
    &lt;td style="text-align:right;"&gt; 16.9 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
-   &lt;td style="text-align:left;box-shadow: 0px 1px"&gt; nbh_exposed &lt;/td&gt;
-   &lt;td style="text-align:left;box-shadow: 0px 1px"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:right;box-shadow: 0px 1px"&gt; 4.2 &lt;/td&gt;
-   &lt;td style="text-align:right;box-shadow: 0px 1px"&gt; 0.9 &lt;/td&gt;
-   &lt;td style="text-align:right;box-shadow: 0px 1px"&gt; 4.2 &lt;/td&gt;
-   &lt;td style="text-align:right;box-shadow: 0px 1px"&gt; 1.1 &lt;/td&gt;
-   &lt;td style="text-align:right;box-shadow: 0px 1px"&gt; 4.2 &lt;/td&gt;
-   &lt;td style="text-align:right;box-shadow: 0px 1px"&gt; 1.0 &lt;/td&gt;
+   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt; nbh_exposed &lt;/td&gt;
+   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:right;box-shadow: 0px 1.5px"&gt; 4.2 &lt;/td&gt;
+   &lt;td style="text-align:right;box-shadow: 0px 1.5px"&gt; 0.9 &lt;/td&gt;
+   &lt;td style="text-align:right;box-shadow: 0px 1.5px"&gt; 4.2 &lt;/td&gt;
+   &lt;td style="text-align:right;box-shadow: 0px 1.5px"&gt; 1.1 &lt;/td&gt;
+   &lt;td style="text-align:right;box-shadow: 0px 1.5px"&gt; 4.2 &lt;/td&gt;
+   &lt;td style="text-align:right;box-shadow: 0px 1.5px"&gt; 1.0 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
@@ -737,12 +771,14 @@ APAX %&gt;%
   &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
+
+
 ]]
 
 ---
 # Causal effect of news articles
 
-.push-left[
+.push-left[.font90[
 
 ```r
 # Run OLS regression to analyze the survey RCT.
@@ -751,86 +787,73 @@ ols &lt;- lm_robust(dis_index ~ article,
 zols &lt;- lm_robust(z_dis_index ~ article, 
                   weight = gewFAKT, data = APAX)
 
-# Make a nice regression table of results.
-htmlreg(
-  list(ols, zols), include.ci = FALSE, digits = 3,
-  custom.model.names = c("OLS", "Z-OLS"),
-  custom.coef.names = c("Intercept (Venus control)", 
-                        "Article on discrimination", 
-                        "Article on integration"))
+modelsummary( # Regression table
+  list("Discr." = ols, "Z-Discr." = zols), stars = TRUE,
+  coef_map = c("(Intercept)" = "Intercept (Venus control)", 
+               "articleTreat_1" = "Article on discrimination", 
+               "articleTreat_2" = "Article on integration"),
+  gof_map = c("nobs", "r.squared"))
 ```
-]
+]]
 
 --
 
 .push-right[
-&lt;table class="texreg" style="margin: 10px auto;border-collapse: collapse;border-spacing: 0px;caption-side: bottom;color: #000000;border-top: 2px solid #000000;"&gt;
-&lt;caption&gt;Statistical models&lt;/caption&gt;
-&lt;thead&gt;
-&lt;tr&gt;
-&lt;th style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/th&gt;
-&lt;th style="padding-left: 5px;padding-right: 5px;"&gt;OLS&lt;/th&gt;
-&lt;th style="padding-left: 5px;padding-right: 5px;"&gt;Z-OLS&lt;/th&gt;
-&lt;/tr&gt;
-&lt;/thead&gt;
+&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; Discr. &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; Z-Discr. &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
 &lt;tbody&gt;
-&lt;tr style="border-top: 1px solid #000000;"&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Intercept (Venus control)&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;1.979&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;-0.171&lt;sup&gt;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.067)&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.074)&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Article on discrimination&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.239&lt;sup&gt;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.264&lt;sup&gt;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.107)&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.118)&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Article on integration&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.137&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.151&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.118)&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.130)&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr style="border-top: 1px solid #000000;"&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;R&lt;sup&gt;2&lt;/sup&gt;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.012&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.012&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Adj. R&lt;sup&gt;2&lt;/sup&gt;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.010&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.010&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Num. obs.&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;1085&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;1085&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr style="border-bottom: 2px solid #000000;"&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;RMSE&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.743&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.818&lt;/td&gt;
-&lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Intercept (Venus control) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 1.979*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −0.171* &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.067) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.074) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Article on discrimination &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.239* &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.264* &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.107) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.118) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Article on integration &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.137 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.151 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.118) &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.130) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 1085 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 1085 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.012 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.012 &lt;/td&gt;
+  &lt;/tr&gt;
 &lt;/tbody&gt;
-&lt;tfoot&gt;
-&lt;tr&gt;
-&lt;td style="font-size: 0.8em;" colspan="3"&gt;&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;p &amp;lt; 0.001; &lt;sup&gt;&amp;#42;&amp;#42;&lt;/sup&gt;p &amp;lt; 0.01; &lt;sup&gt;&amp;#42;&lt;/sup&gt;p &amp;lt; 0.05&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tfoot&gt;
+&lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
+&lt;sup&gt;&lt;/sup&gt; + p &amp;lt; 0.1, * p &amp;lt; 0.05, ** p &amp;lt; 0.01, *** p &amp;lt; 0.001&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;
 &lt;/table&gt;
+
+
 ]
 
 ---
@@ -856,26 +879,29 @@ ggplot(data = plotdata,  aes(y = estimate, x = term)) +
   labs(title = "Causal effect of news articles", 
        x = "Article on",
        y = "Comparison to control group (article on Venus) 
-    in standard deviations") + 
+    in standard deviations",
+    caption = "Note: Resultaterne er baseret på en vægtet OLS-regression med robuste standardfejl.
+    N = 1085, og R2= 0.012.") + 
   theme_minimal()
 ```
 ]
 
+
 .panel[.panel-name[Plot]
-&lt;img src="6-RCTees_files/figure-html/unnamed-chunk-23-1.png" width="65%" style="display: block; margin: auto;" /&gt;
+&lt;img src="6-RCTees_files/figure-html/unnamed-chunk-24-1.png" width="65%" style="display: block; margin: auto;" /&gt;
 ]]
 
 ---
 # Learning goal achieved!
 
 .left-column[
-News media consumption *increases* immigrant minorities' perceptions that they are being discriminated! .backgrnote[
+News media consumption *increases* immigrant minorities' reports of discrimination! .backgrnote[
 
-  + If the news report about discrimination in society ...
+  + If the news report about ethno-racial discrimination ...
 ]]
 
 .right-column[
-&lt;img src="6-RCTees_files/figure-html/unnamed-chunk-24-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+&lt;img src="6-RCTees_files/figure-html/unnamed-chunk-25-1.png" width="90%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -893,10 +919,13 @@ class: middle clear
 class: inverse
 # Today's general lessons
 
-1. Experiment: An artificial environment controlled by the researcher. Allows researchers to control "treatment" assignment.
-2. Randomized Controlled Trials (RCT): An experiment with treatment and control group in which researchers assign treatment or control at random.
-3. Randomization: Random assignment of treatment and control ensures a balanced comparison (no selection/confounder bias). Randomization can fail, especially in small samples.
-4. RCTs can be analyzed with a simple OLS regression.
+1. **Experiment**: A study in which the researcher manipulates one or more variables (the "treatment") and then observes the effect of this manipulation on another variable (the "outcome").
+
+2. **Randomized Controlled Trial (RCT)**: A type of experiment in which participants are randomly assigned to either a treatment group or a control group. The treatment group receives the treatment, while the control group does not. This randomization ensures that the two groups are as similar as possible at the start of the experiment, except for the fact that the treatment group receives the treatment and the control group does not.
+
+3. **Randomization**: The process of randomly assigning participants to either the treatment group or the control group in an RCT. Randomization is important because it helps to ensure that the two groups are as similar as possible at the start of the experiment, which minimizes the risk of selection bias.
+
+4. **OLS regression**: A statistical technique that can be used to analyze the results of an RCT. OLS regression can be used to estimate the causal effect of the treatment on the outcome, while controlling for the effects of other variables that may be correlated with the treatment.
 
 ---
 # References
