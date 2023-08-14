@@ -82,7 +82,7 @@ Dat <- Dat %>% mutate(socialist = case_when( # Years socialist minus years since
 ols <- lm_robust(data = Dat, formula = poverty ~ citizen_rights)
 ```
 1. Regress poverty on our socialism index. With one more year of socialist history, poverty changes by: `r fitb(round(coef(ols)[2], 2), width = "5")` percentage points (two digits).
-`r hide("R solution -> dont' peak to early ;) !")`
+`r hide("R solution -> dont' peak too early ;) !")`
 ```{r results = 'asis'}
 # Estimate regression models.
 ols_1 <- lm_robust(data = Dat, formula = poverty ~ socialist)
@@ -93,7 +93,7 @@ modelsummary(list("Poverty" = ols_1), # Nicely-formatted table.
 `r unhide()`
 
 2. Regress poverty on civic and political citizenship rights. With a one unit-increase in citizenship rights, poverty changes by: `r fitb(round(coef(ols)[2], 2), width = "5")` percentage points (two digits).
-`r hide("R solution -> dont' peak to early ;) !")`
+`r hide("R solution -> dont' peak too early ;) !")`
 ```{r results = 'asis'}
 # Estimate regression models.
 ols_2 <- lm_robust(data = Dat, formula = poverty ~ citizen_rights)
@@ -107,7 +107,7 @@ modelsummary(list("Poverty" = ols_2), # Nicely-formatted table.
 `r mcq(c("The one with socialism", answer = "The one with citizenship rights, as the R2 shows", "The one with citizenship rights, as the stronger beta coefficient shows"))`
 
 4. Make a scatterplot with civic and political citizenship rights on the Y-axis and socialism as predictor on the X-axis.
-`r hide("R solution -> dont' peak to early ;) !")`
+`r hide("R solution -> dont' peak too early ;) !")`
 ```{r out.width='100%', fig.height = 4, fig.width = 7.5, results = FALSE, echo = TRUE}
 ggplot(data = Dat, aes(y = citizen_rights, x = socialist)) +
   geom_text(aes(label = country)) +
@@ -123,7 +123,7 @@ ols <- lm_robust(data = Dat, formula = citizen_rights ~ socialist)
 ```
 
 5. Regress citizenship rights on socialism. With one more year of socialism, citizenship rights change by: `r fitb(round(coef(ols)[2], 2), width = "5")`
-`r hide("R solution -> dont' peak to early ;) !")`
+`r hide("R solution -> dont' peak too early ;) !")`
 ```{r results = 'asis'}
 # Estimate regression models.
 ols_3 <- lm_robust(data = Dat, formula = citizen_rights ~ socialist)
@@ -134,7 +134,7 @@ modelsummary(list("Citiz. Rights" = ols_3), # Nicely-formatted table.
 `r unhide()`
 
 6. Make a regression table that displays all three models. Based on the table, **discuss with your neighbor:** What do the results suggest about whether there is a freedom-equality trade off?
-`r hide("R solution -> dont' peak to early ;) !")`
+`r hide("R solution -> dont' peak too early ;) !")`
 ```{r results = 'asis'}
 modelsummary(list("Poverty" = ols_1, "Poverty" = ols_2, "Citiz. Rights" = ols_3), # Nicely-formatted table.
               gof_map = c("nobs", "r.squared")) 

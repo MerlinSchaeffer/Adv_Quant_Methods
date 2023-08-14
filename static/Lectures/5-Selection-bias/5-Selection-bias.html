@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="" xml:lang="">
   <head>
-    <title>5. Selection Bias</title>
+    <title>Multiple Regression &amp;    Fundamentals of Causal Inference</title>
     <meta charset="utf-8" />
     <meta name="author" content="Merlin Schaeffer  Department of Sociology" />
-    <meta name="date" content="2022-10-12" />
+    <meta name="date" content="2023-08-14" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
     <script src="libs/tile-view/tile-view.js"></script>
@@ -20,24 +20,24 @@
 class: center, middle, inverse, title-slide
 
 .title[
-# 5. Selection Bias
+# Multiple Regression &amp; <br><br> Fundamentals of Causal Inference
 ]
 .subtitle[
-## or why correlation ≠ causation
+## 5. Selection Bias<br><br> or why correlation ≠ causation
 ]
 .author[
 ### Merlin Schaeffer<br> Department of Sociology
 ]
 .date[
-### 2022-10-12
+### 2023-08-14
 ]
 
 ---
 
 
-# The goal of social science research
+# Goal of empirical sociology
 
-.font140[.center[.alert[Use data to discover patterns ("social facts" in Durkheim's terms), &lt;br&gt; and the **social mechanisms that bring them about**.]]]
+.font130[.center[Use data to discover patterns, &lt;br&gt; and the .alert[social mechanisms that bring them about.]]]
 
 &lt;img src="https://liu.se/-/media/istock-501261958.jpg?mw=1120&amp;mh=1120&amp;hash=DA8977CCE6A6E600AE80A40CFEE771C9" width="70%" style="display: block; margin: auto;" /&gt;
 
@@ -45,11 +45,11 @@ class: center, middle, inverse, title-slide
 class: inverse middle
 # Today's schedule
 
-1. **Application**: The Integration (or Discrimination) Paradox
+1. **Today's research question**: The Integration Paradox
 
 2. **Hypothesis `\(\rightarrow\)` comparison**
 
-3. **Fruitless naïv comparison**
+3. **Fruitless\naïv comparisons**
 
 4. **Potential outcomes**
   + The fundamental problem of causality
@@ -67,12 +67,12 @@ class: inverse
 &lt;br&gt;
 .font200[**The Integration Paradox**]
 
-The better immigrant minorities establish themselves among the (native) mainstream the *more* discrimination do they report.
+immigrants and their descendants with seemingly better access to mainstream middle-class society — as evidenced by their education, labor market success, length of residence, or generational status — often report more discrimination than those on the societal margins.
 ]
 
 .push-right[
-&lt;img src="img/Meta.png" width="83%" style="display: block; margin: auto;" /&gt;
-.font70[.center[*Source:* Schaeffer and Kas (2021)]]]
+&lt;img src="img/Meta.png" width="85%" style="display: block; margin: auto;" /&gt;
+.font70[.center[*Source:* Schaeffer and Kas (2023)]]]
 
 ---
 class: inverse
@@ -90,7 +90,7 @@ class: inverse
 --
 
 .left-column[.center[.font110[
-**Does news media consumption** &lt;br&gt;&lt;br&gt; _**increase**_ &lt;br&gt;&lt;br&gt; **immigrant minorities' perceptions that they are being discriminated?**
+**Does news media consumption** &lt;br&gt;&lt;br&gt; _**increase**_ &lt;br&gt;&lt;br&gt; **immigrant minorities' reports of discrimination?**
 ]]]
 
 ---
@@ -98,7 +98,7 @@ class: inverse
 
 .left-column[
 
-.center["How does reading the news affect you?"]
+.center["How does&lt;br&gt; reading the news&lt;br&gt; affect you?"]
 
 &lt;img src="http://www.news.uzh.ch/dam/jcr:00000000-09c6-5ee1-ffff-ffffa1749bbf/mikro.jpg" width="100%" style="display: block; margin: auto;" /&gt;
 .content-box-green[.center[
@@ -109,18 +109,16 @@ Why might this be problematic?
 --
 
 .right-column[
-.center[**Asking the subjects of inquiry &lt;br&gt; to answer your research question is not enough!**]
-- Statements by the subjects of inquiry are important!
+Statements by the subjects of inquiry are important!
 
 
-- But they are .alert[not credible scientific evidence.]
-  + Many people have wrong ideas of how things affect them.
+But they are .alert[not credible scientific evidence.] `\(\rightarrow\)` Many people have wrong ideas of how things affect them.
 
 .left-column[
 &lt;img src="https://feeds.abplive.com/onecms/images/uploaded-images/2021/07/02/498323a6432ea9753e6f84c1e92e5858_original.jpg" width="100%" style="display: block; margin: auto;" /&gt;
 ]
 .right-column[
-&lt;iframe src='https://academic.oup.com/esr/article/27/5/669/598636' width='450' height='330' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+&lt;img src="./img/Neugebauer.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]
 
 ]
@@ -131,13 +129,13 @@ class: inverse middle center
 
 ---
 class: clear
-# Instead: Hypothesis `\(\rightarrow\)` comparison
+# Hypothesis `\(\rightarrow\)` comparison
 
-.alert[Causal claims imply a counter factual: Things would have been different, had] `\(X\)` .alert[(not) happened.]
+Causal claims imply a .alert[counter factual]: Things would have been different, had `\(X\)` (not) happened.
 
-- `\(H_{1}:\)` Media consumption increases immigrant minorities' perceptions that they are being discriminated!
+- `\(H_{1}:\)` Media consumption increases immigrant minorities' reports of discrimination!
   + .backgrnote[ 
-  `\(H_{0}:\)` Media consumption *has no effect* on immigrant minorities' perceptions of discrimination.
+  `\(H_{0}:\)` Media consumption *does not affect* on immigrant minorities' reports of discrimination.
   ]
 
 --
@@ -146,18 +144,17 @@ class: clear
 
 - `\(H_{1}: 0 &lt; Avg_{n}[\text{Discrimination}|\text{Read news} = 1] - Avg_{n}[\text{Discrimination}|\text{Read news} = 0]\)`
  + .backgrnote[ 
- `\(H_{0}: 0 = Avg_{n}[\text{Discrimination}|\text{Read news} = 1] - Avg_{n}[\text{Discrimination}|\text{Read news} = 0]\)`
+ `\(H_{0}: 0 \geq Avg_{n}[\text{Discrimination}|\text{Read news} = 1] - Avg_{n}[\text{Discrimination}|\text{Read news} = 0]\)`
  ]
  
 --
 
-
 .content-box-green[
 .center[**What are the comparisons implied in the following examples?**]
 
-- **Marx**: Capitalist labor alienates people from engaging with their many creative talents and reduces psychological wellbeing.
+- **Marx**: Capitalist labor alienates people from engaging with their creative talents; capitalism thereby reduces mental health.
 
-- **Simmel**: Urbanization increases functional social relations and intensifies nervous stimulation. Residents of cities are therefore rational and distant.
+- **Simmel**: Urbanization increases functional social relations and intensifies nervous stimulation; residents of cities are therefore rational and distant.
 ]
 
 ---
@@ -173,8 +170,7 @@ pacman::p_load(
   ggplot2, # beautiful figures,
   estimatr, # Regression for weighted data,
   modelr, # Turn results of lm() into a tibble,
-  modelsummary, # for balance tables,
-  texreg) # regression tables with nice layout.
+  modelsummary) # for balance and regression tables.
 ```
 ]
 .panel[.panel-name[The APAX survey]
@@ -182,7 +178,7 @@ pacman::p_load(
 - PI: Merlin Schaeffer;&lt;br&gt; Postdoc: Judith Kas.
 - 1093 Immigrants and children of immigrants.
 - Berlin, Hamburg, Munich, Frankfurt, and Cologne.
-- Interviewed in August 2021
+- Interviewed in August 2021.
 - Financed by [German Research Council](https://gepris.dfg.de/gepris/projekt/428878477?language=en)
 ]
 
@@ -205,7 +201,8 @@ Discrimination means that a person is treated worse than others including specif
 .left-column[.font80[
 
 ```r
-load("../../../assets/APAX.RData") # Read APAX data,
+# Read APAX data,
+load("../../../assets/APAX.RData") 
 APAX &lt;- APAX %&gt;% mutate(
   # News in minutes,
   news = news_hrs*60 + news_mins, 
@@ -213,12 +210,12 @@ APAX &lt;- APAX %&gt;% mutate(
     news &lt; 15 ~ 0, # Less than 15  minutes,
     news &gt;= 15 ~ 1, # 15  minutes and more,
     TRUE ~ as.numeric(NA)),
-  # Average discrimination index across domains,
+  # Average discr. index across domains,
 * dis_index = rowmeans(
 *   dis_trainee, dis_job, dis_school,
 *   dis_house, dis_gov, dis_public,
 *   na.rm = TRUE),
-  # Z-standardized discrimination index.
+  # Z-standardized discr. index.
   z_dis_index = scale(dis_index) %&gt;% 
     as.numeric())
 ```
@@ -228,22 +225,22 @@ APAX &lt;- APAX %&gt;% mutate(
 
 ```
 # # A tibble: 1,093 × 24
-#    antidiscr_law dis_i…¹ news_…² news_…³ dis_t…⁴ dis_job dis_s…⁵ dis_h…⁶ dis_gov dis_p…⁷ gewFAKT gender   age imor 
-#            &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt; &lt;fct&gt;  &lt;dbl&gt; &lt;fct&gt;
-#  1             5    3.17       1       0       3       3       4       5       2       2   0.105 Männl…    35 Immi…
-#  2             4    1.8        1       1       5      NA       1       1       1       1   0.103 Männl…    30 Immi…
-#  3             3    2          0      30       1       2       1       3       3       2   0.802 Männl…    35 Immi…
-#  4             5    2.83       0      10       3       3       2       5       1       3   0.104 Männl…    28 Immi…
-#  5             4    3.2        0      30       2       3      NA       5       3       3   0.639 Weibl…    37 Immi…
-#  6             5    2.75       2       0      NA       2      NA       4       3       2   0.2   Männl…    51 Immi…
-#  7             2    1          3      58       1       1       1       1       1       1   2.42  Männl…    40 Immi…
-#  8             4    1.67       5       0       3       1       1       3       1       1   0.102 Männl…    31 Chil…
-#  9             5    4          1      15       4       4       4       4       4       4   6.19  Männl…    76 Immi…
-# 10             4    1.33       0      30       1       2       1       1       1       2   2.08  Männl…    32 Immi…
-# # … with 1,083 more rows, 10 more variables: german &lt;fct&gt;, nbh_exposed &lt;dbl&gt;, appearance &lt;fct&gt;, article &lt;chr&gt;,
-# #   ment_happy &lt;dbl&gt;, leftright &lt;dbl&gt;, gen_trust &lt;dbl&gt;, news &lt;dbl&gt;, news_yn &lt;dbl&gt;, z_dis_index &lt;dbl&gt;, and
-# #   abbreviated variable names ¹​dis_index, ²​news_hrs, ³​news_mins, ⁴​dis_trainee, ⁵​dis_school, ⁶​dis_house,
-# #   ⁷​dis_public
+#    antidiscr_law dis_index news_hrs news_mins dis_trainee dis_job dis_school dis_house dis_gov dis_public gewFAKT
+#            &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;       &lt;dbl&gt;   &lt;dbl&gt;      &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt;      &lt;dbl&gt;   &lt;dbl&gt;
+#  1             5      3.17        1         0           3       3          4         5       2          2   0.105
+#  2             4      1.8         1         1           5      NA          1         1       1          1   0.103
+#  3             3      2           0        30           1       2          1         3       3          2   0.802
+#  4             5      2.83        0        10           3       3          2         5       1          3   0.104
+#  5             4      3.2         0        30           2       3         NA         5       3          3   0.639
+#  6             5      2.75        2         0          NA       2         NA         4       3          2   0.2  
+#  7             2      1           3        58           1       1          1         1       1          1   2.42 
+#  8             4      1.67        5         0           3       1          1         3       1          1   0.102
+#  9             5      4           1        15           4       4          4         4       4          4   6.19 
+# 10             4      1.33        0        30           1       2          1         1       1          2   2.08 
+# # ℹ 1,083 more rows
+# # ℹ 13 more variables: gender &lt;fct&gt;, age &lt;dbl&gt;, imor &lt;fct&gt;, german &lt;fct&gt;, nbh_exposed &lt;dbl&gt;, appearance &lt;fct&gt;,
+# #   article &lt;chr&gt;, ment_happy &lt;dbl&gt;, leftright &lt;dbl&gt;, gen_trust &lt;dbl&gt;, news &lt;dbl&gt;, news_yn &lt;dbl&gt;,
+# #   z_dis_index &lt;dbl&gt;
 ```
 ]
 
@@ -254,7 +251,7 @@ class: inverse middle center
 # Fruitless naïv comparison
 
 ---
-# Fruitless naïv comparison
+# Fruitless\naïv comparison
 
 .push-left[
 &lt;img src="5-Selection-bias_files/figure-html/naiv-1.png" width="98%" style="display: block; margin: auto;" /&gt;
@@ -269,23 +266,48 @@ How does this scatter plot test the comparison stated in `\(H_{1}\)`?
 ```r
 ols &lt;- lm_robust(dis_index ~ news_yn, 
                  weight = gewFAKT, data = APAX)
-screenreg(ols, include.ci = FALSE, digits = 3)
-# 
-# =========================
-#              Model 1     
-# -------------------------
-# (Intercept)     2.187 ***
-#                (0.116)   
-# news_yn        -0.093    
-#                (0.129)   
-# -------------------------
-# R^2             0.002    
-# Adj. R^2        0.001    
-# Num. obs.    1085        
-# RMSE            0.746    
-# =========================
-# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
+modelsummary(list("Discr." = ols), stars = TRUE,
+             gof_map = c("nobs", "r.squared"))
 ```
+
+&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; Discr. &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 2.187*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.116) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; news_yn &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −0.093 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.129) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 1085 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.002 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
+&lt;sup&gt;&lt;/sup&gt; + p &amp;lt; 0.1, * p &amp;lt; 0.05, ** p &amp;lt; 0.01, *** p &amp;lt; 0.001&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;
+&lt;/table&gt;
+
+
 .content-box-green[
 What do we learn about `\(H_{1}\)` here?
 ]]
@@ -298,23 +320,48 @@ What do we learn about `\(H_{1}\)` here?
 ```r
 ols &lt;- lm_robust(dis_index ~ news_yn, 
                  weight = gewFAKT, data = APAX)
-screenreg(ols, include.ci = FALSE, digits = 3)
-# 
-# =========================
-#              Model 1     
-# -------------------------
-# (Intercept)     2.187 ***
-#                (0.116)   
-# news_yn        -0.093    
-#                (0.129)   
-# -------------------------
-# R^2             0.002    
-# Adj. R^2        0.001    
-# Num. obs.    1085        
-# RMSE            0.746    
-# =========================
-# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
+modelsummary(list("Discr." = ols), stars = TRUE,
+             gof_map = c("nobs", "r.squared"))
 ```
+
+&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; Discr. &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 2.187*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.116) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; news_yn &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −0.093 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.129) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 1085 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.002 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
+&lt;sup&gt;&lt;/sup&gt; + p &amp;lt; 0.1, * p &amp;lt; 0.05, ** p &amp;lt; 0.01, *** p &amp;lt; 0.001&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;
+&lt;/table&gt;
+
+
 ]
 
 .right-column[.font80[
@@ -353,6 +400,12 @@ class: middle clear
 
 ---
 class: inverse middle center
+# Break
+
+&lt;iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+
+---
+class: inverse middle center
 # Potential outcomes
 ## The Neyman–Rubin framework of causality
 
@@ -379,7 +432,7 @@ News effect            | +2
 
 ---
 class: center inverse
-# More generally: &lt;br&gt;The average causal effect
+# The average causal effect
 
 `$$Avg_{n}[Y_{1i}-Y_{0i}] = \frac{1}{n} \displaystyle\sum_{i=1}^{n}Y_{1i} - \frac{1}{n} \displaystyle\sum_{i=1}^{n}Y_{0i}.$$`
 
@@ -394,21 +447,22 @@ For example, the average causal effect of reading the news compares discriminati
 
 ---
 layout: false
-class: inverse center middle
-# But there is a problem: &lt;br&gt; The fundamental problem of causality
+class: inverse center
+# The fundamental problem of causality
 
-.left-column[
+.push-left[
 .content-box-blue[
-.center[
-If a person tells us how something affect(ed) them, it is an interesting  personal interpretation.
+When a person tells us how something affected them, it is an interesting personal interpretation. It is how they perceive and make sense of the world around them.
 
-`\(\Rightarrow\)` *But it is not scientific evidence of a causal effect on them!*
+However, it is not scientific evidence of a causal effect on them.
+
+.center[
+`\(\Rightarrow\)` *We can never know how a person's life had turned out, had `\(X\)` (not) occured!*
 ]]
 ]
 
-.right-column[
-&lt;img src="https://pbs.twimg.com/media/Fcit6yEXwAgZ65w?format=png&amp;name=small" width="50%" style="display: block; margin: auto;" /&gt;
-.center[.backgrnote[*Source:* Llaudet and Imai (2022)]]
+.push-right[
+&lt;img src="./img/fork.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -433,7 +487,7 @@ Actual news          | 1    | 0
 ---
 .right-column[
 `$$\begin{equation} \begin{split}
-\text{Anomie effect}_{\text{Ferda}} &amp; \neq \underbrace{\text{Discrimination}_{1, \text{Ferda}}}_{4} - \underbrace{\text{Discrimination}_{0, \text{Tuki}}}_{5} = -1
+\text{News effect}_{\text{Ferda}} &amp; \neq \underbrace{\text{Discrimination}_{1, \text{Ferda}}}_{4} - \underbrace{\text{Discrimination}_{0, \text{Tuki}}}_{5} = -1
 \end{split} \end{equation}$$`
 
 .content-box-green[.center[
@@ -445,7 +499,7 @@ Why is it misleading to compare Ferda to Tuki?
 .right-column[.font90[
 
 `$$\begin{equation} \begin{split}
-\text{Anomie effect}_{\text{Ferda}} &amp; \neq \underbrace{\text{Discr}_{1, \text{Ferda}}}_{4} - \underbrace{\text{Discr}_{0, \text{Tuki}}}_{5} = -1 \\
+\text{News effect}_{\text{Ferda}} &amp; \neq \underbrace{\text{Discr}_{1, \text{Ferda}}}_{4} - \underbrace{\text{Discr}_{0, \text{Tuki}}}_{5} = -1 \\
 &amp; = \underbrace{\text{Discr}_{1, \text{Ferda}} \color{gray}{(- \text{Discr}_{0, \text{Ferda}}}}_{\text{True news effect: 4 - 2 = +2}} \color{gray}{+} \underbrace{\color{gray}{\text{Discr}_{0, \text{Ferda}})} - \text{Discr}_{0, \text{Tuki}}}_{\text{"Selection bias": 2 - 5 = -3}}.
 \end{split} \end{equation}$$`
 ]]
@@ -454,14 +508,14 @@ Why is it misleading to compare Ferda to Tuki?
 
 .right-column[.font90[
 `$$\begin{equation} \begin{split}
-\text{Anomie effect}_{\text{Ferda}} &amp; \neq \underbrace{\text{Discr}_{1, \text{Ferda}}}_{4} - \underbrace{\text{Discr}_{0, \text{Tuki}}}_{5} = -1 \\
+\text{News effect}_{\text{Ferda}} &amp; \neq \underbrace{\text{Discr}_{1, \text{Ferda}}}_{4} - \underbrace{\text{Discr}_{0, \text{Tuki}}}_{5} = -1 \\
 &amp; = \underbrace{\text{Discr}_{1, \text{Ferda}} \color{gray}{(- \text{Discr}_{0, \text{Ferda}}}}_{\text{True news effect: 4 - 2 = +2}} \color{gray}{+} \underbrace{\color{gray}{\text{Discr}_{0, \text{Ferda}})} - \text{Discr}_{0, \text{Tuki}}}_{\text{"Selection bias": 2 - 5 = -3}}.
 \end{split} \end{equation}$$`
 ]
 
 .content-box-red[.center[
 **Selection bias**: `\(Y_{0, \text{Ferda}} \neq Y_{0, \text{Tuki}}\)`
-`\(\Rightarrow\)` Tuki's *baseline* &lt;br&gt; (i.e., no news) perceived discrimination &lt;br&gt; is higher than Ferda's!
+`\(\Rightarrow\)` Tuki's *baseline* &lt;br&gt; (i.e., no news) to report discrimination &lt;br&gt; is higher than Ferda's!
 ]]]
 
 ---
@@ -485,22 +539,24 @@ layout: false
 .center[**Potential outcomes**]
 
 - `\(Y_{0i}|D_{i} = 1\)`: Outcome of treated, if not treated.
-  + .font70[Observed discrimination among those who read news,&lt;br&gt; *if they had not read them*.]
+  + .font70[Observed discrimination among those who read news,&lt;br&gt; *if they had not read news*.]
 
 
 - `\(Y_{1i}|D_{i} = 0\)`: Outcome of non-treated, if treated.
-  + .font70[Observed discrimination among those who don't read news,&lt;br&gt; *if they had read it them*.]
+  + .font70[Observed discrimination among those who don't read news,&lt;br&gt; *if they had read it news*.]
 ]]
 
 ---
-# Differences in observed group means
+# Differences between groups
 
 `$$Avg_{n}[Y_{1i}|D_{i} = 1] - Avg_{n}[Y_{0i}|D_{i} = 0]$$`
 .push-left[
 &lt;img src="https://vitaliscounseling.com/wp-content/uploads/2020/12/compare-643305_1280.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]
 .push-right[
-Differences in observed group means are (most of the time) a comparison of apples (i.e. Ferda) to oranges (i.e. Tuki), which does not tell us about the average causal effect: `\(Avg_{n}[Y_{1i}-Y_{0i}]\)`!
+Differences between groups are, most of the time, a comparison of apples (i.e. Ferda) to oranges (i.e. Tuki). 
+
+They do not tel us the average causal effect: `\(Avg_{n}[Y_{1i}-Y_{0i}]\)`!
 ]
 ---
 # Why? Selection bias!
@@ -513,15 +569,15 @@ Differences in observed group means are (most of the time) a comparison of apple
 .content-box-red[.center[
 `\(\text{Selection bias} = \underbrace{Avg_{n}[Y_{0i} | D_{i} = 1]}_{\text{Unobserved!}} - Avg_{n}[Y_{0i} | D_{i} = 0].\)`
 
-`\(\rightarrow\)` The difference in `\(Avg_{n}(Y_{0i})\)` (the baseline of the outcome) between the groups we compare.
+`\(\rightarrow\)` The difference in `\(Avg_{n}(Y_{0i})\)`, the baseline of the outcome, between the groups we compare.
 ]]
 
 --
 
 .content-box-green[.center[
-**Think carefully**&lt;br&gt;Is `\(Avg_{n}[Y_{0i}]\)` (the baseline level of the outcome) &lt;br&gt;likely to differ between immigrant minorities who read news regularly and those who do not?
+**Think carefully**&lt;br&gt;Is `\(Avg_{n}[Y_{0i}]\)`, the baseline level of the outcome, &lt;br&gt;likely to differ between immigrant minorities who read news regularly and those who do not?
 
-That is, if those who read the news, had not read them:&lt;br&gt; would they feel as discriminated as those who don't read the news?
+That is, if immigrant minorities who read the news had not read them, would they report discrimination as often as those who do not read the news?
 ]]
 
 ---
@@ -533,12 +589,12 @@ That is, if those who read the news, had not read them:&lt;br&gt; would they fee
 ```r
 APAX %&gt;%
   # Select variables for which I want my balance test,
-  select(news_yn, dis_index, age, nbh_exposed, imor, german, gewFAKT) %&gt;%
+  select(news_yn, age, nbh_exposed, imor, german, gewFAKT) %&gt;%
 * rename(weights = gewFAKT) %&gt;% # Rename the weights variable!
 * datasummary_balance( # Make a balance table,
 *   formula = ~ news_yn, # by Reading news Yes/No
-*   data = . ,
-*   title = "Socio-demographic characterisitcs of those who read news and those who don't"
+*   data = . , # Pipe APAX data here
+*   title = "Socio-demographic characterisitcs of those who read news and those who do not"
 * )
 ```
 
@@ -547,7 +603,7 @@ APAX %&gt;%
 ]
 .panel[.panel-name[Balance table]
 &lt;table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;"&gt;
-&lt;caption&gt;Socio-demographic characterisitcs of those who read news and those who don't&lt;/caption&gt;
+&lt;caption&gt;Socio-demographic characterisitcs of those who read news and those who do not&lt;/caption&gt;
  &lt;thead&gt;
 &lt;tr&gt;
 &lt;th style="empty-cells: hide;border-bottom:hidden;" colspan="2"&gt;&lt;/th&gt;
@@ -568,16 +624,6 @@ APAX %&gt;%
  &lt;/thead&gt;
 &lt;tbody&gt;
   &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; dis_index &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 2.2 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 0.9 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 2.1 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 0.9 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; -0.1 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 0.1 &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; age &lt;/td&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 36.7 &lt;/td&gt;
@@ -588,14 +634,14 @@ APAX %&gt;%
    &lt;td style="text-align:right;"&gt; 2.2 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
-   &lt;td style="text-align:left;box-shadow: 0px 1px"&gt; nbh_exposed &lt;/td&gt;
-   &lt;td style="text-align:left;box-shadow: 0px 1px"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:right;box-shadow: 0px 1px"&gt; 4.2 &lt;/td&gt;
-   &lt;td style="text-align:right;box-shadow: 0px 1px"&gt; 0.8 &lt;/td&gt;
-   &lt;td style="text-align:right;box-shadow: 0px 1px"&gt; 4.2 &lt;/td&gt;
-   &lt;td style="text-align:right;box-shadow: 0px 1px"&gt; 1.0 &lt;/td&gt;
-   &lt;td style="text-align:right;box-shadow: 0px 1px"&gt; 0.0 &lt;/td&gt;
-   &lt;td style="text-align:right;box-shadow: 0px 1px"&gt; 0.1 &lt;/td&gt;
+   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt; nbh_exposed &lt;/td&gt;
+   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:right;box-shadow: 0px 1.5px"&gt; 4.2 &lt;/td&gt;
+   &lt;td style="text-align:right;box-shadow: 0px 1.5px"&gt; 0.8 &lt;/td&gt;
+   &lt;td style="text-align:right;box-shadow: 0px 1.5px"&gt; 4.2 &lt;/td&gt;
+   &lt;td style="text-align:right;box-shadow: 0px 1.5px"&gt; 1.0 &lt;/td&gt;
+   &lt;td style="text-align:right;box-shadow: 0px 1.5px"&gt; 0.0 &lt;/td&gt;
+   &lt;td style="text-align:right;box-shadow: 0px 1.5px"&gt; 0.1 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
@@ -649,6 +695,8 @@ APAX %&gt;%
   &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
+
+
 ]]
 
 ---
@@ -657,20 +705,20 @@ class: inverse middle center
 
 ---
 layout: true
-# Directed Acyclical Graphs (DAG)
+# Directed Acyclical Graphs (DAGs)
 
 .push-left[
-- **Nodes** represent variables, **Arrows\edges** represent causal effects (Pearl, Glymour, and Jewell, 2016).
-  + There must not by a cycle: Follow paths until one re-arrives at the origin.
+.center[**A visual way to represent causal relationships**]
 
+*Nodes*: Represent variables.
 
-- DAGs are theoretical models and can contain observed *and unobserved* variables.
+*Arrows/edges*: Represent causal effects.
 
+*DAGs*: Are theoretical models and can contain observed and unobserved variables.
 
-- **Backdoor paths**: All paths linking `\(X\)` and `\(Y\)` that start with an arrow into `\(X\)` (Pearl, Glymour, and Jewell, 2016; Breen, 2022).
+.alert[Backdoor paths]: All paths linking `\(D\)` and `\(Y\)` that start with an arrow into `\(X\)` (Pearl, Glymour, and Jewell, 2016; Breen, 2022).
 
-
-- **Confounder \ Backdoor path bias** = Selection bias.
+.alert[Confounder \ Backdoor path bias] = Selection bias: A confounder is a variable that is on a backdoor path between `\(D\)` and `\(Y\)`. It biases our estimate of the causal effect of `\(D\)` on `\(Y\)`.
 ]
 
 ---
@@ -678,7 +726,7 @@ layout: true
 .push-right[
 &lt;img src="5-Selection-bias_files/figure-html/DAG1-1.png" width="40%" style="display: block; margin: auto;" /&gt;
 .backgrnote[
-The red bi-directed arrow is officially not part of the DAG, but helps you see that the correlation between `\(X\)` and `\(Y\)` is spurious because of `\(C\)`.
+The red bi-directed arrow is officially not part of the DAG, but helps you see that the correlation between `\(D\)` and `\(Y\)` is not causal because of `\(C\)`.
 ]]
 
 ---
@@ -695,14 +743,17 @@ layout: false
 # Learning goal achieved!
 
 .push-left[
-&lt;img src="5-Selection-bias_files/figure-html/unnamed-chunk-17-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="5-Selection-bias_files/figure-html/unnamed-chunk-18-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]
 
 .push-right[.center[
 .content-box-red[
-Correlation ≠ causation,
+**Correlation ≠ causation**
 
-because the baseline of the outcome `\(Y_{0i}\)` likely differs between the groups we compare. This is, because certain other variables (i.e. confounders) make us select into / out of `\(D_{i}\)`. This is called selection, confounder, or backdoor path bias.
+The baseline of the outcome, `\(Y_{0i}\)`, may differ between the groups we compare. This is because certain other variables (i.e. confounders) may make us select into / out of the groups.
+
+.font80[For example, if we find a correlation between ice cream sales and shark attacks, it is more likely that the correlation is due to temperature than to ice cream. Temperature affects both ice cream sales and shark attacks, and it also affects the likelihood of people going swimming. This means that the correlation between ice cream sales and shark attacks is not due to a causal relationship between the two variables.]
+
 ]]]
 
 ---
@@ -724,22 +775,34 @@ class: middle clear
 class: inverse
 # Today's general lessons
 
-1. Causal claims are counter factual claims. Therefore they imply a comparison.
-2. Potential outcomes: A theoretical framework to think about the comparison implied in causal claims.
-3. Personal causal effect: The unobservable comparison for an individual case `\(i\)` to experience treatment `\(D_{i}=1\)` as compared to not experience that treatment ($D_{i}=0$).
-3. Average causal effect: The average of personal causal effects.
-4. Direct comparisons (i.e. differences in group means) are often fruitless and naïv, because of selection/confounder bias.
-5. Selection bias: The baseline of the outcome is unequal between treated and non-treated subjects, because certain type of people select into/out of the treatment.
-6. Balance test: Attempt to test for selection bias, but can only be applied to variables that are observed in the data at hand.
-7. Directed Acyclic Graphs (DAG): A graphical theoretical framework to think about causality. It consists of nodes and directed edges. It may not contain cycles.
-8. Backdoor paths: All paths linking `\(X\)` and `\(Y\)` that start with an arrow into `\(X\)`. Backdoor paths result in confounder/selection bias.
-9. Confounder bias: = selection bias.
+1. Causal claims are **counterfactual** claims. This means that they compare what would happen if a treatment were applied to an individual to what would happen if the treatment were not applied.
+
+2. **Potential outcomes** are a theoretical framework for thinking about causal claims. They represent the possible outcomes for an individual, given that they receive a particular treatment or not.
+
+3. The **personal causal effect** is the difference between the potential outcomes for an individual. It is the effect that the treatment would have on an individual, if they were to receive it.
+
+4. The **average causal effect** is the average of the personal causal effects for a population. It is the effect that the treatment would have on the average person in the population.
+
+5. **Direct comparisons** (i.e. differences in group means) are often fruitless and naïve, because of selection/confounder bias. This is because the average outcome for the treated group may be different from the average outcome for the non-treated group, even if the treatment has no causal effect. This difference can be due to selection bias, which occurs when the treated and non-treated groups are different in ways other than the treatment.
+
+
+---
+class: inverse
+# Today's general lessons
+
+6) A **balance test** is a statistical test that can be used to assess the presence of selection bias. It compares the distribution of covariates (variables other than the treatment) in the treated and non-treated groups. If the distributions are different, this suggests that there may be selection bias.
+
+7) **Directed Acyclic Graphs (DAGs)** are a graphical way of representing causal relationships. They consist of nodes (variables) and directed edges (causal arrows). DAGs can be used to identify potential sources of bias in causal inference.
+
+8) **Backdoor paths** are paths in a DAG that start with an arrow into the treatment variable and end with an arrow into the outcome variable. Backdoor paths can lead to selection bias, because they allow for the possibility that the treatment and outcome are correlated through a third variable.
+
+9) **Confounder \ backdoor bias** is a type of **selection bias** that occurs when a third variable is correlated with both the treatment and the outcome. Confounder bias can lead to an overestimate or underestimate of the causal effect of the treatment.
 
 ---
 class: inverse
 # Today's (important) functions
 
-1. `funiture::rowmeans()`: Combine several variables (that need to have a similar scale) to an additive index.
+1. `funiture::rowmeans()`: Combine several variables to an additive index;  the variable must be measured in the same units.
 2. `modelsummary::datasummary_balance()`: Make a balance table.
 
 ---
@@ -750,17 +813,12 @@ Breen, R. (2022). "Causal inference with observational data". In: _Handbook of S
 Contributions to Rigorous Sociology_. Ed. by K. Gërxhani, N. de Graaf and W. Raub. Edward Elgar
 Publishing, pp. 272-286.
 
-Llaudet, E. and K. Imai (2022). _Data Analysis for Social Science. A Friendly and Practical
-Introduction_. Princeton: Princeton University Press.
-
 Pearl, J., M. Glymour, and N. P. Jewell (2016). _Causal Inference in Statistics - A Primer_. 1.th ed.
 Chichester, West Sussex: Wiley.
 
-Polack, F. P., S. J. Thomas, N. Kitchin, et al. (2020). "Safety and Efficacy of the BNT162b2 mRNA
-Covid-19 Vaccine". In: _New England Journal of Medicine_, pp. 2603-2615.
-
-Schaeffer, M. and J. Kas (2021). "The Integration Paradox: A Theoretical Synthesis and Meta-Analysis".
-In: _Unpublished manuscript_.
+Schaeffer, M. and J. Kas (2023). "The Integration Paradox: A Review and Meta-Analysis of the Complex
+Relationship Between Integration and Reports of Discrimination". In: _International Migration Review_,
+p. 01979183231170809.
 
 Steinmann, J. (2019). "The paradox of integration: why do higher educated new immigrants perceive more
 discrimination in Germany?" In: _Journal of Ethnic and Migration Studies_, pp. 1377-1400.

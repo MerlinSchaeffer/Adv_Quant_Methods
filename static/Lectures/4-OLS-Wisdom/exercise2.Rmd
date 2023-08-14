@@ -105,7 +105,7 @@ Dat <- inner_join(Dat, Dat_citi_rights, by = c("country", "date"))
 ```
 
 1. Visualize a prediction from a regression: How would citizenship rights look on average in the range of 5 years before independence to 50 years after independence from a colonizer? Add a red line that marks independence.
-`r hide("R solution -> dont' peak to early ;) !")`
+`r hide("R solution -> dont' peak too early ;) !")`
 ```{r plot1, out.width='80%', fig.height = 4, fig.width = 5, results = FALSE}
 ols <- lm_robust(citizen_rights ~  years_indep, data = Dat)
 
@@ -131,7 +131,7 @@ ggplot(data = fict_dat, aes(y = fit, x = years_indep)) +
 `r unhide()`
 
 2. Make a coefficient plot that shows how both Denmark and the other former colonizers fare compared to Belgium.
-`r hide("R solution -> dont' peak to early ;) !")`
+`r hide("R solution -> dont' peak too early ;) !")`
 ```{r plot2, out.width='80%', fig.height = 4, fig.width = 5, results = FALSE}
 (plotdata <- lm_robust(poverty ~ colonizer, data = Dat) %>%
    tidy() %>% # Turn results into a tibble, #<<

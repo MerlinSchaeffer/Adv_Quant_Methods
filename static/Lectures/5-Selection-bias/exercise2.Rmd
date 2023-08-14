@@ -1,5 +1,5 @@
 ---
-title: "Exercise 2 (15 minutes)"
+title: "Exercise 2 (20 minutes)"
 subtitle: "When you're done, assist some of the others ..."
 output: webexercises::webexercises_default
 ---
@@ -43,10 +43,11 @@ APAX <- APAX %>% mutate(
     as.numeric())
 ```
 
-1. Together with your neighbor, draw a dag of the effect of news consumption on support for anti-discrimination policies. Go through the APAX data and discuss which variables might be a confounder (i.e, a backdoor path). Add them to your DAG.
+1. Together with your neighbor, draw a DAG of the effect of news consumption on support for anti-discrimination policies. Go through the APAX data and discuss which variables might be a confounder (i.e, a backdoor path). Add them to your DAG.
 
-2. In the APAX survey, we also asked respondents how their physical appearance is typically described in Germany, with answers ranging from White, over Black, to Asian. Test whether the variable on racial appearance is balanced across our binary news reading indicator. That is, are people who appear Asian read the news more often than those who appear white etc.? *What do you conclude from the balance table*?
-`r hide("R solution -> dont' peak to early ;) !")`
+2. In the APAX survey, we also asked respondents how their physical appearance is typically described in Germany, with answers ranging from White, over Black, to Asian. Test whether the variable on racial appearance is balanced across our binary news reading indicator. That is, are people who appear Asian read the news more often than those who appear white etc.? *What do you conclude from the balance table?*
+
+`r hide("R solution -> dont' peak too early ;) !")`
 ```{r}
 APAX %>%
   # Select variables for which I want my balance test,
@@ -59,4 +60,6 @@ APAX %>%
 ```
 `r unhide()`
 
-3. Beyond the variables observed in APAX, consider with your neighbor which unobserved other confounding variables might exist and bias our estimate of the news effect.
+3. Beyond the variables observed in APAX, consider with your neighbor which unobserved other confounding variables might exist and bias our estimate of the news effect. Here are some potential unobserved confounders that could bias our estimate of the causal effect of news consumption on support for anti-discrimination policies:
+  + Political ideology: People with different political ideologies may be more or less likely to read the news and to support anti-discrimination policies.
+  + Social networks: People who are connected to people who read the news may be more or less likely to read the news themselves.

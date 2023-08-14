@@ -18,7 +18,7 @@ library(webexercises)
 
 2. Start a new R-script and copy the lines of R code from my slides that generate 'Dat'. That is, get Freedom House and WB data via the APIs, join them, and construct our socialism index.
   
-`r hide("R solution -> dont' peak to early ;) !")`
+`r hide("R solution -> dont' peak too early ;) !")`
 ```{r}
 pacman::p_load(
   tidyverse, # Data manipulation,
@@ -87,7 +87,7 @@ Dat <- Dat %>% mutate(socialist = case_when( # Years socialist minus years since
 `r unhide()`
 
 3. Make a scatterplot with poverty as outcome on the Y-axis and civic and political citizenship rights as predictor on the X-axis.
-`r hide("R solution -> dont' peak to early ;) !")`
+`r hide("R solution -> dont' peak too early ;) !")`
 ```{r out.width='100%', fig.height = 4, fig.width = 7.5, results = FALSE, echo = TRUE}
 ggplot(data = Dat, aes(y = poverty, x = citizen_rights)) +
   geom_text(aes(label = country)) +
@@ -107,7 +107,7 @@ cor_povcitiz <- cor_povcitiz[1, 2]
 ```
 
 4. Estimate the correlation between poverty and civic and political citizenship rights (rounded to two digits): `r fitb(cor_povcitiz, width = "5")`
-`r hide("R solution -> dont' peak to early ;) !")`
+`r hide("R solution -> dont' peak too early ;) !")`
 ```{r}
 Dat %>% 
   select(poverty, citizen_rights) %>% 

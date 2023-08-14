@@ -1,6 +1,6 @@
 ---
-title: "5. Selection Bias"
-subtitle: "or why correlation ≠ causation"
+title: "Multiple Regression & <br><br> Fundamentals of Causal Inference"
+subtitle: "5. Selection Bias<br><br> or why correlation ≠ causation"
 author: "Merlin Schaeffer<br> Department of Sociology"
 date: "`r Sys.Date()`"
 output: 
@@ -42,9 +42,9 @@ myBib <- ReadBib("./../../../Stats_II.bib", check = FALSE)
 xaringanExtra::use_xaringan_extra(c("tile_view", "tachyons"))
 xaringanExtra::use_panelset()
 ```
-# The goal of social science research
+# Goal of empirical sociology
 
-.font140[.center[.alert[Use data to discover patterns ("social facts" in Durkheim's terms), <br> and the **social mechanisms that bring them about**.]]]
+.font130[.center[Use data to discover patterns, <br> and the .alert[social mechanisms that bring them about.]]]
 
 ```{r, echo = FALSE, out.width='70%', fig.align='center'}
 knitr::include_graphics('https://liu.se/-/media/istock-501261958.jpg?mw=1120&mh=1120&hash=DA8977CCE6A6E600AE80A40CFEE771C9')
@@ -54,11 +54,11 @@ knitr::include_graphics('https://liu.se/-/media/istock-501261958.jpg?mw=1120&mh=
 class: inverse middle
 # Today's schedule
 
-1. **Application**: The Integration (or Discrimination) Paradox
+1. **Today's research question**: The Integration Paradox
 
 2. **Hypothesis $\rightarrow$ comparison**
 
-3. **Fruitless naïv comparison**
+3. **Fruitless\naïv comparisons**
 
 4. **Potential outcomes**
   + The fundamental problem of causality
@@ -76,14 +76,14 @@ class: inverse
 <br>
 .font200[**The Integration Paradox**]
 
-The better immigrant minorities establish themselves among the (native) mainstream the *more* discrimination do they report.
+immigrants and their descendants with seemingly better access to mainstream middle-class society — as evidenced by their education, labor market success, length of residence, or generational status — often report more discrimination than those on the societal margins.
 ]
 
 .push-right[
-```{r, echo = FALSE, out.width='83%', fig.align='center'}
+```{r, echo = FALSE, out.width='85%', fig.align='center'}
 knitr::include_graphics('img/Meta.png')
 ```
-.font70[.center[*Source:* `r Citet(myBib, "schaeffer_integration_2021")`]]]
+.font70[.center[*Source:* `r Citet(myBib, "schaeffer_integration_2023")`]]]
 
 ---
 class: inverse
@@ -108,7 +108,7 @@ knitr::include_graphics('img/Steinmann3.png')
 --
 
 .left-column[.center[.font110[
-**Does news media consumption** <br><br> _**increase**_ <br><br> **immigrant minorities' perceptions that they are being discriminated?**
+**Does news media consumption** <br><br> _**increase**_ <br><br> **immigrant minorities' reports of discrimination?**
 ]]]
 
 ---
@@ -116,7 +116,7 @@ knitr::include_graphics('img/Steinmann3.png')
 
 .left-column[
 
-.center["How does reading the news affect you?"]
+.center["How does<br> reading the news<br> affect you?"]
 
 ```{r, echo = FALSE, out.width='100%', fig.align='center'}
 knitr::include_graphics('http://www.news.uzh.ch/dam/jcr:00000000-09c6-5ee1-ffff-ffffa1749bbf/mikro.jpg')
@@ -129,12 +129,10 @@ Why might this be problematic?
 --
 
 .right-column[
-.center[**Asking the subjects of inquiry <br> to answer your research question is not enough!**]
-- Statements by the subjects of inquiry are important!
+Statements by the subjects of inquiry are important!
 
 
-- But they are .alert[not credible scientific evidence.]
-  + Many people have wrong ideas of how things affect them.
+But they are .alert[not credible scientific evidence.] $\rightarrow$ Many people have wrong ideas of how things affect them.
 
 .left-column[
 ```{r, echo = FALSE, out.width='100%', fig.align='center'}
@@ -142,7 +140,9 @@ knitr::include_graphics('https://feeds.abplive.com/onecms/images/uploaded-images
 ```
 ]
 .right-column[
-<iframe src='https://academic.oup.com/esr/article/27/5/669/598636' width='450' height='330' frameborder='0' scrolling='yes'></iframe>
+```{r, echo = FALSE, out.width='100%', fig.align='center'}
+knitr::include_graphics('./img/Neugebauer.png')
+```
 ]
 
 ]
@@ -153,13 +153,13 @@ class: inverse middle center
 
 ---
 class: clear
-# Instead: Hypothesis $\rightarrow$ comparison
+# Hypothesis $\rightarrow$ comparison
 
-.alert[Causal claims imply a counter factual: Things would have been different, had] $X$ .alert[(not) happened.]
+Causal claims imply a .alert[counter factual]: Things would have been different, had $X$ (not) happened.
 
-- $H_{1}:$ Media consumption increases immigrant minorities' perceptions that they are being discriminated!
+- $H_{1}:$ Media consumption increases immigrant minorities' reports of discrimination!
   + .backgrnote[ 
-  $H_{0}:$ Media consumption *has no effect* on immigrant minorities' perceptions of discrimination.
+  $H_{0}:$ Media consumption *does not affect* on immigrant minorities' reports of discrimination.
   ]
 
 --
@@ -168,18 +168,17 @@ $$\downarrow$$
 
 - $H_{1}: 0 < Avg_{n}[\text{Discrimination}|\text{Read news} = 1] - Avg_{n}[\text{Discrimination}|\text{Read news} = 0]$
  + .backgrnote[ 
- $H_{0}: 0 = Avg_{n}[\text{Discrimination}|\text{Read news} = 1] - Avg_{n}[\text{Discrimination}|\text{Read news} = 0]$
+ $H_{0}: 0 \geq Avg_{n}[\text{Discrimination}|\text{Read news} = 1] - Avg_{n}[\text{Discrimination}|\text{Read news} = 0]$
  ]
  
 --
 
-
 .content-box-green[
 .center[**What are the comparisons implied in the following examples?**]
 
-- **Marx**: Capitalist labor alienates people from engaging with their many creative talents and reduces psychological wellbeing.
+- **Marx**: Capitalist labor alienates people from engaging with their creative talents; capitalism thereby reduces mental health.
 
-- **Simmel**: Urbanization increases functional social relations and intensifies nervous stimulation. Residents of cities are therefore rational and distant.
+- **Simmel**: Urbanization increases functional social relations and intensifies nervous stimulation; residents of cities are therefore rational and distant.
 ]
 
 ---
@@ -194,8 +193,7 @@ pacman::p_load(
   ggplot2, # beautiful figures,
   estimatr, # Regression for weighted data,
   modelr, # Turn results of lm() into a tibble,
-  modelsummary, # for balance tables,
-  texreg) # regression tables with nice layout.
+  modelsummary) # for balance and regression tables.
 ```
 ]
 .panel[.panel-name[The APAX survey]
@@ -203,7 +201,7 @@ pacman::p_load(
 - PI: Merlin Schaeffer;<br> Postdoc: Judith Kas.
 - 1093 Immigrants and children of immigrants.
 - Berlin, Hamburg, Munich, Frankfurt, and Cologne.
-- Interviewed in August 2021
+- Interviewed in August 2021.
 - Financed by [German Research Council](https://gepris.dfg.de/gepris/projekt/428878477?language=en)
 ]
 
@@ -225,7 +223,8 @@ Discrimination means that a person is treated worse than others including specif
 .panel[.panel-name[Get the APAX data]
 .left-column[.font80[
 ```{r results = FALSE}
-load("../../../assets/APAX.RData") # Read APAX data,
+# Read APAX data,
+load("../../../assets/APAX.RData") 
 APAX <- APAX %>% mutate(
   # News in minutes,
   news = news_hrs*60 + news_mins, 
@@ -233,12 +232,12 @@ APAX <- APAX %>% mutate(
     news < 15 ~ 0, # Less than 15  minutes,
     news >= 15 ~ 1, # 15  minutes and more,
     TRUE ~ as.numeric(NA)),
-  # Average discrimination index across domains,
+  # Average discr. index across domains,
   dis_index = rowmeans( #<<
     dis_trainee, dis_job, dis_school, #<<
     dis_house, dis_gov, dis_public, #<<
     na.rm = TRUE), #<<
-  # Z-standardized discrimination index.
+  # Z-standardized discr. index.
   z_dis_index = scale(dis_index) %>% 
     as.numeric())
 ```
@@ -257,7 +256,7 @@ class: inverse middle center
 # Fruitless naïv comparison
 
 ---
-# Fruitless naïv comparison
+# Fruitless\naïv comparison
 
 .push-left[
 ```{r naiv, out.width = "98%", fig.height = 3.5, fig.width = 5, echo = FALSE}
@@ -279,7 +278,8 @@ How does this scatter plot test the comparison stated in $H_{1}$?
 ```{r naiv_OLS}
 ols <- lm_robust(dis_index ~ news_yn, 
                  weight = gewFAKT, data = APAX)
-screenreg(ols, include.ci = FALSE, digits = 3)
+modelsummary(list("Discr." = ols), stars = TRUE,
+             gof_map = c("nobs", "r.squared"))
 ```
 .content-box-green[
 What do we learn about $H_{1}$ here?
@@ -314,7 +314,7 @@ library("lattice")
 coef <- coef(ols)["news_yn"] %>% round(3) %>% as.scalar()
 se <- vcov(ols) %>% diag() %>% sqrt() %>% round(3)
 se <- se["news_yn"] %>% as.scalar()
-critval <- qt(0.975, 1032)
+critval <- qt(0.975, 1085)
 teh <- ols %>% tidy() %>% filter(term == "news_yn") %>% select(statistic) %>% pull() %>% abs()
 
 
@@ -332,7 +332,7 @@ ggplot(data= data, aes(x = betas, y = density)) +
   geom_polygon(data = shade2, aes(betas, density), fill = "orange") +
   geom_vline(xintercept = 0, colour = "#045a8d", size = 1) +
   geom_vline(xintercept = coef, colour = "#045a8d", size = 1, lty = 2) +
-  scale_x_continuous(breaks = c(-critval*se, coef, 0, critval*se), labels = c(expression("0 - Crit.Val.*"~sigma), expression("Est. of "~beta~"=-0.172"), expression("H0:"~beta~"=0"), expression("0 + Crit.Val.*"~sigma)), guide = guide_axis(n.dodge = 2)) +
+  scale_x_continuous(breaks = c(-critval*se, coef, 0, critval*se), labels = c(expression("0 - Crit.Val.*"~sigma), expression("Est. of "~beta~"=-0.093"), expression("H0:"~beta~"=0"), expression("0 + Crit.Val.*"~sigma)), guide = guide_axis(n.dodge = 2)) +
   labs(y = "", x = "") +
   theme_minimal() +
   theme(legend.position = "none")
@@ -360,6 +360,12 @@ knitr::include_graphics('https://www.laserfiche.com/wp-content/uploads/2014/10/f
 <br>
 <iframe src='exercise1.html' width='1000' height='600' frameborder='0' scrolling='yes'></iframe>
 ]
+
+---
+class: inverse middle center
+# Break
+
+<iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'></iframe>
 
 ---
 class: inverse middle center
@@ -391,7 +397,7 @@ knitr::include_graphics('https://miro.medium.com/max/1400/0*M_2Lt3gq2wUHeTrI')
 
 ---
 class: center inverse
-# More generally: <br>The average causal effect
+# The average causal effect
 
 $$Avg_{n}[Y_{1i}-Y_{0i}] = \frac{1}{n} \displaystyle\sum_{i=1}^{n}Y_{1i} - \frac{1}{n} \displaystyle\sum_{i=1}^{n}Y_{0i}.$$
 
@@ -406,23 +412,24 @@ For example, the average causal effect of reading the news compares discriminati
 
 ---
 layout: false
-class: inverse center middle
-# But there is a problem: <br> The fundamental problem of causality
+class: inverse center
+# The fundamental problem of causality
 
-.left-column[
+.push-left[
 .content-box-blue[
-.center[
-If a person tells us how something affect(ed) them, it is an interesting  personal interpretation.
+When a person tells us how something affected them, it is an interesting personal interpretation. It is how they perceive and make sense of the world around them.
 
-$\Rightarrow$ *But it is not scientific evidence of a causal effect on them!*
+However, it is not scientific evidence of a causal effect on them.
+
+.center[
+$\Rightarrow$ *We can never know how a person's life had turned out, had $X$ (not) occured!*
 ]]
 ]
 
-.right-column[
-```{r, echo = FALSE, out.width='50%', fig.align='center'}
-knitr::include_graphics('https://pbs.twimg.com/media/Fcit6yEXwAgZ65w?format=png&name=small')
+.push-right[
+```{r, echo = FALSE, out.width='100%', fig.align='center'}
+knitr::include_graphics('./img/fork.png')
 ```
-.center[.backgrnote[*Source:* `r Citet(myBib, "llaudet_data_2022")`]]
 ]
 
 ---
@@ -449,7 +456,7 @@ Actual news          | 1    | 0
 ---
 .right-column[
 $$\begin{equation} \begin{split}
-\text{Anomie effect}_{\text{Ferda}} & \neq \underbrace{\text{Discrimination}_{1, \text{Ferda}}}_{4} - \underbrace{\text{Discrimination}_{0, \text{Tuki}}}_{5} = -1
+\text{News effect}_{\text{Ferda}} & \neq \underbrace{\text{Discrimination}_{1, \text{Ferda}}}_{4} - \underbrace{\text{Discrimination}_{0, \text{Tuki}}}_{5} = -1
 \end{split} \end{equation}$$
 
 .content-box-green[.center[
@@ -461,7 +468,7 @@ Why is it misleading to compare Ferda to Tuki?
 .right-column[.font90[
 
 $$\begin{equation} \begin{split}
-\text{Anomie effect}_{\text{Ferda}} & \neq \underbrace{\text{Discr}_{1, \text{Ferda}}}_{4} - \underbrace{\text{Discr}_{0, \text{Tuki}}}_{5} = -1 \\
+\text{News effect}_{\text{Ferda}} & \neq \underbrace{\text{Discr}_{1, \text{Ferda}}}_{4} - \underbrace{\text{Discr}_{0, \text{Tuki}}}_{5} = -1 \\
 & = \underbrace{\text{Discr}_{1, \text{Ferda}} \color{gray}{(- \text{Discr}_{0, \text{Ferda}}}}_{\text{True news effect: 4 - 2 = +2}} \color{gray}{+} \underbrace{\color{gray}{\text{Discr}_{0, \text{Ferda}})} - \text{Discr}_{0, \text{Tuki}}}_{\text{"Selection bias": 2 - 5 = -3}}.
 \end{split} \end{equation}$$
 ]]
@@ -470,14 +477,14 @@ $$\begin{equation} \begin{split}
 
 .right-column[.font90[
 $$\begin{equation} \begin{split}
-\text{Anomie effect}_{\text{Ferda}} & \neq \underbrace{\text{Discr}_{1, \text{Ferda}}}_{4} - \underbrace{\text{Discr}_{0, \text{Tuki}}}_{5} = -1 \\
+\text{News effect}_{\text{Ferda}} & \neq \underbrace{\text{Discr}_{1, \text{Ferda}}}_{4} - \underbrace{\text{Discr}_{0, \text{Tuki}}}_{5} = -1 \\
 & = \underbrace{\text{Discr}_{1, \text{Ferda}} \color{gray}{(- \text{Discr}_{0, \text{Ferda}}}}_{\text{True news effect: 4 - 2 = +2}} \color{gray}{+} \underbrace{\color{gray}{\text{Discr}_{0, \text{Ferda}})} - \text{Discr}_{0, \text{Tuki}}}_{\text{"Selection bias": 2 - 5 = -3}}.
 \end{split} \end{equation}$$
 ]
 
 .content-box-red[.center[
 **Selection bias**: $Y_{0, \text{Ferda}} \neq Y_{0, \text{Tuki}}$
-$\Rightarrow$ Tuki's *baseline* <br> (i.e., no news) perceived discrimination <br> is higher than Ferda's!
+$\Rightarrow$ Tuki's *baseline* <br> (i.e., no news) to report discrimination <br> is higher than Ferda's!
 ]]]
 
 ---
@@ -501,15 +508,15 @@ $$\begin{equation} D_{i}=\begin{cases} 1, & \text{if}\ i = \text{Reads news} \\ 
 .center[**Potential outcomes**]
 
 - $Y_{0i}|D_{i} = 1$: Outcome of treated, if not treated.
-  + .font70[Observed discrimination among those who read news,<br> *if they had not read them*.]
+  + .font70[Observed discrimination among those who read news,<br> *if they had not read news*.]
 
 
 - $Y_{1i}|D_{i} = 0$: Outcome of non-treated, if treated.
-  + .font70[Observed discrimination among those who don't read news,<br> *if they had read it them*.]
+  + .font70[Observed discrimination among those who don't read news,<br> *if they had read it news*.]
 ]]
 
 ---
-# Differences in observed group means
+# Differences between groups
 
 $$Avg_{n}[Y_{1i}|D_{i} = 1] - Avg_{n}[Y_{0i}|D_{i} = 0]$$
 .push-left[
@@ -518,7 +525,9 @@ knitr::include_graphics('https://vitaliscounseling.com/wp-content/uploads/2020/1
 ```
 ]
 .push-right[
-Differences in observed group means are (most of the time) a comparison of apples (i.e. Ferda) to oranges (i.e. Tuki), which does not tell us about the average causal effect: $Avg_{n}[Y_{1i}-Y_{0i}]$!
+Differences between groups are, most of the time, a comparison of apples (i.e. Ferda) to oranges (i.e. Tuki). 
+
+They do not tel us the average causal effect: $Avg_{n}[Y_{1i}-Y_{0i}]$!
 ]
 ---
 # Why? Selection bias!
@@ -531,15 +540,15 @@ $$\begin{equation} \begin{split}
 .content-box-red[.center[
 $\text{Selection bias} = \underbrace{Avg_{n}[Y_{0i} | D_{i} = 1]}_{\text{Unobserved!}} - Avg_{n}[Y_{0i} | D_{i} = 0].$
 
-$\rightarrow$ The difference in $Avg_{n}(Y_{0i})$ (the baseline of the outcome) between the groups we compare.
+$\rightarrow$ The difference in $Avg_{n}(Y_{0i})$, the baseline of the outcome, between the groups we compare.
 ]]
 
 --
 
 .content-box-green[.center[
-**Think carefully**<br>Is $Avg_{n}[Y_{0i}]$ (the baseline level of the outcome) <br>likely to differ between immigrant minorities who read news regularly and those who do not?
+**Think carefully**<br>Is $Avg_{n}[Y_{0i}]$, the baseline level of the outcome, <br>likely to differ between immigrant minorities who read news regularly and those who do not?
 
-That is, if those who read the news, had not read them:<br> would they feel as discriminated as those who don't read the news?
+That is, if immigrant minorities who read the news had not read them, would they report discrimination as often as those who do not read the news?
 ]]
 
 ---
@@ -550,12 +559,12 @@ That is, if those who read the news, had not read them:<br> would they feel as d
 ```{r balance1, results = FALSE}
 APAX %>%
   # Select variables for which I want my balance test,
-  select(news_yn, dis_index, age, nbh_exposed, imor, german, gewFAKT) %>%
+  select(news_yn, age, nbh_exposed, imor, german, gewFAKT) %>%
   rename(weights = gewFAKT) %>% # Rename the weights variable! #<<
   datasummary_balance( # Make a balance table, #<<
     formula = ~ news_yn, # by Reading news Yes/No #<< 
-    data = . , #<<
-    title = "Socio-demographic characterisitcs of those who read news and those who don't" #<<
+    data = . , # Pipe APAX data here #<<
+    title = "Socio-demographic characterisitcs of those who read news and those who do not" #<<
   ) #<<
 ```
 
@@ -573,20 +582,20 @@ class: inverse middle center
 
 ---
 layout: true
-# Directed Acyclical Graphs (DAG)
+# Directed Acyclical Graphs (DAGs)
 
 .push-left[
-- **Nodes** represent variables, **Arrows\edges** represent causal effects `r Citep(myBib, "pearl_causal_2016")`.
-  + There must not by a cycle: Follow paths until one re-arrives at the origin.
+.center[**A visual way to represent causal relationships**]
 
+*Nodes*: Represent variables.
 
-- DAGs are theoretical models and can contain observed *and unobserved* variables.
+*Arrows/edges*: Represent causal effects.
 
+*DAGs*: Are theoretical models and can contain observed and unobserved variables.
 
-- **Backdoor paths**: All paths linking $X$ and $Y$ that start with an arrow into $X$ `r Citep(myBib, c("pearl_causal_2016", "gerxhani_causal_2022"))`.
+.alert[Backdoor paths]: All paths linking $D$ and $Y$ that start with an arrow into $X$ `r Citep(myBib, c("pearl_causal_2016", "gerxhani_causal_2022"))`.
 
-
-- **Confounder \ Backdoor path bias** = Selection bias.
+.alert[Confounder \ Backdoor path bias] = Selection bias: A confounder is a variable that is on a backdoor path between $D$ and $Y$. It biases our estimate of the causal effect of $D$ on $Y$.
 ]
 
 ---
@@ -614,7 +623,7 @@ layout: true
 \end{tikzpicture}
 ```
 .backgrnote[
-The red bi-directed arrow is officially not part of the DAG, but helps you see that the correlation between $X$ and $Y$ is spurious because of $C$.
+The red bi-directed arrow is officially not part of the DAG, but helps you see that the correlation between $D$ and $Y$ is not causal because of $C$.
 ]]
 
 ---
@@ -658,9 +667,12 @@ layout: false
 
 .push-right[.center[
 .content-box-red[
-Correlation ≠ causation,
+**Correlation ≠ causation**
 
-because the baseline of the outcome $Y_{0i}$ likely differs between the groups we compare. This is, because certain other variables (i.e. confounders) make us select into / out of $D_{i}$. This is called selection, confounder, or backdoor path bias.
+The baseline of the outcome, $Y_{0i}$, may differ between the groups we compare. This is because certain other variables (i.e. confounders) may make us select into / out of the groups.
+
+.font80[For example, if we find a correlation between ice cream sales and shark attacks, it is more likely that the correlation is due to temperature than to ice cream. Temperature affects both ice cream sales and shark attacks, and it also affects the likelihood of people going swimming. This means that the correlation between ice cream sales and shark attacks is not due to a causal relationship between the two variables.]
+
 ]]]
 
 ---
@@ -684,22 +696,34 @@ knitr::include_graphics('https://www.laserfiche.com/wp-content/uploads/2014/10/f
 class: inverse
 # Today's general lessons
 
-1. Causal claims are counter factual claims. Therefore they imply a comparison.
-2. Potential outcomes: A theoretical framework to think about the comparison implied in causal claims.
-3. Personal causal effect: The unobservable comparison for an individual case $i$ to experience treatment $D_{i}=1$ as compared to not experience that treatment ($D_{i}=0$).
-3. Average causal effect: The average of personal causal effects.
-4. Direct comparisons (i.e. differences in group means) are often fruitless and naïv, because of selection/confounder bias.
-5. Selection bias: The baseline of the outcome is unequal between treated and non-treated subjects, because certain type of people select into/out of the treatment.
-6. Balance test: Attempt to test for selection bias, but can only be applied to variables that are observed in the data at hand.
-7. Directed Acyclic Graphs (DAG): A graphical theoretical framework to think about causality. It consists of nodes and directed edges. It may not contain cycles.
-8. Backdoor paths: All paths linking $X$ and $Y$ that start with an arrow into $X$. Backdoor paths result in confounder/selection bias.
-9. Confounder bias: = selection bias.
+1. Causal claims are **counterfactual** claims. This means that they compare what would happen if a treatment were applied to an individual to what would happen if the treatment were not applied.
+
+2. **Potential outcomes** are a theoretical framework for thinking about causal claims. They represent the possible outcomes for an individual, given that they receive a particular treatment or not.
+
+3. The **personal causal effect** is the difference between the potential outcomes for an individual. It is the effect that the treatment would have on an individual, if they were to receive it.
+
+4. The **average causal effect** is the average of the personal causal effects for a population. It is the effect that the treatment would have on the average person in the population.
+
+5. **Direct comparisons** (i.e. differences in group means) are often fruitless and naïve, because of selection/confounder bias. This is because the average outcome for the treated group may be different from the average outcome for the non-treated group, even if the treatment has no causal effect. This difference can be due to selection bias, which occurs when the treated and non-treated groups are different in ways other than the treatment.
+
+
+---
+class: inverse
+# Today's general lessons
+
+6) A **balance test** is a statistical test that can be used to assess the presence of selection bias. It compares the distribution of covariates (variables other than the treatment) in the treated and non-treated groups. If the distributions are different, this suggests that there may be selection bias.
+
+7) **Directed Acyclic Graphs (DAGs)** are a graphical way of representing causal relationships. They consist of nodes (variables) and directed edges (causal arrows). DAGs can be used to identify potential sources of bias in causal inference.
+
+8) **Backdoor paths** are paths in a DAG that start with an arrow into the treatment variable and end with an arrow into the outcome variable. Backdoor paths can lead to selection bias, because they allow for the possibility that the treatment and outcome are correlated through a third variable.
+
+9) **Confounder \ backdoor bias** is a type of **selection bias** that occurs when a third variable is correlated with both the treatment and the outcome. Confounder bias can lead to an overestimate or underestimate of the causal effect of the treatment.
 
 ---
 class: inverse
 # Today's (important) functions
 
-1. `funiture::rowmeans()`: Combine several variables (that need to have a similar scale) to an additive index.
+1. `funiture::rowmeans()`: Combine several variables to an additive index;  the variable must be measured in the same units.
 2. `modelsummary::datasummary_balance()`: Make a balance table.
 
 ---
