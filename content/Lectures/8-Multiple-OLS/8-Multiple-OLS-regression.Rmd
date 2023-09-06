@@ -2,18 +2,24 @@
 title: "8 Multiple OLS"
 summary: "What happens when we use multiple predictors in a OLS regression?"
 author: Merlin Schaeffer
-date: 2022-11-02
-publishdate: 2022-06-08
+date: 2023-11-01
+publishdate: 2023-08-08
 slides: example
 
 bibliography: "./../../../Stats_II.bib"
 csl: "./../../../assets/american-sociological-review.csl"
 ---
 
-Lecture slides: [**Lecture 8**](/Lectures/8-Multiple-OLS/8-Multiple-OLS.html).
+What happens if our balance test tells us that randomization has failed? If our balance test tells us that randomization has failed, it means that the treatment and control groups are not comparable on all of the important confounding variables.
+
+Is everything lost? Fortunately, not everything is lost! Multiple OLS regression can be used to control for imbalanced confounders. Multiple OLS regression is a statistical method that estimates the relationship between a dependent variable and one or more independent variables. The Frisch-Waugh Theorem gives us an intuitive understanding of how OLS controls for imbalanced confounders. The theorem states that the OLS estimator is the same as the least squares estimator that is obtained by regressing the outcome of interest on the confounders and then using the residuals from this regression as the dependent variable in a second regression with the treatment as the independent variable.
+
+OLS regression is a powerful tool for controlling for imbalanced confounders, but it is not a perfect fix. If our balance test tells us that randomization has failed, we can use OLS regression to control for imbalanced confounders. However, it is important to remember that OLS is not a perfect fix. OLS can only control for confounders that we have observed in the data.
+
+![](/Lectures/8-Multiple-OLS/8-Multiple-OLS_files/figure-html/DAG_FrischWaugh-1.png)
+
+[**Lecture slides**](/Lectures/8-Multiple-OLS/8-Multiple-OLS.html).
 
 Reading: **@veaux_stats_2021[Ch. 9.1-9.4]**.
-
-What happens if our balance test tells us that randomization has failed? Is everything lost? Fortunately not! OLS allows us to control for imbalanced confounders. In this session, we will learn how OLS does that and how the Frisch-Waugh Theorem gives us an intuitive understanding of the underlying statistics. That said, we can only control for confounders that we have observed in the data. OLS will therefore never be a perfect fix.
 
 # References
