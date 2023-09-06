@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="" xml:lang="">
   <head>
-    <title>Natural Experiments &amp;    Instrument Variables (IV)</title>
+    <title>Multiple Regression &amp;    Fundamentals of Causal Inference</title>
     <meta charset="utf-8" />
     <meta name="author" content="Merlin Schaeffer  Department of Sociology" />
-    <meta name="date" content="2022-10-29" />
+    <meta name="date" content="2023-09-06" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
     <script src="libs/tile-view/tile-view.js"></script>
@@ -18,24 +18,24 @@
 class: center, middle, inverse, title-slide
 
 .title[
-# Natural Experiments &amp; <br><br> Instrument Variables (IV)
+# Multiple Regression &amp; <br><br> Fundamentals of Causal Inference
 ]
 .subtitle[
-## Sometimes nature interferes
+## <br>7. Natural Experiments &amp; <br><br> Instrument Variables (IV)
 ]
 .author[
 ### Merlin Schaeffer<br> Department of Sociology
 ]
 .date[
-### 2022-10-29
+### 2023-09-06
 ]
 
 ---
 
 
-# The goal of social science research
+# Goal of empirical sociology
 
-.font140[.center[.alert[Use data to discover patterns ("social facts" in Durkheim's terms), &lt;br&gt; and **the social mechanisms that bring them about**.]]]
+.font130[.center[Use data to discover patterns, &lt;br&gt; and the .alert[social mechanisms that bring them about.]]]
 
 &lt;img src="https://liu.se/-/media/istock-501261958.jpg?mw=1120&amp;mh=1120&amp;hash=DA8977CCE6A6E600AE80A40CFEE771C9" width="70%" style="display: block; margin: auto;" /&gt;
 
@@ -43,19 +43,19 @@ class: center, middle, inverse, title-slide
 class: inverse middle
 # Today's schedule
 
-1. **Application 1**: Terrorist attacks and xenophobia. 
+1. **Today's 1st research question**: Terrorist attacks and xenophobia. 
 
 2. **Natural Experiments**
   + RCTs versus Natural Experiments
 
-3. **Application 2:** Moving out of poor neighborhoods during early childhood.
+3. **Today's 1st research question:** Moving out of poor neighborhoods during early childhood.
 
 4. **Intention to Treat (ITT)** Effects
   + RCTs versus ITTs
 
 5. **Instrument Variables (IV)**
   - 3 IV requirements
-  - First stage, reduced form, &amp; IV estimator
+  - First stage, reduced form, &amp; Wald IV estimator
   - Why IV is LATE (local average treatment effect)
 
 ---
@@ -73,7 +73,7 @@ class: inverse middle
 
 ---
 class: inverse middle center
-# Research question 1 of the day
+# Today's 1st research question
 
 .right-column[
 &lt;img src="https://api.time.com/wp-content/uploads/2019/07/gettyimages-1064896696.jpg" width="60%" style="display: block; margin: auto;" /&gt;&lt;img src="https://www.brookings.edu/wp-content/uploads/2019/07/Denmark.jpg?w=1200&amp;h=630&amp;crop=1" width="60%" style="display: block; margin: auto;" /&gt;
@@ -96,18 +96,18 @@ class: inverse middle center
 .push-left[
 &lt;img src="./img/randomization2.png" width="60%" style="display: block; margin: auto;" /&gt;
 
-- If we *randomly* divide subjects into treatment and control groups: They come from the same underlying population. 
-  &lt;br&gt; &lt;br&gt; `\(\rightarrow\)` Similar .alert[on average], *in every way*,&lt;br&gt; **including their `\(Y_{0}\)` **!
+If we *randomly* divide subjects into treatment and control groups, .alert[they come from the same underlying population]. 
+  &lt;br&gt; &lt;br&gt; `\(\rightarrow\)` They will be similar, on average, *in every way*;&lt;br&gt; **including their `\(Y_{0}\)` **!
   &lt;br&gt; &lt;br&gt; `\(\rightarrow E[Y_{0i}|D=1] = E[Y_{0i}|D=0]\)`!
 ]
 
 .push-right[
 
-`$$\begin{equation}\begin{split} E &amp; [Y_{1i}|D=1] - E[Y_{0i}|D=0] \\  \\ &amp; = E[\color{red}{Y_{0i} + \kappa} |D=1] - E[Y_{0i}|D=0], \\ \\ &amp;= \color{red}{\kappa} + \underbrace{E[Y_{0i} |D=1] - E[Y_{0i}|D=0]}_{\underbrace{0}_{\text{(if randomization has worked)}}}, \\ \\ &amp; = \underbrace{\color{red}{\kappa}.}_{\text{The average causal effect}} \end{split}\end{equation}$$`
+`$$\begin{equation}\begin{split} &amp;  \underbrace{E[Y_{1i}|D=1] - E[Y_{0i}|D=0]}_{\text{Comparison between treatment anc control group}} \\  \\ &amp; = E[\color{red}{Y_{0i} + \kappa} |D=1] - E[Y_{0i}|D=0], \\ \\ &amp;= \color{red}{\kappa} + \underbrace{E[Y_{0i} |D=1] - E[Y_{0i}|D=0]}_{\underbrace{0}_{\text{(if randomization has worked)}}}, \\ \\ &amp; = \underbrace{\color{red}{\kappa}.}_{\text{The average causal effect}} \end{split}\end{equation}$$`
 ]
 
 ---
-# But that's impossible and un-ethical!
+# But that is impossible and un-ethical!
 
 .left-column[.center[
 .alert[We cannot 
@@ -129,7 +129,7 @@ class: clear
 .left-column[
 &lt;br&gt;
 
-&lt;img src="https://jlegewie.com/files/joscha.jpg" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="https://jlegewie.com/files/joscha.jp" width="100%" style="display: block; margin: auto;" /&gt;
 
 ### My friend Joscha 
 
@@ -138,7 +138,7 @@ class: clear
 ]
 
 .right-column[
-&lt;img src="./img/Joscha1.png" width="60%" style="display: block; margin: auto;" /&gt;
+&lt;img src="https://www.wzb.eu/files/styles/4_column_content_lg/public/image/dsi/aam/wzbjahresbericht3836-smaller.jpg?itok=_G0nt5M9" width="60%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -146,7 +146,7 @@ class: clear
 
 
 .push-left[
-**Natural experiment**: .alert[Random exposure] to treatment or control conditions are determined .alert[by nature] (or by other factors outside the control of researchers).
+**Natural experiment**: .alert[Random exposure] to treatment or control conditions are determined .alert[by nature], or by other factors outside the control of researchers.
 
 In comparison to a normal RCT, this allows for:
 &gt; an experiment [...] on the grandest scale.
@@ -180,15 +180,15 @@ The cause of Cholera]
 --
 
 .push-left[
-.alert[Assumption 1]: The European Social Survey is based on random sampling. .alert[The day of] `\(i\)`.alert['s interview is also random!]
+.alert[Assumption 1]: The European Social Survey is based on random sampling. .alert[The day on which] `\(i\)` .alert[was interviewed is also random!]
 
-- *Reachability bias*: Respondents who are easier to contact tend to be interviewed earlier during the survey period.
+*Reachability bias*: Respondents who are easier to contact tend to be interviewed earlier during the survey period.
 ]
 
 --
 
 .push-right[
-.alert[Assumption 2]: No other event or change over time had a causal effect on `\(Y_{i}\)`.
+.alert[Assumption 2]: No other event at the time had a causal effect on `\(Y_{i}\)`.
 ]
 
 ---
@@ -286,6 +286,13 @@ class: middle clear
 ]
 
 ---
+layout: false
+class: inverse middle center
+# Break
+
+&lt;iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+
+---
 class: inverse middle center
 # Intention to Treat (ITT) Designs
 
@@ -341,7 +348,7 @@ Are these average causal effects of moving out of poor neighborhoods during chil
 
 `\(\rightarrow\)` The ITTs are average causal effects.
 
-`\(\rightarrow\)` But they are average causal effects .alert[of being offered support] `\(\color{red}{Z}\)` .alert[, not of having moved to a better neighborhood] `\(\color{black}{D}\)`.alert[!]
+`\(\rightarrow\)` But they are average causal effects .alert[of being offered support] `\(\color{red}{Z}\)` &lt;br&gt;.alert[, not of having moved to a better neighborhood] `\(\color{black}{D}\)`.alert[!]
 
 ]]
 
@@ -354,7 +361,7 @@ layout: false
 
 `$$\begin{equation}\begin{split} &amp; |r_{I,D}| = 1 \\ &amp;\rightarrow I = D! \end{split}\end{equation}$$`
 
-That is, the absolute correlation between intervention `\(I\)` and predictor of interest `\(D\)` is 1, making them practically the same thing.
+The absolute correlation between intervention `\(I\)` and predictor of interest `\(D\)` is 1, making them practically the same thing.
 &lt;br&gt;
 &lt;br&gt;
 
@@ -368,7 +375,7 @@ That is, the absolute correlation between intervention `\(I\)` and predictor of 
 
 `$$\begin{equation}\begin{split} &amp; |r_{Z, D}| &lt; 1 \\ &amp;\rightarrow Z \neq D! \end{split}\end{equation}$$`
 
-That is, the absolute correlation between intervention `\(Z\)` and predictor of interest `\(D\)` is smaller than 1, inducing some portion of random variation into `\(D\)`.
+The absolute correlation between intervention `\(Z\)` and predictor of interest `\(D\)` is smaller than 1, which induces some random variation into `\(D\)`.
 
 
 &lt;img src="7-NatExp-IV1_files/figure-html/DAG5-1.png" width="70%" style="display: block; margin: auto;" /&gt;
@@ -385,12 +392,11 @@ layout: true
 
 .left-column[.content-box-red[
 .center[**3 Requirements**]
-1. *First stage*: Instrument has causal effect on outcome `\(D_{i}\)`.
+1. *First stage*: Instrument has causal effect on `\(D_{i}\)`.
 
 2. *Randomization*: Instrument is randomly assigned (RCT or natural experiment).
 
-3. *Exclusion restriction*: Instrument affects outcome `\(Y_{i}\)` **_only_** through its effect on `\(D\)`.
-  + In practice very difficult to test
+3. *Exclusion restriction*: Instrument affects outcome `\(Y_{i}\)` **_only_** through its effect on `\(D_{i}\)`.
 ]]
 
 ---
@@ -438,12 +444,12 @@ layout: false
 --
 
 .push-right[.content-box-blue[
-.center[**The exclusion restriction matters!**&lt;br&gt;(but we can never test it)]
+.center[**The exclusion restriction matters!**&lt;br&gt;(but we cannot test it)]
 &lt;img src="7-NatExp-IV1_files/figure-html/unnamed-chunk-25-1.png" width="65%" style="display: block; margin: auto;" /&gt;
 
 `$$\frac{1624}{0.4766} = \frac{\rho}{\phi} = \lambda \color{red}{+ ?}$$`
 .center[.alert[
-If the exclusion restriction does not hold, &lt;br&gt; we additionally weigh-up other causal effects than `\(D\)` by `\(\frac{1}{\phi}\)`
+If the exclusion restriction does not hold, &lt;br&gt; we additionally weigh-up other effects by `\(\frac{1}{\phi}\)`
 ]]]]
 
 ---
@@ -553,13 +559,13 @@ class: middle clear
 class: inverse
 # Today's general lessons
 
-1. *Natural Experiment*: Sometimes nature or other forces randomly exposure people to treatment or control conditions. Compared to RCTs we have less control that exposure was truly random, but we can often study more interesting - real - events.
+1. *Natural Experiment*: A natural experiment is a situation in which people are randomly exposed to a treatment or control condition, without the intervention of a researcher. Compared to RCTs we have less control that exposure was truly random, but we can often study more interesting - real - events.
 
-2. *Intention to Treat*: Some people do not comply with the experimental group we assign them to. In that case we estimate an average causal intention to treat effect, if we focus on the randomly assigned treatment alone.
+2. *Intention to Treat*: Intention-to-treat (ITT) analysis is a statistical method that compares the outcomes of people who were assigned to different treatment groups, regardless of whether they actually received the treatment. We thus estimate an average causal intention to treat effect, if we focus on the randomly assigned treatment alone.
 
-3. *Instrument Variables (IV) Estimation*: Instrument variable regression allows us to recover the causal effect of the treatment (not the intention) in such situations.
+3. *Instrument Variables (IV) Estimation*: Instrument variable regression allows us to recover the causal effect of the treatment (not the intention) in an intention to treat design.
 
-4. *LATE (Local average treatment effect:* IV only estimates the treatment effect among compliers; we cannot know how people who did not comply to the intended treatment would have been affected by the treatment.
+4. *LATE (Local average treatment effect):* The LATE is the average treatment effect among people who would have complied with the treatment if they had been assigned to it. This is a narrower effect than the overall treatment effect, but it is often more precise. This means, we cannot know how people who did not comply to the intended treatment would have been affected by the treatment.
 
 ---
 # References

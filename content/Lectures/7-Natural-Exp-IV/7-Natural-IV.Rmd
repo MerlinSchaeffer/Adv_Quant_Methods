@@ -1,29 +1,26 @@
 ---
 title: "7 Natural Experiments & Instrument Variables (IV)"
-summary: "Sometimes RCTs just occur naturally; we don't always need control over treatment assignment."
+summary: "Sometimes RCTs just occur naturally."
 author: Merlin Schaeffer
-date: 2022-10-26
-publishdate: 2022-06-08
+date: 2023-10-25
+publishdate: 2023-08-08
 slides: example
 
 bibliography: "./../../../Stats_II.bib"
 csl: "./../../../assets/american-sociological-review.csl"
 ---
 
-Lecture slides: [**Lecture 7**](/Lectures/7-NatExp-IV1/7-NatExp-IV1.html).
+Randomized controlled trials (RCTs) are the gold standard for estimating causal effects, but they are not always feasible or ethical. For example, we cannot conduct an RCT to study the effects of a terror attack on anti-immigrant attitudes, because it would be unethical to randomly expose people to a terror attack. In such cases, we can use natural experiments, which are situations in which people are randomly exposed to a treatment or control condition, without the intervention of a researcher. However, natural experiments are not always perfect, and they can be difficult to find.
+
+Even when RCTs are feasible, respondents may not always comply with the treatment that they are assigned. For example, in the Sherman and Berk (1984) study of the effects of arrest on domestic violence, many police officers ignored the researchers' instructions and arrested the suspects anyway. In such cases, we can use instrumental variables (IV) regression to estimate the causal effect of the treatment, even if people are not randomly assigned to treatment groups. IV regression is a powerful statistical method, but it can be difficult to implement and interpret. It is important to carefully consider the assumptions of both natural experiments and IV regression before using them to estimate causal effects.
+
+![](/Lectures/7-NatExp-IV1/7-NatExp-IV1_files/figure-html/DAG5-1.png)
+
+[**Lecture slides**](/Lectures/7-NatExp-IV1/7-NatExp-IV1.html).
 
 Reading: **@angrist_mastering_2014[Ch. 3 Instrument Variables, Pages 98-123]**.
 
 *Optional (skim) reading*: @legewie_terrorist_2013,  @sherman_specific_1984, and @chetty_effects_2016.
-
-```{r, echo = FALSE, out.width='50%'}
-knitr::include_graphics('https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Instrumental_variables_-_Zmienne_instrumentalne.svg/1200px-Instrumental_variables_-_Zmienne_instrumentalne.svg.png')
-```
-*Source*: [Wikipedia article on IV](https://en.wikipedia.org/wiki/Instrumental_variables_estimation)
-
-Randomized controlled trials are the gold standard to estimate causal effects, but often we cannot implement them to investigate the things that really interest us. For example, we cannot study the effects of a terror attack on anti-immigrant attitudes with an RCT - it would be un-ethical to commit a terror attack and to randomly expose certain people to it. Instead of an RCT, we might get lucky and find a *Natural Experiment*.
-
-At other times, we may be able to implement a RCT, but the respondents of our study simply don't comply to the treatment that we assign them. For example, @sherman_specific_1984 told police officers to either arrest or only warn husbands who were accused of domestic violence - but when they arrived at the scene many police officers ignored what they were told to do and did what they saw as the best strategy. Fortunately, *Instrument Variable (IV)* regression allows us to recover the causal effect.
 
 ## Don't miss out on this lecture by Joshua Angrist
 <iframe width="560" height="315" src="https://www.youtube.com/embed/yHypzxYikqk" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
