@@ -163,6 +163,11 @@ class: clear
 ```
 ]
 
+.panel[.panel-name[Citizenship rights across the world '22]
+```{r ref.label = "citiz-world", out.width='100%', fig.height = 8, fig.width = 20, results = FALSE, echo = FALSE}
+```
+]
+
 .panel[.panel-name[Plot code] 
 ```{r citiz-world, fig.show = 'hide', echo = TRUE}
 ggplot(data = Dat_citi_rights %>% filter(date == 2022), # Make coordinate system for data from 2022,
@@ -172,10 +177,6 @@ ggplot(data = Dat_citi_rights %>% filter(date == 2022), # Make coordinate system
   labs(y = "Citizenship rights", x = "", cap = "Source: Freedom House data for 2022") + # Axis labels,
   theme_minimal() + # Simple background layout,
   theme(axis.text.x = element_text(angle = 60, hjust = 1)) # Write country names in a 60 degree angle.
-```
-]
-.panel[.panel-name[Civic and political citizenship rights across the world]
-```{r ref.label = "citiz-world", out.width='100%', fig.height = 8, fig.width = 20, results = FALSE, echo = FALSE}
 ```
 ]]
 
@@ -397,6 +398,12 @@ ggplot(data = Dat, # Make coord system for data,
 
 ---
 class: inverse middle center
+# Break
+
+<iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'></iframe>
+
+---
+class: inverse middle center
 # Scatter plots
 
 
@@ -550,12 +557,6 @@ Dat %>% # Use our data,
   cor() # Estimate correlation. #<<
 ```
 ]]]
-
----
-class: inverse middle center
-# Break
-
-<iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'></iframe>
 
 ---
 class: middle clear
