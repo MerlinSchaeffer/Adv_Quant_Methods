@@ -15,23 +15,15 @@ library(webexercises)
 library(essentials)
 ```
 
-```{r eval = FALSE}
-# Run this line of code once, and only if you have not done the new setuop explained under "About".
-# It downloads Data from Gelman & Hill's "Regression and other Stories"
-remotes::install_github("jrnold/masteringmetrics", subdir = "masteringmetrics")
-```
-
 ```{r}
 pacman::p_load(
   tidyverse, # Data manipulation,
   ggplot2, # beautiful figures,
-  texreg, # regression tables with nice layout,
   estimatr, # Regression for weighted data,
   modelr, # Turn results of lm() into a tibble,
-  modelsummary, # for balance tables,
+  modelsummary, # for balance and regression tables
   ivreg, # IV 2SLS,
-  masteringmetrics, # Data and examples from Mastering Metrics
-  remotes) # Install beta version packages from GitHub.
+  masteringmetrics) # Data and examples from Mastering Metrics
 
 # Load the data from the Minneapolis Domestic Violence Experiment
 data("mdve", package = "masteringmetrics")
@@ -111,7 +103,9 @@ mdve <- mdve %>%
       T_FINAL == "Coddled" ~ 1))
 
 ols <- lm_robust(T_FINAL_01 ~ T_RANDOM, data = mdve)
-screenreg(ols, digits = 3)
+
+modelsummary(list("Repeat violence" = ols), stars = TRUE,
+             gof_map = c("nobs", "r.squared"))
 ```
 
 ```{r include = FALSE}

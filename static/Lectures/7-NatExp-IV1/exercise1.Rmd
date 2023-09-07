@@ -23,7 +23,7 @@ pacman::p_load(
   ggplot2, # beautiful figures,
   estimatr, # Regression for weighted data,
   furniture, # For row-means,
-  texreg) # regression tables with nice layout.
+  modelsummary) # for balance and regression tables.
 
 # Bali terror attack
 event_date_begin <- as.Date("2002-09-14")
@@ -69,7 +69,8 @@ ESS <- read_dta("../../../assets/Legewie_ESS_02.dta") %>%
 ols_pt <- lm_robust(anti_immi ~ treat, data = ESS, weights = pspwght)
 
 # Report results in a nicely-formatted table
-screenreg(ols_pt, include.ci = FALSE, digits = 3)
+modelsummary(list("Xeno PT" = ols_pt), stars = TRUE,
+             gof_map = c("nobs", "r.squared"))
 ```
 
 ```{r echo = FALSE}
@@ -147,7 +148,8 @@ ols_se <- lm_robust(anti_immi ~ treat,
                     weights = pspwght)
 
 # Report results in a nicely-formatted table
-screenreg(ols_se, include.ci = FALSE, digits = 3)
+modelsummary(list("Xeno SE" = ols_se), stars = TRUE,
+             gof_map = c("nobs", "r.squared"))
 ```
 
 ```{r echo = FALSE}

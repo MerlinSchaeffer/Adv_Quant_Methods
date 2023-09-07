@@ -53,7 +53,8 @@ APAX <- APAX %>%
 zols <- lm_robust(z_antidiscr_law ~ article, 
                  weight = gewFAKT, data = APAX)
 
-screenreg(zols, include.ci = FALSE, digits = 3)
+modelsummary(list("Anti-discr. law" = zols), stars = TRUE,
+             gof_map = c("nobs", "r.squared"))
 ```
 `r unhide()`
 
