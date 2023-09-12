@@ -4,7 +4,7 @@
     <title>Multiple Regression &amp;    Fundamentals of Causal Inference</title>
     <meta charset="utf-8" />
     <meta name="author" content="Merlin Schaeffer  Department of Sociology" />
-    <meta name="date" content="2023-09-06" />
+    <meta name="date" content="2023-09-12" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
     <script src="libs/tile-view/tile-view.js"></script>
@@ -29,7 +29,7 @@ class: center, middle, inverse, title-slide
 ### Merlin Schaeffer<br> Department of Sociology
 ]
 .date[
-### 2023-09-06
+### 2023-09-12
 ]
 
 ---
@@ -54,6 +54,7 @@ class: inverse
 2. **Recap**
   
   2.1 *Scatter plots*
+  
   2.2 *Correlation*
     + Z-standardization
     + `\(r_{y,x}\)`
@@ -132,7 +133,7 @@ class: clear
 .panel[.panel-name[The data]
 
 .left-column[
-- Since 1972, Freedom House codes civil and political citizenship rights around the world on a scale from 7 (most free) to 1 (least free).
+- Since 1972, Freedom House codes civil and political citizenship rights around the world on a scale from 12 (strong citizenship rights) to 0 (no citizenship rights).
 ]
 
 .right-column[
@@ -270,18 +271,9 @@ OK great, now I have two tibbles. But how can I combine them?
 ---
 # Relational data
 
-.left-column[
-- If you work with multiple tibbles, you work with relational data .alert[if they have one or more variable(s) in common].
-]
+If you work with multiple tibbles, you work with relational data .alert[if they have one or more variable(s) in common].
 
-.right-column[
-&lt;img src="https://d33wubrfki0l68.cloudfront.net/245292d1ea724f6c3fd8a92063dcd7bfb9758d02/5751b/diagrams/relational-nycflights.png" width="100%" style="display: block; margin: auto;" /&gt;
-]
-
----
-# Relational data
-
-Our tibbles are related, because both contain *countries* at various *dates*. &lt;br&gt;The combination of country and date is the **key** that allows us to relate both tibbles.
+Our tibbles are related, because both contain *countries* at various *dates*. &lt;br&gt;The combination of country+date is the **key** that allows us to relate both tibbles.
 
 .push-left[
 
@@ -568,13 +560,15 @@ OK but eye-balling is hardly enough to count as scientific evidence, is it?
 
 .push-right[
 .content-box-blue[
-.center[**A precise statistic**&lt;br&gt; in three steps]
-1. `\(z_y*z_x\)`
-  + positive for a green points, zero for blue ones, and negative for red ones. Larger products contribute more to the association
-2. `\(\sum^{n}_{i=1}z_y*z_x\)`
-  + The general trend.
-3. `\(r = \frac{\sum^{n}_{i=1}z_y*z_x}{n-1}\)`
-  + We divide by `\(n - 1\)`;&lt;br&gt; the resulting `\(r\)` varies between -1 and 1.
+.center[**A precise statistic** &lt;br&gt; in three steps]
+
+`$$r_{y,x} = \frac{\sum^{n}_{i=1}z_y*z_x}{n-1}$$`
+
+1. `\(\color{orange}{z_y*z_x}\)`: positive for a green points, zero for blue ones, and negative for red ones. Larger products contribute more to the association.
+
+2. `\(\color{orange}{\sum^{n}_{i=1}z_y*z_x}\)`: The general trend.
+
+3. `\(\color{orange}{\frac{\sum^{n}_{i=1}z_y*z_x}{n-1}}\)`: We divide by `\(n - 1\)`; the resulting `\(r\)` varies between -1 and 1.
 ]]]
 .panel[.panel-name[Poverty &amp; Socialism]
 .left-column[
@@ -626,19 +620,19 @@ class: inverse middle center
 ]
 
 .left-column[
-- **How can we directly calculate that trend line?** &lt;br&gt;&lt;br&gt; Then we could state how much of a reduction in poverty we would expect for a year increase of socialism.
+**How can we directly calculate that trend line?** &lt;br&gt;&lt;br&gt; Then we could state how much of a reduction in poverty we would expect for a year increase of socialism.
 ]
 
 ---
 # Models
 
 .left-column[
-- **Model**: attempt to give reduced representation of reality. &lt;br&gt;&lt;br&gt;Model should capture answer to our research question. .backgrnote[
+**Model**: attempt to give reduced representation of reality. &lt;br&gt;&lt;br&gt;Model should capture answer to our research question. .backgrnote[
 Models should not be driven by few singular cases, like in this example.]
 ]
 
 .right-column[
-&lt;img src="2-Corr-n-Reg_files/figure-html/unnamed-chunk-31-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="2-Corr-n-Reg_files/figure-html/unnamed-chunk-30-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -728,7 +722,7 @@ modelsummary(list("OLS" = ols, "Std. OLS" = zols), # Nicely-formatted table
              gof_map = c("nobs", "r.squared")) # Only 2 models fit stats
 ```
 
-&lt;img src="2-Corr-n-Reg_files/figure-html/unnamed-chunk-35-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+&lt;img src="2-Corr-n-Reg_files/figure-html/unnamed-chunk-34-1.png" width="70%" style="display: block; margin: auto;" /&gt;
 ]
 
 .left-column[
@@ -774,7 +768,7 @@ modelsummary(list("OLS" = ols, "Std. OLS" = zols), # Nicely-formatted table
 
 .panel[.panel-name[Interpretation]
 .push-left[
-&lt;img src="2-Corr-n-Reg_files/figure-html/unnamed-chunk-37-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="2-Corr-n-Reg_files/figure-html/unnamed-chunk-36-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]
 
 .push-right[

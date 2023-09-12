@@ -62,6 +62,7 @@ class: inverse
 2. **Recap**
   
   2.1 *Scatter plots*
+  
   2.2 *Correlation*
     + Z-standardization
     + $r_{y,x}$
@@ -147,7 +148,7 @@ class: clear
 .panel[.panel-name[The data]
 
 .left-column[
-- Since 1972, Freedom House codes civil and political citizenship rights around the world on a scale from 7 (most free) to 1 (least free).
+- Since 1972, Freedom House codes civil and political citizenship rights around the world on a scale from 12 (strong citizenship rights) to 0 (no citizenship rights).
 ]
 
 .right-column[
@@ -256,20 +257,9 @@ knitr::include_graphics('https://powietrze.malopolska.pl/wp-content/uploads/2020
 ---
 # Relational data
 
-.left-column[
-- If you work with multiple tibbles, you work with relational data .alert[if they have one or more variable(s) in common].
-]
+If you work with multiple tibbles, you work with relational data .alert[if they have one or more variable(s) in common].
 
-.right-column[
-```{r, echo = FALSE, out.width='100%'}
-knitr::include_graphics('https://d33wubrfki0l68.cloudfront.net/245292d1ea724f6c3fd8a92063dcd7bfb9758d02/5751b/diagrams/relational-nycflights.png')
-```
-]
-
----
-# Relational data
-
-Our tibbles are related, because both contain *countries* at various *dates*. <br>The combination of country and date is the **key** that allows us to relate both tibbles.
+Our tibbles are related, because both contain *countries* at various *dates*. <br>The combination of country+date is the **key** that allows us to relate both tibbles.
 
 .push-left[
 ```{r}
@@ -537,13 +527,15 @@ knitr::include_graphics('img/Correlation.png')
 
 .push-right[
 .content-box-blue[
-.center[**A precise statistic**<br> in three steps]
-1. $z_y*z_x$
-  + positive for a green points, zero for blue ones, and negative for red ones. Larger products contribute more to the association
-2. $\sum^{n}_{i=1}z_y*z_x$
-  + The general trend.
-3. $r = \frac{\sum^{n}_{i=1}z_y*z_x}{n-1}$
-  + We divide by $n - 1$;<br> the resulting $r$ varies between -1 and 1.
+.center[**A precise statistic** <br> in three steps]
+
+$$r_{y,x} = \frac{\sum^{n}_{i=1}z_y*z_x}{n-1}$$
+
+1. $\color{orange}{z_y*z_x}$: positive for a green points, zero for blue ones, and negative for red ones. Larger products contribute more to the association.
+
+2. $\color{orange}{\sum^{n}_{i=1}z_y*z_x}$: The general trend.
+
+3. $\color{orange}{\frac{\sum^{n}_{i=1}z_y*z_x}{n-1}}$: We divide by $n - 1$; the resulting $r$ varies between -1 and 1.
 ]]]
 .panel[.panel-name[Poverty & Socialism]
 .left-column[
@@ -596,14 +588,14 @@ socialism_corr2 +
 ]
 
 .left-column[
-- **How can we directly calculate that trend line?** <br><br> Then we could state how much of a reduction in poverty we would expect for a year increase of socialism.
+**How can we directly calculate that trend line?** <br><br> Then we could state how much of a reduction in poverty we would expect for a year increase of socialism.
 ]
 
 ---
 # Models
 
 .left-column[
-- **Model**: attempt to give reduced representation of reality. <br><br>Model should capture answer to our research question. .backgrnote[
+**Model**: attempt to give reduced representation of reality. <br><br>Model should capture answer to our research question. .backgrnote[
 Models should not be driven by few singular cases, like in this example.]
 ]
 

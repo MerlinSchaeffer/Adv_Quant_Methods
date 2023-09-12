@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="" xml:lang="">
   <head>
-    <title>Multiple OLS regression</title>
+    <title>Multiple Regression &amp;    Fundamentals of Causal Inference</title>
     <meta charset="utf-8" />
     <meta name="author" content="Merlin Schaeffer  Department of Sociology" />
-    <meta name="date" content="2022-11-02" />
+    <meta name="date" content="2023-09-12" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
     <script src="libs/tile-view/tile-view.js"></script>
@@ -20,24 +20,24 @@
 class: center, middle, inverse, title-slide
 
 .title[
-# Multiple OLS regression
+# Multiple Regression &amp; <br><br> Fundamentals of Causal Inference
 ]
 .subtitle[
-## Adjusting randomized interventions <br><br> for <em>observed</em> confounders
+## 8. Multiple OLS regression: Adjusting randomized interventions for <em>observed</em> confounders
 ]
 .author[
 ### Merlin Schaeffer<br> Department of Sociology
 ]
 .date[
-### 2022-11-02
+### 2023-09-12
 ]
 
 ---
 
 
-# The goal of social science research
+# Goal of empirical sociology
 
-.font140[.center[.alert[Use data to discover patterns ("social facts" in Durkheim's terms), &lt;br&gt; and **the social mechanisms that bring them about**.]]]
+.font130[.center[Use data to discover patterns, &lt;br&gt; and the .alert[social mechanisms that bring them about.]]]
 
 &lt;img src="https://liu.se/-/media/istock-501261958.jpg?mw=1120&amp;mh=1120&amp;hash=DA8977CCE6A6E600AE80A40CFEE771C9" width="70%" style="display: block; margin: auto;" /&gt;
 
@@ -57,19 +57,17 @@ class: clear
 class: inverse middle
 # Today's schedule
 
-1. **(Natural) Experiments &amp; Multiple OLS** 
+1. **Today's 1st research question**: Terrorist attacks and xenophobia re-visited.
 
-2. **Application 1**: Terrorist attacks and xenophobia re-visited.
-
-3. **Multiple OLS**
-
+2. **Multiple OLS**
+  
   + Omitted variable bias
   + Frisch-Waugh Theorem
   + Estimation
 
-5. **IV &amp; Multiple OLS**
+3. **IV &amp; Multiple OLS**
 
-4. **Application 2**: Zero-tolerance for domestic violence re-visited.
+4. **Today's 2nd research question**: Zero-tolerance for domestic violence re-visited.
   + Multiple OLS to the rescue
 
 ---
@@ -95,8 +93,8 @@ class: inverse middle center
 .push-left[
 &lt;img src="./img/randomization2.png" width="60%" style="display: block; margin: auto;" /&gt;
 
-- If we *randomly* divide subjects into treatment and control groups: They come from the same underlying population. 
-  &lt;br&gt; &lt;br&gt; `\(\rightarrow\)` Similar .alert[on average], *in every way*,&lt;br&gt; **including their `\(Y_{0}\)` **!
+If we *randomly* divide subjects into treatment and control groups, .alert[they come from the same underlying population]. 
+  &lt;br&gt; &lt;br&gt; `\(\rightarrow\)` They will be similar, on average, *in every way*;&lt;br&gt; **including their `\(Y_{0}\)` **!
   &lt;br&gt; &lt;br&gt; `\(\rightarrow E[Y_{0i}|D=1] = E[Y_{0i}|D=0]\)`!
 ]
 
@@ -111,7 +109,7 @@ layout: true
 .left-column[
 &lt;br&gt;
 
-&lt;img src="https://jlegewie.com/files/joscha.jpg" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="https://www.wzb.eu/files/styles/4_column_content_lg/public/image/dsi/aam/wzbjahresbericht3836-smaller.jpg?itok=_G0nt5M9" width="60%" style="display: block; margin: auto;" /&gt;
 
 ]
 
@@ -160,14 +158,14 @@ class: clear
 # Age as confounder? .font70[(i.e., Age-based selection into treatment?)]
 
 .left-column[
-- On average, xenophobia increases with age.
+On average, xenophobia increases with age.
 
-- The older a respondent, the more likely they are part of the control group (i.e., not exposed to Bali attack).
+The older a respondent, the more likely they are part of the control group (i.e., not exposed to Bali attack).
 
 `\(\rightarrow E[Y_{0i}|D=0] \color{red}{&gt;} E[Y_{0i}|D=1]\)` 
 
 .backgrnote[
-- Note that in Portugal, older respondents were more likely to be in the treatment group.
+Note that in Portugal, older respondents were more likely to be in the treatment group.
 `\(\rightarrow E[Y_{0i}|D=0] \color{red}{&lt;} E[Y_{0i}|D=1]\)` 
 ]]
 
@@ -178,6 +176,9 @@ class: clear
 ---
 class: inverse middle center
 # Multiple OLS Regression
+
+
+`$$y_{i} = \alpha + \beta_{1}x_{1} + \beta_{2}x_{2} + \ldots + \beta_{k}x_{k} + \epsilon_{i}$$`
 
 ---
 # Setup and simulated toy data
@@ -213,35 +214,59 @@ toydat &lt;- tibble(
 &lt;img src="8-Multiple-OLS_files/figure-html/unnamed-chunk-10-1.png" width="80%" style="display: block; margin: auto;" /&gt;
 ]]
 .panel[.panel-name[Exposure to terror]
-.push-left[.font90[
+.push-left[.font80[
 
 ```r
 toydat &lt;- toydat %&gt;% 
   mutate( # Day of interview: Age + random.
     int_day = (-0.05*age) + rnorm(n = 500, mean = 0, sd = 1),
-    # Bali: After mean survey period.
-    bali = case_when(
+    bali = case_when( # Bali: After mean survey period.
       int_day &lt; mean(int_day) ~ 0,
       int_day &gt;= mean(int_day) ~ 1))
 
-lm_robust(bali ~ age, data = toydat) %&gt;%
-  screenreg(include.ci = FALSE, digits = 3)
-# 
-# ========================
-#              Model 1    
-# ------------------------
-# (Intercept)    1.299 ***
-#               (0.090)   
-# age           -0.018 ***
-#               (0.002)   
-# ------------------------
-# R^2            0.108    
-# Adj. R^2       0.107    
-# Num. obs.    500        
-# RMSE           0.473    
-# ========================
-# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
+ols &lt;- lm_robust(bali ~ age, data = toydat)
+modelsummary(list("Day of Int." = ols), stars = TRUE,
+             gof_map = c("nobs", "r.squared"))
 ```
+
+&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt;  Day of Int. &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 1.299*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.090) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; age &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −0.018*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.002) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 500 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.108 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
+&lt;sup&gt;&lt;/sup&gt; + p &amp;lt; 0.1, * p &amp;lt; 0.05, ** p &amp;lt; 0.01, *** p &amp;lt; 0.001&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;
+&lt;/table&gt;
+
+
 ]]
 .push-right[
 &lt;img src="8-Multiple-OLS_files/figure-html/unnamed-chunk-12-1.png" width="80%" style="display: block; margin: auto;" /&gt;
@@ -266,7 +291,7 @@ toydat &lt;- toydat %&gt;%
 ]]]
 
 ---
-# What's going one here?
+# What's going on here?
 
 .push-left[
 
@@ -278,10 +303,8 @@ ols_bi &lt;- lm_robust(xeno ~ bali, data = toydat)
 ols_mult &lt;- lm_robust(xeno ~ bali + age, data = toydat)
 
 # Regression table of both results
-htmlreg(list(ols_bi, ols_mult), 
-        include.ci = FALSE, digits = 3,
-        custom.model.names = c("Bivariate OLS", 
-                               "Multiple OLS"))
+modelsummary(list("Biv. OLS" = ols_bi, "Mult. OLS" = ols_mult), stars = TRUE,
+             gof_map = c("nobs", "r.squared"))
 ```
 
 .content-box-green[
@@ -290,73 +313,61 @@ Which one of the two models is correct?
 ]
 
 .push-right[
-&lt;table class="texreg" style="margin: 10px auto;border-collapse: collapse;border-spacing: 0px;caption-side: bottom;color: #000000;border-top: 2px solid #000000;"&gt;
-&lt;caption&gt;Statistical models&lt;/caption&gt;
-&lt;thead&gt;
-&lt;tr&gt;
-&lt;th style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/th&gt;
-&lt;th style="padding-left: 5px;padding-right: 5px;"&gt;Bivariate OLS&lt;/th&gt;
-&lt;th style="padding-left: 5px;padding-right: 5px;"&gt;Multiple OLS&lt;/th&gt;
-&lt;/tr&gt;
-&lt;/thead&gt;
+&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; Biv. OLS &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; Mult. OLS &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
 &lt;tbody&gt;
-&lt;tr style="border-top: 1px solid #000000;"&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(Intercept)&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;2.436&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.663&lt;sup&gt;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.070)&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.264)&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;bali&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.099&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.325&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.095)&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.096)&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;age&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.037&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.005)&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr style="border-top: 1px solid #000000;"&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;R&lt;sup&gt;2&lt;/sup&gt;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.002&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.096&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Adj. R&lt;sup&gt;2&lt;/sup&gt;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.000&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.092&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Num. obs.&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;500&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;500&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr style="border-bottom: 2px solid #000000;"&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;RMSE&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;1.063&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;1.013&lt;/td&gt;
-&lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 2.436*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.663* &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.070) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.264) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; bali &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.099 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.325*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.095) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.096) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; age &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.037*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.005) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 500 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 500 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.002 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.096 &lt;/td&gt;
+  &lt;/tr&gt;
 &lt;/tbody&gt;
-&lt;tfoot&gt;
-&lt;tr&gt;
-&lt;td style="font-size: 0.8em;" colspan="3"&gt;&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;p &amp;lt; 0.001; &lt;sup&gt;&amp;#42;&amp;#42;&lt;/sup&gt;p &amp;lt; 0.01; &lt;sup&gt;&amp;#42;&lt;/sup&gt;p &amp;lt; 0.05&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tfoot&gt;
+&lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
+&lt;sup&gt;&lt;/sup&gt; + p &amp;lt; 0.1, * p &amp;lt; 0.05, ** p &amp;lt; 0.01, *** p &amp;lt; 0.001&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;
 &lt;/table&gt;
+
+
 ]
 
 ---
@@ -369,14 +380,14 @@ class: clear
 
 
 .push-left[
-.center[When we compare Xenophobia between those with Bali = 0 to those with Bali = 1:]
+.center[When we compare Xenophobia between those with Bali = 0 to those with Bali = 1 in our simulated toy data:]
 
 1. We .alert[know] that one part of the difference is the causal effect `\(\beta_{\text{sample}} = 0.3 + \sigma_{\text{sample}} = 0.325\)`.
 
 .content-box-green[
 - Why do we .alert[know] that in this specific case?
 
-- What else is different between those with Bali = 0 compared to those with &lt;br&gt; Bali = 1?
+- What else is different between those with Bali = 0 compared to those with Bali = 1?
 ]]
 
 ---
@@ -385,38 +396,63 @@ class: clear
 
 .push-right[
 &lt;img src="8-Multiple-OLS_files/figure-html/unnamed-chunk-17-1.png" width="80%" style="display: block; margin: auto;" /&gt;
-.font90[
+.font80[
 
 ```r
 ols_age &lt;- lm_robust(age ~ bali, data = toydat)
-screenreg(ols_age, include.ci = FALSE, digits = 3)
-# 
-# ========================
-#              Model 1    
-# ------------------------
-# (Intercept)   48.092 ***
-#               (0.579)   
-# bali          -6.141 ***
-#               (0.790)   
-# ------------------------
-# R^2            0.108    
-# Adj. R^2       0.107    
-# Num. obs.    500        
-# RMSE           8.827    
-# ========================
-# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
+modelsummary(list("Xeno" = ols_age), stars = TRUE,
+             gof_map = c("nobs", "r.squared"))
 ```
+
+&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt;  Xeno &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 48.092*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.579) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; bali &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −6.141*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.790) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 500 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.108 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
+&lt;sup&gt;&lt;/sup&gt; + p &amp;lt; 0.1, * p &amp;lt; 0.05, ** p &amp;lt; 0.01, *** p &amp;lt; 0.001&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;
+&lt;/table&gt;
+
+
 ]]
 
 .push-left[
-.center[When we compare Xenophobia between those with Bali = 0 to those with Bali = 1:]
+.center[When we compare Xenophobia between those with Bali = 0 to those with Bali = 1 in our simulated toy data:]
 
 1. We .alert[know] that one part of the difference is the causal effect `\(\beta_{\text{sample}} = 0.3 + \sigma_{\text{sample}} = 0.325\)`.
 
 2. We compare between people who have an average age difference of -6.141 years.
 
 .content-box-green[
-To how much Xenophobia do -6.141 years of age amount?
+On average, to how much Xenophobia do -6.141 years of age amount?
 ]
 ]
 
@@ -425,16 +461,73 @@ class: clear
 # Omitted variable bias .font60[aka selection/confounder bias]
 
 .push-right[
-&lt;img src="8-Multiple-OLS_files/figure-html/unnamed-chunk-19-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+&lt;img src="8-Multiple-OLS_files/figure-html/unnamed-chunk-19-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+
+&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; Biv. OLS &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; Mult. OLS &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 2.436*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.663* &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.070) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.264) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; bali &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.099 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.325*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.095) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.096) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; age &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.037*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.005) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 500 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 500 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.002 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.096 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
+&lt;sup&gt;&lt;/sup&gt; + p &amp;lt; 0.1, * p &amp;lt; 0.05, ** p &amp;lt; 0.01, *** p &amp;lt; 0.001&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;
+&lt;/table&gt;
+
+
 ]
 
 .push-left[
-.center[When we compare Xenophobia between those with Bali = 0 to those with Bali = 1:]
+.center[When we compare Xenophobia between those with Bali = 0 to those with Bali = 1 in our simulated toy data:]
 
 1. We .alert[know] that one part of the difference is the causal effect `\(\beta_{\text{sample}} = 0.3 + \sigma_{\text{sample}} = 0.325\)`.
 
 2. We compare between people who have an average age difference of -6.141 years.
-   + Because of this age difference, Xenophobia should additionally differ by:
+
+Because of this age difference, Xenophobia should additionally differ by:
 
 `\(\begin{equation}\begin{split} &amp; -6.141 \times (0.05+\sigma_{\text{Sample}}) \\ = &amp; -6.141 \times 0.037, \\ = &amp; -0.226. \end{split}\end{equation}\)`
 
@@ -457,73 +550,61 @@ What is the result if we take 1. and 2. together?
 
 .push-right[
 .font90[
-&lt;table class="texreg" style="margin: 10px auto;border-collapse: collapse;border-spacing: 0px;caption-side: bottom;color: #000000;border-top: 2px solid #000000;"&gt;
-&lt;caption&gt;Statistical models&lt;/caption&gt;
-&lt;thead&gt;
-&lt;tr&gt;
-&lt;th style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/th&gt;
-&lt;th style="padding-left: 5px;padding-right: 5px;"&gt;Bivariate OLS&lt;/th&gt;
-&lt;th style="padding-left: 5px;padding-right: 5px;"&gt;Multiple OLS&lt;/th&gt;
-&lt;/tr&gt;
-&lt;/thead&gt;
+&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; Biv. OLS &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; Mult. OLS &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
 &lt;tbody&gt;
-&lt;tr style="border-top: 1px solid #000000;"&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(Intercept)&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;2.436&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.663&lt;sup&gt;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.070)&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.264)&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;bali&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.099&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.325&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.095)&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.096)&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;age&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.037&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.005)&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr style="border-top: 1px solid #000000;"&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;R&lt;sup&gt;2&lt;/sup&gt;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.002&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.096&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Adj. R&lt;sup&gt;2&lt;/sup&gt;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.000&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.092&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Num. obs.&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;500&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;500&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr style="border-bottom: 2px solid #000000;"&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;RMSE&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;1.063&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;1.013&lt;/td&gt;
-&lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 2.436*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.663* &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.070) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.264) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; bali &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.099 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.325*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.095) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.096) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; age &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.037*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.005) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 500 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 500 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.002 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.096 &lt;/td&gt;
+  &lt;/tr&gt;
 &lt;/tbody&gt;
-&lt;tfoot&gt;
-&lt;tr&gt;
-&lt;td style="font-size: 0.8em;" colspan="3"&gt;&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;p &amp;lt; 0.001; &lt;sup&gt;&amp;#42;&amp;#42;&lt;/sup&gt;p &amp;lt; 0.01; &lt;sup&gt;&amp;#42;&lt;/sup&gt;p &amp;lt; 0.05&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tfoot&gt;
+&lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
+&lt;sup&gt;&lt;/sup&gt; + p &amp;lt; 0.1, * p &amp;lt; 0.05, ** p &amp;lt; 0.01, *** p &amp;lt; 0.001&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;
 &lt;/table&gt;
+
+
 ]
 `$$0.099 = 0.325 + \underbrace{(0.037 \times -6.141)}_{-0.226}$$`
 ]
@@ -549,7 +630,7 @@ It partials out/controlls for:
   1. `\(\beta_{Y \leftarrow C}\)`
   2. `\(\beta_{D \leftarrow C}\)`
   
-Frisch and Waugh (1933) proved that the way multiple OLS achieves this is mathematically equivalent to the following three steps:
+Frisch and Waugh (1933) proved that the way multiple OLS achieves this is mathematically equivalent to three steps.
 
 &lt;img src="8-Multiple-OLS_files/figure-html/DAG_FrischWaugh-1.png" width="70%" style="display: block; margin: auto;" /&gt;
 ]
@@ -585,7 +666,7 @@ Frisch and Waugh (1933) proved that the way multiple OLS achieves this is mathem
 #  8  53.3  -2.80      0 -0.285 -3.03 
 #  9  28.4  -0.373     1  1.21  -0.756
 # 10  37.9  -1.06      1  2.60   0.330
-# # … with 490 more rows
+# # ℹ 490 more rows
 ```
 ]]
 .push-right[
@@ -621,7 +702,7 @@ Frisch and Waugh (1933) proved that the way multiple OLS achieves this is mathem
 #  8  53.3  -2.80      0 -0.285 -3.03  -0.360
 #  9  28.4  -0.373     1  1.21  -0.756  0.201
 # 10  37.9  -1.06      1  2.60   0.330  0.369
-# # … with 490 more rows
+# # ℹ 490 more rows
 ```
 ]]
 .push-right[
@@ -641,28 +722,48 @@ Frisch and Waugh (1933) proved that the way multiple OLS achieves this is mathem
 # Regress xeno on age,
 ols_e &lt;- lm_robust(e_xeno ~ e_bali, data = toydat)
 
-screenreg(list(ols_mult, ols_e),
-          include.ci = FALSE, digits = 3)
-# 
-# =====================================
-#              Model 1      Model 2    
-# -------------------------------------
-# (Intercept)    0.663 *      0.000    
-#               (0.264)      (0.045)   
-# bali           0.325 ***             
-#               (0.096)                
-# age            0.037 ***             
-#               (0.005)                
-# e_bali                      0.325 ***
-#                            (0.096)   
-# -------------------------------------
-# R^2            0.096        0.023    
-# Adj. R^2       0.092        0.021    
-# Num. obs.    500          500        
-# RMSE           1.013        1.012    
-# =====================================
-# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
+modelsummary(list("Resid. Xeno" = ols_e), stars = TRUE,
+             gof_map = c("nobs", "r.squared"))
 ```
+
+&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt;  Resid. Xeno &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.000 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.045) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; e_bali &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.325*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.096) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 500 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.023 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
+&lt;sup&gt;&lt;/sup&gt; + p &amp;lt; 0.1, * p &amp;lt; 0.05, ** p &amp;lt; 0.01, *** p &amp;lt; 0.001&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;
+&lt;/table&gt;
+
+
 ]]
 .push-right[
 &lt;img src="8-Multiple-OLS_files/figure-html/residuals3-1.png" width="100%" style="display: block; margin: auto;" /&gt;
@@ -679,7 +780,7 @@ class: inverse center
 
 - **_If all confounders are observed without measurement error_**, multiple OLS can thus identify the average causal effect `\(\kappa_{Y \leftarrow D}\)`.
 
-&lt;img src="8-Multiple-OLS_files/figure-html/unnamed-chunk-25-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+&lt;img src="8-Multiple-OLS_files/figure-html/unnamed-chunk-26-1.png" width="60%" style="display: block; margin: auto;" /&gt;
 ]]
 
 --
@@ -715,7 +816,7 @@ The best (now multidimensional) "line" is defined by an overall intercept `\(\al
 .push-right[
 .center[**Frisch-Waugh as DAG**]
 
-&lt;img src="8-Multiple-OLS_files/figure-html/unnamed-chunk-26-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+&lt;img src="8-Multiple-OLS_files/figure-html/unnamed-chunk-27-1.png" width="60%" style="display: block; margin: auto;" /&gt;
 
 ]
 
@@ -773,6 +874,8 @@ The best (now multidimensional) "line" is defined by an overall intercept `\(\al
   &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
+
+
 ]]
 .panel[.panel-name[R code]
 
@@ -811,7 +914,7 @@ class: clear
 # Learning goal 1 .font60[Terror attacks can increase xenophobia]
 
 .push-left[
-.font90[
+.font80[
 
 ```r
 # Estimate the treatment effect with OLS
@@ -821,28 +924,66 @@ ols_pt_bi &lt;- lm_robust(anti_immi ~ treat,
 ols_pt_mult &lt;- lm_robust(anti_immi ~ treat + age, 
                          data = ESS %&gt;% filter(cntry == "PT"), 
                          weights = pspwght)
-
 # Report results in a nicely-formatted table
-screenreg(list(ols_pt_bi, ols_pt_mult), 
-          include.ci = FALSE, digits = 3)
-# 
-# =========================================
-#                  Model 1      Model 2    
-# -----------------------------------------
-# (Intercept)        3.621 ***    3.328 ***
-#                   (0.082)      (0.175)   
-# treatAfter Bali    0.330 **     0.313 ** 
-#                   (0.116)      (0.118)   
-# age                             0.006    
-#                                (0.003)   
-# -----------------------------------------
-# R^2                0.032        0.050    
-# Adj. R^2           0.029        0.044    
-# Num. obs.        291          291        
-# RMSE               0.601        0.596    
-# =========================================
-# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
+modelsummary(list("Biv. OLS" = ols_pt_bi, "Mult. OLS" = ols_pt_mult), stars = TRUE,
+             gof_map = c("nobs", "r.squared"))
 ```
+
+&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; Biv. OLS &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; Mult. OLS &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 3.621*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 3.328*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.082) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.175) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; treatAfter Bali &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.330** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.313** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.116) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.118) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; age &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.006+ &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.003) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 291 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 291 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.032 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.050 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
+&lt;sup&gt;&lt;/sup&gt; + p &amp;lt; 0.1, * p &amp;lt; 0.05, ** p &amp;lt; 0.01, *** p &amp;lt; 0.001&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;
+&lt;/table&gt;
+
+
 ]]
 
 .push-right[
@@ -918,7 +1059,7 @@ layout: true
 # Zero-tolerance for domestic violence?
 
 .left-column[
-&lt;img src="https://images.theconversation.com/files/325865/original/file-20200406-6044-hao5gp.jpg?ixlib=rb-1.1.0&amp;q=45&amp;auto=format&amp;w=1200&amp;h=675.0&amp;fit=crop" width="80%" style="display: block; margin: auto;" /&gt;&lt;img src="https://minbynyt.dk/wp-content/uploads/2021/01/Politi-Betjent-ligger-anholdt-i-ha%CC%8AndjernFoto-Lars-Aarjpg1-780x470.jpg" width="80%" style="display: block; margin: auto;" /&gt;
+&lt;img src="https://images.theconversation.com/files/325865/original/file-20200406-6044-hao5gp.jpg?ixlib=rb-1.1.0&amp;q=45&amp;auto=format&amp;w=1200&amp;h=675.0&amp;fit=crop" width="80%" style="display: block; margin: auto;" /&gt;&lt;img src="https://indblik.dk/wp-content/uploads/2021/06/41648075864_b1450a1d67_k.jpg" width="80%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -971,6 +1112,8 @@ layout: false
   &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
+
+
 ]
 .push-right[
 &lt;img src="https://s.abcnews.com/images/US/minneapolis-police-department-chief-search-medaria-arradondo-04-gty-llr-220621_1655836848859_hpMain_16x9_992.jpg" width="80%" style="display: block; margin: auto;" /&gt;
@@ -1060,46 +1203,44 @@ layout: false
 .push-right[
 .panelset[
 .panel[.panel-name[First Stage].font90[
-&lt;table class="texreg" style="margin: 10px auto;border-collapse: collapse;border-spacing: 0px;caption-side: bottom;color: #000000;border-top: 2px solid #000000;"&gt;
-&lt;caption&gt;Statistical models&lt;/caption&gt;
-&lt;thead&gt;
-&lt;tr&gt;
-&lt;th style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/th&gt;
-&lt;th style="padding-left: 5px;padding-right: 5px;"&gt;Model 1&lt;/th&gt;
-&lt;/tr&gt;
-&lt;/thead&gt;
+&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; First stage &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
 &lt;tbody&gt;
-&lt;tr style="border-top: 1px solid #000000;"&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Intercept&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.011&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.011)&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Coddle!&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.786&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;(0.029)&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr style="border-top: 1px solid #000000;"&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;R&lt;sup&gt;2&lt;/sup&gt;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.522&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr style="border-bottom: 2px solid #000000;"&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Num. obs.&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;314&lt;/td&gt;
-&lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.011 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.011) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; T_RANDOMCoddle! &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.786*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.029) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 314 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.522 &lt;/td&gt;
+  &lt;/tr&gt;
 &lt;/tbody&gt;
-&lt;tfoot&gt;
-&lt;tr&gt;
-&lt;td style="font-size: 0.8em;" colspan="2"&gt;&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;p &amp;lt; 0.001; &lt;sup&gt;&amp;#42;&amp;#42;&lt;/sup&gt;p &amp;lt; 0.01; &lt;sup&gt;&amp;#42;&lt;/sup&gt;p &amp;lt; 0.05&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tfoot&gt;
+&lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
+&lt;sup&gt;&lt;/sup&gt; + p &amp;lt; 0.1, * p &amp;lt; 0.05, ** p &amp;lt; 0.01, *** p &amp;lt; 0.001&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;
 &lt;/table&gt;
+
+
 ]]
 .panel[.panel-name[R code]
 
@@ -1115,14 +1256,13 @@ first_stg &lt;- lm_robust(T_FINAL_01 ~ T_RANDOM,
                        data = mdve)
 
 # Regression table
-htmlreg(first_stg, include.ci = FALSE, digits = 3,
-        include.adjrs = FALSE, include.rmse = FALSE,
-        custom.coef.names = c("Intercept", "Coddle!"))
+modelsummary(list("First stage" = first_stg), stars = TRUE,
+             gof_map = c("nobs", "r.squared"))
 ```
 ]]]
 
 .push-left[
-&lt;img src="8-Multiple-OLS_files/figure-html/unnamed-chunk-37-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+&lt;img src="8-Multiple-OLS_files/figure-html/unnamed-chunk-38-1.png" width="70%" style="display: block; margin: auto;" /&gt;
 
 **First Stage:** `\(0.786; \text{call this }\phi.\)`
 
@@ -1138,68 +1278,66 @@ layout: true
 .push-right[
 .panelset[
 .panel[.panel-name[Confounded first stage?]
-&lt;table class="texreg" style="margin: 10px auto;border-collapse: collapse;border-spacing: 0px;caption-side: bottom;color: #000000;border-top: 2px solid #000000;"&gt;
-&lt;caption&gt;Statistical models&lt;/caption&gt;
-&lt;thead&gt;
-&lt;tr&gt;
-&lt;th style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/th&gt;
-&lt;th style="padding-left: 5px;padding-right: 5px;"&gt;Z&lt;/th&gt;
-&lt;th style="padding-left: 5px;padding-right: 5px;"&gt;D&lt;/th&gt;
-&lt;/tr&gt;
-&lt;/thead&gt;
+&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; Z &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; D &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
 &lt;tbody&gt;
-&lt;tr style="border-top: 1px solid #000000;"&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Intercept&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.741 (0.036)&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.004 (0.024)&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Asian&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.259 (0.036)&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.211 (0.034)&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Black&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;-0.032 (0.056)&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.010 (0.044)&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Hisp.&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.134 (0.130)&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.009 (0.166)&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Indian&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;-0.114 (0.077)&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.005 (0.055)&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Other&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.059 (0.203)&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.157 (0.062)&lt;sup&gt;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Z&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.785 (0.030)&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr style="border-top: 1px solid #000000;"&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;R&lt;sup&gt;2&lt;/sup&gt;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.013&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.524&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr style="border-bottom: 2px solid #000000;"&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Num. obs.&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;330&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;314&lt;/td&gt;
-&lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.741*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.004 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; S_RACEAsian &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.259*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.211*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; S_RACEBlack &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −0.032 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.010 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; S_RACEHispanic &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.134 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.009 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; S_RACEIndian &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −0.114 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.005 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; S_RACEOther &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.059 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.157* &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt; T_RANDOM_01 &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; 0.785*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 330 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 314 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.013 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.524 &lt;/td&gt;
+  &lt;/tr&gt;
 &lt;/tbody&gt;
-&lt;tfoot&gt;
-&lt;tr&gt;
-&lt;td style="font-size: 0.8em;" colspan="3"&gt;&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;p &amp;lt; 0.001; &lt;sup&gt;&amp;#42;&amp;#42;&lt;/sup&gt;p &amp;lt; 0.01; &lt;sup&gt;&amp;#42;&lt;/sup&gt;p &amp;lt; 0.05&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tfoot&gt;
+&lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
+&lt;sup&gt;&lt;/sup&gt; + p &amp;lt; 0.1, * p &amp;lt; 0.05, ** p &amp;lt; 0.01, *** p &amp;lt; 0.001&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;
 &lt;/table&gt;
+
+
 ]
 
 .panel[.panel-name[R code]
@@ -1225,10 +1363,8 @@ ols_zc &lt;- lm_robust(T_RANDOM_01 ~ S_RACE, data = mdve)
 ols_dc &lt;- lm_robust(T_FINAL_01 ~ S_RACE + T_RANDOM_01, data = mdve)
 
 # Regression table
-htmlreg(list(ols_zc, ols_dc), include.ci = FALSE, digits = 3, single.row = TRUE,
-        include.adjrs = FALSE, include.rmse = FALSE,
-        custom.model.names = c("Z", "D"),
-        custom.coef.names = c("Intercept", "Asian", "Black", "Hisp.", "Indian", "Other", "Z"))
+modelsummary(list("Z" = ols_zc, "D" = ols_dc), stars = TRUE, 
+             statistic = NULL, gof_map = c("nobs", "r.squared"))
 ```
 ]
 ]]]
@@ -1249,7 +1385,7 @@ htmlreg(list(ols_zc, ols_dc), include.ci = FALSE, digits = 3, single.row = TRUE,
 ---
 
 .push-left[
-&lt;img src="8-Multiple-OLS_files/figure-html/unnamed-chunk-39-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+&lt;img src="8-Multiple-OLS_files/figure-html/unnamed-chunk-40-1.png" width="60%" style="display: block; margin: auto;" /&gt;
 
 .content-box-red[
 - Because randomization failed for Asian suspects, and officers were more likely to coddle Asian suspects (ignoring the intervention): **Ethnicity introduces OVB to `\(\phi\)`.**
@@ -1264,68 +1400,56 @@ layout: false
 
 .push-right[
 .center[Adjusted first stage .alert[and reduced form!]]
-&lt;table class="texreg" style="margin: 10px auto;border-collapse: collapse;border-spacing: 0px;caption-side: bottom;color: #000000;border-top: 2px solid #000000;"&gt;
-&lt;caption&gt;Statistical models&lt;/caption&gt;
-&lt;thead&gt;
-&lt;tr&gt;
-&lt;th style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/th&gt;
-&lt;th style="padding-left: 5px;padding-right: 5px;"&gt;Z&lt;/th&gt;
-&lt;th style="padding-left: 5px;padding-right: 5px;"&gt;D&lt;/th&gt;
-&lt;/tr&gt;
-&lt;/thead&gt;
+&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; D &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
 &lt;tbody&gt;
-&lt;tr style="border-top: 1px solid #000000;"&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Intercept&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.741 (0.036)&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.004 (0.024)&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Asian&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.259 (0.036)&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.211 (0.034)&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Black&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;-0.032 (0.056)&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.010 (0.044)&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Hisp.&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.134 (0.130)&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.009 (0.166)&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Indian&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;-0.114 (0.077)&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.005 (0.055)&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Other&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.059 (0.203)&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.157 (0.062)&lt;sup&gt;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Z&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;&amp;nbsp;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.785 (0.030)&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr style="border-top: 1px solid #000000;"&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;R&lt;sup&gt;2&lt;/sup&gt;&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.013&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;0.524&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr style="border-bottom: 2px solid #000000;"&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;Num. obs.&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;330&lt;/td&gt;
-&lt;td style="padding-left: 5px;padding-right: 5px;"&gt;314&lt;/td&gt;
-&lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.004 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; S_RACEAsian &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.211*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; S_RACEBlack &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.010 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; S_RACEHispanic &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.009 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; S_RACEIndian &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.005 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; S_RACEOther &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.157* &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt; T_RANDOM_01 &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; 0.785*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 314 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.524 &lt;/td&gt;
+  &lt;/tr&gt;
 &lt;/tbody&gt;
-&lt;tfoot&gt;
-&lt;tr&gt;
-&lt;td style="font-size: 0.8em;" colspan="3"&gt;&lt;sup&gt;&amp;#42;&amp;#42;&amp;#42;&lt;/sup&gt;p &amp;lt; 0.001; &lt;sup&gt;&amp;#42;&amp;#42;&lt;/sup&gt;p &amp;lt; 0.01; &lt;sup&gt;&amp;#42;&lt;/sup&gt;p &amp;lt; 0.05&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tfoot&gt;
+&lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
+&lt;sup&gt;&lt;/sup&gt; + p &amp;lt; 0.1, * p &amp;lt; 0.05, ** p &amp;lt; 0.01, *** p &amp;lt; 0.001&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;
 &lt;/table&gt;
+
+
 ]
 
 .push-left[
@@ -1344,7 +1468,7 @@ class: clear
 
 .push-left[.content-box-green[
 
-&lt;img src="8-Multiple-OLS_files/figure-html/unnamed-chunk-40-1.png" width="40%" style="display: block; margin: auto;" /&gt;
+&lt;img src="8-Multiple-OLS_files/figure-html/unnamed-chunk-41-1.png" width="40%" style="display: block; margin: auto;" /&gt;
 
 - OLS can statistically balance **_observed_** confounders, even after the data has been finally collected.
 ]]
@@ -1363,7 +1487,7 @@ class: clear
 
 .push-left[.content-box-green[
 .center[**Pre-treatment**]
-&lt;img src="8-Multiple-OLS_files/figure-html/unnamed-chunk-41-1.png" width="40%" style="display: block; margin: auto;" /&gt;
+&lt;img src="8-Multiple-OLS_files/figure-html/unnamed-chunk-42-1.png" width="40%" style="display: block; margin: auto;" /&gt;
 
 - *Potential confounders*: Variables that are **_causally prior to the treatment_**.
 ]]
@@ -1378,28 +1502,28 @@ class: clear
 # Group work
 
 .content-box-green[
-1. Download "Sesame-variables.doc" from Absalon. Remember that our outcome was "postlet", "encouraged" was the randomized intervention, and "watched" was the treatment of interest. 
+1. Download the "Sesame-variables.doc" file from Absalon. Recall that our outcome was "postlet", the randomized intervention was "encouraged", and the treatment of interest was "watched".
 
-2. Identify variables that should ideally be balanced and if not should be controlled for as pre-treatment confounders.
+2. Identify variables that should ideally be balanced, and if they are not, should be controlled for as pre-treatment confounders.
 
-3. identify variables that we should definitly not control for because they are post-treatment mechanisms, or even alternative measures of the outcome we are interested in.
+3. Identify variables that we should definitely not control for because they are post-treatment mechanisms or even alternative measures of the outcome we are interested in.
 ]
 
 ---
 class: inverse
 # Today's general lessons
 
-1. *Omitted variable bias*: Confounder variables introduce omitted variable bias, which can be calculated if the confounder is observed in the data. Omitted variable bias is basically the same as selection/confounder bias. But OMV usually refers to a specific variable and the latter refers to the problem in general.
+1. *Omitted variable bias*. Confounder variables can introduce omitted variable bias, which can be estimated if the confounder is observed in the data. Omitted variable bias is essentially the same as selection bias or confounder bias. However, the term "omitted variable bias" typically refers to a specific variable, while the terms "selection bias" and "confounder bias" refer to the problem in general.
 
-2. *Controlling for*: Multiple OLS allows us to partial out the selection biases stemming from observed confounding variables.
+2. *Controlling for*: Multiple OLS allows us to partially adjust for the selection biases that arise from observed confounding variables.
 
-3. *Frisch-Waugh Theorem*: We can think of controlling for as working with the residuals (leftovers) after the correlations between the confounders and both `\(Y\)` and `\(D\)` have been partialled out.
+3. *Frisch-Waugh Theorem*: We can think of controlling for as working with the residuals (leftovers) after the correlations between the confounders and both `\(Y\)` and `\(D\)` have been controlled for.
 
-4. *Multiple OLS*: OLS allows us to consider multiple predictor variables. In line with Frisch-Waugh, they are all controlled for each other.
+4. *Multiple OLS*: OLS allows us to consider multiple predictor variables. In accordance with Frisch-Waugh, they are all adjusted for each other.
 
-5. Multiple OLS can thus alleviate unbalanced confounders and thereby "repair" broken randomization. However, OLS can only consider **_observed_** confounders and hence it remains unclear whether a failed randomized is truly fixed.
+5. Multiple OLS can thus reduce the imbalance of confounders and thereby "repair" broken randomization. However, OLS can only consider **_observed_** confounders, so it remains unclear whether a failed randomization is truly fixed.
 
-6. We can also control for confounders in an IV setting. In this case, *we need to control both the First Stage and the Reduced form for confounders.*
+6. We can also control for confounders in an instrumental variables (IV) setting. In this case, *we need to adjust for both the first stage and the reduced form for confounders*.
 
 
 ---

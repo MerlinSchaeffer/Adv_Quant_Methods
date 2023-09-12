@@ -1,6 +1,6 @@
 ---
-title: "Multiple OLS regression"
-subtitle: "Adjusting randomized interventions <br><br> for *observed* confounders"
+title: "Multiple Regression & <br><br> Fundamentals of Causal Inference"
+subtitle: "8. Multiple OLS regression: Adjusting randomized interventions for *observed* confounders"
 author: "Merlin Schaeffer<br> Department of Sociology"
 date: "`r Sys.Date()`"
 output: 
@@ -42,9 +42,9 @@ myBib <- ReadBib("./../../../Stats_II.bib", check = FALSE)
 xaringanExtra::use_xaringan_extra(c("tile_view", "tachyons"))
 xaringanExtra::use_panelset()
 ```
-# The goal of social science research
+# Goal of empirical sociology
 
-.font140[.center[.alert[Use data to discover patterns ("social facts" in Durkheim's terms), <br> and **the social mechanisms that bring them about**.]]]
+.font130[.center[Use data to discover patterns, <br> and the .alert[social mechanisms that bring them about.]]]
 
 ```{r, echo = FALSE, out.width='70%', fig.align='center'}
 knitr::include_graphics('https://liu.se/-/media/istock-501261958.jpg?mw=1120&mh=1120&hash=DA8977CCE6A6E600AE80A40CFEE771C9')
@@ -97,7 +97,7 @@ class: clear
 
 \begin{tikzpicture}
   \node[bag] {Randomized \\ $I$ntervention of, or $E$xposure to \\ $D$}
-    child {node[bag] {Researchers\\randomized $I$}
+    child {node[bag] {Researcher\\randomized $I$}
       child {node[bag] {$|r|_{D \leftarrow I} = 1$}
         child {node[bag] {Randomized \\ Controlled \\ Trial (RCT)}
           child {node[bag] {Bivariate \\ OLS}}
@@ -129,19 +129,17 @@ class: clear
 class: inverse middle
 # Today's schedule
 
-1. **(Natural) Experiments & Multiple OLS** 
+1. **Today's 1st research question**: Terrorist attacks and xenophobia re-visited.
 
-2. **Application 1**: Terrorist attacks and xenophobia re-visited.
-
-3. **Multiple OLS**
-
+2. **Multiple OLS**
+  
   + Omitted variable bias
   + Frisch-Waugh Theorem
   + Estimation
 
-5. **IV & Multiple OLS**
+3. **IV & Multiple OLS**
 
-4. **Application 2**: Zero-tolerance for domestic violence re-visited.
+4. **Today's 2nd research question**: Zero-tolerance for domestic violence re-visited.
   + Multiple OLS to the rescue
 
 ---
@@ -172,8 +170,8 @@ knitr::include_graphics('https://www.brookings.edu/wp-content/uploads/2019/07/De
 knitr::include_graphics('./img/randomization2.png')
 ```
 
-- If we *randomly* divide subjects into treatment and control groups: They come from the same underlying population. 
-  <br> <br> $\rightarrow$ Similar .alert[on average], *in every way*,<br> **including their $Y_{0}$ **!
+If we *randomly* divide subjects into treatment and control groups, .alert[they come from the same underlying population]. 
+  <br> <br> $\rightarrow$ They will be similar, on average, *in every way*;<br> **including their $Y_{0}$ **!
   <br> <br> $\rightarrow E[Y_{0i}|D=1] = E[Y_{0i}|D=0]$!
 ]
 
@@ -210,8 +208,8 @@ layout: true
 .left-column[
 <br>
 
-```{r, echo = FALSE, out.width='100%'}
-knitr::include_graphics('https://jlegewie.com/files/joscha.jpg')
+```{r, echo = FALSE, out.width='60%'}
+knitr::include_graphics('https://www.wzb.eu/files/styles/4_column_content_lg/public/image/dsi/aam/wzbjahresbericht3836-smaller.jpg?itok=_G0nt5M9')
 ```
 
 ]
@@ -289,14 +287,14 @@ class: clear
 # Age as confounder? .font70[(i.e., Age-based selection into treatment?)]
 
 .left-column[
-- On average, xenophobia increases with age.
+On average, xenophobia increases with age.
 
-- The older a respondent, the more likely they are part of the control group (i.e., not exposed to Bali attack).
+The older a respondent, the more likely they are part of the control group (i.e., not exposed to Bali attack).
 
 $\rightarrow E[Y_{0i}|D=0] \color{red}{>} E[Y_{0i}|D=1]$ 
 
 .backgrnote[
-- Note that in Portugal, older respondents were more likely to be in the treatment group.
+Note that in Portugal, older respondents were more likely to be in the treatment group.
 $\rightarrow E[Y_{0i}|D=0] \color{red}{<} E[Y_{0i}|D=1]$ 
 ]]
 
@@ -329,6 +327,9 @@ $\rightarrow E[Y_{0i}|D=0] \color{red}{<} E[Y_{0i}|D=1]$
 ---
 class: inverse middle center
 # Multiple OLS Regression
+
+
+$$y_{i} = \alpha + \beta_{1}x_{1} + \beta_{2}x_{2} + \ldots + \beta_{k}x_{k} + \epsilon_{i}$$
 
 ---
 # Setup and simulated toy data
@@ -368,18 +369,18 @@ ggplot(data = toydat) +
 ```
 ]]
 .panel[.panel-name[Exposure to terror]
-.push-left[.font90[
+.push-left[.font80[
 ```{r}
 toydat <- toydat %>% 
   mutate( # Day of interview: Age + random.
     int_day = (-0.05*age) + rnorm(n = 500, mean = 0, sd = 1),
-    # Bali: After mean survey period.
-    bali = case_when(
+    bali = case_when( # Bali: After mean survey period.
       int_day < mean(int_day) ~ 0,
       int_day >= mean(int_day) ~ 1))
 
-lm_robust(bali ~ age, data = toydat) %>%
-  screenreg(include.ci = FALSE, digits = 3)
+ols <- lm_robust(bali ~ age, data = toydat)
+modelsummary(list("Day of Int." = ols), stars = TRUE,
+             gof_map = c("nobs", "r.squared"))
 ```
 ]]
 .push-right[
@@ -414,7 +415,7 @@ ggplot(data = toydat, aes(x = xeno)) +
 ]]]
 
 ---
-# What's going one here?
+# What's going on here?
 
 .push-left[
 ```{r OLS, eval  = FALSE}
@@ -425,10 +426,8 @@ ols_bi <- lm_robust(xeno ~ bali, data = toydat)
 ols_mult <- lm_robust(xeno ~ bali + age, data = toydat)
 
 # Regression table of both results
-htmlreg(list(ols_bi, ols_mult), 
-        include.ci = FALSE, digits = 3,
-        custom.model.names = c("Bivariate OLS", 
-                               "Multiple OLS"))
+modelsummary(list("Biv. OLS" = ols_bi, "Mult. OLS" = ols_mult), stars = TRUE,
+             gof_map = c("nobs", "r.squared"))
 ```
 
 .content-box-green[
@@ -452,14 +451,14 @@ class: clear
 
 
 .push-left[
-.center[When we compare Xenophobia between those with Bali = 0 to those with Bali = 1:]
+.center[When we compare Xenophobia between those with Bali = 0 to those with Bali = 1 in our simulated toy data:]
 
 1. We .alert[know] that one part of the difference is the causal effect $\beta_{\text{sample}} = 0.3 + \sigma_{\text{sample}} = `r coef(ols_mult)["bali"]`$.
 
 .content-box-green[
 - Why do we .alert[know] that in this specific case?
 
-- What else is different between those with Bali = 0 compared to those with <br> Bali = 1?
+- What else is different between those with Bali = 0 compared to those with Bali = 1?
 ]]
 
 ---
@@ -469,22 +468,23 @@ class: clear
 .push-right[
 ```{tikz, ref.label = "DAG_Age", echo = FALSE, out.width='80%'}
 ```
-.font90[
+.font80[
 ```{r}
 ols_age <- lm_robust(age ~ bali, data = toydat)
-screenreg(ols_age, include.ci = FALSE, digits = 3)
+modelsummary(list("Xeno" = ols_age), stars = TRUE,
+             gof_map = c("nobs", "r.squared"))
 ```
 ]]
 
 .push-left[
-.center[When we compare Xenophobia between those with Bali = 0 to those with Bali = 1:]
+.center[When we compare Xenophobia between those with Bali = 0 to those with Bali = 1 in our simulated toy data:]
 
 1. We .alert[know] that one part of the difference is the causal effect $\beta_{\text{sample}} = 0.3 + \sigma_{\text{sample}} = `r coef(ols_mult)["bali"]`$.
 
 2. We compare between people who have an average age difference of `r coef(ols_age)["bali"]` years.
 
 .content-box-green[
-To how much Xenophobia do `r coef(ols_age)["bali"]` years of age amount?
+On average, to how much Xenophobia do `r coef(ols_age)["bali"]` years of age amount?
 ]
 ]
 
@@ -493,17 +493,21 @@ class: clear
 # Omitted variable bias .font60[aka selection/confounder bias]
 
 .push-right[
-```{tikz, ref.label = "DAG_Age", echo = FALSE, out.width='80%'}
+```{tikz, ref.label = "DAG_Age", echo = FALSE, out.width='70%'}
+```
+
+```{r ref.label = "OLS", echo  = FALSE, results = 'asis'}
 ```
 ]
 
 .push-left[
-.center[When we compare Xenophobia between those with Bali = 0 to those with Bali = 1:]
+.center[When we compare Xenophobia between those with Bali = 0 to those with Bali = 1 in our simulated toy data:]
 
 1. We .alert[know] that one part of the difference is the causal effect $\beta_{\text{sample}} = 0.3 + \sigma_{\text{sample}} = `r coef(ols_mult)["bali"]`$.
 
 2. We compare between people who have an average age difference of `r coef(ols_age)["bali"]` years.
-   + Because of this age difference, Xenophobia should additionally differ by:
+
+Because of this age difference, Xenophobia should additionally differ by:
 
 $\begin{equation}\begin{split} & `r coef(ols_age)["bali"]` \times (0.05+\sigma_{\text{Sample}}) \\ = & `r coef(ols_age)["bali"]` \times `r coef(ols_mult)["age"]`, \\ = & `r coef(ols_age)["bali"] * coef(ols_mult)["age"]`. \end{split}\end{equation}$
 
@@ -575,7 +579,7 @@ It partials out/controlls for:
   1. $\beta_{Y \leftarrow C}$
   2. $\beta_{D \leftarrow C}$
   
-`r Citet(myBib, "frisch_partial_1933")` proved that the way multiple OLS achieves this is mathematically equivalent to the following three steps:
+`r Citet(myBib, "frisch_partial_1933")` proved that the way multiple OLS achieves this is mathematically equivalent to three steps.
 
 ```{tikz, DAG_FrischWaugh, echo = FALSE, out.width='70%'}
 \usetikzlibrary{shapes,decorations,arrows,calc,arrows.meta,fit,positioning,quotes}
@@ -682,8 +686,8 @@ ggplot(data = toydat_plot, mapping = aes(y = bali, x = age)) +
 # Regress xeno on age,
 ols_e <- lm_robust(e_xeno ~ e_bali, data = toydat)
 
-screenreg(list(ols_mult, ols_e),
-          include.ci = FALSE, digits = 3)
+modelsummary(list("Resid. Xeno" = ols_e), stars = TRUE,
+             gof_map = c("nobs", "r.squared"))
 ```
 ]]
 .push-right[
@@ -844,7 +848,7 @@ class: clear
 # Learning goal 1 .font60[Terror attacks can increase xenophobia]
 
 .push-left[
-.font90[
+.font80[
 ```{r olsPT}
 # Estimate the treatment effect with OLS
 ols_pt_bi <- lm_robust(anti_immi ~ treat, 
@@ -853,10 +857,9 @@ ols_pt_bi <- lm_robust(anti_immi ~ treat,
 ols_pt_mult <- lm_robust(anti_immi ~ treat + age, 
                          data = ESS %>% filter(cntry == "PT"), 
                          weights = pspwght)
-
 # Report results in a nicely-formatted table
-screenreg(list(ols_pt_bi, ols_pt_mult), 
-          include.ci = FALSE, digits = 3)
+modelsummary(list("Biv. OLS" = ols_pt_bi, "Mult. OLS" = ols_pt_mult), stars = TRUE,
+             gof_map = c("nobs", "r.squared"))
 ```
 ]]
 
@@ -941,7 +944,7 @@ layout: true
 .left-column[
 ```{r, echo = FALSE, out.width='80%'}
 knitr::include_graphics('https://images.theconversation.com/files/325865/original/file-20200406-6044-hao5gp.jpg?ixlib=rb-1.1.0&q=45&auto=format&w=1200&h=675.0&fit=crop')
-knitr::include_graphics('https://minbynyt.dk/wp-content/uploads/2021/01/Politi-Betjent-ligger-anholdt-i-ha%CC%8AndjernFoto-Lars-Aarjpg1-780x470.jpg')
+knitr::include_graphics('https://indblik.dk/wp-content/uploads/2021/06/41648075864_b1450a1d67_k.jpg')
 ```
 ]
 
@@ -1144,9 +1147,8 @@ first_stg <- lm_robust(T_FINAL_01 ~ T_RANDOM,
                        data = mdve)
 
 # Regression table
-htmlreg(first_stg, include.ci = FALSE, digits = 3,
-        include.adjrs = FALSE, include.rmse = FALSE,
-        custom.coef.names = c("Intercept", "Coddle!"))
+modelsummary(list("First stage" = first_stg), stars = TRUE,
+             gof_map = c("nobs", "r.squared"))
 ```
 ]]
 .panel[.panel-name[R code]
@@ -1192,10 +1194,8 @@ ols_zc <- lm_robust(T_RANDOM_01 ~ S_RACE, data = mdve)
 ols_dc <- lm_robust(T_FINAL_01 ~ S_RACE + T_RANDOM_01, data = mdve)
 
 # Regression table
-htmlreg(list(ols_zc, ols_dc), include.ci = FALSE, digits = 3, single.row = TRUE,
-        include.adjrs = FALSE, include.rmse = FALSE,
-        custom.model.names = c("Z", "D"),
-        custom.coef.names = c("Intercept", "Asian", "Black", "Hisp.", "Indian", "Other", "Z"))
+modelsummary(list("Z" = ols_zc, "D" = ols_dc), stars = TRUE, 
+             statistic = NULL, gof_map = c("nobs", "r.squared"))
 ```
 ]
 
@@ -1263,10 +1263,8 @@ layout: false
 .center[Adjusted first stage .alert[and reduced form!]]
 ```{r ols_ycd2, echo = FALSE, results = 'asis'}
 # Regression table
-htmlreg(list(ols_zc, ols_dc), include.ci = FALSE, digits = 3, single.row = TRUE,
-        include.adjrs = FALSE, include.rmse = FALSE,
-        custom.model.names = c("Z", "D"),
-        custom.coef.names = c("Intercept", "Asian", "Black", "Hisp.", "Indian", "Other", "Z"))
+modelsummary(list("D" = ols_dc), stars = TRUE, 
+             statistic = NULL, gof_map = c("nobs", "r.squared"))
 ```
 ]
 
@@ -1390,28 +1388,28 @@ class: clear
 # Group work
 
 .content-box-green[
-1. Download "Sesame-variables.doc" from Absalon. Remember that our outcome was "postlet", "encouraged" was the randomized intervention, and "watched" was the treatment of interest. 
+1. Download the "Sesame-variables.doc" file from Absalon. Recall that our outcome was "postlet", the randomized intervention was "encouraged", and the treatment of interest was "watched".
 
-2. Identify variables that should ideally be balanced and if not should be controlled for as pre-treatment confounders.
+2. Identify variables that should ideally be balanced, and if they are not, should be controlled for as pre-treatment confounders.
 
-3. identify variables that we should definitly not control for because they are post-treatment mechanisms, or even alternative measures of the outcome we are interested in.
+3. Identify variables that we should definitely not control for because they are post-treatment mechanisms or even alternative measures of the outcome we are interested in.
 ]
 
 ---
 class: inverse
 # Today's general lessons
 
-1. *Omitted variable bias*: Confounder variables introduce omitted variable bias, which can be calculated if the confounder is observed in the data. Omitted variable bias is basically the same as selection/confounder bias. But OMV usually refers to a specific variable and the latter refers to the problem in general.
+1. *Omitted variable bias*. Confounder variables can introduce omitted variable bias, which can be estimated if the confounder is observed in the data. Omitted variable bias is essentially the same as selection bias or confounder bias. However, the term "omitted variable bias" typically refers to a specific variable, while the terms "selection bias" and "confounder bias" refer to the problem in general.
 
-2. *Controlling for*: Multiple OLS allows us to partial out the selection biases stemming from observed confounding variables.
+2. *Controlling for*: Multiple OLS allows us to partially adjust for the selection biases that arise from observed confounding variables.
 
-3. *Frisch-Waugh Theorem*: We can think of controlling for as working with the residuals (leftovers) after the correlations between the confounders and both $Y$ and $D$ have been partialled out.
+3. *Frisch-Waugh Theorem*: We can think of controlling for as working with the residuals (leftovers) after the correlations between the confounders and both $Y$ and $D$ have been controlled for.
 
-4. *Multiple OLS*: OLS allows us to consider multiple predictor variables. In line with Frisch-Waugh, they are all controlled for each other.
+4. *Multiple OLS*: OLS allows us to consider multiple predictor variables. In accordance with Frisch-Waugh, they are all adjusted for each other.
 
-5. Multiple OLS can thus alleviate unbalanced confounders and thereby "repair" broken randomization. However, OLS can only consider **_observed_** confounders and hence it remains unclear whether a failed randomized is truly fixed.
+5. Multiple OLS can thus reduce the imbalance of confounders and thereby "repair" broken randomization. However, OLS can only consider **_observed_** confounders, so it remains unclear whether a failed randomization is truly fixed.
 
-6. We can also control for confounders in an IV setting. In this case, *we need to control both the First Stage and the Reduced form for confounders.*
+6. We can also control for confounders in an instrumental variables (IV) setting. In this case, *we need to adjust for both the first stage and the reduced form for confounders*.
 
 
 ---
