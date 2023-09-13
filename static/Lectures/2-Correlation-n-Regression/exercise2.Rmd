@@ -79,9 +79,10 @@ Dat <- Dat %>% mutate(socialist = case_when( # Years socialist minus years since
 ```
 
 ```{r echo = FALSE}
-ols <- lm_robust(data = Dat, formula = poverty ~ citizen_rights)
+ols_1 <- lm_robust(data = Dat, formula = poverty ~ socialist)
+ols_2 <- lm_robust(data = Dat, formula = poverty ~ citizen_rights)
 ```
-1. Regress poverty on our socialism index. With one more year of socialist history, poverty changes by: `r fitb(round(coef(ols)[2], 2), width = "5")` percentage points (two digits).
+1. Regress poverty on our socialism index. With one more year of socialist history, poverty changes by: `r fitb(round(coef(ols_1)[2], 2), width = "5")` percentage points (two digits).
 `r hide("R solution -> dont' peak too early ;) !")`
 ```{r results = 'asis'}
 # Estimate regression models.
@@ -92,7 +93,7 @@ modelsummary(list("Poverty" = ols_1), # Nicely-formatted table.
 ```
 `r unhide()`
 
-2. Regress poverty on civic and political citizenship rights. With a one unit-increase in citizenship rights, poverty changes by: `r fitb(round(coef(ols)[2], 2), width = "5")` percentage points (two digits).
+2. Regress poverty on civic and political citizenship rights. With a one unit-increase in citizenship rights, poverty changes by: `r fitb(round(coef(ols_2)[2], 2), width = "5")` percentage points (two digits).
 `r hide("R solution -> dont' peak too early ;) !")`
 ```{r results = 'asis'}
 # Estimate regression models.
