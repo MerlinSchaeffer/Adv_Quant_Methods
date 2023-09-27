@@ -4,7 +4,7 @@
     <title>Multiple Regression &amp;    Fundamentals of Causal Inference</title>
     <meta charset="utf-8" />
     <meta name="author" content="Merlin Schaeffer  Department of Sociology" />
-    <meta name="date" content="2023-07-07" />
+    <meta name="date" content="2023-09-27" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
     <script src="libs/tile-view/tile-view.js"></script>
@@ -29,7 +29,7 @@ class: center, middle, inverse, title-slide
 ### Merlin Schaeffer<br> Department of Sociology
 ]
 .date[
-### 2023-07-07
+### 2023-09-27
 ]
 
 ---
@@ -129,7 +129,7 @@ pacman::p_load(
 #  6 Australia   2018     0.5
 #  7 Austria     2020     0.7
 #  8 Azerbaijan  2005     0  
-#  9 Bangladesh  2016    13.5
+#  9 Bangladesh  2022     9.6
 # 10 Belarus     2020     0  
 # # ℹ 152 more rows
 ```
@@ -163,7 +163,7 @@ pacman::p_load(
 ]]
 
 .panel[.panel-name[Coding colonial powers]
-
+.font90[
 
 ```r
 Dat &lt;- Dat %&gt;% 
@@ -190,7 +190,7 @@ Dat &lt;- Dat %&gt;%
       # str_detect(country, "Namibia") ~ "South Africa", # Holland
       # str_detect(country, "Korea|Taiwan") ~ "Japan")) # Japan
 ```
-]
+]]
 
 .panel[.panel-name[Plot Colonizer]
 &lt;img src="4-OLS-Wisdoms_files/figure-html/col-powers-1.png" width="100%" style="display: block; margin: auto;" /&gt;
@@ -247,7 +247,7 @@ Dat &lt;- Dat %&gt;%
 ---
 # Poverty and years of independence
 
-.left-column[
+.left-column[.font90[
 
 ```r
 # Estimate OLS regression
@@ -270,11 +270,11 @@ modelsummary(
 &lt;tbody&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 30.942*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 31.146*** &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (4.220) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (4.262) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; years_indep &lt;/td&gt;
@@ -290,7 +290,7 @@ modelsummary(
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.179 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.175 &lt;/td&gt;
   &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
@@ -298,7 +298,7 @@ modelsummary(
 &lt;/table&gt;
 
 
-]
+]]
 
 .right-column[
 &lt;img src="4-OLS-Wisdoms_files/figure-html/indep-world-1.png" width="100%" style="display: block; margin: auto;" /&gt;
@@ -330,7 +330,9 @@ class: clear
 # Outlier 
 
 .left-column[
-- **Leverage:** Case has strong influence on regression line.
+- The gray dotted line is our OLS line.
+
+- **Leverage:** Case has strong influence on regression line; `\(x_i\)` is far from `\(\bar{x}\)`.
   
 
 - **Z-standardized residuals:** case far from regression line.
@@ -342,7 +344,7 @@ class: clear
 lm(poverty ~ years_indep, 
    data = Dat) %&gt;%
   # The best outlier plot.
-  plot(., which = 5) 
+* plot(., which = 5)
 ```
 ]
 
@@ -368,7 +370,7 @@ Dat_outl &lt;- Dat %&gt;%
 ]
 
 .panel[.panel-name[OLS]
-.left-column[
+.left-column[.font90[
 
 ```r
 # Estimation
@@ -391,11 +393,11 @@ modelsummary(
 &lt;tbody&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 20.734* &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 20.873* &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (8.962) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (9.019) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; years_indep &lt;/td&gt;
@@ -419,7 +421,7 @@ modelsummary(
 &lt;/table&gt;
 
 
-]
+]]
 
 .right-column[
 &lt;img src="4-OLS-Wisdoms_files/figure-html/Sweden-1.png" width="100%" style="display: block; margin: auto;" /&gt;
@@ -428,8 +430,9 @@ modelsummary(
 .left-column[
 - **Leverage:** case has strong influence on regression line.
   
-
 - **Z-standardized residuals:** case far from regression line.
+
+- **Cook's D**: Bu how many standardized residuals would `\(\sum{\bar{y}}\)` change, if case `\(i\)` was deleted?
 
 
 ```r
@@ -437,7 +440,7 @@ modelsummary(
 lm(poverty ~ years_indep, 
    data = Dat_outl) %&gt;%
   # The best outlier plot.
-  plot(., which = 5) 
+* plot(., which = 5)
 ```
 ]
 
@@ -453,7 +456,8 @@ lm(poverty ~ years_indep,
 - The gray dotted line is our regression model.
 
 - The red line should ideally be the same.
-  + .alert[Linearity assumption doesn't perfectly hold, but seems overall OK.]
+
+- .alert[In our example, the linearity assumption doesn't perfectly hold, but seems overall OK.]
 
 
 ```r
@@ -461,7 +465,7 @@ lm(poverty ~ years_indep,
 lm(poverty ~ years_indep, 
    data = Dat) %&gt;%
   # The best linearity plot.
-  plot(., which = 1)
+* plot(., which = 1)
 ```
 ]
 
@@ -536,19 +540,22 @@ Reference &lt;br&gt; .backgrnote[(Britain)] | 0  | 0  | 0
 ]]
 
 .panel[.panel-name[How it's done in R]
-.push-left[
+.push-left[.font80[
 
 ```r
 # R recognizes categorical variables automatically,
 # if they are factor or character vectors.
 ols_2 &lt;- lm_robust(poverty ~ colonizer, data = Dat)
 # Regression table
-modelsummary(list("Poverty" = ols_2), stars = TRUE,
-  coef_rename = c("colonizerFrance" = "France", "colonizerBelgium" = "Belgium",
-  "colonizerPortugal" = "Portugal", "colonizerSpain" = "Spain"),
+modelsummary(
+  list("Poverty" = ols_2), stars = TRUE,
+  coef_rename = c("colonizerFrance" = "France", 
+                  "colonizerBelgium" = "Belgium",
+                  "colonizerPortugal" = "Portugal", 
+                  "colonizerSpain" = "Spain"),
   gof_map = c("nobs", "r.squared"))
 ```
-
+]
 &lt;img src="4-OLS-Wisdoms_files/figure-html/unnamed-chunk-21-1.png" width="75%" style="display: block; margin: auto;" /&gt;
 ]
 .push-right[
@@ -562,43 +569,43 @@ modelsummary(list("Poverty" = ols_2), stars = TRUE,
 &lt;tbody&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 19.400*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 19.541*** &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (3.971) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (3.996) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; France &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 3.552 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 3.654 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (5.941) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (6.012) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Spain &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; −15.829*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −15.988*** &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (4.062) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (4.085) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Belgium &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 42.867*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 42.792*** &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (6.625) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (6.677) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Portugal &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 14.433 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 17.559 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (17.486) &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (20.424) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
@@ -606,7 +613,7 @@ modelsummary(list("Poverty" = ols_2), stars = TRUE,
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.301 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.299 &lt;/td&gt;
   &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
@@ -628,43 +635,43 @@ modelsummary(list("Poverty" = ols_2), stars = TRUE,
 &lt;tbody&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 19.400*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 19.541*** &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (3.971) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (3.996) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; France &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 3.552 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 3.654 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (5.941) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (6.012) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Spain &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; −15.829*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −15.988*** &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (4.062) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (4.085) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Belgium &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 42.867*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 42.792*** &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (6.625) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (6.677) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Portugal &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 14.433 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 17.559 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (17.486) &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (20.424) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
@@ -672,7 +679,7 @@ modelsummary(list("Poverty" = ols_2), stars = TRUE,
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.301 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.299 &lt;/td&gt;
   &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
@@ -686,17 +693,17 @@ modelsummary(list("Poverty" = ols_2), stars = TRUE,
 
 $$
 `\begin{aligned}
-\operatorname{\widehat{poverty}} &amp;= 19.4 + 3.55(\operatorname{colonizer}_{\operatorname{France}})\ - \\
-&amp;\quad 15.83(\operatorname{colonizer}_{\operatorname{Spain}}) + 42.87(\operatorname{colonizer}_{\operatorname{Belgium}})\ + \\
-&amp;\quad 14.43(\operatorname{colonizer}_{\operatorname{Portugal}})
+\operatorname{\widehat{poverty}} &amp;= 19.54 + 3.65(\operatorname{colonizer}_{\operatorname{France}})\ - \\
+&amp;\quad 15.99(\operatorname{colonizer}_{\operatorname{Spain}}) + 42.79(\operatorname{colonizer}_{\operatorname{Belgium}})\ + \\
+&amp;\quad 17.56(\operatorname{colonizer}_{\operatorname{Portugal}})
 \end{aligned}`
 $$
 
 
-- When France = 0, Belgium = 0, Spain == 0, and Portugal = 0, then poverty is on average 19.4%.&lt;br&gt; `\(\rightarrow\)` Average poverty across countries colonized by Britain: 19.4%.
+- When France = 0, Belgium = 0, Spain = 0, and Portugal = 0, then poverty is on average 19.54%.&lt;br&gt; `\(\rightarrow\)` Average poverty across countries colonized by Britain: 19.54%.
 
-- Across countries colonized by France, poverty is on average 3.55% higher than among those colonized by Britain; yet this difference is statistically not significant/systematic (could be the result of randomness).
-  + Across countries colonized by France, poverty is thus: `\(19.4\% + 3.55\% = 22.95\%\)`.
+- Across countries colonized by France, poverty is on average 3.65% higher than among those colonized by Britain; yet this difference is statistically not significant/systematic (could be the result of randomness).
+  + Across countries colonized by France, poverty is thus: `\(19.54\% + 3.65\% = 23.19\%\)`.
 ]]]
 
 ---
@@ -813,10 +820,10 @@ class: clear
        term == "(Intercept)" ~ "Intercept \n (Britain)")) %&gt;%
    filter(term != "Intercept \n (Britain)"))
 #       term estimate std.error statistic  p.value conf.low conf.high df outcome
-# 1   France     3.55      5.94     0.598 5.52e-01     -8.3     15.40 70 poverty
-# 2    Spain   -15.83      4.06    -3.897 2.20e-04    -23.9     -7.73 70 poverty
-# 3  Belgium    42.87      6.62     6.471 1.13e-08     29.7     56.08 70 poverty
-# 4 Portugal    14.43     17.49     0.825 4.12e-01    -20.4     49.31 70 poverty
+# 1   France     3.65      6.01     0.608 5.45e-01    -8.34     15.65 70 poverty
+# 2    Spain   -15.99      4.08    -3.914 2.08e-04   -24.14     -7.84 70 poverty
+# 3  Belgium    42.79      6.68     6.409 1.46e-08    29.48     56.11 70 poverty
+# 4 Portugal    17.56     20.42     0.860 3.93e-01   -23.18     58.29 70 poverty
 ```
 ]
 
@@ -828,11 +835,10 @@ ggplot(data = plotdata, aes(y = estimate,
                             x = reorder(term, estimate))) +
   geom_hline(yintercept = 0, color = "red", lty = "dashed") +
   # Point with confidence interval,
-  geom_pointrange(aes(min = conf.low, max = conf.high)) +
-  coord_flip() + # Flip Y- &amp; X-Axis,
+* geom_pointrange(aes(min = conf.low, max = conf.high)) +
+* coord_flip() + # Flip Y- &amp; X-Axis,
   labs(title = "Regression of poverty",
        x = "Colonizer",
-       # Write Greek beta into axis title.
        y = "Difference in poverty compared to countries colonized by Britain") +
   theme_minimal()
 ```
@@ -852,43 +858,43 @@ ggplot(data = plotdata, aes(y = estimate,
 &lt;tbody&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 19.400*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 19.541*** &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (3.971) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (3.996) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; France &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 3.552 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 3.654 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (5.941) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (6.012) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Spain &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; −15.829*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −15.988*** &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (4.062) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (4.085) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Belgium &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 42.867*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 42.792*** &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (6.625) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (6.677) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Portugal &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 14.433 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 17.559 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (17.486) &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (20.424) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
@@ -896,7 +902,7 @@ ggplot(data = plotdata, aes(y = estimate,
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.301 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.299 &lt;/td&gt;
   &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
@@ -916,8 +922,8 @@ ggplot(data = plotdata, aes(y = estimate,
 ```r
 (ols &lt;- lm_robust(poverty ~ years_indep, data = Dat))
 #             Estimate Std. Error t value Pr(&gt;|t|) CI Lower CI Upper DF
-# (Intercept)   30.942     4.2199    7.33 3.31e-10   22.524  39.3607 69
-# years_indep   -0.134     0.0244   -5.50 6.10e-07   -0.183  -0.0854 69
+# (Intercept)   31.146     4.2621    7.31 3.67e-10   22.644  39.6492 69
+# years_indep   -0.134     0.0244   -5.49 6.14e-07   -0.183  -0.0854 69
 ```
 ]
 .push-right[
@@ -926,7 +932,7 @@ ggplot(data = plotdata, aes(y = estimate,
 .panel[.panel-name[Predictions]
 .push-left[
 **Step 1**: Generate fictional data of `\(x\)` with theoretically informative values.
-
+.font90[
 
 ```r
 (fict_dat &lt;- tibble(years_indep = 1:500))
@@ -945,49 +951,51 @@ ggplot(data = plotdata, aes(y = estimate,
 # 10          10
 # # ℹ 490 more rows
 ```
-]
+]]
 .push-right[
-**Step 2**: What `\(\hat{y}\)` does our model predict for the fictional data?
-
+**Step 2**: What `\(\hat{y}\)` does our OLS model predict for the fictional data?
+.font90[
 
 ```r
 *(fict_dat &lt;- predict(
-* ols, newdata = fict_dat,
+* object = ols,
+* newdata = fict_dat,
 * interval = "confidence", level = 0.95)$fit %&gt;%
    as_tibble() %&gt;% # Turn into a tibble, then
    bind_cols(fict_dat, .)) # Add to the synthetic data.
 # # A tibble: 500 × 4
 #    years_indep   fit   lwr   upr
 #          &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
-#  1           1  30.8  22.4  39.2
-#  2           2  30.7  22.3  39.0
-#  3           3  30.5  22.3  38.8
-#  4           4  30.4  22.2  38.6
-#  5           5  30.3  22.1  38.5
-#  6           6  30.1  22.0  38.3
-#  7           7  30.0  21.9  38.1
-#  8           8  29.9  21.8  37.9
-#  9           9  29.7  21.7  37.7
-# 10          10  29.6  21.6  37.6
+#  1           1  31.0  22.6  39.5
+#  2           2  30.9  22.5  39.3
+#  3           3  30.7  22.4  39.1
+#  4           4  30.6  22.3  38.9
+#  5           5  30.5  22.2  38.8
+#  6           6  30.3  22.1  38.6
+#  7           7  30.2  22.0  38.4
+#  8           8  30.1  21.9  38.2
+#  9           9  29.9  21.8  38.0
+# 10          10  29.8  21.8  37.9
 # # ℹ 490 more rows
 ```
-]]
+]]]
 .panel[.panel-name[Visualization]
-.push-left[
+.push-left[.font90[
 
 ```r
 ggplot(data = fict_dat, aes(y = fit, x = years_indep)) +
-  geom_vline(xintercept = c(34, 236), color = "red", lty = "dashed") +
-  geom_ribbon(aes(ymin = lwr, ymax = upr), alpha = 0.5) +
-  geom_line() +
+  geom_vline(xintercept = c(34, 236), # Red reference lines
+             color = "red", lty = "dashed") +
+  geom_ribbon(aes(ymin = lwr, ymax = upr), # 95% Conf. Int.
+              alpha = 0.5) +
+  geom_line() + # The OLS line
   labs(
     title = "Predictions based on regression of extreme poverty",
     x = "By years since independence",
-    # Write Greek beta into axis title.
     y = "Predicted average of extreme poverty") +
   theme_minimal()
 ```
-]
+]]
 .push-right[
 &lt;img src="4-OLS-Wisdoms_files/figure-html/unnamed-chunk-34-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]]]

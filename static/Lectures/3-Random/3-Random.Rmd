@@ -1,6 +1,6 @@
 ---
 title: "Multiple Regression & <br><br> Fundamentals of Causal Inference"
-subtitle: "Randomness and empirical sociology"
+subtitle: "3. Randomness and empirical sociology"
 author: "Merlin Schaeffer<br> Department of Sociology"
 date: "`r Sys.Date()`"
 output: 
@@ -273,7 +273,7 @@ knitr::include_graphics('https://bloximages.chicago2.vip.townnews.com/buffalonew
 .push-left[
 - A *weight* tells you the probability that a case should be in the sample. .backgrnote[
 In a true random sample, each case of the population has an equal probability to be sampled. Thus each sampled case has a weight of 1.]
--  Some groups tend to be over\under-sampled. Post-stratification weights try to counterbalance this.
+- Some groups are over\under-sampled. Post-stratification weights counterbalance this.
 <br>
 
 .content-box-green[.center[
@@ -678,9 +678,9 @@ ggplot(count_data) +
   geom_ellipse(aes(color = abs(true_beta - x), fill = abs(true_beta - x),
                    group = index, x0 = x, y0 = y, a = bin_width/2, b = 0.5, angle = 0)) +
   coord_equal(bin_width) + # to make the dots look nice and round
-  scale_fill_steps(low = "#901A1E", high = "#425570", breaks = c(round(1.65*SD, 3), round(1.96*SD, 3)), nice.breaks = FALSE, guide = FALSE) +
-  scale_color_steps(low = "#901A1E", high = "#425570", breaks = c(round(1.65*SD, 3), round(1.96*SD, 3)), nice.breaks = FALSE, guide = FALSE) +
-  scale_x_continuous(breaks = c(round(true_beta-1.96*SD, 3), round(true_beta-1.65*SD, 3), round(true_beta, 3), round(true_beta+1.65*SD, 3), round(true_beta+1.96*SD, 3)), guide = guide_axis(n.dodge = 2)) +
+  scale_fill_steps(low = "#901A1E", high = "#425570", breaks = c(round(1.645*SD, 3), round(1.96*SD, 3)), nice.breaks = FALSE, guide = FALSE) +
+  scale_color_steps(low = "#901A1E", high = "#425570", breaks = c(round(1.645*SD, 3), round(1.96*SD, 3)), nice.breaks = FALSE, guide = FALSE) +
+  scale_x_continuous(breaks = c(round(true_beta-1.96*SD, 3), round(true_beta-1.645*SD, 3), round(true_beta, 3), round(true_beta+1.645*SD, 3), round(true_beta+1.96*SD, 3)), guide = guide_axis(n.dodge = 2)) +
   theme_minimal() +
   labs(y = "Count", x = expression(beta)) # +
   # gganimate::transition_reveal(along = index)

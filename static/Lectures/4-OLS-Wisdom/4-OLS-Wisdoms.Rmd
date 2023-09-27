@@ -171,7 +171,7 @@ knitr::include_graphics('./img/Colonial3.png')
 ]]
 
 .panel[.panel-name[Coding colonial powers]
-
+.font90[
 ```{r}
 Dat <- Dat %>% 
   mutate(
@@ -197,7 +197,7 @@ Dat <- Dat %>%
       # str_detect(country, "Namibia") ~ "South Africa", # Holland
       # str_detect(country, "Korea|Taiwan") ~ "Japan")) # Japan
 ```
-]
+]]
 
 .panel[.panel-name[Plot Colonizer]
 ```{r col-powers, out.width='100%', fig.height = 4.5, fig.width = 12, results = FALSE, echo = FALSE}
@@ -271,7 +271,7 @@ ggplot(data = Dat %>% filter(!is.na(colonizer) & !is.na(years_indep)), # Make co
 ---
 # Poverty and years of independence
 
-.left-column[
+.left-column[.font90[
 ```{r}
 # Estimate OLS regression
 ols <- lm_robust(
@@ -282,7 +282,7 @@ modelsummary(
   list("Poverty" = ols), stars = TRUE,
   gof_map = c("nobs", "r.squared"))
 ```
-]
+]]
 
 .right-column[
 ```{r indep-world, out.width='100%', fig.height = 4, fig.width = 6, results = FALSE, echo = FALSE}
@@ -291,7 +291,7 @@ ggplot(data = Dat %>% filter(!is.na(colonizer) & !is.na(years_indep)), # Make co
            x = years_indep)) +
   geom_smooth(method = "lm") +
   geom_text(aes(label = country)) +
-  labs(y = "% population with less than 1.90$ a day", x = "Years since independence") + # Axis labels,
+  labs(y = "% population with less than $2.15 a day", x = "Years since independence") + # Axis labels,
   theme_minimal() # Simple background layout
 ```
 ]
@@ -322,7 +322,9 @@ $\rightarrow$ Scatter plots!
 # Outlier 
 
 .left-column[
-- **Leverage:** Case has strong influence on regression line.
+- The gray dotted line is our OLS line.
+
+- **Leverage:** Case has strong influence on regression line; $x_i$ is far from $\bar{x}$.
   
 
 - **Z-standardized residuals:** case far from regression line.
@@ -333,7 +335,7 @@ $\rightarrow$ Scatter plots!
 lm(poverty ~ years_indep, 
    data = Dat) %>%
   # The best outlier plot.
-  plot(., which = 5) 
+  plot(., which = 5) #<<
 ```
 ]
 
@@ -359,7 +361,7 @@ Dat_outl <- Dat %>%
 ]
 
 .panel[.panel-name[OLS]
-.left-column[
+.left-column[.font90[
 ```{r, results = "asis"}
 # Estimation
 ols_outl <- lm_robust( 
@@ -370,7 +372,7 @@ modelsummary(
   list("Poverty" = ols_outl), stars = TRUE,
   gof_map = c("nobs", "r.squared"))
 ```
-]
+]]
 
 .right-column[
 ```{r Sweden, out.width='100%', fig.height = 4, fig.width = 6.5, results = FALSE, echo = FALSE}
@@ -379,7 +381,7 @@ ggplot(data = Dat_outl, # Make coord system for data,
            x = years_indep)) +
   geom_smooth(method = "lm") +
   geom_text(aes(label = country)) +
-  labs(y = "% population with less than 1.90$ a day", x = "Years since independence") + # Axis labels,
+  labs(y = "% population with less than $2.15 a day", x = "Years since independence") + # Axis labels,
   theme_minimal() # Simple background layout
 ```
 ]]
@@ -387,15 +389,16 @@ ggplot(data = Dat_outl, # Make coord system for data,
 .left-column[
 - **Leverage:** case has strong influence on regression line.
   
-
 - **Z-standardized residuals:** case far from regression line.
+
+- **Cook's D**: Bu how many standardized residuals would $\sum{\bar{y}}$ change, if case $i$ was deleted?
 
 ```{r outlier2, results = FALSE, fig.show='hide'}
 # Re-estimate model using lm(),
 lm(poverty ~ years_indep, 
    data = Dat_outl) %>%
   # The best outlier plot.
-  plot(., which = 5) 
+  plot(., which = 5) #<<
 ```
 ]
 
@@ -412,14 +415,15 @@ lm(poverty ~ years_indep,
 - The gray dotted line is our regression model.
 
 - The red line should ideally be the same.
-  + .alert[Linearity assumption doesn't perfectly hold, but seems overall OK.]
+
+- .alert[In our example, the linearity assumption doesn't perfectly hold, but seems overall OK.]
 
 ```{r linearity, results = FALSE, fig.show = 'hide'}
 # Re-estimate model using lm(),
 lm(poverty ~ years_indep, 
    data = Dat) %>%
   # The best linearity plot.
-  plot(., which = 1)
+  plot(., which = 1) #<<
 ```
 ]
 
@@ -479,7 +483,7 @@ ggplot(data = Dat_bi, aes(y = poverty, x = colonizer_bi)) +
   geom_text(aes(label = country), size = 3) +
   geom_smooth(method = "lm") +
   scale_x_continuous(breaks = c(0, 1), labels = c("Britain", "Belgium")) +
-  labs(y = "% population with less \n than 1.90$ a day", 
+  labs(y = "% population with less \n than $2.15 a day", 
        x = "Colonializer") +
   theme_minimal() +
   guides(color = "none")
@@ -518,7 +522,7 @@ ggplot(data = Dat_bi, aes(y = poverty, x = colonizer_bi)) +
   geom_text(aes(label = country)) +
   geom_smooth(method = "lm") +
   scale_x_continuous(breaks = c(0, 1)) +
-  labs(y = "% population with less \n than 1.90$ a day", 
+  labs(y = "% population with less \n than $2.15 a day", 
        x = "Belgium") +
   theme_minimal() +
   guides(color = "none")
@@ -526,18 +530,21 @@ ggplot(data = Dat_bi, aes(y = poverty, x = colonizer_bi)) +
 ]]
 
 .panel[.panel-name[How it's done in R]
-.push-left[
+.push-left[.font80[
 ```{r ols_2, eval = FALSE}
 # R recognizes categorical variables automatically,
 # if they are factor or character vectors.
 ols_2 <- lm_robust(poverty ~ colonizer, data = Dat)
 # Regression table
-modelsummary(list("Poverty" = ols_2), stars = TRUE,
-  coef_rename = c("colonizerFrance" = "France", "colonizerBelgium" = "Belgium",
-  "colonizerPortugal" = "Portugal", "colonizerSpain" = "Spain"),
+modelsummary(
+  list("Poverty" = ols_2), stars = TRUE,
+  coef_rename = c("colonizerFrance" = "France", 
+                  "colonizerBelgium" = "Belgium",
+                  "colonizerPortugal" = "Portugal", 
+                  "colonizerSpain" = "Spain"),
   gof_map = c("nobs", "r.squared"))
 ```
-
+]
 ```{r ref.label = "categorical", out.width='75%', fig.height = 4, fig.width = 6.5, results = FALSE, echo = FALSE}
 ```
 ]
@@ -559,7 +566,7 @@ ols_2 <- lm(poverty ~ colonizer, data = Dat)
 
 `r extract_eq(ols_2, wrap = TRUE, terms_per_line = 2, use_coefs = TRUE)`
 
-- When France = 0, Belgium = 0, Spain == 0, and Portugal = 0, then poverty is on average `r round(coef(ols_2)[1], 2)`%.<br> $\rightarrow$ Average poverty across countries colonized by Britain: `r round(coef(ols_2)[1], 2)`%.
+- When France = 0, Belgium = 0, Spain = 0, and Portugal = 0, then poverty is on average `r round(coef(ols_2)[1], 2)`%.<br> $\rightarrow$ Average poverty across countries colonized by Britain: `r round(coef(ols_2)[1], 2)`%.
 
 - Across countries colonized by France, poverty is on average `r round(coef(ols_2)[2], 2)`% higher than among those colonized by Britain; yet this difference is statistically not significant/systematic (could be the result of randomness).
   + Across countries colonized by France, poverty is thus: $`r round(coef(ols_2)[1], 2)`\% + `r round(coef(ols_2)[2], 2)`\% = `r round(coef(ols_2)[1], 2) + round(coef(ols_2)[2], 2)`\%$.
@@ -706,11 +713,10 @@ ggplot(data = plotdata, aes(y = estimate,
                             x = reorder(term, estimate))) +
   geom_hline(yintercept = 0, color = "red", lty = "dashed") +
   # Point with confidence interval,
-  geom_pointrange(aes(min = conf.low, max = conf.high)) +
-  coord_flip() + # Flip Y- & X-Axis,
+  geom_pointrange(aes(min = conf.low, max = conf.high)) + #<<
+  coord_flip() + # Flip Y- & X-Axis, #<<
   labs(title = "Regression of poverty",
        x = "Colonizer",
-       # Write Greek beta into axis title.
        y = "Difference in poverty compared to countries colonized by Britain") +
   theme_minimal()
 ```
@@ -763,37 +769,39 @@ ggplot(data = plotdata2, aes(y = estimate,
 .panel[.panel-name[Predictions]
 .push-left[
 **Step 1**: Generate fictional data of $x$ with theoretically informative values.
-
+.font90[
 ```{r}
 (fict_dat <- tibble(years_indep = 1:500))
 ```
-]
+]]
 .push-right[
-**Step 2**: What $\hat{y}$ does our model predict for the fictional data?
-
+**Step 2**: What $\hat{y}$ does our OLS model predict for the fictional data?
+.font90[
 ```{r}
 (fict_dat <- predict( #<<
-  ols, newdata = fict_dat, #<<
+  object = ols, #<<
+  newdata = fict_dat, #<<
   interval = "confidence", level = 0.95)$fit %>% #<<
    as_tibble() %>% # Turn into a tibble, then
    bind_cols(fict_dat, .)) # Add to the synthetic data.
 ```
-]]
+]]]
 .panel[.panel-name[Visualization]
-.push-left[
+.push-left[.font90[
 ```{r Predplot, fig.show = 'hide'}
 ggplot(data = fict_dat, aes(y = fit, x = years_indep)) +
-  geom_vline(xintercept = c(34, 236), color = "red", lty = "dashed") +
-  geom_ribbon(aes(ymin = lwr, ymax = upr), alpha = 0.5) +
-  geom_line() +
+  geom_vline(xintercept = c(34, 236), # Red reference lines
+             color = "red", lty = "dashed") +
+  geom_ribbon(aes(ymin = lwr, ymax = upr), # 95% Conf. Int.
+              alpha = 0.5) +
+  geom_line() + # The OLS line
   labs(
     title = "Predictions based on regression of extreme poverty",
     x = "By years since independence",
-    # Write Greek beta into axis title.
     y = "Predicted average of extreme poverty") +
   theme_minimal()
 ```
-]
+]]
 .push-right[
 ```{r ref.label = "Predplot", out.width='100%', fig.height = 4, fig.width = 6, echo = FALSE}
 ```
