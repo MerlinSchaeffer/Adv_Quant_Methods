@@ -4,7 +4,7 @@
     <title>Multiple Regression &amp;    Fundamentals of Causal Inference</title>
     <meta charset="utf-8" />
     <meta name="author" content="Merlin Schaeffer  Department of Sociology" />
-    <meta name="date" content="2023-10-03" />
+    <meta name="date" content="2023-10-04" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
     <script src="libs/tile-view/tile-view.js"></script>
@@ -29,7 +29,7 @@ class: center, middle, inverse, title-slide
 ### Merlin Schaeffer<br> Department of Sociology
 ]
 .date[
-### 2023-10-03
+### 2023-10-04
 ]
 
 ---
@@ -61,7 +61,7 @@ class: inverse middle
   + Confounder bias (= selection bias)
 
 ---
-# 
+# Race relations in the US
 
 &lt;img src="img/Gallup.png" width="70%" style="display: block; margin: auto;" /&gt;
 .font70[ .center[ *Source:* [Gallup](https://news.gallup.com/poll/1687/race-relations.aspx)]]
@@ -322,14 +322,6 @@ What do we learn about `\(H_{1}\)` here?
 # Small recap .font60[Hypotheses tests, *t*- and, *p*-values]
 
 .left-column[
-
-```r
-ols &lt;- lm_robust(dis_index ~ news_yn, 
-                 weight = gewFAKT, data = APAX)
-modelsummary(list("Discr." = ols), stars = TRUE,
-             gof_map = c("nobs", "r.squared"))
-```
-
 &lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
  &lt;thead&gt;
   &lt;tr&gt;
@@ -562,7 +554,7 @@ layout: false
 .push-right[
 Differences between groups are, most of the time, a comparison of apples (i.e. Ferda) to oranges (i.e. Tuki). 
 
-They do not tel us the average causal effect: `\(Avg_{n}[Y_{1i}-Y_{0i}]\)`!
+They do not tell us the average causal effect: `\(Avg_{n}[Y_{1i}-Y_{0i}]\)`!
 ]
 ---
 # Why? Selection bias!
@@ -722,9 +714,9 @@ layout: true
 
 *DAGs*: Are theoretical models and can contain observed and unobserved variables.
 
-.alert[Backdoor paths]: All paths linking `\(D\)` and `\(Y\)` that start with an arrow into `\(X\)` (Pearl, Glymour, and Jewell, 2016; Breen, 2022).
+.alert[Backdoor paths]: All paths linking `\(D\)` and `\(Y\)` that start with an arrow into `\(D\)` (Pearl, Glymour, and Jewell, 2016; Breen, 2022).
 
-.alert[Confounder \ Backdoor path bias] = Selection bias: A confounder is a variable that is on a backdoor path between `\(D\)` and `\(Y\)`. It biases our estimate of the causal effect of `\(D\)` on `\(Y\)`.
+.alert[Confounder \ Backdoor path bias \ Selection bias]: A confounder is a variable that is on a backdoor path between `\(D\)` and `\(Y\)`. It biases our estimate of the causal effect of `\(D\)` on `\(Y\)`.
 ]
 
 ---
@@ -756,7 +748,7 @@ layout: false
 .content-box-red[
 **Correlation ≠ causation**
 
-The baseline of the outcome, `\(Y_{0i}\)`, may differ between the groups we compare. This is because certain other variables (i.e. confounders) may make us select into / out of the groups.
+The baseline of the outcome, `\(Y_{0i}\)`, may differ between the groups we compare. This is because certain other variables (i.e. confounders) may make us select into / out of the groups that we compare.
 
 .font80[For example, if we find a correlation between ice cream sales and shark attacks, it is more likely that the correlation is due to temperature than to ice cream. Temperature affects both ice cream sales and shark attacks, and it also affects the likelihood of people going swimming. This means that the correlation between ice cream sales and shark attacks is not due to a causal relationship between the two variables.]
 

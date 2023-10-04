@@ -70,7 +70,7 @@ class: inverse middle
   + Confounder bias (= selection bias)
 
 ---
-# 
+# Race relations in the US
 
 ```{r, echo = FALSE, out.width='70%', fig.align='center'}
 knitr::include_graphics('img/Gallup.png')
@@ -297,7 +297,7 @@ What do we learn about $H_{1}$ here?
 # Small recap .font60[Hypotheses tests, *t*- and, *p*-values]
 
 .left-column[
-```{r naiv_OLS}
+```{r naiv_OLS, echo = FALSE}
 ```
 ]
 
@@ -535,7 +535,7 @@ knitr::include_graphics('https://vitaliscounseling.com/wp-content/uploads/2020/1
 .push-right[
 Differences between groups are, most of the time, a comparison of apples (i.e. Ferda) to oranges (i.e. Tuki). 
 
-They do not tel us the average causal effect: $Avg_{n}[Y_{1i}-Y_{0i}]$!
+They do not tell us the average causal effect: $Avg_{n}[Y_{1i}-Y_{0i}]$!
 ]
 ---
 # Why? Selection bias!
@@ -601,9 +601,9 @@ layout: true
 
 *DAGs*: Are theoretical models and can contain observed and unobserved variables.
 
-.alert[Backdoor paths]: All paths linking $D$ and $Y$ that start with an arrow into $X$ `r Citep(myBib, c("pearl_causal_2016", "gerxhani_causal_2022"))`.
+.alert[Backdoor paths]: All paths linking $D$ and $Y$ that start with an arrow into $D$ `r Citep(myBib, c("pearl_causal_2016", "gerxhani_causal_2022"))`.
 
-.alert[Confounder \ Backdoor path bias] = Selection bias: A confounder is a variable that is on a backdoor path between $D$ and $Y$. It biases our estimate of the causal effect of $D$ on $Y$.
+.alert[Confounder \ Backdoor path bias \ Selection bias]: A confounder is a variable that is on a backdoor path between $D$ and $Y$. It biases our estimate of the causal effect of $D$ on $Y$.
 ]
 
 ---
@@ -654,7 +654,6 @@ The red bi-directed arrow is officially not part of the DAG, but helps you see t
     \node[state] (3) [right = of 2] {Perc. discrimination};
 
     \path (1) edge  (2);
-    \path (2) edge (3);
     \path[bidirected] (2) edge[red, bend right=50] (3);
     \path (1) edge (3);
 \end{tikzpicture}
@@ -677,7 +676,7 @@ layout: false
 .content-box-red[
 **Correlation ≠ causation**
 
-The baseline of the outcome, $Y_{0i}$, may differ between the groups we compare. This is because certain other variables (i.e. confounders) may make us select into / out of the groups.
+The baseline of the outcome, $Y_{0i}$, may differ between the groups we compare. This is because certain other variables (i.e. confounders) may make us select into / out of the groups that we compare.
 
 .font80[For example, if we find a correlation between ice cream sales and shark attacks, it is more likely that the correlation is due to temperature than to ice cream. Temperature affects both ice cream sales and shark attacks, and it also affects the likelihood of people going swimming. This means that the correlation between ice cream sales and shark attacks is not due to a causal relationship between the two variables.]
 
