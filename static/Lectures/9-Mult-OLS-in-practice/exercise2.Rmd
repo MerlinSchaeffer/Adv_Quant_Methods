@@ -15,9 +15,9 @@ library(webexercises)
 library(essentials)
 ```
 
-1. Let's take another look at our research question on the legacy of colonialism. Use the setup below.
+1. Continue with our research question on the legacy of colonialism. Make a coefficient plot that visualizes the country differences (compared to Denmark as reference) before and after adjusting for the years since independence.
 
-```{r}
+```{r echo = FALSE}
 pacman::p_load(
   tidyverse, # Data manipulation,
   ggplot2, # beautiful figures,
@@ -95,21 +95,11 @@ Dat <- Dat %>%
       str_detect(country, "Angola|Mozambigue|Papua New Guinea") ~ date - 1975,
       country == "Djibouti" ~ date - 1977, 
       country == "Namibia" ~ date - 1990))
-```
 
-2. Make Denmark the reference category. 
-`r hide("R solution -> dont' peak to early ;) !")`
-```{r}
 Dat <- Dat %>%
   mutate( # Make Denmark the reference
     colonizer = colonizer %>% fct_relevel("Denmark"))
-```
-`r unhide()`
 
-3. Answer the following question: To which degree do differences in the number of years since independence from colonialism explain why we saw significant differences between countries colonized by different colonial powers? `r mcq(c("It does not explain much", "Many of the stars are gone.", answer = "The years since indepence explain a large share of the different poverty legacies of the various colonializers"))`. What does this say about a causal colonializer effect? `r mcq(c("It's much smaller than the bivariate result suggests.", "Correlation isn't causation", answer = "It's unclear whether the years since independence are not themselves an outcome of the colonializer (i.e. a mediator). Thus, it might be bad control if we are interested in a causal effect of the colonializer", "It's larger than the bivariate result suggests."))`
-
-`r hide("R solution -> dont' peak to early ;) !")`
-```{r}
 # Bivariate model
 ols_bi <- lm_robust(poverty ~  colonizer, data = Dat)
 # Controlling for years since independence
@@ -119,4 +109,91 @@ ols_mult <- lm_robust(poverty ~  colonizer + years_indep, data = Dat)
 modelsummary(list("Biv. OLS" = ols_bi, "Mult. OLS" = ols_mult), 
              gof_map = c("nobs", "r.squared"), stars = TRUE)
 ```
+
+
+`r hide("R solution -> dont' peak to early ;) !")`
+```{r Coefplot2, out.width='100%', fig.height = 4, fig.width = 6, eval = FALSE}
+plotdata_1 <- ols_bi %>%
+  tidy() %>% # Turn results into a tibble,
+  mutate( # Rename variables for the plot.
+    term = case_when(
+      term == "colonizerBelgium" ~ "Belgium",
+      term == "colonizerBritain" ~ "Britain",
+      term == "colonizerFrance" ~ "France",
+      term == "colonizerPortugal" ~ "Portugal",
+      term == "colonizerSpain" ~ "Spain")) %>%
+  filter(term != "(Intercept)")
+
+plotdata_2 <- ols_mult %>%
+  tidy() %>% # Turn results into a tibble,
+  mutate( # Rename variables for the plot.
+    term = case_when(
+      term == "colonizerBelgium" ~ "Belgium",
+      term == "colonizerBritain" ~ "Britain",
+      term == "colonizerFrance" ~ "France",
+      term == "colonizerPortugal" ~ "Portugal",
+      term == "colonizerSpain" ~ "Spain")) %>%
+  filter(term != "(Intercept)" & term != "years_indep")
+
+plotdata <- bind_rows(
+  plotdata_1, plotdata_2, .id = "model") %>%
+  mutate(
+    model = case_when(
+      model == 1 ~ "Bivariate",
+      model == 2 ~ "Adjusted for years since independence"))
+
+ggplot(data = plotdata, 
+       aes(y = estimate, 
+           # Order by effect size
+           x = reorder(term, estimate),
+           color = model)) +
+  geom_hline(yintercept = 0, color = "red", lty = "dashed") +
+  # Point with error-bars,
+  geom_pointrange(aes(min = conf.low, max = conf.high),
+                  position = position_dodge(width=0.5)) +
+  coord_flip() + # Flip Y- & X-Axis,
+  labs(
+    title = "Multiple OLS of extreme poverty",
+    x = "",
+    color = "",
+    # Write Greek beta into axis title.
+    y = "Difference in extreme poverty 
+    compared to countries colonized by Denmark") +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+```
 `r unhide()`
+```{r ref.label = "Coefplot2", out.width='100%', fig.height = 4, fig.width = 6, echo = FALSE}
+```
+
+2. Visualize model predictions that show the association of years since independence (from 0 to 300 years) and extreme poverty controlled for colonializer.
+`r hide("R solution -> dont' peak to early ;) !")`
+```{r predplot2, out.width='100%', fig.height = 4, fig.width = 6, eval = FALSE}
+# Make fictional data
+fict_dat <- tibble(
+  years_indep = 0:300,
+  colonizer = "Denmark")
+
+# Get predictions
+fict_dat <- predict(
+  ols_mult, newdata = fict_dat,
+  interval = "confidence", level = 0.95)$fit %>%
+  as_tibble() %>% # Turn into a tibble, then
+  bind_cols(fict_dat, .) # Add to the synthetic data.
+
+ggplot(data = fict_dat, aes(y = fit, x = years_indep)) +
+geom_vline(xintercept = c(34, 236), color = "red", lty = "dashed") +
+  geom_ribbon(aes(ymin = lwr, ymax = upr), alpha = 0.5) +
+  geom_line() +
+  labs(
+    title = "Predictions based on multiple OLS of extreme poverty",
+    x = "By years since independence from colonialism
+    (Colonializer set to: Denmark)",
+    # Write Greek beta into axis title.
+    y = "Predicted average of extreme poverty",
+    caption = "") +
+  theme_minimal()
+```
+`r unhide()`
+```{r ref.label = "predplot2", out.width='100%', fig.height = 4, fig.width = 6, echo = FALSE}
+```
