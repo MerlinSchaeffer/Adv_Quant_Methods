@@ -50,7 +50,7 @@ In 2000. Acemoglu and Angrist (2000) had an idea: Could child labor laws of the 
 ```{r}
 pacman::p_load(
   tidyverse, # Data manipulation,
-  texreg, # regression tables with nice layout,
+  modelsummary, # for balance and regression tables.
   estimatr, # Regression for weighted data,
   modelr, # Turn results of lm() into a tibble,
   ivreg, # IV 2SLS,
@@ -80,9 +80,9 @@ child_labor <- child_labor %>%
 ```{r q1, include = FALSE}
 # Estimate the first stage
 frst_stage <- lm_robust(indEduc ~ chld_lb_lw + yob + year + sob, data = child_labor)
-
-screenreg(frst_stage, # Regression table
-          include.ci = FALSE, digits = 3)
+# Regression table
+modelsummary(list("1st Stage" = frst_stage), stars = TRUE,
+             gof_map = c("nobs", "r.squared"))
 ```
 
 ```{r include = FALSE}
@@ -100,9 +100,9 @@ coef_frst <- coef(frst_stage)["chld_lb_lw"] %>% round(., 3) %>% as.scalar()
 ```{r reduced, include = FALSE}
 # Estimate the reduced stage
 rdcd_stage <- lm_robust(lnwkwage ~ chld_lb_lw + yob + year + sob, data = child_labor)
-
-screenreg(rdcd_stage, # Regression table
-          include.ci = FALSE, digits = 3)
+# Regression table
+modelsummary(list("Reduced Stage" = rdcd_stage), stars = TRUE,
+             gof_map = c("nobs", "r.squared"))
 ```
 
 ```{r include = FALSE}
@@ -131,9 +131,9 @@ child_labor <- child_labor %>%
 
 # Estimate the first stage
 scnd_stage <- lm_robust(lnwkwage ~ pred_indEduc + yob + year + sob, data = child_labor)
-
-screenreg(scnd_stage, # Regression table
-          include.ci = FALSE, digits = 3)
+# Regression table
+modelsummary(list("2nd Stage" = scnd_stage), stars = TRUE,
+             gof_map = c("nobs", "r.squared"))
 ```
 `r unhide()`
 
@@ -142,7 +142,8 @@ screenreg(scnd_stage, # Regression table
 ```{r}
 twosls <- ivreg(lnwkwage ~ indEduc + yob + year + sob | chld_lb_lw + yob + year + sob, data = child_labor)
 
-screenreg(twosls, # Regression table
-          include.ci = FALSE, digits = 3)
+# Regression table
+modelsummary(list("2SLS" = twosls), stars = TRUE,
+             gof_map = c("nobs", "r.squared"))
 ```
 `r unhide()`

@@ -1,16 +1,18 @@
 <!DOCTYPE html>
 <html lang="" xml:lang="">
   <head>
-    <title>Instrument Variables II</title>
+    <title>Multiple Regression &amp;    Fundamentals of Causal Inference</title>
     <meta charset="utf-8" />
     <meta name="author" content="Merlin Schaeffer  Department of Sociology" />
-    <meta name="date" content="2022-11-14" />
+    <meta name="date" content="2023-10-10" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
     <script src="libs/tile-view/tile-view.js"></script>
     <link href="libs/tachyons/tachyons.min.css" rel="stylesheet" />
     <link href="libs/panelset/panelset.css" rel="stylesheet" />
     <script src="libs/panelset/panelset.js"></script>
+    <script src="libs/kePrint/kePrint.js"></script>
+    <link href="libs/lightable/lightable.css" rel="stylesheet" />
     <link rel="stylesheet" href="../template/Merlin169.css" type="text/css" />
   </head>
   <body>
@@ -18,24 +20,24 @@
 class: center, middle, inverse, title-slide
 
 .title[
-# Instrument Variables II
+# Multiple Regression &amp; <br><br> Fundamentals of Causal Inference
 ]
 .subtitle[
-## Two Stage Least Squares (2SLS)
+## Instrument Variables II:<br><br> Two Stage Least Squares (2SLS)
 ]
 .author[
 ### Merlin Schaeffer<br> Department of Sociology
 ]
 .date[
-### 2022-11-14
+### 2023-10-10
 ]
 
 ---
 
 
-# The goal of social science research
+# Goal of empirical sociology
 
-.font140[.center[.alert[Use data to discover patterns ("social facts" in Durkheim's terms), &lt;br&gt; and **the social mechanisms that bring them about**.]]]
+.font130[.center[Use data to discover patterns, &lt;br&gt; and the .alert[social mechanisms that bring them about.]]]
 
 &lt;img src="https://liu.se/-/media/istock-501261958.jpg?mw=1120&amp;mh=1120&amp;hash=DA8977CCE6A6E600AE80A40CFEE771C9" width="70%" style="display: block; margin: auto;" /&gt;
 
@@ -48,8 +50,7 @@ class: inverse middle
   + Two-stage least Squares (2SLS).
   + Wald IV versus 2SLS IV Estimator.
 
-2. Two more IV applications:
-  1. Does reading improve Kids' school performance?
+2. Another IV application:
   2. Does state surveillance spark resistance?
 
 ---
@@ -108,8 +109,8 @@ class: inverse
 .push-left[
 &lt;img src="./img/randomization2.png" width="60%" style="display: block; margin: auto;" /&gt;
 
-- If we *randomly* divide subjects into treatment and control groups: They come from the same underlying population. 
-  &lt;br&gt; &lt;br&gt; `\(\rightarrow\)` Similar .alert[on average], *in every way*,&lt;br&gt; **including their `\(Y_{0}\)` **!
+If we *randomly* divide subjects into treatment and control groups, .alert[they come from the same underlying population]. 
+  &lt;br&gt; &lt;br&gt; `\(\rightarrow\)` They will be similar, on average, *in every way*;&lt;br&gt; **including their `\(Y_{0}\)` **!
   &lt;br&gt; &lt;br&gt; `\(\rightarrow E[Y_{0i}|D=1] = E[Y_{0i}|D=0]\)`!
 ]
 
@@ -157,7 +158,7 @@ Under which assumptions is the quarter of birth a valid instrument for years of 
 pacman::p_load(
   tidyverse, # Data manipulation,
   ggplot2, # beautiful figures,
-  texreg, # regression tables with nice layout,
+  modelsummary, # for balance and regression tables.
   estimatr, # Regression for weighted data,
   modelr, # Turn results of lm() into a tibble,
   ivreg, # IV 2SLS,
@@ -179,64 +180,120 @@ ak91
 #  8  6.05    12  1930     1    51    50
 #  9  5.35    11  1930     1    45    50
 # 10  5.26     7  1930     1    45    50
-# # … with 329,499 more rows
+# # ℹ 329,499 more rows
 ```
 ]]
 .panel[.panel-name[Naïv comparison]
-.push-left[
+.push-left[.font80[
 
 ```r
 # Multiple OLS
 mult_OLS = lm_robust(lnw ~ s + age, data = ak91)
 # Regression table
-screenreg(mult_OLS, include.ci = FALSE, digits = 3)
-# 
-# ===========================
-#              Model 1       
-# ---------------------------
-# (Intercept)       4.776 ***
-#                  (0.018)   
-# s                 0.071 ***
-#                  (0.000)   
-# age               0.005 ***
-#                  (0.000)   
-# ---------------------------
-# R^2               0.118    
-# Adj. R^2          0.118    
-# Num. obs.    329509        
-# RMSE              0.638    
-# ===========================
-# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
+modelsummary(list("log Wage" = mult_OLS), stars = TRUE,
+             gof_map = c("nobs", "r.squared"))
 ```
-]
+
+&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; log Wage &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 4.776*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.018) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; s &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.071*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.000) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; age &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.005*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.000) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 329509 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.118 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
+&lt;sup&gt;&lt;/sup&gt; + p &amp;lt; 0.1, * p &amp;lt; 0.05, ** p &amp;lt; 0.01, *** p &amp;lt; 0.001&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;
+&lt;/table&gt;
+
+
+]]
 .push-right[
 &lt;img src="10-IV-2SLS_files/figure-html/naiv-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]]
 .panel[.panel-name[The reduced form/ITT]
-.push-left[
+.push-left[.font80[
 
 ```r
 # Bivariate OLS
 reduced_frm &lt;- lm_robust(lnw ~ qob, data = ak91)
 # Regression table
-screenreg(reduced_frm, include.ci = FALSE, digits = 3)
-# 
-# ===========================
-#              Model 1       
-# ---------------------------
-# (Intercept)       5.887 ***
-#                  (0.003)   
-# qob               0.005 ***
-#                  (0.001)   
-# ---------------------------
-# R^2               0.000    
-# Adj. R^2          0.000    
-# Num. obs.    329509        
-# RMSE              0.679    
-# ===========================
-# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
+modelsummary(list("log Wage" = reduced_frm), stars = TRUE,
+             gof_map = c("nobs", "r.squared"))
 ```
-]
+
+&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; log Wage &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 5.887*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.003) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; qob &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.005*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.001) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 329509 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.000 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
+&lt;sup&gt;&lt;/sup&gt; + p &amp;lt; 0.1, * p &amp;lt; 0.05, ** p &amp;lt; 0.01, *** p &amp;lt; 0.001&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;
+&lt;/table&gt;
+
+
+]]
 .push-right[
 
 .push-left[
@@ -247,30 +304,55 @@ screenreg(reduced_frm, include.ci = FALSE, digits = 3)
 ]]
 ]
 .panel[.panel-name[The first stage]
-.push-left[
+.push-left[.font80[
 
 ```r
 # Bivariate OLS
 frst_stage &lt;- lm_robust(s ~ qob, data = ak91)
 # Regression table
-screenreg(frst_stage, include.ci = FALSE, digits = 3)
-# 
-# ===========================
-#              Model 1       
-# ---------------------------
-# (Intercept)      12.641 ***
-#                  (0.014)   
-# qob               0.052 ***
-#                  (0.005)   
-# ---------------------------
-# R^2               0.000    
-# Adj. R^2          0.000    
-# Num. obs.    329509        
-# RMSE              3.281    
-# ===========================
-# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
+modelsummary(list("Schooling" = frst_stage), stars = TRUE,
+             gof_map = c("nobs", "r.squared"))
 ```
-]
+
+&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; Schooling &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 12.641*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.014) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; qob &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.052*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.005) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 329509 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.000 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
+&lt;sup&gt;&lt;/sup&gt; + p &amp;lt; 0.1, * p &amp;lt; 0.05, ** p &amp;lt; 0.01, *** p &amp;lt; 0.001&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;
+&lt;/table&gt;
+
+
+]]
 .push-right[
 
 .push-left[
@@ -280,46 +362,109 @@ screenreg(frst_stage, include.ci = FALSE, digits = 3)
 &lt;img src="10-IV-2SLS_files/figure-html/first2-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]]]
 .panel[.panel-name[IV]
-.left-column[
+.left-column[.font80[
 
 ```r
 *iv &lt;- ivreg( # IV (2SLS)
 * lnw ~ s | qob,
 * data = ak91)
 
-screenreg( # Regression table
-  list(mult_OLS, frst_stage, 
-       reduced_frm, iv), 
-  include.ci = FALSE, digits = 3,
-  custom.model.names = 
-    c("OLS", "1st Stage", 
-      "Reduced Form", "IV"))
-```
-]
-.right-column[.font90[
-
-```
-# 
-# ===========================================================================
-#              OLS             1st Stage       Reduced Form    IV            
-# ---------------------------------------------------------------------------
-# (Intercept)       4.776 ***      12.641 ***       5.887 ***       4.633 ***
-#                  (0.018)         (0.014)         (0.003)         (0.250)   
-# s                 0.071 ***                                       0.099 ***
-#                  (0.000)                                         (0.020)   
-# age               0.005 ***                                                
-#                  (0.000)                                                   
-# qob                               0.052 ***       0.005 ***                
-#                                  (0.005)         (0.001)                   
-# ---------------------------------------------------------------------------
-# R^2               0.118           0.000           0.000           0.098    
-# Adj. R^2          0.118           0.000           0.000           0.098    
-# Num. obs.    329509          329509          329509          329509        
-# RMSE              0.638           3.281           0.679                    
-# ===========================================================================
-# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
+modelsummary(list("OLS" = mult_OLS, 
+                  "1st Stage" = frst_stage, 
+                  "Reduced Form" = reduced_frm, 
+                  "IV" = iv), stars = TRUE, 
+             gof_map = c("nobs", "r.squared"))
 ```
 `$$\text{IV} = \frac{\rho}{\phi} = \frac{0.005}{0.052} = 0.099$$`
+]]
+.right-column[.font90[
+&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; OLS &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; 1st Stage &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; Reduced Form &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt;  IV &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 4.776*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 12.641*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 5.887*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 4.633*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.018) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.014) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.003) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.250) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; s &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.071*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.099*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.000) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.020) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; age &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.005*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.000) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; qob &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.052*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.005*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.005) &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.001) &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 329509 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 329509 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 329509 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 329509 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.118 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.000 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.000 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.098 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
+&lt;sup&gt;&lt;/sup&gt; + p &amp;lt; 0.1, * p &amp;lt; 0.05, ** p &amp;lt; 0.01, *** p &amp;lt; 0.001&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;
+&lt;/table&gt;
+
+
 ]]]]
 
 ---
@@ -360,7 +505,7 @@ frst_stage &lt;- lm_robust(s ~ qob, data = ak91) # Bivariate OLS
 #  8  6.05    12  1930     1    51    50   12.7 -0.692
 #  9  5.35    11  1930     1    45    50   12.7 -1.69 
 # 10  5.26     7  1930     1    45    50   12.7 -5.69 
-# # … with 329,499 more rows
+# # ℹ 329,499 more rows
 ```
 
 .content-box-green[.font80[
@@ -380,36 +525,72 @@ Which is unconfounded, the predicted education `pred_s` or the residuals `e_s`?
 `$$Y_{i} = \alpha_2 + \lambda_{\text{2SLS}}\hat{D}_{i} + e_{i}.$$`
 ]
 
-.push-right[
+.push-right[.font80[
 
 ```r
-# Bivariate OLS
 scnd_stage &lt;- lm_robust(lnw ~ pred_s, data = ak91) 
-
 *iv &lt;- ivreg(lnw ~ s | qob, data = ak91) # IV (2SLS)
-
-screenreg(list(scnd_stage, iv), # Regression table
-  include.ci = FALSE, digits = 3,
-  custom.model.names = c("2nd Stage","IV"))
-# 
-# ===========================================
-#              2nd Stage       IV            
-# -------------------------------------------
-# (Intercept)       4.633 ***       4.633 ***
-#                  (0.263)         (0.250)   
-# pred_s            0.099 ***                
-#                  (0.021)                   
-# s                                 0.099 ***
-#                                  (0.020)   
-# -------------------------------------------
-# R^2               0.000           0.098    
-# Adj. R^2          0.000           0.098    
-# Num. obs.    329509          329509        
-# RMSE              0.679                    
-# ===========================================
-# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
+modelsummary(list("2n Stage" = scnd_stage, 
+                  "IV" = iv), stars = TRUE, 
+             gof_map = c("nobs", "r.squared"))
 ```
-]
+
+&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt;  2n Stage &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt;  IV &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 4.633*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 4.633*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.263) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.250) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; pred_s &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.099*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.021) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; s &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.099*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.020) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 329509 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 329509 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.000 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.098 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
+&lt;sup&gt;&lt;/sup&gt; + p &amp;lt; 0.1, * p &amp;lt; 0.05, ** p &amp;lt; 0.01, *** p &amp;lt; 0.001&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;
+&lt;/table&gt;
+
+
+]]
 
 ---
 # Two perspectives on IV
@@ -501,7 +682,7 @@ class: inverse middle center
 class: middle clear
 
 .left-column[
-&lt;img src="https://d1rytvr7gmk1sx.cloudfront.net/wp-content/uploads/2022/08/learn-coding-automation-just.jpeg?x27457" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="https://cdn.dribbble.com/users/10549/screenshots/9916149/media/a9dbfea8e23e5b8e23db142528c3bc9f.png?compress=1&amp;resize=1200x900&amp;vertical=top" width="100%" style="display: block; margin: auto;" /&gt;
 
 &lt;iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
 ]
@@ -512,50 +693,6 @@ class: middle clear
 ]
 
 ---
-class: inverse
-# Does reading improve kids school performance?
-
-.push-left[
-&lt;img src="https://ak.picdn.net/shutterstock/videos/1053393338/thumb/4.jpg?ip=x480" width="80%" style="display: block; margin: auto;" /&gt;&lt;img src="https://images.pond5.com/siblings-reading-book-flashlight-footage-193332935_iconl.jpeg" width="80%" style="display: block; margin: auto;" /&gt;
-]
-
-.push-right[
-&lt;img src="10-IV-2SLS_files/figure-html/DAG_Ea1-1.png" width="100%" style="display: block; margin: auto;" /&gt;
-]
-
----
-layout: true
-# Ea Blaabæk (2020) had an idea
-
-.push-left[
-&lt;img src="./img/Ea1.png" width="70%" style="display: block; margin: auto;" /&gt;
-
-&lt;img src="10-IV-2SLS_files/figure-html/DAG_Ea2-1.png" width="80%" style="display: block; margin: auto;" /&gt;
-]
-
----
-
-.push-right[
-&lt;iframe src='https://www.sciencedirect.com/science/article/pii/S0276562420300159' width='600' height='500' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
-]
-
----
-
-.push-right[
-&lt;img src="./img/Ea2.png" width="80%" style="display: block; margin: auto;" /&gt;
-
-.content-box-green[
-Exclusion assumption: Do you think the weather affects school performance *only* through it's effect on how much kids read?
-]]
-
----
-
-.push-right[
-&lt;img src="./img/Ea3.png" width="100%" style="display: block; margin: auto;" /&gt;
-]
-
----
-layout: false
 class: inverse middle center
 # Break
 
@@ -609,7 +746,7 @@ layout: true
 ---
 
 .left-column[
-&lt;img src="10-IV-2SLS_files/figure-html/unnamed-chunk-30-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+&lt;img src="10-IV-2SLS_files/figure-html/unnamed-chunk-26-1.png" width="80%" style="display: block; margin: auto;" /&gt;
 
 &lt;img src="https://wandanowicka.pl/wp-content/uploads/2020/08/upadek-solidarnosci.jpg" width="85%" style="display: block; margin: auto;" /&gt;&lt;img src="https://edupolis.pl/wp-content/uploads/2021/05/Solidarnosc.jpg" width="85%" style="display: block; margin: auto;" /&gt;
 ]
@@ -627,7 +764,7 @@ layout: true
 ---
 
 .left-column[
-&lt;img src="10-IV-2SLS_files/figure-html/unnamed-chunk-33-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+&lt;img src="10-IV-2SLS_files/figure-html/unnamed-chunk-29-1.png" width="80%" style="display: block; margin: auto;" /&gt;
 
 &lt;img src="https://wandanowicka.pl/wp-content/uploads/2020/08/upadek-solidarnosci.jpg" width="85%" style="display: block; margin: auto;" /&gt;&lt;img src="https://edupolis.pl/wp-content/uploads/2021/05/Solidarnosc.jpg" width="85%" style="display: block; margin: auto;" /&gt;
 ]
@@ -657,7 +794,7 @@ Why might these results not be causal?
 ---
 
 .left-column[
-&lt;img src="10-IV-2SLS_files/figure-html/unnamed-chunk-38-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+&lt;img src="10-IV-2SLS_files/figure-html/unnamed-chunk-34-1.png" width="80%" style="display: block; margin: auto;" /&gt;
 
 &lt;img src="https://wandanowicka.pl/wp-content/uploads/2020/08/upadek-solidarnosci.jpg" width="70%" style="display: block; margin: auto;" /&gt;&lt;img src="https://edupolis.pl/wp-content/uploads/2021/05/Solidarnosc.jpg" width="70%" style="display: block; margin: auto;" /&gt;
 
@@ -754,11 +891,38 @@ class: clear
 ---
 layout: false
 class: inverse
-# Today's general lessons
+# Today's general lessons 1
 
-1. 2SLS first predicts that part of the treatment `\(D\)` that correlates with the instrument. Then it uses this part to predict the outcome of interest `\(Y\)`.
-2. Instrument variables and control variables both use multiple OLS and it's Frisch-Waugh logic. However, they use it in exactly the opposite way. An instrument identifies unconfounded random variation in the treatment `\(D\)`; IV only keeps that part of `\(D\)` that *correlates* with the instrument. A confounder induces selection bias into `\(D\)`. By controlling for it, we only use that part of `\(D\)` that *does not correlate* with it.
-3. If the exclusion restriction does not hold, an instrument basically turns into a confounder!
+Two-stage least squares (2SLS)
+
+1. 2SLS is a statistical technique that can be used to estimate the causal effect of a treatment variable on an outcome variable, even if the treatment variable and outcome variable are correlated.
+
+2. 2SLS works by first predicting the treatment variable using an instrument variable. An instrument variable is a variable that is correlated with the treatment variable but not with the outcome variable, except through the treatment variable. Once the treatment variable has been predicted, 2SLS uses the predicted treatment variable to predict the outcome variable. The estimated causal effect of the treatment variable on the outcome variable is the coefficient on the predicted treatment variable in the second stage regression.
+
+---
+# Today's general lessons 2
+
+Instrument variables vs. control variables: are both used to reduce bias in statistical models. However, they work in different ways.
+
+1. An *instrument variable* is used to identify and control for unconfounded random variation in the treatment variable. 
+
+2. A *control variable* is used to control for systematically confounded variation in the treatment variable.
+
+| Characteristic | Instrument variable | Control variable |
+|---|---|---|
+| Purpose | To identify unconfounded random variation in the treatment variable. | To control for systematically confounded variation in the treatment variable. |
+| Correlation with treatment variable | Causes treatment variable. | Causes treatment variable. |
+| Correlation with outcome variable | Must be uncorrelated with outcome variable, except through the treatment variable. | Causes outcome variable. |
+
+---
+class: inverse
+# Today's general lessons 3
+
+The exclusion restriction
+
+1. The exclusion restriction is a key assumption that must be met for 2SLS to produce unbiased estimates of the causal effect of the treatment variable on the outcome variable. The exclusion restriction states that the instrument variable is only correlated with the outcome variable through the treatment variable.
+
+2. If the exclusion restriction does not hold, then 2SLS estimates will be biased. In particular, the instrument variable will basically turn into a confounder.
 
 ---
 class: inverse
@@ -772,9 +936,6 @@ class: inverse
 .font80[
 Angrist, J. D. and A. B. Krueger (1991). "Does Compulsory School Attendance Affect Schooling and
 Earnings?*". In: _The Quarterly Journal of Economics_, pp. 979-1014.
-
-Blaabæk, E. H. (2020). "Reading when the sun does not shine: The effect of reading on children’s
-academic performance". In: _Research in Social Stratification and Mobility_, p. 100485.
 
 Buckles, K. S. and D. M. Hungerman (2013). "Season of Birth and Later Outcomes: Old Questions, New
 Answers". In: _The Review of Economics and Statistics_, pp. 711-724.
