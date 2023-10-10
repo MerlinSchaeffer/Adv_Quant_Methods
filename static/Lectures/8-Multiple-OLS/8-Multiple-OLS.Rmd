@@ -851,12 +851,10 @@ class: clear
 .font80[
 ```{r olsPT}
 # Estimate the treatment effect with OLS
-ols_pt_bi <- lm_robust(anti_immi ~ treat, 
-                       data = ESS %>% filter(cntry == "PT"), 
-                       weights = pspwght)
-ols_pt_mult <- lm_robust(anti_immi ~ treat + age, 
-                         data = ESS %>% filter(cntry == "PT"), 
-                         weights = pspwght)
+ols_pt_bi <- lm_robust(anti_immi ~ treat, weights = pspwght,
+                       data = ESS %>% filter(cntry == "PT"))
+ols_pt_mult <- lm_robust(anti_immi ~ treat + age, weights = pspwght,
+                         data = ESS %>% filter(cntry == "PT"))
 # Report results in a nicely-formatted table
 modelsummary(list("Biv. OLS" = ols_pt_bi, "Mult. OLS" = ols_pt_mult), stars = TRUE,
              gof_map = c("nobs", "r.squared"))

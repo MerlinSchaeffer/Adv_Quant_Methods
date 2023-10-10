@@ -15,9 +15,9 @@ library(webexercises)
 library(essentials)
 ```
 
-1. Continue with our research question on the legacy of colonialism. Make a coefficient plot that visualizes the country differences (compared to Denmark as reference) before and after adjusting for the years since independence.
+1. Continue with our research question on the legacy of colonialism. Try to replicate the coefficient plot shown below, which visualizes the country differences (compared to Denmark as reference) before and after adjusting for the years since independence.
 
-```{r echo = FALSE}
+```{r echo = FALSE, results='hide'}
 pacman::p_load(
   tidyverse, # Data manipulation,
   ggplot2, # beautiful figures,
@@ -110,7 +110,6 @@ modelsummary(list("Biv. OLS" = ols_bi, "Mult. OLS" = ols_mult),
              gof_map = c("nobs", "r.squared"), stars = TRUE)
 ```
 
-
 `r hide("R solution -> dont' peak to early ;) !")`
 ```{r Coefplot2, out.width='100%', fig.height = 4, fig.width = 6, eval = FALSE}
 plotdata_1 <- ols_bi %>%
@@ -166,7 +165,7 @@ ggplot(data = plotdata,
 ```{r ref.label = "Coefplot2", out.width='100%', fig.height = 4, fig.width = 6, echo = FALSE}
 ```
 
-2. Visualize model predictions that show the association of years since independence (from 0 to 300 years) and extreme poverty controlled for colonializer.
+2. Try to replicate the figure shown below, which visualizes model predictions that show the association of years since independence (from 0 to 300 years) and extreme poverty controlled for colonializer.
 `r hide("R solution -> dont' peak to early ;) !")`
 ```{r predplot2, out.width='100%', fig.height = 4, fig.width = 6, eval = FALSE}
 # Make fictional data

@@ -4,7 +4,7 @@
     <title>Multiple Regression &amp;    Fundamentals of Causal Inference</title>
     <meta charset="utf-8" />
     <meta name="author" content="Merlin Schaeffer  Department of Sociology" />
-    <meta name="date" content="2023-10-09" />
+    <meta name="date" content="2023-10-10" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
     <script src="libs/tile-view/tile-view.js"></script>
@@ -29,7 +29,7 @@ class: center, middle, inverse, title-slide
 ### Merlin Schaeffer<br> Department of Sociology
 ]
 .date[
-### 2023-10-09
+### 2023-10-10
 ]
 
 ---
@@ -55,9 +55,9 @@ class: inverse middle center
 
 ---
 class: clear
-# Confounders versus mediators
+# Confounders versus Mediators
 
-.push-left[
+.push-left[.font90[
 .content-box-red[
 - **Backdoor path**: Any path from `\(D\)` to `\(Y\)` that starts with an arrow **into** `\(D\)`; here `\(C\)` opens a backdoor path and is thus a **confounder**.
 
@@ -71,7 +71,7 @@ class: clear
 
 - If we use multiple OLS to block `\(M\)`, we do not estimate the causal effect of `\(D\)`, but only a part of it.
 - Post-treatment variables could be mediators.
-]]
+]]]
 
 .push-right[
 &lt;img src="9-Mult-OLS-in-practice_files/figure-html/DAG_ConfMed-1.png" width="80%" style="display: block; margin: auto;" /&gt;
@@ -80,10 +80,13 @@ class: clear
 ---
 # Confounders versus Mediators
 
-1. If we want to improve comparisons to get as close as possible to the causal effect `\(D \rightarrow Y\)`, then we need to control for all observed confounders and for no mediators!
+.content-box-red[
+If we want to improve comparisons to get as close as possible to the causal effect `\(D \rightarrow Y\)`, then we need to control for all observed confounders, but she **avoid controlling for any mediators!**
+]
 
-2. If we want to test how much a mediator "explains" the causal effect `\(D \rightarrow Y\)`
-
+.content-box-blue[
+But for some research questions, controlling for mediators can make sense. Sometimes we can be interested in effect `\(D \rightarrow Y\)`, or the association `\(r_{y,x}\)`, that does not run through `\(M\)`. 
+]
 
 ---
 # Confounders versus mediators
@@ -534,9 +537,10 @@ class: inverse middle center
 .left-column[
 &lt;br&gt;
 
-&lt;img src="https://jlegewie.com/files/joscha.jpg" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="https://www.wzb.eu/files/styles/4_column_content_lg/public/image/dsi/aam/wzbjahresbericht3836-smaller.jpg?itok=_G0nt5M9" width="60%" style="display: block; margin: auto;" /&gt;
 
 ]
+
 
 .right-column[
 &lt;img src="./img/Joscha2.png" width="100%" style="display: block; margin: auto;" /&gt;
@@ -554,14 +558,14 @@ class: clear
 # Age as confounder? .font70[(i.e., Age-based selection into treatment?)]
 
 .left-column[
-- On average, xenophobia increases with age.
+On average, xenophobia increases with age.
 
-- The older a respondent, the more likely they are part of the control group (i.e., not exposed to Bali attack).
+The older a respondent, the more likely they are part of the control group (i.e., not exposed to Bali attack).
 
 `\(\rightarrow E[Y_{0i}|D=0] \color{red}{&gt;} E[Y_{0i}|D=1]\)` 
 
 .backgrnote[
-- Note that in Portugal, older respondents were more likely to be in the treatment group.
+Note that in Portugal, older respondents were more likely to be in the treatment group.
 `\(\rightarrow E[Y_{0i}|D=0] \color{red}{&lt;} E[Y_{0i}|D=1]\)` 
 ]]
 
@@ -673,38 +677,74 @@ class: clear
 # Adjusting for age-based selection into treatment
 
 .push-left[
-.font90[
+.font80[
 
 ```r
 # Estimate the treatment effect with OLS
-ols_pt_bi &lt;- lm_robust(anti_immi ~ treat, 
-                       data = ESS %&gt;% filter(cntry == "PT"), 
-                       weights = pspwght)
-ols_pt_mult &lt;- lm_robust(anti_immi ~ treat + age, 
-                         data = ESS %&gt;% filter(cntry == "PT"), 
-                         weights = pspwght)
-
+ols_pt_bi &lt;- lm_robust(anti_immi ~ treat, weights = pspwght,
+                       data = ESS %&gt;% filter(cntry == "PT"))
+ols_pt_mult &lt;- lm_robust(anti_immi ~ treat + age, weights = pspwght,
+                         data = ESS %&gt;% filter(cntry == "PT"))
 # Report results in a nicely-formatted table
-screenreg(list(ols_pt_bi, ols_pt_mult), 
-          include.ci = FALSE, digits = 3)
-# 
-# =========================================
-#                  Model 1      Model 2    
-# -----------------------------------------
-# (Intercept)        3.621 ***    3.328 ***
-#                   (0.082)      (0.175)   
-# treatAfter Bali    0.330 **     0.313 ** 
-#                   (0.116)      (0.118)   
-# age                             0.006    
-#                                (0.003)   
-# -----------------------------------------
-# R^2                0.032        0.050    
-# Adj. R^2           0.029        0.044    
-# Num. obs.        291          291        
-# RMSE               0.601        0.596    
-# =========================================
-# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
+modelsummary(list("Biv. OLS" = ols_pt_bi, "Mult. OLS" = ols_pt_mult), stars = TRUE,
+             gof_map = c("nobs", "r.squared"))
 ```
+
+&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; Biv. OLS &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; Mult. OLS &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 3.621*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 3.328*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.082) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.175) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; treatAfter Bali &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.330** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.313** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.116) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.118) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; age &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.006+ &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.003) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 291 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 291 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.032 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.050 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
+&lt;sup&gt;&lt;/sup&gt; + p &amp;lt; 0.1, * p &amp;lt; 0.05, ** p &amp;lt; 0.01, *** p &amp;lt; 0.001&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;
+&lt;/table&gt;
+
+
 ]]
 
 .push-right[
@@ -749,14 +789,14 @@ class: clear
 
 &lt;img src="9-Mult-OLS-in-practice_files/figure-html/unnamed-chunk-21-1.png" width="40%" style="display: block; margin: auto;" /&gt;
 
-- OLS can statistically balance **_observed_** confounders, even after the data has been finally collected.
+OLS can statistically balance **_observed_** confounders, even after data have been collected.
 ]]
 
 .push-right[.content-box-red[
 
 &lt;img src="9-Mult-OLS-in-practice_files/figure-html/DAG_FrischWaugh2-1.png" width="40%" style="display: block; margin: auto;" /&gt;
 
-- If **_observed_** confounders are imbalanced, *maybe more is broken that we have not observed?*
+If **_observed_** confounders are imbalanced, *maybe even more is broken?*
 ]]
 
 ---
@@ -809,14 +849,14 @@ What else could be `\(C?\)` That is, which other confounders would we need to co
 ]
 
 .push-right[
-
-&lt;iframe src='https://academic.oup.com/qje/article/117/4/1491/1876022' width='700' height='500' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+&lt;img src="./img/DaleKrueger0.png" width="100%" style="display: block; margin: auto;" /&gt;
+.center[.backgrnote[*Source:* Dale and Krueger (2002)]]
 ]
 
 ---
 
 .push-left[
-&lt;img src="9-Mult-OLS-in-practice_files/figure-html/unnamed-chunk-25-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="9-Mult-OLS-in-practice_files/figure-html/unnamed-chunk-26-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]
 
 .push-right[
@@ -843,7 +883,7 @@ class: clear
 ## Do selective universities 
 
 ## pay off?
-&lt;img src="9-Mult-OLS-in-practice_files/figure-html/unnamed-chunk-28-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="9-Mult-OLS-in-practice_files/figure-html/unnamed-chunk-29-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]
 
 .push-right[
@@ -860,23 +900,46 @@ class: inverse middle center
 
 &lt;img src="https://cdn.pixabay.com/photo/2014/03/24/17/18/smiley-295353__340.png" width="10%" style="display: block; margin: auto;" /&gt;
 
+---
+class: inverse middle center
+# Break
 
+&lt;iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+
+---
+class: middle clear
+
+.left-column[
+&lt;img src="https://www.laserfiche.com/wp-content/uploads/2014/10/femalecoder.jpg" width="80%" style="display: block; margin: auto;" /&gt;
+
+&lt;iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+]
+
+.right-column[
+&lt;br&gt;
+&lt;iframe src='exercise2.html' width='1000' height='600' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+]
 
 ---
 class: inverse
-# Today's general lessons
+# Today's general lessons 1
 
-1. The tool of multiple OLS and its Frisch-Waugh logic can be used for many purposes. Tyopically we use it for the four purposes outlined today.
+Multiple ordinary least squares (OLS) is a statistical technique that can be used for a variety of purposes, including:
 
-2. We can improve balance for (natural) experimental designs.
+1. Improving balance for natural experimental designs: Multiple OLS can be used to create more balanced treatment and control groups in natural experimental designs, such as when researchers are comparing the outcomes of students who attend different schools.
 
-3. We can improve comparisons by adjusting for confounders, ideally with a smart summary variable that blocks all backdoor paths.
+2. Improving comparisons by adjusting for confounders: Multiple OLS can be used to adjust for confounders, which are variables that can influence both the treatment and the outcome of interest. This can help to improve the accuracy and fairness of comparisons between treatment and control groups.
 
-4. We can improve comparisons by ruling out alternatives.
+3. Improving comparisons by ruling out mechanisms \ mediators: Multiple OLS can be used to rule out alternative explanations for the observed relationship between the treatment and the outcome of interest.
 
-5. Confounder: A variable that lies on a backdoor path from treatment to outcome (i.e. a path that starts with an arrow into the treatment).
+---
+class: inverse
+# Today's general lessons 2
 
-6. Mediators/mechanisms: A variable that is part of the causal channel via which the treatment affects the outcome of interest.
+- **Confounder**: A variable that lies on a backdoor path from treatment to outcome (i.e., a path that starts with an arrow into the treatment). A confounder is a variable that is related to both the treatment and the outcome of interest, but is not caused by either one. For example, in a study of the effects of a new drug on blood pressure, age could be a confounder. Age is related to both blood pressure and the likelihood of being prescribed the new drug, but it is not caused by either one.
+
+- **Mediator/mechanism**: A variable that is part of the causal channel via which the treatment affects the outcome of interest. A mediator/mechanism is a variable that explains how the treatment affects the outcome of interest. For example, in the study of the new drug and blood pressure, a possible mediator/mechanism is the drug's effect on cholesterol levels. The drug may lower blood pressure by lowering cholesterol levels, so cholesterol levels are a mediator/mechanism of the drug's effect on blood pressure.
+
 ---
 # References
 

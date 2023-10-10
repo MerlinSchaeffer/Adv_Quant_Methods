@@ -106,7 +106,7 @@ Dat <- Dat %>%
 ```
 `r unhide()`
 
-3. Answer the following question: To which degree do differences in the number of years since independence from colonialism explain why we saw significant differences between countries colonized by different colonial powers? `r mcq(c("It does not explain much", "Many of the stars are gone.", answer = "The years since indepence explain a large share of the different poverty legacies of the various colonializers"))`. What does this say about a causal colonializer effect? `r mcq(c("It's much smaller than the bivariate result suggests.", "Correlation isn't causation", answer = "It's unclear whether the years since independence are not themselves an outcome of the colonializer (i.e. a mediator). Thus, it might be bad control if we are interested in a causal effect of the colonializer", "It's larger than the bivariate result suggests."))`
+3. Answer the following question: To which degree do differences in the number of years since independence from colonialism explain why we saw significant differences between countries colonized by different colonial powers? `r mcq(c("It does not explain much", "Many of the stars are gone.", answer = "The years since indepence explain a large share of the different poverty legacies of the various colonializers"))`. 
 
 `r hide("R solution -> dont' peak to early ;) !")`
 ```{r}
@@ -120,3 +120,5 @@ modelsummary(list("Biv. OLS" = ols_bi, "Mult. OLS" = ols_mult),
              gof_map = c("nobs", "r.squared"), stars = TRUE)
 ```
 `r unhide()`
+
+4. What does this say about a causal colonializer effect? `r mcq(c("It's much smaller than the bivariate result suggests.", "Correlation isn't causation", answer = "It's unclear whether the years since independence are not themselves an outcome of the colonializer (i.e. a mediator). Thus, it might be bad control if we are interested in a causal effect of the colonializer", "It's larger than the bivariate result suggests."))`

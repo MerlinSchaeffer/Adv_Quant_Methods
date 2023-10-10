@@ -4,7 +4,7 @@
     <title>Multiple Regression &amp;    Fundamentals of Causal Inference</title>
     <meta charset="utf-8" />
     <meta name="author" content="Merlin Schaeffer  Department of Sociology" />
-    <meta name="date" content="2023-09-12" />
+    <meta name="date" content="2023-10-10" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
     <script src="libs/tile-view/tile-view.js"></script>
@@ -29,7 +29,7 @@ class: center, middle, inverse, title-slide
 ### Merlin Schaeffer<br> Department of Sociology
 ]
 .date[
-### 2023-09-12
+### 2023-10-10
 ]
 
 ---
@@ -918,12 +918,10 @@ class: clear
 
 ```r
 # Estimate the treatment effect with OLS
-ols_pt_bi &lt;- lm_robust(anti_immi ~ treat, 
-                       data = ESS %&gt;% filter(cntry == "PT"), 
-                       weights = pspwght)
-ols_pt_mult &lt;- lm_robust(anti_immi ~ treat + age, 
-                         data = ESS %&gt;% filter(cntry == "PT"), 
-                         weights = pspwght)
+ols_pt_bi &lt;- lm_robust(anti_immi ~ treat, weights = pspwght,
+                       data = ESS %&gt;% filter(cntry == "PT"))
+ols_pt_mult &lt;- lm_robust(anti_immi ~ treat + age, weights = pspwght,
+                         data = ESS %&gt;% filter(cntry == "PT"))
 # Report results in a nicely-formatted table
 modelsummary(list("Biv. OLS" = ols_pt_bi, "Mult. OLS" = ols_pt_mult), stars = TRUE,
              gof_map = c("nobs", "r.squared"))
