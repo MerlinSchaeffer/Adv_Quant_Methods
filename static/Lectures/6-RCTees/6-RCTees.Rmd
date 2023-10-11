@@ -269,7 +269,7 @@ layout: true
 .left-column[
 - We do not *passively observe*, <br> we .alert[actively intervene].
 
-- Thereby *we* control, who gets $X$ and who does not!
+- Thereby *we* control, who gets $D$ and who does not!
 
 ```{r, echo = FALSE, out.width='67%', fig.align='center'}
 knitr::include_graphics('./img/randomization1.png')
@@ -312,7 +312,7 @@ knitr::include_graphics('./img/randomization1.png')
 ```
 
 .content-box-green[.center[
-How can we $\color{red}{I}$ntervene to ensure that there is no correlation between the treatment and any confounders?
+How can we $\color{red}{I}$ntervene to ensure that there is no correlation between the treatment $D$ and any confounders $C$?
 ]]]
 
 ---
@@ -394,7 +394,8 @@ layout: false
 
 If we *randomly* divide subjects into treatment and control groups, .alert[they come from the same underlying population]. 
   <br> <br> $\rightarrow$ They will be similar, on average, *in every way*;<br> **including their $Y_{0}$ **!
-
+  <br> <br> $\rightarrow E[Y_{0i}|D=1] = E[Y_{0i}|D=0]$!
+  
 **Beware**, in practice randomization can fail, especially if your sample is small.
 ]
 
@@ -415,6 +416,8 @@ knitr::include_graphics('./img/randomization2.png')
 If we *randomly* divide subjects into treatment and control groups, .alert[they come from the same underlying population]. 
     <br> <br> $\rightarrow$ They will be similar, on average, *in every way*;<br> **including their $Y_{0}$ **!
     <br> <br> $\rightarrow E[Y_{0i}|D=1] = E[Y_{0i}|D=0]$!
+    
+**Beware**, in practice randomization can fail, especially if your sample is small.
 ]
 
 --
@@ -432,6 +435,8 @@ $$\begin{equation}\begin{split} &  \underbrace{E[Y_{1i}|D=1] - E[Y_{0i}|D=0]}_{\
 Because of the randomization, there is no backdoor path. <br><br> $\rightarrow$ no path from $I$ to $Y$ that starts with an arrow into $I$.
 
 $\Rightarrow$ No selection/confounder bias!
+
+**Beware**, in practice randomization can fail, especially if your sample is small.
 ]
 
 .right-column[
@@ -455,13 +460,13 @@ knitr::include_graphics('./img/randomization2.png')
 
 <br>
 
-We.alert[randomly] decided, who got:
+We .alert[randomly] decided, who got:
 
   + Venus $\rightarrow$ *control group*, 
   
   + Discrimination $\rightarrow$ *treatment group 1*,
   
-  + Integration $\rightarrow$ *treatment group 2*.
+  + Acculturation $\rightarrow$ *treatment group 2*.
 ]
 
 ---
@@ -497,8 +502,8 @@ layout: false
 ```{r ref.label = "balance1", echo = FALSE}
 ```
 ]
-.panel[.panel-name[R code]
-```{r balance2, results = FALSE}
+.panel[.panel-name[Balance table (RCT news)]
+```{r balance2, echo = FALSE}
 APAX %>%
   # Select variables for which I want my balance test,
   select(article, news_yn, age, nbh_exposed, imor, german, gewFAKT) %>%
@@ -511,8 +516,8 @@ APAX %>%
 ```
 ]
 
-.panel[.panel-name[Balance table (RCT news)]
-```{r ref.label = "balance2", echo = FALSE}
+.panel[.panel-name[R code]
+```{r ref.label = "balance2", results = FALSE}
 ```
 ]]
 
@@ -520,6 +525,8 @@ APAX %>%
 # Causal effect of news articles
 
 .push-left[.font90[
+<br>
+
 ```{r OLS_causal, results = 'hide'}
 # Run OLS regression to analyze the survey RCT.
 ols <- lm_robust(dis_index ~ article, 
@@ -531,7 +538,7 @@ modelsummary( # Regression table
   list("Discr." = ols, "Z-Discr." = zols), stars = TRUE,
   coef_map = c("(Intercept)" = "Intercept (Venus control)", 
                "articleTreat_1" = "Article on discrimination", 
-               "articleTreat_2" = "Article on integration"),
+               "articleTreat_2" = "Article on acculturation"),
   gof_map = c("nobs", "r.squared"))
 ```
 ]]
@@ -539,6 +546,8 @@ modelsummary( # Regression table
 --
 
 .push-right[
+<br>
+
 ```{r ref.label = "OLS_causal", echo = FALSE, results = 'asis'}
 ```
 ]
@@ -555,7 +564,7 @@ plotdata <- zols %>%
   mutate( # Rename variables for the plot.
     term = case_when(
       term == "articleTreat_1" ~ "Discrimination",
-      term == "articleTreat_2" ~ "Integration"))
+      term == "articleTreat_2" ~ "acculturation"))
 
 ggplot(data = plotdata,  aes(y = estimate, x = term)) +
   geom_hline(yintercept = 0, color = "orange", 
