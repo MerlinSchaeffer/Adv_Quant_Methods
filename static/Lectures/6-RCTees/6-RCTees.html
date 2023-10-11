@@ -798,7 +798,7 @@ modelsummary( # Regression table
   list("Discr." = ols, "Z-Discr." = zols), stars = TRUE,
   coef_map = c("(Intercept)" = "Intercept (Venus control)", 
                "articleTreat_1" = "Article on discrimination", 
-               "articleTreat_2" = "Article on acculturation"),
+               "articleTreat_2" = "Article on Acculturation"),
   gof_map = c("nobs", "r.squared"))
 ```
 ]]
@@ -838,7 +838,7 @@ modelsummary( # Regression table
    &lt;td style="text-align:center;"&gt; (0.118) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; Article on acculturation &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Article on Acculturation &lt;/td&gt;
    &lt;td style="text-align:center;"&gt; 0.137 &lt;/td&gt;
    &lt;td style="text-align:center;"&gt; 0.151 &lt;/td&gt;
   &lt;/tr&gt;
@@ -878,7 +878,7 @@ plotdata &lt;- zols %&gt;%
   mutate( # Rename variables for the plot.
     term = case_when(
       term == "articleTreat_1" ~ "Discrimination",
-      term == "articleTreat_2" ~ "acculturation"))
+      term == "articleTreat_2" ~ "Acculturation"))
 
 ggplot(data = plotdata,  aes(y = estimate, x = term)) +
   geom_hline(yintercept = 0, color = "orange", 
