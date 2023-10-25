@@ -171,8 +171,8 @@ class: clear
 .left-column[
 <br>
 
-```{r, echo = FALSE, out.width='100%'}
-knitr::include_graphics('https://jlegewie.com/files/joscha.jp')
+```{r, echo = FALSE, out.width='45%'}
+knitr::include_graphics('https://sociology.fas.harvard.edu/sites/hwpi.harvard.edu/files/styles/profile_full/public/sociology/files/legeiwe_headshot_for_crop_1_0.jpg?m=1689020156&itok=ESF3upCN')
 ```
 
 ### My friend Joscha 
@@ -183,7 +183,7 @@ knitr::include_graphics('https://jlegewie.com/files/joscha.jp')
 
 .right-column[
 ```{r, echo = FALSE, out.width='60%'}
-knitr::include_graphics('https://www.wzb.eu/files/styles/4_column_content_lg/public/image/dsi/aam/wzbjahresbericht3836-smaller.jpg?itok=_G0nt5M9')
+knitr::include_graphics('./img/Joscha1.png')
 ```
 ]
 
@@ -198,6 +198,11 @@ In comparison to a normal RCT, this allows for:
 > an experiment [...] on the grandest scale.
 
 > -- `r Citet(myBib, "snow_mode_1856")`
+
+```{r, echo = FALSE, out.width='30%'}
+knitr::include_graphics('https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/John_Snow_memorial_and_pub.jpg/1024px-John_Snow_memorial_and_pub.jpg')
+```
+
 ]
 
 .push-right[.center[
@@ -225,7 +230,7 @@ knitr::include_graphics('https://dynaimage.cdn.cnn.com/cnn/c_fill,g_auto,w_1200,
 ---
 # The natural experiment
 
-```{r, echo = FALSE, out.width='70%'}
+```{r, echo = FALSE, out.width='60%'}
 knitr::include_graphics('./img/Joscha2.png')
 ```
 .center[.backgrnote[*Source:* `r Citet(myBib, "legewie_terrorist_2013")`]]
@@ -437,7 +442,7 @@ knitr::include_graphics('https://i.ytimg.com/vi/h5MD2ptO998/maxresdefault.jpg')
 
 .right-column[
 ```{r, echo = FALSE, out.width='80%'}
-knitr::include_graphics('./img/Chetty1.png')
+knitr::include_graphics('./img/Chetty_1.png')
 ```
 .center[.backgrnote[*Source:* `r Citet(myBib, "chetty_effects_2016")`]]
 ]
@@ -446,19 +451,19 @@ knitr::include_graphics('./img/Chetty1.png')
 
 .right-column[
 ```{r, echo = FALSE, out.width='80%'}
-knitr::include_graphics('./img/Chetty2.png')
+knitr::include_graphics('./img/Chetty_2.png')
 ```
 .center[.backgrnote[*Source:* `r Citet(myBib, "chetty_effects_2016")`]]
 
 .content-box-green[.center[
-Are these average causal effects of moving out of poor neighborhoods during childhood?
+Is the ITT an average causal effects of moving out of poor neighborhoods during childhood?
 ]]]
 
 ---
 
 .right-column[
 ```{r, echo = FALSE, out.width='80%'}
-knitr::include_graphics('./img/Chetty2.png')
+knitr::include_graphics('./img/Chetty_2.png')
 ```
 .center[.backgrnote[*Source:* `r Citet(myBib, "chetty_effects_2016")`]]
 
@@ -468,7 +473,7 @@ knitr::include_graphics('./img/Chetty2.png')
 
 $\rightarrow$ The ITTs are average causal effects.
 
-$\rightarrow$ But they are average causal effects .alert[of being offered support] $\color{red}{Z}$ <br>.alert[, not of having moved to a better neighborhood] $\color{black}{D}$.alert[!]
+$\rightarrow$ But they are average causal effects .alert[of being offered support] $\color{red}{Z}$, <br>.alert[not of having moved to a better neighborhood] $\color{black}{D}$.alert[!]
 
 ]]
 
@@ -614,7 +619,7 @@ layout: true
 
 \begin{tikzpicture}
 \sffamily
-\node[state] (1) [red, align = center] at (0,0) {Support};
+\node[state] (1) [red, align = center] at (0,0) {Win \\ lottery};
 \node[state] (2) [right = of 1, align = center] {Moving out \\ of poverty};
 \node[state] (3) [above = of 2, align = center] {E.g.\ optimistic \\ personality};
 \node[state] (4) [right = of 2, align = center] {Income \\ as adult};
@@ -626,7 +631,7 @@ layout: true
 \end{tikzpicture}
 ```
 
-$$\underbrace{\kappa_{\text{Win lottery}\rightarrow\text{Income}}}_{1624\text{ Dollar}} = \underbrace{\kappa_{\text{Support}\rightarrow\text{Moving}}}_{0.4766} \times \underbrace{\kappa_{\text{Moving}\rightarrow\text{Income}}}_{?}$$
+$$\underbrace{\kappa_{\text{Win lottery}\rightarrow\text{Income}}}_{1624\text{ Dollar}} = \underbrace{\kappa_{\text{Win lottery}\rightarrow\text{Moving}}}_{0.4766} \times \underbrace{\kappa_{\text{Moving}\rightarrow\text{Income}}}_{?}$$
 
 ]
 
@@ -636,7 +641,7 @@ $$\underbrace{\kappa_{\text{Win lottery}\rightarrow\text{Income}}}_{1624\text{ D
 ```{tikz, ref.label = "DAG7", echo = FALSE, out.width='100%'}
 ```
 
-$$\begin{equation}\begin{split} & \underbrace{\kappa_{\text{Support}\rightarrow\text{Income}}}_{1624\text{ Dollar}} = \underbrace{\kappa_{\text{Support}\rightarrow\text{Moving}}}_{0.4766} \times \underbrace{\kappa_{\text{Moving}\rightarrow\text{Income}}}_{?} \\ \\ & \frac{\kappa_{\text{Support}\rightarrow\text{Income}}}{\kappa_{\text{Support}\rightarrow\text{Moving}}} = \underbrace{\kappa_{\text{Moving}\rightarrow\text{Income}}}_{?} \end{split}\end{equation}$$
+$$\begin{equation}\begin{split} & \underbrace{\kappa_{\text{Win lottery}\rightarrow\text{Income}}}_{1624\text{ Dollar}} = \underbrace{\kappa_{\text{Win lottery}\rightarrow\text{Moving}}}_{0.4766} \times \underbrace{\kappa_{\text{Moving}\rightarrow\text{Income}}}_{?} \\ \\ & \frac{\kappa_{\text{Win lottery}\rightarrow\text{Income}}}{\kappa_{\text{Win lottery}\rightarrow\text{Moving}}} = \underbrace{\kappa_{\text{Moving}\rightarrow\text{Income}}}_{?} \end{split}\end{equation}$$
 ]
 ---
 layout: false
@@ -776,12 +781,13 @@ $\lambda = \frac{\rho}{\phi} = \frac{E[Y_{i}|Z_{i}=1]-E[Y_{i}|Z_{i}=0]}{E[D_{i}|
 ]
 .right-column[
 ```{r, echo = FALSE, out.width='100%'}
-knitr::include_graphics('./img/Chetty2.png')
+knitr::include_graphics('./img/Chetty_3.png')
 ```
 .center[.backgrnote[*Source:* `r Citet(myBib, "chetty_effects_2016")`]]
 ]
 
 ---
+layout: false
 class: inverse middle center
 # Break
 
@@ -795,14 +801,16 @@ layout: true
 .push-right[
 ```{r, echo = FALSE, out.width='80%'}
 knitr::include_graphics('https://images.theconversation.com/files/325865/original/file-20200406-6044-hao5gp.jpg?ixlib=rb-1.1.0&q=45&auto=format&w=1200&h=675.0&fit=crop')
-knitr::include_graphics('https://minbynyt.dk/wp-content/uploads/2021/01/Politi-Betjent-ligger-anholdt-i-ha%CC%8AndjernFoto-Lars-Aarjpg1-780x470.jpg')
+knitr::include_graphics('https://indblik.dk/wp-content/uploads/2021/06/41648075864_b1450a1d67_k.jpg')
 ```
 ]
 
 ---
 
 .push-left[
-<iframe src='https://www.jstor.org/stable/2095575#metadata_info_tab_contents' width='600' height='550' frameborder='0' scrolling='yes'></iframe>
+```{r, echo = FALSE, out.width='100%'}
+knitr::include_graphics('./img/Domestic.png')
+```
 ]
 
 ---
