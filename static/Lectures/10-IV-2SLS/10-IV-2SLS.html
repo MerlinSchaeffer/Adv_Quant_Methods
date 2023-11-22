@@ -4,7 +4,7 @@
     <title>Multiple Regression &amp;    Fundamentals of Causal Inference</title>
     <meta charset="utf-8" />
     <meta name="author" content="Merlin Schaeffer  Department of Sociology" />
-    <meta name="date" content="2023-10-10" />
+    <meta name="date" content="2023-11-21" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
     <script src="libs/tile-view/tile-view.js"></script>
@@ -29,7 +29,7 @@ class: center, middle, inverse, title-slide
 ### Merlin Schaeffer<br> Department of Sociology
 ]
 .date[
-### 2023-10-10
+### 2023-11-21
 ]
 
 ---
@@ -132,7 +132,7 @@ If we *randomly* divide subjects into treatment and control groups, .alert[they 
 
 .center[
 
-`\(\rightarrow\)` Dropouts' born in the 4th quarter of a year, will have one more year of education compared to those born in the first one!
+`\(\rightarrow\)` Dropouts born in the 4th quarter of a year, will have one more year of education compared to those born in the first one!
 
 ]
 
@@ -602,7 +602,7 @@ modelsummary(list("2n Stage" = scnd_stage,
 .center[**Wald IV estimator**]
 
 `$$\lambda_{\text{Wald}} = \frac{\rho}{\phi}$$`
-*Conceptually*: Weigh-up the ITT `\(\rho\)` on `\(Y\)` to get the causal effect of `\(D\)` among those who actually received `\(D\)`.
+*Conceptually*: Weigh up the ITT (or `\(\rho\)` ) on `\(Y\)` to get the causal effect of `\(D\)` among those who actually received `\(D\)`.
 ]]
 
 .push-right[
@@ -623,7 +623,7 @@ modelsummary(list("2n Stage" = scnd_stage,
 
 An instrument variable `\(Z\)` induces unconfounded random variation into `\(D\)`. 
 
-By using IV, we only keep that part of `\(D\)` that **_correlates_** with `\(Z\)`.
+By using IV, we only keep the predicted values (not the resuduals) of `\(D\)`, the part of `\(D\)` that **_correlates_** with `\(Z\)`.
 ]]
 
 .push-left[.content-box-red[
@@ -631,7 +631,7 @@ By using IV, we only keep that part of `\(D\)` that **_correlates_** with `\(Z\)
 
 A confounder `\(C\)` induces omitted variable/selection bias into `\(D\)`. 
 
-By controlling for `\(C\)`, we only keep that part of `\(D\)` that **_does not correlate_** with `\(C\)`.
+By controlling for `\(C\)`, we only keep the residuals (not the predicted values) of `\(D\)`, the part of `\(D\)` that **_does not correlate_** with `\(C\)`.
 ]]
 
 ---
@@ -720,7 +720,7 @@ layout: true
 .right-column[.font80[
 &gt; Following World War II, in 1947 the Soviet Union imposed a Marxist–Leninist government in Poland, called the Polish People’s Republic (henceforth, PPR). [...] 
 
-&gt; To avert open resistance, the PPR established the Department of Security (Urzad Bezpieczeństwa, UB; since 1956 Służba Bezpieczeństwa, SB), a secret police and espionage agency. [..] 
+&gt; To avert open resistance, the PPR established the Department of Security (Urzad Bezpieczeństwa, UB; since 1956 Służba Bezpieczeństwa, SB), a secret police and espionage agency. [...] 
 
 &gt; By the early 1980s, protests organized by workers of state firms led to the creation of the Independent and Self-Governing Trade Union Solidarity (henceforth, Solidarność), the first independent trade union in Communist Poland. Solidarność created a broad, nonviolent, anticommunist social movement. The following years saw bitter fights, and the PPR was ultimately forced to hold (semi-)free elections in 1989.
 
