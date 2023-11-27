@@ -1,6 +1,6 @@
 ---
-title: "Interaction/Conditional effects"
-subtitle: "When the relation between $y$ and $x_1$ <br> depends on $x_2$"
+title: "Multiple Regression & <br><br> Fundamentals of Causal Inference"
+subtitle: "Interaction/Conditional effects: <br> <br>When the relation between $y$ and $x_1$ <br> depends on $x_2$"
 author: "Merlin Schaeffer<br> Department of Sociology"
 date: "`r Sys.Date()`"
 output: 
@@ -42,9 +42,9 @@ myBib <- ReadBib("./../../../Stats_II.bib", check = FALSE)
 xaringanExtra::use_xaringan_extra(c("tile_view", "tachyons"))
 xaringanExtra::use_panelset()
 ```
-# The goal of social science research
+# Goal of empirical sociology
 
-.font140[.center[.alert[Use data to <ins>discover patterns</ins> ("social facts" in Durkheim's terms), <br> and the social mechanisms that bring them about.]]]
+.font130[.center[Use data to .alert[discover patterns], <br> and the social mechanisms that bring them about.]]
 
 ```{r, echo = FALSE, out.width='70%', fig.align='center'}
 knitr::include_graphics('https://liu.se/-/media/istock-501261958.jpg?mw=1120&mh=1120&hash=DA8977CCE6A6E600AE80A40CFEE771C9')
@@ -93,7 +93,7 @@ pacman::p_load(
   haven, # Handle labelled data.
   ggplot2, # beautiful figures,
   estimatr, # Regression for weighted data,
-  texreg) # regression tables with nice layout.
+  modelsummary) # regression tables with nice layout.
 
 # Read the ESS round 9 data
 ESS <- read_spss("../../../assets/ESS9e03_1.sav") %>%
@@ -135,9 +135,9 @@ ols_mult_1 <- lm_robust(imwbcnt ~ cntry + eduyrs,
                         data = ESS, weights = pspwght)
 ols_mult_2 <- lm_robust(imwbcnt ~ cntry + eduyrs + agea, 
                         data = ESS, weights = pspwght)
-# Report results in a regression table
-screenreg(list(ols_bi, ols_mult_1, ols_mult_2), 
-          include.ci = FALSE, digits = 3)
+
+modelsummary(list("Xeno" = ols_bi, "Xeno" = ols_mult_1, "Xeno" = ols_mult_2),
+             gof_map = c("nobs", "r.squared"), stars = TRUE)
 ```
 ]]
 
@@ -152,10 +152,10 @@ bind_rows( # Combine estimate results into one tibble,
   mutate( # Rename the model variable,
     term = case_when(
       model == 1 ~ "Bivariate",
-      model == 2 ~ "Adjusted for education",
-      model == 3 ~ "Adjusted for education and age") %>%
-      fct_relevel("Adjusted for education and age", 
-                  "Adjusted for education",
+      model == 2 ~ "Controlled for \n education",
+      model == 3 ~ "Controlled for \n education and age") %>%
+      fct_relevel("Controlled for \n education and age", 
+                  "Controlled for \n education",
                   "Bivariate")) %>%
   ggplot(aes(y = estimate, x = term, # Plot the results,
              ymin = conf.low, ymax = conf.high)) +
@@ -163,7 +163,7 @@ bind_rows( # Combine estimate results into one tibble,
   geom_hline(yintercept = 0, lty = "dashed", color = "red") +
   coord_flip() +
   labs(y = "Difference in xenophobia between
-       Bulgaria and Denmark
+       Denmark (reference) and Bulgaria
        (10-point Likert Scale)",
        x = "") +
   theme_minimal()
@@ -182,14 +182,6 @@ bind_rows( # Combine estimate results into one tibble,
 ```
 ]]]
 .panel[.panel-name[Multiple OLS is additive]
-.left-column[
-**Multiple OLS, so far:** Allows us to express an outcome as linear function of several continuous and categorical predictor variables. The predictors are adjusted/controlled for each other .alert[and additive].
-
-.font70[
-$\rightarrow$ For a Bulgarian who is 20 and has 10 years of education, Model 3 predicts: 
-$4.21 + 1.61 + (10\times -0.04) + (20 \times 0.01) = 5.62 \text{ Xeno}$
-
-]]
 .right-column[
 .font90[
 ```{r echo = FALSE}
@@ -201,7 +193,15 @@ ols_equa <- lm(imwbcnt ~ cntry + eduyrs + agea,
 
 ```
 
+]]
+.left-column[
+**Multiple OLS, so far:** Allows us to express an outcome as linear function of several continuous and categorical predictor variables. The predictors are adjusted/controlled for each other .alert[and additive].
+
+.font70[
 `r extract_eq(ols_equa, use_coefs = TRUE)`
+
+$\rightarrow$ For a Bulgarian who is 20 and has 10 years of education, Model 3 predicts: 
+$4.21 + 1.61 + (10\times -0.04) + (20 \times 0.01) = 5.62 \text{ Xeno}$
 
 ]]]
 .panel[.panel-name[Additive implies linear]
@@ -250,7 +250,7 @@ plot_ly(x=~x1.seq, y=~x2.seq, z=~z, type="surface") %>%
 Two predictors $X_{1i}$ and $X_{2i}$ are **"conditional on each other"** or **"interact"**, when the association between the outcome $Y_{i}$ and one of the predictors depends on values of the other.
 ]
 
-- Education is a more negative predictor of xenophobia in Denmark than in Bulgaria. 
+- The association between xenophobia and education is more negative in Denmark than in Bulgaria. 
   + .backgrnote[That is, the association between education and xenophobia depends on the country people live in.]
 
 
@@ -282,15 +282,14 @@ ggplot(data = ESS, aes(y = imwbcnt, x = eduyrs, color = cntry)) +
 $$Y_{i} = \alpha + \beta_{1} X_{1} + \beta_{2}X_{2} + \color{red}{\beta_{3}(X_{1}\times X_{2})} + e_{i}$$
 
 .push-left[
-.font90[
+.font80[
 ```{r inter}
-ols_mult_1 <- lm_robust(imwbcnt ~ cntry + eduyrs, 
-                        data = ESS, weights = pspwght)
 ols_inter <- lm_robust(imwbcnt ~ cntry*eduyrs, #<<
                        data = ESS, weights = pspwght)
+
 # Report results in a regression table
-screenreg(list(ols_mult_1, ols_inter), 
-          include.ci = FALSE, digits = 3)
+modelsummary(list("Xeno" = ols_mult_1, "Xeno" = ols_inter),
+             gof_map = c("nobs", "r.squared"), stars = TRUE)
 ```
 ]]
 
@@ -301,6 +300,7 @@ screenreg(list(ols_mult_1, ols_inter),
 
 ```
 - R *adds* an "interaction term", technically the product of the two interacted variables (i.e. $\text{Bulgaria} \times \text{Education}$).
+
 - Thereby, multiple OLS processes the conditional relation in an additive way (aka "linearization").
 ]
 
@@ -327,6 +327,7 @@ ESS %>%
 
 ```
 - R *adds* an "interaction term", technically the product of the two interacted variables (i.e. $\text{Bulgaria} \times \text{Education}$).
+
 - Thereby, multiple OLS processes the conditional relation in an additive way (aka "linearization").
 ]
 
@@ -339,8 +340,8 @@ ESS %>%
 ols_inter2 <- lm_robust(imwbcnt ~ cntry + eduyrs + intr_trm,
                        data = ESS, weights = pspwght)
 # Report results in a regression table
-screenreg(list(ols_inter, ols_inter2), 
-          include.ci = FALSE, digits = 3)
+modelsummary(list("Xeno" = ols_inter, "Xeno" = ols_inter2),
+             gof_map = c("nobs", "r.squared"), stars = TRUE)
 ```
 ]]
 
@@ -349,6 +350,7 @@ screenreg(list(ols_inter, ols_inter2),
 
 ```
 - R *adds* an "interaction term", technically the product of the two interacted variables (i.e. $\text{Bulgaria} \times \text{Education}$).
+
 - Thereby, multiple OLS processes the conditional relation in an additive way (aka "linearization").
 ]
 
@@ -393,7 +395,7 @@ $\rightarrow \beta_{\text{Bulgaria}}\color{red}{|\text{eduyrs} = 0}.$
 
 $$\beta_1\color{red}{|x_2=0} \text{ & } \beta_2\color{red}{|x_1=0}$$
 
-$\rightarrow \beta_{\text{eduyrs}}\color{red}{|\text{Bulgaria} = 0}$: A year increase in education goes along with a decline of xenophobia by `r coef(ols_inter)["eduyrs"]` scale points, .alert[if Bulgaria = 0]. $\rightarrow$ .alert[In Denmark], a year increase in education ...
+$\rightarrow \beta_{\text{eduyrs}}\color{red}{|\text{Bulgaria} = 0}$: A year increase in education goes along with a decline of xenophobia by `r coef(ols_inter)["eduyrs"]` scale points, .alert[if Bulgaria = 0]. $\rightarrow$ .alert[In Denmark]
 
 $\rightarrow \beta_{\text{Bulgaria}}\color{red}{|\text{eduyrs} = 0}.$
 ]
@@ -423,7 +425,7 @@ ggplot(data = ESS, aes(y = imwbcnt, x = eduyrs, color = cntry)) +
 
 $$\beta_1\color{red}{|x_2=0} \text{ & } \beta_2\color{red}{|x_1=0}$$
 
-$\rightarrow \beta_{\text{eduyrs}}\color{red}{|\text{Bulgaria} = 0}$: A year increase in education goes along with a decline of xenophobia by `r coef(ols_inter)["eduyrs"]` scale points, .alert[if Bulgaria = 0]. $\rightarrow$ .alert[In Denmark], a year increase in education ...
+$\rightarrow \beta_{\text{eduyrs}}\color{red}{|\text{Bulgaria} = 0}$: A year increase in education goes along with a decline of xenophobia by `r coef(ols_inter)["eduyrs"]` scale points, .alert[if Bulgaria = 0]. $\rightarrow$ .alert[In Denmark].
 
 $\rightarrow \beta_{\text{Bulgaria}}\color{red}{|\text{eduyrs} = 0}.$
 ]
@@ -469,8 +471,8 @@ class: clear
 ols_inter3 <- lm_robust(imwbcnt ~ cntry*mc_eduyrs,
                        data = ESS, weights = pspwght)
 # Report results in a regression table
-screenreg(list(ols_inter, ols_inter3), 
-          include.ci = FALSE, digits = 3)
+modelsummary(list("Xeno" = ols_inter, "Xeno" = ols_inter3),
+             gof_map = c("nobs", "r.squared"), stars = TRUE)
 ```
 ]
 
@@ -481,7 +483,7 @@ screenreg(list(ols_inter, ols_inter3),
 
 $$\beta_1\color{red}{|x_2=0} \text{ & } \beta_2\color{red}{|x_1=0}$$
 
-$\rightarrow \beta_{\text{eduyrs}}\color{red}{|\text{Bulgaria} = 0}$: A year increase in education goes along with a decline of xenophobia by `r coef(ols_inter)["eduyrs"]` scale points, .alert[if Bulgaria = 0]. $\rightarrow$ .alert[In Denmark], a year increase in education ...
+$\rightarrow \beta_{\text{eduyrs}}\color{red}{|\text{Bulgaria} = 0}$: A year increase in education goes along with a decline of xenophobia by `r coef(ols_inter)["eduyrs"]` scale points, .alert[if Bulgaria = 0]. $\rightarrow$ .alert[In Denmark].
 
 $\rightarrow \beta_{\text{Bulgaria}}\color{red}{|\text{eduyrs} = 0}.$
 ]
@@ -502,9 +504,9 @@ $\rightarrow \beta_{\text{Bulgaria}}\color{red}{|\text{eduyrs} = 0}.$
 
 $$\beta_1\color{red}{|x_2=0} \text{ & } \beta_2\color{red}{|x_1=0}$$
 
-$\rightarrow \beta_{\text{eduyrs}}\color{red}{|\text{Bulgaria} = 0}$: A year increase in education goes along with a decline of xenophobia by `r coef(ols_inter)["eduyrs"]` scale points, .alert[if Bulgaria = 0]. $\rightarrow$ .alert[In Denmark], a year increase in education ...
+$\rightarrow \beta_{\text{eduyrs}}\color{red}{|\text{Bulgaria} = 0}$: A year increase in education goes along with a decline of xenophobia by `r coef(ols_inter)["eduyrs"]` scale points, .alert[if Bulgaria = 0]. $\rightarrow$ .alert[In Denmark].
 
-$\rightarrow \beta_{\text{Bulgaria}}\color{red}{|\text{eduyrs} = 0}$: Bulgarians are, on average, `r coef(ols_inter3)["cntryBulgaria"]` scale points more xenophobic than Danes, .alert[if education = 0]. $\rightarrow$ .alert[Among persons with an average level of education], Bulgarians are ...
+$\rightarrow \beta_{\text{Bulgaria}}\color{red}{|\text{eduyrs} = 0}$: Bulgarians are, on average, `r coef(ols_inter3)["cntryBulgaria"]` scale points more xenophobic than Danes, .alert[if education = 0]. $\rightarrow$ .alert[Among persons with an average level of education].
 
 ]
 
@@ -517,7 +519,8 @@ class: clear
 The interaction term, $\beta_3(X_{1i}\times X_{2i})$, can be interpreted in two ways
 ```{r inter3, echo = FALSE}
 # Report results in a regression table
-screenreg(ols_inter3, include.ci = FALSE, digits = 3)
+modelsummary(list("Xeno" = ols_inter3),
+             gof_map = c("nobs", "r.squared"), stars = TRUE)
 ```
 ]
 
@@ -559,8 +562,8 @@ layout: false
 ols_inter <- lm_robust(imwbcnt ~ mc_eduyrs*gndr,
                        data = ESS, weights = pspwght)
 # Report results in a regression table
-screenreg(list(ols_inter), 
-          include.ci = FALSE, digits = 3)
+modelsummary(list("Xeno" = ols_inter),
+             gof_map = c("nobs", "r.squared"), stars = TRUE)
 ```
 ]]
 .right-column[
@@ -622,12 +625,6 @@ $\rightarrow \beta_{Female}|\text{Educ}=0$: At average levels of education, the 
 ```
 ]]]
 
----
-class: inverse middle center
-# Break
-
-<iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'></iframe>
-
 
 ---
 # Control for potential confounders .font70[Easy ...]
@@ -637,8 +634,8 @@ class: inverse middle center
 ols_inter4 <- lm_robust(imwbcnt ~ cntry*mc_eduyrs + gndr + agea,
                        data = ESS, weights = pspwght)
 # Report results in a regression table
-screenreg(list(ols_inter3, ols_inter4), 
-          include.ci = FALSE, digits = 3)
+modelsummary(list("Xeno" = ols_inter3, "Xeno" = ols_inter4),
+             gof_map = c("nobs", "r.squared"), stars = TRUE)
 ```
 ]
 
@@ -697,11 +694,17 @@ ggplot(data = fict_dat, aes(y = fit, x = mc_eduyrs)) +
 ]]]
 
 ---
+class: inverse middle center
+# Break
+
+<iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'></iframe>
+
+---
 class: middle clear
 
 .left-column[
-```{r, echo = FALSE, out.width='100%'}
-knitr::include_graphics('https://d1rytvr7gmk1sx.cloudfront.net/wp-content/uploads/2022/08/learn-coding-automation-just.jpeg?x27457')
+```{r, echo = FALSE, out.width='80%'}
+knitr::include_graphics('https://www.laserfiche.com/wp-content/uploads/2014/10/femalecoder.jpg')
 ```
 
 <iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'></iframe>
@@ -711,6 +714,12 @@ knitr::include_graphics('https://d1rytvr7gmk1sx.cloudfront.net/wp-content/upload
 <br>
 <iframe src='exercise1.html' width='1000' height='600' frameborder='0' scrolling='yes'></iframe>
 ]
+
+---
+class: inverse middle center
+# Break
+
+<iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'></iframe>
 
 ---
 class: inverse
@@ -859,8 +868,9 @@ Dat <- Dat %>% mutate( # Mean-center predictors
 # Multiple OLS
 ols_add <- lm_robust(poverty ~ mc_socialist + mc_citizen_rights, data = Dat)
 
-# Regression table
-screenreg(list(ols_add), include.ci = FALSE, digits = 3)
+# Report results in a regression table
+modelsummary(list("Poverty" = ols_add),
+             gof_map = c("nobs", "r.squared"), stars = TRUE)
 ```
 ]
 .push-right[
@@ -880,9 +890,11 @@ Dat <- Dat %>% mutate( # Mean-center predictors
 # Multiple OLS
 ols_inter <- lm_robust(poverty ~ mc_socialist*mc_citizen_rights, data = Dat)
 
-# Regression table
-screenreg(list(ols_inter), include.ci = FALSE, digits = 3)
+# Report results in a regression table
+modelsummary(list("Poverty" = ols_add, "Poverty" = ols_inter),
+             gof_map = c("nobs", "r.squared"), stars = TRUE)
 
+# The 3-D plot
 library(rockchalk)
 plotPlane(ols_inter, "mc_citizen_rights", "mc_socialist", pch=16, alty=1,alwd=1, theta=35, phi=20)
 ```
@@ -893,17 +905,7 @@ plotPlane(ols_inter, "mc_citizen_rights", "mc_socialist", pch=16, alty=1,alwd=1,
 plotPlane(ols_inter, "mc_citizen_rights", "mc_socialist", pch=16, alty=1,alwd=1, theta=35, phi=20)
 ```
 ]]
-.panel[.panel-name[Code]
-```{r ref.label = "socialism", eval = FALSE}
-```
-]]
-
----
-class: clear
-# Interaction of two continuous variables
-
-.panelset[
-.panel[.panel-name[OLS results]
+.panel[.panel-name[Interpretation]
 .push-left[
 ```{r ref.label = "socialism2", echo = FALSE}
 
@@ -920,86 +922,22 @@ $$\beta_{\text{Socialism} \times \text{Citizen Rights}}$$
 2) With every additional year of socialism, citizenship rights are `r coef(ols_inter)["mc_socialist:mc_citizen_rights"]` percentage points less associated with declines in poverty.
 
 ]]
-.panel[.panel-name[Predictions]
-.push-left[
-.font90[
-```{r}
-summary(Dat$mc_socialist)
-summary(Dat$mc_citizen_rights)
-
-(fict_dat <- tibble( # Choose "representative" values of #<<
-  # x1 and x2 at which you wish to predict #<<
-  # Repeat min, mean, and max each four times,
-  mc_socialist = rep(c(-6, 0, 60), each = 3),
-  # Repeat min, mean max four times.
-  mc_citizen_rights = rep(c(-7, 0, 4), 3)))
-```
-]]
-.push-right[
-.font90[
-```{r}
-(fict_dat <- predict(
-  ols_inter, newdata = fict_dat,
-  interval = "confidence", level = 0.95)$fit %>%
-   as_tibble() %>% # Turn into a tibble, then
-   bind_cols(fict_dat, .)) # Add to the synthetic data.
-```
-]]
-.panel[.panel-name[Plots]
-.push-left[
-```{r predictions2, fig.height = 4, fig.width = 5, echo = FALSE, out.width='100%'}
-ggplot(data = fict_dat, aes(y = fit, x = mc_socialist)) +
-  geom_ribbon(aes(ymin = lwr, ymax = upr, 
-                  fill = factor(mc_citizen_rights)), alpha = 0.5) +
-  geom_line(aes(color = factor(mc_citizen_rights))) +
-  labs(
-    fill = "Mean-centered citizenship rights:", 
-    color = "Mean-centered citizenship rights:",
-    title = "Predictions based on multiple OLS",
-    x = "By mean-centered years of socialist history",
-    y = "Predicted Extreme poverty 
-    among population") +
-  theme_minimal() +
-  theme(legend.position = "bottom")
-```
-]
-.push-right[
-```{r predictions3, fig.height = 4, fig.width = 5, echo = FALSE, out.width='100%'}
-ggplot(data = fict_dat, aes(y = fit, x = mc_citizen_rights)) +
-  geom_ribbon(aes(ymin = lwr, ymax = upr, 
-                  fill = factor(mc_socialist)), alpha = 0.5) +
-  geom_line(aes(color = factor(mc_socialist))) +
-  labs(
-    fill = "Mean-centered socialist history:", 
-    color = "Mean-centered socialist history:",
-    title = "Predictions based on multiple OLS",
-    x = "By mean-centered citizenship rights",
-    y = "Predicted Extreme poverty 
-    among population") +
-  theme_minimal() +
-  theme(legend.position = "bottom")
-```
-]]
 .panel[.panel-name[Code]
-.push-left[
-.font90[
-```{r ref.label = "predictions2", fig.show = 'hide'}
-
+```{r ref.label = "socialism2", eval = FALSE}
 ```
 ]]
-.push-right[
-.font90[
-```{r ref.label = "predictions3", fig.show = 'hide'}
-
-```
-]]]]]
 
 ---
 layout: false
 class: inverse
 # Today's general lessons
 
-1. Two predictors are "conditional on each other" or "interact", when the association between the outcome and one of the predictors depends on values of the other.
-2. Such conditional relations are modeling by the including of an "interaction term", which is the product of the two variables involved in the interaction.
-3. The interpretation of interaction terms is complex. The so called "main terms" are the relation between the respective variable and the outcome, when the other variable involved in the interaction is 0, and vice versa. The interaction term captures how the relation between a predictor and the outcome changes if the oother vairbale involved in the interaction increases by one unit, and vice versa.
-4. Because interaction terms are complex, it is best to visualize them using predictions.
+1. *Interaction*: When the association between an outcome and one predictor depends on the values of another predictor, the two predictors are said to be "conditional on each other" or to "interact."
+
+2. *Interaction Term*: A mathematical expression that captures the interaction effect between two predictors. It is typically created by multiplying the two variables involved in the interaction.
+
+3. *Interpreting Interaction Terms*:
+  + *Main Effects*: The relationship between each predictor and the outcome when the other predictor is held at zero.
+  + *Interaction Effect*: The change in the relationship between a predictor and the outcome as the other predictor increases by one unit, and vice versa.
+
+4. *Visualization*: Due to the complexity of interaction terms, visualizing them using predictions is recommended.

@@ -1,16 +1,18 @@
 <!DOCTYPE html>
 <html lang="" xml:lang="">
   <head>
-    <title>Interaction/Conditional effects</title>
+    <title>Multiple Regression &amp;    Fundamentals of Causal Inference</title>
     <meta charset="utf-8" />
     <meta name="author" content="Merlin Schaeffer  Department of Sociology" />
-    <meta name="date" content="2022-11-21" />
+    <meta name="date" content="2023-11-27" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
     <script src="libs/tile-view/tile-view.js"></script>
     <link href="libs/tachyons/tachyons.min.css" rel="stylesheet" />
     <link href="libs/panelset/panelset.css" rel="stylesheet" />
     <script src="libs/panelset/panelset.js"></script>
+    <script src="libs/kePrint/kePrint.js"></script>
+    <link href="libs/lightable/lightable.css" rel="stylesheet" />
     <script src="libs/htmlwidgets/htmlwidgets.js"></script>
     <script src="libs/plotly-binding/plotly.js"></script>
     <script src="libs/typedarray/typedarray.min.js"></script>
@@ -26,24 +28,24 @@
 class: center, middle, inverse, title-slide
 
 .title[
-# Interaction/Conditional effects
+# Multiple Regression &amp; <br><br> Fundamentals of Causal Inference
 ]
 .subtitle[
-## When the relation between <span class="math inline"><em>y</em></span> and <span class="math inline"><em>x</em><sub>1</sub></span> <br> depends on <span class="math inline"><em>x</em><sub>2</sub></span>
+## Interaction/Conditional effects: <br> <br>When the relation between <span class="math inline"><em>y</em></span> and <span class="math inline"><em>x</em><sub>1</sub></span> <br> depends on <span class="math inline"><em>x</em><sub>2</sub></span>
 ]
 .author[
 ### Merlin Schaeffer<br> Department of Sociology
 ]
 .date[
-### 2022-11-21
+### 2023-11-27
 ]
 
 ---
 
 
-# The goal of social science research
+# Goal of empirical sociology
 
-.font140[.center[.alert[Use data to &lt;ins&gt;discover patterns&lt;/ins&gt; ("social facts" in Durkheim's terms), &lt;br&gt; and the social mechanisms that bring them about.]]]
+.font130[.center[Use data to .alert[discover patterns], &lt;br&gt; and the social mechanisms that bring them about.]]
 
 &lt;img src="https://liu.se/-/media/istock-501261958.jpg?mw=1120&amp;mh=1120&amp;hash=DA8977CCE6A6E600AE80A40CFEE771C9" width="70%" style="display: block; margin: auto;" /&gt;
 
@@ -89,7 +91,7 @@ pacman::p_load(
   haven, # Handle labelled data.
   ggplot2, # beautiful figures,
   estimatr, # Regression for weighted data,
-  texreg) # regression tables with nice layout.
+  modelsummary) # regression tables with nice layout.
 
 # Read the ESS round 9 data
 ESS &lt;- read_spss("../../../assets/ESS9e03_1.sav") %&gt;%
@@ -127,7 +129,7 @@ ESS
 #  8   182 Bulgaria   0.503 Male       17    58       4
 #  9   208 Bulgaria   1.32  Male       12    52       1
 # 10   234 Bulgaria   1.49  Male       17    76       7
-# # … with 3,320 more rows
+# # ℹ 3,320 more rows
 ```
 ]]
 
@@ -139,28 +141,82 @@ ESS
 
 .push-right[
 .font90[
+&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt;  Xeno &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt;  Xeno  &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt;  Xeno   &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 4.326*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 4.909*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 4.206*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.071) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.213) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.237) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; cntryBulgaria &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 1.680*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 1.635*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 1.608*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.098) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.100) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.100) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; eduyrs &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −0.043** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −0.040** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.014) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.014) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; agea &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.014*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.003) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 3330 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 3330 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 3330 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.113 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.116 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.128 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
+&lt;sup&gt;&lt;/sup&gt; + p &amp;lt; 0.1, * p &amp;lt; 0.05, ** p &amp;lt; 0.01, *** p &amp;lt; 0.001&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;
+&lt;/table&gt;
 
-```
-# 
-# =======================================================
-#                Model 1       Model 2       Model 3     
-# -------------------------------------------------------
-# (Intercept)       4.326 ***     4.909 ***     4.206 ***
-#                  (0.071)       (0.213)       (0.237)   
-# cntryBulgaria     1.680 ***     1.635 ***     1.608 ***
-#                  (0.098)       (0.100)       (0.100)   
-# eduyrs                         -0.043 **     -0.040 ** 
-#                                (0.014)       (0.014)   
-# agea                                          0.014 ***
-#                                              (0.003)   
-# -------------------------------------------------------
-# R^2               0.113         0.116         0.128    
-# Adj. R^2          0.113         0.116         0.127    
-# Num. obs.      3330          3330          3330        
-# RMSE              2.348         2.344         2.329    
-# =======================================================
-# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
-```
+
 ]]
 
 .push-left[
@@ -180,10 +236,10 @@ bind_rows( # Combine estimate results into one tibble,
   mutate( # Rename the model variable,
     term = case_when(
       model == 1 ~ "Bivariate",
-      model == 2 ~ "Adjusted for education",
-      model == 3 ~ "Adjusted for education and age") %&gt;%
-      fct_relevel("Adjusted for education and age", 
-                  "Adjusted for education",
+      model == 2 ~ "Controlled for \n education",
+      model == 3 ~ "Controlled for \n education and age") %&gt;%
+      fct_relevel("Controlled for \n education and age", 
+                  "Controlled for \n education",
                   "Bivariate")) %&gt;%
   ggplot(aes(y = estimate, x = term, # Plot the results,
              ymin = conf.low, ymax = conf.high)) +
@@ -191,7 +247,7 @@ bind_rows( # Combine estimate results into one tibble,
   geom_hline(yintercept = 0, lty = "dashed", color = "red") +
   coord_flip() +
   labs(y = "Difference in xenophobia between
-       Bulgaria and Denmark
+       Denmark (reference) and Bulgaria
        (10-point Likert Scale)",
        x = "") +
   theme_minimal()
@@ -207,84 +263,192 @@ ols_mult_1 &lt;- lm_robust(imwbcnt ~ cntry + eduyrs,
                         data = ESS, weights = pspwght)
 ols_mult_2 &lt;- lm_robust(imwbcnt ~ cntry + eduyrs + agea, 
                         data = ESS, weights = pspwght)
-# Report results in a regression table
-screenreg(list(ols_bi, ols_mult_1, ols_mult_2), 
-          include.ci = FALSE, digits = 3)
+
+modelsummary(list("Xeno" = ols_bi, "Xeno" = ols_mult_1, "Xeno" = ols_mult_2),
+             gof_map = c("nobs", "r.squared"), stars = TRUE)
 ```
 ]]]
 .panel[.panel-name[Multiple OLS is additive]
-.left-column[
-**Multiple OLS, so far:** Allows us to express an outcome as linear function of several continuous and categorical predictor variables. The predictors are adjusted/controlled for each other .alert[and additive].
-
-.font70[
-`\(\rightarrow\)` For a Bulgarian who is 20 and has 10 years of education, Model 3 predicts: 
-`\(4.21 + 1.61 + (10\times -0.04) + (20 \times 0.01) = 5.62 \text{ Xeno}\)`
-
-]]
 .right-column[
 .font90[
 
 
+&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt;  Xeno &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt;  Xeno  &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt;  Xeno   &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 4.326*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 4.909*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 4.206*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.071) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.213) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.237) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; cntryBulgaria &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 1.680*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 1.635*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 1.608*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.098) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.100) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.100) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; eduyrs &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −0.043** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −0.040** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.014) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.014) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; agea &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.014*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.003) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 3330 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 3330 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 3330 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.113 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.116 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.128 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
+&lt;sup&gt;&lt;/sup&gt; + p &amp;lt; 0.1, * p &amp;lt; 0.05, ** p &amp;lt; 0.01, *** p &amp;lt; 0.001&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;
+&lt;/table&gt;
 
-```
-# 
-# =======================================================
-#                Model 1       Model 2       Model 3     
-# -------------------------------------------------------
-# (Intercept)       4.326 ***     4.909 ***     4.206 ***
-#                  (0.071)       (0.213)       (0.237)   
-# cntryBulgaria     1.680 ***     1.635 ***     1.608 ***
-#                  (0.098)       (0.100)       (0.100)   
-# eduyrs                         -0.043 **     -0.040 ** 
-#                                (0.014)       (0.014)   
-# agea                                          0.014 ***
-#                                              (0.003)   
-# -------------------------------------------------------
-# R^2               0.113         0.116         0.128    
-# Adj. R^2          0.113         0.116         0.127    
-# Num. obs.      3330          3330          3330        
-# RMSE              2.348         2.344         2.329    
-# =======================================================
-# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
-```
 
+
+]]
+.left-column[
+**Multiple OLS, so far:** Allows us to express an outcome as linear function of several continuous and categorical predictor variables. The predictors are adjusted/controlled for each other .alert[and additive].
+
+.font70[
 $$
 \operatorname{\widehat{imwbcnt}} = 4.21 + 1.61(\operatorname{cntry}_{\operatorname{Bulgaria}}) - 0.04(\operatorname{eduyrs}) + 0.01(\operatorname{agea})
 $$
 
+
+`\(\rightarrow\)` For a Bulgarian who is 20 and has 10 years of education, Model 3 predicts: 
+`\(4.21 + 1.61 + (10\times -0.04) + (20 \times 0.01) = 5.62 \text{ Xeno}\)`
 
 ]]]
 .panel[.panel-name[Additive implies linear]
 
 .push-left[
 .font90[
+&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt;  Xeno &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt;  Xeno  &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt;  Xeno   &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 4.326*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 4.909*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 4.206*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.071) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.213) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.237) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; cntryBulgaria &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 1.680*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 1.635*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 1.608*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.098) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.100) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.100) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; eduyrs &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −0.043** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −0.040** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.014) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.014) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; agea &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.014*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.003) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 3330 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 3330 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 3330 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.113 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.116 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.128 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
+&lt;sup&gt;&lt;/sup&gt; + p &amp;lt; 0.1, * p &amp;lt; 0.05, ** p &amp;lt; 0.01, *** p &amp;lt; 0.001&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;
+&lt;/table&gt;
 
-```
-# 
-# =======================================================
-#                Model 1       Model 2       Model 3     
-# -------------------------------------------------------
-# (Intercept)       4.326 ***     4.909 ***     4.206 ***
-#                  (0.071)       (0.213)       (0.237)   
-# cntryBulgaria     1.680 ***     1.635 ***     1.608 ***
-#                  (0.098)       (0.100)       (0.100)   
-# eduyrs                         -0.043 **     -0.040 ** 
-#                                (0.014)       (0.014)   
-# agea                                          0.014 ***
-#                                              (0.003)   
-# -------------------------------------------------------
-# R^2               0.113         0.116         0.128    
-# Adj. R^2          0.113         0.116         0.127    
-# Num. obs.      3330          3330          3330        
-# RMSE              2.348         2.344         2.329    
-# =======================================================
-# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
-```
+
 ]]
 
 .push-right[
-<div id="htmlwidget-1651e0577eb459109e35" style="width:100%;height:432px;" class="plotly html-widget"></div>
-<script type="application/json" data-for="htmlwidget-1651e0577eb459109e35">{"x":{"visdat":{"d173e0f7be1":["function () ","plotlyVisDat"],"d176a8e109b":["function () ","data"]},"cur_data":"d176a8e109b","attrs":{"d173e0f7be1":{"x":{},"y":{},"z":{},"alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"surface"},"d176a8e109b":{"x":[17,11,16,9,15,21,11,9,13,11,9,9,17,9,11,21,14,16,9,12,20,9,13,15,17,12,18,9,17,9,12,15,15,12,15,11,10,12,18,13,9,20,14,16,15,14,16,19,13,11,17,20,12,15,10,9,12,12,12,11,10,9,12,17,12,13,12,12,18,14,18,9,21,9,12,9,10,17,11,11,9,11,12,14,9,21,9,12,12,14,12,12,14,9,15,18,17,9,15,19,12,12,9,19,15,12,14,21,20,9,9,11,20,9,19,12,11,16,19,9,9,12,12,11,13,14,16,17,9,17,12,9,16,16,17,9,11,9,12,9,12,13,16,11,9,12,17,19,21,9,20,9,12,13,18,15,12,9,17,15,13,18,11,9,17,9,17,11,14,9,11,9,16,10,12,16,9,19,15,11,9,9,9,16,17,15,9,13,13,11,16,9,11,19,13,11,9,9,18,21],"y":[29,49,43,75,22,85,46,73,36,44,71,56,39,73,44,48,72,61,88,67,45,46,71,50,50,55,36,50,40,17,67,72,53,19,44,54,19,84,55,49,60,45,20,63,68,67,29,32,26,75,26,50,22,63,68,65,44,44,68,33,90,56,61,43,60,23,69,44,61,23,49,77,42,70,54,23,72,31,64,42,38,45,66,65,65,55,27,31,89,53,56,77,71,59,70,76,48,70,66,70,49,48,84,29,44,54,21,74,77,17,80,39,43,68,39,33,51,38,30,31,18,75,23,45,77,69,41,33,52,59,31,51,50,55,64,59,49,90,64,16,66,44,77,62,66,50,64,55,61,79,58,88,62,86,45,64,29,76,55,22,66,63,71,58,48,87,48,80,43,45,79,70,49,19,42,32,47,32,60,50,76,18,32,23,32,43,62,57,77,17,43,51,67,63,52,35,46,33,38,71],"z":[5,4,6,4,6,5,6,4,5,6,5,5,5,6,6,5,5,5,6,5,5,5,4,4,5,4,5,4,5,4,5,6,5,4,6,5,6,6,4,5,5,5,6,5,4,5,4,5,5,6,5,5,4,5,6,4,5,5,5,5,5,5,5,4,5,4,5,6,6,5,5,6,4,5,5,5,5,5,5,5,4,4,6,4,5,6,6,4,5,6,4,5,5,5,4,6,6,5,4,6,5,5,5,5,6,5,5,5,5,5,5,5,4,5,5,6,5,5,5,5,5,4,4,5,5,5,5,4,5,4,5,6,6,5,6,6,5,5,6,5,5,4,5,5,6,4,6,4,5,5,4,5,5,5,5,5,5,6,5,5,5,6,4,5,5,5,5,5,6,4,5,6,6,5,6,6,5,5,4,5,5,5,4,4,5,6,6,5,5,5,5,4,6,4,4,4,6,5,4,5],"alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"scatter3d","mode":"markers","marker":{"color":"#a6a6a6","opacity":0.7,"symbol":105},"inherit":true}},"layout":{"margin":{"b":40,"l":60,"t":25,"r":10},"scene":{"xaxis":{"title":"Eduyrs"},"yaxis":{"title":"Age"},"zaxis":{"title":"Xeno"}},"hovermode":"closest","showlegend":false,"legend":{"yanchor":"top","y":0.5}},"source":"A","config":{"modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"data":[{"colorbar":{"title":"z","ticklen":2,"len":0.5,"lenmode":"fraction","y":1,"yanchor":"top"},"colorscale":[["0","rgba(68,1,84,1)"],["0.0416666666666669","rgba(70,19,97,1)"],["0.0833333333333333","rgba(72,32,111,1)"],["0.125","rgba(71,45,122,1)"],["0.166666666666667","rgba(68,58,128,1)"],["0.208333333333334","rgba(64,70,135,1)"],["0.25","rgba(60,82,138,1)"],["0.291666666666666","rgba(56,93,140,1)"],["0.333333333333333","rgba(49,104,142,1)"],["0.375","rgba(46,114,142,1)"],["0.416666666666667","rgba(42,123,142,1)"],["0.458333333333333","rgba(38,133,141,1)"],["0.5","rgba(37,144,140,1)"],["0.541666666666667","rgba(33,154,138,1)"],["0.583333333333333","rgba(39,164,133,1)"],["0.625","rgba(47,174,127,1)"],["0.666666666666667","rgba(53,183,121,1)"],["0.708333333333334","rgba(79,191,110,1)"],["0.75","rgba(98,199,98,1)"],["0.791666666666666","rgba(119,207,85,1)"],["0.833333333333333","rgba(147,214,70,1)"],["0.875","rgba(172,220,52,1)"],["0.916666666666667","rgba(199,225,42,1)"],["0.958333333333333","rgba(226,228,40,1)"],["1","rgba(253,231,37,1)"]],"showscale":true,"x":[9,9.5,10,10.5,11,11.5,12,12.5,13,13.5,14,14.5,15,15.5,16,16.5,17,17.5,18,18.5,19,19.5,20,20.5,21],"y":[15,18.125,21.25,24.375,27.5,30.625,33.75,36.875,40,43.125,46.25,49.375,52.5,55.625,58.75,61.875,65,68.125,71.25,74.375,77.5,80.625,83.75,86.875,90],"z":[[5.00812066445599,4.97047587010215,4.93283107574831,4.89518628139448,4.85754148704064,4.8198966926868,4.78225189833296,4.74460710397913,4.70696230962529,4.66931751527145,4.63167272091761,4.59402792656378,4.55638313220994,4.5187383378561,4.48109354350227,4.44344874914843,4.40580395479459,4.36815916044075,4.33051436608692,4.29286957173308,4.25522477737924,4.2175799830254,4.17993518867157,4.14229039431773,4.10464559996389],[5.05812816259167,5.02048336823783,4.98283857388399,4.94519377953015,4.90754898517632,4.86990419082248,4.83225939646864,4.7946146021148,4.75696980776097,4.71932501340713,4.68168021905329,4.64403542469945,4.60639063034562,4.56874583599178,4.53110104163794,4.49345624728411,4.45581145293027,4.41816665857643,4.38052186422259,4.34287706986876,4.30523227551492,4.26758748116108,4.22994268680724,4.19229789245341,4.15465309809957],[5.10813566072734,5.07049086637351,5.03284607201967,4.99520127766583,4.95755648331199,4.91991168895816,4.88226689460432,4.84462210025048,4.80697730589664,4.76933251154281,4.73168771718897,4.69404292283513,4.6563981284813,4.61875333412746,4.58110853977362,4.54346374541978,4.50581895106595,4.46817415671211,4.43052936235827,4.39288456800443,4.3552397736506,4.31759497929676,4.27995018494292,4.24230539058908,4.20466059623525],[5.15814315886302,5.12049836450918,5.08285357015535,5.04520877580151,5.00756398144767,4.96991918709383,4.93227439274,4.89462959838616,4.85698480403232,4.81934000967849,4.78169521532465,4.74405042097081,4.70640562661697,4.66876083226314,4.6311160379093,4.59347124355546,4.55582644920162,4.51818165484779,4.48053686049395,4.44289206614011,4.40524727178627,4.36760247743244,4.3299576830786,4.29231288872476,4.25466809437092],[5.2081506569987,5.17050586264486,5.13286106829102,5.09521627393719,5.05757147958335,5.01992668522951,4.98228189087567,4.94463709652184,4.906992302168,4.86934750781416,4.83170271346033,4.79405791910649,4.75641312475265,4.71876833039881,4.68112353604498,4.64347874169114,4.6058339473373,4.56818915298346,4.53054435862963,4.49289956427579,4.45525476992195,4.41760997556811,4.37996518121428,4.34232038686044,4.3046755925066],[5.25815815513438,5.22051336078054,5.1828685664267,5.14522377207286,5.10757897771903,5.06993418336519,5.03228938901135,4.99464459465752,4.95699980030368,4.91935500594984,4.881710211596,4.84406541724217,4.80642062288833,4.76877582853449,4.73113103418065,4.69348623982682,4.65584144547298,4.61819665111914,4.5805518567653,4.54290706241147,4.50526226805763,4.46761747370379,4.42997267934996,4.39232788499612,4.35468309064228],[5.30816565327005,5.27052085891622,5.23287606456238,5.19523127020854,5.15758647585471,5.11994168150087,5.08229688714703,5.04465209279319,5.00700729843936,4.96936250408552,4.93171770973168,4.89407291537784,4.85642812102401,4.81878332667017,4.78113853231633,4.74349373796249,4.70584894360866,4.66820414925482,4.63055935490098,4.59291456054715,4.55526976619331,4.51762497183947,4.47998017748563,4.4423353831318,4.40469058877796],[5.35817315140573,5.3205283570519,5.28288356269806,5.24523876834422,5.20759397399038,5.16994917963655,5.13230438528271,5.09465959092887,5.05701479657503,5.0193700022212,4.98172520786736,4.94408041351352,4.90643561915968,4.86879082480585,4.83114603045201,4.79350123609817,4.75585644174433,4.7182116473905,4.68056685303666,4.64292205868282,4.60527726432899,4.56763246997515,4.52998767562131,4.49234288126747,4.45469808691364],[5.40818064954141,5.37053585518757,5.33289106083374,5.2952462664799,5.25760147212606,5.21995667777222,5.18231188341839,5.14466708906455,5.10702229471071,5.06937750035687,5.03173270600304,4.9940879116492,4.95644311729536,4.91879832294152,4.88115352858769,4.84350873423385,4.80586393988001,4.76821914552618,4.73057435117234,4.6929295568185,4.65528476246466,4.61763996811083,4.57999517375699,4.54235037940315,4.50470558504931],[5.45818814767709,5.42054335332325,5.38289855896941,5.34525376461558,5.30760897026174,5.2699641759079,5.23231938155406,5.19467458720023,5.15702979284639,5.11938499849255,5.08174020413871,5.04409540978488,5.00645061543104,4.9688058210772,4.93116102672337,4.89351623236953,4.85587143801569,4.81822664366185,4.78058184930802,4.74293705495418,4.70529226060034,4.6676474662465,4.63000267189267,4.59235787753883,4.55471308318499],[5.50819564581277,5.47055085145893,5.43290605710509,5.39526126275125,5.35761646839742,5.31997167404358,5.28232687968974,5.2446820853359,5.20703729098207,5.16939249662823,5.13174770227439,5.09410290792056,5.05645811356672,5.01881331921288,4.98116852485904,4.94352373050521,4.90587893615137,4.86823414179753,4.83058934744369,4.79294455308986,4.75529975873602,4.71765496438218,4.68001017002834,4.64236537567451,4.60472058132067],[5.55820314394844,5.52055834959461,5.48291355524077,5.44526876088693,5.40762396653309,5.36997917217926,5.33233437782542,5.29468958347158,5.25704478911774,5.21939999476391,5.18175520041007,5.14411040605623,5.1064656117024,5.06882081734856,5.03117602299472,4.99353122864088,4.95588643428705,4.91824163993321,4.88059684557937,4.84295205122553,4.8053072568717,4.76766246251786,4.73001766816402,4.69237287381018,4.65472807945635],[5.60821064208412,5.57056584773028,5.53292105337645,5.49527625902261,5.45763146466877,5.41998667031493,5.3823418759611,5.34469708160726,5.30705228725342,5.26940749289959,5.23176269854575,5.19411790419191,5.15647310983807,5.11882831548424,5.0811835211304,5.04353872677656,5.00589393242272,4.96824913806889,4.93060434371505,4.89295954936121,4.85531475500737,4.81766996065354,4.7800251662997,4.74238037194586,4.70473557759203],[5.6582181402198,5.62057334586596,5.58292855151212,5.54528375715829,5.50763896280445,5.46999416845061,5.43234937409678,5.39470457974294,5.3570597853891,5.31941499103526,5.28177019668142,5.24412540232759,5.20648060797375,5.16883581361991,5.13119101926608,5.09354622491224,5.0559014305584,5.01825663620456,4.98061184185073,4.94296704749689,4.90532225314305,4.86767745878922,4.83003266443538,4.79238787008154,4.7547430757277],[5.70822563835548,5.67058084400164,5.6329360496478,5.59529125529397,5.55764646094013,5.52000166658629,5.48235687223245,5.44471207787862,5.40706728352478,5.36942248917094,5.3317776948171,5.29413290046327,5.25648810610943,5.21884331175559,5.18119851740175,5.14355372304792,5.10590892869408,5.06826413434024,5.0306193399864,4.99297454563257,4.95532975127873,4.91768495692489,4.88004016257106,4.84239536821722,4.80475057386338],[5.75823313649115,5.72058834213732,5.68294354778348,5.64529875342964,5.60765395907581,5.57000916472197,5.53236437036813,5.49471957601429,5.45707478166046,5.41942998730662,5.38178519295278,5.34414039859894,5.30649560424511,5.26885080989127,5.23120601553743,5.19356122118359,5.15591642682976,5.11827163247592,5.08062683812208,5.04298204376825,5.00533724941441,4.96769245506057,4.93004766070673,4.8924028663529,4.85475807199906],[5.80824063462683,5.77059584027299,5.73295104591916,5.69530625156532,5.65766145721148,5.62001666285764,5.58237186850381,5.54472707414997,5.50708227979613,5.4694374854423,5.43179269108846,5.39414789673462,5.35650310238078,5.31885830802695,5.28121351367311,5.24356871931927,5.20592392496543,5.1682791306116,5.13063433625776,5.09298954190392,5.05534474755008,5.01769995319625,4.98005515884241,4.94241036448857,4.90476557013474],[5.85824813276251,5.82060333840867,5.78295854405484,5.745313749701,5.70766895534716,5.67002416099332,5.63237936663949,5.59473457228565,5.55708977793181,5.51944498357797,5.48180018922414,5.4441553948703,5.40651060051646,5.36886580616262,5.33122101180879,5.29357621745495,5.25593142310111,5.21828662874728,5.18064183439344,5.1429970400396,5.10535224568576,5.06770745133193,5.03006265697809,4.99241786262425,4.95477306827041],[5.90825563089819,5.87061083654435,5.83296604219051,5.79532124783668,5.75767645348284,5.720031659129,5.68238686477516,5.64474207042133,5.60709727606749,5.56945248171365,5.53180768735981,5.49416289300598,5.45651809865214,5.4188733042983,5.38122850994447,5.34358371559063,5.30593892123679,5.26829412688295,5.23064933252912,5.19300453817528,5.15535974382144,5.1177149494676,5.08007015511377,5.04242536075993,5.00478056640609],[5.95826312903387,5.92061833468003,5.88297354032619,5.84532874597235,5.80768395161852,5.77003915726468,5.73239436291084,5.694749568557,5.65710477420317,5.61945997984933,5.58181518549549,5.54417039114165,5.50652559678782,5.46888080243398,5.43123600808014,5.3935912137263,5.35594641937247,5.31830162501863,5.28065683066479,5.24301203631096,5.20536724195712,5.16772244760328,5.13007765324944,5.09243285889561,5.05478806454177],[6.00827062716954,5.97062583281571,5.93298103846187,5.89533624410803,5.85769144975419,5.82004665540036,5.78240186104652,5.74475706669268,5.70711227233884,5.66946747798501,5.63182268363117,5.59417788927733,5.55653309492349,5.51888830056966,5.48124350621582,5.44359871186198,5.40595391750815,5.36830912315431,5.33066432880047,5.29301953444663,5.2553747400928,5.21772994573896,5.18008515138512,5.14244035703128,5.10479556267745],[6.05827812530522,6.02063333095138,5.98298853659755,5.94534374224371,5.90769894788987,5.87005415353603,5.8324093591822,5.79476456482836,5.75711977047452,5.71947497612069,5.68183018176685,5.64418538741301,5.60654059305917,5.56889579870534,5.5312510043515,5.49360620999766,5.45596141564382,5.41831662128999,5.38067182693615,5.34302703258231,5.30538223822847,5.26773744387464,5.2300926495208,5.19244785516696,5.15480306081312],[6.1082856234409,6.07064082908706,6.03299603473322,5.99535124037939,5.95770644602555,5.92006165167171,5.88241685731787,5.84477206296404,5.8071272686102,5.76948247425636,5.73183767990253,5.69419288554869,5.65654809119485,5.61890329684101,5.58125850248718,5.54361370813334,5.5059689137795,5.46832411942566,5.43067932507183,5.39303453071799,5.35538973636415,5.31774494201031,5.28010014765648,5.24245535330264,5.2048105589488],[6.15829312157658,6.12064832722274,6.0830035328689,6.04535873851506,6.00771394416123,5.97006914980739,5.93242435545355,5.89477956109971,5.85713476674588,5.81948997239204,5.7818451780382,5.74420038368437,5.70655558933053,5.66891079497669,5.63126600062285,5.59362120626902,5.55597641191518,5.51833161756134,5.4806868232075,5.44304202885367,5.40539723449983,5.36775244014599,5.33010764579215,5.29246285143832,5.25481805708448],[6.20830061971225,6.17065582535842,6.13301103100458,6.09536623665074,6.05772144229691,6.02007664794307,5.98243185358923,5.94478705923539,5.90714226488156,5.86949747052772,5.83185267617388,5.79420788182004,5.75656308746621,5.71891829311237,5.68127349875853,5.64362870440469,5.60598391005086,5.56833911569702,5.53069432134318,5.49304952698935,5.45540473263551,5.41775993828167,5.38011514392783,5.342470349574,5.30482555522016]],"type":"surface","frame":null},{"x":[17,11,16,9,15,21,11,9,13,11,9,9,17,9,11,21,14,16,9,12,20,9,13,15,17,12,18,9,17,9,12,15,15,12,15,11,10,12,18,13,9,20,14,16,15,14,16,19,13,11,17,20,12,15,10,9,12,12,12,11,10,9,12,17,12,13,12,12,18,14,18,9,21,9,12,9,10,17,11,11,9,11,12,14,9,21,9,12,12,14,12,12,14,9,15,18,17,9,15,19,12,12,9,19,15,12,14,21,20,9,9,11,20,9,19,12,11,16,19,9,9,12,12,11,13,14,16,17,9,17,12,9,16,16,17,9,11,9,12,9,12,13,16,11,9,12,17,19,21,9,20,9,12,13,18,15,12,9,17,15,13,18,11,9,17,9,17,11,14,9,11,9,16,10,12,16,9,19,15,11,9,9,9,16,17,15,9,13,13,11,16,9,11,19,13,11,9,9,18,21],"y":[29,49,43,75,22,85,46,73,36,44,71,56,39,73,44,48,72,61,88,67,45,46,71,50,50,55,36,50,40,17,67,72,53,19,44,54,19,84,55,49,60,45,20,63,68,67,29,32,26,75,26,50,22,63,68,65,44,44,68,33,90,56,61,43,60,23,69,44,61,23,49,77,42,70,54,23,72,31,64,42,38,45,66,65,65,55,27,31,89,53,56,77,71,59,70,76,48,70,66,70,49,48,84,29,44,54,21,74,77,17,80,39,43,68,39,33,51,38,30,31,18,75,23,45,77,69,41,33,52,59,31,51,50,55,64,59,49,90,64,16,66,44,77,62,66,50,64,55,61,79,58,88,62,86,45,64,29,76,55,22,66,63,71,58,48,87,48,80,43,45,79,70,49,19,42,32,47,32,60,50,76,18,32,23,32,43,62,57,77,17,43,51,67,63,52,35,46,33,38,71],"z":[5,4,6,4,6,5,6,4,5,6,5,5,5,6,6,5,5,5,6,5,5,5,4,4,5,4,5,4,5,4,5,6,5,4,6,5,6,6,4,5,5,5,6,5,4,5,4,5,5,6,5,5,4,5,6,4,5,5,5,5,5,5,5,4,5,4,5,6,6,5,5,6,4,5,5,5,5,5,5,5,4,4,6,4,5,6,6,4,5,6,4,5,5,5,4,6,6,5,4,6,5,5,5,5,6,5,5,5,5,5,5,5,4,5,5,6,5,5,5,5,5,4,4,5,5,5,5,4,5,4,5,6,6,5,6,6,5,5,6,5,5,4,5,5,6,4,6,4,5,5,4,5,5,5,5,5,5,6,5,5,5,6,4,5,5,5,5,5,6,4,5,6,6,5,6,6,5,5,4,5,5,5,4,4,5,6,6,5,5,5,5,4,6,4,4,4,6,5,4,5],"type":"scatter3d","mode":"markers","marker":{"color":"#a6a6a6","opacity":0.7,"symbol":105,"line":{"color":"rgba(255,127,14,1)"}},"error_y":{"color":"rgba(255,127,14,1)"},"error_x":{"color":"rgba(255,127,14,1)"},"line":{"color":"rgba(255,127,14,1)"},"frame":null}],"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.2,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+<div class="plotly html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-1a082562719a75473054" style="width:100%;height:432px;"></div>
+<script type="application/json" data-for="htmlwidget-1a082562719a75473054">{"x":{"visdat":{"34b54d34bc44":["function () ","plotlyVisDat"],"34b541343bf5":["function () ","data"]},"cur_data":"34b541343bf5","attrs":{"34b54d34bc44":{"x":{},"y":{},"z":{},"alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"surface"},"34b541343bf5":{"x":[17,13,11,14,16,12,9,9,12,15,11,11,12,16,9,10,10,11,14,9,12,15,11,9,20,13,9,14,12,14,11,21,12,21,21,9,15,12,9,9,19,12,9,20,10,18,18,15,17,9,14,21,11,21,9,15,11,11,17,11,9,12,16,12,12,21,9,12,13,16,9,10,11,12,12,9,17,9,12,9,13,12,11,9,17,9,14,13,19,9,15,11,10,12,11,9,12,11,11,11,13,11,12,16,9,17,12,12,16,13,9,20,11,15,11,12,17,11,17,12,9,18,9,16,16,9,19,11,17,9,18,17,21,12,18,11,12,14,21,13,14,15,20,12,9,20,9,12,16,16,9,11,9,13,15,18,11,10,9,16,12,15,9,12,16,11,11,11,10,9,17,15,9,18,9,10,18,15,17,9,9,9,12,11,19,16,9,9,13,16,9,21,12,18,9,21,19,9,14,18],"y":[23,49,67,55,49,58,58,67,54,61,42,44,56,46,73,64,66,36,45,60,74,63,84,63,41,19,88,36,44,43,67,79,70,63,70,57,30,44,31,73,70,61,24,39,16,50,37,68,32,15,55,85,44,43,60,22,71,69,49,71,74,59,66,79,19,48,69,42,18,69,56,23,52,26,22,60,34,16,19,19,23,66,68,64,50,65,21,81,32,66,32,44,64,77,49,53,35,74,70,75,53,87,38,41,32,33,51,49,36,52,40,83,74,22,71,30,45,46,26,59,54,54,30,63,23,88,63,58,51,56,27,24,74,32,37,73,78,75,28,87,29,33,70,31,80,67,52,71,54,44,45,68,79,44,64,51,67,17,85,50,59,21,17,44,73,71,61,59,16,16,64,69,72,55,58,17,48,22,74,71,78,36,19,70,29,40,74,81,68,73,78,79,35,46,75,38,42,77,67,26],"z":[4,6,5,4,6,4,5,5,5,6,4,5,5,4,5,4,6,6,4,4,6,5,6,5,5,5,5,5,5,6,6,5,5,5,5,5,5,6,5,5,6,5,5,4,5,5,5,4,5,5,5,5,6,5,5,5,5,5,5,6,6,4,5,6,5,5,6,5,5,5,5,5,5,6,4,4,5,5,6,5,5,5,4,4,5,5,5,6,5,5,5,6,5,6,4,5,6,5,5,6,5,4,4,5,5,5,5,5,6,6,5,6,6,5,6,5,5,5,5,5,6,4,4,4,5,6,4,4,5,5,5,6,5,5,5,6,4,6,5,5,4,5,5,5,5,5,5,4,6,5,5,5,4,4,5,5,6,5,5,6,6,5,5,5,6,5,4,4,5,4,4,5,5,4,5,6,6,6,5,5,4,5,4,5,5,5,6,5,5,5,5,5,5,4,4,5,4,4,4,5],"alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"scatter3d","mode":"markers","marker":{"color":"#a6a6a6","opacity":0.69999999999999996,"symbol":105},"inherit":true}},"layout":{"margin":{"b":40,"l":60,"t":25,"r":10},"scene":{"xaxis":{"title":"Eduyrs"},"yaxis":{"title":"Age"},"zaxis":{"title":"Xeno"}},"hovermode":"closest","showlegend":false,"legend":{"yanchor":"top","y":0.5}},"source":"A","config":{"modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"data":[{"colorbar":{"title":"z","ticklen":2,"len":0.5,"lenmode":"fraction","y":1,"yanchor":"top"},"colorscale":[["0","rgba(68,1,84,1)"],["0.0416666666666668","rgba(70,19,97,1)"],["0.0833333333333332","rgba(72,32,111,1)"],["0.125","rgba(71,45,122,1)"],["0.166666666666667","rgba(68,58,128,1)"],["0.208333333333334","rgba(64,70,135,1)"],["0.25","rgba(60,82,138,1)"],["0.291666666666667","rgba(56,93,140,1)"],["0.333333333333333","rgba(49,104,142,1)"],["0.375","rgba(46,114,142,1)"],["0.416666666666667","rgba(42,123,142,1)"],["0.458333333333333","rgba(38,133,141,1)"],["0.5","rgba(37,144,140,1)"],["0.541666666666667","rgba(33,154,138,1)"],["0.583333333333333","rgba(39,164,133,1)"],["0.625","rgba(47,174,127,1)"],["0.666666666666667","rgba(53,183,121,1)"],["0.708333333333333","rgba(79,191,110,1)"],["0.75","rgba(98,199,98,1)"],["0.791666666666667","rgba(119,207,85,1)"],["0.833333333333333","rgba(147,214,70,1)"],["0.875","rgba(172,220,52,1)"],["0.916666666666666","rgba(199,225,42,1)"],["0.958333333333333","rgba(226,228,40,1)"],["1","rgba(253,231,37,1)"]],"showscale":true,"x":[9,9.5,10,10.5,11,11.5,12,12.5,13,13.5,14,14.5,15,15.5,16,16.5,17,17.5,18,18.5,19,19.5,20,20.5,21],"y":[15,18.125,21.25,24.375,27.5,30.625,33.75,36.875,40,43.125,46.25,49.375,52.5,55.625,58.75,61.875,65,68.125,71.25,74.375,77.5,80.625,83.75,86.875,90],"z":[[5.0081206644559861,4.970475870102149,4.9328310757483109,4.8951862813944729,4.8575414870406357,4.8198966926867985,4.7822518983329605,4.7446071039791224,4.7069623096252853,4.6693175152714481,4.6316727209176101,4.594027926563772,4.5563831322099348,4.5187383378560977,4.4810935435022596,4.4434487491484216,4.4058039547945844,4.3681591604407473,4.3305143660869092,4.2928695717330712,4.255224777379234,4.2175799830253968,4.1799351886715588,4.1422903943177216,4.1046455999638836],[5.0581281625916645,5.0204833682378274,4.9828385738839893,4.9451937795301513,4.9075489851763141,4.8699041908224769,4.8322593964686389,4.7946146021148008,4.7569698077609637,4.7193250134071265,4.6816802190532885,4.6440354246994504,4.6063906303456132,4.5687458359917761,4.531101041637938,4.4934562472841,4.4558114529302628,4.4181666585764257,4.3805218642225876,4.3428770698687496,4.3052322755149124,4.2675874811610743,4.2299426868072372,4.1922978924533991,4.154653098099562],[5.108135660727342,5.0704908663735049,5.0328460720196668,4.9952012776658288,4.9575564833119916,4.9199116889581544,4.8822668946043164,4.8446221002504783,4.8069773058966412,4.769332511542804,4.731687717188966,4.6940429228351279,4.6563981284812908,4.6187533341274536,4.5811085397736155,4.5434637454197775,4.5058189510659403,4.4681741567121032,4.4305293623582651,4.3928845680044271,4.3552397736505899,4.3175949792967518,4.2799501849429147,4.2423053905890766,4.2046605962352395],[5.1581431588630196,5.1204983645091824,5.0828535701553443,5.0452087758015063,5.0075639814476691,4.969919187093832,4.9322743927399939,4.8946295983861559,4.8569848040323187,4.8193400096784815,4.7816952153246435,4.7440504209708054,4.7064056266169683,4.6687608322631311,4.631116037909293,4.593471243555455,4.5558264492016178,4.5181816548477807,4.4805368604939426,4.4428920661401046,4.4052472717862674,4.3676024774324294,4.3299576830785922,4.2923128887247541,4.254668094370917],[5.2081506569986971,5.1705058626448599,5.1328610682910218,5.0952162739371838,5.0575714795833466,5.0199266852295095,4.9822818908756714,4.9446370965218334,4.9069923021679962,4.869347507814159,4.831702713460321,4.7940579191064829,4.7564131247526458,4.7187683303988086,4.6811235360449706,4.6434787416911325,4.6058339473372953,4.5681891529834582,4.5305443586296201,4.4928995642757821,4.4552547699219449,4.4176099755681077,4.3799651812142697,4.3423203868604325,4.3046755925065945],[5.2581581551343746,5.2205133607805374,5.1828685664266994,5.1452237720728613,5.1075789777190241,5.069934183365187,5.0322893890113489,4.9946445946575109,4.9569998003036737,4.9193550059498365,4.8817102115959985,4.8440654172421604,4.8064206228883233,4.7687758285344861,4.7311310341806481,4.69348623982681,4.6558414454729729,4.6181966511191357,4.5805518567652976,4.5429070624114596,4.5052622680576224,4.4676174737037853,4.4299726793499472,4.39232788499611,4.354683090642272],[5.3081656532700521,5.2705208589162158,5.2328760645623777,5.1952312702085397,5.1575864758547016,5.1199416815008654,5.0822968871470273,5.0446520927931893,5.0070072984393512,4.9693625040855149,4.9317177097316769,4.8940729153778388,4.8564281210240008,4.8187833266701645,4.7811385323163265,4.7434937379624884,4.7058489436086504,4.6682041492548141,4.630559354900976,4.592914560547138,4.5552697661932999,4.5176249718394628,4.4799801774856256,4.4423353831317876,4.4046905887779495],[5.3581731514057305,5.3205283570518933,5.2828835626980553,5.2452387683442172,5.20759397399038,5.1699491796365429,5.1323043852827048,5.0946595909288668,5.0570147965750296,5.0193700022211925,4.9817252078673544,4.9440804135135163,4.9064356191596792,4.868790824805842,4.831146030452004,4.7935012360981659,4.7558564417443288,4.7182116473904916,4.6805668530366535,4.6429220586828155,4.6052772643289783,4.5676324699751403,4.5299876756213031,4.4923428812674651,4.4546980869136279],[5.408180649541408,5.3705358551875708,5.3328910608337328,5.2952462664798947,5.2576014721260576,5.2199566777722204,5.1823118834183823,5.1446670890645443,5.1070222947107071,5.06937750035687,5.0317327060030319,4.9940879116491939,4.9564431172953567,4.9187983229415195,4.8811535285876815,4.8435087342338434,4.8058639398800063,4.7682191455261691,4.730574351172331,4.692929556818493,4.6552847624646558,4.6176399681108178,4.5799951737569806,4.5423503794031426,4.5047055850493054],[5.4581881476770855,5.4205433533232483,5.3828985589694103,5.3452537646155722,5.3076089702617351,5.2699641759078979,5.2323193815540598,5.1946745872002218,5.1570297928463846,5.1193849984925475,5.0817402041387094,5.0440954097848714,5.0064506154310342,4.968805821077197,4.931161026723359,4.8935162323695209,4.8558714380156838,4.8182266436618466,4.7805818493080086,4.7429370549541705,4.7052922606003333,4.6676474662464962,4.6300026718926581,4.5923578775388201,4.5547130831849829],[5.508195645812763,5.4705508514589258,5.4329060571050878,5.3952612627512497,5.3576164683974126,5.3199716740435754,5.2823268796897374,5.2446820853358993,5.2070372909820621,5.169392496628225,5.1317477022743869,5.0941029079205489,5.0564581135667117,5.0188133192128745,4.9811685248590365,4.9435237305051984,4.9058789361513613,4.8682341417975241,4.8305893474436861,4.792944553089848,4.7552997587360109,4.7176549643821737,4.6800101700283356,4.6423653756744985,4.6047205813206604],[5.5582031439484405,5.5205583495946033,5.4829135552407653,5.4452687608869272,5.4076239665330901,5.3699791721792529,5.3323343778254149,5.2946895834715768,5.2570447891177396,5.2193999947639025,5.1817552004100644,5.1441104060562264,5.1064656117023892,5.0688208173485521,5.031176022994714,4.993531228640876,4.9558864342870388,4.9182416399332016,4.8805968455793636,4.8429520512255255,4.8053072568716884,4.7676624625178512,4.7300176681640131,4.692372873810176,4.6547280794563379],[5.6082106420841189,5.5705658477302809,5.5329210533764428,5.4952762590226047,5.4576314646687685,5.4199866703149304,5.3823418759610924,5.3446970816072543,5.307052287253418,5.26940749289958,5.2317626985457419,5.1941179041919039,5.1564731098380676,5.1188283154842296,5.0811835211303915,5.0435387267765535,5.0058939324227172,4.9682491380688791,4.9306043437150411,4.892959549361203,4.8553147550073668,4.8176699606535287,4.7800251662996907,4.7423803719458535,4.7047355775920163],[5.6582181402197964,5.6205733458659592,5.5829285515121212,5.5452837571582831,5.507638962804446,5.4699941684506088,5.4323493740967708,5.3947045797429327,5.3570597853890956,5.3194149910352584,5.2817701966814203,5.2441254023275823,5.2064806079737451,5.168835813619908,5.1311910192660699,5.0935462249122319,5.0559014305583947,5.0182566362045575,4.9806118418507195,4.9429670474968814,4.9053222531430443,4.8676774587892062,4.830032664435369,4.792387870081531,4.7547430757276938],[5.7082256383554739,5.6705808440016368,5.6329360496477987,5.5952912552939607,5.5576464609401235,5.5200016665862863,5.4823568722324483,5.4447120778786102,5.4070672835247731,5.3694224891709359,5.3317776948170978,5.2941329004632598,5.2564881061094226,5.2188433117555855,5.1811985174017474,5.1435537230479094,5.1059089286940722,5.068264134340235,5.030619339986397,4.9929745456325589,4.9553297512787218,4.9176849569248837,4.8800401625710466,4.8423953682172085,4.8047505738633713],[5.7582331364911514,5.7205883421373143,5.6829435477834762,5.6452987534296382,5.607653959075801,5.5700091647219638,5.5323643703681258,5.4947195760142877,5.4570747816604506,5.4194299873066134,5.3817851929527754,5.3441403985989373,5.3064956042451001,5.268850809891263,5.2312060155374249,5.1935612211835869,5.1559164268297497,5.1182716324759125,5.0806268381220745,5.0429820437682364,5.0053372494143993,4.9676924550605621,4.9300476607067241,4.8924028663528869,4.8547580719990489],[5.8082406346268289,5.7705958402729918,5.7329510459191537,5.6953062515653157,5.6576614572114785,5.6200166628576413,5.5823718685038033,5.5447270741499652,5.5070822797961281,5.4694374854422909,5.4317926910884529,5.3941478967346148,5.3565031023807776,5.3188583080269405,5.2812135136731024,5.2435687193192644,5.2059239249654272,5.1682791306115901,5.130634336257752,5.092989541903914,5.0553447475500768,5.0176999531962396,4.9800551588424016,4.9424103644885644,4.9047655701347264],[5.8582481327625064,5.8206033384086702,5.7829585440548321,5.7453137497009941,5.707668955347156,5.6700241609933197,5.6323793666394817,5.5947345722856436,5.5570897779318056,5.5194449835779693,5.4818001892241313,5.4441553948702932,5.4065106005164552,5.3688658061626189,5.3312210118087808,5.2935762174549428,5.2559314231011047,5.2182866287472685,5.1806418343934304,5.1429970400395923,5.1053522456857543,5.0677074513319171,5.03006265697808,4.9924178626242419,4.9547730682704039],[5.908255630898184,5.8706108365443477,5.8329660421905096,5.7953212478366716,5.7576764534828335,5.7200316591289972,5.6823868647751592,5.6447420704213211,5.6070972760674831,5.5694524817136468,5.5318076873598088,5.4941628930059707,5.4565180986521327,5.4188733042982964,5.3812285099444583,5.3435837155906203,5.3059389212367822,5.268294126882946,5.2306493325291079,5.1930045381752699,5.1553597438214318,5.1177149494675946,5.0800701551137575,5.0424253607599194,5.0047805664060814],[5.9582631290338623,5.9206183346800252,5.8829735403261871,5.8453287459723491,5.8076839516185119,5.7700391572646748,5.7323943629108367,5.6947495685569987,5.6571047742031615,5.6194599798493243,5.5818151854954863,5.5441703911416482,5.5065255967878111,5.4688808024339739,5.4312360080801358,5.3935912137262978,5.3559464193724606,5.3183016250186235,5.2806568306647854,5.2430120363109474,5.2053672419571102,5.1677224476032722,5.130077653249435,5.0924328588955969,5.0547880645417598],[6.0082706271695399,5.9706258328157027,5.9329810384618646,5.8953362441080266,5.8576914497541894,5.8200466554003523,5.7824018610465142,5.7447570666926762,5.707112272338839,5.6694674779850018,5.6318226836311638,5.5941778892773257,5.5565330949234886,5.5188883005696514,5.4812435062158134,5.4435987118619753,5.4059539175081381,5.368309123154301,5.3306643288004629,5.2930195344466249,5.2553747400927877,5.2177299457389505,5.1800851513851125,5.1424403570312744,5.1047955626774373],[6.0582781253052174,6.0206333309513802,5.9829885365975422,5.9453437422437041,5.9076989478898669,5.8700541535360298,5.8324093591821917,5.7947645648283537,5.7571197704745165,5.7194749761206793,5.6818301817668413,5.6441853874130032,5.6065405930591661,5.5688957987053289,5.5312510043514909,5.4936062099976528,5.4559614156438156,5.4183166212899785,5.3806718269361404,5.3430270325823024,5.3053822382284652,5.2677374438746281,5.23009264952079,5.192447855166952,5.1548030608131148],[6.1082856234408949,6.0706408290870577,6.0329960347332197,5.9953512403793816,5.9577064460255444,5.9200616516717073,5.8824168573178692,5.8447720629640312,5.807127268610194,5.7694824742563569,5.7318376799025188,5.6941928855486807,5.6565480911948436,5.6189032968410064,5.5812585024871684,5.5436137081333303,5.5059689137794932,5.468324119425656,5.4306793250718179,5.3930345307179799,5.3553897363641427,5.3177449420103056,5.2801001476564675,5.2424553533026303,5.2048105589487923],[6.1582931215765733,6.1206483272227352,6.0830035328688972,6.0453587385150591,6.0077139441612228,5.9700691498073848,5.9324243554535467,5.8947795610997087,5.8571347667458724,5.8194899723920344,5.7818451780381963,5.7442003836843583,5.706555589330522,5.6689107949766839,5.6312660006228459,5.5936212062690078,5.5559764119151716,5.5183316175613335,5.4806868232074955,5.4430420288536574,5.4053972344998211,5.3677524401459831,5.330107645792145,5.2924628514383079,5.2548180570844707],[6.2083006197122508,6.1706558253584136,6.1330110310045756,6.0953662366507375,6.0577214422969003,6.0200766479430632,5.9824318535892251,5.9447870592353871,5.9071422648815499,5.8694974705277128,5.8318526761738747,5.7942078818200367,5.7565630874661995,5.7189182931123623,5.6812734987585243,5.6436287044046862,5.6059839100508491,5.5683391156970119,5.5306943213431738,5.4930495269893358,5.4554047326354986,5.4177599382816606,5.3801151439278234,5.3424703495739854,5.3048255552201482]],"type":"surface","frame":null},{"x":[17,13,11,14,16,12,9,9,12,15,11,11,12,16,9,10,10,11,14,9,12,15,11,9,20,13,9,14,12,14,11,21,12,21,21,9,15,12,9,9,19,12,9,20,10,18,18,15,17,9,14,21,11,21,9,15,11,11,17,11,9,12,16,12,12,21,9,12,13,16,9,10,11,12,12,9,17,9,12,9,13,12,11,9,17,9,14,13,19,9,15,11,10,12,11,9,12,11,11,11,13,11,12,16,9,17,12,12,16,13,9,20,11,15,11,12,17,11,17,12,9,18,9,16,16,9,19,11,17,9,18,17,21,12,18,11,12,14,21,13,14,15,20,12,9,20,9,12,16,16,9,11,9,13,15,18,11,10,9,16,12,15,9,12,16,11,11,11,10,9,17,15,9,18,9,10,18,15,17,9,9,9,12,11,19,16,9,9,13,16,9,21,12,18,9,21,19,9,14,18],"y":[23,49,67,55,49,58,58,67,54,61,42,44,56,46,73,64,66,36,45,60,74,63,84,63,41,19,88,36,44,43,67,79,70,63,70,57,30,44,31,73,70,61,24,39,16,50,37,68,32,15,55,85,44,43,60,22,71,69,49,71,74,59,66,79,19,48,69,42,18,69,56,23,52,26,22,60,34,16,19,19,23,66,68,64,50,65,21,81,32,66,32,44,64,77,49,53,35,74,70,75,53,87,38,41,32,33,51,49,36,52,40,83,74,22,71,30,45,46,26,59,54,54,30,63,23,88,63,58,51,56,27,24,74,32,37,73,78,75,28,87,29,33,70,31,80,67,52,71,54,44,45,68,79,44,64,51,67,17,85,50,59,21,17,44,73,71,61,59,16,16,64,69,72,55,58,17,48,22,74,71,78,36,19,70,29,40,74,81,68,73,78,79,35,46,75,38,42,77,67,26],"z":[4,6,5,4,6,4,5,5,5,6,4,5,5,4,5,4,6,6,4,4,6,5,6,5,5,5,5,5,5,6,6,5,5,5,5,5,5,6,5,5,6,5,5,4,5,5,5,4,5,5,5,5,6,5,5,5,5,5,5,6,6,4,5,6,5,5,6,5,5,5,5,5,5,6,4,4,5,5,6,5,5,5,4,4,5,5,5,6,5,5,5,6,5,6,4,5,6,5,5,6,5,4,4,5,5,5,5,5,6,6,5,6,6,5,6,5,5,5,5,5,6,4,4,4,5,6,4,4,5,5,5,6,5,5,5,6,4,6,5,5,4,5,5,5,5,5,5,4,6,5,5,5,4,4,5,5,6,5,5,6,6,5,5,5,6,5,4,4,5,4,4,5,5,4,5,6,6,6,5,5,4,5,4,5,5,5,6,5,5,5,5,5,5,4,4,5,4,4,4,5],"type":"scatter3d","mode":"markers","marker":{"color":"#a6a6a6","opacity":0.69999999999999996,"symbol":105,"line":{"color":"rgba(255,127,14,1)"}},"error_y":{"color":"rgba(255,127,14,1)"},"error_x":{"color":"rgba(255,127,14,1)"},"line":{"color":"rgba(255,127,14,1)"},"frame":null}],"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
 ]]]
 
 ---
@@ -298,7 +462,7 @@ $$
 Two predictors `\(X_{1i}\)` and `\(X_{2i}\)` are **"conditional on each other"** or **"interact"**, when the association between the outcome `\(Y_{i}\)` and one of the predictors depends on values of the other.
 ]
 
-- Education is a more negative predictor of xenophobia in Denmark than in Bulgaria. 
+- The association between xenophobia and education is more negative in Denmark than in Bulgaria. 
   + .backgrnote[That is, the association between education and xenophobia depends on the country people live in.]
 
 
@@ -329,36 +493,82 @@ ggplot(data = ESS, aes(y = imwbcnt, x = eduyrs, color = cntry)) +
 `$$Y_{i} = \alpha + \beta_{1} X_{1} + \beta_{2}X_{2} + \color{red}{\beta_{3}(X_{1}\times X_{2})} + e_{i}$$`
 
 .push-left[
-.font90[
+.font80[
 
 ```r
-ols_mult_1 &lt;- lm_robust(imwbcnt ~ cntry + eduyrs, 
-                        data = ESS, weights = pspwght)
 *ols_inter &lt;- lm_robust(imwbcnt ~ cntry*eduyrs,
                        data = ESS, weights = pspwght)
+
 # Report results in a regression table
-screenreg(list(ols_mult_1, ols_inter), 
-          include.ci = FALSE, digits = 3)
-# 
-# ================================================
-#                       Model 1       Model 2     
-# ------------------------------------------------
-# (Intercept)              4.909 ***     5.873 ***
-#                         (0.213)       (0.279)   
-# cntryBulgaria            1.635 ***    -0.375    
-#                         (0.100)       (0.385)   
-# eduyrs                  -0.043 **     -0.113 ***
-#                         (0.014)       (0.019)   
-# cntryBulgaria:eduyrs                   0.153 ***
-#                                       (0.027)   
-# ------------------------------------------------
-# R^2                      0.116         0.127    
-# Adj. R^2                 0.116         0.126    
-# Num. obs.             3330          3330        
-# RMSE                     2.344         2.330    
-# ================================================
-# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
+modelsummary(list("Xeno" = ols_mult_1, "Xeno" = ols_inter),
+             gof_map = c("nobs", "r.squared"), stars = TRUE)
 ```
+
+&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt;  Xeno &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt;  Xeno  &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 4.909*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 5.873*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.213) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.279) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; cntryBulgaria &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 1.635*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −0.375 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.100) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.385) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; eduyrs &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −0.043** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −0.113*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.014) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.019) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; cntryBulgaria × eduyrs &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.153*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.027) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 3330 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 3330 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.116 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.127 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
+&lt;sup&gt;&lt;/sup&gt; + p &amp;lt; 0.1, * p &amp;lt; 0.05, ** p &amp;lt; 0.01, *** p &amp;lt; 0.001&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;
+&lt;/table&gt;
+
+
 ]]
 
 --
@@ -366,6 +576,7 @@ screenreg(list(ols_mult_1, ols_inter),
 .push-right[
 &lt;img src="11-Conditionals_files/figure-html/unnamed-chunk-11-1.png" width="75%" style="display: block; margin: auto;" /&gt;
 - R *adds* an "interaction term", technically the product of the two interacted variables (i.e. `\(\text{Bulgaria} \times \text{Education}\)`).
+
 - Thereby, multiple OLS processes the conditional relation in an additive way (aka "linearization").
 ]
 
@@ -398,13 +609,14 @@ ESS %&gt;%
 #  8   182 Bulgaria         1     17       17
 #  9   208 Bulgaria         1     12       12
 # 10   234 Bulgaria         1     17       17
-# # … with 3,320 more rows
+# # ℹ 3,320 more rows
 ```
 ]
 
 .push-right[
 &lt;img src="11-Conditionals_files/figure-html/unnamed-chunk-13-1.png" width="75%" style="display: block; margin: auto;" /&gt;
 - R *adds* an "interaction term", technically the product of the two interacted variables (i.e. `\(\text{Bulgaria} \times \text{Education}\)`).
+
 - Thereby, multiple OLS processes the conditional relation in an additive way (aka "linearization").
 ]
 
@@ -418,35 +630,91 @@ ESS %&gt;%
 ols_inter2 &lt;- lm_robust(imwbcnt ~ cntry + eduyrs + intr_trm,
                        data = ESS, weights = pspwght)
 # Report results in a regression table
-screenreg(list(ols_inter, ols_inter2), 
-          include.ci = FALSE, digits = 3)
-# 
-# ================================================
-#                       Model 1       Model 2     
-# ------------------------------------------------
-# (Intercept)              5.873 ***     5.873 ***
-#                         (0.279)       (0.279)   
-# cntryBulgaria           -0.375        -0.375    
-#                         (0.385)       (0.385)   
-# eduyrs                  -0.113 ***    -0.113 ***
-#                         (0.019)       (0.019)   
-# cntryBulgaria:eduyrs     0.153 ***              
-#                         (0.027)                 
-# intr_trm                               0.153 ***
-#                                       (0.027)   
-# ------------------------------------------------
-# R^2                      0.127         0.127    
-# Adj. R^2                 0.126         0.126    
-# Num. obs.             3330          3330        
-# RMSE                     2.330         2.330    
-# ================================================
-# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
+modelsummary(list("Xeno" = ols_inter, "Xeno" = ols_inter2),
+             gof_map = c("nobs", "r.squared"), stars = TRUE)
 ```
+
+&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt;  Xeno &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt;  Xeno  &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 5.873*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 5.873*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.279) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.279) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; cntryBulgaria &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −0.375 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −0.375 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.385) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.385) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; eduyrs &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −0.113*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −0.113*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.019) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.019) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; cntryBulgaria × eduyrs &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.153*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.027) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; intr_trm &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.153*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.027) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 3330 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 3330 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.127 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.127 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
+&lt;sup&gt;&lt;/sup&gt; + p &amp;lt; 0.1, * p &amp;lt; 0.05, ** p &amp;lt; 0.01, *** p &amp;lt; 0.001&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;
+&lt;/table&gt;
+
+
 ]]
 
 .push-right[
 &lt;img src="11-Conditionals_files/figure-html/unnamed-chunk-15-1.png" width="75%" style="display: block; margin: auto;" /&gt;
 - R *adds* an "interaction term", technically the product of the two interacted variables (i.e. `\(\text{Bulgaria} \times \text{Education}\)`).
+
 - Thereby, multiple OLS processes the conditional relation in an additive way (aka "linearization").
 ]
 
@@ -458,28 +726,71 @@ class: clear
 ---
 .push-left[
 .font90[
+&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt;  Xeno &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt;  Xeno  &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 4.909*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 5.873*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.213) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.279) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; cntryBulgaria &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 1.635*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −0.375 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.100) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.385) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; eduyrs &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −0.043** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −0.113*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.014) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.019) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; cntryBulgaria × eduyrs &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.153*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.027) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 3330 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 3330 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.116 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.127 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
+&lt;sup&gt;&lt;/sup&gt; + p &amp;lt; 0.1, * p &amp;lt; 0.05, ** p &amp;lt; 0.01, *** p &amp;lt; 0.001&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;
+&lt;/table&gt;
 
-```
-# 
-# ================================================
-#                       Model 1       Model 2     
-# ------------------------------------------------
-# (Intercept)              4.909 ***     5.873 ***
-#                         (0.213)       (0.279)   
-# cntryBulgaria            1.635 ***    -0.375    
-#                         (0.100)       (0.385)   
-# eduyrs                  -0.043 **     -0.113 ***
-#                         (0.014)       (0.019)   
-# cntryBulgaria:eduyrs                   0.153 ***
-#                                       (0.027)   
-# ------------------------------------------------
-# R^2                      0.116         0.127    
-# Adj. R^2                 0.116         0.126    
-# Num. obs.             3330          3330        
-# RMSE                     2.344         2.330    
-# ================================================
-# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
-```
+
 ]]
 
 .push-right[
@@ -497,28 +808,71 @@ class: clear
 
 .push-left[
 .font90[
+&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt;  Xeno &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt;  Xeno  &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 4.909*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 5.873*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.213) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.279) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; cntryBulgaria &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 1.635*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −0.375 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.100) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.385) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; eduyrs &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −0.043** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −0.113*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.014) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.019) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; cntryBulgaria × eduyrs &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.153*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.027) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 3330 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 3330 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.116 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.127 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
+&lt;sup&gt;&lt;/sup&gt; + p &amp;lt; 0.1, * p &amp;lt; 0.05, ** p &amp;lt; 0.01, *** p &amp;lt; 0.001&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;
+&lt;/table&gt;
 
-```
-# 
-# ================================================
-#                       Model 1       Model 2     
-# ------------------------------------------------
-# (Intercept)              4.909 ***     5.873 ***
-#                         (0.213)       (0.279)   
-# cntryBulgaria            1.635 ***    -0.375    
-#                         (0.100)       (0.385)   
-# eduyrs                  -0.043 **     -0.113 ***
-#                         (0.014)       (0.019)   
-# cntryBulgaria:eduyrs                   0.153 ***
-#                                       (0.027)   
-# ------------------------------------------------
-# R^2                      0.116         0.127    
-# Adj. R^2                 0.116         0.126    
-# Num. obs.             3330          3330        
-# RMSE                     2.344         2.330    
-# ================================================
-# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
-```
+
 ]]
 
 .push-right[
@@ -527,7 +881,7 @@ class: clear
 
 `$$\beta_1\color{red}{|x_2=0} \text{ &amp; } \beta_2\color{red}{|x_1=0}$$`
 
-`\(\rightarrow \beta_{\text{eduyrs}}\color{red}{|\text{Bulgaria} = 0}\)`: A year increase in education goes along with a decline of xenophobia by -0.113 scale points, .alert[if Bulgaria = 0]. `\(\rightarrow\)` .alert[In Denmark], a year increase in education ...
+`\(\rightarrow \beta_{\text{eduyrs}}\color{red}{|\text{Bulgaria} = 0}\)`: A year increase in education goes along with a decline of xenophobia by -0.113 scale points, .alert[if Bulgaria = 0]. `\(\rightarrow\)` .alert[In Denmark]
 
 `\(\rightarrow \beta_{\text{Bulgaria}}\color{red}{|\text{eduyrs} = 0}.\)`
 ]
@@ -536,28 +890,71 @@ class: clear
 
 .push-left[
 .font90[
+&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt;  Xeno &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt;  Xeno  &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 4.909*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 5.873*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.213) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.279) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; cntryBulgaria &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 1.635*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −0.375 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.100) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.385) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; eduyrs &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −0.043** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −0.113*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.014) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.019) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; cntryBulgaria × eduyrs &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.153*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.027) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 3330 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 3330 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.116 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.127 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
+&lt;sup&gt;&lt;/sup&gt; + p &amp;lt; 0.1, * p &amp;lt; 0.05, ** p &amp;lt; 0.01, *** p &amp;lt; 0.001&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;
+&lt;/table&gt;
 
-```
-# 
-# ================================================
-#                       Model 1       Model 2     
-# ------------------------------------------------
-# (Intercept)              4.909 ***     5.873 ***
-#                         (0.213)       (0.279)   
-# cntryBulgaria            1.635 ***    -0.375    
-#                         (0.100)       (0.385)   
-# eduyrs                  -0.043 **     -0.113 ***
-#                         (0.014)       (0.019)   
-# cntryBulgaria:eduyrs                   0.153 ***
-#                                       (0.027)   
-# ------------------------------------------------
-# R^2                      0.116         0.127    
-# Adj. R^2                 0.116         0.126    
-# Num. obs.             3330          3330        
-# RMSE                     2.344         2.330    
-# ================================================
-# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
-```
+
 ]]
 
 .push-right[
@@ -566,7 +963,7 @@ class: clear
 
 `$$\beta_1\color{red}{|x_2=0} \text{ &amp; } \beta_2\color{red}{|x_1=0}$$`
 
-`\(\rightarrow \beta_{\text{eduyrs}}\color{red}{|\text{Bulgaria} = 0}\)`: A year increase in education goes along with a decline of xenophobia by -0.113 scale points, .alert[if Bulgaria = 0]. `\(\rightarrow\)` .alert[In Denmark], a year increase in education ...
+`\(\rightarrow \beta_{\text{eduyrs}}\color{red}{|\text{Bulgaria} = 0}\)`: A year increase in education goes along with a decline of xenophobia by -0.113 scale points, .alert[if Bulgaria = 0]. `\(\rightarrow\)` .alert[In Denmark].
 
 `\(\rightarrow \beta_{\text{Bulgaria}}\color{red}{|\text{eduyrs} = 0}.\)`
 ]
@@ -600,32 +997,91 @@ class: clear
 ---
 
 .push-left[
+&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt;  Xeno &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt;  Xeno  &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 5.873*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 4.378*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.279) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.072) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; cntryBulgaria &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −0.375 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 1.650*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.385) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.099) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; eduyrs &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −0.113*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.019) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; cntryBulgaria × eduyrs &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.153*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.027) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; mc_eduyrs &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −0.113*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.019) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; cntryBulgaria × mc_eduyrs &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.153*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.027) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 3330 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 3330 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.127 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.127 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
+&lt;sup&gt;&lt;/sup&gt; + p &amp;lt; 0.1, * p &amp;lt; 0.05, ** p &amp;lt; 0.01, *** p &amp;lt; 0.001&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;
+&lt;/table&gt;
 
-```
-# 
-# ===================================================
-#                          Model 1       Model 2     
-# ---------------------------------------------------
-# (Intercept)                 5.873 ***     4.378 ***
-#                            (0.279)       (0.072)   
-# cntryBulgaria              -0.375         1.650 ***
-#                            (0.385)       (0.099)   
-# eduyrs                     -0.113 ***              
-#                            (0.019)                 
-# cntryBulgaria:eduyrs        0.153 ***              
-#                            (0.027)                 
-# mc_eduyrs                                -0.113 ***
-#                                          (0.019)   
-# cntryBulgaria:mc_eduyrs                   0.153 ***
-#                                          (0.027)   
-# ---------------------------------------------------
-# R^2                         0.127         0.127    
-# Adj. R^2                    0.126         0.126    
-# Num. obs.                3330          3330        
-# RMSE                        2.330         2.330    
-# ===================================================
-# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
-```
+
 ]
 
 .push-right[
@@ -634,7 +1090,7 @@ class: clear
 
 `$$\beta_1\color{red}{|x_2=0} \text{ &amp; } \beta_2\color{red}{|x_1=0}$$`
 
-`\(\rightarrow \beta_{\text{eduyrs}}\color{red}{|\text{Bulgaria} = 0}\)`: A year increase in education goes along with a decline of xenophobia by -0.113 scale points, .alert[if Bulgaria = 0]. `\(\rightarrow\)` .alert[In Denmark], a year increase in education ...
+`\(\rightarrow \beta_{\text{eduyrs}}\color{red}{|\text{Bulgaria} = 0}\)`: A year increase in education goes along with a decline of xenophobia by -0.113 scale points, .alert[if Bulgaria = 0]. `\(\rightarrow\)` .alert[In Denmark].
 
 `\(\rightarrow \beta_{\text{Bulgaria}}\color{red}{|\text{eduyrs} = 0}.\)`
 ]
@@ -643,32 +1099,91 @@ class: clear
 
 .push-left[
 
+&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt;  Xeno &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt;  Xeno  &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 5.873*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 4.378*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.279) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.072) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; cntryBulgaria &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −0.375 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 1.650*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.385) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.099) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; eduyrs &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −0.113*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.019) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; cntryBulgaria × eduyrs &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.153*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.027) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; mc_eduyrs &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −0.113*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.019) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; cntryBulgaria × mc_eduyrs &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.153*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.027) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 3330 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 3330 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.127 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.127 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
+&lt;sup&gt;&lt;/sup&gt; + p &amp;lt; 0.1, * p &amp;lt; 0.05, ** p &amp;lt; 0.01, *** p &amp;lt; 0.001&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;
+&lt;/table&gt;
 
-```
-# 
-# ===================================================
-#                          Model 1       Model 2     
-# ---------------------------------------------------
-# (Intercept)                 5.873 ***     4.378 ***
-#                            (0.279)       (0.072)   
-# cntryBulgaria              -0.375         1.650 ***
-#                            (0.385)       (0.099)   
-# eduyrs                     -0.113 ***              
-#                            (0.019)                 
-# cntryBulgaria:eduyrs        0.153 ***              
-#                            (0.027)                 
-# mc_eduyrs                                -0.113 ***
-#                                          (0.019)   
-# cntryBulgaria:mc_eduyrs                   0.153 ***
-#                                          (0.027)   
-# ---------------------------------------------------
-# R^2                         0.127         0.127    
-# Adj. R^2                    0.126         0.126    
-# Num. obs.                3330          3330        
-# RMSE                        2.330         2.330    
-# ===================================================
-# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
-```
+
 ]
 
 .push-right[
@@ -677,9 +1192,9 @@ class: clear
 
 `$$\beta_1\color{red}{|x_2=0} \text{ &amp; } \beta_2\color{red}{|x_1=0}$$`
 
-`\(\rightarrow \beta_{\text{eduyrs}}\color{red}{|\text{Bulgaria} = 0}\)`: A year increase in education goes along with a decline of xenophobia by -0.113 scale points, .alert[if Bulgaria = 0]. `\(\rightarrow\)` .alert[In Denmark], a year increase in education ...
+`\(\rightarrow \beta_{\text{eduyrs}}\color{red}{|\text{Bulgaria} = 0}\)`: A year increase in education goes along with a decline of xenophobia by -0.113 scale points, .alert[if Bulgaria = 0]. `\(\rightarrow\)` .alert[In Denmark].
 
-`\(\rightarrow \beta_{\text{Bulgaria}}\color{red}{|\text{eduyrs} = 0}\)`: Bulgarians are, on average, 1.65 scale points more xenophobic than Danes, .alert[if education = 0]. `\(\rightarrow\)` .alert[Among persons with an average level of education], Bulgarians are ...
+`\(\rightarrow \beta_{\text{Bulgaria}}\color{red}{|\text{eduyrs} = 0}\)`: Bulgarians are, on average, 1.65 scale points more xenophobic than Danes, .alert[if education = 0]. `\(\rightarrow\)` .alert[Among persons with an average level of education].
 
 ]
 
@@ -690,28 +1205,60 @@ class: clear
 
 .push-left[
 The interaction term, `\(\beta_3(X_{1i}\times X_{2i})\)`, can be interpreted in two ways
+&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt;  Xeno &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 4.378*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.072) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; cntryBulgaria &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 1.650*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.099) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; mc_eduyrs &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −0.113*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.019) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; cntryBulgaria × mc_eduyrs &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.153*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.027) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 3330 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.127 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
+&lt;sup&gt;&lt;/sup&gt; + p &amp;lt; 0.1, * p &amp;lt; 0.05, ** p &amp;lt; 0.01, *** p &amp;lt; 0.001&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;
+&lt;/table&gt;
 
-```
-# 
-# =====================================
-#                          Model 1     
-# -------------------------------------
-# (Intercept)                 4.378 ***
-#                            (0.072)   
-# cntryBulgaria               1.650 ***
-#                            (0.099)   
-# mc_eduyrs                  -0.113 ***
-#                            (0.019)   
-# cntryBulgaria:mc_eduyrs     0.153 ***
-#                            (0.027)   
-# -------------------------------------
-# R^2                         0.127    
-# Adj. R^2                    0.126    
-# Num. obs.                3330        
-# RMSE                        2.330    
-# =====================================
-# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
-```
+
 ]
 
 ---
@@ -746,28 +1293,60 @@ layout: false
 .panel[.panel-name[Age and gender]
 .left-column[
 .font90[
+&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt;  Xeno &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 5.278*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.075) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; mc_eduyrs &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −0.060** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.021) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; gndrFemale &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −0.097 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.102) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; mc_eduyrs × gndrFemale &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −0.037 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.029) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 3330 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.013 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
+&lt;sup&gt;&lt;/sup&gt; + p &amp;lt; 0.1, * p &amp;lt; 0.05, ** p &amp;lt; 0.01, *** p &amp;lt; 0.001&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;
+&lt;/table&gt;
 
-```
-# 
-# ==================================
-#                       Model 1     
-# ----------------------------------
-# (Intercept)              5.278 ***
-#                         (0.075)   
-# mc_eduyrs               -0.060 ** 
-#                         (0.021)   
-# gndrFemale              -0.097    
-#                         (0.102)   
-# mc_eduyrs:gndrFemale    -0.037    
-#                         (0.029)   
-# ----------------------------------
-# R^2                      0.013    
-# Adj. R^2                 0.012    
-# Num. obs.             3330        
-# RMSE                     2.478    
-# ==================================
-# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
-```
+
 ]]
 .right-column[
 &lt;img src="11-Conditionals_files/figure-html/conditional4-1.png" width="90%" style="display: block; margin: auto;" /&gt;
@@ -776,28 +1355,60 @@ layout: false
 
 .left-column[
 .font90[
+&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt;  Xeno &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 5.278*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.075) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; mc_eduyrs &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −0.060** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.021) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; gndrFemale &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −0.097 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.102) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; mc_eduyrs × gndrFemale &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −0.037 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.029) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 3330 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.013 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
+&lt;sup&gt;&lt;/sup&gt; + p &amp;lt; 0.1, * p &amp;lt; 0.05, ** p &amp;lt; 0.01, *** p &amp;lt; 0.001&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;
+&lt;/table&gt;
 
-```
-# 
-# ==================================
-#                       Model 1     
-# ----------------------------------
-# (Intercept)              5.278 ***
-#                         (0.075)   
-# mc_eduyrs               -0.060 ** 
-#                         (0.021)   
-# gndrFemale              -0.097    
-#                         (0.102)   
-# mc_eduyrs:gndrFemale    -0.037    
-#                         (0.029)   
-# ----------------------------------
-# R^2                      0.013    
-# Adj. R^2                 0.012    
-# Num. obs.             3330        
-# RMSE                     2.478    
-# ==================================
-# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
-```
+
 ]]
 .right-column[
 &lt;img src="11-Conditionals_files/figure-html/unnamed-chunk-28-1.png" width="45%" style="display: block; margin: auto;" /&gt;
@@ -809,28 +1420,60 @@ layout: false
 
 .left-column[
 .font90[
+&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt;  Xeno &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 5.278*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.075) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; mc_eduyrs &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −0.060** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.021) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; gndrFemale &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −0.097 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.102) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; mc_eduyrs × gndrFemale &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −0.037 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.029) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 3330 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.013 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
+&lt;sup&gt;&lt;/sup&gt; + p &amp;lt; 0.1, * p &amp;lt; 0.05, ** p &amp;lt; 0.01, *** p &amp;lt; 0.001&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;
+&lt;/table&gt;
 
-```
-# 
-# ==================================
-#                       Model 1     
-# ----------------------------------
-# (Intercept)              5.278 ***
-#                         (0.075)   
-# mc_eduyrs               -0.060 ** 
-#                         (0.021)   
-# gndrFemale              -0.097    
-#                         (0.102)   
-# mc_eduyrs:gndrFemale    -0.037    
-#                         (0.029)   
-# ----------------------------------
-# R^2                      0.013    
-# Adj. R^2                 0.012    
-# Num. obs.             3330        
-# RMSE                     2.478    
-# ==================================
-# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
-```
+
 ]]
 .right-column[
 &lt;img src="11-Conditionals_files/figure-html/unnamed-chunk-30-1.png" width="45%" style="display: block; margin: auto;" /&gt;
@@ -848,8 +1491,8 @@ layout: false
 ols_inter &lt;- lm_robust(imwbcnt ~ mc_eduyrs*gndr,
                        data = ESS, weights = pspwght)
 # Report results in a regression table
-screenreg(list(ols_inter), 
-          include.ci = FALSE, digits = 3)
+modelsummary(list("Xeno" = ols_inter),
+             gof_map = c("nobs", "r.squared"), stars = TRUE)
 ```
 ]
 
@@ -869,75 +1512,187 @@ ggplot(data = ESS, aes(y = imwbcnt, x = mc_eduyrs, color = gndr)) +
 ```
 ]]]
 
----
-class: inverse middle center
-# Break
-
-&lt;iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
-
 
 ---
 # Control for potential confounders .font70[Easy ...]
 
 .push-left[
+&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt;  Xeno &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt;  Xeno  &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 4.378*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 3.789*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.072) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.150) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; cntryBulgaria &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 1.650*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 1.625*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.099) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.099) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; mc_eduyrs &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −0.113*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −0.108*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.019) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.018) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; cntryBulgaria × mc_eduyrs &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.153*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.150*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.027) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.027) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; gndrFemale &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −0.135 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.096) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; agea &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.014*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.003) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 3330 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 3330 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.127 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.139 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
+&lt;sup&gt;&lt;/sup&gt; + p &amp;lt; 0.1, * p &amp;lt; 0.05, ** p &amp;lt; 0.01, *** p &amp;lt; 0.001&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;
+&lt;/table&gt;
 
-```
-# 
-# ===================================================
-#                          Model 1       Model 2     
-# ---------------------------------------------------
-# (Intercept)                 4.378 ***     3.789 ***
-#                            (0.072)       (0.150)   
-# cntryBulgaria               1.650 ***     1.625 ***
-#                            (0.099)       (0.099)   
-# mc_eduyrs                  -0.113 ***    -0.108 ***
-#                            (0.019)       (0.018)   
-# cntryBulgaria:mc_eduyrs     0.153 ***     0.150 ***
-#                            (0.027)       (0.027)   
-# gndrFemale                               -0.135    
-#                                          (0.096)   
-# agea                                      0.014 ***
-#                                          (0.003)   
-# ---------------------------------------------------
-# R^2                         0.127         0.139    
-# Adj. R^2                    0.126         0.137    
-# Num. obs.                3330          3330        
-# RMSE                        2.330         2.315    
-# ===================================================
-# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
-```
+
 ]
 
 ---
 # Visualize!
 
 .push-left[
+&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt;  Xeno &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt;  Xeno  &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 4.378*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 3.789*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.072) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.150) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; cntryBulgaria &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 1.650*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 1.625*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.099) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.099) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; mc_eduyrs &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −0.113*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −0.108*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.019) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.018) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; cntryBulgaria × mc_eduyrs &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.153*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.150*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.027) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.027) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; gndrFemale &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −0.135 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.096) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; agea &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.014*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.003) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 3330 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 3330 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.127 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.139 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
+&lt;sup&gt;&lt;/sup&gt; + p &amp;lt; 0.1, * p &amp;lt; 0.05, ** p &amp;lt; 0.01, *** p &amp;lt; 0.001&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;
+&lt;/table&gt;
 
-```
-# 
-# ===================================================
-#                          Model 1       Model 2     
-# ---------------------------------------------------
-# (Intercept)                 4.378 ***     3.789 ***
-#                            (0.072)       (0.150)   
-# cntryBulgaria               1.650 ***     1.625 ***
-#                            (0.099)       (0.099)   
-# mc_eduyrs                  -0.113 ***    -0.108 ***
-#                            (0.019)       (0.018)   
-# cntryBulgaria:mc_eduyrs     0.153 ***     0.150 ***
-#                            (0.027)       (0.027)   
-# gndrFemale                               -0.135    
-#                                          (0.096)   
-# agea                                      0.014 ***
-#                                          (0.003)   
-# ---------------------------------------------------
-# R^2                         0.127         0.139    
-# Adj. R^2                    0.126         0.137    
-# Num. obs.                3330          3330        
-# RMSE                        2.330         2.315    
-# ===================================================
-# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
-```
+
 ]
 
 .push-right[
@@ -967,7 +1722,7 @@ class: inverse middle center
 #  8        -2 Bulgaria Female  52.2
 #  9        -1 Denmark  Female  52.2
 # 10        -1 Bulgaria Female  52.2
-# # … with 18 more rows
+# # ℹ 18 more rows
 ```
 ]]
 .panel[.panel-name[Predictions]
@@ -992,7 +1747,7 @@ class: inverse middle center
 #  8        -2 Bulgaria Female  52.2  5.92  5.75  6.08
 #  9        -1 Denmark  Female  52.2  4.48  4.30  4.66
 # 10        -1 Bulgaria Female  52.2  5.96  5.80  6.11
-# # … with 18 more rows
+# # ℹ 18 more rows
 ```
 ]]
 .panel[.panel-name[Plot]
@@ -1016,10 +1771,16 @@ ggplot(data = fict_dat, aes(y = fit, x = mc_eduyrs)) +
 ]]]
 
 ---
+class: inverse middle center
+# Break
+
+&lt;iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+
+---
 class: middle clear
 
 .left-column[
-&lt;img src="https://d1rytvr7gmk1sx.cloudfront.net/wp-content/uploads/2022/08/learn-coding-automation-just.jpeg?x27457" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="https://www.laserfiche.com/wp-content/uploads/2014/10/femalecoder.jpg" width="80%" style="display: block; margin: auto;" /&gt;
 
 &lt;iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
 ]
@@ -1028,6 +1789,12 @@ class: middle clear
 &lt;br&gt;
 &lt;iframe src='exercise1.html' width='1000' height='600' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
 ]
+
+---
+class: inverse middle center
+# Break
+
+&lt;iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
 
 ---
 class: inverse
@@ -1072,54 +1839,121 @@ class: clear
 .panelset[
 .panel[.panel-name[Additive multiple OLS]
 .push-left[
+&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; Poverty &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 41.415*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (2.547) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; mc_socialist &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −0.263 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.210) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; mc_citizen_rights &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −5.396*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.743) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 144 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.281 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
+&lt;sup&gt;&lt;/sup&gt; + p &amp;lt; 0.1, * p &amp;lt; 0.05, ** p &amp;lt; 0.01, *** p &amp;lt; 0.001&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;
+&lt;/table&gt;
 
-```
-# 
-# ==============================
-#                    Model 1    
-# ------------------------------
-# (Intercept)         41.849 ***
-#                     (2.506)   
-# mc_socialist        -0.329    
-#                     (0.202)   
-# mc_citizen_rights   -5.331 ***
-#                     (0.735)   
-# ------------------------------
-# R^2                  0.282    
-# Adj. R^2             0.272    
-# Num. obs.          146        
-# RMSE                30.237    
-# ==============================
-# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
-```
+
 ]
 .push-right[
 &lt;img src="11-Conditionals_files/figure-html/unnamed-chunk-41-1.png" width="80%" style="display: block; margin: auto;" /&gt;
 ]]
 .panel[.panel-name[Interactions imply non-linearity!]
 .push-left[
-
-```
-# 
-# ===========================================
-#                                 Model 1    
-# -------------------------------------------
-# (Intercept)                      42.609 ***
-#                                  (2.585)   
-# mc_socialist                     -0.163    
-#                                  (0.216)   
-# mc_citizen_rights                -5.242 ***
-#                                  (0.733)   
-# mc_socialist:mc_citizen_rights    0.079 *  
-#                                  (0.039)   
-# -------------------------------------------
-# R^2                               0.295    
-# Adj. R^2                          0.280    
-# Num. obs.                       146        
-# RMSE                             30.061    
-# ===========================================
-# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
-```
+&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; Poverty &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; Poverty  &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 41.415*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 41.842*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (2.547) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (2.586) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; mc_socialist &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −0.263 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −0.168 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.210) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.207) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; mc_citizen_rights &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −5.396*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −5.333*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.743) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.742) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; mc_socialist × mc_citizen_rights &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.052 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.046) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 144 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 144 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.281 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.286 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
+&lt;sup&gt;&lt;/sup&gt; + p &amp;lt; 0.1, * p &amp;lt; 0.05, ** p &amp;lt; 0.01, *** p &amp;lt; 0.001&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;
+&lt;/table&gt;
 
 &lt;img src="11-Conditionals_files/figure-html/socialism2-1.png" width="504" style="display: block; margin: auto;" /&gt;
 ]
@@ -1127,163 +1961,120 @@ class: clear
 .push-right[
 &lt;img src="11-Conditionals_files/figure-html/unnamed-chunk-42-1.png" width="80%" style="display: block; margin: auto;" /&gt;
 ]]
-.panel[.panel-name[Code]
-
-]]
-
----
-class: clear
-# Interaction of two continuous variables
-
-.panelset[
-.panel[.panel-name[OLS results]
+.panel[.panel-name[Interpretation]
 .push-left[
+&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; Poverty &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; Poverty  &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 41.415*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 41.842*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (2.547) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (2.586) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; mc_socialist &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −0.263 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −0.168 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.210) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.207) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; mc_citizen_rights &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −5.396*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −5.333*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.743) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.742) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; mc_socialist × mc_citizen_rights &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.052 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.046) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 144 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 144 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.281 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.286 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
+&lt;sup&gt;&lt;/sup&gt; + p &amp;lt; 0.1, * p &amp;lt; 0.05, ** p &amp;lt; 0.01, *** p &amp;lt; 0.001&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;
+&lt;/table&gt;
 
-```
-# 
-# ===========================================
-#                                 Model 1    
-# -------------------------------------------
-# (Intercept)                      42.609 ***
-#                                  (2.585)   
-# mc_socialist                     -0.163    
-#                                  (0.216)   
-# mc_citizen_rights                -5.242 ***
-#                                  (0.733)   
-# mc_socialist:mc_citizen_rights    0.079 *  
-#                                  (0.039)   
-# -------------------------------------------
-# R^2                               0.295    
-# Adj. R^2                          0.280    
-# Num. obs.                       146        
-# RMSE                             30.061    
-# ===========================================
-# *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
-```
-
-&lt;img src="11-Conditionals_files/figure-html/unnamed-chunk-44-1.png" width="504" style="display: block; margin: auto;" /&gt;
+&lt;img src="11-Conditionals_files/figure-html/unnamed-chunk-43-1.png" width="504" style="display: block; margin: auto;" /&gt;
 ]
 .push-right[
 `\(\beta_{\text{Socialism}}|\text{Citizen Rights}=0\)`: At average levels of citizenship rights, socialism is not significantly related to declines in poverty.
 
-`\(\beta_{\text{Citizen Rights}}|\text{Socialism}=0\)`: At average levels of socialism, a unit increase in citizenship rights is significantly related to a -5.242 percentage point decline in poverty.
+`\(\beta_{\text{Citizen Rights}}|\text{Socialism}=0\)`: At average levels of socialism, a unit increase in citizenship rights is significantly related to a -5.333 percentage point decline in poverty.
 
 `$$\beta_{\text{Socialism} \times \text{Citizen Rights}}$$`
-1) With every unit more citizenship rights, socialism gets 0.079 percentage points worse at being related to declines in poverty.
+1) With every unit more citizenship rights, socialism gets 0.052 percentage points worse at being related to declines in poverty.
 
-2) With every additional year of socialism, citizenship rights are 0.079 percentage points less associated with declines in poverty.
+2) With every additional year of socialism, citizenship rights are 0.052 percentage points less associated with declines in poverty.
 
-]]
-.panel[.panel-name[Predictions]
-.push-left[
-.font90[
-
-```r
-summary(Dat$mc_socialist)
-#    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-#    -6.7    -6.7    -6.7     0.0    -1.7    66.3
-summary(Dat$mc_citizen_rights)
-#    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-#   -7.62   -2.62    0.38    0.00    3.38    4.38
-*(fict_dat &lt;- tibble( # Choose "representative" values of
-* # x1 and x2 at which you wish to predict
-  # Repeat min, mean, and max each four times,
-  mc_socialist = rep(c(-6, 0, 60), each = 3),
-  # Repeat min, mean max four times.
-  mc_citizen_rights = rep(c(-7, 0, 4), 3)))
-# # A tibble: 9 × 2
-#   mc_socialist mc_citizen_rights
-#          &lt;dbl&gt;             &lt;dbl&gt;
-# 1           -6                -7
-# 2           -6                 0
-# 3           -6                 4
-# 4            0                -7
-# 5            0                 0
-# 6            0                 4
-# 7           60                -7
-# 8           60                 0
-# 9           60                 4
-```
-]]
-.push-right[
-.font90[
-
-```r
-(fict_dat &lt;- predict(
-  ols_inter, newdata = fict_dat,
-  interval = "confidence", level = 0.95)$fit %&gt;%
-   as_tibble() %&gt;% # Turn into a tibble, then
-   bind_cols(fict_dat, .)) # Add to the synthetic data.
-# # A tibble: 9 × 5
-#   mc_socialist mc_citizen_rights   fit    lwr   upr
-#          &lt;dbl&gt;             &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;
-# 1           -6                -7  83.6  70.1   97.1
-# 2           -6                 0  43.6  38.2   48.9
-# 3           -6                 4  20.7  14.3   27.2
-# 4            0                -7  79.3  66.9   91.7
-# 5            0                 0  42.6  37.5   47.7
-# 6            0                 4  21.6  14.9   28.4
-# 7           60                -7  36.4  10.5   62.3
-# 8           60                 0  32.8   5.95  59.7
-# 9           60                 4  30.8 -11.4   73.1
-```
-]]
-.panel[.panel-name[Plots]
-.push-left[
-&lt;img src="11-Conditionals_files/figure-html/predictions2-1.png" width="100%" style="display: block; margin: auto;" /&gt;
-]
-.push-right[
-&lt;img src="11-Conditionals_files/figure-html/predictions3-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]]
 .panel[.panel-name[Code]
-.push-left[
-.font90[
 
 ```r
-ggplot(data = fict_dat, aes(y = fit, x = mc_socialist)) +
-  geom_ribbon(aes(ymin = lwr, ymax = upr, 
-                  fill = factor(mc_citizen_rights)), alpha = 0.5) +
-  geom_line(aes(color = factor(mc_citizen_rights))) +
-  labs(
-    fill = "Mean-centered citizenship rights:", 
-    color = "Mean-centered citizenship rights:",
-    title = "Predictions based on multiple OLS",
-    x = "By mean-centered years of socialist history",
-    y = "Predicted Extreme poverty 
-    among population") +
-  theme_minimal() +
-  theme(legend.position = "bottom")
+# Same data as Lecture 2 
+Dat &lt;- Dat %&gt;% mutate( # Mean-center predictors
+  mc_socialist = socialist - mean(socialist, na.rm = TRUE),
+  mc_citizen_rights = citizen_rights - mean(citizen_rights, na.rm = TRUE))
+
+# Multiple OLS
+ols_inter &lt;- lm_robust(poverty ~ mc_socialist*mc_citizen_rights, data = Dat)
+
+# Report results in a regression table
+modelsummary(list("Poverty" = ols_add, "Poverty" = ols_inter),
+             gof_map = c("nobs", "r.squared"), stars = TRUE)
+
+# The 3-D plot
+library(rockchalk)
+plotPlane(ols_inter, "mc_citizen_rights", "mc_socialist", pch=16, alty=1,alwd=1, theta=35, phi=20)
 ```
 ]]
-.push-right[
-.font90[
-
-```r
-ggplot(data = fict_dat, aes(y = fit, x = mc_citizen_rights)) +
-  geom_ribbon(aes(ymin = lwr, ymax = upr, 
-                  fill = factor(mc_socialist)), alpha = 0.5) +
-  geom_line(aes(color = factor(mc_socialist))) +
-  labs(
-    fill = "Mean-centered socialist history:", 
-    color = "Mean-centered socialist history:",
-    title = "Predictions based on multiple OLS",
-    x = "By mean-centered citizenship rights",
-    y = "Predicted Extreme poverty 
-    among population") +
-  theme_minimal() +
-  theme(legend.position = "bottom")
-```
-]]]]]
 
 ---
 layout: false
 class: inverse
 # Today's general lessons
 
-1. Two predictors are "conditional on each other" or "interact", when the association between the outcome and one of the predictors depends on values of the other.
-2. Such conditional relations are modeling by the including of an "interaction term", which is the product of the two variables involved in the interaction.
-3. The interpretation of interaction terms is complex. The so called "main terms" are the relation between the respective variable and the outcome, when the other variable involved in the interaction is 0, and vice versa. The interaction term captures how the relation between a predictor and the outcome changes if the oother vairbale involved in the interaction increases by one unit, and vice versa.
-4. Because interaction terms are complex, it is best to visualize them using predictions.
+1. *Interaction*: When the association between an outcome and one predictor depends on the values of another predictor, the two predictors are said to be "conditional on each other" or to "interact."
+
+2. *Interaction Term*: A mathematical expression that captures the interaction effect between two predictors. It is typically created by multiplying the two variables involved in the interaction.
+
+3. *Interpreting Interaction Terms*:
+  + *Main Effects*: The relationship between each predictor and the outcome when the other predictor is held at zero.
+  + *Interaction Effect*: The change in the relationship between a predictor and the outcome as the other predictor increases by one unit, and vice versa.
+
+4. *Visualization*: Due to the complexity of interaction terms, visualizing them using predictions is recommended.
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="../template/remark-latest.min.js"></script>

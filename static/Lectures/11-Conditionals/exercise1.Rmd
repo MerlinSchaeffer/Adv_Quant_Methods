@@ -24,7 +24,7 @@ pacman::p_load(
   ggplot2, # beautiful figures,
   estimatr, # Regression for weighted data,
   furniture, # For row-means,
-  texreg) # regression tables with nice layout.
+  modelsummary) # regression tables with nice layout.
 
 # Bali terror attack
 event_date_begin <- as.Date("2002-09-14")
@@ -88,7 +88,8 @@ ESS <- ESS %>%
 ols_inter <- lm_robust(anti_immi ~ treat*cntry, data = ESS, weights = pspwght)
 
 # Report results in a nicely-formatted table
-screenreg(ols_inter, include.ci = FALSE, digits = 3)
+modelsummary(list("Xeno" = ols_inter),
+             gof_map = c("nobs", "r.squared"), stars = TRUE)
 ```
 `r unhide()`
 
@@ -113,6 +114,7 @@ coef(ols_inter)["treatAfter the attack"] + coef(ols_inter)["treatAfter the attac
 ols_inter2 <- lm_robust(anti_immi ~ treat*cntry + age + empl_stat, data = ESS, weights = pspwght)
 
 # Report results in a nicely-formatted table
-screenreg(list(ols_inter, ols_inter2), include.ci = FALSE, digits = 3)
+modelsummary(list("Xeno" = ols_inter, "Xeno" = ols_inter2),
+             gof_map = c("nobs", "r.squared"), stars = TRUE)
 ```
 `r unhide()`
