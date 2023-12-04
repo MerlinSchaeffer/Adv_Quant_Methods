@@ -42,9 +42,9 @@ myBib <- ReadBib("./../../../Stats_II.bib", check = FALSE)
 xaringanExtra::use_xaringan_extra(c("tile_view", "tachyons"))
 xaringanExtra::use_panelset()
 ```
-# The goal of social science research
+# Goal of empirical sociology
 
-.font140[.center[.alert[Use data to <ins>discover patterns</ins> ("social facts" in Durkheim's terms), <br> and the social mechanisms that bring them about.]]]
+.font130[.center[Use data to .alert[discover patterns], <br> and the social mechanisms that bring them about.]]
 
 ```{r, echo = FALSE, out.width='70%', fig.align='center'}
 knitr::include_graphics('https://liu.se/-/media/istock-501261958.jpg?mw=1120&mh=1120&hash=DA8977CCE6A6E600AE80A40CFEE771C9')
@@ -69,7 +69,7 @@ class: inverse
 
 .push-left[
 ```{r, echo = FALSE, out.width='65%', fig.align='center'}
-knitr::include_graphics('https://wp2.solidstarts.com/wp-content/uploads/Faces-Babies-Make-When-Eating_Kalani-1024x819.jpg')
+knitr::include_graphics('https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/The_newborn_baby_in_men.jpg/1920px-The_newborn_baby_in_men.jpg')
 knitr::include_graphics('https://ychef.files.bbci.co.uk/976x549/p086k2k4.jpg')
 ```
 ]
@@ -94,7 +94,7 @@ pacman::p_load(
   ggplot2, # beautiful figures,
   wbstats, # download data from Worldbank. Tremendous source of global socio-economic data.
   estimatr, # OLS with robust SE
-  texreg, # regression tables with nice layout,
+  modelsummary, # regression tables with nice layout,
   directlabels, # Labels addded to ggplot2 lines,
   rockchalk, # 3d plots of interaction effects,
   democracyData) # download democracy data used in the scholarly literature.
@@ -102,7 +102,7 @@ pacman::p_load(
 Dat_life <- wb_data(
   # Download Life expectancy and healthcare expenditures data.
   c("SP.DYN.LE00.IN", "SH.XPD.CHEX.PP.CD"), #<<
-  start_date = 2002, end_date = 2022) %>%
+  start_date = 2002, end_date = 2023) %>%
   rename(LifeExpect = SP.DYN.LE00.IN, # rename health variables, #<<
          HealthExp = SH.XPD.CHEX.PP.CD) %>% #<<
   select(country, date, LifeExpect, HealthExp) %>% # Keep only 4 variables
@@ -125,40 +125,38 @@ Dat <- inner_join(Dat_life, Dat_citi_rights, by = c("country", "date"))
 .panel[.panel-name[Add socialism]
 .font60[
 ```{r join}
-Dat <- Dat %>%
-  mutate(socialist = case_when( # Years socialist minus years since,
-    country == "China" ~ date - 1949,
-    country == "Vietnam" ~ date - 1945,
-    country == "Algeria" ~ date - 1962,
-    str_detect(country,"Portugal|Bangladesh") ~ date - 1972,
-    country == "Guinea-Bissau" ~ date - 1973,
-    country == "India" ~ date - 1976,
-    country == "Nicaragua" ~ date - 1979,
-    country == "Sri Lanka" ~ date - 1978,
-    country == "Tanzania" ~ date - 1964,
-    country == "Albania" ~ (1992 - 1944) - (date - 1992),
-    str_detect(country, "Angola|Cabo Verde|Madagascar") ~ (1992 - 1975) - (date - 1992),
-    str_detect(country,"Belarus|Bulgaria") ~ (1990 - 1946) - (date - 1990),
-    str_detect(country, "Benin|Mozambique") ~ (1990 - 1975) - (date - 1990),
-    country == "Chad" ~ (1975 - 1962) - (date - 1975), country == "Congo, Rep." ~ (1992 - 1970) - (date - 1992),
-    country == "Czech Republic" ~ (1990 - 1948) - (date - 1990), country == "Djibouti" ~ (1992 - 1981) - (date - 1992),
-    country == "Ethiopia" ~ (1991 - 1974) - (date - 1991), country == "Ghana" ~ (1966 - 1960) - (date - 1966),
-    country == "Guinea" ~ (1984 - 1958) - (date - 1984), country == "Hungary" ~ (1989 - 1949) - (date - 1989),
-    country == "Iraq" ~ (2005 - 1958) - (date - 2005), country == "Mali" ~ (1991 - 1960) - (date - 1991),
-    country == "Mauritania" ~ (1978 - 1961) - (date - 1978), country == "Mongolia" ~ (1992 - 1924) - (date - 1992),
-    country == "Myanmar" ~ (1988 - 1962) - (date - 1988), country == "Poland" ~ (1989 - 1945) - (date - 1989),
-    country == "Romania" ~ (1989 - 1947) - (date - 1989), country == "Russian Federation" ~ (1991 - 1922) - (date - 1991),
-    country == "Seychelles" ~ (1991 - 1977) - (date - 1991), country == "Senegal" ~ (1981 - 1960) - (date - 1981),
-    country == "Sierra Leone" ~ (1991 - 1978) - (date - 1991), country == "Somalia" ~ (1991 - 1969) - (date - 1991),
-    country == "Sudan" ~ (1985 - 1969) - (date - 1985), country == "Syria" ~ (2012 - 1963) - (date - 2012),
-    country == "Tunisia" ~ (1988 - 1964) - (date - 1988), country == "Ukraine" ~ (1991 - 1919) - (date - 1991),
-    country == "Yemen, Rep." ~ (1991 - 1967) - (date - 1991), country == "Zambia" ~ (1991 - 1973) - (date - 1991),
-    str_detect(country,"Slovenia|Croatia|Serbia|Montenegro|Bosnia and Herzegovina|North Macedonia|Kosovo") ~ (1992 - 1943) - (date - 1992),
-    TRUE ~ 0),
-    socialist = case_when( # Min. 5 years given socialist history,
-      (socialist < 5 & socialist > 0) | socialist < 0 ~ 5,
-      TRUE ~ socialist)) %>% 
-  drop_na() # Drop countries with missing values.
+Dat <- Dat %>% mutate(socialist = case_when( # Years socialist minus years since,
+  country == "China" ~ date - 1949,
+  country == "Vietnam" ~ date - 1945,
+  country == "Algeria" ~ date - 1962,
+  str_detect(country,"Portugal|Bangladesh") ~ date - 1972,
+  country == "Guinea-Bissau" ~ date - 1973,
+  country == "India" ~ date - 1976,
+  country == "Nicaragua" ~ date - 1979,
+  country == "Sri Lanka" ~ date - 1978,
+  country == "Tanzania" ~ date - 1964,
+  country == "Albania" ~ (1992 - 1944) - (date - 1992),
+  str_detect(country, "Angola|Cabo Verde|Madagascar") ~ (1992 - 1975) - (date - 1992),
+  str_detect(country,"Belarus|Bulgaria") ~ (1990 - 1946) - (date - 1990),
+  str_detect(country, "Benin|Mozambique") ~ (1990 - 1975) - (date - 1990),
+  country == "Chad" ~ (1975 - 1962) - (date - 1975), country == "Congo, Rep." ~ (1992 - 1970) - (date - 1992),
+  country == "Czech Republic" ~ (1990 - 1948) - (date - 1990), country == "Djibouti" ~ (1992 - 1981) - (date - 1992),
+  country == "Ethiopia" ~ (1991 - 1974) - (date - 1991), country == "Ghana" ~ (1966 - 1960) - (date - 1966),
+  country == "Guinea" ~ (1984 - 1958) - (date - 1984), country == "Hungary" ~ (1989 - 1949) - (date - 1989),
+  country == "Iraq" ~ (2005 - 1958) - (date - 2005), country == "Mali" ~ (1991 - 1960) - (date - 1991),
+  country == "Mauritania" ~ (1978 - 1961) - (date - 1978), country == "Mongolia" ~ (1992 - 1924) - (date - 1992),
+  country == "Myanmar" ~ (1988 - 1962) - (date - 1988), country == "Poland" ~ (1989 - 1945) - (date - 1989),
+  country == "Romania" ~ (1989 - 1947) - (date - 1989), country == "Russian Federation" ~ (1991 - 1922) - (date - 1991),
+  country == "Seychelles" ~ (1991 - 1977) - (date - 1991), country == "Senegal" ~ (1981 - 1960) - (date - 1981),
+  country == "Sierra Leone" ~ (1991 - 1978) - (date - 1991), country == "Somalia" ~ (1991 - 1969) - (date - 1991),
+  country == "Sudan" ~ (1985 - 1969) - (date - 1985), country == "Syria" ~ (2012 - 1963) - (date - 2012),
+  country == "Tunisia" ~ (1988 - 1964) - (date - 1988), country == "Ukraine" ~ (1991 - 1919) - (date - 1991),
+  country == "Yemen, Rep." ~ (1991 - 1967) - (date - 1991), country == "Zambia" ~ (1991 - 1973) - (date - 1991),
+  str_detect(country,"Slovenia|Croatia|Serbia|Montenegro|Bosnia and Herzegovina|North Macedonia|Kosovo") ~ (1992 - 1943) - (date - 1992),
+  TRUE ~ 0),
+  socialist = case_when( # Min. 5 years given socialist history,
+    (socialist < 5 & socialist > 0) | socialist < 0 ~ 5,
+    TRUE ~ socialist)) %>% drop_na() # Drop countries with missing values.
 ```
 ]]
 .panel[.panel-name[The resulting data]
@@ -202,23 +200,24 @@ class: inverse center middle
 
 .push-left[
 .font80[
-```{r}
+```{r out.width='60%', fig.height = 5, fig.width = 5}
 ols_1 <- lm_robust(
   LifeExpect ~ date + socialist*citizen_rights, data = Dat,
   clusters = country) # Note that we need to specify this argument, #<<
 # because the observations are not independent! #<<
 # They are repeated observations of the same countries. #<<
 
-screenreg(ols_1, include.ci = FALSE, digits = 3)
+# 3D plot of interaction. Controls set to their mean.
+plotPlane(ols_1, "citizen_rights", "socialist", 
+          theta = 35, phi = 20)
 ```
 ]]
 
 .push-right[
-.font90[
-```{r LifeExp2, out.width='75%', fig.height = 5, fig.width = 5}
-# 3D plot of interaction. Controls set to their mean.
-plotPlane(ols_1, "citizen_rights", "socialist", 
-          theta = 85, phi = 10)
+.font80[
+```{r LifeExp2}
+modelsummary(list("Life Exp." = ols_1),
+             gof_map = c("nobs", "r.squared"), stars = TRUE)
 ```
 ]]
 
@@ -233,13 +232,13 @@ class: inverse center middle
 .push-left[
 .font80[
 ```{r}
-ols_2 <- lm_robust(
-  LifeExpect ~ date + socialist*citizen_rights + 
-    # I() allows to transform x within model. #<<
-    I(HealthExp / 1000), # 1 unit increase = $1000 #<<
-  data = Dat, clusters = country)
-
-screenreg(list(ols_1, ols_2), include.ci = FALSE, digits = 3)
+ols_2 <- lm_robust(LifeExpect ~ I(HealthExp / 1000) + # I() allows to transform x 
+                   # within model. 1 unit increase = $1000 #<<
+                   date + socialist*citizen_rights, data = Dat, clusters = country)
+```
+```{r, echo = FALSE}
+modelsummary(list("Life Exp." = ols_2),
+             gof_map = c("nobs", "r.squared"), stars = TRUE)
 ```
 ]]
 
@@ -333,11 +332,13 @@ layout: true
 .push-left[
 .font80[
 ```{r}
-ols_3 <- lm_robust(LifeExpect ~ date + socialist*citizen_rights + 
-                     I(HealthExp/1000) + I((HealthExp/1000)^2), #<<
+ols_3 <- lm_robust(LifeExpect ~ I(HealthExp/1000) + I((HealthExp/1000)^2) + #<<
+                   date + socialist*citizen_rights,
                    data = Dat, clusters = country)
-
-screenreg(ols_3, include.ci = FALSE, digits = 3)
+```
+```{r, echo = FALSE}
+modelsummary(list("Life Exp." = ols_3),
+             gof_map = c("nobs", "r.squared"), stars = TRUE)
 ```
 ]]
 
@@ -345,7 +346,6 @@ screenreg(ols_3, include.ci = FALSE, digits = 3)
 
 .push-right[
 - We need a non-linear model:
-  + Here: An initial steep increase, which progressively flattens out.
   
 $$Y_{i} = \alpha + \beta_{1}X_{1} + \beta_{2}X_{1}^2 + \ldots + e_{i}$$
 .content-box-green[.center[
@@ -373,12 +373,13 @@ layout: true
 .push-left[
 .font80[
 ```{r}
-ols_4 <- lm_robust(LifeExpect ~ date + socialist*citizen_rights + 
-                     # poly() is better to specify polynomials #<<
-                     poly(I(HealthExp/1000), degree = 2, raw = TRUE), #<<
-                   data = Dat, clusters = country)
-
-screenreg(ols_4, include.ci = FALSE, digits = 3)
+ols_4 <- lm_robust( # Use poly() is better to specify polynomials #<<
+  LifeExpect ~ poly(I(HealthExp/1000), degree = 2, raw = TRUE) + #<< 
+    date + socialist*citizen_rights, data = Dat, clusters = country)
+```
+```{r, echo = FALSE}
+modelsummary(list("Life Exp." = ols_4),
+             gof_map = c("nobs", "r.squared"), stars = TRUE)
 ```
 ]]
 
@@ -461,10 +462,13 @@ class: clear
 .push-left[
 .font80[
 ```{r}
-ols_5 <- lm_robust(LifeExpect ~ date + socialist*citizen_rights + 
-                     poly(I(HealthExp/1000), degree = 4, raw = TRUE), #<<
-                   data = Dat, clusters = country)
-screenreg(ols_5, include.ci = FALSE, digits = 3)
+ols_5 <- lm_robust(
+  LifeExpect ~ poly(I(HealthExp/1000), degree = 4, raw = TRUE) + #<<
+    date + socialist*citizen_rights, data = Dat, clusters = country)
+```
+```{r, echo = FALSE}
+modelsummary(list("Life Exp." = ols_5),
+             gof_map = c("nobs", "r.squared"), stars = TRUE)
 ```
 ]]
 
@@ -571,8 +575,8 @@ class: inverse middle center
 class: middle clear
 
 .left-column[
-```{r, echo = FALSE, out.width='100%'}
-knitr::include_graphics('https://d1rytvr7gmk1sx.cloudfront.net/wp-content/uploads/2022/08/learn-coding-automation-just.jpeg?x27457')
+```{r, echo = FALSE, out.width='80%'}
+knitr::include_graphics('https://www.laserfiche.com/wp-content/uploads/2014/10/femalecoder.jpg')
 ```
 
 <iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'></iframe>
@@ -671,10 +675,12 @@ layout: true
 .push-left[
 .font80[
 ```{r}
-ols_6 <- lm_robust(LifeExpect ~ date + socialist*citizen_rights + 
-                     I(log2(HealthExp)), #<<
-                   data = Dat, clusters = country)
-screenreg(ols_6, include.ci = FALSE, digits = 3)
+ols_6 <- lm_robust(LifeExpect ~ I(log2(HealthExp)) + #<<
+                     date + socialist*citizen_rights, data = Dat, clusters = country)
+```
+```{r, echo = FALSE}
+modelsummary(list("Life Exp." = ols_6),
+             gof_map = c("nobs", "r.squared"), stars = TRUE)
 ```
 ]]
 
@@ -747,6 +753,7 @@ class: clear
 .right-column[
 .font80[
 ```{r echo = FALSE}
+library(texreg)
 screenreg(list(ols_5, ols_6), include.ci = FALSE, digits = 3)
 ```
 ]]
@@ -777,8 +784,8 @@ class: inverse middle center
 class: middle clear
 
 .left-column[
-```{r, echo = FALSE, out.width='100%'}
-knitr::include_graphics('https://d1rytvr7gmk1sx.cloudfront.net/wp-content/uploads/2022/08/learn-coding-automation-just.jpeg?x27457')
+```{r, echo = FALSE, out.width='80%'}
+knitr::include_graphics('https://www.laserfiche.com/wp-content/uploads/2014/10/femalecoder.jpg')
 ```
 
 <iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'></iframe>

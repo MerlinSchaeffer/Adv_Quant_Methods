@@ -1,5 +1,5 @@
 ---
-title: "Exercise 1 (20 minutes)"
+title: "Exercise 2 (20 minutes)"
 subtitle: "When you're done, assist some of the others ..."
 output: webexercises::webexercises_default
 ---
@@ -21,7 +21,7 @@ pacman::p_load(
   haven, # Handle labelled data.
   ggplot2, # beautiful figures,
   estimatr, # Regression for weighted data,
-  texreg) # regression tables with nice layout.
+  modelsummary) # regression tables with nice layout.
 
 # Read the ESS round 9 data
 ESS <- read_spss("../../../assets/ESS9e03_1.sav") %>%
@@ -46,7 +46,8 @@ ESS <- read_spss("../../../assets/ESS9e03_1.sav") %>%
 ols_log <- lm_robust(imwbcnt ~ cntry + gndr + eduyrs + I(log2(agea)), data = ESS, weights = pspwght)
 
 # Report results in a nicely-formatted table
-screenreg(ols_log, include.ci = FALSE, digits = 3)
+modelsummary(list("Xeno" = ols_log),
+             gof_map = c("nobs", "r.squared"), stars = TRUE)
 ```
 
 ```{r echo = FALSE}
@@ -63,7 +64,8 @@ ols_poly2 <- lm_robust(imwbcnt ~ cntry + gndr + eduyrs + poly(I(agea / 10), 2, r
                        data = ESS, weights = pspwght)
 
 # Report results in a nicely-formatted table
-screenreg(list(ols_log, ols_poly2), include.ci = FALSE, digits = 3)
+modelsummary(list("Xeno" = ols_log, "Xeno" = ols_poly2),
+             gof_map = c("nobs", "r.squared"), stars = TRUE)
 ```
 `r unhide()`
 
