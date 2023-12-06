@@ -1,0 +1,650 @@
+name,id,sis_id,section,section_id,section_sis_id,submitted,attempt,"758014: We need some data to explore urbanization across municipalities. A simple (and somewhat naive) measure of this could be the population size in a municipality: The larger the population, the more urbanized!
+We can use the dkstat-package to explore data from the Statistics Denmark api. 
+What does the function ""dst_search"" from the dkstat package do according to the package help-page? ""This function provides a search function for... [dst_search]
+Use the dst_search-function to search for statistics related to ""folketal"" and inspect the first 10 results. Which statistic shows both ""kommune"" and ""bystørrelse""? [stat]
+",1.0,"758015: Now, lets download the BY2 data from 2022 with the code snippet from the quiz-script.
+Create a tibble that summarizes the number of adults (in 10thousands) across all municipalities in the BY-data and name the tibble popCounts.
+How many rows are in the popCount-data? [popCount]",1.0,"758016: Now we have a data frame of municipalities and population sizes.
+Then, we need to prepare and summarize the survey data.
+Read theelection campaign data, select the variable for municipality of residence, the variable for perceiving immigration as a threat and the variable for thinking Inger Støjberg should be allowed to be minister. Remove all missing observations across the three variables. How many rows are in this data? [nrow_survey]
+Fill out the code in the quizzscript to summarize the survey data to municipality level data showing for each municipality the mean attitude towards immigration and the proportion who thinks Inger Støjberg should be allowed to be minister after the election. What proportion of citizens in Copenhagen thinks Inger Støjberg should be allowed to be minister after the election (3 digits)? [propCop]
+Now left_join the immigrationData on the popCounts by the variable ""municipality"". One municipality is missing data - which? [miss]
+Is it okay to remove this observation from data? (yes/no) [rm]",2.0,"758034: In both models the municipality of Copenhagen had by far the higher Cooks D.
+Is it a good idea to filter out Copenhagen from a model of Danish Municipalities? Write at leas one argument for, one against, and what you think is the better argument",1.0,"758035: Population size is a very noisy measure of urbanization. For instance, Frederiksberg has a lower population size than Vejle
+
+Luckily, the DST-api has other stats, namely a categorical kommune-grouping based on urbanisation. Use the quizscript to download these data and join them to the current data.
+Count the municipality-group variable. One group has much fewer observations than the other - which?",1.0,"758038: Use the script and the function fct_recode to recode ""Hovedstadskommuner"" together with ""Storbykommuner"" to make the latter have a higher number of observations.
+Then use the script to make a boxplot of the relationsship between the population count and the municipality urbanization groups.
+Based on the boxplot, think about which of the two is the better measure of urbanization and what potential effects that might be overlooked in the models we have calculated up until now
+",0,"758251: Let's make a coefficient plot of the regression of immigration attitude (perceiving immigration as a threat) on urbanization to easily visualize our findings.
+First, tidy the model output using tidy() with the conf.int -argument and filter as shown in the quiz script.
+Then, modify the coefficient-plot code to create a coefficient plot.
+How many of the 95% confidence intervals visualized include 0? [CI]
+Judging by the coefficient plot, does the model seem to predict that less urbanized municipalities have citizens who perceive immigration as a bigger threat? [neg]",2.0,"758342: On a scale from 0 (the worst possible quiz for this lecture) to 10 (the best possible quiz for this lecture), how would you rate the quiz, that you have just completed?",0.0,"758343: If you have any suggestions as to how we can improve these quizzes, feel free to let us know here.
+If you don't have any suggestions, just type a blank space",0.0,"758017: We want to find out how population size and citizens attitudes towards immigration (perceiving immigration as a threat) are related to one another.
+Run an OLS regression of immigration attitude on population size using lm().
+For each 10,000 more adults in a municipality, how many scale points does mean perception of immigration as a threat change 
+  
+    [ Select ]
+  
+  [""0.012"", ""0.011"", ""-0.011"", ""-0.012""]
+
+ (3 digits)?
+Is the correlation statistically significant at the 0.05-level? 
+  
+    [ Select ]
+  
+  [""Yes"", ""No""]
+
+
+Use the glance-function from the broom-package to inspect summary statistics for the model. What is the R2? 
+  
+    [ Select ]
+  
+  [""0.044"", ""0.054"", ""0.064"", ""0.074""]
+
+ (3 digits)
+",2.0,"758021: Make a scatterplot of population size and citizens attitudes towards immigration (perceiving immigration as a threat).
+The country that is furthest from the regression line in the scatterplot is probably the most likely to cause trouble for the regression model. Which country is that in this case? 
+  
+    [ Select ]
+  
+  [""Samsø"", ""Lemvig"", ""København"", ""Faxe""]
+
+
+Run an OLS regression of immigration attitude (perceiving immigration as a threat) on population size using lm() and make a diagnostic outlier plot of the regression model.
+Add a variable for Cook's distance from the regression model to the data set.One municipality has a Cook's distance of  0.2. Which one is that? 
+  
+    [ Select ]
+  
+  [""Samsø"", ""Lemvig"", ""København"", ""Faxe""]
+
+
+(Hint: The numbers by the dots in the diagnostic plot are the observation numbers. Use this number in square brackets to find the right country name from the country variable.)
+Filter out this municipality from the dataset and run the regression again. Is the coefficient still significant? 
+  
+    [ Select ]
+  
+  [""Yes"", ""No""]
+
+",3.0,"758248: Run an OLS regression of immigration attitude (perceiving immigration as a threat) on urbanization.
+How much higher is the mean level of perceiving immigration as a threat in an ""oplandskommune"" compared to a ""Storbykommune""? 
+  
+    [ Select ]
+  
+  [""0.009"", ""0.114"", ""0.166"", ""0.125""]
+
+
+Is the difference statistically significant at the 0.05-level? 
+  
+    [ Select ]
+  
+  [""Yes"", ""No""]
+
+",2.0,"758033: Make a scatterplot ofpopulation size and citizens attitudes towards immigration (proportion who thinks Inger Støjberg can be minister).
+The municipality that is furthest from the regression line in the scatterplot is probably the most likely to cause trouble for the regression model. Which municipality is that in this case? 
+  
+    [ Select ]
+  
+  [""Rebild"", ""Rødovre"", ""København"", ""Aarhus""]
+
+
+Run an OLS regression of immigration attitude (proportion who thinks Inger Støjberg can be minister) on population size using lm() and make a diagnostic outlier plot of the regression model.
+Add a variable for Cook's distance from the regression model to the data set.One municipality has a Cook's distance of  0.2. Which one is that? 
+  
+    [ Select ]
+  
+  [""Rebild"", ""Rødovre"", ""København"", ""Aarhus""]
+
+
+(Hint: The numbers by the dots in the diagnostic plot are the observation numbers. Use this number in square brackets to find the right country name from the country variable.)
+Filter out this municipality from the dataset and run the regression again. Is the coefficient still significant? 
+  
+    [ Select ]
+  
+  [""Yes"", ""No""]
+
+",3.0,"758249: Run an OLS regression of immigration attitude (perceiving immigration as a threat) on urbanization.
+How much higher is the mean level of perceiving immigration as a threat in an ""landkommune"" compared to a ""storbykommune""? 
+  
+    [ Select ]
+  
+  [""0.094"", ""0.114"", ""0.166"", ""0.125""]
+
+
+Is the difference statistically significant at the 0.05-level? 
+  
+    [ Select ]
+  
+  [""Yes"", ""No""]
+
+",2.0,"758018: We want to find out how population size and citizens attitudes towards immigration (perceiving immigration as a threat) are related to one another.
+Run an OLS regression of immigration attitude on population size using lm().
+For each 10,000 more adults in a municipality, how many scale points doesmean perception of immigration as a threatchange 
+  
+    [ Select ]
+  
+  [""0.0110"", ""0.0109"", ""-0.0109"", ""-0.0110""]
+
+ (4 digits)?
+Is the correlation statistically significant at the 0.05-level? 
+  
+    [ Select ]
+  
+  [""Yes"", ""No""]
+
+
+Use the glance-function from the broom-package to inspect summary statistics for the model. What is the R2? 
+  
+    [ Select ]
+  
+  [""0.0439"", ""0.0539"", ""0.0639"", ""0.0739""]
+
+ (5 digits)",2.0,"758020: We want to find out how population size and citizens attitudes towards immigration (proportion who thinks Inger Støjberg can be minister) are related to one another.
+Run an OLS regression of immigration attitude on population size using lm().
+For each 10,000 more adults in a municipality, how much doestheproportion who thinks Inger Støjberg can be ministerchange 
+  
+    [ Select ]
+  
+  [""-0.00496"", ""-0.00596"", ""-0.00696"", ""-0.00796""]
+
+ (5 digits)?
+Is the correlation statistically significant at the 0.05-level? 
+  
+    [ Select ]
+  
+  [""Yes"", ""No""]
+
+
+Use the glance-function from the broom-package to inspect summary statistics for the model. What is the R2? 
+  
+    [ Select ]
+  
+  [""0.10877"", ""0.11877"", ""0.12877"", ""0.13877""]
+
+ (5 digits)",2.0,"758250: Run an OLS regression of immigration attitude (perceiving immigration as a threat) on urbanization.
+How much higher is the mean level of perceiving immigration as a threat in an ""provinsbykommune"" compared to a ""storbykommune""? 
+  
+    [ Select ]
+  
+  [""0.094"", ""0.114"", ""0.166"", ""0.125""]
+
+
+Is the difference statistically significant at the 0.05-level? 
+  
+    [ Select ]
+  
+  [""Yes"", ""No""]
+
+
+",2.0,"758019: We want to find out how population size and citizens attitudes towards immigration (proportion who thinks Inger Støjberg can be minister) are related to one another.
+Run an OLS regression of immigration attitude on population size using lm().
+For each 10,000 more adults in a municipality, how much does the proportion who thinks Inger Støjberg can be minister change 
+  
+    [ Select ]
+  
+  [""-0.005"", ""-0.006"", ""-0.007"", ""-0.008""]
+
+ (3 digits)?
+Is the correlation statistically significant at the 0.05-level? 
+  
+    [ Select ]
+  
+  [""Yes"", ""No""]
+
+
+Use the glance-function from the broom-package to inspect summary statistics for the model. What is the R2? 
+  
+    [ Select ]
+  
+  [""0.109"", ""0.119"", ""0.129"", ""0.139""]
+
+ (3 digits)",2.0,n correct,n incorrect,score
+Johan Gilbert Rasmussen,391247,753328,Hold2;,155355,Hsyl198739,2023-10-11 21:59:59 UTC,1,"the description field of available data series,BY2",1.0,"",0.0,"",0.0,"",0.0,"",0.0,"",0,"",0.0,"",0.0,"",0.0,"",0.0,"",0.0,"",0.0,"","","","","","","","","","","","",4,8,1.0
+Sanng Barzenji,389864,750294,Hold3;,155356,Hsyl198740,2023-10-11 21:59:59 UTC,1,"an overview of available data series,BY2",0.5,"",0.0,"",0.0,"",0.0,"",0.0,"",0,"",0.0,"",0.0,"",0.0,"",0.0,"","","","","",0.0,"",0.0,"","","","","","","","",4,8,0.5
+Morris Emil Agersted-Hass,390651,766194,Hold2;,155355,Hsyl198739,2023-10-11 21:59:59 UTC,1,"",0.0,"",0.0,"",0.0,"",0.0,"",0.0,"",0,"",0.0,"",0.0,"",0.0,"","","","","",0.0,"",0.0,"","","",0.0,"","","","","","",3,9,0.0
+Kristina Amalie Busk Lange,391026,755586,Hold2;,155355,Hsyl198739,2023-10-11 21:59:59 UTC,1,"the description field of available data series,BY2",0.5,"",0.0,"",0.0,"",0.0,"",0.0,"",0,"",0.0,"",0.0,"",0.0,"","","",0.0,"","","","","",0.0,"","","",0.0,"","","","",4,8,0.5
+Laila Ali Ugaas Abdulle,389114,752832,Hold2;,155355,Hsyl198739,2023-10-11 21:59:59 UTC,1,"the description field of available data series,BY2",1.0,"",0.0,"",0.0,"",0.0,"",0.0,"",0,"",0.0,"",0.0,"",0.0,"","","",0.0,"","","","","","","","","",0.0,"",0.0,"","",4,8,1.0
+Laura Kiær Ahring,387831,760653,Hold4;,155357,Hsyl198741,2023-10-11 09:29:09 UTC,1,"the description field of available data series,BY2",0.5,99,1.0,"10632,0.264,Christiansø,yes",2.0,"On one hand, you can check better at other municipalitites, due to Copenhagen being a speciffic group and not so diverse in its opponions
+
+ 
+
+However, people who live in copenhagen often live there due to their oppinions being simmilar, so ",0.0,Landkommuner,0.0,"",0,"1,No",0.0,2,0.0,"This quiz was so difficult, therefore I had to guess, as I couldn't get my r-script to work properly and give the correct numbers put forwards in the quiz",0.0,"","","","","","","København,Rødovre,No",0.0,"0.114,No",1.0,"","","-0.00696,Yes,0.12877",0.6666666666666666,"","","","",9,3,5.166666666666667
+Natasja Liv Peterson Porst,390791,754639,Hold4;,155357,Hsyl198741,2023-10-11 07:59:24 UTC,1,"the description field of available data series,BY2",1.0,8,0.0,"5,2\,354,Brønshøj,No",0.0,"No, it's a big city that have different political views, which are important to keep in the statistics
+
+Yes, Copenhagen disrupts the data, so it should be filtered out
+
+I personally don't think, Copenhagen should be removed from the data",0.0,Storbykommuner,1.0,"",0,"1,Yes",1.0,3,0.0,Its to hard,0.0,"","","København,København,Yes",1.0,"","","","","","","0.0109,Yes,0.0439",0.6666666666666666,"","","0.166,Yes",0.0,"","",9,3,4.666666666666667
+Julia Wilczewska,406218,786591,Hold3;,155356,Hsyl198740,2023-10-11 07:52:42 UTC,1,"the description field of available data series,BY2",1.0,99,1.0,"10632,0.263,Christiansø,yes",1.5,"Copenhagen still has important data. 
+
+Copenhagen variable has a big impact on outcome of analysis.
+
+I think we shouldnt filter it because it is still relevant data. ",0.0,Storbykommuner,1.0,"",0,"1,Yes",1.0,5,0.0,"",0.0,"","","","","0.114,Yes",1.0,"København,København,No",1.0,"","","","","","","","","-0.005,Yes,0.109",2.0,12,0,9.5
+Benjamin Rom Viegand Hansen,390154,768270,Hold3;,155356,Hsyl198740,2023-10-11 06:59:01 UTC,1,"the description field of available data series,BY2",1.0,5,0.0,"25,444,4,yes",0.5,"For:  Copenhagen may be an outlier that significantly influences the model. By filtering out Copenhagen, the model might be better at capturing the general patterns and relationships among other Danish municipalities. This can lead to a more robust and representative model for the majority of cases.
+
+Against: Copenhagen is the capital and largest city in Denmark, that may play a crucial role in the overall patterns. Removing Copenhagen might lead to an oversimplified model that doesn't account for the specific factors influencing the capital city. ",0.0,Hovedstadskommuner,0.0,"",0,"1,Yes",1.0,7,0.0,"",0.0,"","","","","0.114,No",0.0,"København,København,Yes",2.0,"","","","","","","","","-0.006,Yes,0.129",0.6666666666666666,9,3,5.166666666666667
+Olivia Munksgaard Palmqvist,368520,733298,Hold4;,155357,Hsyl198741,2023-10-11 06:01:58 UTC,1,"the description field of available data series,BY2",0.5,12474,1.0,"10632,0.264,Christiansø,yes",2.0,"Because of the higher Cooks D, Copenhagen has a really big impact on the model - by moving it we are reducing the risk of outliers first and foremost. Because Copenhagen is so prominent in the model by removing it we might get a better feel of all the other municipalities. However, by removing Copenhagen we do not have an accurate representation of the municipalities - especially if we look at the cultural significance of CPH and how many people live there ",0.0,Storbykommuner,1.0,"",0,"3,Yes",1.0,2,0.0,I had a really difficult time just setting up R with this data and everything so it was an uphill battle from the get-go and you just want to give up then ,0.0,"","","Lemvig,Samsø,Yes",0.0,"","","","","","","","","-0.00496,Yes,0.10877",2.0,"0.166,Yes",0.0,"","",10,2,7.5
+Jacob Løhmann Kristensen,387737,748373,Hold3;,155356,Hsyl198740,2023-10-11 00:14:10 UTC,1,"the description field of available data series,BY2",0.5,99,1.0,"98,0.264,Ærø,yes",1.0,"Copenhagen is by far the largest of all danish municipalities by taking it out of the dataset you remove a large portion of the total population. This could give skeewed results. 
+
+ 
+
+On the other hand removing a datapoint with a higher cooks D value, improves the dataquality of the dataset. 
+
+ 
+
+In essens i think it would be better to leave it in. ",0.0,Storbykommuner,1.0,"",0,"1,Yes",1.0,7,0.0,"",0.0,"","","","","","","Rebild,Rebild,Yes",3.0,"","","","","-0.00596,Yes,0.11877",0.6666666666666666,"0.114,No",2.0,"","",12,0,10.166666666666666
+Rasmus Højgaard Toftholm,388650,765370,Hold4;,155357,Hsyl198741,2023-10-10 21:26:57 UTC,1,"the description field of available data series,BY2",1.0,98,0.0,"0,0,0,0",0.0,"ive really been struggling with getting R to work here - no matter what im trying, RTools dosent seem to properly install. 
+
+I can however still try to formulate general arguments:
+
+An obvious argument against, is that filtering out Copenhagen is very disruptive to the data, and seems to me to be a crude attempt to force the model to fit the data, rather then accepting that the data dose not support the proposed model. 
+
+An argument for could perhaps be, that there is a great deal of differences between Copenhagen and many other municipalities in denmark, and insisting on keeping Copenhagen in, renders a otherwise good model useless.
+
+ 
+
+Obviously i haven't yet been able to make the code work and produce the model that im trying to discuss here, so maybe im talking nonsense - i haven't been able to see for myself.  Anyway i think as a general rule, that you should refrain from filtering out data.
+
+ ",0.0,Storbykommuner,1.0,"",0,"2,Yes",2.0,5,0.0,"",0.0,"0.011,Yes,0.054",0.6666666666666666,"","","","","København,København,Yes",2.0,"0.114,Yes",0.0,"","","","","","","","",9,3,6.666666666666667
+Hjalte Jørgensen,390695,754602,Hold4;,155357,Hsyl198741,2023-10-10 21:00:32 UTC,1,"the description field of available data series,BY2",1.0,99,1.0,"10632,43.8,,no",0.5,"",0.0,Oplandskommuner,0.0,"",0,"0,Yes",1.0,5,0.0,"",0.0,"","","","","0.166,Yes",2.0,"København,Rebild,Yes",3.0,"","","","","-0.00596,No,0.10877",0.6666666666666666,"","","","",11,1,9.166666666666666
+Noemi Sara Bromenne Jacobsen,385755,770160,Hold4;,155357,Hsyl198741,2023-10-10 20:34:16 UTC,1,"the description field of available data series,BY2",0.5,99,1.0,"10632,1.851,Christiansø,yes",1.5,blabla,0.0,Hovedstadskommuner,0.0,"",0,"1,Yes",1.0,0,0.0,stupid,0.0,"","","Samsø,Lemvig,No",2.0,"","","","","0.114,No",1.0,"","","","","","","-0.005,Yes,0.109",2.0,11,1,9.0
+Camilla Storgaard,389430,763604,"Hold2;, Hold3;","155355, 155356","Hsyl198739, Hsyl198740",2023-10-10 20:34:15 UTC,1,"the description field of available data series,BY2",1.0,99,1.0,"10632,1851,Christiansø,yes",1.5,yes.,0.0,Landkommuner,0.0,"",0,"2,No",1.0,0,0.0,"",0.0,"","","Samsø,Lemvig,Yes",1.0,"","","","","","","0.0110,No,0.0539",0.0,"","","0.114,Yes",1.0,"","",10,2,6.5
+Jolie Fenna Van der Meer,405455,786965,Hold1;,155354,Hsyl198738,2023-10-10 20:19:51 UTC,1,"an overview of available data series,BY1",0.0,9,0.0,"6,8.628,5,yes",0.5,No it's not because on the ,0.0,Oplandskommuner,0.0,"",0,"2,No",1.0,6,0.0,"",0.0,"","","","","","","København,Aarhus,Yes",2.0,"0.166,No",1.0,"0.0109,No,0.0639",0.0,"","","","","","",8,4,4.5
+Olivia Weiland Møller Mehlbye,366529,731993,Hold4;,155357,Hsyl198741,2023-10-10 12:53:21 UTC,1,"the description field of available data series,BY2",1.0,2,0.0,"4,2.34,,No",0.0,"",0.0,Landkommuner,0.0,"",0,"0,Yes",1.0,1,0.0,"I honestly gave up on this quiz, and found it very hard and mest impossible to complete…",0.0,"","","","","","","Rødovre,Rebild,No",1.0,"","","","","-0.00496,Yes,0.11877",1.3333333333333333,"0.166,Yes",0.0,"","",8,4,4.333333333333333
+Sara Marie Ruwald,385942,748768,Hold3;,155356,Hsyl198740,2023-10-10 09:54:23 UTC,1,"the description field of available data series,BY2",1.0,99,1.0,"98,0.185,Christiansø,yes",1.0,"High Cook's D values suggest that Cph has a strong influence on the model's coefficients.
+
+By removing it, it may reduce the influence of this potential outlier and also improve the overall model fit.",0.0,Storbykommuner,1.0,"",0,"0,Yes",1.0,3,0.0,only 3 because I thought it was very difficult,0.0,"","","","","","","København,København,Yes",2.0,"","","","","-0.00696,Yes,0.10877",1.3333333333333333,"0.094,No",1.0,"","",12,0,9.333333333333332
+Theis Molin Sørensen,387308,750201,Hold3;,155356,Hsyl198740,2023-10-10 08:29:07 UTC,1,"the description field of available data series,BY2",1.0,99,1.0,"10632,0.264,Christiansø,yes",2.0,"It is not a good idea as the population of Copenhagen is about a tenth of the Danish population. That means that even though a lot of people with the same opinions are clustered, they're still relevant
+
+ 
+
+Copenhagen municipality should be filtered as it is too big of an outlier. It skews the image that is relevant in the rest of the country. 
+
+ 
+
+I think it should not be filtered
+
+ 
+
+ ",0.0,Storbykommuner,1.0,"",0,"2,Yes",2.0,2,0.0, .,0.0,"-0.011,Yes,0.074",2.0,"Lemvig,København,No",2.0,"0.166,Yes",2.0,"","","","","","","","","","","","",12,0,13.0
+Theresa Elisabeth Meyer,405653,786929,Hold1;,155354,Hsyl198738,2023-10-10 07:37:31 UTC,1,"the description field of available data series,BY1",0.5,3,0.0,"10632,,,no",0.5,"It would be good to leave Copenhagen out, since it is a statistical outliner and would therefore influence the data far more for the CooksD then the other municipalities.
+
+ 
+
+It would not be good to filter out Copnehagen, since eventhough it has the much higher value in CooksD, it still represtens a far higher density of danish citizens, then other municipalities.
+
+ 
+
+The second one, to not leave out Copenhagen.",0.0,Storbykommuner,1.0,"",0,"1,Yes",1.0,4,0.0," 
+
+ ",0.0,"","","Lemvig,Samsø,Yes",0.0,"","","","","0.114,Yes",0.0,"","","-0.00596,Yes,0.11877",0.6666666666666666,"","","","",9,3,3.6666666666666665
+Caroline Bøgh Hørslev,386323,747740,Hold4;,155357,Hsyl198741,2023-10-09 20:51:49 UTC,1,"the description field of available data series,BY2",1.0,99,1.0,"10632,2.548,Christiansø,yes",1.5,"1. It is a good idea to filter Copenhagen out because it is an outlier
+
+2. It is not a good idea because it is the capital city
+
+I think the best argument is number 1, because it affects the data",0.0,Hovedstadskommuner,0.0,"",0,"1,Yes",1.0,2,0.0,"More help in the scripts, so you don't get stuck at one question and therefore can't move on",0.0,"-0.011,Yes,0.074",2.0,"København,København,Yes",1.0,"","","","","0.114,Yes",0.0,"","","","","","","","",10,2,7.5
+Fie Lund Thomsen,386186,765044,"Hold1;, Hold3;","155354, 155356","Hsyl198738, Hsyl198740",2023-10-09 20:22:02 UTC,1,"the description field of available data series,BY2",1.0,99,1.0,"10632,0.264,Christiansø,Yes",2.0,Copenhagen is the Capital Where many citizens live,0.0,Storbykommuner,1.0,"",0,"1,Yes",1.0,2,0.0,we could not merge the cells,0.0,"-0.011,Yes,0.074",2.0,"Samsø,København,No",3.0,"","","","","","","","","","","0.166,No",1.0,"","",12,0,12.0
+Kirstine Bjerno Folkvardsen,386264,761925,Hold3;,155356,Hsyl198740,2023-10-09 20:08:42 UTC,1,"the description field of available data series,BY2",1.0,99,1.0,"10632,0.264,Christiansø,Yes",2.0,It is not a good idea to drop København since it is the capital and a lot of the population lives in København,0.0,Storbykommuner,1.0,"",0,"2,Yes",2.0,0,0.0,Very difficult! I had to guess for the last question since I had no clue what to do ,0.0,"","","Samsø,København,No",3.0,"","","","","","","","","-0.00496,Yes,0.10877",2.0,"0.166,Yes",0.0,"","",11,1,12.0
+Emily Grace Cook,406344,785821,Hold1;,155354,Hsyl198738,2023-10-09 18:30:02 UTC,1,"the description field of available data series,BY2",0.5,99,1.0,"10632,0.264,Christiansø,yes",2.0,"Against - No there is a reason for Copenhagen to be an outlier in the dataset due to it being a capital city. Furthermore removing it would make the model less representative of the real world.
+
+For - When you remove Copenhagen it may lead to a more robust model and better fitting model.
+
+I think Copenhagen should not be removed from the model.",0.0,Storbykommuner,1.0,"",0,"2,Yes",2.0,6,0.0,"More explanation of how to complete code
+
+More explanations of what the variables mean to non-Danish people. Did not understand what the variable describing urbanization was meant to be",0.0,"","","","","0.166,Yes",2.0,"København,København,Yes",1.0,"","","","","","","","","-0.005,Yes,0.109",2.0,12,0,11.5
+CHI KWAN LUK,405993,786151,Hold4;,155357,Hsyl198741,2023-10-09 17:05:21 UTC,1,"the description field of available data series,BY2",1.0,99,1.0,"10632,0.264,Christiansø,yes",2.0,"1. A good idea to filter out Copenhagen:
+
+Copenhagen is the outlier among the data which creates imbalances to the analysis and therefore it might be a good idea to filter out Copenhagen.
+
+2. A bad idea to filter out Copenhagen:
+
+Copenhagen is the capital of Denmark, accounting for the the majority proportion of the population. If we filter Copenhagen in the analysis, the result might not to representative.",0.0,Storbykommuner,1.0,"",0,"2,Yes",2.0,5,0.0,The quiz is too long.,0.0,"","","København,København,No",2.0,"","","","","","","-0.0109,Yes,0.0739",2.0,"","","0.114,No",2.0,"","",12,0,13.0
+Josefine Witt Rønne,386305,752898,Hold2;,155355,Hsyl198739,2023-10-09 16:59:26 UTC,1,"the description field of available data series,BY2",1.0,5,0.0,"4,3.456,3,yes",0.5,good,0.0,Hovedstadskommuner,0.0,"",0,"2,No",1.0,0,0.0,"",0.0,"","","Lemvig,Lemvig,No",1.0,"","","","","0.125,No",2.0,"","","-0.00596,No,0.10877",0.6666666666666666,"","","","",10,2,6.166666666666667
+Mira Chatterji Rosen Sørensen,386694,766818,Hold2;,155355,Hsyl198739,2023-10-09 16:58:51 UTC,1,"the description field of available data series,BY2",1.0,5,0.0,"10632,0.264,Nordjylland,no",1.0,"",0.0,Hovedstadskommuner,0.0,"",0,"1,Yes",1.0,0,0.0,"The quiz was far too difficult, so I guessed/filled in arbitrary numbers for the last part of the quiz. 
+
+ 
+
+I think the content was a good match for the lecture. However, it is difficult to know what to do based on the script and description of the questions.",0.0,"","","","","","","Rødovre,Aarhus,Yes",1.0,"","","","","","","0.094,No",1.0,"-0.005,Yes,0.119",1.3333333333333333,10,2,6.333333333333333
+Laura Trude Christensen,388295,764503,Hold3;,155356,Hsyl198740,2023-10-09 16:40:25 UTC,1,"the description field of available data series,BY2",1.0,99,1.0,"10632,0.264,Christiansø ,yes",2.0,"It is not a good idea to remove Copenhagen, since it is the capital. A lot of citizens live there. ",0.0,Hovedstadskommuner,0.0,"",0,"1,Yes",1.0,3,0.0,Question number 8 and 9 were very difficult to answer and I could not figure out which code to use,0.0,"","","Samsø,København,No",3.0,"","","","","0.166,Yes",0.0,"","","","","","","-0.005,Yes,0.109",2.0,10,2,10.0
+Julie Nygaard,386081,750647,Hold1;,155354,Hsyl198738,2023-10-09 13:20:06 UTC,1,"the description field of available data series,BY2",0.5,99,1.0,"10632,0.264,Christiansø ,yes",2.0,"For = Copenhagen has such a large population, that has a radically different attitude towards immigration that the rest of the municipalities, and therefor it can scew the data 
+
+Against = The results won't be very representative if you filter out the capital of Denmark, and there might be a sociological explanation as to why Copenhagener (as well as people from other bigger cities like Aarhus and Aalborg, generally have a more positive attitude towards immigration --> The bigger the city, the more postive attitude) 
+
+ 
+
+I think the argument against is better, and wouldn't filter out Copenhagen 
+
+ ",0.0,Storbykommuner,1.0,"",0,"2,Yes",2.0,1,0.0,"I have spend almost 6 hours on this quiz, I think it was way to difficult esspecially the last questions
+
+ 
+
+Also i was confused that sometime there were stars, where you weren't supposed to edit the code ",0.0,"","","","","","","København,København,No",0.0,"0.114,No",1.0,"-0.0109,Yes,0.0739",2.0,"","","","","","",11,1,9.5
+Jonathan Victor Bastlund Woollhead,388430,766810,Hold4;,155357,Hsyl198741,2023-10-09 13:19:15 UTC,1,"the description field of available data series,BY2",1.0,99,1.0,"10632,0.264,Christiansø,yes",2.0,"For = Including Copenhagen makes the model less applicable for predicting.
+
+ 
+
+Against = the attitudes of Copenhageners is just as relevant for the model as the attitutdes in other municipallities, even though it screws the dataset.
+
+I would argue that Copenhagen should be included in the model, with the prerequisite that the model is then taken more with a grain of salt. ",0.0,Storbykommuner,1.0,"",0,"2,Yes",2.0,2,0.0,Make it less difficult!!! We spent 4 hours completing it,0.0,"-0.012,Yes,0.074",1.3333333333333333,"København,København,No",2.0,"","","","","","","","","","","0.114,No",2.0,"","",12,0,12.333333333333332
+Andreas Leth Simonsen,365203,732689,2500-E23;Multiple Regression Analysis and Fundamentals of Causal Inference,155316,Dsyl119500,2023-10-09 05:58:23 UTC,1,"the description field of available data series,BY2",1.0,99,1.0,"10632,0.263,Christiansø,yes",1.5,Copenhagen is deffitly an outlier. But copenhagen is also denmarks biggest and argubaly the most important one. But it does also swing out alot,0.0,Storbykommuner,1.0,"",0,"1,Yes",1.0,0,0.0,Very confusing quizz. Spent 3 hours on this one being confused as to what i was supposed to do in the quizz script. Lots of time spend cross cheking things data and if i had understood things correctly,0.0,"-0.011,Yes,0.074",2.0,"","","","","Rebild,København,Yes",1.0,"","","","","","","0.094,No",1.0,"","",12,0,9.5
+Tak Chiu CHAN,405946,786062,Hold3;,155356,Hsyl198740,2023-10-09 02:20:04 UTC,1,"the description field of available data series,BY1",0.5,99,1.0,"10632,0.264,Christiansø,yes",2.0,"For: Filtering it out may increase the accuracy of the model.
+
+Against: Copenhagen has the most population in Denmark, it will negatively significantly affect the model after filtering it out. This may cause the new model less convincing.",0.0,Storbykommuner,1.0,"",0,"1,Yes",1.0,9,0.0,Thank you for making a nice quiz!,0.0,"","","København,København,Yes",1.0,"0.009,Yes",1.0,"","","","","","","-0.00496,Yes,0.10877",2.0,"","","","",12,0,9.5
+Frida Nitschke Madsen,387695,752970,Hold3;,155356,Hsyl198740,2023-10-08 17:49:49 UTC,1,"an overview of available data series,BY2",0.5,99,1.0,"10632,0.264,Christiansø,yes",2.0,"For writing out:
+
+* There might be other circumstances in the capital compared to other cities. We therefore might need to examine Copenhagen by itself. 
+
+Against writing out:
+
+* It is a large part of the country (the far biggest municipality) and the data is therefore not representative if taken out.
+
+The better argument: 
+
+I don't think we should write out Copenhagen
+
+ 
+
+ ",0.0,Storbykommuner,1.0,"",0,"0,Yes",1.0,2,0.0,"",0.0,"-0.011,Yes,0.074",2.0,"","","","","Rebild,København,Yes",1.0,"","","","","","","0.114,No",2.0,"","",12,0,10.5
+Carla Schultz,386797,764919,Hold3;,155356,Hsyl198740,2023-10-08 15:53:17 UTC,1,"the description field of available data series,BY2",1.0,99,1.0,"10632,0.264,Christiansø,yes",2.0,Yes i think so,0.0,Storbykommuner,1.0,"",0,"1,Yes",1.0,2,0.0,It was way too hard.,0.0,"","","","","","","København,Rebild,Yes",3.0,"","","","","","","0.166,Yes",0.0,"-0.005,Yes,0.109",2.0,11,1,11.0
+Cecilie Bach Kjeldsen,389000,765603,Hold2;,155355,Hsyl198739,2023-10-08 11:08:26 UTC,1,"the description field of available data series,BY2",0.5,12.474,0.0,"10.632,0.505,?,yes",0.5,"If the city is a big outlier, it is a good idea to remove it and if it change the result a lot, you should remove it.  However, it can be important to see and check the different outliers in the data. ",0.0,Storbykommuner,1.0,"",0,"1,Yes",1.0,1,0.0,too difficult ,0.0,"","","","","","","København,København,Yes",1.0,"","","","","","","0.114,Yes",1.0,"-0.005,Yes,0.129",1.3333333333333333,11,1,6.333333333333333
+Tøger Fuur Wiberg,333867,692312,Hold2;,155355,Hsyl198739,2023-10-07 20:39:22 UTC,1,"an overview of available data series,BY2",0.5,99,1.0,"10632,0.264,Christiansø,yes",2.0,"Pro: vigtig del af DK at repræsentere
+
+Con: for ekstrem måling der larmer for meget",0.0,Storbykommuner,1.0,"",0,"1,Yes",1.0,4,0.0,-,0.0,"","","","","","","Rødovre,København,Yes",1.0,"","","","","","","0.114,No",2.0,"-0.005,Yes,0.109",2.0,12,0,10.5
+Vincent Keyaniyan,404156,786917,Hold2;,155355,Hsyl198739,2023-10-06 17:11:39 UTC,1,"the description field of available data series,BY2",1.0,99,1.0,"10632,0.264,Christiansø,yes",2.0,"Since Copenhagen is the capital and biggest city of Denmark, it's a important region for forcasting the political attitude in the country. Possibly, Copenhagen has the largest and most heterogeneous share of different ethnicities, which is why the analysis is so skewed. Due to the great influence that the population of Copenhagen has on Danish society and politics, the exclusion of the municipality would most likely generate a very unrealistic model. For this reason, I recommend keeping Copenhagen in the model.",0.0,Storbykommuner,1.0,"",0,"2,Yes",2.0,9,0.0,no everything is great.,0.0,"","","Lemvig,København,No",2.0,"0.166,Yes",2.0,"","","","","","","","","","","-0.005,Yes,0.109",2.0,12,0,13.0
+Louise Anna Céline Hascoët,406307,786450,Hold2;,155355,Hsyl198739,2023-10-06 13:00:15 UTC,1,"the description field of available data series,BY2",1.0,5,0.0,"5,5, q,no",0.0,"The high Cooks D value indicate that Copenhagen is an outlier, which can significantly influence the results of statistical models in the data. This can potentially leading to biased or skewed conclusions ; that's why removing Copenhagen could result in a better / more representative model of the majority of municipalities. This would allow for more accurate generalizations about the rest of Denmark.
+
+On the other hand, Copenhagen is the capital and the largest city in Denmark, so its characteristics can differ significantly  from smaller municipalities. Excluding it could lead to a model that doesn't accurately reflect the diverse urban dynamics  in the country. Removing it could lead to a model that is less representative of the overall Danish municipal landscape.
+
+The decision between keeping or removing Copenhagen must be taken considering the specific research question, and the need for generalizability versus specificity in the study. If the goal of the study is to understand general tendencies of the average danish municipalities, we can justify the exclusion of Copenhagen. If the research is more about studying the unique dynamics of urban centers, then we should keep Copenhaguen. In this case, understanding the distinctiveness of the city and its impact on the overall analysis might provide valuable insights into the complexities of urban governance and planning.",0.0,Hovedstadskommuner,0.0,"",0,"2,No",1.0,3,0.0,I don't have any suggestions. This is too difficult for me because I didn't had a correct introduction to R,0.0,"","","Samsø,København,Yes",2.0,"","","","","","","","","-0.00496,Yes,0.10877",2.0,"0.094,No",1.0,"","",9,3,7.0
+Johanne Cecilie Alnor Einarson,388612,753046,Hold2;,155355,Hsyl198739,2023-10-06 12:57:15 UTC,1,"the description field of available data series,FOLK3",0.5,99,1.0,"10632,0.263,Christiansø,Yes",1.5,"It is a good idea to filter out Copenhagen, since it is such a big outlier that it distorts the data and p-values (from significant to not-significant). However, Copenhagen is also the largest municipality in Denmark, and it would be wrong to not include it, since if has quite the voice in the meaning of the danish population.",0.0,Storbykommuner,1.0,"",0,"1,Yes",1.0,0,0.0,"Maybe write in the script when the ""*"" is an R-function (and that it is not a sign of replacing **** with some other code). It took ages to figure out that some stars means ""replace"" and some you should leave alone :)",0.0,"","","Lemvig,København,No",2.0,"","","","","","","","","","","0.114,No",2.0,"-0.005,Yes,0.109",2.0,12,0,11.0
+Maryème BEN MOHAMED,406324,786419,Hold1;,155354,Hsyl198738,2023-10-06 12:18:40 UTC,1,"the description field of available data series,BY2",0.5,12474,1.0,"3,,,yes",0.5,"",0.0,Hovedstadskommuner,0.0,"",0,"1,No",0.0,7,0.0,   ,0.0,"","","","","","","Rødovre,Rebild,No",1.0,"","","","","","","0.114,Yes",1.0,"-0.006,Yes,0.119",0.6666666666666666,10,2,4.666666666666667
+Marie-Louise Skov Jensen,36564,489916,Hold1;,155354,Hsyl198738,2023-10-06 11:45:37 UTC,1,"the description field of available data series,BY2",0.5,99,1.0,"10632,2.55,Christiansø,no",1.0,"Against: big percentage of the danish population lives in mph
+
+For: big outlier",0.0,Storbykommuner,1.0,"",0,"2,No",1.0,6,0.0,"its difficult to figure out, when I have to put any code instead of ""'*****"" or not",0.0,"","","","","","","Rebild,København,No",1.0,"","","","","-0.00496,Yes,0.10877",2.0,"0.114,Yes",1.0,"","",12,0,8.5
+Emilie Moosdorf Vejgaard,388420,746151,Hold1;,155354,Hsyl198738,2023-10-06 11:40:05 UTC,1,"the description field of available data series,BY2",0.5,99,1.0,"10632,0.263,Christiansø,yes",1.5,"",0.0,Oplandskommuner,0.0,"",0,"1,No",0.0,1,0.0,"",0.0,"","","Lemvig,København,Yes",1.0,"","","","","0.114,No",1.0,"","","","","","","-0.005,Yes,0.109",2.0,10,2,7.0
+Caroline Marie Gehlert Hansen,386364,747661,Hold3;,155356,Hsyl198740,2023-10-06 09:25:57 UTC,1,"an overview of available data series,FOLK1A",0.0,32,0.0,"10,1.75,Horsens,yes",0.5,I feel like this quiz unfortunately is too hard. Im sure it is a good filter though ,0.0,Provinsbykommuner,0.0,"",0,"1,Yes",1.0,1,0.0,"I dont have any suggestions, but i found it to be too challening ",0.0,"","","Samsø,Lemvig,Yes",1.0,"","","","","","","0.0109,No,0.0639",0.0,"","","0.094,No",1.0,"","",8,4,3.5
+Josephine Holm Clausen,390677,752053,Hold2;,155355,Hsyl198739,2023-10-06 08:02:50 UTC,1,"the description field of available data series,BY2",1.0,99,1.0,"10632,0.26,Christiansø,yes",1.5,"No, because it is how reality is in Denmark
+
+ 
+
+Yes, because it makes it hard to interpret the other places",0.0,Storbykommuner,1.0,"",0,"2,Yes",2.0,3,0.0,"I find it frustrating when I work with the quizzes that we are expected to use functions in r that we have never been explained what they mean, and some we have never been introduced to.",0.0,"","","København,København,No",2.0,"0.125,No",0.0,"","","","","","","","","","","-0.005,Yes,0.109",2.0,11,1,10.5
+Jesper Chanel Iversholt Jørgensen,387633,753159,Hold4;,155357,Hsyl198741,2023-10-06 07:41:35 UTC,1,"the description field of available data series,BY2",1.0,4,0.0,"3,421,Sjælland,No",0.0,"",0.0,Provinsbykommuner,0.0,"",0,"1,No",0.0,2,0.0,"",0.0,"","","","","","","København,Rødovre,Yes",2.0,"0.166,No",1.0,"","","-0.00596,Yes,0.11877",0.6666666666666666,"","","","",8,4,4.666666666666667
+Cecilia Høgenhaug,389839,764452,Hold2;,155355,Hsyl198739,2023-10-05 14:33:40 UTC,1,"the description field of available data series,BY2",1.0,99,1.0,"10632,0.264,Christiansø,yes",2.0,idk,0.0,Storbykommuner,1.0,"",0,"",0.0,"",0.0,"",0.0,"","","Lemvig,København,No",2.0,"",0.0,"","","","","","","-0.00496,Yes,0.10877",2.0,"","","","",9,3,9.0
+Lila Simone Hjort,368246,721374,Hold3;,155356,Hsyl198740,2023-10-05 14:14:28 UTC,1,"the description field of available data series,BY2",1.0,99,1.0,"10632,0.264,Christiansø,no",1.5,"No because it's the capital, yes because it's far more left skewed politically than other municipalities, and therefore maybe a bad comparison",0.0,Storbykommuner,1.0,"",0,"3,No",0.0,0,0.0,"so long and so difficult... used the whole day, and couldn't have done without anothers script, when r kept annoying me. 
+
+too many elements where when fucking up once all fucked up and no way to continue",0.0,"","","Lemvig,Lemvig,Yes",0.0,"","","","","0.114,No",1.0,"-0.0109,No,0.0739",1.3333333333333333,"","","","","","",10,2,6.833333333333333
+Sofie Bangsborg Thomsen,390077,755412,Hold1;,155354,Hsyl198738,2023-10-05 14:12:48 UTC,1,"the description field of available data series,BY2",0.5,99,1.0,"10632,0.264,Christiansø,yes",2.0,"Argument for filter Copenhagen out:
+
+It is a good idea to filter out Copenhagen because it is an statistical outlier and because Copenhagen is a large city, thus making it bigger than other Danish Municipalities and it could possibly distort and pull the regression, which cooks distance also indicates. If it's filtered out, the regression represents the Municipalities better.
+
+ 
+
+Argument against filter Copenhagen out:
+
+Copenhagen is the capital and it thus important to keep due to its large size and more diversity than the other municipalities. If it is filtered out could lead to a model that does not account for its true influence on the other Municipalities.
+
+ 
+
+Better argument:
+
+It is better to include Copenhagen in the model.",0.0,Storbykommuner,1.0,"",0,"2,Yes",2.0,3,0.0,    ,0.0,"","","Lemvig,København,Yes",1.0,"0.166,Yes",2.0,"","","","","","","","","","","-0.005,Yes,0.109",2.0,12,0,11.5
+Gry Simone Lumbye Floor,386623,746759,Hold1;,155354,Hsyl198738,2023-10-05 14:01:18 UTC,1,"the description field of available data series,BY2",0.5,99,1.0,"10632,0.264,Christiansø,yes",2.0,"For:
+
+Copenhagen as a statistical outlier. Copenhagen is the capital city and therefore potentially/likely lays a higher economically than other municipalities. This might distort and/or pull the regression as seen by cooks distance. If we filter it out we get a better representation of the municipalities with a more equal likeness.
+
+Agains:
+
+As Copenhagen is the capital, and is therefore also a great representation for Denmark as the larger and most diverse municipality, it could skew decision being taken of this analysis not regarding the filtered out data.
+
+Better argument:
+
+Both has equal value in my opinion. I think this would very much depend of what use one would use the analysis for.",0.0,Oplandskommuner,0.0,"",0,"2,Yes",2.0,2,0.0,"please, this was hard. Maybe a little hint to as what to do - ChatGPT was my friend here but also left me with a feeling of not learning that much",0.0,"-0.011,Yes,0.074",2.0,"","","0.114,Yes",1.0,"Rebild,København,Yes",2.0,"","","","","","","","","","",11,1,10.5
+Lotus Yip Bargejani,388143,764316,Hold4;,155357,Hsyl198741,2023-10-05 11:09:44 UTC,1,"the description field of available data series,BY2",1.0,"",0.0,"10632,,,no",0.5,"",0.0,Provinsbykommuner,0.0,"",0,"2,No",1.0,0,0.0,"it was way too difficult and time consuming, therefore i guessed a lot of the answers",0.0,"","","","","0.166,No",1.0,"København,Rebild,Yes",3.0,"","","","","-0.00596,Yes,0.11877",0.6666666666666666,"","","","",10,2,7.166666666666667
+Astrid Bluhme Roed,389362,761754,Hold3;,155356,Hsyl198740,2023-10-05 08:58:34 UTC,1,"the description field of available data series,BY2",0.5,99,1.0,"10632,0.264,Christiansø,yes",2.0,"with: Shows the general relationship in DK
+
+ 
+
+Without: CPH is an outlier, so when filtering it out, we see a more precise indication of the rest of DK",0.0,Storbykommuner,1.0,"",0,"2,Yes",2.0,2,0.0,       ,0.0,"","","København,København,Yes",1.0,"","","","","","","-0.0109,Yes,0.0739",2.0,"","","0.114,No",2.0,"","",12,0,11.5
+Laura Krogh Thomassen,386908,766595,Hold4;,155357,Hsyl198741,2023-10-04 20:22:26 UTC,1,"the description field of available data series,BY2",0.5,99,1.0,"98,0.26,Christiansø ,yes",1.0,"It is not to remove Copenhagen, because Copenhagen is the biggest municipality in Denmark; therefore, we loose a lot of observations 
+
+ 
+
+It is a good idea to remove Copenhagen, because Copenhagen has a lot of leverage, which disturb the regression model. ",0.0,Storbykommuner,1.0,"",0,"2,No",1.0,3,0.0,"Please, give more detailed destriptions of what you should do. ",0.0,"","","København,København,No",2.0,"","","","","0.125,No",2.0,"-0.0109,No,0.0739",1.3333333333333333,"","","","","","",12,0,9.833333333333332
+Emilie Brix Pedersen,363565,725062,"Hold1;, Hold2;","155354, 155355","Hsyl198738, Hsyl198739",2023-10-04 19:12:58 UTC,1,"the description field of available data series,BY2",0.5,99,1.0,"10632,0.264,Christiansø,yes",2.0,"A good idea to filter out, because it influences the rest of the communes in the regression, the whole view of the opinion in Denmark. But bad idea to filter out, because Copenhagen is also a part of Denmark, and a very big part of the Danes live in Copenhagen - their opinion is important as well.",0.0,Storbykommuner,1.0,"",0,"2,Yes",2.0,4,0.0,It is way too difficult and complicated,0.0,"","","Lemvig,København,No",2.0,"","","","","0.125,No",2.0,"","","","","","","-0.005,Yes,0.109",2.0,12,0,12.5
+Maria Dahl Thorsager,387728,760985,Hold4;,155357,Hsyl198741,2023-10-04 19:00:03 UTC,1,"the description field of available data series,BY2",0.5,99,1.0,"10632,0.264,Christiansø,yes",2.0,"Copenhagen appears to have a significantly higher Cook's distance compared to other municipalities. Cook's distance measures the influence of individual data points on the model, and such a high value for one data point may indicate that it is an outlier. Removing extreme outliers can sometimes improve the overall fit and generalizability of the model, as these outliers may disproportionately influence the model parameters.
+
+The decision to remove Copenhagen from the model depends on the research goals and the context of your analysis. If the goal is to create a general model that represents the typical behavior of Danish municipalities and the presence of Copenhagen as an extreme outlier is problematic, removing it may be justified.
+
+In this case, the better argument may lean toward not removing Copenhagen from the model. Copenhagen is a significant and influential municipality in Denmark, and its characteristics and policies may be important factors in understanding the overall dynamics of Danish municipalities",0.0,Storbykommuner,1.0,"",0,"2,No",1.0,2,0.0,"very hard, but gets better
+
+please improve the mistakes in the script ",0.0,"","","Lemvig,København,Yes",1.0,"","","","","0.125,No",2.0,"","","","","","","-0.005,Yes,0.109",2.0,12,0,10.5
+Astrid Bang Therkildsen,386471,762426,Hold4;,155357,Hsyl198741,2023-10-04 13:49:56 UTC,1,"the description field of available data series,BY2",1.0,99,1.0,"10632,0.264,Christiansø,yes",2.0,"It is a good idea to filter Copenhagen out, because it is far from representable. 
+
+It is a bad idea to filter Copenhagen out because it is important to represent all municipalities. 
+
+I am not sure which is the better. It must be important to represent all citizents, so i guess Copenhagen shouldn't be filtered out. ",0.0,Storbykommuner,1.0,"",0,"2,Yes",2.0,5,0.0,It was very difficult,0.0,"","","Samsø,København,Yes",2.0,"","","","","","","-0.0109,Yes,0.0539",1.3333333333333333,"","","0.094,Yes",0.0,"","",11,1,10.333333333333332
+Rebecca Frostholm Markussen,386054,746755,Hold4;,155357,Hsyl198741,2023-10-04 12:30:51 UTC,1,"the description field of available data series,BY2",1.0,34,0.0,"5,4\,678,43,No",0.0,....,0.0,Hovedstadskommuner,0.0,"",0,"1,Yes",1.0,5,0.0,Its way too difficult and the solutionscript helped me to actually learn,0.0,"-0.011,Yes,0.054",1.3333333333333333,"","","0.166,Yes",2.0,"Rødovre,København,No",0.0,"","","","","","","","","","",8,4,5.333333333333333
+Signe Bruun Nielsen,388423,764020,Hold4;,155357,Hsyl198741,2023-10-04 12:00:46 UTC,1,"an overview of available data series,BY2",0.0,99,1.0,"10632,0.264,Christiansø,yes",2.0,"For: pas
+
+Against: the p-value get's higher and thereby the correlation get's worse when removing Copenhagen",0.0,Storbykommuner,1.0,"",0,"0,No",0.0,2,0.0,"I met some obstacles in quiz (that is why I have given it such a low rating) because I became really frustrated with many of the basic things in the script. I did not get what was meant to be the register we should use, and overall I just thing there is a lack of descriptions to what should be put into the blind spots. I had to get a lot of help to this script, which was really frustrating for me, because I don't think I got much learning out of doing this quiz. 
+A solution could be to get some more time in the exercise lessons, so we don't feel so rushed to do it throughout the week (with other readings as well), given that if you don't complete the quiz within a week, then you suddenly have 2 quizzes to think about. 
+I hope it makes sense. ",0.0,"","","Samsø,København,No",3.0,"","","","","","","","","","","0.114,Yes",1.0,"-0.005,Yes,0.109",2.0,10,2,10.0
+Anna Alvilda Damgaard Bjerg,390755,755504,Hold2;,155355,Hsyl198739,2023-10-04 11:52:19 UTC,1,"the description field of available data series,BY2",0.5,99,1.0,"10632,3.21,Christiansø,Yes",1.5,"One argument for:
+Citizens from Copenhagen are overrepresented in the data. Therefore they weigh more than the other citizens. 
+
+ 
+
+One argument against:
+Copenhagen is the largest city in Denmark, and therefore the citizens from Copenhagen represent a big part of Denmark. 
+
+ 
+
+The better argument is to keep Copenhagen in the dataset, or else you would ruin the data. ",0.0,Storbykommuner,1.0,"",0,"2,Yes",2.0,3,0.0,"It is hard to do the quiz when you don't know what went wrong in your script. 
+My script could not find the ""lm_robust"" function, and I could not find out why - so I could not do the rest of the quiz ",0.0,"-0.011,Yes,0.074",2.0,"","","","","København,København,No",0.0,"0.114,Yes",0.0,"","","","","","","","",10,2,8.0
+Jasmin Renee Jensen,390164,746781,Hold3;,155356,Hsyl198740,2023-10-04 11:51:40 UTC,1,"the description field of available data series,BY2",0.5,99,1.0,"10632,3.21,Christiansø,Yes",1.5,"One argument for:
+
+Citizens from Copenhagen are overrepresented in the data. Therefore they weigh more than the other citizens. 
+
+One argument against:
+
+Copenhagen is the largest city in Denmark, and therefore the citizens from Copenhagen represent a big part of Denmark. 
+
+The better argument is to keep Copenhagen in the dataset, or else you would ruin the data.",0.0,Storbykommuner,1.0,"",0,"2,Yes",2.0,3,0.0,It could be nice with a solution script to understand it all way better,0.0,"","","","","","","København,København,No",0.0,"","","-0.0110,Yes,0.0739",1.3333333333333333,"","","0.114,Yes",1.0,"","",11,1,8.333333333333332
+Frederikke Basler Larsen,387405,746271,Hold3;,155356,Hsyl198740,2023-10-04 10:08:43 UTC,1,"the description field of available data series,BY2",1.0,99,1.0,"10632,0.185,Christiansø,yes",1.5,The result will not be effected by Copenhagen as an outlier,0.0,Storbykommuner,1.0,"",0,"2,Yes",2.0,5,0.0,"",0.0,"","","","","","","København,København,Yes",2.0,"0.114,No",1.0,"","","","","","","-0.007,Yes,0.109",1.3333333333333333,12,0,10.833333333333332
+Johanne Benn Munck,391181,768566,Hold1;,155354,Hsyl198738,2023-10-04 09:55:34 UTC,1,"the description field of available data series,BY2",0.5,99,1.0,"10632,0.264,Christiansø,yes",2.0,"The Cooks Distance describe how many standardized residuals our predictions change, and because Copenhagen has a high Cooks D, it has an unfairly large influence on the model. It is unfair, because the influence of the other municipalities are way less. Another way could be to code Copenhagen into the smaller municipalities, so the 'weight' is more equal.
+
+I don't think it is a good idea to filter out Copenhagen, because a large part of the population actually lives there, and therefor it should have a large influence on the model.",0.0,Storbykommuner,1.0,"",0,"2,No",1.0,6,0.0,"",0.0,"","","Lemvig,København,No",2.0,"","","","","0.125,No",2.0,"","","-0.00496,Yes,0.10877",2.0,"","","","",12,0,11.5
+Hanna Isabel Dahl,389062,761961,Hold3;,155356,Hsyl198740,2023-10-03 14:56:53 UTC,1,"the description field of available data series,BY2",1.0,99,1.0,"10632,0.185,Christiansø,yes",1.5,"For: The data will have a better correlation
+
+Against: The data will have unrealistic comparison to the population
+
+I think the better argument is: against.",0.0,Storbykommuner,1.0,"",0,"2,Yes",2.0,3,0.0,"",0.0,"","","Lemvig,Lemvig,Yes",0.0,"","","","","","","","","-0.00496,Yes,0.10877",2.0,"0.114,No",2.0,"","",11,1,10.5
+Victoria Ritzau Pagh,389937,770349,Hold3;,155356,Hsyl198740,2023-10-03 14:03:48 UTC,1,"the description field of available data series,BY2",1.0,99,1.0,"10632,0.185,Christiansø,yes",1.5,"No, because Copenhagen is a very important municipaly in Denmark.
+
+Yes, because there are so many people living in Copenhagen that it is difficult to say something general about it. ",0.0,Storbykommuner,1.0,"",0,"2,Yes",2.0,0,0.0,Maybe give hints on where to find the solutions in the lecture slide or maybe give som kind of hints of what to fill out the blanck spaces with - and maybe check an extra time if you have made any mistake in the quiz,0.0,"","","Samsø,København,No",3.0,"","","","","","","-0.0110,Yes,0.0739",1.3333333333333333,"","","0.114,No",2.0,"","",12,0,12.833333333333332
+Mariem Hady,387469,749741,Hold1;,155354,Hsyl198738,2023-10-03 13:59:06 UTC,1,"an overview of available data series,BY2",0.0,"",0.0,"",0.0,"",0.0,Provinsbykommuner,0.0,"",0,"1,No",0.0,0,0.0,"",0.0,"","","","","","","Rebild,Rødovre,Yes",2.0,"","","","","","","0.114,Yes",1.0,"-0.006,Yes,0.129",0.6666666666666666,7,5,3.6666666666666665
+Astrid James Madsen,388502,762515,Hold3;,155356,Hsyl198740,2023-10-03 12:20:37 UTC,1,"an overview of available data series,BY2",0.5,99,1.0,"10632,0.264,Christiansø,Yes",2.0,"I don't understand Cooks Distance well enough to answer this, if i am being honest ",0.0,Storbykommuner,1.0,"",0,"2,Yes",2.0,1,0.0,"I don't hope this is the level expected from us, as i really struggled with this quiz. It took me three hours to complete, and that was with a lot of help from classmates. It stops being learning, when you have to struggle on this level in order to complete it",0.0,"","","","","","","Rebild,København,No",0.0,"","","-0.0109,Yes,0.0739",2.0,"","","0.114,No",2.0,"","",11,1,10.5
+Marie Delendorff Schneider,385851,759023,Hold1;,155354,Hsyl198738,2023-10-02 16:20:42 UTC,1,"the description field of available data series,BY2",1.0,99,1.0,"10996,0\,000,Glostrup ,yes",0.5,"",0.0,Hovedstadskommuner,0.0,"",0,"2,Yes",2.0,"",0.0,"",0.0,"","","","","","","København,Rebild,Yes",3.0,"0.166,Yes",0.0,"","","-0.00496,Yes,0.10877",2.0,"","","","",9,3,9.5
+Silje Elleby Larsen,389654,766922,Hold1;,155354,Hsyl198738,2023-10-02 14:29:53 UTC,1,"the description field of available data series,BY2",0.5,99,1.0,"10632,0.264,Christiansø,yes",2.0,    ,0.0,Storbykommuner,1.0,"",0,"2,Yes",2.0,2,0.0,"I found it very difficult - there is no consistency in when to add anwers (starst, questionsmarks etc.) ",0.0,"","","Lemvig,København,No",2.0,"","","","","0.125,No",2.0,"0.0109,Yes,0.0739",1.3333333333333333,"","","","","","",12,0,11.833333333333332
+Zara Kjærgaard Thustrup,388437,765878,Hold1;,155354,Hsyl198738,2023-10-02 14:29:25 UTC,1,"the description field of available data series,BY2",0.5,99,1.0,"10632,0.264,Christiansø,yes",2.0,    ,0.0,Storbykommuner,1.0,"",0,"2,No",1.0,2,0.0,I just find it too difficult ,0.0,"","","","","","","Rebild,København,Yes",2.0,"0.125,No",2.0,"","","","","","","-0.005,Yes,0.109",2.0,12,0,11.5
+Thomas Holm Tambjerg,390683,764794,Hold4;,155357,Hsyl198741,2023-10-02 14:16:29 UTC,1,"the description field of available data series,BY2",0.5,99,1.0,"10632,0.26,Christiansø,yes",1.5,"For: Copenhagen distorts the correlation between the variables since it is by far the biggest city and therefore has a very high leverage. It makes sense to filter Copenhagen out since it might give us an impression that there is a correlation when, in fact, there might not be one in the rest of the danish municipalities. 
+
+ 
+
+Against: A very big portion of the danish population lives in Copenhagen, and therefore it would be wrong to filter the municipality out, since that would ignore the reality of a large portion of the population.
+
+ 
+
+I think that the argument against is the better argument. ",0.0,Storbykommuner,1.0,"",0,"2,No",1.0,2,0.0,"Try to make it clearer in the quiz-script when we are supposed to write code, and when you have written in for us. It is unclear at times.
+
+I also don't understand the ""Task"" categorization. Maybe categorize the script by question instead. 
+
+ 
+
+I don't know how to fix this, but it is quite frustrating knowing that you get a wrong result (when the result you get is not a part of the multiple choice), but having no way of knowing where you made a mistake. 
+
+ ",0.0,"","","Samsø,København,No",3.0,"0.166,Yes",2.0,"","","","","","","-0.00496,Yes,0.10877",2.0,"","","","",12,0,12.0
+Linnea Bruhn-Jensen,386229,766211,Hold1;,155354,Hsyl198738,2023-10-02 13:29:55 UTC,1,"the description field of available data series,BY2",0.5,99,1.0,"10632,0.264,Christiansø,yes",2.0,"no, as copenhagen is the largest municipality",0.0,Storbykommuner,1.0,"",0,"1,No",0.0,1,0.0,"This was a terrible experience.
+
+1. the quiz was waaay to long for how challenging it was
+
+2. it was way too difficult, I very much appreciate, that we are doing these quizzes, and i definitely learn from them, but this quiz has bothered me for 5 days now, and there is now way i should have to spend multiple hours on it, when I have a bunch of reading to do as well.
+
+3. It seems like there are some very high expectations for the level of coding we know. The scripts simply have to tell us what to do, instead of assuming that we will know what to put in the ""*****"", we have absolutely no way of knowing, when we have never seen these codes before.
+
+4. the ""øvelsestimer"" are not long enough for us to actually be able to get the help we need with the quizzes, so that means, that sometimes we are just stuck.
+
+5. I ended up just having to guess for the last questions on this quiz, which does not help my learning, but I can't spend anymore time on it.",0.0,"","","","","","","Rebild,Rebild,Yes",3.0,"","","-0.0109,Yes,0.0739",2.0,"","","0.094,Yes",0.0,"","",10,2,9.5
+Naja Bjørg Møller,387403,769627,Hold3;,155356,Hsyl198740,2023-10-02 12:40:36 UTC,1,"the description field of available data series,BY2",0.5,99,1.0,"10996,0.264,Christiansø,yes",1.5,"Pro - keeping the Copenhagen datapoint
+
+The goal is to make a regression model that makes the best estimate of the effect the size of the municipality has on it perception on immigration. By leaving Copenhagen out, we would loose a important datapoint, as we would no longer have a model that would be able to estimate - since we have to be carefull not to use the model for estimating numbers outside of the observed population size. 
+
+ 
+
+Con - keeping the Copenhagen datapoint
+
+Copenhagen has a much larger leverage than some of the other datapoints, which could be an issue since the perception on immigration in Copenhagen is only influenced by the size of the municipality, but also the share of immigrants or children of immigrants is larger in Copenhagen than i some of the smaller municipalities observed. 
+
+ 
+
+I think the Pro argument is the better argument, as we can 'controle' for the influence that the share of friends and family of immigrants by adding an extra variable to the OLS regression. ",0.0,Storbykommuner,1.0,"",0,"1,Yes",1.0,8,0.0,.,0.0,"","","","","0.166,No",1.0,"Rebild,København,No",1.0,"","","","","-0.00496,Yes,0.10877",2.0,"","","","",12,0,9.0
+Anna Essendrop Bach,386682,758896,Hold1;,155354,Hsyl198738,2023-10-02 09:49:00 UTC,1,"an overview of available data series,BY2",0.0,99,1.0,"10632,0.264,Christiansø,yes",2.0,no ,0.0,Storbykommuner,1.0,"",0,"",0.0,8,0.0,"",0.0,"","","Lemvig,København,No",2.0,"","","","","","","-0.0109,Yes,0.0739",2.0,"","","0.114,No",2.0,"","",10,2,10.0
+Alba Augusta Larsen,389478,764927,Hold3;,155356,Hsyl198740,2023-10-01 17:52:44 UTC,1,"the description field of available data series,BY2",0.5,99,1.0,"10632,0.264,Christiansø,yes",2.0,"argument for filtering: if it's only significant with copenhagen, then it tells us that it's not a generally good model and we can't reject the nullhypothesis 
+
+argument for not filtering: 
+
+the model is not significant without copenhagen which tells us that it is important 
+
+I think the first argument is the better argument ",0.0,Storbykommuner,1.0,"",0,"2,Yes",2.0,3,0.0,maybe evaluate how long time it's supposed to take to complete - personally I think this one had too many questions. ,0.0,"","","","","0.166,Yes",2.0,"Rebild,København,No",1.0,"","","","","","","","","-0.005,Yes,0.109",2.0,12,0,11.5
+Elvira Egede Beiskjær,389216,750632,Hold2;,155355,Hsyl198739,2023-10-01 17:20:16 UTC,1,"the description field of available data series,BY2",0.5,99,1.0,"10632,0.264,Christiansø,yes",2.0,"Given that Copenhagen is a big outlier, which has a big influence on the what the significance of the coefficient of the regression is, it could be a good idea to filter if from the dataset. This is further supported by the the fact that more than just being an outlier, it exceeds the both recommended thresholds given by cooks.distance by a large margin. 
+
+However, Copenhagen is the largest municipality in the dataset, as well as the capital of Denmark. The reason why the dataset changes significantly when Copenhagen is omitted, could also be due to its population size. 
+
+I think that it would be relevant to run two different datasets, one with and one without Copenhagen and be transparent about how the coefficients and significance levels change. If I had to choose just one regression to run, I would choose to run it with Copenhagen, due to its size. ",0.0,Storbykommuner,1.0,"",0,"0,No",0.0,5,0.0,"I think maybe you should try to coordinate with Merlin about what we have learned in the course vs. what we have to complete in the r-script. This r-script was at a much higher level than what we have completed in previous years and in class. There's nothing wrong with having a high level, however it would be helpful if we at least had a fair chance to complete the r-script. ",0.0,"","","København,København,No",2.0,"0.166,No",1.0,"","","","","","","","","","","-0.005,Yes,0.109",2.0,11,1,9.5
+Olivia Oxhøj Hein,390064,705685,Hold1;,155354,Hsyl198738,2023-10-01 16:08:21 UTC,1,"the description field of available data series,BY2",0.5,99,1.0,"10632,0.264,Christiansø,yes",2.0,"Ulemper: København er en stor kommune og derfor er det problematisk at fjerne den.
+
+Fordele: København afviger fra de andre kommuner og derfor kan det give et mere retvisende billede af holdningen i de andre kommuner. ",0.0,Storbykommuner,1.0,"",0,"2,Yes",2.0,5,0.0,    ,0.0,"-0.011,Yes,0.074",2.0,"","","","","Rebild,København,No",1.0,"","","","","","","0.114,No",2.0,"","",12,0,11.5
+Anna Dahl Lund,386249,751612,Hold1;,155354,Hsyl198738,2023-10-01 16:05:13 UTC,1,"the description field of available data series,BY2",0.5,99,1.0,"10632,0.264,Christiansø,no",1.5,"Pros: 
+
+* there Copenhagen is a very different municipality than the others and therefore differ a lot from the rest of the country.
+
+Cons: 
+
+-  Copenhagen should be represented because of size. it is problematic to remove that many people from the statistic. ",0.0,Storbykommuner,1.0,"",0,"2,Yes",2.0,1,0.0,Det er for svært og omfattende ,0.0,"","","","","","","Rebild,København,No",1.0,"0.114,No",1.0,"-0.0110,Yes,0.0739",1.3333333333333333,"","","","","","",12,0,9.333333333333332
+Freja Kromann Schiøler,341332,698814,Hold1;,155354,Hsyl198738,2023-10-01 16:02:56 UTC,1,"an overview of available data series,BY2",0.0,99,1.0,"10632,0.264,Christiansø,yes",2.0,"For filtering out Copenhagen:
+
+* Copenhagen is not comparable to any of the other municipalities as it's number of residents is remarkably larger than the other municipalities.
+
+ 
+
+Against filtering out Copenhagen:
+
+* It does not makes sense to filter out a municipality, in which a great amount of the population lives. This will make the data set unusable to infer from to the greater public.
+
+ 
+
+I think the best argument is NOT filtering out Copenhagen.",0.0,Storbykommuner,1.0,"",0,"2,Yes",2.0,8,0.0,.,0.0,"-0.011,Yes,0.074",2.0,"Lemvig,København,No",2.0,"","","","","","","","","","","0.114,No",2.0,"","",11,1,12.0
+Johan Rafael Barnholdt Nielsen,385993,767847,Hold2;,155355,Hsyl198739,2023-10-01 14:21:33 UTC,1,"an overview of available data series,BY2",0.0,99,1.0,"10632,0.264,Christiansø,yes",2.0,"No, it ruined the dataset so i could'nt run another ols ",0.0,Hovedstadskommuner,0.0,"",0,"0,Yes",1.0,3,0.0,I was very confused as i got different results than presented in some of the aswers. The coding was harder than the previous weeks. I think we should get more suggestions on troubleshooting with R or atleast clearer descriptions of objectives in the script. ,0.0,"","","","","","","København,København,No",0.0,"0.125,Yes",1.0,"-0.0109,No,0.0739",1.3333333333333333,"","","","","","",9,3,6.333333333333333
+Anna Berg Christensen,386929,764146,Hold2;,155355,Hsyl198739,2023-10-01 10:34:58 UTC,1,"the description field of available data series,BY2",0.5,99,1.0,"10632,0\,264,Christiansø,Yes",1.5,"As Copenhagen seem to be a special case it could be a good idea to remove it, because it affects the general tendency in the data.
+
+However Copenhagen is apart of the population, that we are investigating and it could therefore be seen as misleading to remove Copenhagen. I would therefore argue for not removing Copenhagen, but in my analysis I will have in mind that Copenhagen differ from the other minicipalities in my interpretation of the data and maybe I would use some time to investigate copenhagen further. ",0.0,Storbykommuner,1.0,"",0,"",0.0,3,0.0,"This quiz was really difficult - I normally find the quizzes okay and I would say that I am okay at R, but in this quiz I kept getting totally different numbers than the pre-assigned answer categories. I used a lot of time on the quiz and ended up quitting short after the spacer...",0.0,"","","","","","","Rebild,København,Yes",2.0,"","","","","-0.00496,Yes,0.10877",2.0,"",0.0,"","",10,2,8.0
+Asmus Oliver Lewis,387200,767772,Hold1;,155354,Hsyl198738,2023-09-30 14:22:18 UTC,1,"the description field of available data series,BY2",0.5,99,1.0,"10632,0.264,Christiansø,yes",2.0,"Against: Copenhagen is by far the largest municipality in Denmark, which means filtering it out would mean filtering out a large chuck of the danish voterbase - which might be a bit problematic if one wants to use the data to draw conclusion about the danish voters in general or predict election outcomes.
+
+For: Even though that filtering Copenhagen removes a large chuck of Danish population from the model, it still is intersting that removing a single datapoint can have such a large effect on the reliability of the model. This might be interesting if we want to say something specific about the relation between size of municipalities and views on immigration outside of the context of an election.
+
+ 
+
+What I like best: Well that depends on what I want to find out",0.0,Storbykommuner,1.0,"",0,"2,No",1.0,8,0.0,  ,0.0,"","","Samsø,København,No",3.0,"0.166,Yes",2.0,"","","","","-0.0109,Yes,0.0739",2.0,"","","","","","",12,0,12.5
+Marcus Scheel Fjording,388037,747654,Hold1;,155354,Hsyl198738,2023-09-30 11:36:04 UTC,1,"the description field of available data series,BY2",0.5,99,1.0,"3,0.26,??,yes",0.5,"Against: Copenhagen is by far the largest municipality and excluding it would mean excluding a large part of the survey data. The data set would no longer be representative of ""danish municipalities""
+
+For: Copgenhagen represents such a radical difference from every other danish municipality that it becomes difficult to compare. It makes sense to exclude copenhagen in order to better compare the differences between the remaining municipalities.",0.0,Storbykommuner,1.0,"",0,"2,Yes",2.0,8,0.0,    ,0.0,"-0.011,Yes,0.074",2.0,"","","","","Rebild,København,No",1.0,"0.125,No",2.0,"","","","","","","","",12,0,10.0
+Marie Hoby Fausbøll,388500,764961,Hold1;,155354,Hsyl198738,2023-09-30 08:10:20 UTC,1,"the description field of available data series,BY2",0.5,99,1.0,"10632,0.264,Christiansø,Yes",2.0,"Copenhagen is a much bigger municipality than any other in DK, which can affect the results. However, Copenhagen holds - naturally - a big part of the population. Therefore, when filtering Copenhagen out, a lot of data is being filtered out. ",0.0,Storbykommuner,1.0,"",0,"1,Yes",1.0,7,0.0,"",0.0,"","","Lemvig,København,Yes",1.0,"0.166,Yes",2.0,"","","","","-0.0110,Yes,0.0739",1.3333333333333333,"","","","","","",12,0,9.833333333333332
+Gustav Holck Frandsen,386602,761244,Hold2;,155355,Hsyl198739,2023-09-29 14:31:22 UTC,1,"the description field of available data series,BY2",0.5,99,1.0,"10632,0.264,Christiansø,Yes",2.0,To get it to act as a kind of weight.,0.0,Storbykommuner,1.0,"",0,"1,No",0.0,2,0.0,"Very, very hard. And took about three hours. Tobias' exercises was good overall. I think that we lack an understanding of the basics of R, which has been failed over last semester.
+
+ 
+
+The last question did not work at all. Not even with chatGPT",0.0,"-0.011,Yes,0.074",2.0,"Samsø,København,No",3.0,"","","","","0.125,No",2.0,"","","","","","","","",11,1,11.5
+Anna Vinther Heydenreich,390099,750165,Hold2;,155355,Hsyl198739,2023-09-29 14:30:54 UTC,1,"the description field of available data series,BY2",0.5,99,1.0,"3,0.264,Christiansø,yes",1.5,"As a huge city it has many different people living there, which might influence the opinion",0.0,Storbykommuner,1.0,"",0,"1,Yes",1.0,2,0.0,very difficult,0.0,"","","","","0.166,Yes",2.0,"Rebild,København,No",1.0,"","","","","-0.00496,Yes,0.10877",2.0,"","","","",12,0,10.0
+Louise Mackeprang,389075,756052,"Hold1;, Hold3;","155354, 155356","Hsyl198738, Hsyl198740",2023-09-29 14:14:51 UTC,1,"an overview of available data series,BY2",0.0,99,1.0,"10632,0.264,Christiansø,yes",2.0,"Yes, because the outliers impacts the OLS regression remarkably.
+
+ 
+
+No, because outliers might have an impact on the other answers and the impact might be important, if we remove Copenhagen.
+
+ 
+
+Both are valid, it depends on what you want to figure out, if Copenhagen has an impacted on that or not.  ",0.0,Storbykommuner,1.0,"",0,"2,Yes",2.0,0,0.0,More explanation in the script,0.0,"","","","","0.114,Yes",1.0,"Rebild,København,No",1.0,"","","","","","","","","-0.005,Yes,0.109",2.0,11,1,10.0
+Anna Sofie Blauenfeldt Pedersen,386178,753380,Hold1;,155354,Hsyl198738,2023-09-29 14:13:36 UTC,1,"an overview of available data series,BY2",0.0,99,1.0,"10632,0\,264,Christiansø,Yes",1.5,"Yes it is a good idea, because the outlier impacts the OLS remarkably. This gives us a vague indication of the general pattern. 
+
+ 
+
+No because outliers can be important for the general analysis. 
+
+ 
+
+I think both arguments are great. Therefore I will always show models of both with and without outliers. Maybe use other models which is more fitting for the data. ",0.0,Storbykommuner,1.0,"",0,"2,Yes",2.0,0,0.0,"Absolutely terribel test. Think the last part with this part:
+
+munData <- munData %>%   mutate(""5"" = fct_recode(municipalityGrp,                              ?????"" = ""******"", # ???? is the level you want to change the *****-level  to          municipalityGrp = factor(x = municipalityGrp,                                    levels = c(""Storbykommuner"",                                              ""Provinsbykommuner"",                                              ""Oplandskommuner"",                                              ""Landkommuner"")))
+
+ 
+
+Was the worst. 
+
+It's just too difficult and with no knowledge of how to do what beforehand, its pretty difficult to solve the script. Makes me feel so stupid",0.0,"","","","","","","Rebild,København,No",1.0,"0.114,Yes",0.0,"","","","","","","-0.005,Yes,0.109",2.0,10,2,8.5
+Leonora Frydensberg Sepstrup,368459,716279,Hold2;,155355,Hsyl198739,2023-09-29 14:03:37 UTC,1,"the description field of available data series,BY2",0.5,99,1.0,"10632,0.264,Christiansø,yes",2.0,"Copenhagen, as the capital and largest city in Denmark, has a significantly different population size, demographic composition, and socio-economic structure compared to other municipalities. Thereby you could argue, that it could be removed to better represents the typical Danish municipality.",0.0,Storbykommuner,1.0,"",0,"2,Yes",2.0,2,0.0,"Way to difficult and hard to understand. I dont feel like I learn anything because it is to difficult, and whenever you make a mistake, you cant complete the rest of the task. I used over two hours to complete (with help from other student in the same situation), and we had to give up at last, because we had an error in the code we couldn't understand, and therefore we had to guess the last two questions.
+
+Hopefully we will get more time to solve these quizes in the Øvelsestime, to get a better chance to understand.",0.0,"","","","","","","Rebild,København,No",1.0,"","","","","","","0.094,No",1.0,"-0.005,Yes,0.109",2.0,12,0,10.5
+Camilla Greve Bruun Nielsen,387784,764067,"Hold2;, Hold1;","155355, 155354","Hsyl198739, Hsyl198738",2023-09-29 14:03:36 UTC,1,"an overview of available data series,BY2",0.0,5,0.0,"3, 0.264, Christiansø, yes",1.5,I think that it is a good idea to filter out Copenhagen so it does not influence the model,0.0,Storbykommuner,1.0,"",0,"1,Yes",1.0,2,0.0,"Again, I feel like this quiz was way over me and my students level in R. I have made the quiz in a group, and we used almost 1.5 hour, and guessed on the last 3 questions.
+
+It would be nice to have more time to get help to the quizzes on Fridays.
+
+A positive thing in todays extra-lecture (friday), was that we had som review R-tasks to make. About 4 questions we answered in R, which made me remember a lot of stuff, that we had on second semester, but which I first understanded completely today (friday) (im on team 2)",0.0,"","","Lemvig,København,No",2.0,"0.114,Yes",1.0,"","","","","","","","","","","-0.005,Yes,0.109",2.0,10,2,8.5
+Aske Lindskov Steensig,388205,752780,Hold1;,155354,Hsyl198738,2023-09-29 13:48:48 UTC,1,"the description field of available data series,BY2",0.5,99,1.0,"10632,0\,263,Christiansø,yes",1.5,"One argument for:
+
+Its a realy big outlier, so including it might not give a good representation of the general attitude within the danish population
+
+ 
+
+One argument against.
+
+Copenhagen is the biggest municipality, so removing it misrepresents denmark as a whole
+
+Conclusion: You should not remove copenhagen",0.0,Provinsbykommuner,0.0,"",0,"2,Yes",2.0,3,0.0,Very long and hard,0.0,"","","","","","","Rebild,København,No",1.0,"","","","","-0.00496,Yes,0.10877",2.0,"0.166,Yes",0.0,"","",10,2,8.0
+Frida Mohr Jespersen,388174,759920,Hold1;,155354,Hsyl198738,2023-09-29 13:48:04 UTC,1,"an overview of available data series,BY2",0.0,99,1.0,"10632,0.263,Christiansø,yes",1.5,"One argument for: 
+
+* it is an outlier, and therefore including might not give a good representation of the attitude within the danish population
+
+One argument against: 
+
+* it is the capital (and biggest municipality), and therefore it is crucial to include it in the attitude of the danish population to make sure there is no misrepresentation
+
+* This Is the best argument - it is crucial:)",0.0,Provinsbykommuner,0.0,"",0,"2,Yes",2.0,3,0.0,"",0.0,"","","Lemvig,København,No",2.0,"","","","","0.114,Yes",0.0,"","","","","","","-0.005,Yes,0.109",2.0,9,3,8.5
+Jonathan Aske Holkenov,389372,745823,Hold1;,155354,Hsyl198738,2023-09-29 13:33:19 UTC,1,"the description field of available data series,BY2",0.5,99,1.0,"10632,0.263,Christiansø,yes",1.5,"It would depend what we are trying to see.
+
+If it is the bigger picture or state of cities, then no
+
+if it is rural life then sure
+
+For the general picture of Denmark I would not, but it would be informative to look at the model without Copenhagen and see what that looks like. Removing Copenhagen without reason would be dumb.",0.0,Provinsbykommuner,0.0,"",0,"1,No",0.0,3,0.0,cooks D section was terribly confusing :(,0.0,"","","Lemvig,København,Yes",1.0,"","","","","","","","","-0.00496,Yes,0.10877",2.0,"0.166,Yes",0.0,"","",9,3,6.0
+Benjamin Henanger,386181,753131,Hold2;,155355,Hsyl198739,2023-09-29 10:04:41 UTC,1,"the description field of available data series,BY2",0.5,99,1.0,"10632,0.26,Christiansø,Yes",1.5,"I don't fully understand why Copenhagen's Cooks Distance is so large, since it's actually quite close to the regression line. Perhaps it has something to do with its increased leverage due to its distance from the mean of the regression line? 
+
+ 
+
+Argument 1: I wouldn't filter out Copenhagen since it follows the linear development of the remaining Danish cities (Aarhus, Aalborg, Odense), despite its Cooks Distance being the largest. I think this is the better argument.
+
+Argument 2: The large Cooks Distance value of Copenhagen means that we should filter it out, since it has a large leverage and affects the regression line significantly.",0.0,Storbykommuner,1.0,"",0,"2,No",1.0,3,0.0,"The prompts in the quiz, especially in question 1 and 2, were very cryptic. I spent a lot of time wrapping my head around these cryptic sentences, unfortunately. I learnt a lot though, so that was great, but it was tougher than usual due to the cryptic language and strange code.",0.0,"-0.011,Yes,0.074",2.0,"Samsø,København,Yes",2.0,"0.166,Yes",2.0,"","","","","","","","","","","","",12,0,11.0
+Ida Victoria Dharti Juhl Holm,369898,716657,Hold3;,155356,Hsyl198740,2023-09-29 09:35:18 UTC,1,"the description field of available data series,BY2",0.5,12.474,0.0,"66,7,4,No",0.0,    ,0.0,Landkommuner,0.0,"",0,"2,No",1.0,0,0.0,"This was sooooo difficualt and I guess all the way through. It was codes that I had never seen before, and we have not had in the lecture at all.",0.0,"","","","","0.166,Yes",2.0,"Rødovre,Aarhus,No",0.0,"","","","","-0.00596,No,0.12877",0.0,"","","","",7,5,3.5
+Rebecca Limbrecht Bruhn,385771,745917,Hold3;,155356,Hsyl198740,2023-09-29 09:15:54 UTC,1,"the description field of available data series,BY2",0.5,10,0.0,"4,3,5,3",0.0,?,0.0,Oplandskommuner,0.0,"",0,"2,Yes",2.0,0,0.0,"Quizzen er alt, alt for svær. Det er en kæmpe udfordring, at man selv skal lave koder, for hvis ikke man lykkes med det, kan man umuligt komme videre og lave de resterende spørgsmål. Jeg har derfor måttet gætte i stort set hele quizzen og har ikke lært noget af den i denne omgang... 
+
+ ",0.0,"","","Lemvig,København,Yes",1.0,"","","","","","","0.0109,Yes,0.0639",0.6666666666666666,"","","0.114,No",2.0,"","",9,3,6.166666666666667
+Ida Jensen Ketelsen,391023,755215,Hold2;,155355,Hsyl198739,2023-09-29 08:41:41 UTC,1,"an overview of available data series,BY2",0.0,3,0.0,"3,123,2,no",0.0,I cannot make the script work...,0.0,Provinsbykommuner,0.0,"",0,"1,No",0.0,3,0.0,"The quiz is too difficult. I could use the solution script, to be able to understand, what I am doing wrong and how to use the different functions. ",0.0,"","","Faxe,Samsø,Yes",0.0,"","","","","0.166,No",1.0,"","","","","","","-0.006,Yes,0.119",0.6666666666666666,6,6,1.6666666666666665
+Sule Tan,406114,787937,Hold3;,155356,Hsyl198740,2023-09-28 21:48:39 UTC,1,"the description field of available data series,BY2",0.5,12474,1.0,"98,0.264,Christiansø,yes",1.5,"Because the municipality of Copenhagen has far more different attitudes than other municipalities, it seems that this municipality dominates the results and is likely to make the observations in other municipalities insignificant.
+
+However, because we observe Danish municipalities, we have to include Copenhagen, where a big part of the population lives, to make the result more representative.",0.0,Storbykommuner,1.0,"",0,"3,Yes",1.0,6,0.0,"",0.0,"-0.011,Yes,0.074",2.0,"","","","","Rebild,København,No",1.0,"","","","","","","0.114,No",2.0,"","",12,0,10.0
+Natalie Maria Kaarsberg Bøjsen,387299,762161,Hold1;,155354,Hsyl198738,2023-09-28 10:01:28 UTC,1,"the description field of available data series,BY2",0.5,"",0.0,"10632,0.264,Chr,yes",1.5,"No, since it is part of the country
+
+Yes, it can distrube the results
+
+ 
+
+No is the better",0.0,Storbykommuner,1.0,"",0,"2,Yes",2.0,2,0.0,"To little assisentance, a lot of functions we havent worked with before, which makes it difficult. Also there were flaws, like variables that was pre-written in the script, but were written wrong",0.0,"","","","","","","Rebild,København,Yes",2.0,"0.125,No",2.0,"","","-0.00496,Yes,0.10877",2.0,"","","","",11,1,11.0

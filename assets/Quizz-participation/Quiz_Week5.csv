@@ -1,0 +1,607 @@
+name,id,sis_id,section,section_id,section_sis_id,submitted,attempt,"793195: Open the script for the quiz. You have fill in the relevant code where it says ""*******"" and run all code in the section ""1.0 Prepare data"", before you move on. It will create a a variable calledpopulationCount that we will use throughout the quiz :-) ",0,792439: Can we interpret the estimate of population count on attitudes towards immigrant as a causal effect? Please explain why or why not.,1.0,"792446: Based on the previous questions, do you think it is random where voters decide to live? Please explain why or why not.",1.0,792447: Can you list other factors that might influence where people decide to live?,1.0,"792366: Please make sure that your data set has a variable calledExtra_ImmigrationIsAThreatandpopulationCount. We will now basically examine the same relationship as we did in last week's quiz. Namely, how the population count where the voters live (populationCount) might influence their attitudes towards immigrants (Extra_ImmigrationIsAThreat). Answer the following questions:
+1) What is the null hypothesis for this test? Answer: 
+  
+    [ Select ]
+  
+  [""The estimate of population count on anti-immigrant attitudes is positive"", ""The estimate of population count on anti-immigrant attitudes is zero"", ""The estimate of population count on anti-immigrant attitudes is negative""]
+
+
+2) Using the lm() function, what is the estimate forpopulationCountonExtra_ImmigrationIsAThreat? Answer: 
+  
+    [ Select ]
+  
+  [""-0.01137"", ""0.01237"", ""-0.01247"", ""-0.01237""]
+
+ (5 digits)
+3) How could we interpret that result? Answer: 
+  
+    [ Select ]
+  
+  [""Voters who live in more urbanized areas hold stronger pro-immigrant attitudes"", ""There is no relationship between population count and attitudes towards immigrants"", ""Voters who live in more urbanized areas hold stronger anti-immigrant attitudes""]
+
+
+4) Based on thep-value, would you reject the null hypothesis? Answer: 
+  
+    [ Select ]
+  
+  [""Yes"", ""No""]
+
+",2.0,"792368: An essential criteria for causal inference is the absence of selection bias. In this case, a causal interpretation would take that population count was randomly distributed among the respondents, and therefore different levels of population count should have the same distribution of confounding variables. Ultimately, it have to be random where voters decide to live. Lets see about that!
+Now, insert the following re-code of education into education categories.
+
+Then, group by education categories (educationCat) and calculate the mean population count. Answer the following questions:
+1) Which education group generally live in the least populated areas? Answer: 
+  
+    [ Select ]
+  
+  [""Elementary or vocational education"", ""Gymnasium or higher education"", """"]
+
+
+2) Which education group generally live in the most populated areas? Answer: 
+  
+    [ Select ]
+  
+  [""Elementary or vocational education"", ""Gymnasium or higher education""]
+
+
+3) What is the mean difference in population count between the two education groups? Answer: 
+  
+    [ Select ]
+  
+  [""4.2 (42000ish citizens)"", ""4.4 (44000ish citizens)"", ""4.6 (46000ish citizens)"", ""4.8 (48000ish citizens)""]
+
+
+Finally, estimate the effect of education group(educationCat) on population count (populationCount). Inspect the result and answer the following questions.
+1) At first glance, what is the interpretation of the result? Answer: 
+  
+    [ Select ]
+  
+  [""Voter who hold a gymnasium or higher education tend to live in less populated areas"", ""There is no relationship between education and population count"", ""Voter who hold a gymnasium or higher education tend to live in morepopulated areas""]
+
+
+2) What is the estimate of ""Gymnasium or higher education"" compared to the reference group (""Elementary or vocational education"")? Answer: 
+  
+    [ Select ]
+  
+  [""4.613"", ""4.623"", ""4.633"", ""4.643""]
+
+ (3 digits)
+3) Is the estimate of ""Gymnasium or higher education"" compared to the reference group (""Elementary or vocational education"") significantly different from zero at a conventional 5% significance level? Answer: 
+  
+    [ Select ]
+  
+  [""Yes"", ""No""]
+
+",4.0,"792449: Selection bias based on background characteristics is of major concern if the same characteristics are correlated with the outcome. In this case, we will be worried if age and education also correlates with attitudes toward immigrants. Lets have a look!
+Firstly, use the lm() function to estimate attitudes toward immigrants (Extra_ImmigrationIsAThreat) as a function of age group (ageCat). Please answer the following questions:
+1) What is the mean difference in attitudes towards immigrants comparing ""35-55 years"" to the reference group (""18-34 years"")? Answer: 
+  
+    [ Select ]
+  
+  [""0.56234"", ""0.58244"", ""0.59541"", ""0.59244""]
+
+ (5 digits)
+2) Is the mean difference in attitudes comparing ""35-55 years"" to the reference group (""18-34 years"") significantly different from zero at a conventional 5% significance level? Answer: 
+  
+    [ Select ]
+  
+  [""Yes"", ""No""]
+
+
+Secondly, use the lm() function to estimate attitudes toward immigrants (Extra_ImmigrationIsAThreat) as a function of education group (educationCat). Please answer the following questions:
+1) What is the estimate of ""Gymnasium or higher education"" compared to the reference group (""Elementary or vocational education"")? Answer: 
+  
+    [ Select ]
+  
+  [""--0.66182"", ""-0.66144"", ""-0.66032"", ""-0.66088""]
+
+ (5 digits)
+2) Is the estimate of ""Gymnasium or higher education"" compared to the reference group (""Elementary or vocational education"") significantly different from zero at a conventional 5% significance level? Answer: 
+  
+    [ Select ]
+  
+  [""Yes"", ""No""]
+
+
+Finally, what does the findings point towards? Answer: 
+  
+    [ Select ]
+  
+  [""Age is correlated with attitudes towards immigrants, but education is not"", ""Education is correlated with attitudes towards immigrants, but age is not"", ""Both age and education is correlated with attitudes towards immigrants"", ""Age and education is both not correlated with attitudes towards immigrants""]
+
+",2.0,"792438: Take a look at our baseline model for population count on attitudes towards immigrants below.
+
+What happens to the estimate ofpopulationCountif we only include voters in the education group ""Elementary or vocational education""? Let find out! Please filter your data such that it only includes ""Elementary or vocational education"" on the educationCat variable, and answer the following questions:
+1) Run the lm() function with populationCount and Extra_ImmigrationIsAThreat again on the subsetted sample. What happened to the estimate of population count compared to our baseline model? Answer: 
+  
+    [ Select ]
+  
+  [""The association between population count and attitudes towards immigrants became stronger (further negative)"", ""The association between population count and attitudes towards immigrants remained the same"", ""The association between population count and attitudes towards immigrants became weaker (closer to zero)""]
+
+
+2) What is the new estimate of new estimate of populationCount? Answer: 
+  
+    [ Select ]
+  
+  [""-0.005"", ""-0.007"", ""-0.009"", ""-0.010""]
+
+ (3 digits)
+3) Based on thep-value, would you still reject the null hypothesis? Answer: 
+  
+    [ Select ]
+  
+  [""Yes"", ""No""]
+
+",1.0,"792365: Please make sure that your data set has a variable calledExtra_ImmigrationIsAThreat andpopulationCount. We will now basically examine the same relationship as we did in last week's quiz. Namely, how the population count where the voters live (populationCount) might influence their attitudes towards immigrants (Extra_ImmigrationIsAThreat). Answer the following questions:
+1) What is the null hypothesis for this test? Answer: 
+  
+    [ Select ]
+  
+  [""The estimate of population count on anti-immigrant attitudes is positive"", ""The estimate of population count on anti-immigrant attitudes is zero"", ""The estimate of population count on anti-immigrant attitudes is negative""]
+
+
+2) Using the lm() function, what is the estimate for populationCounton Extra_ImmigrationIsAThreat? Answer: 
+  
+    [ Select ]
+  
+  [""0.012"", ""0.011"", ""-0.013"", ""-0.012""]
+
+ (3 digits)
+3) How could we interpret that result? Answer: 
+  
+    [ Select ]
+  
+  [""Voters who live in more urbanized areas hold stronger pro-immigrant attitudes"", ""There is no relationship between population count and attitudes towards immigrants"", ""Voters who live in more urbanized areas hold stronger anti-immigrant attitudes""]
+
+
+4) Based on the p-value, would you reject the null hypothesis? Answer: 
+  
+    [ Select ]
+  
+  [""Yes"", ""No""]
+
+",2.0,"792448: Selection bias based on background characteristics is of major concern if the same characteristics are correlated with the outcome. In this case, we will be worried if age and education also correlates with attitudes toward immigrants. Lets have a look!
+Firstly, use the lm() function to estimate attitudes toward immigrants (Extra_ImmigrationIsAThreat) as a function of age group (ageCat). Please answer the following questions:
+1) What is the mean difference in attitudes towards immigrants comparing ""35-55 years"" to the reference group (""18-23 years"")? Answer: 
+  
+    [ Select ]
+  
+  [""0.552"", ""0.562"", ""0.582"", ""0.592""]
+
+ (3 digits)
+2) Is the mean difference in attitudes comparing ""35-55 years"" to the reference group (""18-34 years"") significantly different from zero at a conventional 5% significance level? Answer: 
+  
+    [ Select ]
+  
+  [""Yes"", ""No""]
+
+
+Secondly, use the lm() function to estimate attitudes toward immigrants (Extra_ImmigrationIsAThreat) as a function of education group (educationCat). Please answer the following questions:
+1) What is the estimate of ""Gymnasium or higher education"" compared to the reference group (""Elementary or vocational education"")? Answer: 
+  
+    [ Select ]
+  
+  [""-0.661"", ""-0.663"", ""-0.683"", ""-0.681""]
+
+ (3 digits)
+2) Is the estimate of ""Gymnasium or higher education"" compared to the reference group (""Elementary or vocational education"") significantly different from zero at a conventional 5% significance level? Answer: 
+  
+    [ Select ]
+  
+  [""Yes"", ""No""]
+
+
+Finally, what does the findings point towards? Answer: 
+  
+    [ Select ]
+  
+  [""Age is correlated with attitudes towards immigrants, but education is not"", ""Education is correlated with attitudes towards immigrants, but age is not"", ""Age and education is both not correlated with attitudes towards immigrants"", ""Both age and education is correlated with attitudes towards immigrants""]
+
+",2.0,"792367: An essential criteria for causal inference is the absence of selection bias. In this case, a causal interpretation would take that population count was randomly distributed among the respondents, and therefore different levels of population count should have the same distribution of confounding variables. Ultimately, it have to be random where voters decide to live. Lets see about that!
+Now, insert the following re-code of age into age categories.
+
+Then, group by age categories (ageCat) and calculate the mean population count. Answer the following questions:
+1) Which age group generally live in the least populated areas? Answer: 
+  
+    [ Select ]
+  
+  [""18-34 years"", ""35-55 years"", ""56 years or older""]
+
+
+2) Which age group generally live in the most populated areas? Answer: 
+  
+    [ Select ]
+  
+  [""18-34 years"", ""35-55 years"", ""56 years or older""]
+
+
+3) What is the mean difference in population count between the age group who live in the least populated areas and the age group who live in the most populated areas? Answer: 
+  
+    [ Select ]
+  
+  [""6.8 (68000ish citizens)"", ""6.9 (69000ish citizens)"", ""7.1 (71000ish citizens)"", ""7.6 (76000ish citizens)"", ""7.9 (79000ish citizens)""]
+
+
+Finally, estimate the effect of age group (ageCat) on population count (populationCount). Inspect the result and answer the following questions.
+1) At first glance, what is the interpretation of the result? Answer: 
+  
+    [ Select ]
+  
+  [""Older voters tend to live in less populated areas"", ""There is no relationship between age and population count"", ""Older voters tend to live in more populated areas""]
+
+
+2) What is the mean difference in population count comparing ""35-55 years"" to the reference group (""18-34 years"")? Answer: 
+  
+    [ Select ]
+  
+  [""-6.678"", ""-6.638"", ""-7.640"", ""-7.680""]
+
+ (3 digits)
+3) Is the mean difference in population count comparing ""35-55 years"" to the reference group (""18-34 years"") significantly different from zero at a conventional 5% significance level? Answer: 
+  
+    [ Select ]
+  
+  [""Yes"", ""No""]
+
+",4.0,"792437: Take a look at our baseline model for population count on attitudes towards immigrants below.
+
+What happens to the estimate ofpopulationCountif we only include voters in the age group ""56 years or older""? Let find out! Please filter your data such that it only includes ""56 years or older"" on theageCatvariable, and answer the following questions:
+1) Run the lm() function with populationCount and Extra_ImmigrationIsAThreat again on the subsetted sample. What happened to the estimate of population count compared to our baseline model? Answer: 
+  
+    [ Select ]
+  
+  [""The association between population count and attitudes towards immigrants became stronger (further negative)"", ""The association between population count and attitudes towards immigrants remained the same"", ""The association between population count and attitudes towards immigrants became weaker (closer to zero)""]
+
+
+2) What is the new estimate of populationCount? Answer: 
+  
+    [ Select ]
+  
+  [""-0.005"", ""-0.007"", ""-0.009"", ""-0.010""]
+
+ (3 digits)
+3) Based on thep-value, would you still reject the null hypothesis? Answer: 
+  
+    [ Select ]
+  
+  [""Yes"", ""No""]
+
+",1.0,n correct,n incorrect,score
+Johan Gilbert Rasmussen,391247,753328,Hold2;,155355,Hsyl198739,2023-10-25 07:29:06 UTC,1,"",0,"Not yet, we havent checked for other variables, or investigated the samplebias ",0.0,"I do not, as educational level plays a part as well as potential other background variables ",0.0,"Place of birth, income, employment ",0.0,"The estimate of population count on anti-immigrant attitudes is zero,0.01237,Voters who live in more urbanized areas hold stronger anti-immigrant attitudes,No",0.5,"Elementary or vocational education,Gymnasium or higher education,4.4 (44000ish citizens),Voter who hold a gymnasium or higher education tend to live in morepopulated areas,4.613,Yes",2.6666666666666665,"0.59541,Yes,-0.66144,Yes,Both age and education is correlated with attitudes towards immigrants",1.2,"The association between population count and attitudes towards immigrants became weaker (closer to zero),-0.007,No",0.3333333333333333,"","","","","","","","",8,0,4.699999999999999
+Caroline Marie Gehlert Hansen,386364,747661,Hold3;,155356,Hsyl198740,2023-10-25 07:07:38 UTC,1,"",0,Corrolattion is not the same as equal causation ,0.0,I do not think it is random. Where you choose to live will be based on your economical capital (and those who earn less are more likely to live in rural areas as they are less expensive than the capitals. The rural areas are less populated then the bigger cities. ,0.0,"Economic abilities, 
+
+Livining conditons 
+
+Schools/nusery options for children 
+
+work places / job oppertunities 
+
+Friends and family nearby 
+
+ ",0.0,"","","Elementary or vocational education,Gymnasium or higher education,4.4 (44000ish citizens),Voter who hold a gymnasium or higher education tend to live in morepopulated areas,4.633,Yes",2.6666666666666665,"","","The association between population count and attitudes towards immigrants remained the same,-0.007,Yes",0.3333333333333333,"-0.012,Voters who live in more urbanized areas hold stronger anti-immigrant attitudes,The estimate of population count on anti-immigrant attitudes is zero,Yes",1.5,"0.562,Yes,Yes,-0.663,Both age and education is correlated with attitudes towards immigrants",1.2,"","","","",8,0,5.699999999999999
+Laila Ali Ugaas Abdulle,389114,752832,Hold2;,155355,Hsyl198739,2023-10-25 05:21:15 UTC,1,"",0,"",0.0,No,0.0,Employment opportunities,0.0,"","","","","","","The association between population count and attitudes towards immigrants remained the same,-0.007,No",0.0,"0.011,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,The estimate of population count on anti-immigrant attitudes is zero,Yes",1.5,"0.562,Yes,No,-0.683,Education is correlated with attitudes towards immigrants\, but age is not",0.4,"56 years or older,18-34 years,7.1 (71000ish citizens),There is no relationship between age and population count,-7.680,No",1.3333333333333333,"","",7,1,3.233333333333333
+Jacob Løhmann Kristensen,387737,748373,Hold3;,155356,Hsyl198740,2023-10-24 22:47:20 UTC,1,"",0,"The demograhpics of higher density population might have a different demographic. There might for one istance be more immigrants, or that the demographic is higher educated than more rural areas. So it might not be the population count that has an effect on the attitude towards immigrans, but the variables that come with a higher denisity population. ",0.0,"No, it would seem that older voters seems to live in more rural / less dense areas. ",0.0,"Health, Education, Family, Work, Age, Climate and Nature.",0.0,"","","","","","","The association between population count and attitudes towards immigrants became weaker (closer to zero),-0.009,Yes",1.0,"-0.012,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,The estimate of population count on anti-immigrant attitudes is zero,No",1.5,"0.582,Yes,Yes,-0.681,Both age and education is correlated with attitudes towards immigrants",1.6,"56 years or older,18-34 years,7.6 (76000ish citizens),Older voters tend to live in less populated areas,-6.638,Yes",4.0,"","",8,0,8.1
+Rasmus Højgaard Toftholm,388650,765370,Hold4;,155357,Hsyl198741,2023-10-24 21:58:00 UTC,1,"",0,"Sinch the bench mark is by no means the same, it is difficult to claim a causal effect. Aside from population count, many other variables are likely to be very different between the two groups.  ",0.0,"It is not random, voter with higher education tend to live in the more urban arears. There could be a number of reasons for this - for one jobs in urban areas more often demand higher education, also prices for housing are likely to be higher, making urban areas less accessible to low education/low income voters.",0.0,"where respondents grew up, job type, income, personal preference, age, former residences, ect.",0.0,"","","Elementary or vocational education,Gymnasium or higher education,4.6 (46000ish citizens),Voter who hold a gymnasium or higher education tend to live in morepopulated areas,4.633,Yes",3.3333333333333335,"","","The association between population count and attitudes towards immigrants became weaker (closer to zero),-0.009,Yes",1.0,"-0.012,Voters who live in more urbanized areas hold stronger anti-immigrant attitudes,The estimate of population count on anti-immigrant attitudes is zero,Yes",1.5,"0.562,No,Yes,-0.663,Education is correlated with attitudes towards immigrants\, but age is not",0.4,"","","","",8,0,6.233333333333333
+Fie Lund Thomsen,386186,765044,"Hold1;, Hold3;","155354, 155356","Hsyl198738, Hsyl198740",2023-10-24 21:26:25 UTC,1,"",0,     .,0.0,.,0.0,. ,0.0,"The estimate of population count on anti-immigrant attitudes is zero,0.01237,There is no relationship between population count and attitudes towards immigrants,Yes",1.0,"Elementary or vocational education,Gymnasium or higher education,4.6 (46000ish citizens),Voter who hold a gymnasium or higher education tend to live in morepopulated areas,4.623,No",3.3333333333333335,"0.58244,No,-0.66144,Yes,Education is correlated with attitudes towards immigrants\, but age is not",0.8,"The association between population count and attitudes towards immigrants remained the same,-0.005,Yes",0.3333333333333333,"","","","","","","","",8,0,5.466666666666666
+Askil Brandt Broegaard Ryan,386826,746350,Hold4;,155357,Hsyl198741,2023-10-24 21:24:11 UTC,1,"",0,"We cannot - given the p-value, any observations are highly likely to be the result of statistical noise.",0.0,"No, there seems to be a correlation between higher education levels and living in higher-population areas",0.0,"As education is not a perfect indicator of income, economic factors are important to take into consideration. Cultural, sentimental and familial reasons for living in certain places are also important, but difficult to include in the given data.",0.0,"The estimate of population count on anti-immigrant attitudes is zero,-0.01237,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,No",1.5,"Gymnasium or higher education,Elementary or vocational education,4.6 (46000ish citizens),Voter who hold a gymnasium or higher education tend to live in morepopulated areas,4.623,Yes",2.6666666666666665,"0.58244,Yes,-0.66088,Yes,Both age and education is correlated with attitudes towards immigrants",2.0,"The association between population count and attitudes towards immigrants became weaker (closer to zero),-0.009,Yes",1.0,"","","","","","","","",8,0,7.166666666666666
+Benjamin Rom Viegand Hansen,390154,768270,Hold3;,155356,Hsyl198740,2023-10-24 16:59:43 UTC,1,"",0,"",0.0,"I do not think it is random. It appears that the choice of residence among voters is influenced by specific factors rather than being entirely random. The patterns observed in the data could be becuase people with higher education went to the bigger cities to study, and ended up getting a job close by",0.0,"Familiy, culture, cost of living, etc.",0.0,"","","Elementary or vocational education,Gymnasium or higher education,4.4 (44000ish citizens),Voter who hold a gymnasium or higher education tend to live in morepopulated areas,4.633,Yes",2.6666666666666665,"0.56234,No,-0.66144,No,Both age and education is correlated with attitudes towards immigrants",0.4,"The association between population count and attitudes towards immigrants became stronger (further negative),-0.007,No",0.0,"-0.012,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,The estimate of population count on anti-immigrant attitudes is positive,Yes",1.5,"","","","","","",7,1,4.566666666666666
+Sanng Barzenji,389864,750294,Hold3;,155356,Hsyl198740,2023-10-24 12:28:48 UTC,1,"",0,No we cannot since the relationship is one of correlation and not of causality. We can say whether or not there is a relationship between the two but not whether one causes the other to behave the way it does. Also because the population is randomly selected we account for selection bias which further diminishes the likelihood of it having any causality. ,0.0,"Based on the previous question with the population bias being removed duo to random selection, it would seem that people choose their places to live based off of their level of education, which seems fitting since ones education level is directly tied to level of income which can determine whether you are able to live in more or less populated areas. ",0.0,"Things like income or job location could have some effect on the decision, where income is a larger contributor while location might be less of a factor. ",0.0,"The estimate of population count on anti-immigrant attitudes is negative,-0.01237,There is no relationship between population count and attitudes towards immigrants,Yes",1.0,"Elementary or vocational education,Gymnasium or higher education,4.6 (46000ish citizens),Voter who hold a gymnasium or higher education tend to live in less populated areas,4.623,Yes",3.3333333333333335,"0.58244,Yes,-0.66144,Yes,Age is correlated with attitudes towards immigrants\, but education is not",1.2,"","","","","","","","","The association between population count and attitudes towards immigrants became weaker (closer to zero),-0.010,Yes",0.6666666666666666,8,0,6.199999999999999
+Olivia Munksgaard Palmqvist,368520,733298,Hold4;,155357,Hsyl198741,2023-10-24 11:38:20 UTC,1,"",0,We'd have to be careful about that without further research into the matter. we'd have to look more closely at confounding variables so we don't just make a rash decision - we also don't have a clear view of correlation versus causation ,0.0,"",0.0,"Job possibilities, education, economy ",0.0,"","","","","","","The association between population count and attitudes towards immigrants became stronger (further negative),-0.005,No",0.0,"-0.012,There is no relationship between population count and attitudes towards immigrants,The estimate of population count on anti-immigrant attitudes is zero,Yes",1.5,"0.562,Yes,No,-0.663,Education is correlated with attitudes towards immigrants\, but age is not",0.4,"56 years or older,18-34 years,7.6 (76000ish citizens),Older voters tend to live in less populated areas,-6.638,Yes",4.0,"","",7,1,5.9
+Olivia Oxhøj Hein,390064,705685,Hold1;,155354,Hsyl198738,2023-10-24 11:20:31 UTC,2,"",0,"No, not yet. There can be other underlying factors, that influence both variables in the model. The effect between population count and immigration can be because of a cofounding variable. 
+
+ ",0.0,"No, I think that older respondents is more likely to live in less populated areas, while younger respondents tends to live in more populated areas. This is due to the mean population count. ",0.0,"Economy, work, cultural background and social network. 
+
+ 
+
+ ",0.0,"The estimate of population count on anti-immigrant attitudes is zero,-0.01247,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,Yes",1.5,"","","0.58244,No,-0.66032,No,Both age and education is correlated with attitudes towards immigrants",0.8,"The association between population count and attitudes towards immigrants became weaker (closer to zero),-0.007,Yes",0.6666666666666666,"","","","","56 years or older,18-34 years,7.1 (71000ish citizens),Older voters tend to live in less populated areas,-6.638,Yes",3.3333333333333335,"","",8,0,6.3
+Bjørk Bonvig Killemose,389814,767012,Hold3;,155356,Hsyl198740,2023-10-23 15:30:16 UTC,1,"",0,No we can not,0.0,No,0.0,"",0.0,"","","Elementary or vocational education,Gymnasium or higher education,4.6 (46000ish citizens),Voter who hold a gymnasium or higher education tend to live in morepopulated areas,4.613,Yes",3.3333333333333335,"","","The association between population count and attitudes towards immigrants remained the same,-0.009,Yes",0.6666666666666666,"-0.012,There is no relationship between population count and attitudes towards immigrants,The estimate of population count on anti-immigrant attitudes is positive,Yes",1.0,"0.582,No,No,-0.663,Education is correlated with attitudes towards immigrants\, but age is not",0.4,"","","","",8,0,5.3999999999999995
+Sara Marie Ruwald,385942,748768,Hold3;,155356,Hsyl198740,2023-10-23 14:03:45 UTC,1,"",0,Det er svært at interpret population som attitude mod immigranter som en kausal effekt - Give god mening med forskellige mennesker og ikke bare grupper af mennesker. ,0.0,"No, i do not think it is random. 
+
+At vælge hvor man bor er en stor beslutning som kan være med til at fortælle meget om dig og din familie, samt give muligheder videre til dine egne børn. Der er forskel om man bor i by eller land. ",0.0,"Familie, jobmuligheder, økonomi. ",0.0,"The estimate of population count on anti-immigrant attitudes is negative,-0.01247,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,Yes",1.0,"Elementary or vocational education,Gymnasium or higher education,4.6 (46000ish citizens),Voter who hold a gymnasium or higher education tend to live in morepopulated areas,4.613,No",2.6666666666666665,"","","The association between population count and attitudes towards immigrants became stronger (further negative),-0.009,Yes",0.6666666666666666,"","","0.552,Yes,Yes,-0.683,Both age and education is correlated with attitudes towards immigrants",1.2,"","","","",8,0,5.533333333333332
+Julie Nygaard,386081,750647,Hold1;,155354,Hsyl198738,2023-10-23 12:42:56 UTC,2,"",0,"Can we interpret the estimate of population count on attitudes towards immigrant as a causal effect? Please explain why or why not. 
+
+Your answer:
+
+The relationship could in theory be causal but we have no prof of that so far!
+
+ 
+
+There can be many sociological explanations as to why people in cities have more postive attitude towards immigration",0.0,"The model shows a significant relationship between population size and education, this implies that is not random where voters decide to live. But we can't know whether the relationsship is causal ",0.0,"Relationships, family, friends, education, jobs etc. ",0.0,"","","Elementary or vocational education,Gymnasium or higher education,4.6 (46000ish citizens),Voter who hold a gymnasium or higher education tend to live in morepopulated areas,4.623,Yes",4.0,"","","The association between population count and attitudes towards immigrants became weaker (closer to zero),-0.009,Yes",1.0,"-0.012,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,The estimate of population count on anti-immigrant attitudes is zero,Yes",2.0,"0.582,Yes,Yes,-0.661,Both age and education is correlated with attitudes towards immigrants",2.0,"","","","",8,0,9.0
+Julia Wilczewska,406218,786591,Hold3;,155356,Hsyl198740,2023-10-23 09:15:26 UTC,1,"",0,We cannot because there may be other factors than population caunt impacting attitudes towards immigratioin.,0.0,"It is not random where voters decide to live, for instance level of education one received may have an immpact on that. ",0.0,"Profession, place they were born, gender",0.0,"The estimate of population count on anti-immigrant attitudes is zero,-0.01137,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,Yes",1.5,"Elementary or vocational education,Gymnasium or higher education,4.6 (46000ish citizens),Voter who hold a gymnasium or higher education tend to live in morepopulated areas,4.623,Yes",4.0,"0.58244,Yes,-0.66088,Yes,Both age and education is correlated with attitudes towards immigrants",2.0,"The association between population count and attitudes towards immigrants became weaker (closer to zero),-0.007,No",0.3333333333333333,"","","","","","","","",8,0,7.833333333333333
+Kirstine Bjerno Folkvardsen,386264,761925,Hold3;,155356,Hsyl198740,2023-10-21 21:05:04 UTC,1,"",0,"There is a risk that the effect we see is not causal but is instead an expression of a different baseline. There is a chance that those who live in larger municipalities have longer education, are younger and have more left-wing attitudes and are therefore more pro-immigration rather than because they live among many people.",0.0,No I do not think it is random ,0.0,"Where they grew up, what they work with,...",0.0,"","","Elementary or vocational education,Gymnasium or higher education,4.6 (46000ish citizens),Voter who hold a gymnasium or higher education tend to live in morepopulated areas,4.623,No",3.3333333333333335,"","","The association between population count and attitudes towards immigrants became stronger (further negative),-0.007,Yes",0.3333333333333333,"-0.012,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,The estimate of population count on anti-immigrant attitudes is negative,No",1.0,"0.582,Yes,Yes,-0.661,Both age and education is correlated with attitudes towards immigrants",2.0,"","","","",8,0,6.666666666666666
+Hanna Isabel Dahl,389062,761961,Hold3;,155356,Hsyl198740,2023-10-19 12:21:30 UTC,1,"",0,"The estimate for at higher density populations opinion on immigration as a threat has a negative causal effect of -0.1237.
+
+There is a small correlation between the variables, but not enough causation to establish a causal effect based on the given information.",0.0,"I believe that it is not random where voters have decided to live.
+
+The population mean count is lower for voters who are older, in reference to the younger voters.
+
+The p-value is small 2.705 meaning that the difference is statistically significant",0.0,no,0.0,"The estimate of population count on anti-immigrant attitudes is negative,-0.01237,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,No",1.0,"","","0.56234,Yes,-0.66144,Yes,Both age and education is correlated with attitudes towards immigrants",1.2,"","","","","","","35-55 years,18-34 years,6.8 (68000ish citizens),Older voters tend to live in less populated areas,-6.678,Yes",2.0,"The association between population count and attitudes towards immigrants became stronger (further negative),-0.005,Yes",0.3333333333333333,8,0,4.533333333333333
+Laura Trude Christensen,388295,764503,Hold3;,155356,Hsyl198740,2023-10-19 11:47:35 UTC,1,"",0,"Yes. When investigating whether population count come with certain characteristics among respondents, it is seen that it does not come with certain characteristics since the effect for age and educational background for both OLS regressions are close to 0. ",0.0,"No, I don't think it is random. It seems that educational level plays a role. ",0.0,income could be another factor ,0.0,"The estimate of population count on anti-immigrant attitudes is zero,-0.01237,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,Yes",2.0,"Elementary or vocational education,Gymnasium or higher education,4.6 (46000ish citizens),Voter who hold a gymnasium or higher education tend to live in morepopulated areas,4.633,Yes",3.3333333333333335,"","","The association between population count and attitudes towards immigrants became weaker (closer to zero),-0.009,Yes",1.0,"","","0.582,Yes,Yes,-0.661,Both age and education is correlated with attitudes towards immigrants",2.0,"","","","",8,0,8.333333333333332
+Anna Vinther Heydenreich,390099,750165,Hold2;,155355,Hsyl198739,2023-10-18 21:59:00 UTC,1,"",0,"",0.0,"",0.0,"",0.0,"","","",0.0,"",0.0,"","","Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,The estimate of population count on anti-immigrant attitudes is zero",1.0,"","","","","",0.0,5,3,1.0
+Gustav Holck Frandsen,386602,761244,Hold2;,155355,Hsyl198739,2023-10-18 21:59:00 UTC,1,"",0,"",0.0,"",0.0,"",0.0,"The estimate of population count on anti-immigrant attitudes is zero,-0.01237,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,Yes",2.0,"",0.0,"",0.0,"",0.0,"","","","","","","","",5,3,2.0
+Jesper Chanel Iversholt Jørgensen,387633,753159,Hold4;,155357,Hsyl198741,2023-10-18 21:59:00 UTC,1,"",0,"",0.0,"",0.0,"",0.0,"The estimate of population count on anti-immigrant attitudes is zero,-0.01247,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,Yes",1.5,"",0.0,"","","","","","","",0.0,"","","",0.0,5,3,1.5
+Natasja Liv Peterson Porst,390791,754639,Hold4;,155357,Hsyl198741,2023-10-18 21:59:00 UTC,1,"",0,"",0.0,"",0.0,"",0.0,"","","",0.0,"","","",0.0,"-0.012,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,The estimate of population count on anti-immigrant attitudes is zero,Yes",2.0,"",0.0,"","","","",5,3,2.0
+Anna Essendrop Bach,386682,758896,Hold1;,155354,Hsyl198738,2023-10-18 21:59:00 UTC,1,"",0,"",0.0,"",0.0,"",0.0,"","","","","",0.0,"","","",0.0,"","","",0.0,"",0.0,4,4,0.0
+Carla Schultz,386797,764919,Hold3;,155356,Hsyl198740,2023-10-18 21:59:00 UTC,1,"",0,It is a causal effect because the to groups are similar. The only thing seperating them is where they live,0.0,"",0.0,"",0.0,"The estimate of population count on anti-immigrant attitudes is negative,-0.01237,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,No",1.0,"","","",0.0,"","","","","","","56 years or older,7.6 (76000ish citizens),Older voters tend to live in less populated areas,-6.678",1.3333333333333333,"",0.0,6,2,2.333333333333333
+Olivia Oxhøj Hein,390064,705685,Hold1;,155354,Hsyl198738,2023-10-18 21:59:00 UTC,1,"",0,"",0.0,"",0.0,"",0.0,"","","","","",0.0,"","","",0.0,"","","",0.0,"",0.0,4,4,0.0
+Frederikke Basler Larsen,387405,746271,Hold3;,155356,Hsyl198740,2023-10-18 21:59:00 UTC,1,"",0,"",0.0,"",0.0,"",0.0,"","","",0.0,"","","","","-0.012,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,The estimate of population count on anti-immigrant attitudes is zero,Yes",2.0,"",0.0,"","","",0.0,5,3,2.0
+Mira Chatterji Rosen Sørensen,386694,766818,Hold2;,155355,Hsyl198739,2023-10-18 21:59:00 UTC,1,"",0,"I can see that there is some correlation, but I have not controlled for other confounder variables, meaning I cannot say anything about causation yet. I will need to at least do a balance table of background variables (and differences in these) before I can make any claim about causation. ",0.0,"I do not think it is random where voters decide to live. The models indicate that more educated voters seek to live in more populated areas such as cities, and that more immigrant positive people live in more populated areas. I do not, however; know whether they live in these areas because of their education and political affiliations or whether their localities affect their political stance and their access to education. ",0.0,"",0.0,"The estimate of population count on anti-immigrant attitudes is zero,-0.01237,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,Yes",2.0,"Elementary or vocational education,Gymnasium or higher education,4.6 (46000ish citizens),Voter who hold a gymnasium or higher education tend to live in morepopulated areas,4.623,Yes",4.0,"",0.0,"",0.0,"","","","","","","","",6,2,6.0
+Tøger Fuur Wiberg,333867,692312,Hold2;,155355,Hsyl198739,2023-10-18 21:59:00 UTC,1,"",0,et spørgsmål om det er randomiseret og dermed  Ceteris paribus,0.0,"",0.0,"",0.0,"The estimate of population count on anti-immigrant attitudes is zero,-0.01237,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,Yes",2.0,"",0.0,"","","",0.0,"","","",0.0,"","","","",5,3,2.0
+Julie Nygaard,386081,750647,Hold1;,155354,Hsyl198738,2023-10-18 21:59:00 UTC,1,"",0,"The relationship could in theory be causal but we have no prof of that so far!
+
+ 
+
+There can be many sociological explanations as to why people in cities have more postive attitude towards immigration  ",0.0,"",0.0,"",0.0,"The estimate of population count on anti-immigrant attitudes is zero,-0.01237,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,Yes",2.0,"",0.0,"","","",0.0,"","","",0.0,"","","","",5,3,2.0
+Cecilia Høgenhaug,389839,764452,Hold2;,155355,Hsyl198739,2023-10-18 21:59:00 UTC,1,"",0,"No, because we don't know whether there could be other factors involved. ",0.0,Nope,0.0,"",0.0,"The estimate of population count on anti-immigrant attitudes is zero,-0.01237,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,Yes",2.0,"Elementary or vocational education,Gymnasium or higher education,4.6 (46000ish citizens),Voter who hold a gymnasium or higher education tend to live in less populated areas,4.623,Yes",3.3333333333333335,"0.58244,Yes,-0.66088,Yes,Both age and education is correlated with attitudes towards immigrants",2.0,"","","","","","","","","",0.0,7,1,7.333333333333333
+Tak Chiu CHAN,405946,786062,Hold3;,155356,Hsyl198740,2023-10-18 21:59:00 UTC,1,"",0,"",0.0,"",0.0,"",0.0,"",0.0,"","","",0.0,"","","","","","","",0.0,"",0.0,4,4,0.0
+Frida Nitschke Madsen,387695,752970,Hold3;,155356,Hsyl198740,2023-10-17 11:27:51 UTC,1,"",0,"No, we are not aware of any confounders and others factors that preexisted for the people living in urban areas making them more pro immirgration. Therefore we have no wat of confirming a causal effect.",0.0,Generally older voters tend to live en less populated areas and young people tend to live in more populated areas. This could be because young people are moving to the big cities to take their education. This relationship is however not statistically significant.,0.0,"Political opinions, type of jobs (some are only available in cities), ethnicity, gender, ",0.0,"The estimate of population count on anti-immigrant attitudes is zero,-0.01237,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,Yes",2.0,"","","0.58244,Yes,-0.66088,Yes,Both age and education is correlated with attitudes towards immigrants",2.0,"","","","","","","56 years or older,18-34 years,7.6 (76000ish citizens),Older voters tend to live in less populated areas,-6.638,No",3.3333333333333335,"-0.007,No",0.3333333333333333,8,0,7.666666666666666
+Mariem Hady,387469,749741,Hold1;,155354,Hsyl198738,2023-10-17 10:34:11 UTC,1,"",0,"Vi kan se der er en negativ sammenhæng mellem variablene, hvilket vil sige at hvis man bor i en mere urbaniseret kommune, falder holdningen til om immigration er en trussel. Derudover er der en meget lav p-værdi, og man kan derfor se at der er en statistisk signifikans, på over 95%. Dog ved vi ikke om dette er en kausal sammenhæng, da hældningen er meget lav, og der kan derfor være andre variable, der spiller en rolle",0.0,"",0.0,"",0.0,"The estimate of population count on anti-immigrant attitudes is zero,-0.01237,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,Yes",2.0,"Elementary or vocational education,Gymnasium or higher education,4.6 (46000ish citizens),Voter who hold a gymnasium or higher education tend to live in morepopulated areas,4.623,Yes",4.0,"0.58244,Yes,-0.66088,Yes,Both age and education is correlated with attitudes towards immigrants",2.0,"","","","","","","","","The association between population count and attitudes towards immigrants became stronger (further negative),-0.007,Yes",0.6666666666666666,8,0,8.666666666666666
+Anna Dahl Lund,386249,751612,Hold1;,155354,Hsyl198738,2023-10-17 09:02:01 UTC,1,"",0,Der kan være mange andre variable der spiller ind end derfor ingen kausalitet effekt ,0.0,"No. It seems like that higher educated people tend to cluster in larger cities, maybe because that is were the jobs suited for those educations and the educationinstitutions are. the numbers are significant ",0.0,"education, jobs, ",0.0,"","","Elementary or vocational education,Gymnasium or higher education,4.8 (48000ish citizens),Voter who hold a gymnasium or higher education tend to live in morepopulated areas,4.623,Yes",3.3333333333333335,"0.58244,Yes,-0.66144,Yes,Age is correlated with attitudes towards immigrants\, but education is not",1.2,"","","-0.012,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,The estimate of population count on anti-immigrant attitudes is zero,Yes",2.0,"","","","","The association between population count and attitudes towards immigrants became stronger (further negative),-0.009,Yes",0.3333333333333333,8,0,6.866666666666666
+Cecilie Bach Kjeldsen,389000,765603,Hold2;,155355,Hsyl198739,2023-10-16 17:01:12 UTC,1,"",0,Need absence of selection bias.,0.0,"No i do not think it is random. If you need to attend education, you live in the city who has it for example. ",0.0,no,0.0,"","","Elementary or vocational education,Gymnasium or higher education,4.6 (46000ish citizens),Voter who hold a gymnasium or higher education tend to live in morepopulated areas,4.623,Yes",4.0,"0.58244,Yes,-0.66144,Yes,Both age and education is correlated with attitudes towards immigrants",1.6,"The association between population count and attitudes towards immigrants became stronger (further negative),-0.007,Yes",0.3333333333333333,"-0.013,Voters who live in more urbanized areas hold stronger anti-immigrant attitudes,The estimate of population count on anti-immigrant attitudes is zero,Yes",1.0,"","","","","","",8,0,6.933333333333334
+Laura Kiær Ahring,387831,760653,Hold4;,155357,Hsyl198741,2023-10-15 09:28:47 UTC,1,"",0,"Grundet at p-værdien er lig 0 og at standartfejlen ikke svarer til halvdelen af koefficienterne, virker dette ikke som en kausal effekt, da de statistiske beregninger ikke udviser noget statistisk signifikant. Derfor er det svært at sige noget om netop denne sammenhæng, og man skulle måske i stedet kigge på nogle andre faktorer end populationstal, som fx hvad folk stemmer i området ",0.0,"Folk der er ældre bor generelt ikke i de mest befolkede områder. Man kan se at de ""18-34 årige"" intercepter ved 17,4 i befolkningstal, og at de andre grupper generelt bor i mindre befolkede områder, når man ser at deres koefficienter er negative",0.0,"Other factors to peoples decisions on where to live could include job possibilities, school opitions, political values ect",0.0,"","","","","","","The association between population count and attitudes towards immigrants became weaker (closer to zero),-0.009,No",0.6666666666666666,"-0.012,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,The estimate of population count on anti-immigrant attitudes is zero,Yes",2.0,"0.582,Yes,Yes,-0.661,Education is correlated with attitudes towards immigrants\, but age is not",1.6,"56 years or older,18-34 years,7.6 (76000ish citizens),Older voters tend to live in less populated areas,-7.640,No",2.6666666666666665,"","",8,0,6.933333333333333
+Noemi Sara Bromenne Jacobsen,385755,770160,Hold4;,155357,Hsyl198741,2023-10-14 21:26:48 UTC,1,"",0,"It is very difficult to claim causal effects with confidence. We cannot interpret the estimate of population count on attitudes towards immigrants as a causal effect, since many other factors could have influenced the result. But because the p-value is extremely small, there is some trustworthy evidence, that the populationcount could have a causal effect on the attitude towards immigrant, since the p-value in this case tells us, that the results, that we got, are with a large probability not due to randomness, meaning, that if we made the same test again it is very likely that we would get a similar result. ",0.0,"Du you mean education? No, apparently it is not random where people decide to live in regard to education, since people with higher education tend to live in bigger cities. ",0.0,"Political belief, income, place of birth",0.0,"The estimate of population count on anti-immigrant attitudes is zero,-0.01237,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,Yes",2.0,"Elementary or vocational education,Gymnasium or higher education,4.6 (46000ish citizens),Voter who hold a gymnasium or higher education tend to live in morepopulated areas,4.623,Yes",4.0,"0.58244,Yes,-0.66088,Yes,Both age and education is correlated with attitudes towards immigrants",2.0,"The association between population count and attitudes towards immigrants became stronger (further negative),-0.009,Yes",0.6666666666666666,"","","","","","","","",8,0,8.666666666666666
+Theresa Elisabeth Meyer,405653,786929,Hold1;,155354,Hsyl198738,2023-10-13 13:42:55 UTC,1,"",0,"For the interpretation we would need to keep in mind the direction of the causality between the two variables. The population count alone does not explain the attitude towrds immigrantion alone. While higher populated areas can influence the attitude, it is also possible, that these areas attract a more diverse population and therefore influence the attitude. 
+
+The principle of revers causation is also an aspect, since as mentioned before the general attitude on immigration attracts more people in general and therefore a more diverse community.
+
+The regression analysis can reveal associations between variables, however it cannot establish causation from observational data alone. To do an interpretation of the Population and attitude towards immigration as a causal effect we would require additional methodologies, such as natural experiments or longitudinal studies.",0.0,"The decision on where to live is not random.
+
+The younger part of the population is generally attracted to higher populated areas. Possible reason were previusly mentioned as the diversity of the population and therefore a generally higher accptence to minorities. This is again a two sided connection, since the higher population leads to more acceptance, but the accaptence in higher populated areas attracts new citizens.
+
+The other way around, the leass populated areas are also less deiverse and therefore not as often confronted with diversity, which might lead to a less accepting attitude towards diversity. Again, this is a two sided mechanism.",0.0,"Other factors might include: 
+
+* possibility of affordable housing
+
+* the overall infrastructure
+
+* the possiblities of cultural and social life
+
+* the possibility to find employement/ job or educational offers
+
+* the existence of families (people tend to preffer to raise children in less populated areas",0.0,"The estimate of population count on anti-immigrant attitudes is zero,-0.01237,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,Yes",2.0,"","","","","","","","","0.582,Yes,Yes,-0.663,Both age and education is correlated with attitudes towards immigrants",1.6,"56 years or older,18-34 years,7.1 (71000ish citizens),Older voters tend to live in less populated areas,-6.638,Yes",3.3333333333333335,"The association between population count and attitudes towards immigrants became weaker (closer to zero),-0.009,Yes",0.6666666666666666,8,0,7.6
+CHI KWAN LUK,405993,786151,Hold4;,155357,Hsyl198741,2023-10-13 13:40:46 UTC,1,"",0,"No, because there might be other confounders affecting the two variables.",0.0,I do not think it is random where voters decide to live as older voters tend to live in less populated area according to the statistical significant relationship between ageCat and populationCount.,0.0,"Crime rate, welfare, income.",0.0,"","","","","","","","","-0.012,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,The estimate of population count on anti-immigrant attitudes is zero,Yes",2.0,"0.582,Yes,Yes,-0.661,Both age and education is correlated with attitudes towards immigrants",2.0,"56 years or older,18-34 years,7.6 (76000ish citizens),Older voters tend to live in less populated areas,-6.638,Yes",4.0,"The association between population count and attitudes towards immigrants became weaker (closer to zero),-0.007,Yes",1.0,8,0,9.0
+Camilla Storgaard,389430,763604,"Hold2;, Hold3;","155355, 155356","Hsyl198739, Hsyl198740",2023-10-13 13:40:17 UTC,1,"",0,"We do not know whether the relationship is causal or not. There could be ""invisible"" explanatory factors that we are unaware of. ",0.0,No I do not believe so. It is more attractive to live in more populated areas and people with more resources tend to do so.,0.0,"Prestige, wealth, crime rates ect.",0.0,"","","Elementary or vocational education,Gymnasium or higher education,4.6 (46000ish citizens),Voter who hold a gymnasium or higher education tend to live in morepopulated areas,4.623,Yes",4.0,"","","The association between population count and attitudes towards immigrants became weaker (closer to zero),-0.009,Yes",1.0,"-0.012,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,The estimate of population count on anti-immigrant attitudes is zero,Yes",2.0,"0.582,Yes,Yes,-0.661,Both age and education is correlated with attitudes towards immigrants",2.0,"","","","",8,0,9.0
+Johanne Cecilie Alnor Einarson,388612,753046,Hold2;,155355,Hsyl198739,2023-10-13 13:34:13 UTC,1,"",0,"It's challenging to establish a direct causal relationship between the number of people in a city and their attitudes toward immigrants. The reasons behind the output could have many confounders: maybe the people living in urban areas are more pro-immigrant because of their political views? Or their level of religion? I would think there is a big confounder in political opinion behind the numbers.
+
+ ",0.0,"I think there is some level of predictability in where the voters live. People with longer education may have more job possibilites in the cities as opposed to people with shorter educations, who tend to do more ""practical"" work.
+
+The reason can also be that people with longer education usually lives in the city when they study, and when they are finished they stick around because now their social life is in the city and they have already build a life there.
+
+But I also do believe there are some underlying reasons also, fx. where the voters have grown up, that also deeply affects you when deciding where to live.",0.0,"As previously mentioned, your own upbringing would probably have a deep impact on where you want to live when you get to decide yourself. Also practicalities like where you can get the job you want and whether you would like to live close to family when having children.",0.0,"The estimate of population count on anti-immigrant attitudes is negative,-0.01237,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,Yes",1.5,"Elementary or vocational education,Gymnasium or higher education,4.6 (46000ish citizens),Voter who hold a gymnasium or higher education tend to live in morepopulated areas,4.623,Yes",4.0,"0.58244,Yes,-0.66088,Yes,Both age and education is correlated with attitudes towards immigrants",2.0,"The association between population count and attitudes towards immigrants became weaker (closer to zero),-0.009,No",0.6666666666666666,"","","","","","","","",8,0,8.166666666666666
+Josephine Holm Clausen,390677,752053,Hold2;,155355,Hsyl198739,2023-10-13 12:59:00 UTC,1,"",0,"No, because there may be several other factors influencing as well. It is difficult to make causal claims. And it also may not be random who lives in urban areas and who lives in the countryside",0.0,"No, people who have more education tend to live in the cities",0.0,"distance to family members, universities, jobs, housing prices",0.0,"","","Elementary or vocational education,Gymnasium or higher education,4.8 (48000ish citizens),There is no relationship between education and population count,4.643,No",1.3333333333333333,"0.58244,Yes,-0.66088,Yes,Both age and education is correlated with attitudes towards immigrants",2.0,"The association between population count and attitudes towards immigrants became weaker (closer to zero),-0.009,Yes",1.0,"-0.012,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,The estimate of population count on anti-immigrant attitudes is zero,Yes",2.0,"","","","","","",8,0,6.333333333333333
+Theis Molin Sørensen,387308,750201,Hold3;,155356,Hsyl198740,2023-10-13 12:43:01 UTC,1,"",0,"No, as there can be multiple other confounders explaining the variation",0.0,"It is not random, as people tend to group in areas with people who're similar to themselves ",0.0,"Socio-economic background --> where it is affordable to live, could be a huge confounder for this study. ",0.0,"The estimate of population count on anti-immigrant attitudes is zero,-0.01237,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,Yes",2.0,"","","0.58244,Yes,-0.66088,Yes,Both age and education is correlated with attitudes towards immigrants",2.0,"","","","","","","56 years or older,18-34 years,7.6 (76000ish citizens),Older voters tend to live in less populated areas,-6.638,Yes",4.0,"The association between population count and attitudes towards immigrants became weaker (closer to zero),-0.009,Yes",0.6666666666666666,8,0,8.666666666666666
+Marie-Louise Skov Jensen,36564,489916,Hold1;,155354,Hsyl198738,2023-10-13 12:15:17 UTC,1,"",0,"There is a correlation, but to assume a causal effect, we would have to be sure that the people living in urbanized vs. not urbanized areas are completely equal on the baseline ",0.0,"No, its not - more people with higher education tend to live in the bigger and more populated cities. ",0.0,"Income, family size",0.0,"The estimate of population count on anti-immigrant attitudes is zero,-0.01237,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,Yes",2.0,"Elementary or vocational education,Gymnasium or higher education,4.6 (46000ish citizens),Voter who hold a gymnasium or higher education tend to live in morepopulated areas,4.623,Yes",4.0,"0.58244,Yes,-0.66088,Yes,Both age and education is correlated with attitudes towards immigrants",2.0,"The association between population count and attitudes towards immigrants became weaker (closer to zero),-0.009,Yes",1.0,"","","","","","","","",8,0,9.0
+Jasmin Renee Jensen,390164,746781,Hold3;,155356,Hsyl198740,2023-10-13 12:11:11 UTC,1,"",0,"We could interpret that people living in urbanized ares are more exposed to immigrant culture in generel, which would make it a casual effect.",0.0,"No, because normally younger people tend to live in cities where they can go to school and make more friends in the communities in the city. ",0.0,"* school
+
+* friends
+
+* family
+
+* where they grew up
+
+* economy",0.0,"The estimate of population count on anti-immigrant attitudes is positive,-0.01237,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,No",1.0,"","","0.58244,No,-0.66032,Yes,Both age and education is correlated with attitudes towards immigrants",1.2,"","","","","","","56 years or older,18-34 years,7.1 (71000ish citizens),Older voters tend to live in less populated areas,-6.638,Yes",3.3333333333333335,"The association between population count and attitudes towards immigrants became stronger (further negative),-0.007,Yes",0.6666666666666666,8,0,6.199999999999999
+Anna Alvilda Damgaard Bjerg,390755,755504,Hold2;,155355,Hsyl198739,2023-10-13 12:10:51 UTC,1,"",0,"We could interpret that people living in urbanized areas are more exposed to immigrant culture in general, which would make it a causal effect. ",0.0,"It might not be random, because younger people live in cities where they will be closer to their schools and might also be more willing and wanting in living close with other people ",0.0,"Where they grew up, where their family and friends live, where they can afford to live",0.0,"The estimate of population count on anti-immigrant attitudes is positive,-0.01237,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,No",1.0,"","","0.58244,Yes,-0.66144,Yes,Both age and education is correlated with attitudes towards immigrants",1.6,"","","","","","","56 years or older,18-34 years,7.1 (71000ish citizens),Older voters tend to live in less populated areas,-7.640,Yes",2.6666666666666665,"The association between population count and attitudes towards immigrants became stronger (further negative),-0.007,Yes",0.6666666666666666,8,0,5.933333333333333
+Emily Grace Cook,406344,785821,Hold1;,155354,Hsyl198738,2023-10-12 09:31:23 UTC,1,"",0,"No we cannot, have not considered confounders and the sample does not contain all combinations of people at the baseline",0.0,No older people tend to live in less populated areas and younger voters tended to live in more populated areas. There must be some factor linked with life-course that influences why young people move to cities and older to suburbs.,0.0,"Income
+
+Nationality
+
+Gender
+
+Social class",0.0,"","","","","0.58244,Yes,-0.66144,Yes,Both age and education is correlated with attitudes towards immigrants",1.6,"","","0.011,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,The estimate of population count on anti-immigrant attitudes is zero,Yes",1.5,"","","56 years or older,18-34 years,7.6 (76000ish citizens),Older voters tend to live in less populated areas,-6.638,Yes",4.0,"The association between population count and attitudes towards immigrants became stronger (further negative),-0.007,Yes",0.6666666666666666,8,0,7.766666666666667
+Lila Simone Hjort,368246,721374,Hold3;,155356,Hsyl198740,2023-10-11 19:13:49 UTC,1,"",0,No because it's might a naive comparison,0.0,no... i can't explain why,0.0,"income, work place, children or not, place of birth, nature preferences, citizenship",0.0,"The estimate of population count on anti-immigrant attitudes is zero,-0.01237,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,Yes",2.0,"","","","","","","","","0.582,Yes,Yes,-0.661,Both age and education is correlated with attitudes towards immigrants",2.0,"56 years or older,18-34 years,7.6 (76000ish citizens),Older voters tend to live in less populated areas,-6.638,Yes",4.0,"The association between population count and attitudes towards immigrants became weaker (closer to zero),-0.007,No",0.6666666666666666,8,0,8.666666666666666
+Gry Simone Lumbye Floor,386623,746759,Hold1;,155354,Hsyl198738,2023-10-11 19:12:46 UTC,1,"",0,"After the code we can see a correlation between the urbanized counties (higher population counts) and pro-immigration attitudes, though we cannot be sure of a causal effect, since we would have to be sure that the baseline is completely similar on every aspect but their attitude on immigration.",0.0,"Based on the previous answers voters with a higher education seems to live in areas with a higher population. I do not think it is random as to where people with higher education locates as they will normally find ""better"" jobs in the bigger cities",0.0,"Housing preference, safety and crime rates, family and social ties, employment opportunities, cost of living",0.0,"The estimate of population count on anti-immigrant attitudes is zero,-0.01237,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,Yes",2.0,"Elementary or vocational education,Gymnasium or higher education,4.6 (46000ish citizens),Voter who hold a gymnasium or higher education tend to live in morepopulated areas,4.623,Yes",4.0,"","","","","","","0.582,Yes,Yes,-0.661,Both age and education is correlated with attitudes towards immigrants",2.0,"","","The association between population count and attitudes towards immigrants became stronger (further negative),-0.009,Yes",0.3333333333333333,8,0,8.333333333333334
+Johan Rafael Barnholdt Nielsen,385993,767847,Hold2;,155355,Hsyl198739,2023-10-11 12:47:22 UTC,1,"",0,"With an estimate of -0.0124 and a minute p-value of 4.04e-43, we spy a statistically significant inverse relationship between population count and attitudes. But beware, statistical sailors! These waters whisper correlation, not causation – a treacherous journey through confounder seas and causality currents awaits those seeking deeper truths!",0.0,"Even though there is a correlation i still think it is random, as the more populated areas have more variation because of their bigger sample size. ",0.0,"Nature 
+
+Community 
+
+Family 
+
+Jobs 
+
+Emotional Attachment ",0.0,"","","Elementary or vocational education,Gymnasium or higher education,4.6 (46000ish citizens),Voter who hold a gymnasium or higher education tend to live in morepopulated areas,4.623,Yes",4.0,"0.58244,Yes,-0.66144,Yes,Both age and education is correlated with attitudes towards immigrants",1.6,"","","-0.012,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,The estimate of population count on anti-immigrant attitudes is negative,Yes",1.5,"","","","","The association between population count and attitudes towards immigrants became stronger (further negative),-0.007,Yes",0.6666666666666666,8,0,7.766666666666667
+Astrid Bluhme Roed,389362,761754,Hold3;,155356,Hsyl198740,2023-10-11 09:45:19 UTC,1,"",0,"I dont the the relationship is strong enough, or at least we would have to check for confounders and such",0.0,"No. People with a higher educational level will typically live in bigger cities, because they will have a typically have a higher income, and be able to match the prices. Also, the jobs are in the cities for them and not in the suburbs",0.0,"family, income, schools",0.0,"","","Elementary or vocational education,Gymnasium or higher education,4.6 (46000ish citizens),Voter who hold a gymnasium or higher education tend to live in morepopulated areas,4.623,Yes",4.0,"","","","","-0.012,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,The estimate of population count on anti-immigrant attitudes is zero,Yes",2.0,"0.582,Yes,Yes,-0.663,Both age and education is correlated with attitudes towards immigrants",1.6,"","","The association between population count and attitudes towards immigrants became weaker (closer to zero),-0.005,No",0.3333333333333333,8,0,7.933333333333334
+Linus Emil Achilles Åttingsberg,320672,660662,Hold4;,155357,Hsyl198741,2023-10-11 07:49:34 UTC,1,"",0,"We can, if the change in population count happened before the change in attitude towards immigrants.",0.0,I do not. Older people would probably like to live in less populated areas and younger people tend to go to the bigger cities with a larger population.,0.0,"Location, work, family, income",0.0,"The estimate of population count on anti-immigrant attitudes is positive,-0.01237,Voters who live in more urbanized areas hold stronger anti-immigrant attitudes,Yes",1.0,"","","0.56234,Yes,-0.66144,No,Both age and education is correlated with attitudes towards immigrants",0.8,"","","","","","","56 years or older,18-34 years,6.8 (68000ish citizens),Older voters tend to live in less populated areas,-6.638,Yes",3.3333333333333335,"The association between population count and attitudes towards immigrants became weaker (closer to zero),-0.007,Yes",1.0,8,0,6.133333333333333
+Anna Sofie Blauenfeldt Pedersen,386178,753380,Hold1;,155354,Hsyl198738,2023-10-10 19:12:35 UTC,1,"",0,"",0.0,I don't think it's random where people of a certain age decides to live. People tend to live in big cities when they are younger or before raising a family. They often seek to live in multi cultural places where they receive all kinds of stimuli. When starting a family often around their 30s they want to move to a more calmer city often outside the city. They want to buy a bigger place to give their kids their own room etc.. This pattern becomes stronger throughout a lifetime. I guess in some way it also depends on the individuals economy. People with strong economy will have the money to live in the city which often tends to be more expensive where people with less money lives outside big cities because they can't afford it ,0.0,"",0.0,"The estimate of population count on anti-immigrant attitudes is zero,-0.01237,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,Yes",2.0,"","","","","","","","","0.582,No,No,-0.661,Both age and education is correlated with attitudes towards immigrants",1.2,"56 years or older,18-34 years,7.6 (76000ish citizens),Older voters tend to live in less populated areas,-6.638,No",3.3333333333333335,"The association between population count and attitudes towards immigrants became weaker (closer to zero),-0.005,No",0.3333333333333333,8,0,6.866666666666666
+Alba Augusta Larsen,389478,764927,Hold3;,155356,Hsyl198740,2023-10-10 11:52:57 UTC,1,"",0,"no, there might also be other factors, plus moving to a more populated area would not cause an increase in positive attitude towards immigration ",0.0,"no I don't think so, younger people tend to live in more populated areas due to education",0.0,"* jobs
+
+* family 
+
+* affordability ",0.0,"","","","","","","The association between population count and attitudes towards immigrants became weaker (closer to zero),-0.009,Yes",1.0,"-0.012,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,The estimate of population count on anti-immigrant attitudes is zero,Yes",2.0,"0.582,Yes,Yes,-0.661,Both age and education is correlated with attitudes towards immigrants",2.0,"56 years or older,18-34 years,7.6 (76000ish citizens),Older voters tend to live in less populated areas,-6.638,Yes",4.0,"","",8,0,9.0
+Emilie Moosdorf Vejgaard,388420,746151,Hold1;,155354,Hsyl198738,2023-10-10 11:22:02 UTC,1,"",0,"",0.0,"it could be random, but younger people tend to live in bigger citys, that has a higher population count, due to education. ",0.0,"education, family, work",0.0,"The estimate of population count on anti-immigrant attitudes is negative,-0.01247,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,Yes",1.0,"","","0.58244,Yes,-0.66088,Yes,Both age and education is correlated with attitudes towards immigrants",2.0,"The association between population count and attitudes towards immigrants became stronger (further negative),-0.010,Yes",0.3333333333333333,"","","","","56 years or older,18-34 years,7.6 (76000ish citizens),Older voters tend to live in less populated areas,-6.638,Yes",4.0,"","",8,0,7.333333333333333
+Elvira Egede Beiskjær,389216,750632,Hold2;,155355,Hsyl198739,2023-10-10 10:26:50 UTC,1,"",0,"Based on the regression we have done, I wouldn't say that we can estimate causality. Given that we haven't looked at possible confounders, it's possible that there are other variables that influence the relationship between out two variables. ",0.0,"No, given that all three population count means was at above a 0.001 significance level. ",0.0,"It could be factors like income level, where relatives live, where you were born or grew up and what job you have. ",0.0,"The estimate of population count on anti-immigrant attitudes is zero,-0.01237,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,Yes",2.0,"","","0.58244,Yes,-0.66144,Yes,Both age and education is correlated with attitudes towards immigrants",1.6,"","","","","","","56 years or older,18-34 years,7.6 (76000ish citizens),Older voters tend to live in less populated areas,-6.638,Yes",4.0,"The association between population count and attitudes towards immigrants became weaker (closer to zero),-0.007,Yes",1.0,8,0,8.6
+Thomas Holm Tambjerg,390683,764794,Hold4;,155357,Hsyl198741,2023-10-10 09:20:23 UTC,1,"",0,"We can't since we have only found a correlation between the two variables. We don't know which direction the variables impact eachother, or whether the correlation is in fact made up of other confounding variables. Therefore, without theoretical knowledge or more thorough testing we can't say whether there is a causal relationship between the two variables. ",0.0,"I don't think it is. As seen in the model, younger people tend to live in more urbanised areas, whereas older people tend to live in more rural areas. This makes sense intuitively, as people tend to settle down and move out of cities as they get older, whereas younger people move to cities in search of education and jobs. ",0.0,"Income, where they grew up, ",0.0,"","","","","","","","","-0.012,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,The estimate of population count on anti-immigrant attitudes is zero,Yes",2.0,"0.582,Yes,Yes,-0.661,Both age and education is correlated with attitudes towards immigrants",2.0,"56 years or older,18-34 years,7.6 (76000ish citizens),Older voters tend to live in less populated areas,-6.638,Yes",4.0,"The association between population count and attitudes towards immigrants became weaker (closer to zero),-0.007,Yes",1.0,8,0,9.0
+Sofie Bangsborg Thomsen,390077,755412,Hold1;,155354,Hsyl198738,2023-10-10 08:33:46 UTC,1,"",0,"There's a correlation between the urbanized areas and pro-immigration attitude, but in order to interpret correctly, we have to be sure that the baseline is equal and similar",0.0,"The previous questions and the analysis does not give a direct and precise information about whether it is random or not where the voters decide to live. But there is a significant correlation, indicating that the data are probably by chance.",0.0,"* Income
+
+* Employment
+
+* Family and people's social network
+
+* How close it is to public transportation
+
+* Taxes
+
+* Housing prices
+
+ ",0.0,"The estimate of population count on anti-immigrant attitudes is zero,-0.01237,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,Yes",2.0,"","","","","The association between population count and attitudes towards immigrants became stronger (further negative),-0.009,Yes",0.6666666666666666,"","","0.582,Yes,Yes,-0.661,Both age and education is correlated with attitudes towards immigrants",2.0,"56 years or older,18-34 years,7.6 (76000ish citizens),Older voters tend to live in less populated areas,-6.638,Yes",4.0,"","",8,0,8.666666666666666
+Victoria Ritzau Pagh,389937,770349,Hold3;,155356,Hsyl198740,2023-10-10 08:21:28 UTC,1,"",0,"We can not interpret the estimate of population count on attitudes towards immigrants as a causal effect, because we don't know which way to draw the arrows. We can not be sure that it is due to urbanization that the attitudes seem to be more pro-immigrant. Maybe it is the attitudes in the city that cause urbanization. We can be sure that there is a correlation between those two, but not causation. ",0.0,No i don't think so. It seems that younger voters live in more urbanized areas. ,0.0,"income, household type, ",0.0,"The estimate of population count on anti-immigrant attitudes is zero,-0.01237,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,Yes",2.0,"","","0.58244,Yes,-0.66088,Yes,Both age and education is correlated with attitudes towards immigrants",2.0,"","","","","","","56 years or older,18-34 years,7.6 (76000ish citizens),Older voters tend to live in less populated areas,-6.638,Yes",4.0,"The association between population count and attitudes towards immigrants became weaker (closer to zero),-0.007,Yes",1.0,8,0,9.0
+Ida Jensen Ketelsen,391023,755215,Hold2;,155355,Hsyl198739,2023-10-09 20:52:36 UTC,1,"",0,"No, because: ""Correlation does not equal causation! This is a mantra that statisticians around the world repeat often"".
+
+ 
+
+Though the linear model suggests a correlation, this is not equal to causation, since there can be other variables that are not accounted for, that affects the result (aka. selection bias).",0.0,"No, I do not think it is random where voters decide to live. This is because there seems to be inference between population count and education categories. ",0.0,no,0.0,"The estimate of population count on anti-immigrant attitudes is zero,-0.01237,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,No",1.5,"Elementary or vocational education,Gymnasium or higher education,4.6 (46000ish citizens),Voter who hold a gymnasium or higher education tend to live in morepopulated areas,4.623,Yes",4.0,"","","The association between population count and attitudes towards immigrants remained the same,-0.005,No",0.0,"","","0.562,Yes,Yes,-0.661,Age and education is both not correlated with attitudes towards immigrants",1.2,"","","","",7,1,6.7
+Anna Berg Christensen,386929,764146,Hold2;,155355,Hsyl198739,2023-10-09 18:33:02 UTC,1,"",0,"No I would say that population counts can provide valuable insights into patterns and associations about attitudes towards immigrants, but they do not, by themselves, demonstrate causal relationships. There might be a correlation between the two variables, but we need more to tell wether it is causation.",0.0,No not totally random. I would assume that the reason why the youngest age group live in the most populated areas could be education - many young people move from smaller cities to big cities when the start studying.,0.0,"economy, family type, social class, occupation ",0.0,"","","","","0.58244,Yes,-0.66088,Yes,Age and education is both not correlated with attitudes towards immigrants",1.6,"The association between population count and attitudes towards immigrants became weaker (closer to zero),-0.009,Yes",1.0,"-0.012,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,The estimate of population count on anti-immigrant attitudes is zero,Yes",2.0,"","","56 years or older,18-34 years,7.6 (76000ish citizens),Older voters tend to live in less populated areas,-6.638,Yes",4.0,"","",8,0,8.6
+Vincent Keyaniyan,404156,786917,Hold2;,155355,Hsyl198739,2023-10-09 18:22:07 UTC,1,"",0,No we can not interpret the forecast as causal effect since we can not be sure that there exist contributers which corse backdoor pathing. ,0.0,"I think in average it is not random, where the voters decide to live. In general I would expect that people with higher education tend to have a more internationally integrated profession and tend to be more politically interested and therefore prefer a more diverse environment, which is more likely to be found in regions with a high population density.",0.0,"* family members/ friends
+
+* hometown where the voters grew up.
+
+* job opportunities 
+
+* cultural proximity
+
+* rental prices
+
+* move to the partner
+
+* personal interest in the living location
+
+* pets
+
+* studies
+
+* safety
+
+* health care infrastructure",0.0,"The estimate of population count on anti-immigrant attitudes is zero,-0.01237,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,Yes",2.0,"Elementary or vocational education,Gymnasium or higher education,4.6 (46000ish citizens),Voter who hold a gymnasium or higher education tend to live in morepopulated areas,4.623,Yes",4.0,"0.58244,Yes,-0.66088,Yes,Both age and education is correlated with attitudes towards immigrants",2.0,"The association between population count and attitudes towards immigrants became weaker (closer to zero),-0.009,Yes",1.0,"","","","","","","","",8,0,9.0
+Lotus Yip Bargejani,388143,764316,Hold4;,155357,Hsyl198741,2023-10-09 17:15:06 UTC,1,"",0,"we can because of the p-value. 
+
+If the p-value is less than 0.05  it is  interpreted as evidence against the null hypothesis. ",0.0,"younger people tend to live in more populated areas, whereas when you get older you want to move away from the city life and settle down in areas that are a bit quieter",0.0,"Education opp. job opp. wanting to start a family, wanting peace and quiet",0.0,"","","","","0.56234,Yes,-0.66032,Yes,Education is correlated with attitudes towards immigrants\, but age is not",0.8,"","","-0.012,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,The estimate of population count on anti-immigrant attitudes is zero,Yes",2.0,"","","56 years or older,18-34 years,7.1 (71000ish citizens),Older voters tend to live in less populated areas,-6.638,No",2.6666666666666665,"The association between population count and attitudes towards immigrants became weaker (closer to zero),-0.009,Yes",0.6666666666666666,8,0,6.133333333333333
+Josefine Witt Rønne,386305,752898,Hold2;,155355,Hsyl198739,2023-10-09 17:09:09 UTC,1,"",0,i dont know,0.0,??,0.0,no,0.0,"The estimate of population count on anti-immigrant attitudes is positive,-0.01137,There is no relationship between population count and attitudes towards immigrants,No",0.0,"","","0.58244,Yes,-0.66088,Yes,Education is correlated with attitudes towards immigrants\, but age is not",1.6,"The association between population count and attitudes towards immigrants became stronger (further negative),-0.007,Yes",0.3333333333333333,"","","","","35-55 years,18-34 years,6.8 (68000ish citizens),There is no relationship between age and population count,-6.638,No",1.3333333333333333,"","",7,1,3.266666666666666
+Jonathan Victor Bastlund Woollhead,388430,766810,Hold4;,155357,Hsyl198741,2023-10-09 14:52:47 UTC,1,"",0,"The relationship could be causal, but we in no way have evidence so far to suggest that it is.",0.0,"Of course it is not random where voters decide to live, with that said i can't use the model to predict why they choose to live where they do.",0.0,"Political opinion, values, stresslevel, regard for nature etc.",0.0,"","","","","","","The association between population count and attitudes towards immigrants became weaker (closer to zero),-0.009,No",0.6666666666666666,"-0.012,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,The estimate of population count on anti-immigrant attitudes is zero,Yes",2.0,"0.582,Yes,Yes,-0.661,Both age and education is correlated with attitudes towards immigrants",2.0,"56 years or older,18-34 years,7.6 (76000ish citizens),Older voters tend to live in less populated areas,-7.640,Yes",3.3333333333333335,"","",8,0,8.0
+Silje Elleby Larsen,389654,766922,Hold1;,155354,Hsyl198738,2023-10-08 19:13:47 UTC,1,"",0,No we cannot. There are many other factors that can play a role i attitude towards immigrants than how populated the area the respondent lives in is. ,0.0,"No i do not think it is random. As we see in the data, people with gymnasium or higher education tend to live in more populated areas. I see a very low p-value and the SE is half of the coefficient, making be believe that it is a significant correlation. ",0.0,"Jobs, family, what they can afford.",0.0,"The estimate of population count on anti-immigrant attitudes is zero,-0.01237,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,Yes",2.0,"Elementary or vocational education,Gymnasium or higher education,4.6 (46000ish citizens),Voter who hold a gymnasium or higher education tend to live in morepopulated areas,4.623,Yes",4.0,"","","The association between population count and attitudes towards immigrants became weaker (closer to zero),-0.009,Yes",1.0,"","","0.582,Yes,Yes,-0.661,Both age and education is correlated with attitudes towards immigrants",2.0,"","","","",8,0,9.0
+Louise Mackeprang,389075,756052,"Hold1;, Hold3;","155354, 155356","Hsyl198738, Hsyl198740",2023-10-08 18:51:41 UTC,1,"",0,"yes, because the population count and the attitude towards immigrants matters compared to where you live.",0.0," no, I think it has meaning for different people",0.0,"education, age and where they grew up",0.0,"The estimate of population count on anti-immigrant attitudes is positive,-0.01237,Voters who live in more urbanized areas hold stronger anti-immigrant attitudes,Yes",1.0,"Elementary or vocational education,Gymnasium or higher education,4.4 (44000ish citizens),Voter who hold a gymnasium or higher education tend to live in morepopulated areas,4.623,Yes",3.3333333333333335,"0.59541,Yes,-0.66088,No,Both age and education is correlated with attitudes towards immigrants",1.2,"","","","","","","","","The association between population count and attitudes towards immigrants became weaker (closer to zero),-0.005,Yes",0.6666666666666666,8,0,6.199999999999999
+Marie Delendorff Schneider,385851,759023,Hold1;,155354,Hsyl198738,2023-10-08 17:49:10 UTC,1,"",0,"There can be other variables, known as confounding variables, that influence both population count and attitudes towards immigrants. These confounders can create a spurious association.",0.0,"I do not think it is completely random where voters decide to live. There are life circumstances that probably pull you in a certain direction such as economic factors or social ties, but I would also say there is a need to live close to people like you which align with one's cultural or lifestyle preferences.",0.0,"jobs, family, education, ",0.0,"The estimate of population count on anti-immigrant attitudes is zero,-0.01237,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,Yes",2.0,"Elementary or vocational education,Gymnasium or higher education,4.2 (42000ish citizens),Voter who hold a gymnasium or higher education tend to live in morepopulated areas,4.633,Yes",2.6666666666666665,"0.58244,Yes,-0.66088,Yes,Both age and education is correlated with attitudes towards immigrants",2.0,"","","","","","","","","The association between population count and attitudes towards immigrants became weaker (closer to zero),-0.005,No",0.3333333333333333,8,0,6.999999999999999
+Camilla Greve Bruun Nielsen,387784,764067,"Hold2;, Hold1;","155355, 155354","Hsyl198739, Hsyl198738",2023-10-08 14:41:24 UTC,1,"",0,"the p-value is zero, so we can consider interpreting the estimate of population count on respondents attitudes towards immigrants as a potential causal effect.",0.0,It seems like people with higher education tend to live places with a higher population count,0.0,gender. Women tend to life in cities,0.0,"","","Elementary or vocational education,Gymnasium or higher education,4.2 (42000ish citizens),Voter who hold a gymnasium or higher education tend to live in morepopulated areas,4.613,Yes",2.6666666666666665,"0.58244,Yes,-0.66088,No,Education is correlated with attitudes towards immigrants\, but age is not",1.2,"The association between population count and attitudes towards immigrants became weaker (closer to zero),-0.009,Yes",1.0,"-0.012,Voters who live in more urbanized areas hold stronger anti-immigrant attitudes,The estimate of population count on anti-immigrant attitudes is zero,No",1.0,"","","","","","",8,0,5.866666666666666
+Frida Mohr Jespersen,388174,759920,Hold1;,155354,Hsyl198738,2023-10-08 09:44:12 UTC,1,"",0,"Maybe, you could guess that there is a causal relationship that living in the city (and therefore being exposed to a lot of different cultures and ethnicities) will make you more pro-immigration. 
+
+But (!) I do not think we could do that without looking at other variables that have might influenced this. 
+
+Maybe people in the cities are more highly-educated and do not fear loosing jobs because of immigration, maybe they are more left-wing, maybe people in the city are more international etc.
+
+Therefore I think there is correlation but not necessarily causation.
+
+ ",0.0,"No, as seen, older people tend to live in less populated areas and I am sure that there are many other sociodemographic factors in the question of  where people choose to live",0.0,"Educational Background 
+
+Income 
+
+Family Ties
+
+Ethnicity 
+
+Cultural background 
+
+Network 
+
+Jobs (type of job or having a job/not having a job)",0.0,"The estimate of population count on anti-immigrant attitudes is zero,-0.01237,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,Yes",2.0,"","","","","","","","","0.582,Yes,Yes,-0.663,Age and education is both not correlated with attitudes towards immigrants",1.2,"56 years or older,18-34 years,7.6 (76000ish citizens),Older voters tend to live in less populated areas,-7.640,Yes",3.3333333333333335,"The association between population count and attitudes towards immigrants became weaker (closer to zero),-0.010,Yes",0.6666666666666666,8,0,7.199999999999999
+Johanne Benn Munck,391181,768566,Hold1;,155354,Hsyl198738,2023-10-07 21:31:32 UTC,1,"",0,"No, there are possibly multiple confounders that influence both why people have an positive attitude towards immigrants and where they live. The baseline are not similar.",0.0,"No, I do not think that it is randomn. There seems to be a correlation between the educational choice and weather or not the voter lives in a populated place. PopulationCount is thus a mediator, because it is influenced by education and influences attitudes towards immigrants.",0.0,"Other than education, which obviously also relates to important factors such as occupational opportunities, income etc., I think one's socialclass has an influence, but that is somewhat the same. And perhabs peoples own place of upbringing also has a effect.",0.0,"The estimate of population count on anti-immigrant attitudes is zero,-0.01237,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,Yes",2.0,"Elementary or vocational education,Gymnasium or higher education,4.6 (46000ish citizens),Voter who hold a gymnasium or higher education tend to live in morepopulated areas,4.623,Yes",4.0,"0.58244,Yes,-0.66088,Yes,Both age and education is correlated with attitudes towards immigrants",2.0,"","","","","","","","","The association between population count and attitudes towards immigrants became weaker (closer to zero),-0.007,Yes",1.0,8,0,9.0
+Leonora Frydensberg Sepstrup,368459,716279,Hold2;,155355,Hsyl198739,2023-10-07 15:20:51 UTC,1,"",0,"There are different challenges we can face in estimating causal effects, such as selection bias.",0.0,"The results indicate that individuals with ""Gymnasium or higher education"" have a significantly higher expected population count compared to the reference group ""Elementary or vocational education."" The significant p-value suggests that this difference is not random, and the level of education has a significant effect on the population count.",0.0,"* Family
+
+* Economy
+
+* Work
+
+* Transport",0.0,"The estimate of population count on anti-immigrant attitudes is zero,-0.01237,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,Yes",2.0,"Elementary or vocational education,Gymnasium or higher education,4.4 (44000ish citizens),Voter who hold a gymnasium or higher education tend to live in morepopulated areas,4.623,Yes",3.3333333333333335,"0.58244,Yes,-0.66088,Yes,Both age and education is correlated with attitudes towards immigrants",2.0,"The association between population count and attitudes towards immigrants became stronger (further negative),-0.010,Yes",0.3333333333333333,"","","","","","","","",8,0,7.666666666666666
+Astrid James Madsen,388502,762515,Hold3;,155356,Hsyl198740,2023-10-07 12:19:27 UTC,1,"",0,"No, because correlation does not equal causation. ",0.0,"No, i think older people tend to move to the countryside ",0.0,Housing prices ,0.0,"The estimate of population count on anti-immigrant attitudes is zero,-0.01237,Voters who live in more urbanized areas hold stronger anti-immigrant attitudes,Yes",1.5,"","","","","The association between population count and attitudes towards immigrants remained the same,-0.005,No",0.0,"","","0.582,No,Yes,-0.663,Age and education is both not correlated with attitudes towards immigrants",0.4,"56 years or older,18-34 years,7.6 (76000ish citizens),Older voters tend to live in less populated areas,-6.638,Yes",4.0,"","",7,1,5.9
+Marie Hoby Fausbøll,388500,764961,Hold1;,155354,Hsyl198738,2023-10-06 16:27:12 UTC,1,"",0,"We cannot interpret estimate of population count on attitude towards immigrant as a causal effect, because there can occur selection bias. This means that there can be systemic differences between the group other than what we are looking at.",0.0,"I do not think it is random. People tend to be among others alike. Furthermore, there are often more jobs in bigger cities, which could be a reason for higher educated choosing to live in bigger cities.  ",0.0,"Possibilities, social",0.0,"The estimate of population count on anti-immigrant attitudes is zero,-0.01247,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,Yes",1.5,"Elementary or vocational education,Gymnasium or higher education,4.6 (46000ish citizens),Voter who hold a gymnasium or higher education tend to live in morepopulated areas,4.623,Yes",4.0,"","","The association between population count and attitudes towards immigrants became stronger (further negative),-0.010,Yes",0.3333333333333333,"","","0.582,Yes,Yes,-0.661,Both age and education is correlated with attitudes towards immigrants",2.0,"","","","",8,0,7.833333333333333
+Maria Dahl Thorsager,387728,760985,Hold4;,155357,Hsyl198741,2023-10-06 13:43:29 UTC,1,"",0,"No, i would not think so. I think these two variables might correlate due to different aspects thant just population counts. ",0.0,No i do not think so,0.0,"yes many, like job opportunities, family, nature (wanting to live away from the city) noise, public transportation, access to education etc.",0.0,"","","Gymnasium or higher education,Elementary or vocational education,4.6 (46000ish citizens),Voter who hold a gymnasium or higher education tend to live in morepopulated areas,4.633,Yes",2.0,"","","The association between population count and attitudes towards immigrants became weaker (closer to zero),-0.009,Yes",1.0,"-0.012,Voters who live in more urbanized areas hold stronger anti-immigrant attitudes,The estimate of population count on anti-immigrant attitudes is zero,Yes",1.5,"0.582,Yes,Yes,-0.661,Both age and education is correlated with attitudes towards immigrants",2.0,"","","","",8,0,6.5
+Emilie Brix Pedersen,363565,725062,"Hold1;, Hold2;","155354, 155355","Hsyl198738, Hsyl198739",2023-10-06 12:57:25 UTC,1,"",0,"No, because we haven't take other possible variables into account.",0.0,No,0.0,"* Nature
+
+* Friends and family close by
+
+* Economic situation",0.0,"","","Elementary or vocational education,Gymnasium or higher education,4.6 (46000ish citizens),Voter who hold a gymnasium or higher education tend to live in morepopulated areas,4.623,Yes",4.0,"","","","","-0.012,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,The estimate of population count on anti-immigrant attitudes is zero,Yes",2.0,"0.582,Yes,Yes,-0.661,Both age and education is correlated with attitudes towards immigrants",2.0,"","","The association between population count and attitudes towards immigrants became weaker (closer to zero),-0.007,Yes",1.0,8,0,9.0
+Aske Lindskov Steensig,388205,752780,Hold1;,155354,Hsyl198738,2023-10-06 12:56:07 UTC,1,"",0,"Since the p-value is 0 and there is a negative correlation between attitude towards immigration and population. We can expect there to be a causal effect. there might however be other cofounders, such as education of wealth that has causal effect as well",0.0,No it is not. Based on the previous question we could assume that jobs that require a higher level of education is more widespread in more populated areas or that people with higher education in more cases can afford to live in those areas,0.0,"Where they grew up, Where there is relevant jobs available, Where their family lives, price of housing.",0.0,"The estimate of population count on anti-immigrant attitudes is zero,-0.01237,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,No",1.5,"Elementary or vocational education,Gymnasium or higher education,4.6 (46000ish citizens),Voter who hold a gymnasium or higher education tend to live in morepopulated areas,4.623,Yes",4.0,"","","The association between population count and attitudes towards immigrants became weaker (closer to zero),-0.009,Yes",1.0,"","","0.582,Yes,Yes,-0.661,Both age and education is correlated with attitudes towards immigrants",2.0,"","","","",8,0,8.5
+Morris Emil Agersted-Hass,390651,766194,Hold2;,155355,Hsyl198739,2023-10-06 12:31:07 UTC,1,"",0,Not without further testing. We have no knowledge of possible confounders.,0.0,No,0.0,"Wealth, culture, nature, family and other connections, superstition and all sorts of opportunities for activities.",0.0,"","","Elementary or vocational education,Gymnasium or higher education,4.6 (46000ish citizens),Voter who hold a gymnasium or higher education tend to live in morepopulated areas,4.623,Yes",4.0,"0.58244,Yes,-0.66088,Yes,Both age and education is correlated with attitudes towards immigrants",2.0,"The association between population count and attitudes towards immigrants became weaker (closer to zero),-0.007,Yes",0.6666666666666666,"-0.013,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,The estimate of population count on anti-immigrant attitudes is zero,Yes",1.5,"","","","","","",8,0,8.166666666666666
+Jonathan Aske Holkenov,389372,745823,Hold1;,155354,Hsyl198738,2023-10-06 12:31:07 UTC,1,"",0,Not yet. We have no knowledge or control of confounders. For all we know the causality might be reversed,0.0,No. The P value suggests that our outcome being random is highly unlikely. ,0.0,"Other than education and views on immigrants, cost of living, family, nightlife, relationships, superstition, drug abuse, mental illness and career opportunities et cetera might affect peoples decisions to move to a new city (or not)",0.0,"The estimate of population count on anti-immigrant attitudes is zero,-0.01237,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,Yes",2.0,"Elementary or vocational education,Gymnasium or higher education,4.6 (46000ish citizens),Voter who hold a gymnasium or higher education tend to live in morepopulated areas,4.623,Yes",4.0,"","","","","","","0.582,Yes,Yes,-0.661,Both age and education is correlated with attitudes towards immigrants",2.0,"","","The association between population count and attitudes towards immigrants became weaker (closer to zero),-0.007,Yes",1.0,8,0,9.0
+Maryème BEN MOHAMED,406324,786419,Hold1;,155354,Hsyl198738,2023-10-06 12:13:35 UTC,1,"",0,no,0.0,no,0.0,"",0.0,"","","","","","","","","0.011,There is no relationship between population count and attitudes towards immigrants,The estimate of population count on anti-immigrant attitudes is zero,Yes",1.0,"0.562,Yes,Yes,-0.663,Age is correlated with attitudes towards immigrants\, but education is not",0.4,"35-55 years,18-34 years,6.9 (69000ish citizens),There is no relationship between age and population count,-6.638,Yes",2.0,"The association between population count and attitudes towards immigrants remained the same,-0.005,Yes",0.3333333333333333,8,0,3.7333333333333334
+Zara Kjærgaard Thustrup,388437,765878,Hold1;,155354,Hsyl198738,2023-10-06 12:02:18 UTC,1,"",0,"No we can not, because we do not know the baseline for the variables.",0.0,"I do not think it is random, cause we tend to live close to people we are alike.",0.0,"Maybe it is important to people what is in the area (shopping oppertunities, schools and more). Ones income can also influence the decision.",0.0,"The estimate of population count on anti-immigrant attitudes is zero,-0.01237,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,Yes",2.0,"Elementary or vocational education,Gymnasium or higher education,4.6 (46000ish citizens),Voter who hold a gymnasium or higher education tend to live in morepopulated areas,4.623,Yes",4.0,"0.58244,Yes,-0.66088,Yes,Both age and education is correlated with attitudes towards immigrants",2.0,"The association between population count and attitudes towards immigrants became weaker (closer to zero),-0.009,Yes",1.0,"","","","","","","","",8,0,9.0
+Kristina Amalie Busk Lange,391026,755586,Hold2;,155355,Hsyl198739,2023-10-06 10:40:36 UTC,1,"",0,Yes the fact that the larger the population the more pro-immigration people seem to be,0.0,"No there can be many factors i think. For younger people it is important to have acces to education and more social activities. As people grow into the 35-55 age group, things like having children could for example effect where they choose to live and so on...",0.0,"Preferences in nature vs. lots of social activities, family, pollution and infrastructure could be parameters... ",0.0,"","","","","0.58244,Yes,-0.66088,Yes,Both age and education is correlated with attitudes towards immigrants",2.0,"The association between population count and attitudes towards immigrants became weaker (closer to zero),-0.009,Yes",1.0,"-0.012,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,The estimate of population count on anti-immigrant attitudes is zero,Yes",2.0,"","","56 years or older,18-34 years,7.6 (76000ish citizens),Older voters tend to live in less populated areas,-6.638,Yes",4.0,"","",8,0,9.0
+Ida Victoria Dharti Juhl Holm,369898,716657,Hold3;,155356,Hsyl198740,2023-10-06 10:38:06 UTC,1,"",0,"Yes. Because we can see that the larger the population in a city is, the more positive attitude you have towards immigration. ",0.0,"No I don't think it is, because younger people often move to bigger cities due to education. When people get's older there is a tendency that they move away and bosætter sig in all parts of the country.",0.0,economic etc.,0.0,"The estimate of population count on anti-immigrant attitudes is zero,-0.01237,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,Yes",2.0,"","","0.58244,Yes,-0.66088,Yes,Both age and education is correlated with attitudes towards immigrants",2.0,"The association between population count and attitudes towards immigrants became weaker (closer to zero),-0.007,No",0.3333333333333333,"","","","","56 years or older,18-34 years,7.6 (76000ish citizens),Older voters tend to live in less populated areas,-6.638,Yes",4.0,"","",8,0,8.333333333333334
+Caroline Bøgh Hørslev,386323,747740,Hold4;,155357,Hsyl198741,2023-10-06 10:13:23 UTC,1,"",0,"It can be interpreted as a causal effect, because it is expected people who live in more urbanized areas are more exposed to other cultures and therefore more cultivated. Therefore they might not see immigrants as a threat",0.0,The reason why many young people tend to live in the cities may be because they are studying. The reason why people with a higher education tend to live in cities may also be because of studies or higher educational job being located in the cities,0.0,"Economic ressources, relations with family and friends, possibilities for jobs, education etc.",0.0,"","","Elementary or vocational education,Gymnasium or higher education,4.8 (48000ish citizens),Voter who hold a gymnasium or higher education tend to live in morepopulated areas,4.623,Yes",3.3333333333333335,"0.58244,Yes,-0.66088,Yes,Both age and education is correlated with attitudes towards immigrants",2.0,"","","-0.012,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,The estimate of population count on anti-immigrant attitudes is positive,No",1.0,"","","","","The association between population count and attitudes towards immigrants became stronger (further negative),-0.007,Yes",0.6666666666666666,8,0,7.0
+Rebecca Limbrecht Bruhn,385771,745917,Hold3;,155356,Hsyl198740,2023-10-06 10:13:20 UTC,1,"",0,"It can be interpret as a causal effect, because we expect that people who live in urbanized cities are more cultivated and exposed to different cultures. ",0.0,"I don't think it is random. I think young people seek urbanized places to live, because more things happen, there are many other young people and more parties to attempt, more cultural life. I think elder people prefer to live in less urbanized places, because they want peace, less stress and like to know their neighbors. ",0.0,"Economic ressources, family and friends relations, possibilities for jibs, educations etc. ",0.0,"","","","","","","","","-0.012,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,The estimate of population count on anti-immigrant attitudes is positive,Yes",1.5,"0.582,Yes,Yes,-0.661,Both age and education is correlated with attitudes towards immigrants",2.0,"56 years or older,18-34 years,7.6 (76000ish citizens),Older voters tend to live in less populated areas,-6.638,Yes",4.0,"The association between population count and attitudes towards immigrants became stronger (further negative),-0.007,Yes",0.6666666666666666,8,0,8.166666666666666
+Laura Krogh Thomassen,386908,766595,Hold4;,155357,Hsyl198741,2023-10-06 09:56:39 UTC,1,"",0,"There is statistic signifacnt relationship between population count and attitude towards immigrants due to the p-value under 0.05; so in this case, yes. But correlation doesn't necessarily mean causalation; the result could be influenced by a cofounder variable due to selecetion bias, which affects the result. This cofounder could for example be age. ",0.0,"No, it could indicate that there is relationship between the age of voters and where they live due to the p-value under 0.001; but this makes good sense due to the fact, that students often live in the cities, and when they get family, they move out of the city. 
+
+ ",0.0,"* Economics
+
+* Family 
+
+* Work 
+
+* Recreative aspects; if you want to be close to museums, shopping or forests, becahes 
+
+* Health; mabye you can get better health services by living in another place?
+
+* Education 
+
+* Friends 
+
+* Retirement 
+
+* Change in laws, regulations, politics, which force you to move/make it more profitable for you to move 
+
+* If you are a refugee... ",0.0,"","","","","","","","","-0.012,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,The estimate of population count on anti-immigrant attitudes is zero,Yes",2.0,"0.582,Yes,Yes,-0.661,Both age and education is correlated with attitudes towards immigrants",2.0,"56 years or older,18-34 years,7.6 (76000ish citizens),Older voters tend to live in less populated areas,-6.638,Yes",4.0,"The association between population count and attitudes towards immigrants became weaker (closer to zero),-0.007,Yes",1.0,8,0,9.0
+Olivia Weiland Møller Mehlbye,366529,731993,Hold4;,155357,Hsyl198741,2023-10-06 09:19:38 UTC,1,"",0,"No, we can't. We can't be sure, as we don't know what the estimate would be without. ",0.0,"No I don't think it's random. Younger people often live in the bigger, more populated towns and citys (often while studying/working.) Older people often move to less populated areas after studying or when wanting more space. ",0.0,economic situation,0.0,"","","","","0.58244,Yes,-0.66144,Yes,Both age and education is correlated with attitudes towards immigrants",1.6,"","","0.012,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,The estimate of population count on anti-immigrant attitudes is zero,Yes",1.5,"","","56 years or older,18-34 years,7.6 (76000ish citizens),Older voters tend to live in less populated areas,-6.638,Yes",4.0,"The association between population count and attitudes towards immigrants became stronger (further negative),-0.010,Yes",0.3333333333333333,8,0,7.433333333333334
+Astrid Bang Therkildsen,386471,762426,Hold4;,155357,Hsyl198741,2023-10-06 09:19:28 UTC,1,"",0,"We cannot be sure that there is a causal effect, when we don't know what the answer would be without this. Like the video about college applications. Because it has happened we wouldn't know how it would be without. ",0.0,I do not think it is random as the answers show. In more populated areas there is probably more jobs for the higher educated than there is in the less populated areas. ,0.0,"* personal reasons
+
+* jobs
+
+* family
+
+* money",0.0,"The estimate of population count on anti-immigrant attitudes is zero,-0.01237,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,Yes",2.0,"Elementary or vocational education,Gymnasium or higher education,4.2 (42000ish citizens),Voter who hold a gymnasium or higher education tend to live in morepopulated areas,4.623,Yes",3.3333333333333335,"","","The association between population count and attitudes towards immigrants became weaker (closer to zero),-0.009,Yes",1.0,"","","0.582,Yes,Yes,-0.661,Both age and education is correlated with attitudes towards immigrants",2.0,"","","","",8,0,8.333333333333332
+Rebecca Frostholm Markussen,386054,746755,Hold4;,155357,Hsyl198741,2023-10-06 09:05:50 UTC,1,"",0,I dont think so because we would need more information in order to understand if there is a causation. ,0.0,"It seems like there is a causal effect between age and where the voters decides to live, both based on the statistics but it also makes sense based on my understanding. The p-values are very low. ",0.0,"Home town (Where they were born)
+
+Job
+
+Income 
+
+Preferences in terms of fx noise, shopping opportunities, etc 
+
+ 
+
+ 
+
+ ",0.0,"The estimate of population count on anti-immigrant attitudes is zero,-0.01247,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,Yes",1.5,"","","","","The association between population count and attitudes towards immigrants became stronger (further negative),-0.009,Yes",0.6666666666666666,"","","0.582,No,Yes,-0.661,Both age and education is correlated with attitudes towards immigrants",1.2,"56 years or older,18-34 years,7.6 (76000ish citizens),Older voters tend to live in less populated areas,-6.638,No",3.3333333333333335,"","",8,0,6.699999999999999
+Freja Kromann Schiøler,341332,698814,Hold1;,155354,Hsyl198738,2023-10-06 08:09:52 UTC,1,"",0,"We can not interpret the estimate as a causal effect, as we do not no if there is any confounders involved in the relation.",0.0,"No, it is not random where voters decide to live.
+
+Some of the explanations are:
+
+* Job opportunities
+
+* Prices of houses/appartments
+
+* Location of family
+
+* Etc.",0.0,"* Prices on houses/appartments
+
+* Where family live
+
+* Job opportunities
+
+* Acces to school and university
+
+* Cost of living",0.0,"The estimate of population count on anti-immigrant attitudes is zero,-0.01237,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,Yes",2.0,"Elementary or vocational education,Gymnasium or higher education,4.8 (48000ish citizens),Voter who hold a gymnasium or higher education tend to live in morepopulated areas,4.623,Yes",3.3333333333333335,"0.58244,Yes,-0.66088,Yes,Both age and education is correlated with attitudes towards immigrants",2.0,"The association between population count and attitudes towards immigrants became weaker (closer to zero),-0.009,Yes",1.0,"","","","","","","","",8,0,8.333333333333332
+Sule Tan,406114,787937,Hold3;,155356,Hsyl198740,2023-10-05 18:40:37 UTC,1,"",0,We cannot interpret a causal relationship because the fact that there is a correlation does not mean that there is a causation.  This relationship may have several confounding variables influencing this relationship. ,0.0,"There is a correlation between where people live and education levels. It does not seem random, meaning there are possible variables for this relationship.",0.0,"Cost of living, safety and job opportunities",0.0,"","","Gymnasium or higher education,Elementary or vocational education,4.6 (46000ish citizens),Voter who hold a gymnasium or higher education tend to live in morepopulated areas,4.623,Yes",2.6666666666666665,"0.58244,Yes,-0.66088,Yes,Both age and education is correlated with attitudes towards immigrants",2.0,"The association between population count and attitudes towards immigrants became stronger (further negative),-0.009,Yes",0.6666666666666666,"-0.012,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,The estimate of population count on anti-immigrant attitudes is zero,Yes",2.0,"","","","","","",8,0,7.333333333333333
+Marcus Scheel Fjording,388037,747654,Hold1;,155354,Hsyl198738,2023-10-05 15:46:25 UTC,1,"",0,It's difficult to determine causality from such a simple model. We can not really know if there is more variables that contribute to the observable effect. We can only say that there is a significant correlation.,0.0,"No, it seems that voters decide to live depending on their current life situation such as education.",0.0,"Income
+
+Kids or no kids
+
+Ethnicity
+
+ ",0.0,"","","Elementary or vocational education,Gymnasium or higher education,4.6 (46000ish citizens),Voter who hold a gymnasium or higher education tend to live in morepopulated areas,4.623,Yes",4.0,"0.58244,Yes,-0.66088,Yes,Both age and education is correlated with attitudes towards immigrants",2.0,"The association between population count and attitudes towards immigrants became weaker (closer to zero),-0.009,No",0.6666666666666666,"-0.012,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,The estimate of population count on anti-immigrant attitudes is zero,Yes",2.0,"","","","","","",8,0,8.666666666666666
+Naja Bjørg Møller,387403,769627,Hold3;,155356,Hsyl198740,2023-10-05 14:27:23 UTC,1,"",0,"No I wouldn't say that there is a causal effect between the size of the population and the attitude towards immigrants. It's more likely that the size of the population is a confounder variable for immigration, since the baselines more likely are different for the municipalities.
+
+ 
+
+For example the larger municipalities have a more diverse population compared to forexample  Rebild. i believe that has more of a causal effect on the attitude towards immigrants. The same goes for education level - they tend on average to be higher in larger municipalities, since they are the university municipalities. 
+
+ ",0.0,No i think that the people who have a highschool or higher education are attracted to larger municipalities as it is in those their jobs are located and vice versa. ,0.0,"* income (its more expensive to live in the larger municipalities)
+
+* civil status (larger share of singles in the larger municipalities and larger share families and couples in the smaller municipalities) 
+
+* job type (probably a confounder to education and income or vice versa) ",0.0,"The estimate of population count on anti-immigrant attitudes is zero,-0.01237,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,Yes",2.0,"Elementary or vocational education,Gymnasium or higher education,4.6 (46000ish citizens),Voter who hold a gymnasium or higher education tend to live in morepopulated areas,4.623,Yes",4.0,"0.58244,Yes,-0.66088,Yes,Both age and education is correlated with attitudes towards immigrants",2.0,"The association between population count and attitudes towards immigrants became weaker (closer to zero),-0.009,Yes",1.0,"","","","","","","","",8,0,9.0
+Asmus Oliver Lewis,387200,767772,Hold1;,155354,Hsyl198738,2023-10-05 14:24:55 UTC,1,"",0,Nope. We don't know the baseline for the treatment variable.,0.0,"No age seems to be an important factor when people choose where to live. 
+
+Basen on the models we have made we can of course not say if there is a causal relationship. ",0.0,"Where they were born.
+
+If they have kids or not.
+
+Their salary.",0.0,"The estimate of population count on anti-immigrant attitudes is zero,-0.01237,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,Yes",2.0,"","","0.58244,Yes,-0.66088,Yes,Both age and education is correlated with attitudes towards immigrants",2.0,"The association between population count and attitudes towards immigrants became weaker (closer to zero),-0.009,Yes",1.0,"","","","","56 years or older,18-34 years,7.6 (76000ish citizens),Older voters tend to live in less populated areas,-6.638,Yes",4.0,"","",8,0,9.0
+Signe Bruun Nielsen,388423,764020,Hold4;,155357,Hsyl198741,2023-10-05 13:55:39 UTC,1,"",0,To conclude whether or not the estimate has a causal effect we have to know if the respondents has the same baseline. In this case this would mean that we would have to know if a person from a similar population counts has the same attitude towards immigrants or if they don't. ,0.0,"I think there are structures affecting individuals to where they are living. Persons who study at a university tends to live in bigger cities because of the universities being placed in bigger cities, and the bigger cities has a bigger population count, so therefore I think there is underlying structures determining where people decide to live. ",0.0,"* Job
+
+* Income 
+
+* Family size",0.0,"","","Elementary or vocational education,Gymnasium or higher education,4.6 (46000ish citizens),Voter who hold a gymnasium or higher education tend to live in morepopulated areas,4.623,Yes",4.0,"0.58244,Yes,-0.66088,Yes,Both age and education is correlated with attitudes towards immigrants",2.0,"The association between population count and attitudes towards immigrants became weaker (closer to zero),-0.007,Yes",0.6666666666666666,"-0.012,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,The estimate of population count on anti-immigrant attitudes is zero,Yes",2.0,"","","","","","",8,0,8.666666666666666
+Natalie Maria Kaarsberg Bøjsen,387299,762161,Hold1;,155354,Hsyl198738,2023-10-05 09:28:27 UTC,1,"",0,"It is hard to say, we dont know anything about any possible confounders for example yet.",0.0,"No, it seems that education has quite a lot to say",0.0,"Income/job, race/ethnicity, ",0.0,"The estimate of population count on anti-immigrant attitudes is zero,-0.01237,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,Yes",2.0,"Elementary or vocational education,Gymnasium or higher education,4.8 (48000ish citizens),Voter who hold a gymnasium or higher education tend to live in morepopulated areas,4.623,Yes",3.3333333333333335,"0.58244,Yes,-0.66088,Yes,Both age and education is correlated with attitudes towards immigrants",2.0,"","","","","","","","","The association between population count and attitudes towards immigrants became weaker (closer to zero),-0.007,Yes",1.0,8,0,8.333333333333332
+Benjamin Henanger,386181,753131,Hold2;,155355,Hsyl198739,2023-10-05 09:23:37 UTC,1,"",0,"No - correlation does not equal causation, even though we heuristically might think that higher-educated citizens that tend to live in densely populated urban areas often hold pro-immigration stances. There could be a selection bias, i.e., the pollers could have selected respondents from different municipalities (groups) that have systematic differences between them (e.g., many differences across various measured and unmeasured variables). Moreover, there could be confounding variables - related to my first point regarding selection bias - that have a causal effect on both Extra_ImmigrationIsAThreat and populationCount. For instance, it is conceivable that a variable such as economic status could be associated with both populationCount and ImmigrationIsAThreat, since people in urban areas typically are more affluent than people in rural areas and typically hold pro-immigration sentiments in comparison with less afluent people.",0.0,"No, education seems to be a confounding variable that we have now discovered, which might have an effect on where voters decide to live. It seems like education has an association with both populationCount (the higher the education, the more populated area of residence) and, heuristically speaking, also with ImmigrationIsAThreat (the more educated, the more likely to hold pro-immigration stances). ",0.0,"Education. Usually, institutions for higher education are located in more densely populated areas (municipalities with higher populations), which might cause people wanting such education to move there.
+
+ 
+
+ ",0.0,"The estimate of population count on anti-immigrant attitudes is zero,-0.01237,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,Yes",2.0,"Elementary or vocational education,Gymnasium or higher education,4.6 (46000ish citizens),Voter who hold a gymnasium or higher education tend to live in morepopulated areas,4.623,Yes",4.0,"","","The association between population count and attitudes towards immigrants became weaker (closer to zero),-0.007,Yes",0.6666666666666666,"","","0.582,Yes,Yes,-0.661,Both age and education is correlated with attitudes towards immigrants",2.0,"","","","",8,0,8.666666666666666
+Linnea Bruhn-Jensen,386229,766211,Hold1;,155354,Hsyl198738,2023-10-04 17:19:54 UTC,1,"",0,"No, we cannot, we can only say that there is evidence of a correlation",0.0,"No, I think that many young voters live in more populated areas, because they usually study or work in bigger cities, while older voters typically don't study, and some are retired, meaning that they dont have to be near a big city where the population is higher",0.0,where their family is from and such,0.0,"","","","","","","","","-0.012,Voters who live in more urbanized areas hold stronger pro-immigrant attitudes,The estimate of population count on anti-immigrant attitudes is zero,Yes",2.0,"0.582,Yes,Yes,-0.661,Both age and education is correlated with attitudes towards immigrants",2.0,"56 years or older,18-34 years,7.6 (76000ish citizens),Older voters tend to live in less populated areas,-6.638,Yes",4.0,"The association between population count and attitudes towards immigrants became stronger (further negative),-0.007,Yes",0.6666666666666666,8,0,8.666666666666666

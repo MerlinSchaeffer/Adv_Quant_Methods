@@ -4,7 +4,7 @@
     <title>Polynomials and transformations</title>
     <meta charset="utf-8" />
     <meta name="author" content="Merlin Schaeffer  Department of Sociology" />
-    <meta name="date" content="2023-12-04" />
+    <meta name="date" content="2023-12-06" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
     <script src="libs/tile-view/tile-view.js"></script>
@@ -29,7 +29,7 @@ class: center, middle, inverse, title-slide
 ### Merlin Schaeffer<br> Department of Sociology
 ]
 .date[
-### 2023-12-04
+### 2023-12-06
 ]
 
 ---
@@ -306,7 +306,7 @@ class: inverse center middle
 .font80[
 
 ```r
-ols_2 &lt;- lm_robust(LifeExpect ~ I(HealthExp / 1000) + # I() allows to transform x 
+*ols_2 &lt;- lm_robust(LifeExpect ~ I(HealthExp / 1000) + # I() allows to transform x
 *                  # within model. 1 unit increase = $1000
                    date + socialist*citizen_rights, data = Dat, clusters = country)
 ```
@@ -451,9 +451,10 @@ layout: true
 .font80[
 
 ```r
-*ols_3 &lt;- lm_robust(LifeExpect ~ I(HealthExp/1000) + I((HealthExp/1000)^2) +
-                   date + socialist*citizen_rights,
-                   data = Dat, clusters = country)
+ols_3 &lt;- lm_robust(
+  LifeExpect ~ I(HealthExp/1000) + 
+*   I((HealthExp/1000)^2) +
+    date + socialist*citizen_rights, data = Dat, clusters = country)
 ```
 &lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
  &lt;thead&gt;
@@ -1017,8 +1018,8 @@ layout: true
 &lt;img src="https://helpingwithmath.com/wp-content/uploads/2021/10/Logarithms-1.png" width="60%" style="display: block; margin: auto;" /&gt;
 
 `$$\text{Example 1: }\log_2(32)=5 \leftrightarrow 2^5 = 32$$`
-`$$\text{Example 1: }\log_2(16)=4 \leftrightarrow 2^4 = 16$$`
-- When we use log to the base 2, an increase of the exponent by 1 implies a doubling of the original value/argument!
+`$$\text{Example 1: }\log_2(4)=2 \leftrightarrow 2^2 = 4$$`
+- When we use log to the base 2, .alert[an increase of the exponent by 1 implies a doubling of the original value/argument!]
 ]
 
 ---

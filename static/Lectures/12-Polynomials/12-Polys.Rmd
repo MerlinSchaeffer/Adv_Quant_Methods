@@ -232,7 +232,7 @@ class: inverse center middle
 .push-left[
 .font80[
 ```{r}
-ols_2 <- lm_robust(LifeExpect ~ I(HealthExp / 1000) + # I() allows to transform x 
+ols_2 <- lm_robust(LifeExpect ~ I(HealthExp / 1000) + # I() allows to transform x #<<
                    # within model. 1 unit increase = $1000 #<<
                    date + socialist*citizen_rights, data = Dat, clusters = country)
 ```
@@ -332,9 +332,10 @@ layout: true
 .push-left[
 .font80[
 ```{r}
-ols_3 <- lm_robust(LifeExpect ~ I(HealthExp/1000) + I((HealthExp/1000)^2) + #<<
-                   date + socialist*citizen_rights,
-                   data = Dat, clusters = country)
+ols_3 <- lm_robust(
+  LifeExpect ~ I(HealthExp/1000) + 
+    I((HealthExp/1000)^2) + #<<
+    date + socialist*citizen_rights, data = Dat, clusters = country)
 ```
 ```{r, echo = FALSE}
 modelsummary(list("Life Exp." = ols_3),
@@ -606,8 +607,8 @@ knitr::include_graphics('https://helpingwithmath.com/wp-content/uploads/2021/10/
 ```
 
 $$\text{Example 1: }\log_2(32)=5 \leftrightarrow 2^5 = 32$$
-$$\text{Example 1: }\log_2(16)=4 \leftrightarrow 2^4 = 16$$
-- When we use log to the base 2, an increase of the exponent by 1 implies a doubling of the original value/argument!
+$$\text{Example 1: }\log_2(4)=2 \leftrightarrow 2^2 = 4$$
+- When we use log to the base 2, .alert[an increase of the exponent by 1 implies a doubling of the original value/argument!]
 ]
 
 ---
