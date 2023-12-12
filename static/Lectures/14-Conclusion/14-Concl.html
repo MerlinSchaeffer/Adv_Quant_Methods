@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Multiple Regression &amp;    Fundamentals of Causal Inference</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Merlin Schaeffer  Department of Sociology" />
+    <meta name="date" content="2023-12-12" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
+    <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
+    <script src="libs/tile-view/tile-view.js"></script>
+    <link href="libs/tachyons/tachyons.min.css" rel="stylesheet" />
+    <link href="libs/panelset/panelset.css" rel="stylesheet" />
+    <script src="libs/panelset/panelset.js"></script>
+    <script src="libs/kePrint/kePrint.js"></script>
+    <link href="libs/lightable/lightable.css" rel="stylesheet" />
+    <link rel="stylesheet" href="../template/Merlin169.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+.title[
+# Multiple Regression &amp; <br><br> Fundamentals of Causal Inference
+]
+.subtitle[
+## 13. Conclusion
+]
+.author[
+### Merlin Schaeffer<br> Department of Sociology
+]
+.date[
+### 2023-12-12
+]
+
+---
+
+
+# Goal of empirical sociology
+
+.font130[.center[.alert[Use data to discover patterns], &lt;br&gt; .alert[and the social mechanisms that bring them about.]]]
+
+&lt;img src="https://liu.se/-/media/istock-501261958.jpg?mw=1120&amp;mh=1120&amp;hash=DA8977CCE6A6E600AE80A40CFEE771C9" width="70%" style="display: block; margin: auto;" /&gt;
+
+---
+# Quizzes
+
+&lt;img src="14-Concl_files/figure-html/histo-1.png" width="65%" style="display: block; margin: auto;" /&gt;
+
+---
+# The Null-model
+
+.left-column[
+- To the right, we have the Null-model, which simply uses the average as prediction.
+
+- The Null-model explains none of the overall variation of `\(Y\)` (i.e., the red deviations from `\(\bar{Y}\)`)
+]
+
+.right-column[
+&lt;img src="14-Concl_files/figure-html/nomodel-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+# We studied OLS regression
+
+.left-column[
+
+- OLS estimates the parameters of a specified model, here $$
+\operatorname{mcorrect} = \alpha + \beta_{1}(\operatorname{appearances}) + \epsilon
+$$
+, by `\(\text{min}(e^2)\)`.
+
+- OLS regression can be regarded as a knife that cuts the overall variation in `\(Y\)` into two parts:
+  1. .alert2[Blue: Explained by the model.]
+  2. .alert[Red: Residual, unexplained by the model.]
+]
+
+.right-column[
+&lt;img src="14-Concl_files/figure-html/ols1-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+# Two Goals
+
+.push-left[
+.center[
+**1) Describe patterns accurately**
+
+`\(\rightarrow\)` Increase the explained blue variation and&lt;br&gt; decrease the unexplained red part.
+]
+
+1. *Dummy coding* for categorical variables.
+2. *Multiple OLS* for multiple predicators.
+3. *Interaction effects* for conditional associations.
+4. *Polynomials &amp; transformations* for non-linear associations.
+]
+
+.push-right[
+.center[
+**2) Identify causal mechanisms**
+
+`\(\rightarrow\)` Use a research design to randomly assign `\(X\)`.&lt;br&gt;
+(All variation in `\(X\)` is random)
+]
+
+1. *Randomized Controlled Trials* (RCT)
+2. *Intention to Treat Designs* (ITT, Reduced Form)
+3. *Instrument Variable Regression* (Wald)
+
+&lt;br&gt;
+.center[
+`\(\rightarrow\)` Use OLS to identify random variation in `\(X\)`.&lt;br&gt;
+(Most variation in `\(X\)` is not random)
+]
+
+3. *Instrument Variable Regression* (2SLS)
+4. *Control for confounders*
+]
+
+---
+class: inverse middle center
+
+# Goal 1: Describe patterns accurately
+
+### `\(\rightarrow\)` Increase the explained blue variation and&lt;br&gt; decrease the unexplained red part.
+
+---
+# Categorical \ Dummy variables
+
+.push-left[
+`$$x=
+  \begin{cases}
+    1, &amp; \text{if condition is met} \\
+    0 &amp; \text{otherwise}
+  \end{cases}$$`
+
+Name                       | Female | Male | ...
+---------------------------------|----|----|----
+Søren                 | 0  | 1  | 0 
+Hannah                 | 1  | 0  | 0
+...                 | 1  | 0  | 0
+Asger                          | 0  | 1  | 0  
+Merlin                          | 0  | 1  | 0
+...                          | 0  | 1  | 0
+]
+
+.push-right[
+
+```r
+ols &lt;- lm_robust(mcorrect ~ woman, data = result) # OLS
+
+# Regression table with nice layout
+modelsummary(list("% Correct" = ols), stars = TRUE,
+  gof_map = c("nobs", "r.squared"))
+```
+
+&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; % Correct &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 86.666*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (2.141) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; woman &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.291 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (2.406) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 101 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.000 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
+&lt;sup&gt;&lt;/sup&gt; + p &amp;lt; 0.1, * p &amp;lt; 0.05, ** p &amp;lt; 0.01, *** p &amp;lt; 0.001&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;
+&lt;/table&gt;
+
+
+]
+
+---
+# Categorical \ Dummy variables
+
+.push-left[.font90[
+
+```r
+library(text) # Large language models from Huggingface.com
+
+# LLM zero-shot encoding 
+## 1. Predict gender of first names.
+###################################
+zeroshot &lt;- text::textZeroShot(
+  # List of names.
+  sequences = result$name,
+  # Possible gender(s) for names.
+  candidate_labels = c("woman"),
+  # Multiple genders per name?
+  multi_label = FALSE,
+  # Template for hypothesis for each name.
+  hypothesis_template = "A Person with this name is a {}.",
+  # The model that is used to predict the gender.
+  model = "alexandrainst/scandi-nli-base")
+```
+]]
+
+.push-right[
+&lt;img src="14-Concl_files/figure-html/dummy-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+# Stats skills = `\(f(\text{your name})\)`?
+
+.push-left[
+.font90[
+
+```r
+# LLM zero-shot encoding 
+## 1. Predict gender of first names.
+###################################
+zeroshot &lt;- text::textZeroShot(
+  # The list of first names to be predicted.
+  sequences = result$name,
+  # The possible genders for the first names.
+  candidate_labels = c("Statistics"),
+  # Indicates whether multiple genders should be predicted for each first name.
+  multi_label = FALSE,
+  # The template for the hypothesis that is generated for each first name.
+  hypothesis_template = "A Person with this name is great at {}.",
+  # The model that is used to predict the gender.
+  model = "alexandrainst/scandi-nli-base")
+```
+]]
+
+.push-right[
+&lt;img src="14-Concl_files/figure-html/quatsch-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+# Multiple OLS
+
+.push-right[
+&lt;br&gt;
+
+&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; % Correct &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 61.927*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (16.471) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Female &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.913 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (2.612) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Stats skills &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 4.916 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (16.962) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Nr. completed quizzes &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 1.933* &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.763) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 100 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.119 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
+&lt;sup&gt;&lt;/sup&gt; + p &amp;lt; 0.1, * p &amp;lt; 0.05, ** p &amp;lt; 0.01, *** p &amp;lt; 0.001&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;
+&lt;/table&gt;
+
+
+]
+
+.push-left[
+&lt;br&gt;
+
+`$$Y_{i} = \alpha + \beta_{2} X_{1i} + \ldots + \beta_{k} X_{ki} + \epsilon_{i}$$`
+]
+
+---
+# Interaction \ conditional effects
+
+.push-right[
+&lt;img src="14-Concl_files/figure-html/inter-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
+
+
+.push-left[
+`$$Y_{i} = \alpha + \beta_{2} X_{1i} + \beta_{2} X_{2i} + \color{orange}{\beta_{3} X_{1i}*X_{2i}} + \epsilon_{i}$$`
+&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; % Correct &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 102.709*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (12.513) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Female &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −40.170* &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (16.110) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Nr. completed quizzes &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −1.592 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (1.270) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Female:Nr. completed quizzes &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 3.930* &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (1.589) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 101 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.134 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
+&lt;sup&gt;&lt;/sup&gt; + p &amp;lt; 0.1, * p &amp;lt; 0.05, ** p &amp;lt; 0.01, *** p &amp;lt; 0.001&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;
+&lt;/table&gt;
+
+
+]
+
+---
+# Polynomials
+
+.push-left[
+`$$Y_{i} = \alpha + \beta_{1} X_{1i} + \color{orange}{\beta_{2} X_{1i}^2 + \beta_{3} X_{1i}^3} + \epsilon_{i}$$`
+
+&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; % Correct &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; % Correct  &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 66.505*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 531.817+ &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (7.907) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (291.021) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Nr. completed quizzes &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 1.957** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −145.779 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.745) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (89.473) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Nr. completed quizzes^2 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 15.357+ &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (9.067) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Nr. completed quizzes^3 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −0.524+ &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.303) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 100 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 100 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.117 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.163 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
+&lt;sup&gt;&lt;/sup&gt; + p &amp;lt; 0.1, * p &amp;lt; 0.05, ** p &amp;lt; 0.01, *** p &amp;lt; 0.001&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;
+&lt;/table&gt;
+
+
+]
+
+.push-right[
+&lt;img src="14-Concl_files/figure-html/poly-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+# Transformations
+
+.push-left[
+`$$Y_{i} = \alpha +  \color{orange}{\beta_{1} \text{log}_{2}(X_{1i})} + \epsilon_{i}$$`
+
+&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; % Correct &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 42.712* &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (18.585) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; I(log2(appearances)) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 13.108* &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (5.468) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 100 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.115 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
+&lt;sup&gt;&lt;/sup&gt; + p &amp;lt; 0.1, * p &amp;lt; 0.05, ** p &amp;lt; 0.01, *** p &amp;lt; 0.001&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;
+&lt;/table&gt;
+
+
+]
+
+.push-right[
+&lt;img src="14-Concl_files/figure-html/trans-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+# You can combine these techniques
+
+.push-left[
+`$$Y_{i} = \alpha + \beta_{1} X_{1i} + \beta_{2} X_{2i} + \color{orange}{\beta_{2} X_{1i}^2 + \beta_{3} X_{1i} * X_{2i} + \beta_{4} X_{1i}^2 * X_{2i}} + \epsilon_{i}$$`
+
+&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; % Correct &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 142.945 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (162.474) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Female &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −85.897 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (167.492) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Nr. completed quizzes &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −11.468 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (31.572) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Nr. completed quizzes^2 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.572 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (1.523) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Female:Nr. completed quizzes &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 15.032 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (32.550) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Female:Nr. completed quizzes^2 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −0.638 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (1.572) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 100 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.128 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
+&lt;sup&gt;&lt;/sup&gt; + p &amp;lt; 0.1, * p &amp;lt; 0.05, ** p &amp;lt; 0.01, *** p &amp;lt; 0.001&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;
+&lt;/table&gt;
+
+
+]
+
+.push-right[
+&lt;img src="14-Concl_files/figure-html/combi-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
+---
+class: inverse middle center
+
+# Goal 2: Identify causal mechanisms
+
+---
+# Selection \ omitted variable bias
+
+.push-left[
+`$$\begin{equation} \begin{split}
+\underbrace{Avg_{n}[Y_{1i}|D_{i} = 1] - Avg_{n}[Y_{0i}|D_{i} = 0]}_{\text{Difference in observed group means}} = \underbrace{Avg_{n}[Y_{1i}|D_{i} = 1] \color{gray}{(-  Avg_{n}[Y_{0i}|D_{i} = 1]}}_{\text{Average causal effect } among \text{ } the \text{ } treated} \color{gray}{+} \underbrace{\color{gray}{Avg_{n}[Y_{0i}|D_{i} = 1])} -  Avg_{n}[Y_{0i}|D_{i} = 0]}_{\text{Selection bias}}.
+\end{split} \end{equation}$$`
+&lt;br&gt;
+&lt;br&gt;
+&lt;br&gt;
+
+`$$\tilde{\beta}_{Y \leftarrow X} = \beta_{Y \leftarrow X} + \underbrace{(\beta_{Y \leftarrow C} \times \beta_{C \leftarrow X})}_{\text{Omitted Variable Bias}}$$`
+]
+&lt;br&gt;
+&lt;br&gt;
+&lt;br&gt;
+&lt;br&gt;
+&lt;br&gt;
+
+.push-right[
+&lt;img src="14-Concl_files/figure-html/DAG1-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+class: inverse middle center
+
+## `\(\rightarrow\)` Use a research design to randomly assign `\(X\)`.
+### (All variation in `\(X\)` is random)
+
+---
+# RCT .font60[&amp; natural RCT]
+
+.left-column[
+- We `\(\color{red}I\)`intervene &amp; `\(I\)` perfectly determines who gets `\(X\)` and who does not (i.e., `\(|r| = 1\)`).
+
+- If the `\(I\)`ntervention is categorical, a simple bivariate model suffices: `\(Y = \alpha + \color{red}{\beta} I_i + \epsilon_i\)`
+
+- If the `\(I\)`ntervention is continuous, one can test for a non-linear causal effect, for example: `\(Y = \alpha + \color{red}{\beta_1} I_i + \color{red}{\beta_2} I_i^2 + \epsilon_i\)`
+
+- We can use interaction effects to investiagte whether `\(X\)` affects subpopulations differently: `\(Y = \alpha + \color{red}{\beta_1} I_i + \beta X_i + \color{red}{\beta_2} I_i*X_i + \epsilon_i\)`
+
+
+]
+.push-right[
+&lt;img src="14-Concl_files/figure-html/DAG2-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+# ITT
+
+.left-column[
+- We `\(\color{red}I\)`ntervene, but `\(I\)` does not perfectly determine who gets `\(X\)` and who does not (i.e., `\(|r| &lt; 1\)`).
+
+- We can estimate ITT just like RCT effects, but it gives us causal effect of `\(I\)` not of `\(X\)`. 
+
+- To get causal effect of X (for compliers): `\(y = \alpha + \lambda X_i + \epsilon_i; \text{with } \lambda = \frac{\text{ITT}}{r}\)`
+
+
+]
+.push-right[
+&lt;img src="14-Concl_files/figure-html/DAG3-1.png" width="50%" style="display: block; margin: auto;" /&gt;
+
+&lt;img src="14-Concl_files/figure-html/DAG4-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
+---
+class: inverse middle center
+
+## `\(\rightarrow\)` Use OLS to identify random variation in `\(X\)`.&lt;br&gt;
+### (Most variation in `\(X\)` is *not* random)
+
+---
+# `\(I\)`, `\(C\)`, and `\(M\)`
+
+.push-left[
+- If `\(X\)` was random and sociologically relevant, you have an natural experiment. The you can just proceed like with a RCT.
+
+- In a "first step", `\(X\)` can be the outcome of `\(I\)` or `\(C\)`. Remember, the .alert2[blue part is explained] by `\(I | C\)`, the .alert[red part is unexplained] by it.
+
+- If you find a random `\(I\)` that causes `\(X\)`, you use the blue variation of `\(X\)` in a 2SLS-IV. We identify the blue variation by predicting the `\(\hat{X}\)`.
+
+- If you have observed a counfounder `\(C\)`, you use the red variation of `\(X\)` that is unconfounded by it. You can do that by adding `\(C\)` to a multiple regression. Then the first step is incorporated.
+
+- If you have a mediator `\(M\)`, You add it in a second step and see how much `\(X\)` is reduced (aka explained \ mediated) by it. 
+]
+.push-right[
+&lt;img src="14-Concl_files/figure-html/unnamed-chunk-11-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+&lt;img src="14-Concl_files/figure-html/DAG5-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+]
+---
+class: inverse middle center
+
+# Spørgsmål?
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="../template/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightLanguage": "r",
+"highlightStyle": "zenburn",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"ratio": "16:9"
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

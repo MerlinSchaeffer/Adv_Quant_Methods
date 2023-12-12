@@ -1,0 +1,137 @@
+name,id,sis_id,section,section_id,section_sis_id,submitted,attempt,"803350: Lets make a visual assessment of the relationship between attitudes towards immigrants and age. Start by transforming the data: Group the data byage and then calculate the mean of Extra_ImmigrationIsAThreat with each year of age. Then, create a scatter plot with age on the horisontal axis and mean attitudes towards immigrants on the vertical axis. Please answer the following questions:
+1) When do respondents exhibit the strongest anti-immigrant attitudes? Answer: [strong]2) At which age does the mean attitudes towards immigrants hit the lowest point? Answer: [low]",1.0,"803351: Now, apply a regression line to the scatter plot. You can do this be copying the following code. From the ""methods"" argument in the geom_smooth() function, we specify that it should be a linear model that follows what we input to the ""formula"" argument. Lastly, we paint the line red in the ""color"" argument to distinguish it from the dots in the plot.
+
+After running the code, examine the plot. Does the red line follow the dots in the data?",1.0,"803352: The red line shows that the relationship between attitudes towards immigrants and age does not follow a linear trend. Therefore, we know that the estimate of age in our baseline OLS regression model is biased. Here, we can address the problem by using polynomial regression. Polynomial regression involves adding polynomial terms to our baseline OLS regression model. But how many polynomial terms should we add to the model?
+This can be hard question to answer, but a nice place to start is to try out different degrees of polynomials in the visual representation. Run the code in the script that adds a blue line which includes a quadratic term (x2) in the ""formula"" argument of the geom_smooth() function.What has happened to the linear model by adding the quadratic term?",1.0,"803353: Lets try to add a cubic term (x3) and a quartic term (x4) as well. Follow the script and add the cubic term as a green line and the quartic term as a yellow line. You can do this by editing the ""formula"" argument of the geom_smooth() function to ""y ~ x + I(x^2) + I(x^3)"" for cubic polynomial regression and ""y ~ x + I(x^2) + I(x^3) + I(x^4)"" for quartic polynomial regression.
+Which one of the lines (red, blue, green or yellow) do you think fits the data best?",1.0,"803400: Now, it has become a bit hard to see the original data points because of all the lines. Therefore, create a scatter plot with only the line that you think fits data best. Save the plot with the ggsave() function and upload the picture here.",1.0,"803344: As mentioned, we will examine the relationship between attitudes towards immigrants and age. First step, we will create a baseline model for later comparison. Now, use the lm_robust() function to fit a model of anti-immigrant attitudes (Extra_ImmigrationIsAThreat) as a function of the age of the respondents (age). Afterwards, use the tidy() function to create a model output and answer the following questions:
+1) Is the estimate ofagestatistically significant at a conventional 5% significance level? Answer: 
+  
+    [ Select ]
+  
+  [""Yes"", ""No""]
+
+2) What is the estimate ofageonExtra_ImmigrationIsAThreat? Answer: 
+  
+    [ Select ]
+  
+  [""0.01218"", ""0.01028"", ""0.01011"", ""0.00995""]
+
+ (3 digits)3) How should we interpret this result? Answer: 
+  
+    [ Select ]
+  
+  [""There is no association between attitudes towards immigrants and age"", ""Anti-immigrant attitudes increases with age"", ""Anti-immigrant attitudes decreases with age""]
+
+",2.0,"803402: Lastly, we want to compare the results of the polynomial regression to the baseline OLS regression model we did in the beginning of the quiz. Especially, we want to compare R2of the two models to get an estimate of which one that fits data best.Use the lm_robust() function to do a polynomial regression of the impact ofageonExtra_ImmigrationIsAThreat. Add a cubic term of age to the formula and answer the following questions.
+1)What is the estimate ofage(the linear component) onExtra_ImmigrationIsAThreatin the polynomial regression? Answer: 
+  
+    [ Select ]
+  
+  [""0.089"", ""0.111"", ""0.129"", ""0.146""]
+
+ (3 digits)2) What is the estimate of R2in the baseline model? Answer: 
+  
+    [ Select ]
+  
+  [""0.010"", ""0.013"", ""0.017"", ""0.019""]
+
+ (3 digits)3) What is the estimate of R2in the polynomial regression model? Answer: 
+  
+    [ Select ]
+  
+  [""0.032"", ""0.033"", ""0.034"", ""0.035""]
+
+ (3 digits)",2.0,"803343: As mentioned, we will examine the relationship between attitudes towards immigrants and age. First step, we will create a baseline model for later comparison. Now, use the lm_robust() function to fit a model of anti-immigrant attitudes (Extra_ImmigrationIsAThreat) as a function of the age of the respondents (age). Afterwards, use the tidy() function to create a model output and answer the following questions:
+1) Is the estimate of agestatistically significant at a conventional 5% significance level? Answer: 
+  
+    [ Select ]
+  
+  [""Yes"", ""No""]
+
+2) What is the estimate of age on Extra_ImmigrationIsAThreat? Answer: 
+  
+    [ Select ]
+  
+  [""0.012"", ""0.010"", ""0.009"", ""0.007""]
+
+ (3 digits)3) How should we interpret this result? Answer: 
+  
+    [ Select ]
+  
+  [""There is no association between attitudes towards immigrants and age"", ""Anti-immigrant attitudes decreases with age"", ""Anti-immigrant attitudes increases with age""]
+
+",2.0,"803403: Lastly, we want to compare the results of the polynomial regression to the baseline OLS regression model we did in the beginning of the quiz. Especially, we want to compare R2of the two models to get an estimate of which one that fits data best.Use the lm_robust() function to do a polynomial regression of the impact ofageonExtra_ImmigrationIsAThreat. Add a quartic term of age to the formula and answer the following questions.
+1)What is the estimate ofage(the linear component) onExtra_ImmigrationIsAThreatin the polynomial regression? Answer: 
+  
+    [ Select ]
+  
+  [""-0.110"", ""-0.130"", ""-0.141"", ""-0.143""]
+
+ (3 digits)2) What is the estimate of R2in the baseline model? Answer: 
+  
+    [ Select ]
+  
+  [""0.010"", ""0.013"", ""0.017"", ""0.019""]
+
+ (3 digits)3) What is the estimate of R2in the polynomial regression model? Answer: 
+  
+    [ Select ]
+  
+  [""0.030"", ""0.032"", ""0.035"", ""0.037""]
+
+ (3 digits)",2.0,"803401: Lastly, we want to compare the results of the polynomial regression to the baseline OLS regression model we did in the beginning of the quiz. Especially, we want to compare R2of the two models to get an estimate of which one that fits data best.Use the lm_robust() function to do a polynomial regression of the impact of ageon Extra_ImmigrationIsAThreat. Add a quadratic term of age to the formula and answer the following questions.
+1) What is the estimate ofage (the linear component) onExtra_ImmigrationIsAThreat in the polynomial regression? Answer: 
+  
+    [ Select ]
+  
+  [""0.064"", ""0.071"", ""0.076"", ""0.089""]
+
+ (3 digits)2) What is the estimate of R2 in the baseline model? Answer: 
+  
+    [ Select ]
+  
+  [""0.010"", ""0.013"", ""0.017"", ""0.019""]
+
+ (3 digits)3) What is the estimate of R2 in the polynomial regression model? Answer: 
+  
+    [ Select ]
+  
+  [""0.025"", ""0.027"", ""0.030"", ""0.032""]
+
+ (3 digits)",2.0,n correct,n incorrect,score
+Theresa Elisabeth Meyer,405653,786929,Hold1;,155354,Hsyl198738,2023-12-11 15:31:01 UTC,1,"In their 20s,In their 20s",0.5,"Not quite, data does not follow a linear trend",1.0,"Compared to the red line, the blue line curves upwards",0.0,"I think the yellow line reflects the data the best. 
+
+It represents the upwards movement in the 20s, the the slight downwards movement in the 80s and the following upwards movement after the 80s.",0.0,immi-age-poly-plot.png,0.0,"Yes,0.00995,Anti-immigrant attitudes decreases with age",1.3333333333333333,"0.111,0.017,0.033",1.3333333333333333,"","","","","","",6,1,4.166666666666666
+Victoria Ritzau Pagh,389937,770349,Hold3;,155356,Hsyl198740,2023-12-11 08:35:01 UTC,1,"In their 40s,In their 20s",0.5,"Not quite, data does not follow a linear trend",1.0,"Compared to the red line, the blue line curves downwards",1.0,Yellow.,0.0,immi-age-poly-plot.png,0.0,"","","","","Yes,0.010,Anti-immigrant attitudes increases with age",2.0,"0.017,0.032",0.6666666666666666,"","",7,0,5.166666666666667
+Jonathan Aske Holkenov,389372,745823,Hold1;,155354,Hsyl198738,2023-12-09 16:51:43 UTC,1,"In their 30s,In their 30s",0.0,"There is some deviation, but the red line models the linear tendency of the data",0.0,"Compared to the red line, the blue line curves downwards",1.0,red,0.0,"",0.0,"","","0.129,0.010,0.033",1.3333333333333333,"Yes,0.010,Anti-immigrant attitudes decreases with age",1.3333333333333333,"","","","",5,2,3.666666666666666
+Silje Elleby Larsen,389654,766922,Hold1;,155354,Hsyl198738,2023-12-09 10:58:45 UTC,1,"In their 50s,In their 20s",1.0,"Not quite, data does not follow a linear trend",1.0,"Compared to the red line, the blue line curves downwards",1.0,I think the blue line fits the data best.,0.0,immi-age-poly-plot.png,0.0,"","","0.129,0.017,0.033",2.0,"Yes,0.010,Anti-immigrant attitudes increases with age",2.0,"","","","",7,0,7.0
+Olivia Weiland Møller Mehlbye,366529,731993,Hold4;,155357,Hsyl198741,2023-12-08 15:38:52 UTC,1,"In their 50s,In their 20s",1.0,"Not quite, data does not follow a linear trend",1.0,"Compared to the red line, the blue line curves downwards",1.0,The yellow line fits the data best. ,0.0,immi-age-poly-plot.png,0.0,"","","","","Yes,0.010,Anti-immigrant attitudes increases with age",2.0,"-0.130,0.017,0.035",2.0,"","",7,0,7.0
+Marie Hoby Fausbøll,388500,764961,Hold1;,155354,Hsyl198738,2023-12-08 14:56:55 UTC,1,"In their 40s,In their 30s",0.0,"Not quite, data does not follow a linear trend",1.0,"Compared to the red line, the blue line curves downwards",1.0,"The green line fits the data the best. Even though it is similar to the yellow, the yellow lines is to affect by the few observations after the age of 80 years, where the lines increases again. ",0.0,Skærmbillede 2023-12-08 kl. 15.31.57.png,0.0,"Yes,0.01011,Anti-immigrant attitudes increases with age",1.3333333333333333,"0.089,0.017,0.032",0.6666666666666666,"","","","","","",6,1,3.9999999999999996
+Aske Lindskov Steensig,388205,752780,Hold1;,155354,Hsyl198738,2023-12-08 14:29:28 UTC,1,"In their 40s,In their 20s",0.5,"Not quite, data does not follow a linear trend",1.0,"Compared to the red line, the blue line curves downwards",1.0,the yellow one,0.0,polynomial.png,0.0,"","","","","Yes,0.010,Anti-immigrant attitudes increases with age",2.0,"","","0.064,0.017,0.032",2.0,7,0,6.5
+Johanne Benn Munck,391181,768566,Hold1;,155354,Hsyl198738,2023-12-08 14:27:28 UTC,1,"In their 40s,In their 20s",0.5,"Not quite, data does not follow a linear trend",1.0,"Compared to the red line, the blue line curves downwards",1.0,I think the green line fits the bets. ,0.0,immi-age-poly-plot.png,0.0,"Yes,0.00995,There is no association between attitudes towards immigrants and age",1.3333333333333333,"","","","","","","0.064,0.017,0.032",2.0,7,0,5.833333333333333
+CHI KWAN LUK,405993,786151,Hold4;,155357,Hsyl198741,2023-12-08 14:16:15 UTC,1,"In their 50s,In their 20s",1.0,"Not quite, data does not follow a linear trend",1.0,"Compared to the red line, the blue line curves downwards",1.0,I think the yellow (the one with 4 degrees) fits better.,0.0,immi-age-poly-plot.png,0.0,"","","","","Yes,0.010,Anti-immigrant attitudes increases with age",2.0,"-0.130,0.017,0.035",2.0,"","",7,0,7.0
+Louise Mackeprang,389075,756052,"Hold3;, Hold1;","155356, 155354","Hsyl198740, Hsyl198738",2023-12-08 14:08:31 UTC,1,"In their 40s,In their 20s",0.5,"Not quite, data does not follow a linear trend",1.0,"Compared to the red line, the blue line curves downwards",1.0,the blue line to keep it simple ,0.0,immi-age-poly-plot3.png,0.0,"","","0.111,0.017,0.034",0.6666666666666666,"Yes,0.010,Anti-immigrant attitudes increases with age",2.0,"","","","",7,0,5.166666666666667
+Morris Emil Agersted-Hass,390651,766194,Hold2;,155355,Hsyl198739,2023-12-08 13:53:42 UTC,1,"In their 50s,In their 20s",1.0,"Not quite, data does not follow a linear trend",1.0,"Compared to the red line, the blue line curves downwards",1.0,"Green, slightly. The more polynomials we add, the model should be described better. If we added the same amount of polynomials as observations we'd just have connecting lines",0.0,immi-age-poly-plot.png,0.0,"","","0.111,0.017,0.035",0.6666666666666666,"Yes,0.009,Anti-immigrant attitudes increases with age",1.3333333333333333,"","","","",7,0,5.0
+Sanng Barzenji,389864,750294,Hold3;,155356,Hsyl198740,2023-12-08 13:53:28 UTC,1,"In their 50s,In their 20s",1.0,"There is some deviation, but the red line models the linear tendency of the data",0.0,"Compared to the red line, the blue line curves downwards",1.0,"The Yellow line represents the model the best, since the trend goes up after it goes down. This is in line with the fact that the more polynomials we add compared to the number of observations, the closer it resembles the model.",0.0,immi-age-poly-plot.png,0.0,"","","","","Yes,0.010,Anti-immigrant attitudes increases with age",2.0,"-0.110,0.017,0.037",0.6666666666666666,"","",6,1,4.666666666666667
+Anna Alvilda Damgaard Bjerg,390755,755504,Hold2;,155355,Hsyl198739,2023-12-08 13:43:41 UTC,1,"In their 60s,In their 20s",0.5,"Not quite, data does not follow a linear trend",1.0,"Compared to the red line, the blue line curves downwards",1.0,The yellow line fits the data the best ,0.0,Rplot yellow line.png,0.0,"Yes,0.00995,Anti-immigrant attitudes increases with age",2.0,"","","","","","","0.064,0.017,0.032",2.0,7,0,6.5
+Camilla Storgaard,389430,763604,"Hold2;, Hold3;","155355, 155356","Hsyl198739, Hsyl198740",2023-12-08 13:43:14 UTC,1,"In their 50s,In their 20s",1.0,"Not quite, data does not follow a linear trend",1.0,"Compared to the red line, the blue line curves downwards",1.0,The yellow one,0.0,Skærmbillede 2023-12-08 kl. 14.33.30.png,0.0,"","","","","Yes,0.010,Anti-immigrant attitudes increases with age",2.0,"","","0.064,0.017,0.032",2.0,7,0,7.0
+Gustav Holck Frandsen,386602,761244,Hold2;,155355,Hsyl198739,2023-12-08 13:42:34 UTC,1,"In their 60s,In their 20s",0.5,"Not quite, data does not follow a linear trend",1.0,"Compared to the red line, the blue line curves downwards",1.0,I think the yellow line fits the trend the best,0.0,Rplot.png,0.0,"","","","","Yes,0.010,Anti-immigrant attitudes increases with age",2.0,"","","0.064,0.017,0.032",2.0,7,0,6.5
+Anna Essendrop Bach,386682,758896,Hold1;,155354,Hsyl198738,2023-12-08 13:42:11 UTC,1,"In their 60s,In their 30s",0.0,"Not quite, data does not follow a linear trend",1.0,"Compared to the red line, the blue line curves downwards",1.0,    nk,0.0,"",0.0,"No,0.00995,There is no association between attitudes towards immigrants and age",0.6666666666666666,"","","","","","","0.071,0.013,0.025",0.0,5,2,2.6666666666666665
+Elvira Egede Beiskjær,389216,750632,Hold2;,155355,Hsyl198739,2023-12-08 13:40:50 UTC,1,"In their 50s,In their 20s",1.0,"Not quite, data does not follow a linear trend",1.0,"Compared to the red line, the blue line curves downwards",1.0,"either the green or the yellow lines fit the data the best. The yellow line seems to follow the data points more exactly, however there's a risk that it overcorrects for certain outliers at the end of the data (from 80 years and older).",0.0,immi-age-poly-plot.png,0.0,"Yes,0.00995,Anti-immigrant attitudes increases with age",2.0,"","","","","","","0.076,0.017,0.027",0.6666666666666666,7,0,5.666666666666667
+Maryème BEN MOHAMED,406324,786419,Hold1;,155354,Hsyl198738,2023-12-08 13:27:38 UTC,1,"In their 40s,In their 30s",0.0,"There is some deviation, but the red line models the linear tendency of the data",0.0,"Compared to the red line, the blue line curves downwards",1.0,"",0.0,"",0.0,"","","0.111,0.013,0.033",0.6666666666666666,"No,0.012,Anti-immigrant attitudes increases with age",0.6666666666666666,"","","","",5,2,2.333333333333333
+Frida Nitschke Madsen,387695,752970,Hold3;,155356,Hsyl198740,2023-12-08 12:29:03 UTC,1,"In their 50s,In their 20s",1.0,"Not quite, data does not follow a linear trend",1.0,"Compared to the red line, the blue line curves downwards",1.0,The yellow line that represents the quartic term (x^4) fits the data best.,0.0,immi-age-poly-plot.png,0.0,"","","","","Yes,0.010,Anti-immigrant attitudes increases with age",2.0,"","","0.017,0.032",1.3333333333333333,7,0,6.333333333333333
+Carla Schultz,386797,764919,Hold3;,155356,Hsyl198740,2023-12-08 12:28:57 UTC,1,"In their 40s,In their 20s",0.5,"Not quite, data does not follow a linear trend",1.0,"Compared to the red line, the blue line curves downwards",1.0,The yellow line fits data best. ,0.0,Skærmbillede 2023-12-08 kl. 13.19.29.png,0.0,"","","0.129,0.017,0.035",1.3333333333333333,"Yes,0.010,Anti-immigrant attitudes increases with age",2.0,"","","","",7,0,5.833333333333333
+Theis Molin Sørensen,387308,750201,Hold3;,155356,Hsyl198740,2023-12-08 12:14:04 UTC,1,"In their 40s,In their 20s",0.5,"Not quite, data does not follow a linear trend",1.0,"Compared to the red line, the blue line curves downwards",1.0,"The yellow line appears to fit best, with slight upwards movement in the end",0.0,x^4.png,0.0,"Yes,0.00995,Anti-immigrant attitudes increases with age",2.0,"","","","","-0.130,0.017,0.035",2.0,"","",7,0,6.5
+Caroline Marie Gehlert Hansen,386364,747661,Hold3;,155356,Hsyl198740,2023-12-08 10:55:14 UTC,1,"In their 50s,In their 20s",1.0,"Not quite, data does not follow a linear trend",1.0,"Compared to the red line, the blue line curves downwards",1.0,The yellow one ,0.0,regression.png,0.0,"Yes,0.01011,Anti-immigrant attitudes increases with age",1.3333333333333333,"","","","","","","0.064,0.017,0.032",2.0,7,0,6.333333333333333
+Naja Bjørg Møller,387403,769627,Hold3;,155356,Hsyl198740,2023-12-08 10:55:13 UTC,1,"In their 50s,In their 20s",1.0,"Not quite, data does not follow a linear trend",1.0,"Compared to the red line, the blue line curves downwards",1.0,I think the yellow line (quartic polynomial regression) fits the data best,0.0,immi-age-poly-plot.png,0.0,"","","0.089,0.017,0.032",0.6666666666666666,"Yes,0.010,Anti-immigrant attitudes increases with age",2.0,"","","","",7,0,5.666666666666667
+Frida Mohr Jespersen,388174,759920,Hold1;,155354,Hsyl198738,2023-12-08 10:43:14 UTC,1,"In their 40s,In their 20s",0.5,"Not quite, data does not follow a linear trend",1.0,"Compared to the red line, the blue line curves downwards",1.0,I think the yellow line fits bets,0.0,immi-age-poly-plot.png,0.0,"","","","","Yes,0.012,Anti-immigrant attitudes increases with age",1.3333333333333333,"","","0.071,0.017,0.027",0.6666666666666666,7,0,4.5
+Laura Krogh Thomassen,386908,766595,Hold4;,155357,Hsyl198741,2023-12-08 10:05:55 UTC,1,"In their 40s,In their 20s",0.5,"Not quite, data does not follow a linear trend",1.0,"Compared to the red line, the blue line curves downwards",1.0,"By looking at it first, it looked like quadratic polynominal fitted the observations best. But when adding the quartic polynominal, the line perfectly fit with the observations, so i guess the quartic. 
+
+ 
+
+But does this type of regression not you follow the observations by their coefficients?",0.0,immi-age-poly-plot.png,0.0,"Yes,0.00995,Anti-immigrant attitudes increases with age",2.0,"","","","","","","0.064,0.017,0.032",2.0,7,0,6.5
+Marcus Scheel Fjording,388037,747654,Hold1;,155354,Hsyl198738,2023-12-08 09:31:18 UTC,1,"In their 50s,In their 20s",1.0,"Not quite, data does not follow a linear trend",1.0,"Compared to the red line, the blue line curves downwards",1.0,The blue one seems to capture the lower point of the age bracket better than the rest.,0.0,immi-age-poly-plot.png,0.0,"Yes,0.01028,Anti-immigrant attitudes increases with age",1.3333333333333333,"","","","","-0.130,0.017,0.037",1.3333333333333333,"","",7,0,5.666666666666666
+Anna Sofie Blauenfeldt Pedersen,386178,753380,Hold1;,155354,Hsyl198738,2023-12-07 11:56:14 UTC,1,"In their 40s,In their 20s",0.5,"Not quite, data does not follow a linear trend",1.0,"Compared to the red line, the blue line curves downwards",1.0,I think the yellow line follows the plots the best. The yellow line follows the cluster of datapoint both in the lower part of plot and the upper part of the plot,0.0,immi-age-poly-plot.png,0.0,"","","","","Yes,0.010,Anti-immigrant attitudes increases with age",2.0,"","","0.089,0.017,0.032",1.3333333333333333,7,0,5.833333333333333
+Rebecca Limbrecht Bruhn,385771,745917,Hold3;,155356,Hsyl198740,2023-12-07 09:19:53 UTC,1,"In their 30s,In their 40s",0.0,"There is some deviation, but the red line models the linear tendency of the data",0.0,"Compared to the red line, the blue line curves downwards",1.0,"",0.0,"",0.0,"","","","","Yes,0.010,There is no association between attitudes towards immigrants and age",1.3333333333333333,"-0.141,0.013,0.032",0.0,"","",4,3,2.333333333333333
+Sule Tan,406114,787937,Hold3;,155356,Hsyl198740,2023-12-06 20:14:21 UTC,1,"In their 60s,In their 20s",0.5,"Not quite, data does not follow a linear trend",1.0,"Compared to the red line, the blue line curves downwards",1.0,yellow,0.0,immi-age-poly-plot.png,0.0,"Yes,0.00995,Anti-immigrant attitudes increases with age",2.0,"","","","","-0.130,0.017,0.035",2.0,"","",7,0,6.5
+Natalie Maria Kaarsberg Bøjsen,387299,762161,Hold1;,155354,Hsyl198738,2023-12-06 17:30:48 UTC,1,"In their 50s,In their 20s",1.0,"Not quite, data does not follow a linear trend",1.0,"Compared to the red line, the blue line curves downwards",1.0,"It is between green and yellow, it is hard to say, but i think yellow",0.0,immi-age-poly-plot.png,0.0,"Yes,0.00995,Anti-immigrant attitudes increases with age",2.0,"","","","","-0.130,0.017,0.035",2.0,"","",7,0,7.0
