@@ -1,0 +1,31 @@
+name,id,sis_id,section,section_id,section_sis_id,submitted,attempt,"804535: First of all, please read and inspect the dataset.
+As mentioned, it contains 2.771 responses from citizens in Copenhagen.
+The most frequent highest level of education (Uddannelse) in the data is [edu]
+The mean age (alder) in the data is [age]",1.0,"804536: Plot the income variable.
+The variable is based on a self.reported survey measure of household income. The variable has been made numeric by taking the mid-point of each income interval from the original survey question. If you want to, you can find the original survey here: https://www.kk.dk/sites/default/files/2023-06/Sp%C3%B8rgeskema%202023_0.pdf
+If you could, how would you change the categories of the income-question in the survey?",2.0,"804537: Calculate a regression model to inspect how income varies between educational-levels. Data is clustered on the Bydel-variable, so use the *clusters*-argument from the lm_robust-function.
+Compared to respondents with 1.-10. klasse as their highest level of education, people with Lange videregående uddannelser on average has a household income [LVU]
+Compared to respondents with 1.-10. klasse as their highest level of education, people with Gymnasial uddannelse on average has a household income [gym]
+",2.0,"804538: It seems weird that persons with a higher level of education (Gymnasie) earns less than persons with a lower level of education (1. to 10. klasse).
+An explanation could be that the age of the person is a confounder: Lenght of educations increase over generations. This means that older respondents on average have shorter educations than younger respondents. On average, grown ups tend to earn more than younger people! So lets see what happens when controlling for age.
+When the model is controlled for age...
+",1.0,"804539: So the relationship was not confounded by age... however, age can help explain the relationship between Gymnasieuddannelse and Indkomst in another way - namely as an interaction term.
+Calculate an interaction model where Indkomst is explained by Uddannelse, alder, and an interaction term between the two predictors.
+Please interpret the interaction and explain how the coeffiecient of Gymnasial uddannelse varies with alder:",2.0,"804542: A problem with the model above is that the coefficient for *UddannelseGymnasial uddannelse* (or any of the Uddannelses-coefficients for that matter) is not very informative, as it communicates the uddannelses-coefficientes for age-values of 0 years... therefore, it is always informative to plot interaction models and especially to do so for the values of age actually occuring in the data set!
+Use the ?-command to see the documentation from the plot_slopes-function from the marginaleffects-package in r. Now use the plot_slopes-function to visualize the interaction model.
+Specify the *variables*-argument to ""Uddannelse"" and the *condition*-argument to ""alder"".
+Please explain how age and education seems to be interacting when explaining income. Focus on Gymnasial uddannelse, but feel free to broaden the analysis.",3.0,"804657: But wait - now we have included age as a first order term in our linear model. This does not have to be the case: As you saw in week 12, the functional form of the relationship between age and immigrant attitudes were better described by a polynomial model.
+Now, use what you learned last week to plot the relationship between age and income as a linear model, a model with a quadratic term and a model with a cubic term.
+Which of the three functional forms fit the data best?",2.0,"804658: Now, calculate a model explaining Indkomst wit alder and a quadratic term of alder.
+Interpret the model results:
+The coefficient for alder is [alder]
+The coefficient for alder^2 is [alder2]
+This means, that the effect of age on income is [inter]",2.0,"804659: Interpreting polynomial regressions is super hard!
+Therefore, it is easier to visualize the results. The model that we just calculated can be used to interpret relationships between the independent and dependent variable - but it can also be used to predict values of the dependent variable based on values on the independent variable.
+Use the fucntion ""predictions"" from the marginaleffects-package on the polynomial model from the question before. This gives as dataset where every row has a predicted income (estimate) based on their age. Now plot age (Alder) and the predicted income (estimate) with a point-plot.
+At what age does the positive relationship between age and income seem to turn into a negative one?",2.0,"804660: On a scale from0(the worst possible quiz for this lecture) to10(the best possible quiz for this lecture), how would you rate the quiz, that you have just completed?",1.0,"804661: If you have any suggestions as to how we can improve these quizzes, feel free to let us know here.
+If you don't have any suggestions, just type a blank space",1.0,n correct,n incorrect,score
+Louise Anna Céline Hascoët,406307,786450,Hold2;,155355,Hsyl198739,2023-12-13 16:16:59 UTC,1,"Lange videregående uddannelser og Forskeruddannelser,46",0.5,"We could had more categories beyond 1,000,000 kr. to distinguish between higher income levels for example, or adjust the intervals to reflect more meaningful income segments. We could also provide an option for respondents to enter an exact income figure, which can provide more precise data.
+Additionally, we could clarify what's implied in ""income"" (salaries ? pensions ?).",0.0,which is 73.761 kr. higher,0.0,The coefficien for Gymnasial uddannelse remains negative and significant,1.0,"The interaction term is not significant\, so we should not conclude anything based on it",0.0,"",0.0,The model with the cubic term,0.0,"Significant and positive,Significant and negative,Positive for younger levels of alder and then becomes negative for higher levels of alder",2.0,Around 48 years,2.0,4,1.0,"Thanks for the quizzes! It was a really good way to learn R.
+
+I would say that I prefer when a quizz is separate in some parts, because sometimes I struggle to answer a question / correctly code what's needed, and then I cannot answer the rest of the quizz :(",0.0,8,3,6.5

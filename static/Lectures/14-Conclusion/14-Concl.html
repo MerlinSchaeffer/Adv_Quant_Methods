@@ -4,7 +4,7 @@
     <title>Multiple Regression &amp;    Fundamentals of Causal Inference</title>
     <meta charset="utf-8" />
     <meta name="author" content="Merlin Schaeffer  Department of Sociology" />
-    <meta name="date" content="2023-12-12" />
+    <meta name="date" content="2023-12-14" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
     <script src="libs/tile-view/tile-view.js"></script>
@@ -29,7 +29,7 @@ class: center, middle, inverse, title-slide
 ### Merlin Schaeffer<br> Department of Sociology
 ]
 .date[
-### 2023-12-12
+### 2023-12-14
 ]
 
 ---
@@ -145,8 +145,9 @@ Merlin                          | 0  | 1  | 0
 
 .push-right[
 
+
 ```r
-ols &lt;- lm_robust(mcorrect ~ woman, data = result) # OLS
+ols &lt;- lm_robust(mcorrect ~ gndr, data = plotdata) # OLS
 
 # Regression table with nice layout
 modelsummary(list("% Correct" = ols), stars = TRUE,
@@ -163,27 +164,27 @@ modelsummary(list("% Correct" = ols), stars = TRUE,
 &lt;tbody&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 86.666*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 85.043*** &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (2.141) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (2.123) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; woman &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.291 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; gndrWomen &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 1.300 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (2.406) &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (2.258) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 101 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 99 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.000 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.004 &lt;/td&gt;
   &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
@@ -266,43 +267,43 @@ zeroshot &lt;- text::textZeroShot(
 &lt;tbody&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 61.927*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 54.835** &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (16.471) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (18.360) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Female &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.913 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 1.649 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (2.612) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (2.755) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Stats skills &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 4.916 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 8.536 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (16.962) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (17.800) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Nr. completed quizzes &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 1.933* &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 2.123* &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.763) &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.820) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 100 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 99 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.119 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.098 &lt;/td&gt;
   &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
@@ -338,43 +339,43 @@ zeroshot &lt;- text::textZeroShot(
 &lt;tbody&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 102.709*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 113.094*** &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (12.513) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (26.161) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Female &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; −40.170* &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −57.732* &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (16.110) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (27.626) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Nr. completed quizzes &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; −1.592 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −2.621 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (1.270) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (2.494) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Female:Nr. completed quizzes &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 3.930* &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 5.498* &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (1.589) &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (2.621) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 101 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 99 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.134 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.166 &lt;/td&gt;
   &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
@@ -401,53 +402,53 @@ zeroshot &lt;- text::textZeroShot(
 &lt;tbody&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 66.505*** &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 531.817+ &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 63.000*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −925.916+ &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (7.907) &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (291.021) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (8.778) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (518.206) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Nr. completed quizzes &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 1.957** &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; −145.779 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 2.151** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 285.246+ &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (0.745) &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (89.473) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.809) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (151.910) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Nr. completed quizzes^2 &lt;/td&gt;
    &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 15.357+ &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −26.754+ &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
    &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (9.067) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (14.741) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Nr. completed quizzes^3 &lt;/td&gt;
    &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; −0.524+ &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.835+ &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
    &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.303) &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.474) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 100 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 100 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 99 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 99 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.117 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.163 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.092 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.172 &lt;/td&gt;
   &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
@@ -477,27 +478,27 @@ zeroshot &lt;- text::textZeroShot(
 &lt;tbody&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 42.712* &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 31.280 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (18.585) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (19.569) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; I(log2(appearances)) &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 13.108* &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 16.037** &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (5.468) &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (5.705) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 100 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 99 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.115 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.100 &lt;/td&gt;
   &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
@@ -527,59 +528,59 @@ zeroshot &lt;- text::textZeroShot(
 &lt;tbody&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 142.945 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −111.364 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (162.474) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (184.226) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Female &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; −85.897 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 80.021 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (167.492) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (190.762) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Nr. completed quizzes &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; −11.468 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 39.937 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (31.572) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (36.503) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Nr. completed quizzes^2 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.572 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −2.002 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (1.523) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (1.797) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Female:Nr. completed quizzes &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 15.032 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −20.171 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (32.550) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (37.734) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Female:Nr. completed quizzes^2 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; −0.638 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 1.189 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (1.572) &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (1.855) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 100 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 99 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.128 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.200 &lt;/td&gt;
   &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
@@ -682,7 +683,7 @@ class: inverse middle center
 - If you have a mediator `\(M\)`, You add it in a second step and see how much `\(X\)` is reduced (aka explained \ mediated) by it. 
 ]
 .push-right[
-&lt;img src="14-Concl_files/figure-html/unnamed-chunk-11-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+&lt;img src="14-Concl_files/figure-html/unnamed-chunk-12-1.png" width="80%" style="display: block; margin: auto;" /&gt;
 
 &lt;img src="14-Concl_files/figure-html/DAG5-1.png" width="60%" style="display: block; margin: auto;" /&gt;
 ]

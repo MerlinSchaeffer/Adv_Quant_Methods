@@ -58,7 +58,7 @@ knitr::include_graphics('https://liu.se/-/media/istock-501261958.jpg?mw=1120&mh=
 # Quizzes
 
 ```{r histo, out.width = "65%", fig.height = 3.5, fig.width = 5, echo = FALSE}
-plotdata <- result %>% filter(appearances >= 7)
+plotdata <- result %>% filter(appearances > 7)
 
 ggplot(data = plotdata, aes(x = mcorrect)) +
   geom_histogram(aes(y = after_stat(count / sum(count)))) +
@@ -192,8 +192,15 @@ Merlin                          | 0  | 1  | 0
 ]
 
 .push-right[
+```{r echo = FALSE}
+plotdata <- plotdata %>%
+  mutate(
+    gndr = case_when(
+      woman > 0.5 ~ "Women",
+      TRUE ~ "Men"))
+```
 ```{r}
-ols <- lm_robust(mcorrect ~ woman, data = result) # OLS
+ols <- lm_robust(mcorrect ~ gndr, data = plotdata) # OLS
 
 # Regression table with nice layout
 modelsummary(list("% Correct" = ols), stars = TRUE,
@@ -283,11 +290,11 @@ ggplot(data = plotdata, aes(y = mcorrect, x = Statistics)) +
 <br>
 
 ```{r echo = FALSE}
-ols2 <- lm_robust(mcorrect ~ woman + Statistics + appearances, data = plotdata) # OLS
+ols2 <- lm_robust(mcorrect ~ gndr + Statistics + appearances, data = plotdata) # OLS
 
 # Regression table with nice layout
 modelsummary(list("% Correct" = ols2), stars = TRUE,
-             coef_rename = c("woman" = "Female", 
+             coef_rename = c("gndrWomen" = "Female", 
                              "Statistics" = "Stats skills",
                              "appearances" = "Nr. completed quizzes"),
              gof_map = c("nobs", "r.squared"))
@@ -305,12 +312,6 @@ $$Y_{i} = \alpha + \beta_{2} X_{1i} + \ldots + \beta_{k} X_{ki} + \epsilon_{i}$$
 
 .push-right[
 ```{r inter, out.width = "100%", fig.height = 4.5, fig.width = 5, echo = FALSE}
-plotdata <- plotdata %>%
-  mutate(
-    gndr = case_when(
-      woman > 0.5 ~ "Women",
-      TRUE ~ "Men"))
-
 ggplot(data = plotdata, aes(y = mcorrect, x = appearances)) +
   geom_point(aes(color = gndr), alpha = 1/2, size = 3) +
   geom_hline(yintercept = mean(plotdata$mcorrect)) +
@@ -328,11 +329,11 @@ ggplot(data = plotdata, aes(y = mcorrect, x = appearances)) +
 .push-left[
 $$Y_{i} = \alpha + \beta_{2} X_{1i} + \beta_{2} X_{2i} + \color{orange}{\beta_{3} X_{1i}*X_{2i}} + \epsilon_{i}$$
 ```{r echo = FALSE}
-ols3 <- lm_robust(mcorrect ~ woman*appearances, data = result) # OLS
+ols3 <- lm_robust(mcorrect ~ gndr*appearances, data = plotdata) # OLS
 
 # Regression table with nice layout
 modelsummary(list("% Correct" = ols3), stars = TRUE,
-             coef_rename = c("woman" = "Female", 
+             coef_rename = c("gndrWomen" = "Female", 
                              "appearances" = "Nr. completed quizzes"),
              gof_map = c("nobs", "r.squared"))
 ```
@@ -352,7 +353,7 @@ mod2 <- plotdata %>%
 
 # Regression table with nice layout
 modelsummary(list("% Correct" = mod1, "% Correct" = mod2), stars = TRUE,
-             coef_rename = c("woman" = "Female", 
+             coef_rename = c("gndrWomen" = "Female", 
                              "appearances" = "Nr. completed quizzes",
                              "poly(appearances, 3, raw = TRUE)1" = "Nr. completed quizzes",
                              "poly(appearances, 3, raw = TRUE)2" = "Nr. completed quizzes^2",
@@ -394,7 +395,7 @@ modder <- plotdata %>%
 
 # Regression table with nice layout
 modelsummary(list("% Correct" = modder), stars = TRUE,
-             coef_rename = c("woman" = "Female", 
+             coef_rename = c("gndrWomen" = "Female", 
                              "appearances" = "Nr. completed quizzes"),
              gof_map = c("nobs", "r.squared"))
 ```
@@ -429,11 +430,11 @@ $$Y_{i} = \alpha + \beta_{1} X_{1i} + \beta_{2} X_{2i} + \color{orange}{\beta_{2
 
 ```{r echo=FALSE}
 mod <- plotdata %>%
-  lm_robust(formula = mcorrect ~ woman*poly(appearances, 2, raw = TRUE), data = .)
+  lm_robust(formula = mcorrect ~ gndr*poly(appearances, 2, raw = TRUE), data = .)
 
 # Regression table with nice layout
 modelsummary(list("% Correct" = mod), stars = TRUE,
-             coef_rename = c("woman" = "Female", 
+             coef_rename = c("gndrWomen" = "Female", 
                              "poly(appearances, 2, raw = TRUE)1" = "Nr. completed quizzes",
                              "poly(appearances, 2, raw = TRUE)2" = "Nr. completed quizzes^2"),
              gof_map = c("nobs", "r.squared"))

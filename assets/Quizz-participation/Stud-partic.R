@@ -16,10 +16,10 @@ Q9 <- read_csv("assets/Quizz-participation/Quiz_Week9.csv") %>% mutate(correct =
 Q10 <- read_csv("assets/Quizz-participation/Quiz_Week10.csv") %>% mutate(correct = (`n correct` / (`n correct` + `n incorrect`)) * 100) %>% select(name, correct)
 Q11 <- read_csv("assets/Quizz-participation/Quiz_Week11.csv") %>% mutate(correct = (`n correct` / (`n correct` + `n incorrect`)) * 100) %>% select(name, correct)
 Q12 <- read_csv("assets/Quizz-participation/Quiz_Week12.csv") %>% mutate(correct = (`n correct` / (`n correct` + `n incorrect`)) * 100) %>% select(name, correct)
-# Q13 <- read_csv("assets/Quizz-participation/Quiz_Week13.csv") %>% select(name)
+Q13 <- read_csv("assets/Quizz-participation/Quiz_Week13.csv") %>% mutate(correct = (`n correct` / (`n correct` + `n incorrect`)) * 100) %>% select(name, correct)
 
 # Combine the dataframes into a single dataframe
-dataframes <- list(Q1, Q2, Q3, Q4, Q5, Q6, Q7, Q8, Q9, Q10, Q11, Q12) # , Q13)
+dataframes <- list(Q1, Q2, Q3, Q4, Q5, Q6, Q7, Q8, Q9, Q10, Q11, Q12, Q13)
 Q <- bind_rows(dataframes, .id = "source_df") %>% filter(name != "Charlotte Baarts")
 
 # Use group_by and summarize to count the occurrences of each name
@@ -82,40 +82,18 @@ result <- left_join( # Join apax and name encoded data
     # Turn into wide tibble with one row per name
     pivot_wider(names_from = statskills, values_from = scores), by = "name")
 
-
-# LLM  zero-shot encoding 
-## 3. Non-Danish name 
-###################################
-zeroshot <- text::textZeroShot(
-  # The list of first names to be predicted.
-  sequences = result$name,
-  # The possible genders for the first names.
-  candidate_labels = c("Danish"),
-  # Indicates whether multiple genders should be predicted for each first name.
-  multi_label = FALSE,
-  # The template for the hypothesis that is generated for each first name.
-  hypothesis_template = "A Person with this name is {}.",
-  # The model that is used to predict the gender.
-  model = "alexandrainst/scandi-nli-base") %>%
-  # Renames the column `sequences` to `name`.
-  rename(name = sequence)
-
-result <- left_join( # Join apax and name encoded data
-  result, # The original survey data.
-  rbind( # Stack zero-shot columns into one long tibble
-    zeroshot %>% select(name, labels_x_1, scores_x_1) %>% rename(Danish = labels_x_1, scores = scores_x_1)) %>% #,
-    # zeroshot %>% select(name, labels_x_2, scores_x_2) %>% rename(gender = labels_x_2, scores = scores_x_2)) %>%
-    # Turn into wide tibble with one row per name
-    pivot_wider(names_from = Danish, values_from = scores), by = "name")
-
 # Print the result
 result %>% print(n = 102)
 
 # Who is not qualified?
 result %>%
-  filter(appearances < 7 | 
-           (appearances < 8 & (str_detect(in_dataframes, "11") | str_detect(in_dataframes, "12"))) |
-           (appearances < 9 & str_detect(in_dataframes, "11, 12"))) %>%
+  filter(appearances < 9) %>%
+  print(.)
+
+# Who is not qualified?
+result %>%
+  filter(appearances < 8 | 
+           (appearances < 9 & str_detect(in_dataframes, "12, 13"))) %>%
   print(.)
 
 save(result, file = "/Users/fsm788/Documents/Teaching/My classes/Multiple Regression and Causal Inference/static/Lectures/14-Conclusion/Result.RData")
