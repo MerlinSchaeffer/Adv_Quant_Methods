@@ -41,6 +41,26 @@ myBib <- ReadBib("./../../../Stats_II.bib", check = FALSE)
 xaringanExtra::use_xaringan_extra(c("tile_view", "tachyons"))
 xaringanExtra::use_panelset()
 ```
+# Course structure
+
+.left-column[
+<br>
+
+| TA       | Fridays  | Room       |
+|:---------|:---------|:-----------|
+| Adna     | 8  am    | CSS 2-1-02 |
+| Josefine | 8  am    | CSS 4-1-30 |
+| Elias    | 10 am    | CSS 2-2-55 |
+| Jonas    | 10 am    | CSS 2-1-55 |
+]
+
+.right-column[
+```{r, echo = FALSE, out.width='100%', fig.align='center'}
+knitr::include_graphics('./img/Structure.png')
+```  
+]
+
+---
 class: middle center
 background-image: url("https://stanfordbloodcenter.org/wp-content/uploads/2021/01/iStock-1208283967.jpg")
 background-position: center
@@ -50,7 +70,7 @@ background-size: cover
 **My research agenda**
 ]
 .font200[
-**Analysis of <br><br> immigration-based ethnic diversity and stratification,<br><br> including their contentious political consequences.**
+**How Does International Immigration<br><br>Transform our Societies?**
 ]
 
 
@@ -84,15 +104,15 @@ knitr::include_graphics('./img/jcac025f1.jpeg')
 
 ---
 
-```{r, echo = FALSE, out.width='45%'}
+```{r, echo = FALSE, out.width='42%'}
 knitr::include_graphics('./img/Krzysz.png')
 ```
 .center[.backgrnote[*Source*: `r Citet(myBib, "krakowski_populist_2022")`]]
 
 ---
 
-```{r, echo = FALSE, out.width='80%'}
-knitr::include_graphics('./img/Ethnic_Discr2-1.png')
+```{r, echo = FALSE, out.width='95%'}
+knitr::include_graphics('./img/IT-Healthcare.png')
 ```
 .center[.backgrnote[*Source*: `r Citet(myBib, "krakowski_populist_2022")`]]
 
@@ -103,43 +123,9 @@ knitr::include_graphics('./img/Ethnic_Discr2-1.png')
 knitr::include_graphics('./img/Wiedner.png')
 ```
 .center[.backgrnote[*Source*: `r Citet(myBib, "wiedner_ethno-religious_2023")`]]
-
----
-layout: false
-class: middle center
-
-.font200[
-Did you the [**setup**](https://merlin-ols.netlify.app/about/) <br><br> and are you ready to go?
-]
-
----
-layout: false
-class: inverse
-# I assume
-
-1. You have basic R coding skills and know how to use RStudio.
-
---
-
-2. You know basic statistics:
-  + Descriptive statistics: $\%$, $\bar{x}$, $\text{SD}(x)$.
-  + Associations: Correlation $r_{y,x}$ & OLS regression $y_{i} = \alpha + \beta x_{i} + \epsilon_{i}$.
-  + Inference: Confidence intervals, $t$-values & $p$-values.
-
----
-class: inverse
-# Today's schedule
-
-1. Explanatory sociology
-
-2. Three learning goals
-  1. Advanced OLS regression
-  2. Visualization of regression results
-  3. Causal inference
   
-3. Course organization
-
 ---
+layout: false
 class: inverse middle center
 # Explanatory Sociology
 
@@ -171,7 +157,7 @@ class: inverse middle center
 
 
 
-**(4) Explanatory**: What is the effect of .alert[X]? <br> .backgrnote[(Vice versa: How does .alert[Y] come about?)]
+**(4) Explanatory**: What is the effect of .alert[X]?
   - What are the consequences of anomie? <br> .backgrnote[Why does the suicide rate vary across societies?]
   - How does capitalism affect us?
   - How does urbanization affect us?
@@ -212,7 +198,7 @@ Think of the last exam you wrote. What type of research question did it enage wi
 
 
 .content-box-red[
-**(4) Explanatory**: What is the effect of $X$? <br> .backgrnote[(Vice versa: How does .alert[Y] come about?)]
+**(4) Explanatory**: What is the effect of $X$?
   - What are the consequences of anomie? <br> .backgrnote[Why does the suicide rate vary across societies?]
   - How does capitalism affect us?
   - How does urbanization affect us?
@@ -318,7 +304,7 @@ knitr::include_graphics('https://pbs.twimg.com/media/FOH1FlhWUAIqbN1.jpg:large')
 
 
 .push-right[
-.center[Municipalities where far-right candidates *ran*
+.center[Municipalities where far-right candidates <br> *ran*
 versus where they *won*]
 ```{r, echo = FALSE, out.width='100%', fig.align='center'}
 knitr::include_graphics('./img/Map_Italy.png')
@@ -330,6 +316,7 @@ knitr::include_graphics('./img/Map_Italy.png')
 class: clear
 # Example: Regression discontinuity design
 
+
 ```{r, echo = FALSE, out.width='50%', fig.align='center'}
 knitr::include_graphics('./img/Romarri.png')
 ```
@@ -339,11 +326,18 @@ knitr::include_graphics('./img/Romarri.png')
 class: clear
 # Example: Regression discontinuity design
 
-```{r, echo = FALSE, out.width='90%', fig.align='center'}
-knitr::include_graphics('./img/Right_Wing5-1.png')
+.left-column[
+```{r, echo = FALSE, out.width='100%'}
+knitr::include_graphics('./img/Krzysz.png')
+```
+]
+
+.right-column[
+```{r, echo = FALSE, out.width='100%', fig.align='center'}
+knitr::include_graphics('./img/Figure2a-1.png')
 ```
 .backgrnote[.center[*Source:* `r Citet(myBib, "krakowski_populist_2022")`]]
-
+]
 
 ---
 class: inverse middle center
@@ -351,56 +345,232 @@ class: inverse middle center
 
 <iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'></iframe>
 
-
 ---
-layout: false
-class: inverse middle center
-# Course organization
-
----
-# Weekly course elements
-
-.left-column[
-.center[**Recommendations**]
-- Activate email notifications on Absalon.
-- Regularly check your KU email or forward it to your personal email.
-- Ask and answer questions in the [t-R-ouble forum](https://absalon.ku.dk/courses/70545/discussion_topics/563046?module_item_id=2037268) on Absalon.
-]
+# Course structure
 
 .right-column[
 ```{r, echo = FALSE, out.width='100%', fig.align='center'}
 knitr::include_graphics('./img/Structure.png')
-```  
+```
+]
+
+--
+
+.left-column[
+.center[**Recommendations**]
+- Activate email notifications on Absalon.
+
+- Regularly check your KU email or forward it to your personal email.
+
+- Ask and answer questions in the [t-R-ouble forum](https://absalon.ku.dk/courses/70545/discussion_topics/563046?module_item_id=2037268) on Absalon.
 ]
 
 ---
 class: clear
 
-```{r, echo = FALSE, out.width='70%', fig.align='center'}
-knitr::include_graphics('./img/Quizz.png')
+```{r, echo = FALSE, out.width='60%', fig.align='center'}
+knitr::include_graphics('./img/Quizz1.png')
+knitr::include_graphics('./img/Quizz2.png')
+knitr::include_graphics('./img/Quizz3.png')
 ```  
 ---
 # Weekly Absalon Online Quizzes
 
 .left-column[
-- 14 Online Quizzes on Absalon designed by Thorkil and Emil from [Epinion](https://epinionglobal.com/).
-- Quizzes are based on real data Epinion collects for the municipality of Copenhagen, DR, Skat, and many more.
-- You must .alert[submit at least 10 completed quizzes] to qualify for the integrated exam with "Velfærd, ulighed og mobilitet".
-- Quizzes must be submitted .alert[individually and within two weeks] after they are made available online (i.e., Wednesdays after the lecture).
+- 13 Online Quizzes on Absalon designed by [Epinion](https://epinionglobal.com/) & Adna.
+
+- Based on data Epinion collects for municipality of Copenhagen, DR, Skat, etc.
+
+- .alert[Submit at least 10 completed quizzes] to qualify for the integrated exam with "Velfærd, ulighed og mobilitet"!
+
+- .alert[Submit individually and within two weeks] after they are made available online (i.e., Wednesdays after the lecture).
 ]
 
 .right-column[
-```{r, echo = FALSE, out.width='90%', fig.align='center'}
-knitr::include_graphics('./img/Quizz.png')
+```{r, echo = FALSE, out.width='80%', fig.align='center'}
+knitr::include_graphics('./img/Quizz1.png')
+knitr::include_graphics('./img/Quizz2.png')
+knitr::include_graphics('./img/Quizz3.png')
 ```  
 ]
 
 ---
+class: inverse
+# Consequently, this course assumes
+
+1. You have basic R coding skills and know how to use RStudio.
+
+--
+
+2. You know basic statistics:
+  + Descriptive statistics: $\%$, $\bar{x}$, $\text{SD}(x)$.
+  + Associations: 
+      + Correlation: $r_{y,x}$,
+      + OLS regression: $y_{i} = \alpha + \beta x_{i} + \epsilon_{i}$.
+  + Inference: Confidence intervals, $t$-values & $p$-values.
+
+---
+# Task 1
+
+1. Get a [recent version of R (>= 4.3.0)](https://mirrors.dotsrc.org/cran/).
+
+2. [Install RStudio](https://posit.co/download/rstudio-desktop/), or update to the most recent version.
+
+---
+# Task 2 .font70[Open RStudio and follow these instructions]
+
+```{r, echo = FALSE, out.width='55%', fig.align='center'}
+knitr::include_graphics('https://d33wubrfki0l68.cloudfront.net/8a64bb047429d7ae0e2acae35c40e421e6439bf6/80e5d/diagrams/rstudio-editor.png')
+```
+
+---
+# Task 3 .font70[Set R Studio preferences]
+
+.left-column[
+Set these preferences to improve *reproducibility*!<br>
+  $\rightarrow$ RStudio/Tools/Global options.
+]
+
+.right-column[
+```{r, echo = FALSE, out.width='70%', fig.align='center'}
+knitr::include_graphics('https://d33wubrfki0l68.cloudfront.net/7fa44a5471d40025344176ede4169c5ad3159482/1577f/screenshots/rstudio-workspace.png')
+```
+]
+
+---
+# R Studio workflow
+
+.left-column[
+1. Use **Projects** to manage all files (scripts, data, figures and tables) belonging to the same project.
+
+2. Always start your RStudio session by clicking on the **Project** for this course.
+
+2. Use the editor the write as many **R scripts** as you like, save them in the same folder as your **Project**. Thereby you can reproduce your results.
+]
+
+.right-column[
+```{r, echo = FALSE, out.width='85%', fig.align='center'}
+knitr::include_graphics('https://d33wubrfki0l68.cloudfront.net/8a64bb047429d7ae0e2acae35c40e421e6439bf6/80e5d/diagrams/rstudio-editor.png')
+```
+]
+
+---
+# Set up your "Stats_II" project
+
+.left-column[
+- Click on the Project button.
+]
+
+.right-column[
+```{r, echo = FALSE, out.width='40%', fig.align='center'}
+knitr::include_graphics('./img/RProject1.png')
+```
+]
+
+---
+layout: true
+# Set up your "Stats_II" project
+.left-column[
+Set up a new project in R Studio. 
+  1. "New Directory"
+  2. "New Project"
+  3. Finally, a name for the folder and under "Browse" where you want that folder to be located. I call mine Stats_II. 
+    + This will also generate a folder with the name you chose. Use that folder for everything related to this course.
+
+**Done!** Now you should find an empty folder under the path your wanted it to be set up.
+
+.alert[In the future, always start RStudio by double clicking on the project icon in your folder for this course.]
+]
+
+---
+
+.right-column[
+```{r, echo = FALSE, out.width='90%', fig.align='center'}
+knitr::include_graphics('./img/RProject2.png')
+```
+]
+
+---
+
+.right-column[
+```{r, echo = FALSE, out.width='90%', fig.align='center'}
+knitr::include_graphics('./img/RProject3.png')
+```
+]
+
+---
+
+.right-column[
+```{r, echo = FALSE, out.width='90%', fig.align='center'}
+knitr::include_graphics('./img/RProject4.png')
+```
+]
+
+---
+
+.right-column[
+```{r, echo = FALSE, out.width='90%', fig.align='center'}
+knitr::include_graphics('./img/RProject5.png')
+```
+]
+
+
+---
+layout: false
+layout: true
+# R Scripts
+---
+
+.left-column[
+1. Open a new R Script.
+2. Save it in your new folder.
+  + Find it under "Files".
+]
+
+.right-column[
+```{r, echo = FALSE, out.width='100%', fig.align='center'}
+knitr::include_graphics('./img/Rscript1.png')
+```
+]
+
+---
+
+.left-column[
+1. Type the lines shon in the screenshot on the right.
+2. Save the file by clicking on the flopy disc icon;
+  - I called mine "Lecture.R".
+3. Mark all code and click "run".
+]
+
+.right-column[
+```{r, echo = FALSE, out.width='100%', fig.align='center'}
+knitr::include_graphics('./img/Rscript3.png')
+```
+]
+
+---
+
+.left-column[
+OK, you are good to go! 
+
+**Pro tip:** *Use the R Script to take notes during the lecture!*
+
+A `#` defines a comment. So use it to take notes and code in one single document per lecture.
+]
+
+.right-column[
+```{r, echo = FALSE, out.width='100%', fig.align='center'}
+knitr::include_graphics('./img/Rscript4.png')
+```
+]
+
+---
+layout: false
 class: clear
 # AI & Large Language Models like ChatGPT
 
 .push-left[
-1. **Privacy**: Everything gets sent to OpenAI's servers. .alert[Don't use AI/LLMs to process sensitive information!]
+1. **Privacy**: .alert[Don't use AI/LLMs to process sensitive information!]
 2. **Learning**: Use AI/LLMs to *explain, comment, debug, and improve* R code that you drafted. Also use AI/LLMs to get *summaries* of text passages and concepts that you do not understand. This will help you to read complex texts and better understand difficult topics. You can also use use AI/LLMs to *discuss* your understanding of the course materials and ask things that confuse you.
 
 3. **Generation**: Don't use AI/LLMs to *generate, draft, and write* your R code. .alert[You need to learn how to code to assess whether ChatGPT coded what you asked for.]
@@ -410,33 +580,6 @@ class: clear
 ```{r, echo = FALSE, out.width='100%', fig.align='center'}
 knitr::include_graphics('https://media1.giphy.com/media/iiSb58oATiANL65Dd2/giphy.gif?cid=ecf05e470i00dk1kq5bvalzh4irqygm4pieeqkdyz9vk76ht&ep=v1_gifs_search&rid=giphy.gif&ct=g')
 ```  
-]
-
----
-layout: true
-# Working with various data sources
-
-.left-column[
-Throughout the lectures, holds, and weekly Absalon online quizzes, you will work with various different data sources.
-]
-
----
-.right-column[
-.center[Data collected by the World Bank]
-```{r, echo = FALSE, out.width='90%', fig.align='center'}
-knitr::include_graphics('./../2-Correlation-n-Regression/2-Corr-n-Reg_files/figure-html/socialism-corr1-1.png')
-```  
-
-]
-
----
-
-.right-column[
-.center[APAX survey of immigrants and their descendants in Germany]
-```{r, echo = FALSE, out.width='90%', fig.align='center'}
-knitr::include_graphics('./../5-Selection-bias/5-Selection-bias_files/figure-html/naiv-1.png')
-```  
-
 ]
 
 ---

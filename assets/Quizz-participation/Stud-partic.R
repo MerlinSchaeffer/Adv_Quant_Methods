@@ -87,13 +87,7 @@ result %>% print(n = 102)
 
 # Who is not qualified?
 result %>%
-  filter(appearances < 9) %>%
-  print(.)
-
-# Who is not qualified?
-result %>%
-  filter(appearances < 8 | 
-           (appearances < 9 & str_detect(in_dataframes, "12, 13"))) %>%
+  filter(appearances < 10) %>%
   print(.)
 
 save(result, file = "/Users/fsm788/Documents/Teaching/My classes/Multiple Regression and Causal Inference/static/Lectures/14-Conclusion/Result.RData")
