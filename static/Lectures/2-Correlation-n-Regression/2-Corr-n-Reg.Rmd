@@ -109,7 +109,7 @@ knitr::include_graphics('https://miro.medium.com/max/1280/1*8Y_EPw2a67TRRos3b24Y
 ]
 
 .push-right[
-```{r, echo = FALSE, out.width='90%'}
+```{r, echo = FALSE, out.width='85%'}
 knitr::include_graphics('https://chineseposters.net/sites/default/files/2020-06/pc-1968-l-005.jpg')
 ```
 ]
@@ -763,13 +763,7 @@ modelsummary(list("OLS" = ols, "Std. OLS" = zols), # Nicely-formatted table
 ]
 
 .left-column[
-```{r results = 'asis'}
-ols <- lm_robust(data = Dat, formula = poverty ~ socialist)
-zols <- lm_robust(data = Dat, formula = z_poverty ~ z_socialist)
-
-modelsummary(list("OLS" = ols, "Std. OLS" = zols), # Nicely-formatted table
-             statistic = NULL, # Don't report stat. inference
-             gof_map = c("nobs", "r.squared")) # Only 2 models fit stats
+```{r ref.label = "ols", echo = FALSE, results='asis'}
 ```
 ]]
 
