@@ -4,15 +4,13 @@
     <title>Multiple Regression &amp;    Fundamentals of Causal Inference</title>
     <meta charset="utf-8" />
     <meta name="author" content="Merlin Schaeffer  Department of Sociology" />
-    <meta name="date" content="2023-09-12" />
+    <meta name="date" content="2024-09-05" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
     <script src="libs/tile-view/tile-view.js"></script>
     <link href="libs/tachyons/tachyons.min.css" rel="stylesheet" />
     <link href="libs/panelset/panelset.css" rel="stylesheet" />
     <script src="libs/panelset/panelset.js"></script>
-    <script src="libs/kePrint/kePrint.js"></script>
-    <link href="libs/lightable/lightable.css" rel="stylesheet" />
     <link rel="stylesheet" href="../template/Merlin169.css" type="text/css" />
   </head>
   <body>
@@ -29,7 +27,7 @@ class: center, middle, inverse, title-slide
 ### Merlin Schaeffer<br> Department of Sociology
 ]
 .date[
-### 2023-09-12
+### 2024-09-05
 ]
 
 ---
@@ -76,7 +74,7 @@ class: clear
 --
 
 .left-column[
-Some of you criticized:&lt;br&gt; *But aren't socialist countries better at providing* **social** *citizenship rights, like affordable housing, healthcare, work, and minimum quality of life?*
+One may criticize:&lt;br&gt; *Aren't socialist countries better at providing* **social** *citizenship rights, like affordable housing, healthcare, work, and minimum quality of life?*
 ]
 
 ---
@@ -84,7 +82,7 @@ class: inverse
 # Today's research question
 
 .center[.font140[
-**Is there a freedom-equality trade-off?**
+**Is there a freedom/equality trade-off?**
 ]
 .font110[
 In other words:&lt;br&gt;
@@ -97,7 +95,7 @@ In other words:&lt;br&gt;
 ]
 
 .push-right[
-&lt;img src="https://almayasabdam.com/wp-content/uploads/2020/09/1496441134_communists.png" width="96%" style="display: block; margin: auto;" /&gt;
+&lt;img src="https://chineseposters.net/sites/default/files/2020-06/pc-1968-l-005.jpg" width="90%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -106,7 +104,7 @@ In other words:&lt;br&gt;
 .panelset[
 .panel[.panel-name[Packages for today's session]
 
-```r
+``` r
 pacman::p_load(
   tidyverse, # Data manipulation,
   ggplot2, # beautiful figures,
@@ -141,11 +139,14 @@ class: clear
 ]]
 .panel[.panel-name[Use API to get the data]
 
-```r
+``` r
 *(Dat_citi_rights &lt;- download_fh(verbose = FALSE) %&gt;% # Use API to download FH data for all countries since 1972,
    rename(country = fh_country, # rename country ID,
           citizen_rights = fh_total_reversed, # rename Citizenship rights indicator,
           date = year) %&gt;% # rename year variable,
+   mutate(country = case_when( 
+     country == "Vietnam" ~ "Viet Nam", # Rename Vietnam
+     TRUE ~ country)) %&gt;% # Leave all others as they are
    select(country, date, citizen_rights)) # Keep only these 3 variables.
 # # A tibble: 9,045 × 3
 #    country      date citizen_rights
@@ -170,7 +171,7 @@ class: clear
 
 .panel[.panel-name[Plot code] 
 
-```r
+``` r
 ggplot(data = Dat_citi_rights %&gt;% filter(date == 2022), # Make coordinate system for data from 2022,
        aes(y = citizen_rights, # Y- and X-axis of plot,
            x = reorder(country, citizen_rights))) +
@@ -189,8 +190,8 @@ class: clear
 .panel[.panel-name[Searching WB archive]
 - With `wbstats::wb_search()`, you can search the Wb archive for any keyword! Here I use "poverty":
 
-```r
-*(wb_poverty_archive &lt;- wb_search("Poverty"))
+``` r
+*(wb_poverty_archive &lt;- wb_search("Poverty")) # Search WB data bank for "Poverty"
 # # A tibble: 702 × 3
 #    indicator_id         indicator                               indicator_desc                                     
 #    &lt;chr&gt;                &lt;chr&gt;                                   &lt;chr&gt;                                              
@@ -209,28 +210,28 @@ class: clear
 ]
 .panel[.panel-name[Use WB API]
 
-```r
+``` r
 *(Dat_poverty &lt;- wb_data("SI.POV.DDAY", # Download poverty data: &lt;$2.15 per day,
-*                       start_date = 2002, end_date = 2023) %&gt;%
+*                       start_date = 2002, end_date = 2024) %&gt;%
    rename(poverty = SI.POV.DDAY) %&gt;% # rename poverty variable,
    select(country, date, poverty) %&gt;% # Keep only 3 variables
    drop_na(poverty) %&gt;% # Drop cases with missing data,
    group_by(country) %&gt;% # Group by country,
    filter(date == max(date)) %&gt;% ungroup()) # Keep the most recent poverty statistic per country.
-# # A tibble: 162 × 3
+# # A tibble: 164 × 3
 #    country     date poverty
 #    &lt;chr&gt;      &lt;dbl&gt;   &lt;dbl&gt;
 #  1 Albania     2020     0  
 #  2 Algeria     2011     0.5
 #  3 Angola      2018    31.1
-#  4 Argentina   2021     1  
-#  5 Armenia     2021     0.5
+#  4 Argentina   2022     0.6
+#  5 Armenia     2022     0.8
 #  6 Australia   2018     0.5
-#  7 Austria     2020     0.7
+#  7 Austria     2021     0.5
 #  8 Azerbaijan  2005     0  
-#  9 Bangladesh  2016    13.5
+#  9 Bangladesh  2022     5  
 # 10 Belarus     2020     0  
-# # ℹ 152 more rows
+# # ℹ 154 more rows
 ```
 ]
 .panel[.panel-name[Purchasing power parity (PPP)]
@@ -277,7 +278,7 @@ Our tibbles are related, because both contain *countries* at various *dates*. &l
 
 .push-left[
 
-```r
+``` r
 Dat_citi_rights
 # # A tibble: 9,045 × 3
 #    country      date citizen_rights
@@ -298,22 +299,22 @@ Dat_citi_rights
 
 .push-right[
 
-```r
+``` r
 Dat_poverty
-# # A tibble: 162 × 3
+# # A tibble: 164 × 3
 #    country     date poverty
 #    &lt;chr&gt;      &lt;dbl&gt;   &lt;dbl&gt;
 #  1 Albania     2020     0  
 #  2 Algeria     2011     0.5
 #  3 Angola      2018    31.1
-#  4 Argentina   2021     1  
-#  5 Armenia     2021     0.5
+#  4 Argentina   2022     0.6
+#  5 Armenia     2022     0.8
 #  6 Australia   2018     0.5
-#  7 Austria     2020     0.7
+#  7 Austria     2021     0.5
 #  8 Azerbaijan  2005     0  
-#  9 Bangladesh  2016    13.5
+#  9 Bangladesh  2022     5  
 # 10 Belarus     2020     0  
-# # ℹ 152 more rows
+# # ℹ 154 more rows
 ```
 ]
 
@@ -351,7 +352,7 @@ Dat_poverty
 # Inner join .font70[Poverty and citizenship rights]
 
 
-```r
+``` r
 *(Dat &lt;- inner_join(Dat_poverty, Dat_citi_rights, by = c("country", "date")))
 # # A tibble: 145 × 4
 #    country     date poverty citizen_rights
@@ -359,12 +360,12 @@ Dat_poverty
 #  1 Albania     2020     0                8
 #  2 Algeria     2011     0.5              3
 #  3 Angola      2018    31.1              3
-#  4 Argentina   2021     1               10
-#  5 Armenia     2021     0.5              6
+#  4 Argentina   2022     0.6             10
+#  5 Armenia     2022     0.8              6
 #  6 Australia   2018     0.5             12
-#  7 Austria     2020     0.7             12
+#  7 Austria     2021     0.5             12
 #  8 Azerbaijan  2005     0                3
-#  9 Bangladesh  2016    13.5              6
+#  9 Bangladesh  2022     5                4
 # 10 Belarus     2020     0                1
 # # ℹ 135 more rows
 ```
@@ -388,11 +389,11 @@ Dat_poverty
 .panel[.panel-name[Coding the index]
 .font70[
 
-```r
+``` r
 Dat &lt;- Dat %&gt;% mutate(
   socialist = case_when( # Years socialist minus years since not socialist anymore,
     country == "China" ~ date - 1949,
-    country == "Vietnam" ~ date - 1945,
+    country == "Viet Nam" ~ date - 1945,
     country == "Algeria" ~ date - 1962,
     str_detect(country,"Portugal|Bangladesh") ~ date - 1972,
     country == "Guinea-Bissau" ~ date - 1973, country == "India" ~ date - 1976, 
@@ -423,7 +424,7 @@ Dat &lt;- Dat %&gt;% mutate(
 ]]
 .panel[.panel-name[Resulting data] 
 
-```r
+``` r
 Dat
 # # A tibble: 145 × 5
 #    country     date poverty citizen_rights socialist
@@ -431,12 +432,12 @@ Dat
 #  1 Albania     2020     0                8        20
 #  2 Algeria     2011     0.5              3        49
 #  3 Angola      2018    31.1              3         5
-#  4 Argentina   2021     1               10         0
-#  5 Armenia     2021     0.5              6         0
+#  4 Argentina   2022     0.6             10         0
+#  5 Armenia     2022     0.8              6         0
 #  6 Australia   2018     0.5             12         0
-#  7 Austria     2020     0.7             12         0
+#  7 Austria     2021     0.5             12         0
 #  8 Azerbaijan  2005     0                3         0
-#  9 Bangladesh  2016    13.5              6        44
+#  9 Bangladesh  2022     5                4        50
 # 10 Belarus     2020     0                1        14
 # # ℹ 135 more rows
 ```
@@ -501,7 +502,7 @@ class: clear
 ]
 .panel[.panel-name[R Code]
 
-```r
+``` r
 (Dat &lt;- Dat %&gt;%
    mutate( # Z-Standardize variables.
 *    z_socialist = scale(socialist) %&gt;% as.numeric(),
@@ -509,16 +510,16 @@ class: clear
 # # A tibble: 145 × 7
 #    country     date poverty citizen_rights socialist z_socialist z_poverty
 #    &lt;chr&gt;      &lt;dbl&gt;   &lt;dbl&gt;          &lt;dbl&gt;     &lt;dbl&gt;       &lt;dbl&gt;     &lt;dbl&gt;
-#  1 Albania     2020     0                8        20       0.907    -0.623
-#  2 Algeria     2011     0.5              3        49       2.88     -0.596
-#  3 Angola      2018    31.1              3         5      -0.114     1.05 
-#  4 Argentina   2021     1               10         0      -0.454    -0.569
-#  5 Armenia     2021     0.5              6         0      -0.454    -0.596
-#  6 Australia   2018     0.5             12         0      -0.454    -0.596
-#  7 Austria     2020     0.7             12         0      -0.454    -0.585
-#  8 Azerbaijan  2005     0                3         0      -0.454    -0.623
-#  9 Bangladesh  2016    13.5              6        44       2.54      0.104
-# 10 Belarus     2020     0                1        14       0.498    -0.623
+#  1 Albania     2020     0                8        20       0.894    -0.607
+#  2 Algeria     2011     0.5              3        49       2.84     -0.579
+#  3 Angola      2018    31.1              3         5      -0.112     1.12 
+#  4 Argentina   2022     0.6             10         0      -0.448    -0.574
+#  5 Armenia     2022     0.8              6         0      -0.448    -0.562
+#  6 Australia   2018     0.5             12         0      -0.448    -0.579
+#  7 Austria     2021     0.5             12         0      -0.448    -0.579
+#  8 Azerbaijan  2005     0                3         0      -0.448    -0.607
+#  9 Bangladesh  2022     5                4        50       2.91     -0.329
+# 10 Belarus     2020     0                1        14       0.492    -0.607
 # # ℹ 135 more rows
 ```
 ]
@@ -577,13 +578,13 @@ How do we interpret this result?
 ]]]
 .right-column[
 
-```r
+``` r
 Dat %&gt;% # Use our data,
   select(poverty, socialist) %&gt;% # Select vars for analysis,
 * cor() # Estimate correlation.
 #           poverty socialist
-# poverty     1.000    -0.101
-# socialist  -0.101     1.000
+# poverty    1.0000   -0.0848
+# socialist -0.0848    1.0000
 ```
 ]]]
 
@@ -662,7 +663,7 @@ Models should not be driven by few singular cases, like in this example.]
 **Residuals**, `\(e_{i} =y_{i} - \hat{y}\)`&lt;br&gt;
 differences between what model predicts and actual data.
 
-`\(e_{\text{Denmark}} = 0.2\% - 12.4\%=-12.2\%\)`
+`\(e_{\text{Denmark}} = 0.2\% - 11.6\%=-11.4\%\)`
 ]
 .right-column[
 &lt;img src="2-Corr-n-Reg_files/figure-html/residuals-1.png" width="100%" style="display: block; margin: auto;" /&gt;
@@ -713,7 +714,7 @@ How much smaller are the residuals from our model (blue line), compared to simpl
 .panel[.panel-name[Regression using R]
 .right-column[
 
-```r
+``` r
 ols &lt;- lm_robust(data = Dat, formula = poverty ~ socialist)
 zols &lt;- lm_robust(data = Dat, formula = z_poverty ~ z_socialist)
 
@@ -726,43 +727,159 @@ modelsummary(list("OLS" = ols, "Std. OLS" = zols), # Nicely-formatted table
 ]
 
 .left-column[
-&lt;table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;"&gt;
- &lt;thead&gt;
-  &lt;tr&gt;
-   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
-   &lt;th style="text-align:center;"&gt; OLS &lt;/th&gt;
-   &lt;th style="text-align:center;"&gt; Std. OLS &lt;/th&gt;
-  &lt;/tr&gt;
- &lt;/thead&gt;
-&lt;tbody&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 12.418 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.000 &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; socialist &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; −0.128 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt; z_socialist &lt;/td&gt;
-   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; −0.101 &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 145 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 145 &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.010 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.010 &lt;/td&gt;
-  &lt;/tr&gt;
-&lt;/tbody&gt;
-&lt;/table&gt;
 
+``` r
+ols &lt;- lm_robust(data = Dat, formula = poverty ~ socialist)
+zols &lt;- lm_robust(data = Dat, formula = z_poverty ~ z_socialist)
+
+modelsummary(list("OLS" = ols, "Std. OLS" = zols), # Nicely-formatted table
+             statistic = NULL, # Don't report stat. inference
+             gof_map = c("nobs", "r.squared")) # Only 2 models fit stats
+```
+
+
+```{=html}
+&lt;!DOCTYPE html&gt; 
+&lt;html lang="en"&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;title&gt;tinytable_s0shaumx8ap0arwu6wjw&lt;/title&gt;
+    &lt;style&gt;
+.table td.tinytable_css_6b99y7bxq2h0sfg5iayg, .table th.tinytable_css_6b99y7bxq2h0sfg5iayg {    border-bottom: solid 0.1em #d3d8dc; }
+.table td.tinytable_css_2vat8ukdrdm18cd5kz4l, .table th.tinytable_css_2vat8ukdrdm18cd5kz4l {    text-align: left; }
+.table td.tinytable_css_2vguf4p34rhy2uzospf8, .table th.tinytable_css_2vguf4p34rhy2uzospf8 {    text-align: center; }
+.table td.tinytable_css_e44sh3eaevh5jfgpmv9w, .table th.tinytable_css_e44sh3eaevh5jfgpmv9w {    text-align: center; }
+.table td.tinytable_css_lrn1f7wcs38m16h6tjh1, .table th.tinytable_css_lrn1f7wcs38m16h6tjh1 {    border-bottom: solid 0.05em black; }
+    &lt;/style&gt;
+    &lt;script src="https://polyfill.io/v3/polyfill.min.js?features=es6"&gt;&lt;/script&gt;
+    &lt;script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"&gt;&lt;/script&gt;
+    &lt;script&gt;
+    MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']]
+      },
+      svg: {
+        fontCache: 'global'
+      }
+    };
+    &lt;/script&gt;
+  &lt;/head&gt;
+
+  &lt;body&gt;
+    &lt;div class="container"&gt;
+      &lt;table class="table table-borderless" id="tinytable_s0shaumx8ap0arwu6wjw" style="width: auto; margin-left: auto; margin-right: auto;" data-quarto-disable-processing='true'&gt;
+        &lt;thead&gt;
+        
+              &lt;tr&gt;
+                &lt;th scope="col"&gt; &lt;/th&gt;
+                &lt;th scope="col"&gt;OLS&lt;/th&gt;
+                &lt;th scope="col"&gt;Std. OLS&lt;/th&gt;
+              &lt;/tr&gt;
+        &lt;/thead&gt;
+        
+        &lt;tbody&gt;
+                &lt;tr&gt;
+                  &lt;td&gt;(Intercept)&lt;/td&gt;
+                  &lt;td&gt;11.618&lt;/td&gt;
+                  &lt;td&gt;0.000 &lt;/td&gt;
+                &lt;/tr&gt;
+                &lt;tr&gt;
+                  &lt;td&gt;socialist  &lt;/td&gt;
+                  &lt;td&gt;-0.103&lt;/td&gt;
+                  &lt;td&gt;      &lt;/td&gt;
+                &lt;/tr&gt;
+                &lt;tr&gt;
+                  &lt;td&gt;z_socialist&lt;/td&gt;
+                  &lt;td&gt;      &lt;/td&gt;
+                  &lt;td&gt;-0.085&lt;/td&gt;
+                &lt;/tr&gt;
+                &lt;tr&gt;
+                  &lt;td&gt;Num.Obs.   &lt;/td&gt;
+                  &lt;td&gt;145   &lt;/td&gt;
+                  &lt;td&gt;145   &lt;/td&gt;
+                &lt;/tr&gt;
+                &lt;tr&gt;
+                  &lt;td&gt;R2         &lt;/td&gt;
+                  &lt;td&gt;0.007 &lt;/td&gt;
+                  &lt;td&gt;0.007 &lt;/td&gt;
+                &lt;/tr&gt;
+        &lt;/tbody&gt;
+      &lt;/table&gt;
+    &lt;/div&gt;
+
+    &lt;script&gt;
+      function styleCell_tinytable_q0qsz7wtpolhk2ovxu5o(i, j, css_id) {
+        var table = document.getElementById("tinytable_s0shaumx8ap0arwu6wjw");
+        table.rows[i].cells[j].classList.add(css_id);
+      }
+      function insertSpanRow(i, colspan, content) {
+        var table = document.getElementById('tinytable_s0shaumx8ap0arwu6wjw');
+        var newRow = table.insertRow(i);
+        var newCell = newRow.insertCell(0);
+        newCell.setAttribute("colspan", colspan);
+        // newCell.innerText = content;
+        // this may be unsafe, but innerText does not interpret &lt;br&gt;
+        newCell.innerHTML = content;
+      }
+      function spanCell_tinytable_q0qsz7wtpolhk2ovxu5o(i, j, rowspan, colspan) {
+        var table = document.getElementById("tinytable_s0shaumx8ap0arwu6wjw");
+        const targetRow = table.rows[i];
+        const targetCell = targetRow.cells[j];
+        for (let r = 0; r &lt; rowspan; r++) {
+          // Only start deleting cells to the right for the first row (r == 0)
+          if (r === 0) {
+            // Delete cells to the right of the target cell in the first row
+            for (let c = colspan - 1; c &gt; 0; c--) {
+              if (table.rows[i + r].cells[j + c]) {
+                table.rows[i + r].deleteCell(j + c);
+              }
+            }
+          }
+          // For rows below the first, delete starting from the target column
+          if (r &gt; 0) {
+            for (let c = colspan - 1; c &gt;= 0; c--) {
+              if (table.rows[i + r] &amp;&amp; table.rows[i + r].cells[j]) {
+                table.rows[i + r].deleteCell(j);
+              }
+            }
+          }
+        }
+        // Set rowspan and colspan of the target cell
+        targetCell.rowSpan = rowspan;
+        targetCell.colSpan = colspan;
+      }
+
+window.addEventListener('load', function () { styleCell_tinytable_q0qsz7wtpolhk2ovxu5o(0, 0, 'tinytable_css_6b99y7bxq2h0sfg5iayg') })
+window.addEventListener('load', function () { styleCell_tinytable_q0qsz7wtpolhk2ovxu5o(0, 1, 'tinytable_css_6b99y7bxq2h0sfg5iayg') })
+window.addEventListener('load', function () { styleCell_tinytable_q0qsz7wtpolhk2ovxu5o(0, 2, 'tinytable_css_6b99y7bxq2h0sfg5iayg') })
+window.addEventListener('load', function () { styleCell_tinytable_q0qsz7wtpolhk2ovxu5o(0, 0, 'tinytable_css_2vat8ukdrdm18cd5kz4l') })
+window.addEventListener('load', function () { styleCell_tinytable_q0qsz7wtpolhk2ovxu5o(1, 0, 'tinytable_css_2vat8ukdrdm18cd5kz4l') })
+window.addEventListener('load', function () { styleCell_tinytable_q0qsz7wtpolhk2ovxu5o(2, 0, 'tinytable_css_2vat8ukdrdm18cd5kz4l') })
+window.addEventListener('load', function () { styleCell_tinytable_q0qsz7wtpolhk2ovxu5o(3, 0, 'tinytable_css_2vat8ukdrdm18cd5kz4l') })
+window.addEventListener('load', function () { styleCell_tinytable_q0qsz7wtpolhk2ovxu5o(4, 0, 'tinytable_css_2vat8ukdrdm18cd5kz4l') })
+window.addEventListener('load', function () { styleCell_tinytable_q0qsz7wtpolhk2ovxu5o(5, 0, 'tinytable_css_2vat8ukdrdm18cd5kz4l') })
+window.addEventListener('load', function () { styleCell_tinytable_q0qsz7wtpolhk2ovxu5o(0, 1, 'tinytable_css_2vguf4p34rhy2uzospf8') })
+window.addEventListener('load', function () { styleCell_tinytable_q0qsz7wtpolhk2ovxu5o(1, 1, 'tinytable_css_2vguf4p34rhy2uzospf8') })
+window.addEventListener('load', function () { styleCell_tinytable_q0qsz7wtpolhk2ovxu5o(2, 1, 'tinytable_css_2vguf4p34rhy2uzospf8') })
+window.addEventListener('load', function () { styleCell_tinytable_q0qsz7wtpolhk2ovxu5o(3, 1, 'tinytable_css_2vguf4p34rhy2uzospf8') })
+window.addEventListener('load', function () { styleCell_tinytable_q0qsz7wtpolhk2ovxu5o(4, 1, 'tinytable_css_2vguf4p34rhy2uzospf8') })
+window.addEventListener('load', function () { styleCell_tinytable_q0qsz7wtpolhk2ovxu5o(5, 1, 'tinytable_css_2vguf4p34rhy2uzospf8') })
+window.addEventListener('load', function () { styleCell_tinytable_q0qsz7wtpolhk2ovxu5o(0, 2, 'tinytable_css_e44sh3eaevh5jfgpmv9w') })
+window.addEventListener('load', function () { styleCell_tinytable_q0qsz7wtpolhk2ovxu5o(1, 2, 'tinytable_css_e44sh3eaevh5jfgpmv9w') })
+window.addEventListener('load', function () { styleCell_tinytable_q0qsz7wtpolhk2ovxu5o(2, 2, 'tinytable_css_e44sh3eaevh5jfgpmv9w') })
+window.addEventListener('load', function () { styleCell_tinytable_q0qsz7wtpolhk2ovxu5o(3, 2, 'tinytable_css_e44sh3eaevh5jfgpmv9w') })
+window.addEventListener('load', function () { styleCell_tinytable_q0qsz7wtpolhk2ovxu5o(4, 2, 'tinytable_css_e44sh3eaevh5jfgpmv9w') })
+window.addEventListener('load', function () { styleCell_tinytable_q0qsz7wtpolhk2ovxu5o(5, 2, 'tinytable_css_e44sh3eaevh5jfgpmv9w') })
+window.addEventListener('load', function () { styleCell_tinytable_q0qsz7wtpolhk2ovxu5o(3, 0, 'tinytable_css_lrn1f7wcs38m16h6tjh1') })
+window.addEventListener('load', function () { styleCell_tinytable_q0qsz7wtpolhk2ovxu5o(3, 1, 'tinytable_css_lrn1f7wcs38m16h6tjh1') })
+window.addEventListener('load', function () { styleCell_tinytable_q0qsz7wtpolhk2ovxu5o(3, 2, 'tinytable_css_lrn1f7wcs38m16h6tjh1') })
+    &lt;/script&gt;
+
+  &lt;/body&gt;
+
+&lt;/html&gt;
+```
 
 ]]
 
@@ -774,16 +891,16 @@ modelsummary(list("OLS" = ols, "Std. OLS" = zols), # Nicely-formatted table
 .push-right[
 
 $$
-\operatorname{\widehat{poverty}} = 12.42 - 0.13(\operatorname{socialist})
+\operatorname{\widehat{poverty}} = 11.62 - 0.1(\operatorname{socialist})
 $$
  `\(\rightarrow\)` the best-fitting line that `\(\min \sum_{i=1}^{n} e_{i}^{2}\)`.
 
-Among countries without a socialist past, poverty is on average 12.42%.
-  + `\((\hat{y}|\text{Socialism = 0}) = 12.42\%\)`.
+Among countries without a socialist past, poverty is on average 11.62%.
+  + `\((\hat{y}|\text{Socialism = 0}) = 11.62\%\)`.
   
-With every year of socialism, the average level of poverty is -0.13 percentage points lower.
+With every year of socialism, the average level of poverty is -0.1 percentage points lower.
 
-This model accounts for 0.01* 100% more of the variance of poverty across the world, than the average `\(\bar{y} = 11.56\%\)`.
+This model accounts for 0.01* 100% more of the variance of poverty across the world, than the average `\(\bar{y} = 10.93\%\)`.
 ]]]
 
 ---
@@ -792,7 +909,7 @@ This model accounts for 0.01* 100% more of the variance of poverty across the wo
 .left-column[
 .center[**1. Causal**]
 
-With every additional year of socialism, poverty is expected to decline by -0.13 percentage points. Thus, if China and Vietnam stay socialist, poverty will further decline.
+With every additional year of socialism, poverty is expected to decline by -0.1 percentage points. Thus, if China and Vietnam stay socialist, poverty will further decline.
 
 .alert[Beware, this interpretation only holds under some conditions.] 
 
@@ -806,7 +923,7 @@ I will teach you how to estimate regressions that have a causal interpretation l
 **2. Descriptive: conditional means `\(\bar{y}|x\)`**
 ]
 
-With every year of socialism, the average level of poverty -0.13 percentage points lower.
+With every year of socialism, the average level of poverty -0.1 percentage points lower.
 
 Here regression is a (linear) model that describes the average of the outcome for different values of the predictor.
 

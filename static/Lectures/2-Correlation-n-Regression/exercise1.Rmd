@@ -31,10 +31,13 @@ pacman::p_load(
 
 # 1. Download Freedom House data for all countries since 1972,
 Dat_citi_rights <- download_fh(verbose = FALSE) %>% 
-   rename(country = fh_country, # rename country ID,
-          citizen_rights = fh_total_reversed, # rename Citizenship rights indicator,
-          date = year) %>% # rename year,
-   select(country, date, citizen_rights) # Keep only these 3 variables.
+  rename(country = fh_country, # rename country ID,
+         citizen_rights = fh_total_reversed, # rename Citizenship rights indicator,
+         date = year) %>% # rename year,
+  mutate(country = case_when( 
+    country == "Vietnam" ~ "Viet Nam", # Rename Vietnam
+    TRUE ~ country)) %>% # Leave all others as they are
+  select(country, date, citizen_rights) # Keep only these 3 variables.
 
 # 2. Download poverty data: <US$2.15 per day
 Dat_poverty <- wb_data("SI.POV.DDAY", 
@@ -52,7 +55,7 @@ Dat <- inner_join(Dat_poverty, Dat_citi_rights, by = c("country", "date"))
 # 4. Code socialism index
 Dat <- Dat %>% mutate(socialist = case_when( # Years socialist minus years since,
   country == "China" ~ date - 1949,
-  country == "Vietnam" ~ date - 1945,
+  country == "Viet Nam" ~ date - 1945,
   country == "Algeria" ~ date - 1962,
   str_detect(country,"Portugal|Bangladesh") ~ date - 1972,
   country == "Guinea-Bissau" ~ date - 1973,

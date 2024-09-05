@@ -86,7 +86,7 @@ knitr::include_graphics('img/FreedomHouse.png')
 --
 
 .left-column[
-Some of you criticized:<br> *But aren't socialist countries better at providing* **social** *citizenship rights, like affordable housing, healthcare, work, and minimum quality of life?*
+One may criticize:<br> *Aren't socialist countries better at providing* **social** *citizenship rights, like affordable housing, healthcare, work, and minimum quality of life?*
 ]
 
 ---
@@ -94,7 +94,7 @@ class: inverse
 # Today's research question
 
 .center[.font140[
-**Is there a freedom-equality trade-off?**
+**Is there a freedom/equality trade-off?**
 ]
 .font110[
 In other words:<br>
@@ -109,8 +109,8 @@ knitr::include_graphics('https://miro.medium.com/max/1280/1*8Y_EPw2a67TRRos3b24Y
 ]
 
 .push-right[
-```{r, echo = FALSE, out.width='96%'}
-knitr::include_graphics('https://almayasabdam.com/wp-content/uploads/2020/09/1496441134_communists.png')
+```{r, echo = FALSE, out.width='90%'}
+knitr::include_graphics('https://chineseposters.net/sites/default/files/2020-06/pc-1968-l-005.jpg')
 ```
 ]
 
@@ -160,6 +160,9 @@ class: clear
    rename(country = fh_country, # rename country ID,
           citizen_rights = fh_total_reversed, # rename Citizenship rights indicator,
           date = year) %>% # rename year variable,
+   mutate(country = case_when( 
+     country == "Vietnam" ~ "Viet Nam", # Rename Vietnam
+     TRUE ~ country)) %>% # Leave all others as they are
    select(country, date, citizen_rights)) # Keep only these 3 variables.
 ```
 ]
@@ -189,13 +192,13 @@ class: clear
 .panel[.panel-name[Searching WB archive]
 - With `wbstats::wb_search()`, you can search the Wb archive for any keyword! Here I use "poverty":
 ```{r}
-(wb_poverty_archive <- wb_search("Poverty")) #<<
+(wb_poverty_archive <- wb_search("Poverty")) # Search WB data bank for "Poverty" #<< 
 ```
 ]
 .panel[.panel-name[Use WB API]
 ```{r}
 (Dat_poverty <- wb_data("SI.POV.DDAY", # Download poverty data: <$2.15 per day, #<<
-                        start_date = 2002, end_date = 2023) %>% #<<
+                        start_date = 2002, end_date = 2024) %>% #<<
    rename(poverty = SI.POV.DDAY) %>% # rename poverty variable,
    select(country, date, poverty) %>% # Keep only 3 variables
    drop_na(poverty) %>% # Drop cases with missing data,
@@ -340,7 +343,7 @@ knitr::include_graphics('https://raw.githubusercontent.com/gadenbuie/tidyexplain
 Dat <- Dat %>% mutate(
   socialist = case_when( # Years socialist minus years since not socialist anymore,
     country == "China" ~ date - 1949,
-    country == "Vietnam" ~ date - 1945,
+    country == "Viet Nam" ~ date - 1945,
     country == "Algeria" ~ date - 1962,
     str_detect(country,"Portugal|Bangladesh") ~ date - 1972,
     country == "Guinea-Bissau" ~ date - 1973, country == "India" ~ date - 1976, 
@@ -760,7 +763,13 @@ modelsummary(list("OLS" = ols, "Std. OLS" = zols), # Nicely-formatted table
 ]
 
 .left-column[
-```{r ref.label = "ols", results = 'asis', echo = FALSE}
+```{r results = 'asis'}
+ols <- lm_robust(data = Dat, formula = poverty ~ socialist)
+zols <- lm_robust(data = Dat, formula = z_poverty ~ z_socialist)
+
+modelsummary(list("OLS" = ols, "Std. OLS" = zols), # Nicely-formatted table
+             statistic = NULL, # Don't report stat. inference
+             gof_map = c("nobs", "r.squared")) # Only 2 models fit stats
 ```
 ]]
 
