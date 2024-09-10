@@ -4,13 +4,15 @@
     <title>Multiple Regression &amp;    Fundamentals of Causal Inference</title>
     <meta charset="utf-8" />
     <meta name="author" content="Merlin Schaeffer  Department of Sociology" />
-    <meta name="date" content="2024-09-05" />
+    <meta name="date" content="2024-09-10" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
     <script src="libs/tile-view/tile-view.js"></script>
     <link href="libs/tachyons/tachyons.min.css" rel="stylesheet" />
     <link href="libs/panelset/panelset.css" rel="stylesheet" />
     <script src="libs/panelset/panelset.js"></script>
+    <script src="libs/kePrint/kePrint.js"></script>
+    <link href="libs/lightable/lightable.css" rel="stylesheet" />
     <link rel="stylesheet" href="../template/Merlin169.css" type="text/css" />
   </head>
   <body>
@@ -27,7 +29,7 @@ class: center, middle, inverse, title-slide
 ### Merlin Schaeffer<br> Department of Sociology
 ]
 .date[
-### 2024-09-05
+### 2024-09-10
 ]
 
 ---
@@ -39,6 +41,8 @@ class: center, middle, inverse, title-slide
 .font130[.center[Use data to .alert[discover patterns], &lt;br&gt; and the social mechanisms that bring them about.]]
 
 &lt;img src="https://liu.se/-/media/istock-501261958.jpg?mw=1120&amp;mh=1120&amp;hash=DA8977CCE6A6E600AE80A40CFEE771C9" width="70%" style="display: block; margin: auto;" /&gt;
+
+
 ---
 class: inverse
 # Today's schedule
@@ -58,9 +62,9 @@ class: inverse
     + `\(r_{y,x}\)`
   
   2.3 *Bivariate OLS regression*
-  + OLS estimation
-  + Causal versus descriptive interpretation
-  
+    + OLS estimation
+    + Causal versus descriptive interpretation
+
 ---
 class: clear
 # Remember? .font70[Civic and political Citizenship rights across the world]
@@ -68,10 +72,8 @@ class: clear
 .right-column[
 [Freedom House World Map 2021](https://freedomhouse.org/explore-the-map?type=fiw&amp;year=2020)
 
-&lt;img src="img/FreedomHouse.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="./img/FreedomHouse.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]
-
---
 
 .left-column[
 One may criticize:&lt;br&gt; *Aren't socialist countries better at providing* **social** *citizenship rights, like affordable housing, healthcare, work, and minimum quality of life?*
@@ -91,6 +93,8 @@ In other words:&lt;br&gt;
 
 &lt;br&gt;
 .push-left[
+
+
 &lt;img src="https://miro.medium.com/max/1280/1*8Y_EPw2a67TRRos3b24YlA.jpeg" width="90%" style="display: block; margin: auto;" /&gt;
 ]
 
@@ -718,136 +722,59 @@ How much smaller are the residuals from our model (blue line), compared to simpl
 ols &lt;- lm_robust(data = Dat, formula = poverty ~ socialist)
 zols &lt;- lm_robust(data = Dat, formula = z_poverty ~ z_socialist)
 
-modelsummary(list("OLS" = ols, "Std. OLS" = zols), # Nicely-formatted table
-             statistic = NULL, # Don't report stat. inference
-             gof_map = c("nobs", "r.squared")) # Only 2 models fit stats
+modelsummary(list("OLS" = ols, "Std. OLS" = zols), # Nicely-formatted table,
+             statistic = NULL, # Don't report stat. inference (yet),
+             gof_map = c("nobs", "r.squared")) # Only 2 model-fit stats.
 ```
 
 &lt;img src="2-Corr-n-Reg_files/figure-html/unnamed-chunk-34-1.png" width="70%" style="display: block; margin: auto;" /&gt;
 ]
 
 .left-column[
+&lt;br&gt; 
+&lt;table class="table" style="color: black; width: auto !important; margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; OLS &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; Std. OLS &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 11.618 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.000 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; socialist &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −0.103 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt; z_socialist &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; −0.085 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 145 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 145 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.007 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.007 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
 
-```{=html}
-&lt;!-- preamble start --&gt;
-
-    &lt;script&gt;
-      function styleCell_ovtdm1sp2sic8m4v0tmz(i, j, css_id) {
-        var table = document.getElementById("tinytable_ovtdm1sp2sic8m4v0tmz");
-        table.rows[i].cells[j].classList.add(css_id);
-      }
-      function insertSpanRow(i, colspan, content) {
-        var table = document.getElementById('tinytable_ovtdm1sp2sic8m4v0tmz');
-        var newRow = table.insertRow(i);
-        var newCell = newRow.insertCell(0);
-        newCell.setAttribute("colspan", colspan);
-        // newCell.innerText = content;
-        // this may be unsafe, but innerText does not interpret &lt;br&gt;
-        newCell.innerHTML = content;
-      }
-      function spanCell_ovtdm1sp2sic8m4v0tmz(i, j, rowspan, colspan) {
-        var table = document.getElementById("tinytable_ovtdm1sp2sic8m4v0tmz");
-        const targetRow = table.rows[i];
-        const targetCell = targetRow.cells[j];
-        for (let r = 0; r &lt; rowspan; r++) {
-          // Only start deleting cells to the right for the first row (r == 0)
-          if (r === 0) {
-            // Delete cells to the right of the target cell in the first row
-            for (let c = colspan - 1; c &gt; 0; c--) {
-              if (table.rows[i + r].cells[j + c]) {
-                table.rows[i + r].deleteCell(j + c);
-              }
-            }
-          }
-          // For rows below the first, delete starting from the target column
-          if (r &gt; 0) {
-            for (let c = colspan - 1; c &gt;= 0; c--) {
-              if (table.rows[i + r] &amp;&amp; table.rows[i + r].cells[j]) {
-                table.rows[i + r].deleteCell(j);
-              }
-            }
-          }
-        }
-        // Set rowspan and colspan of the target cell
-        targetCell.rowSpan = rowspan;
-        targetCell.colSpan = colspan;
-      }
-window.addEventListener('load', function () { styleCell_ovtdm1sp2sic8m4v0tmz(0, 0, 'tinytable_css_iddi7z3i74jka2p9fzmhmz') })
-window.addEventListener('load', function () { styleCell_ovtdm1sp2sic8m4v0tmz(0, 1, 'tinytable_css_idyrxrreqc5alannywgw0z') })
-window.addEventListener('load', function () { styleCell_ovtdm1sp2sic8m4v0tmz(0, 2, 'tinytable_css_idyrxrreqc5alannywgw0z') })
-window.addEventListener('load', function () { styleCell_ovtdm1sp2sic8m4v0tmz(1, 0, 'tinytable_css_id91elagxvr5feuws9xce5') })
-window.addEventListener('load', function () { styleCell_ovtdm1sp2sic8m4v0tmz(1, 1, 'tinytable_css_idvcmn1cff8vx01c8716ct') })
-window.addEventListener('load', function () { styleCell_ovtdm1sp2sic8m4v0tmz(1, 2, 'tinytable_css_idvcmn1cff8vx01c8716ct') })
-window.addEventListener('load', function () { styleCell_ovtdm1sp2sic8m4v0tmz(2, 0, 'tinytable_css_id91elagxvr5feuws9xce5') })
-window.addEventListener('load', function () { styleCell_ovtdm1sp2sic8m4v0tmz(2, 1, 'tinytable_css_idvcmn1cff8vx01c8716ct') })
-window.addEventListener('load', function () { styleCell_ovtdm1sp2sic8m4v0tmz(2, 2, 'tinytable_css_idvcmn1cff8vx01c8716ct') })
-window.addEventListener('load', function () { styleCell_ovtdm1sp2sic8m4v0tmz(3, 0, 'tinytable_css_idkmy00ml38evdjkosv5dt') })
-window.addEventListener('load', function () { styleCell_ovtdm1sp2sic8m4v0tmz(3, 1, 'tinytable_css_id5ucci7u20xv3o40edaha') })
-window.addEventListener('load', function () { styleCell_ovtdm1sp2sic8m4v0tmz(3, 2, 'tinytable_css_id5ucci7u20xv3o40edaha') })
-window.addEventListener('load', function () { styleCell_ovtdm1sp2sic8m4v0tmz(4, 0, 'tinytable_css_id91elagxvr5feuws9xce5') })
-window.addEventListener('load', function () { styleCell_ovtdm1sp2sic8m4v0tmz(4, 1, 'tinytable_css_idvcmn1cff8vx01c8716ct') })
-window.addEventListener('load', function () { styleCell_ovtdm1sp2sic8m4v0tmz(4, 2, 'tinytable_css_idvcmn1cff8vx01c8716ct') })
-window.addEventListener('load', function () { styleCell_ovtdm1sp2sic8m4v0tmz(5, 0, 'tinytable_css_id91elagxvr5feuws9xce5') })
-window.addEventListener('load', function () { styleCell_ovtdm1sp2sic8m4v0tmz(5, 1, 'tinytable_css_idvcmn1cff8vx01c8716ct') })
-window.addEventListener('load', function () { styleCell_ovtdm1sp2sic8m4v0tmz(5, 2, 'tinytable_css_idvcmn1cff8vx01c8716ct') })
-    &lt;/script&gt;
-
-    &lt;style&gt;
-    .table td.tinytable_css_iddi7z3i74jka2p9fzmhmz, .table th.tinytable_css_iddi7z3i74jka2p9fzmhmz {  text-align: left;  border-bottom: solid 0.1em #d3d8dc; }
-    .table td.tinytable_css_idyrxrreqc5alannywgw0z, .table th.tinytable_css_idyrxrreqc5alannywgw0z {  text-align: center;  border-bottom: solid 0.1em #d3d8dc; }
-    .table td.tinytable_css_id91elagxvr5feuws9xce5, .table th.tinytable_css_id91elagxvr5feuws9xce5 {  text-align: left; }
-    .table td.tinytable_css_idvcmn1cff8vx01c8716ct, .table th.tinytable_css_idvcmn1cff8vx01c8716ct {  text-align: center; }
-    .table td.tinytable_css_idkmy00ml38evdjkosv5dt, .table th.tinytable_css_idkmy00ml38evdjkosv5dt {  border-bottom: solid 0.05em black;  text-align: left; }
-    .table td.tinytable_css_id5ucci7u20xv3o40edaha, .table th.tinytable_css_id5ucci7u20xv3o40edaha {  border-bottom: solid 0.05em black;  text-align: center; }
-    &lt;/style&gt;
-    &lt;div class="container"&gt;
-      &lt;table class="table table-borderless" id="tinytable_ovtdm1sp2sic8m4v0tmz" style="width: auto; margin-left: auto; margin-right: auto;" data-quarto-disable-processing='true'&gt;
-        &lt;thead&gt;
-        
-              &lt;tr&gt;
-                &lt;th scope="col"&gt; &lt;/th&gt;
-                &lt;th scope="col"&gt;OLS&lt;/th&gt;
-                &lt;th scope="col"&gt;Std. OLS&lt;/th&gt;
-              &lt;/tr&gt;
-        &lt;/thead&gt;
-        
-        &lt;tbody&gt;
-                &lt;tr&gt;
-                  &lt;td&gt;(Intercept)&lt;/td&gt;
-                  &lt;td&gt;11.618&lt;/td&gt;
-                  &lt;td&gt;0.000 &lt;/td&gt;
-                &lt;/tr&gt;
-                &lt;tr&gt;
-                  &lt;td&gt;socialist  &lt;/td&gt;
-                  &lt;td&gt;-0.103&lt;/td&gt;
-                  &lt;td&gt;      &lt;/td&gt;
-                &lt;/tr&gt;
-                &lt;tr&gt;
-                  &lt;td&gt;z_socialist&lt;/td&gt;
-                  &lt;td&gt;      &lt;/td&gt;
-                  &lt;td&gt;-0.085&lt;/td&gt;
-                &lt;/tr&gt;
-                &lt;tr&gt;
-                  &lt;td&gt;Num.Obs.   &lt;/td&gt;
-                  &lt;td&gt;145   &lt;/td&gt;
-                  &lt;td&gt;145   &lt;/td&gt;
-                &lt;/tr&gt;
-                &lt;tr&gt;
-                  &lt;td&gt;R2         &lt;/td&gt;
-                  &lt;td&gt;0.007 &lt;/td&gt;
-                  &lt;td&gt;0.007 &lt;/td&gt;
-                &lt;/tr&gt;
-        &lt;/tbody&gt;
-      &lt;/table&gt;
-    &lt;/div&gt;
-&lt;!-- hack to avoid NA insertion in last line --&gt;
-```
 
 ]]
 
 .panel[.panel-name[Interpretation]
 .push-left[
-&lt;img src="2-Corr-n-Reg_files/figure-html/unnamed-chunk-36-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="2-Corr-n-Reg_files/figure-html/unnamed-chunk-35-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]
 
 .push-right[

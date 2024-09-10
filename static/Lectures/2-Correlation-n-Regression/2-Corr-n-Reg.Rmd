@@ -23,9 +23,10 @@ library(ggrepel) # Nicely placed labels in figures.
 library(modelr)
 library(webexercises) # Small web-based answer scales.
 library(equatiomatic) # Regression equations from model objects.
+library(kableExtra)
 
-options(htmltools.preserve.raw = FALSE,
-        htmltools.dir.version = FALSE, servr.interval = 0.5, width = 115, digits = 3)
+options(htmltools.preserve.raw = FALSE, htmltools.dir.version = FALSE, 
+        servr.interval = 0.5, width = 115, digits = 3)
 knitr::opts_chunk$set(
   collapse = TRUE, message = FALSE, fig.retina = 3, error = TRUE,
   warning = FALSE, cache = FALSE, fig.align = 'center',
@@ -49,6 +50,8 @@ xaringanExtra::use_panelset()
 ```{r, echo = FALSE, out.width='70%', fig.align='center'}
 knitr::include_graphics('https://liu.se/-/media/istock-501261958.jpg?mw=1120&mh=1120&hash=DA8977CCE6A6E600AE80A40CFEE771C9')
 ```
+
+
 ---
 class: inverse
 # Today's schedule
@@ -68,9 +71,9 @@ class: inverse
     + $r_{y,x}$
   
   2.3 *Bivariate OLS regression*
-  + OLS estimation
-  + Causal versus descriptive interpretation
-  
+    + OLS estimation
+    + Causal versus descriptive interpretation
+
 ---
 class: clear
 # Remember? .font70[Civic and political Citizenship rights across the world]
@@ -79,11 +82,9 @@ class: clear
 [Freedom House World Map 2021](https://freedomhouse.org/explore-the-map?type=fiw&year=2020)
 
 ```{r, echo = FALSE, out.width='100%'}
-knitr::include_graphics('img/FreedomHouse.png')
+knitr::include_graphics('./img/FreedomHouse.png')
 ```
 ]
-
---
 
 .left-column[
 One may criticize:<br> *Aren't socialist countries better at providing* **social** *citizenship rights, like affordable housing, healthcare, work, and minimum quality of life?*
@@ -103,6 +104,8 @@ In other words:<br>
 
 <br>
 .push-left[
+
+
 ```{r, echo = FALSE, out.width='90%'}
 knitr::include_graphics('https://miro.medium.com/max/1280/1*8Y_EPw2a67TRRos3b24YlA.jpeg')
 ```
@@ -749,13 +752,13 @@ resid +
 
 .panel[.panel-name[Regression using R]
 .right-column[
-```{r ols, eval = FALSE}
+```{r ols, results = 'hide'}
 ols <- lm_robust(data = Dat, formula = poverty ~ socialist)
 zols <- lm_robust(data = Dat, formula = z_poverty ~ z_socialist)
 
-modelsummary(list("OLS" = ols, "Std. OLS" = zols), # Nicely-formatted table
-             statistic = NULL, # Don't report stat. inference
-             gof_map = c("nobs", "r.squared")) # Only 2 models fit stats
+modelsummary(list("OLS" = ols, "Std. OLS" = zols), # Nicely-formatted table,
+             statistic = NULL, # Don't report stat. inference (yet),
+             gof_map = c("nobs", "r.squared")) # Only 2 model-fit stats.
 ```
 
 ```{r ref.label = "min_resid", out.width='70%', fig.height = 4, fig.width = 6.5, results = FALSE, echo = FALSE}
@@ -763,7 +766,11 @@ modelsummary(list("OLS" = ols, "Std. OLS" = zols), # Nicely-formatted table
 ]
 
 .left-column[
-```{r ref.label = "ols", echo = FALSE, results='asis'}
+<br> 
+```{r ols_table, echo = FALSE, results='asis'}
+modelsummary(list("OLS" = ols, "Std. OLS" = zols), # Nicely-formatted table
+             statistic = NULL, # Don't report stat. inference
+             gof_map = c("nobs", "r.squared"), output = "kableExtra") # Only 2 models fit stats
 ```
 ]]
 
