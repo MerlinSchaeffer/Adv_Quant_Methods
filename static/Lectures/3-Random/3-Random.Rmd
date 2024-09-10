@@ -102,7 +102,7 @@ pacman::p_load(
 
 .panel[.panel-name[Get the ESS data]
 .push-left[
-Download the "ESS9e03_1.sav" data from Absalon. Place them into the folder for this course and where you have your R-project.
+Download the "ESS9e03_1.sav" data from Absalon. Place them into the folder for this course (where your R-project is located).
 ]
 .push-right[
 ```{r ESS}
@@ -145,7 +145,7 @@ knitr::include_graphics('https://upload.wikimedia.org/wikipedia/commons/thumb/f/
 (1) Populations are too large to study everyone.
 
 ```{r, echo = FALSE, out.width='90%', fig.align='center'}
-knitr::include_graphics('https://optimise2.assets-servd.host/best-fit/production/images/Roskilde-2022-Orange-Stage-Post-Malone-FlemmingBoJensen.jpeg?w=600&h=338&q=100&auto=format&fit=crop&dm=1669804307&s=b60a3165c822d00e54be5f3b64a69a7d')
+knitr::include_graphics('https://republicpolicy.com/wp-content/uploads/2024/07/world-population-day.jpg')
 ```
 ]
 
@@ -216,7 +216,7 @@ knitr::include_graphics('https://upload.wikimedia.org/wikipedia/commons/7/78/Mon
 
 .push-right[
 ```{r, echo = FALSE, out.width='80%', fig.align='center'}
-knitr::include_graphics('https://lotterylab.s3.amazonaws.com/summernoteimages/606ffa6b3468c.gif')
+knitr::include_graphics('https://cdn.dribbble.com/users/1731126/screenshots/7225519/media/f7015f6a25ed60946661e1ec9435d083.gif')
 ```
 
 1. Thrill: No one knows the outcome.
@@ -232,7 +232,7 @@ layout: true
 .push-left[
 
 ```{r, echo = FALSE, out.width='60%', fig.align='center'}
-knitr::include_graphics('https://lotterylab.s3.amazonaws.com/summernoteimages/606ffa6b3468c.gif')
+knitr::include_graphics('https://cdn.dribbble.com/users/1731126/screenshots/7225519/media/f7015f6a25ed60946661e1ec9435d083.gif')
 ```
 
 <br>
@@ -256,8 +256,6 @@ Random sampling is the equivalent of <br> giving the soup a proper stir before w
 ---
 layout: false
 class: inverse middle center
-
-Nice talk man.
 
 **But we all know that it's not random who participates in a study**
 
@@ -351,6 +349,12 @@ weighted.mean(x = `Voted yes`, w = Weight) * 100 # (3)
 # Weights can be amazing!
 
 .push-left[
+
+
+
+```{r, echo = FALSE, out.width='60%', fig.align='center'}
+knitr::include_graphics('https://mediaplaynews.b-cdn.net/wp-content/uploads/2020/09/PlayStation-Gamer-Girts-Ragelis-Shutterstock-WEB.jpg')
+```
 ```{r, echo = FALSE, out.width='100%', fig.align='center'}
 knitr::include_graphics('img/Wang1.png')
 ```
@@ -397,7 +401,7 @@ mod2 <- lm_robust(psppsgva ~ eduyrs, data = ESS, # Weighted
 # Nicely-formatted regression table
 modelsummary(list("Unweighted" = mod1, "Weighted" = mod2),
              statistic = NULL, # Don't report stat. inference
-             gof_map = c("nobs", "r.squared")) # Only 2 models fit stats
+             gof_map = c("nobs", "r.squared"), output = "kableExtra") # Only 2 models fit stats
 ```
 
 .panel[.panel-name[Example]
@@ -483,7 +487,7 @@ class: inverse middle center
 $\downarrow$ 
 ]
 
-**Solution**: *Random sampling* prohibits systematic biases, and *weighting* helps to alleviate partly failed randomization.
+**Solution**: *Random sampling* prohibits systematic biases, *weighting* alleviates partly-failed randomization.
 
 .center[
 $\downarrow$ 
@@ -508,9 +512,9 @@ knitr::include_graphics('https://ecampusontario.pressbooks.pub/app/uploads/sites
 # Sampling error $\sigma$ .font60[(aka sampling variability)]
 
 .push-left[
-- **Let's assume, the Danish ESS with it's `r nrow(ESS)` respondents was our (unobservable super) population of interest.** .backgrnote[Thus no weights in this example ;)]
+- **Let's assume, the Danish ESS with its `r nrow(ESS)` respondents was our (unobservable super) population of interest.** .backgrnote[Thus no weights in this example ;)]
 
-- That would mean, we can *calculate* the true OLS regression line (in blue): $\beta = `r coef(lm(psppsgva ~ eduyrs, data = ESS))["eduyrs"]`$.
+- That would mean, we can *calculate* the true OLS regression line (in blue): An increase of education by 1-year, goes along with an increase in political efficacy of $\beta = `r coef(lm(psppsgva ~ eduyrs, data = ESS))["eduyrs"]`$.
 ]
 
 .push-right[
@@ -528,9 +532,9 @@ ggplot(data = ESS, aes(y = psppsgva, x = eduyrs)) +
 # Sampling error $\sigma$ .font60[(aka sampling variability)]
 
 .push-left[
-- **Lets assume, the Danish ESS with it's `r nrow(ESS)` respondents was our (unobservable super) population of interest.** .backgrnote[I thus don't use weights in this example ;)]
+- **Let's assume, the Danish ESS with its `r nrow(ESS)` respondents was our (unobservable super) population of interest.** .backgrnote[Thus no weights in this example ;)]
 
-- That would mean, we can *calculate* the true OLS regression line (in blue): $\beta = `r coef(lm(psppsgva ~ eduyrs, data = ESS))["eduyrs"]`$.
+- That would mean, we can *calculate* the true OLS regression line (in blue): An increase of education by 1-year, goes along with an increase in political efficacy of $\beta = `r coef(lm(psppsgva ~ eduyrs, data = ESS))["eduyrs"]`$.
 
 - Now I take a random sample of 50 persons.
 
@@ -641,7 +645,7 @@ ggplot(data = Samples, aes(y = psppsgva, x = eduyrs)) +
        x = "Years of education") +
   transition_states(factor(sample_nr),
                     transition_length = 10,
-                    state_length = 1) +
+                    state_length = 50) +
   shadow_mark(alpha = 0.15, size = 0.1)
 ```
 ]
@@ -805,7 +809,7 @@ mod <- lm_robust( # OLS regression
 
 modelsummary( # Regression table
   list("Pol. efficacy" = mod),
-  gof_map = c("nobs", "r.squared"))
+  gof_map = c("nobs", "r.squared"), output = "kableExtra")
 ```
 ]]
 
@@ -824,7 +828,7 @@ mod2 <- lm_robust( # OLS regression
 
 modelsummary( # Regression table
   list("Pol. efficacy" = mod2),
-  gof_map = c("nobs", "r.squared"))
+  gof_map = c("nobs", "r.squared"), output = "kableExtra")
 ```
 ]]
 
@@ -1101,7 +1105,7 @@ class: middle clear
 
 .left-column[
 ```{r, echo = FALSE, out.width='100%'}
-knitr::include_graphics('https://www.latentview.com/wp-content/uploads/2016/04/LatentView-Turns-Ten-A-decade-of-data-science.jpg')
+knitr::include_graphics('https://www.chalmers.se/_next/image/?url=https%3A%2F%2Fcms.www.chalmers.se%2FMedia%2Fmb3hi4kn%2Fcoding-7-1920.jpg%3Fwidth%3D1920%26height%3D1080%26v%3D1d98d6204a2cd70%26quality%3D60%26format%3Dwebp&w=3840&q=90')
 ```
 
 <iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'></iframe>

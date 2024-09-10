@@ -4,7 +4,7 @@
     <title>Multiple Regression &amp;    Fundamentals of Causal Inference</title>
     <meta charset="utf-8" />
     <meta name="author" content="Merlin Schaeffer  Department of Sociology" />
-    <meta name="date" content="2023-09-20" />
+    <meta name="date" content="2024-09-10" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
     <script src="libs/tile-view/tile-view.js"></script>
@@ -29,7 +29,7 @@ class: center, middle, inverse, title-slide
 ### Merlin Schaeffer<br> Department of Sociology
 ]
 .date[
-### 2023-09-20
+### 2024-09-10
 ]
 
 ---
@@ -82,7 +82,7 @@ class: inverse
 .panelset[
 .panel[.panel-name[Packages for today's session]
 
-```r
+``` r
 pacman::p_load(
   tidyverse, # Data manipulation,
   haven, # Handle labelled data.
@@ -95,11 +95,11 @@ pacman::p_load(
 
 .panel[.panel-name[Get the ESS data]
 .push-left[
-Download the "ESS9e03_1.sav" data from Absalon. Place them into the folder for this course and where you have your R-project.
+Download the "ESS9e03_1.sav" data from Absalon. Place them into the folder for this course (where your R-project is located).
 ]
 .push-right[
 
-```r
+``` r
 # Read the ESS round 9 data
 ESS &lt;- read_spss("../../../assets/ESS9e03_1.sav") %&gt;%
   filter(cntry == "DK") %&gt;% # Keep only the Danish data,
@@ -136,7 +136,7 @@ All data we use are samples based on which we seek to draw general insights.
 .push-left[
 (1) Populations are too large to study everyone.
 
-&lt;img src="https://optimise2.assets-servd.host/best-fit/production/images/Roskilde-2022-Orange-Stage-Post-Malone-FlemmingBoJensen.jpeg?w=600&amp;h=338&amp;q=100&amp;auto=format&amp;fit=crop&amp;dm=1669804307&amp;s=b60a3165c822d00e54be5f3b64a69a7d" width="90%" style="display: block; margin: auto;" /&gt;
+&lt;img src="https://republicpolicy.com/wp-content/uploads/2024/07/world-population-day.jpg" width="90%" style="display: block; margin: auto;" /&gt;
 ]
 
 --
@@ -199,7 +199,7 @@ Why do many games have a random element?
 --
 
 .push-right[
-&lt;img src="https://lotterylab.s3.amazonaws.com/summernoteimages/606ffa6b3468c.gif" width="80%" style="display: block; margin: auto;" /&gt;
+&lt;img src="https://cdn.dribbble.com/users/1731126/screenshots/7225519/media/f7015f6a25ed60946661e1ec9435d083.gif" width="80%" style="display: block; margin: auto;" /&gt;
 
 1. Thrill: No one knows the outcome.
 
@@ -213,7 +213,7 @@ layout: true
 
 .push-left[
 
-&lt;img src="https://lotterylab.s3.amazonaws.com/summernoteimages/606ffa6b3468c.gif" width="60%" style="display: block; margin: auto;" /&gt;
+&lt;img src="https://cdn.dribbble.com/users/1731126/screenshots/7225519/media/f7015f6a25ed60946661e1ec9435d083.gif" width="60%" style="display: block; margin: auto;" /&gt;
 
 &lt;br&gt;
 &lt;br&gt;
@@ -234,8 +234,6 @@ Random sampling is the equivalent of &lt;br&gt; giving the soup a proper stir be
 ---
 layout: false
 class: inverse middle center
-
-Nice talk man.
 
 **But we all know that it's not random who participates in a study**
 
@@ -263,7 +261,7 @@ Why would survey researchers assign lower weights to older people?
 ]
 .panel[.panel-name[Code]
 
-```r
+``` r
 ggplot(data = ESS, 
        mapping = aes(y = pspwght, x = agea)) +
   geom_point(alpha = 1/3) +
@@ -348,21 +346,21 @@ What is the patriarchy-weighted percent &lt;br&gt; of "Yes"-votes?
 .panelset[
 .panel[.panel-name[1.]
 
-```r
+``` r
 ((0*2 + 1*2 + 1 + 1 + 0) / 7) * 100 # (1)
 # [1] 57.1
 ```
 ]
 .panel[.panel-name[2.]
 
-```r
+``` r
 (sum(`Voted yes` * Weight) / sum(Weight)) * 100 # (2)
 # [1] 57.1
 ```
 ]
 .panel[.panel-name[3.]
 
-```r
+``` r
 weighted.mean(x = `Voted yes`, w = Weight) * 100 # (3)
 # [1] 57.1
 ```
@@ -372,6 +370,10 @@ weighted.mean(x = `Voted yes`, w = Weight) * 100 # (3)
 # Weights can be amazing!
 
 .push-left[
+
+
+
+&lt;img src="https://mediaplaynews.b-cdn.net/wp-content/uploads/2020/09/PlayStation-Gamer-Girts-Ragelis-Shutterstock-WEB.jpg" width="60%" style="display: block; margin: auto;" /&gt;
 &lt;img src="img/Wang1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]
 
@@ -401,7 +403,7 @@ Using weights results in heteroscedastic residuals, which violates an OLS assump
 &lt;img src="3-Random_files/figure-html/ols_fig-1.png" width="90%" style="display: block; margin: auto;" /&gt;
 ]
 .panel[.panel-name[OLS Regression]
-&lt;table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;"&gt;
+&lt;table class="table" style="color: black; width: auto !important; margin-left: auto; margin-right: auto;"&gt;
  &lt;thead&gt;
   &lt;tr&gt;
    &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
@@ -437,7 +439,7 @@ Using weights results in heteroscedastic residuals, which violates an OLS assump
 ]
 .panel[.panel-name[Code]
 
-```r
+``` r
 # Prepare the data
 ESS &lt;- ESS %&gt;% mutate(
     psppsgva = zap_labels(psppsgva), # Make numeric
@@ -456,7 +458,7 @@ mod2 &lt;- lm_robust(psppsgva ~ eduyrs, data = ESS, # Weighted
 # Nicely-formatted regression table
 modelsummary(list("Unweighted" = mod1, "Weighted" = mod2),
              statistic = NULL, # Don't report stat. inference
-             gof_map = c("nobs", "r.squared")) # Only 2 models fit stats
+             gof_map = c("nobs", "r.squared"), output = "kableExtra") # Only 2 models fit stats
 ```
 ]]]
 
@@ -520,7 +522,7 @@ class: inverse middle center
 `\(\downarrow\)` 
 ]
 
-**Solution**: *Random sampling* prohibits systematic biases, and *weighting* helps to alleviate partly failed randomization.
+**Solution**: *Random sampling* prohibits systematic biases, *weighting* alleviates partly-failed randomization.
 
 .center[
 `\(\downarrow\)` 
@@ -543,9 +545,9 @@ class: inverse middle center
 # Sampling error `\(\sigma\)` .font60[(aka sampling variability)]
 
 .push-left[
-- **Let's assume, the Danish ESS with it's 1511 respondents was our (unobservable super) population of interest.** .backgrnote[Thus no weights in this example ;)]
+- **Let's assume, the Danish ESS with its 1511 respondents was our (unobservable super) population of interest.** .backgrnote[Thus no weights in this example ;)]
 
-- That would mean, we can *calculate* the true OLS regression line (in blue): `\(\beta = 0.039\)`.
+- That would mean, we can *calculate* the true OLS regression line (in blue): An increase of education by 1-year, goes along with an increase in political efficacy of `\(\beta = 0.039\)`.
 ]
 
 .push-right[
@@ -556,14 +558,14 @@ class: inverse middle center
 # Sampling error `\(\sigma\)` .font60[(aka sampling variability)]
 
 .push-left[
-- **Lets assume, the Danish ESS with it's 1511 respondents was our (unobservable super) population of interest.** .backgrnote[I thus don't use weights in this example ;)]
+- **Let's assume, the Danish ESS with its 1511 respondents was our (unobservable super) population of interest.** .backgrnote[Thus no weights in this example ;)]
 
-- That would mean, we can *calculate* the true OLS regression line (in blue): `\(\beta = 0.039\)`.
+- That would mean, we can *calculate* the true OLS regression line (in blue): An increase of education by 1-year, goes along with an increase in political efficacy of `\(\beta = 0.039\)`.
 
 - Now I take a random sample of 50 persons.
 
 
-```r
+``` r
 set.seed(1261990) # Random seed, to reproduce result.
 ESS_sample &lt;- ESS %&gt;% sample_n(50) # Draw the sample.
 ```
@@ -584,7 +586,7 @@ ESS_sample &lt;- ESS %&gt;% sample_n(50) # Draw the sample.
 - Now I take a random sample of 50 persons.
 
 
-```r
+``` r
 set.seed(1261990) # Random seed, to reproduce result.
 ESS_sample &lt;- ESS %&gt;% sample_n(50) # Draw the sample.
 ```
@@ -607,7 +609,7 @@ ESS_sample &lt;- ESS %&gt;% sample_n(50) # Draw the sample.
 - .alert[Let's take another random sample of 50 persons.]
 
 
-```r
+``` r
 ESS_sample_2 &lt;- ESS %&gt;% sample_n(50) # Draw the sample.
 ```
 
@@ -624,7 +626,7 @@ ESS_sample_2 &lt;- ESS %&gt;% sample_n(50) # Draw the sample.
 .panelset[
 .panel[.panel-name[Code for the Nerds]
 
-```r
+``` r
 Samples &lt;- bind_rows(
   ESS_sample, ESS_sample_2, 
   .id = "sample_nr") %&gt;%
@@ -657,7 +659,7 @@ for (draw in 3:1000) {
 
 .font90[
 
-```r
+``` r
 # If assuming the Normal distribution
 # is correct, then 95% of the 
 # estimates of beta will lie in 
@@ -681,7 +683,7 @@ Critical values depend on the degrees of freedom (df): Sample size `\(n\)` minus
 
 .font80[
 
-```r
+``` r
 # Critical value for 95%,
 # with df = 50 - 5:
 (crit_val &lt;- qt(p = 0.975, df = 48))
@@ -729,12 +731,12 @@ layout: true
 True sampling error from our repeated samples:
 
 
-```r
+``` r
 sd(beta_hat)
 # [1] 0.0359
 ```
 
-&lt;img src="3-Random_files/figure-html/unnamed-chunk-32-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="3-Random_files/figure-html/unnamed-chunk-33-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -758,7 +760,7 @@ Estimated sampling error based on our initial 50-person sample using Gauss' form
 ]
 .push-right[
 
-```r
+``` r
 mod &lt;- lm_robust( # OLS regression
   psppsgva ~ eduyrs, 
 * se_type = "classical", # Gauss
@@ -766,10 +768,10 @@ mod &lt;- lm_robust( # OLS regression
 
 modelsummary( # Regression table
   list("Pol. efficacy" = mod),
-  gof_map = c("nobs", "r.squared"))
+  gof_map = c("nobs", "r.squared"), output = "kableExtra")
 ```
 
-&lt;table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;"&gt;
+&lt;table class="table" style="color: black; width: auto !important; margin-left: auto; margin-right: auto;"&gt;
  &lt;thead&gt;
   &lt;tr&gt;
    &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
@@ -815,7 +817,7 @@ Estimated sampling error based on our second 50-person sample using Gauss' formu
 ]
 .push-right[
 
-```r
+``` r
 mod2 &lt;- lm_robust( # OLS regression
   psppsgva ~ eduyrs, 
 * se_type = "classical", # Gauss
@@ -823,10 +825,10 @@ mod2 &lt;- lm_robust( # OLS regression
 
 modelsummary( # Regression table
   list("Pol. efficacy" = mod2),
-  gof_map = c("nobs", "r.squared"))
+  gof_map = c("nobs", "r.squared"), output = "kableExtra")
 ```
 
-&lt;table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;"&gt;
+&lt;table class="table" style="color: black; width: auto !important; margin-left: auto; margin-right: auto;"&gt;
  &lt;thead&gt;
   &lt;tr&gt;
    &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
@@ -888,7 +890,7 @@ class: clear
 .panelset[
 .panel[.panel-name[Code]
 
-```r
+``` r
 ggplot(data = ESS_sample, aes(y = psppsgva, x = eduyrs)) +
   geom_jitter(alpha = 1/3, width = 0.1, height = 0.1) +
   geom_smooth(method = "lm", # OLS
@@ -902,11 +904,11 @@ ggplot(data = ESS_sample, aes(y = psppsgva, x = eduyrs)) +
 ]
 .panel[.panel-name[Plot]
 .push-left[
-&lt;img src="3-Random_files/figure-html/unnamed-chunk-36-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+&lt;img src="3-Random_files/figure-html/unnamed-chunk-37-1.png" width="90%" style="display: block; margin: auto;" /&gt;
 ]
 
 .push-right[
-&lt;img src="3-Random_files/figure-html/unnamed-chunk-37-1.gif" width="90%" style="display: block; margin: auto;" /&gt;
+&lt;img src="3-Random_files/figure-html/unnamed-chunk-38-1.gif" width="90%" style="display: block; margin: auto;" /&gt;
 ]]]
 
 ---
@@ -1018,7 +1020,7 @@ Can you come up with another example?
 .panelset[
 .panel[.panel-name[Regression model]
 
-```r
+``` r
 ols &lt;- lm_robust(psppsgva ~ eduyrs, data = ESS_sample)
 summary(ols)
 # 
@@ -1067,7 +1069,7 @@ summary(ols)
 .panelset[
 .panel[.panel-name[Regression table]
 
-```r
+``` r
 ols_goal &lt;- lm_robust(psppsgva ~ eduyrs, weights = pspwght, data = ESS)
 summary(ols_goal, include.ci = FALSE, digits = 3)
 # 
@@ -1099,7 +1101,7 @@ class: inverse middle center
 class: middle clear
 
 .left-column[
-&lt;img src="https://www.latentview.com/wp-content/uploads/2016/04/LatentView-Turns-Ten-A-decade-of-data-science.jpg" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="https://www.chalmers.se/_next/image/?url=https%3A%2F%2Fcms.www.chalmers.se%2FMedia%2Fmb3hi4kn%2Fcoding-7-1920.jpg%3Fwidth%3D1920%26height%3D1080%26v%3D1d98d6204a2cd70%26quality%3D60%26format%3Dwebp&amp;w=3840&amp;q=90" width="100%" style="display: block; margin: auto;" /&gt;
 
 &lt;iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
 ]
