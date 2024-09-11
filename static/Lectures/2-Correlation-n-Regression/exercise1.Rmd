@@ -41,7 +41,7 @@ Dat_citi_rights <- download_fh(verbose = FALSE) %>%
 
 # 2. Download poverty data: <US$2.15 per day
 Dat_poverty <- wb_data("SI.POV.DDAY", 
-                        start_date = 2002, end_date = 2022) %>% #<<
+                        start_date = 1972, end_date = 2022) %>% #<<
    rename(poverty = SI.POV.DDAY) %>% # rename poverty variable,
    select(country, date, poverty) %>% # Keep only 3 variables
    drop_na(poverty) %>% # Drop cases with missing data,

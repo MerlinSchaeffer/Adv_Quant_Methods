@@ -126,12 +126,11 @@ knitr::include_graphics('https://chineseposters.net/sites/default/files/2020-06/
 pacman::p_load(
   tidyverse, # Data manipulation,
   ggplot2, # beautiful figures,
-  wbstats, # download data from Worldbank. Tremendous source of global socio-economic data.
+  wbstats, # download data from Worldbank. Tremendous source of global socio-economic data. #<<
+  democracyData, # Use democracy data APIs, #<<
   estimatr, # OLS with robust SE,
   modelsummary, # regression tables with nice layout,
-  democracyData, # Use democracy data APIs,
-  countrycode, # Easy recodings of country names,
-  remotes) # Install beta version packages from GitHub.
+  countrycode) # Easy recodings of country names.
 ```
 ]]
 
@@ -151,7 +150,7 @@ class: clear
 .panel[.panel-name[The data]
 
 .left-column[
-- Since 1972, Freedom House codes civil and political citizenship rights around the world on a scale from 12 (strong citizenship rights) to 0 (no citizenship rights).
+Since 1972, Freedom House codes civil and political citizenship rights around the world on a scale from 12 (strong citizenship rights) to 0 (no citizenship rights).
 ]
 
 .right-column[
@@ -201,7 +200,7 @@ class: clear
 .panel[.panel-name[Use WB API]
 ```{r}
 (Dat_poverty <- wb_data("SI.POV.DDAY", # Download poverty data: <$2.15 per day, #<<
-                        start_date = 2002, end_date = 2024) %>% #<<
+                        start_date = 1972, end_date = 2024) %>% #<<
    rename(poverty = SI.POV.DDAY) %>% # rename poverty variable,
    select(country, date, poverty) %>% # Keep only 3 variables
    drop_na(poverty) %>% # Drop cases with missing data,
@@ -223,11 +222,11 @@ knitr::include_graphics('./img/PPP.png')
 .push-right[
 <br>
 .content-box-red[
-US$1 buys as much in the US, as DKK6.5 buy in Denmark.
+$1 buys in the US, what Kr. 6.5 buy in Denmark.
 
-US$2.15 = DKK14 per day.
+$\rightarrow$ US$2.15 = Kr. 14 per day.
 
-$30\times\text{DKK}14 \approx \text{DKK}420$ to get by per month.
+$\rightarrow$ Less than $30\text{Days}\times\text{Kr. }14 \approx \text{Kr. }420$ to get by per month.
 ]]]
 
 .panel[.panel-name[Poverty across the world]
@@ -236,7 +235,7 @@ ggplot(data = Dat_poverty, # Make coord system for data,
        aes(y = poverty, # Y- and X-axis of plot,
            x = reorder(country, poverty))) +
   geom_bar(stat = "identity") + # plot data as is in a bar chart,
-  labs(y = "% population with less than US$2.15 a day\n (like living in Denmark with DKK420 per month)", x = "") + # Axis labels,
+  labs(y = "% population with less than US$2.15 a day\n (like living in Denmark with less than Kr.420 per month)", x = "") + # Axis labels,
   theme_minimal() + # Simple background layout,
   theme(axis.text.x = element_text(angle = 60, hjust = 1)) # Write country names in a 60 degree angle.
 ```
@@ -251,7 +250,9 @@ class: inverse
 <br>
 <br>
 <br>
-OK great, now I have two tibbles. But how can I combine them?
+OK great, now I have two tibbles. 
+
+But how can I combine them?
 ]
 
 .push-right[
@@ -265,7 +266,7 @@ knitr::include_graphics('https://powietrze.malopolska.pl/wp-content/uploads/2020
 
 If you work with multiple tibbles, you work with relational data .alert[if they have one or more variable(s) in common].
 
-Our tibbles are related, because both contain *countries* at various *dates*. <br>The combination of country+date is the **key** that allows us to relate both tibbles.
+Our tibbles are related, because both contain *countries* at various *dates*. <br>The combination of country+date is the .alert[key] that allows us to relate both tibbles.
 
 .push-left[
 ```{r}
@@ -331,6 +332,7 @@ knitr::include_graphics('https://raw.githubusercontent.com/gadenbuie/tidyexplain
 .panel[.panel-name[Socialist countries]
 .left-column[
 - Wikipedia has tables on self-declared socialist countries.
+
 - I suggest a simple index:
   + Years socialist minus years since not socialist anymore.
   + Min. 5 years given any socialist history.
@@ -371,7 +373,7 @@ Dat <- Dat %>% mutate(
     str_detect(country,"Slovenia|Croatia|Serbia|Montenegro|Bosnia and Herzegovina|North Macedonia|Kosovo") ~ (1992 - 1943) - (date - 1992),
     TRUE ~ 0),
   socialist = case_when( # Min. 5 years given any socialist history,
-    (socialist < 5 & socialist > 0) | socialist < 0 ~ 5,
+    socialist != 0 & socialist < 5 ~ 5,
     TRUE ~ socialist)) %>% drop_na() # Drop countries with missing values.
 ```
 ]]
@@ -453,7 +455,7 @@ class: clear
 $$z(x) = \frac{x - \bar{x}}{\text{SD}(x)}$$
 **We subtract the mean:** Values above 0 are above average, values below 0 are below average.
 
-**We divide by the standard deviation:** Our variable now has standard deviations as unit.<br><br> $\rightarrow$ Intuitive understanding how common vis-á-vis extreme cases are.
+**We divide by the standard deviation:** Our variable now has standard deviations as unit.<br><br> $\rightarrow$ Intuitive understanding: How common vis-á-vis extreme is a case?
 ]
 
 .push-right[
@@ -546,7 +548,7 @@ $$r_{y,x} = \frac{\sum^{n}_{i=1}z_y*z_x}{n-1}$$
 .panel[.panel-name[Poverty & Socialism]
 .left-column[
 .content-box-green[.center[
-How do we interpret this result?
+How do we<br>interpret this result?
 ]]]
 .right-column[
 ```{r}
@@ -601,7 +603,7 @@ socialism_corr2 +
 # Models
 
 .left-column[
-**Model**: attempt to give reduced representation of reality. <br><br>Model should capture answer to our research question. .backgrnote[
+**Model**: A reduced representation of reality. <br><br>Model should capture answer to our research question. .backgrnote[
 Models should not be driven by few singular cases, like in this example.]
 ]
 
@@ -617,9 +619,9 @@ Models should not be driven by few singular cases, like in this example.]
 .content-box-blue[
 .center[**Linear models**<br>defined by two parameters]
 
-$\color{orange}{\alpha}$ 'constant'/'intercept': The value of y at which the line intercepts the Y-axis $(\hat{Y}|X=0)$.
+$\color{orange}{\alpha}$ .alert[constant/intercept]: The value of y at which the line intercepts the Y-axis $(\hat{Y}|X=0)$.
   
-$\color{orange}{\beta}$ 'slope': How does $\hat{Y}$ change, if $X$ increases by one unit.
+$\color{orange}{\beta}$ .alert[slope]: How does $\hat{Y}$ change, if $X$ increases by one unit.
 ]]
 
 .right-column[
@@ -643,7 +645,7 @@ Dat_ols <- Dat %>%
 ```
 
 .left-column[
-**Residuals**, $e_{i} =y_{i} - \hat{y}$<br>
+**Residuals**: $e_{i} =y_{i} - \hat{y}$<br>
 differences between what model predicts and actual data.
 
 $e_{\text{Denmark}} = `r Dat_ols$poverty[Dat_ols$country == "Denmark"]`\% - `r round(Dat_ols$pred[Dat_ols$country == "Denmark"], 1)`\%=`r Dat_ols$poverty[Dat_ols$country == "Denmark"] - round(Dat_ols$pred[Dat_ols$country == "Denmark"], 1)`\%$
@@ -667,17 +669,22 @@ resid +
   geom_label_repel(data = Dat_ols %>% filter(country == "Denmark"), 
                    aes(y = pred, label = paste("Predicted poverty for ", country, ": ", round(pred, 1), "%", sep = "")),
                    show.legend = FALSE,
-                   alpha = 0.8, segment.curvature = -0.1,
-                   segment.ncp = 4, segment.angle = 10,
+                   alpha = 0.8, segment.curvature = -0.2,
+                   segment.ncp = 5, segment.angle = 15,
                    size = 3, box.padding = 1.5,
-                   point.padding = 0.5, force = 100,
+                   point.padding = 0.5, force = 50,
                    segment.size  = 0.3) +
   geom_label_repel(data = Dat_ols %>% filter(country == "Denmark"), 
                    aes(label = paste("Actual poverty in ", country, ": ", poverty, "%", sep = "")),
+                   nudge_x = .15,
+                   box.padding = 0.5,
+                   nudge_y = 1,
+                   segment.curvature = -0.1,
+                   segment.ncp = 3,
+                   segment.angle = 20, 
                    show.legend = FALSE,
-                   alpha = 0.8, segment.curvature = -0.1,
-                   segment.ncp = 4, segment.angle = 10,
-                   size = 3, box.padding = 1.5,
+                   alpha = 0.8,
+                   size = 3,
                    point.padding = 0.5, force = 100,
                    segment.size  = 0.3)
 ```
@@ -736,15 +743,20 @@ $$R^2=\frac{\text{TSS} - \text{RSS}}{\text{TSS}}$$
 ```{r R2, out.width='100%', fig.height = 4, fig.width = 6.5, results = FALSE, echo = FALSE}
 resid +
   geom_hline(yintercept = mean(Dat$poverty), color = "#ffbd38") +
-  geom_linerange(data = Dat_ols %>% filter(country == "Vietnam"),
+  geom_linerange(data = Dat_ols %>% filter(country == "China"),
                  mapping = aes(ymin = pred, ymax = (resid + pred)), color = "#901A1E") +
-  geom_linerange(data = Dat_ols %>% filter(country == "Vietnam"),
+  geom_linerange(data = Dat_ols %>% filter(country == "China"),
                  mapping = aes(ymin = mean(Dat$poverty), ymax = (pred)), color = "#901A1E", size = 2) +
-  geom_label_repel(data = Dat_ols %>% filter(country == "Vietnam"),
+  geom_label_repel(data = Dat_ols %>% filter(country == "China"),
+                   nudge_x = .15,
+                   box.padding = 0.5,
+                   nudge_y = 1,
+                   segment.curvature = -0.1,
+                   segment.ncp = 3,
+                   segment.angle = 20, 
                    show.legend = FALSE,
-                   alpha = 0.8, segment.curvature = -0.1,
-                   segment.ncp = 4, segment.angle = 10,
-                   size = 3, box.padding = 1.5,
+                   alpha = 0.8,
+                   size = 3,
                    point.padding = 0.5, force = 100,
                    segment.size  = 0.3)
 ```
@@ -791,7 +803,7 @@ Among countries without a socialist past, poverty is on average `r round(coef(ol
   
 With every year of socialism, the average level of poverty is `r round(coef(ols)[2], 2)` percentage points lower.
 
-This model accounts for `r round(summary(ols)$r.squared, 2)`* 100% more of the variance of poverty across the world, than the average $\bar{y} = `r round(mean(Dat$poverty), 2)`\%$.
+This model accounts for `r round(summary(ols)$r.squared, 3)`*100% = `r round(summary(ols)$r.squared, 3)*100`% more of the variance of poverty across the world, than the average $\bar{y} = `r round(mean(Dat$poverty), 2)`\%$.
 ]]]
 
 ---

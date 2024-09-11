@@ -4,7 +4,7 @@
     <title>Multiple Regression &amp;    Fundamentals of Causal Inference</title>
     <meta charset="utf-8" />
     <meta name="author" content="Merlin Schaeffer  Department of Sociology" />
-    <meta name="date" content="2024-09-10" />
+    <meta name="date" content="2024-09-11" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
     <script src="libs/tile-view/tile-view.js"></script>
@@ -29,7 +29,7 @@ class: center, middle, inverse, title-slide
 ### Merlin Schaeffer<br> Department of Sociology
 ]
 .date[
-### 2024-09-10
+### 2024-09-11
 ]
 
 ---
@@ -112,12 +112,11 @@ In other words:&lt;br&gt;
 pacman::p_load(
   tidyverse, # Data manipulation,
   ggplot2, # beautiful figures,
-  wbstats, # download data from Worldbank. Tremendous source of global socio-economic data.
+* wbstats, # download data from Worldbank. Tremendous source of global socio-economic data.
+* democracyData, # Use democracy data APIs,
   estimatr, # OLS with robust SE,
   modelsummary, # regression tables with nice layout,
-  democracyData, # Use democracy data APIs,
-  countrycode, # Easy recodings of country names,
-  remotes) # Install beta version packages from GitHub.
+  countrycode) # Easy recodings of country names.
 ```
 ]]
 
@@ -135,7 +134,7 @@ class: clear
 .panel[.panel-name[The data]
 
 .left-column[
-- Since 1972, Freedom House codes civil and political citizenship rights around the world on a scale from 12 (strong citizenship rights) to 0 (no citizenship rights).
+Since 1972, Freedom House codes civil and political citizenship rights around the world on a scale from 12 (strong citizenship rights) to 0 (no citizenship rights).
 ]
 
 .right-column[
@@ -216,13 +215,13 @@ class: clear
 
 ``` r
 *(Dat_poverty &lt;- wb_data("SI.POV.DDAY", # Download poverty data: &lt;$2.15 per day,
-*                       start_date = 2002, end_date = 2024) %&gt;%
+*                       start_date = 1972, end_date = 2024) %&gt;%
    rename(poverty = SI.POV.DDAY) %&gt;% # rename poverty variable,
    select(country, date, poverty) %&gt;% # Keep only 3 variables
    drop_na(poverty) %&gt;% # Drop cases with missing data,
    group_by(country) %&gt;% # Group by country,
    filter(date == max(date)) %&gt;% ungroup()) # Keep the most recent poverty statistic per country.
-# # A tibble: 164 × 3
+# # A tibble: 168 × 3
 #    country     date poverty
 #    &lt;chr&gt;      &lt;dbl&gt;   &lt;dbl&gt;
 #  1 Albania     2020     0  
@@ -235,7 +234,7 @@ class: clear
 #  8 Azerbaijan  2005     0  
 #  9 Bangladesh  2022     5  
 # 10 Belarus     2020     0  
-# # ℹ 154 more rows
+# # ℹ 158 more rows
 ```
 ]
 .panel[.panel-name[Purchasing power parity (PPP)]
@@ -246,11 +245,11 @@ class: clear
 .push-right[
 &lt;br&gt;
 .content-box-red[
-US$1 buys as much in the US, as DKK6.5 buy in Denmark.
+$1 buys in the US, what Kr. 6.5 buy in Denmark.
 
-US$2.15 = DKK14 per day.
+`\(\rightarrow\)` US$2.15 = Kr. 14 per day.
 
-`\(30\times\text{DKK}14 \approx \text{DKK}420\)` to get by per month.
+`\(\rightarrow\)` Less than `\(30\text{Days}\times\text{Kr. }14 \approx \text{Kr. }420\)` to get by per month.
 ]]]
 
 .panel[.panel-name[Poverty across the world]
@@ -266,7 +265,9 @@ class: inverse
 &lt;br&gt;
 &lt;br&gt;
 &lt;br&gt;
-OK great, now I have two tibbles. But how can I combine them?
+OK great, now I have two tibbles. 
+
+But how can I combine them?
 ]
 
 .push-right[
@@ -278,7 +279,7 @@ OK great, now I have two tibbles. But how can I combine them?
 
 If you work with multiple tibbles, you work with relational data .alert[if they have one or more variable(s) in common].
 
-Our tibbles are related, because both contain *countries* at various *dates*. &lt;br&gt;The combination of country+date is the **key** that allows us to relate both tibbles.
+Our tibbles are related, because both contain *countries* at various *dates*. &lt;br&gt;The combination of country+date is the .alert[key] that allows us to relate both tibbles.
 
 .push-left[
 
@@ -305,7 +306,7 @@ Dat_citi_rights
 
 ``` r
 Dat_poverty
-# # A tibble: 164 × 3
+# # A tibble: 168 × 3
 #    country     date poverty
 #    &lt;chr&gt;      &lt;dbl&gt;   &lt;dbl&gt;
 #  1 Albania     2020     0  
@@ -318,7 +319,7 @@ Dat_poverty
 #  8 Azerbaijan  2005     0  
 #  9 Bangladesh  2022     5  
 # 10 Belarus     2020     0  
-# # ℹ 154 more rows
+# # ℹ 158 more rows
 ```
 ]
 
@@ -358,7 +359,7 @@ Dat_poverty
 
 ``` r
 *(Dat &lt;- inner_join(Dat_poverty, Dat_citi_rights, by = c("country", "date")))
-# # A tibble: 145 × 4
+# # A tibble: 149 × 4
 #    country     date poverty citizen_rights
 #    &lt;chr&gt;      &lt;dbl&gt;   &lt;dbl&gt;          &lt;dbl&gt;
 #  1 Albania     2020     0                8
@@ -371,7 +372,7 @@ Dat_poverty
 #  8 Azerbaijan  2005     0                3
 #  9 Bangladesh  2022     5                4
 # 10 Belarus     2020     0                1
-# # ℹ 135 more rows
+# # ℹ 139 more rows
 ```
 
 ---
@@ -381,6 +382,7 @@ Dat_poverty
 .panel[.panel-name[Socialist countries]
 .left-column[
 - Wikipedia has tables on self-declared socialist countries.
+
 - I suggest a simple index:
   + Years socialist minus years since not socialist anymore.
   + Min. 5 years given any socialist history.
@@ -422,7 +424,7 @@ Dat &lt;- Dat %&gt;% mutate(
     str_detect(country,"Slovenia|Croatia|Serbia|Montenegro|Bosnia and Herzegovina|North Macedonia|Kosovo") ~ (1992 - 1943) - (date - 1992),
     TRUE ~ 0),
   socialist = case_when( # Min. 5 years given any socialist history,
-    (socialist &lt; 5 &amp; socialist &gt; 0) | socialist &lt; 0 ~ 5,
+    socialist != 0 &amp; socialist &lt; 5 ~ 5,
     TRUE ~ socialist)) %&gt;% drop_na() # Drop countries with missing values.
 ```
 ]]
@@ -430,7 +432,7 @@ Dat &lt;- Dat %&gt;% mutate(
 
 ``` r
 Dat
-# # A tibble: 145 × 5
+# # A tibble: 149 × 5
 #    country     date poverty citizen_rights socialist
 #    &lt;chr&gt;      &lt;dbl&gt;   &lt;dbl&gt;          &lt;dbl&gt;     &lt;dbl&gt;
 #  1 Albania     2020     0                8        20
@@ -443,7 +445,7 @@ Dat
 #  8 Azerbaijan  2005     0                3         0
 #  9 Bangladesh  2022     5                4        50
 # 10 Belarus     2020     0                1        14
-# # ℹ 135 more rows
+# # ℹ 139 more rows
 ```
 ]
 .panel[.panel-name[Socialist history across the world]
@@ -497,7 +499,7 @@ class: clear
 `$$z(x) = \frac{x - \bar{x}}{\text{SD}(x)}$$`
 **We subtract the mean:** Values above 0 are above average, values below 0 are below average.
 
-**We divide by the standard deviation:** Our variable now has standard deviations as unit.&lt;br&gt;&lt;br&gt; `\(\rightarrow\)` Intuitive understanding how common vis-á-vis extreme cases are.
+**We divide by the standard deviation:** Our variable now has standard deviations as unit.&lt;br&gt;&lt;br&gt; `\(\rightarrow\)` Intuitive understanding: How common vis-á-vis extreme is a case?
 ]
 
 .push-right[
@@ -511,20 +513,20 @@ class: clear
    mutate( # Z-Standardize variables.
 *    z_socialist = scale(socialist) %&gt;% as.numeric(),
 *    z_poverty = scale(poverty) %&gt;% as.numeric()))
-# # A tibble: 145 × 7
+# # A tibble: 149 × 7
 #    country     date poverty citizen_rights socialist z_socialist z_poverty
 #    &lt;chr&gt;      &lt;dbl&gt;   &lt;dbl&gt;          &lt;dbl&gt;     &lt;dbl&gt;       &lt;dbl&gt;     &lt;dbl&gt;
-#  1 Albania     2020     0                8        20       0.894    -0.607
-#  2 Algeria     2011     0.5              3        49       2.84     -0.579
-#  3 Angola      2018    31.1              3         5      -0.112     1.12 
-#  4 Argentina   2022     0.6             10         0      -0.448    -0.574
-#  5 Armenia     2022     0.8              6         0      -0.448    -0.562
-#  6 Australia   2018     0.5             12         0      -0.448    -0.579
-#  7 Austria     2021     0.5             12         0      -0.448    -0.579
-#  8 Azerbaijan  2005     0                3         0      -0.448    -0.607
-#  9 Bangladesh  2022     5                4        50       2.91     -0.329
-# 10 Belarus     2020     0                1        14       0.492    -0.607
-# # ℹ 135 more rows
+#  1 Albania     2020     0                8        20       0.916    -0.620
+#  2 Algeria     2011     0.5              3        49       2.88     -0.592
+#  3 Angola      2018    31.1              3         5      -0.102     1.11 
+#  4 Argentina   2022     0.6             10         0      -0.441    -0.587
+#  5 Armenia     2022     0.8              6         0      -0.441    -0.575
+#  6 Australia   2018     0.5             12         0      -0.441    -0.592
+#  7 Austria     2021     0.5             12         0      -0.441    -0.592
+#  8 Azerbaijan  2005     0                3         0      -0.441    -0.620
+#  9 Bangladesh  2022     5                4        50       2.95     -0.342
+# 10 Belarus     2020     0                1        14       0.509    -0.620
+# # ℹ 139 more rows
 ```
 ]
 .panel[.panel-name[Illustration]
@@ -578,7 +580,7 @@ OK but eye-balling is hardly enough to count as scientific evidence, is it?
 .panel[.panel-name[Poverty &amp; Socialism]
 .left-column[
 .content-box-green[.center[
-How do we interpret this result?
+How do we&lt;br&gt;interpret this result?
 ]]]
 .right-column[
 
@@ -587,8 +589,8 @@ Dat %&gt;% # Use our data,
   select(poverty, socialist) %&gt;% # Select vars for analysis,
 * cor() # Estimate correlation.
 #           poverty socialist
-# poverty    1.0000   -0.0848
-# socialist -0.0848    1.0000
+# poverty     1.000    -0.089
+# socialist  -0.089     1.000
 ```
 ]]]
 
@@ -632,7 +634,7 @@ class: inverse middle center
 # Models
 
 .left-column[
-**Model**: attempt to give reduced representation of reality. &lt;br&gt;&lt;br&gt;Model should capture answer to our research question. .backgrnote[
+**Model**: A reduced representation of reality. &lt;br&gt;&lt;br&gt;Model should capture answer to our research question. .backgrnote[
 Models should not be driven by few singular cases, like in this example.]
 ]
 
@@ -647,9 +649,9 @@ Models should not be driven by few singular cases, like in this example.]
 .content-box-blue[
 .center[**Linear models**&lt;br&gt;defined by two parameters]
 
-`\(\color{orange}{\alpha}\)` 'constant'/'intercept': The value of y at which the line intercepts the Y-axis `\((\hat{Y}|X=0)\)`.
+`\(\color{orange}{\alpha}\)` .alert[constant/intercept]: The value of y at which the line intercepts the Y-axis `\((\hat{Y}|X=0)\)`.
   
-`\(\color{orange}{\beta}\)` 'slope': How does `\(\hat{Y}\)` change, if `\(X\)` increases by one unit.
+`\(\color{orange}{\beta}\)` .alert[slope]: How does `\(\hat{Y}\)` change, if `\(X\)` increases by one unit.
 ]]
 
 .right-column[
@@ -664,10 +666,10 @@ Models should not be driven by few singular cases, like in this example.]
 
 
 .left-column[
-**Residuals**, `\(e_{i} =y_{i} - \hat{y}\)`&lt;br&gt;
+**Residuals**: `\(e_{i} =y_{i} - \hat{y}\)`&lt;br&gt;
 differences between what model predicts and actual data.
 
-`\(e_{\text{Denmark}} = 0.2\% - 11.6\%=-11.4\%\)`
+`\(e_{\text{Denmark}} = 0.2\% - 11.9\%=-11.7\%\)`
 ]
 .right-column[
 &lt;img src="2-Corr-n-Reg_files/figure-html/residuals-1.png" width="100%" style="display: block; margin: auto;" /&gt;
@@ -743,28 +745,28 @@ modelsummary(list("OLS" = ols, "Std. OLS" = zols), # Nicely-formatted table,
 &lt;tbody&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 11.618 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 11.860 &lt;/td&gt;
    &lt;td style="text-align:center;"&gt; 0.000 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; socialist &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; −0.103 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −0.109 &lt;/td&gt;
    &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt; z_socialist &lt;/td&gt;
    &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; −0.085 &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; −0.089 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 145 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 145 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 149 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 149 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.007 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.007 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.008 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.008 &lt;/td&gt;
   &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
@@ -780,16 +782,16 @@ modelsummary(list("OLS" = ols, "Std. OLS" = zols), # Nicely-formatted table,
 .push-right[
 
 $$
-\operatorname{\widehat{poverty}} = 11.62 - 0.1(\operatorname{socialist})
+\operatorname{\widehat{poverty}} = 11.86 - 0.11(\operatorname{socialist})
 $$
  `\(\rightarrow\)` the best-fitting line that `\(\min \sum_{i=1}^{n} e_{i}^{2}\)`.
 
-Among countries without a socialist past, poverty is on average 11.62%.
-  + `\((\hat{y}|\text{Socialism = 0}) = 11.62\%\)`.
+Among countries without a socialist past, poverty is on average 11.86%.
+  + `\((\hat{y}|\text{Socialism = 0}) = 11.86\%\)`.
   
-With every year of socialism, the average level of poverty is -0.1 percentage points lower.
+With every year of socialism, the average level of poverty is -0.11 percentage points lower.
 
-This model accounts for 0.01* 100% more of the variance of poverty across the world, than the average `\(\bar{y} = 10.93\%\)`.
+This model accounts for 0.008*100% = 0.8% more of the variance of poverty across the world, than the average `\(\bar{y} = 11.15\%\)`.
 ]]]
 
 ---
@@ -798,7 +800,7 @@ This model accounts for 0.01* 100% more of the variance of poverty across the wo
 .left-column[
 .center[**1. Causal**]
 
-With every additional year of socialism, poverty is expected to decline by -0.1 percentage points. Thus, if China and Vietnam stay socialist, poverty will further decline.
+With every additional year of socialism, poverty is expected to decline by -0.11 percentage points. Thus, if China and Vietnam stay socialist, poverty will further decline.
 
 .alert[Beware, this interpretation only holds under some conditions.] 
 
@@ -812,7 +814,7 @@ I will teach you how to estimate regressions that have a causal interpretation l
 **2. Descriptive: conditional means `\(\bar{y}|x\)`**
 ]
 
-With every year of socialism, the average level of poverty -0.1 percentage points lower.
+With every year of socialism, the average level of poverty -0.11 percentage points lower.
 
 Here regression is a (linear) model that describes the average of the outcome for different values of the predictor.
 
