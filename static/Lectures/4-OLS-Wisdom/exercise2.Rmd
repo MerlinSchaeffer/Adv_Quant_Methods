@@ -23,7 +23,7 @@ pacman::p_load(
 
 # 1. The worldbank data
 Dat <- wb_data("SI.POV.DDAY", # Download poverty data: <2.15$ per day,
-               start_date = 2002, end_date = 2022) %>%
+               start_date = 2000, end_date = 2024) %>%
   rename(poverty = SI.POV.DDAY) %>% # rename poverty variable,
   select(country, date, poverty) %>% # Keep only 3 variables
   drop_na(poverty) %>% # Drop cases with missing data,
@@ -37,11 +37,11 @@ Dat <- Dat %>%
     colonizer = case_when(
       str_detect(country, "Algeria|Benin|Burkina Faso|Cambodia|Central African Republic|Chad") |
         str_detect(country, "Djibouti|Gabon|Guinea|Haiti|Laos|Lebanon|Madagascar|Mali|Congo, Rep.|Cote D'Ivoire") | 
-        str_detect(country, "Mauritania|Niger|Senegal|Syria|Togo|Tunisia|Vietnam") ~ "France", # France
+        str_detect(country, "Mauritania|Niger|Senegal|Syria|Togo|Tunisia|Viet Nam") ~ "France", # France
       str_detect(country, "Angola|Brazil|Mozambique|Guinea-Bissau") ~ "Portugal", # Portugal
       str_detect(country, "Argentina|Bolivia|Chile|Colombia|Costa Rica|Cuba|Dominican Republic|Ecuador") |
         str_detect(country, "El Salvador|Guatemala|Honduras|Mexico|Nicaragua|Panama|Paraguay|Peru") |
-        str_detect(country, "Uruguay|Venezuela") ~ "Spain", # Spain
+        str_detect(country, "Uruguay|Venezuela, RB") ~ "Spain", # Spain
       str_detect(country, "Bahrain|Bangladesh|Botswana|Cyprus|Egypt|Fiji") |
         str_detect(country, "Gambia|Ghana|Guyana|India|Iraq|Jamaica|Jordan|Kenya|Kuwait") |
         str_detect(country, "Lesotho|Malawi|Malaysia|Mauritius|Myanmar|Nigeria|Oman") | 
@@ -100,7 +100,7 @@ Dat_citi_rights <- download_fh(verbose = FALSE) %>%
           date = year) %>% # rename year,
    select(country, date, citizen_rights) # Keep only these 3 variables.
 
-# 3. Join Dat and Freedom House data
+# 5. Join Dat and Freedom House data
 Dat <- inner_join(Dat, Dat_citi_rights, by = c("country", "date"))
 ```
 
@@ -133,7 +133,7 @@ ggplot(data = fict_dat, aes(y = fit, x = years_indep)) +
 2. Make a coefficient plot that shows how both Denmark and the other former colonizers fare compared to Belgium.
 `r hide("R solution -> dont' peak too early ;) !")`
 ```{r plot2, out.width='80%', fig.height = 4, fig.width = 5, results = FALSE}
-(plotdata <- lm_robust(poverty ~ colonizer, data = Dat) %>%
+(plotdata <- lm_robust(citizen_rights ~ colonizer, data = Dat) %>%
    tidy() %>% # Turn results into a tibble, #<<
    mutate( # Rename variables for the plot.
      term = case_when(
@@ -153,7 +153,7 @@ ggplot(data = plotdata, aes(y = estimate,
   geom_pointrange(aes(min = conf.low, max = conf.high)) +
   coord_flip() + # Flip Y- & X-Axis,
   labs(
-    title = "Regression of poverty",
+    title = "Regression of citizen rights",
     x = "Colonizer",
     # Write Greek beta into axis title.
     y = expression("Estimate of"~beta~"(Difference to countries colonized by Belium)")) +

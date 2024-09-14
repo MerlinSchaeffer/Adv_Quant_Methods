@@ -4,7 +4,7 @@
     <title>Multiple Regression &amp;    Fundamentals of Causal Inference</title>
     <meta charset="utf-8" />
     <meta name="author" content="Merlin Schaeffer  Department of Sociology" />
-    <meta name="date" content="2024-09-10" />
+    <meta name="date" content="2024-09-14" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
     <script src="libs/tile-view/tile-view.js"></script>
@@ -29,7 +29,7 @@ class: center, middle, inverse, title-slide
 ### Merlin Schaeffer<br> Department of Sociology
 ]
 .date[
-### 2024-09-10
+### 2024-09-14
 ]
 
 ---
@@ -403,7 +403,7 @@ Using weights results in heteroscedastic residuals, which violates an OLS assump
 &lt;img src="3-Random_files/figure-html/ols_fig-1.png" width="90%" style="display: block; margin: auto;" /&gt;
 ]
 .panel[.panel-name[OLS Regression]
-&lt;table class="table" style="color: black; width: auto !important; margin-left: auto; margin-right: auto;"&gt;
+&lt;table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;"&gt;
  &lt;thead&gt;
   &lt;tr&gt;
    &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
@@ -771,7 +771,7 @@ modelsummary( # Regression table
   gof_map = c("nobs", "r.squared"), output = "kableExtra")
 ```
 
-&lt;table class="table" style="color: black; width: auto !important; margin-left: auto; margin-right: auto;"&gt;
+&lt;table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;"&gt;
  &lt;thead&gt;
   &lt;tr&gt;
    &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
@@ -828,7 +828,7 @@ modelsummary( # Regression table
   gof_map = c("nobs", "r.squared"), output = "kableExtra")
 ```
 
-&lt;table class="table" style="color: black; width: auto !important; margin-left: auto; margin-right: auto;"&gt;
+&lt;table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;"&gt;
  &lt;thead&gt;
   &lt;tr&gt;
    &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
@@ -893,8 +893,7 @@ class: clear
 ``` r
 ggplot(data = ESS_sample, aes(y = psppsgva, x = eduyrs)) +
   geom_jitter(alpha = 1/3, width = 0.1, height = 0.1) +
-  geom_smooth(method = "lm", # OLS
-              level = 0.95, # 95% CI
+  geom_smooth(method = "lm", # OLS 
               color = "#901A1E") + 
   ylim(1, 5) +
   labs(y = "The political system allows people \n to have a say in what government does",
