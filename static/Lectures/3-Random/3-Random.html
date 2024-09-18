@@ -4,7 +4,7 @@
     <title>Multiple Regression &amp;    Fundamentals of Causal Inference</title>
     <meta charset="utf-8" />
     <meta name="author" content="Merlin Schaeffer  Department of Sociology" />
-    <meta name="date" content="2024-09-14" />
+    <meta name="date" content="2024-09-18" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
     <script src="libs/tile-view/tile-view.js"></script>
@@ -29,7 +29,7 @@ class: center, middle, inverse, title-slide
 ### Merlin Schaeffer<br> Department of Sociology
 ]
 .date[
-### 2024-09-14
+### 2024-09-18
 ]
 
 ---
@@ -333,7 +333,7 @@ ggplot(data = ESS,
 
 .center[
 .content-box-green[
-What is the patriarchy-weighted percent &lt;br&gt; of "Yes"-votes?
+What is the percent &lt;br&gt; of "Yes"-votes (disregarding the weights)?
 ]
 ]
 ]
@@ -458,7 +458,8 @@ mod2 &lt;- lm_robust(psppsgva ~ eduyrs, data = ESS, # Weighted
 # Nicely-formatted regression table
 modelsummary(list("Unweighted" = mod1, "Weighted" = mod2),
              statistic = NULL, # Don't report stat. inference
-             gof_map = c("nobs", "r.squared"), output = "kableExtra") # Only 2 models fit stats
+             gof_map = c("nobs", "r.squared"), # Only 2 models fit stats
+             output = "kableExtra") 
 ```
 ]]]
 
@@ -476,7 +477,11 @@ class: inverse middle center
 
 .push-left[
 &lt;br&gt;
-OK, great: Randomness prohibits systematic biases and thus enables us to draw representative samples. If randomization has partly failed, we use post-stratification weights to counterbalance.
+OK, great: Randomness prohibits systematic biases.
+
+It thus enables us to draw representative samples. 
+
+If randomization has partly failed, we use post-stratification weights to counterbalance.
 
 **But doesn't this mean, I have randomness in my data** &lt;br&gt; (e.g., just by chance too many vegetarians or so) &lt;br&gt; **and thus still biased data?**
 ]
@@ -539,7 +544,7 @@ class: inverse middle center
 
 .push-right[
 &lt;img src="https://ecampusontario.pressbooks.pub/app/uploads/sites/376/2019/02/70-959x1024.png" width="60%" style="display: block; margin: auto;" /&gt;
-.backgrnote[.center[Random sampling ensures validity (i.e. unbiased), but it results in some unreliability (i.e. sampling error). The question is: How unreliable are the data?]]
+.backgrnote[.center[Random sampling ensures validity (i.e. unbiasedness), but it results in some unreliability (i.e. sampling error). &lt;br&gt; The question is: How unreliable are the data?]]
 ]
 ---
 # Sampling error `\(\sigma\)` .font60[(aka sampling variability)]
@@ -579,9 +584,9 @@ ESS_sample &lt;- ESS %&gt;% sample_n(50) # Draw the sample.
 # Sampling error `\(\sigma\)` .font60[(aka sampling variability)]
 
 .push-left[
-- **Lets assume, the Danish ESS with it's 1511 respondents was our (unobservable super) population of interest.** .backgrnote[I thus don't use weights in this example ;)]
+- **Let's assume, the Danish ESS with its 1511 respondents was our (unobservable super) population of interest.** .backgrnote[Thus no weights in this example ;)]
 
-- That would mean, we can *calculate* the true OLS regression line (in blue): `\(\beta = 0.039\)`.
+- That would mean, we can *calculate* the true OLS regression line (in blue): An increase of education by 1-year, goes along with an increase in political efficacy of `\(\beta = 0.039\)`.
 
 - Now I take a random sample of 50 persons.
 
@@ -602,9 +607,9 @@ ESS_sample &lt;- ESS %&gt;% sample_n(50) # Draw the sample.
 # Sampling error `\(\sigma\)` .font60[(aka sampling variability)]
 
 .push-left[
-- **Lets assume, the Danish ESS with it's 1511 respondents was our (unobservable super) population of interest.** .backgrnote[I thus don't use weights in this example ;)]
+- **Let's assume, the Danish ESS with its 1511 respondents was our (unobservable super) population of interest.** .backgrnote[Thus no weights in this example ;)]
 
-- That would mean, we can *calculate* the true OLS regression line (in blue): `\(\beta = 0.039\)`
+- That would mean, we can *calculate* the true OLS regression line (in blue): An increase of education by 1-year, goes along with an increase in political efficacy of `\(\beta = 0.039\)`.
 
 - .alert[Let's take another random sample of 50 persons.]
 
@@ -660,10 +665,9 @@ for (draw in 3:1000) {
 .font90[
 
 ``` r
-# If assuming the Normal distribution
-# is correct, then 95% of the 
-# estimates of beta will lie in 
-# the interval:
+# Assuming the Normal distribution, 
+# 95% of the estimates of beta 
+# will lie in the interval:
 mean(beta_hat) - 1.96 * sd(beta_hat)
 # [1] -0.0337
 mean(beta_hat) + 1.96 * sd(beta_hat)
@@ -684,10 +688,10 @@ Critical values depend on the degrees of freedom (df): Sample size `\(n\)` minus
 .font80[
 
 ``` r
-# Critical value for 95%,
-# with df = 50 - 5:
+# Critical value for 95%, with df = 50 - 2:
 (crit_val &lt;- qt(p = 0.975, df = 48))
 # [1] 2.01
+# Assuming the t-distribution,
 # 95% of the estimates of beta 
 # will lie in the interval
 mean(beta_hat) - crit_val * sd(beta_hat)
@@ -719,7 +723,9 @@ class: inverse middle center
 
 .push-left[
 &lt;br&gt;
-But if I can't sample the whole (unobservable super) population, then I surely can't draw thousands of 50 person samples.
+I can't sample the whole (super) population.
+
+But then I certainly can't draw thousands of `\(n=50\)` samples either.
 ]
 
 ---
@@ -768,7 +774,8 @@ mod &lt;- lm_robust( # OLS regression
 
 modelsummary( # Regression table
   list("Pol. efficacy" = mod),
-  gof_map = c("nobs", "r.squared"), output = "kableExtra")
+  gof_map = c("nobs", "r.squared"), 
+  output = "kableExtra")
 ```
 
 &lt;table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;"&gt;
@@ -813,7 +820,7 @@ modelsummary( # Regression table
 
 .right-column[
 .push-left[
-Estimated sampling error based on our second 50-person sample using Gauss' formula for the standard error of an OLS regression coefficient, `\(\hat{\sigma}(\beta)=\sqrt{\frac{1}{n-2}\frac{\text{SD}(e)}{\text{SD}(x)}}\)`
+Estimated sampling error based on our initial 50-person sample using Gauss' formula for the standard error of an OLS regression coefficient: `$$\hat{\sigma}(\beta)=\sqrt{\frac{1}{n-2}\frac{\text{SD}(e)}{\text{SD}(x)}}$$`
 ]
 .push-right[
 
@@ -825,7 +832,8 @@ mod2 &lt;- lm_robust( # OLS regression
 
 modelsummary( # Regression table
   list("Pol. efficacy" = mod2),
-  gof_map = c("nobs", "r.squared"), output = "kableExtra")
+  gof_map = c("nobs", "r.squared"), 
+  output = "kableExtra")
 ```
 
 &lt;table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;"&gt;
@@ -934,14 +942,14 @@ Doing research is basically like having a debate with an opponent who does not b
 &lt;img src="https://www.convinceandconvert.com/wp-content/uploads/2014/07/bigstock-Portrait-of-a-senior-man-skept-12585803.jpg" width="60%" style="display: block; margin: auto;" /&gt;
 ]
 
-.push-right[
-&gt; More educated people read more news and thus know about all the corruption. 
+.push-right[.font90[
+&gt; Sure, more educated people may read more news, but that just means they're more aware of all the corruption. 
 
-&gt; Certainly, their believe in political efficacy is no different!
+&gt; Their belief in political efficacy isn't any different from anyone else's! 
 
-&gt; That you find otherwise in your data is just a chance finding.
+&gt; Your data showing otherwise is nothing more than a fluke - a statistical accident. Don't read too much into it.
 
-]]
+]]]
 
 ---
 
@@ -952,15 +960,15 @@ Doing research is basically like having a debate with an opponent who does not b
 &lt;img src="https://www.convinceandconvert.com/wp-content/uploads/2014/07/bigstock-Portrait-of-a-senior-man-skept-12585803.jpg" width="60%" style="display: block; margin: auto;" /&gt;
 ]
 
-.push-right[
-&gt; More educated people read more news and thus know about all the corruption. 
+.push-right[.font90[
+&gt; Sure, more educated people may read more news, but that just means they're more aware of all the corruption. 
 
-&gt; Certainly, their believe in political efficacy is no different!
+&gt; Their belief in political efficacy isn't any different from anyone else's! 
 
-&gt; That you find otherwise in your data is just a chance finding.
+&gt; Your data showing otherwise is nothing more than a fluke - a statistical accident. Don't read too much into it.
 
 `\(\rightarrow \underbrace{H_{0}:}_{\text{Aka }H_{\text{0pponent  }} ;)}\beta_{\text{Years of education}} = 0\)`
-]]
+]]]
 
 ---
 layout: false
@@ -1042,13 +1050,20 @@ summary(ols)
 &lt;img src="3-Random_files/figure-html/density1-1.png" width="90%" style="display: block; margin: auto;" /&gt;
 ]
 .panel[.panel-name[t- and p-value]
-.push-left[
-- `\(t=\frac{\hat{\beta}}{\sigma}\)`: How many `\(\sigma\)`'s is `\(\hat{\beta}\)` away from `\(H_{0}:\beta=0\)`?
+.push-left[.font70[
+1. `\(t\)`-statistic: `\(t=\frac{\hat{\beta}}{\hat{\sigma}}\)`
+  + Tells us how many standard errors `\((\hat{\sigma})\)` our estimated `\(\hat{\beta}\)` is away from 0.
+  + "How far is our estimate from what we'd expect if there was no effect?"
 
 
-- `\(p\)`-value: The area outside `\(0 \pm t\)`
-  + `\(P(\hat{\beta}|\beta=0)\)`: The probability that we observe `\(\hat{\beta}\)`, although `\(\beta=0\)` in reality.
-]
+2. `\(p\)`-value: Area under the sampling distribution in both tails outside `\(0 \pm t\)`
+  + `\(P(|\hat{\beta}| \geq \text{observed } \hat{\beta}\text{ } | \text{ } \beta = 0)\)`
+  + "If there truly was no effect, how likely would we be to see a result this extreme or more extreme?"
+  + A small `\(p\)`-value (typically &lt; 0.05) suggests: observed result is unlikely under the null hypothesis.
+  + This doesn't prove `\(H_{1}\)`, but it provides evidence against `\(H_{0}\)`.
+
+
+]]
 .push-right[
 &lt;img src="3-Random_files/figure-html/density2-1.png" width="90%" style="display: block; margin: auto;" /&gt;
 ]]]
@@ -1113,23 +1128,44 @@ class: middle clear
 ---
 class: inverse
 # Today's general lessons
-- Randomness prevents systematic bias, ensuring that random samples are representative unless the sample size (n) is very small.
-- In cases where random sampling is not feasible, we utilize post-stratification weights to counterbalance bias.
-- Random sampling introduces sampling error, which reduces reliability.
-- These errors follow a normal or `\(t\)`-distribution, depending on the sample size.
-- We can estimate the sampling error from our data using the standard error `\((\hat{\sigma})\)`.
-- By leveraging our knowledge of the normal and `\(t\)`-distributions, we can estimate 95% confidence intervals to express uncertainty and conduct hypothesis tests to determine the likelihood of our findings being due to chance.
-- Hypothesis tests assess the null hypothesis ($H_0$), typically the opposite of what is being demonstrated.
-- They evaluate the probability ($p$-value) of observing the data when `\(H_0\)` is true.
-- The `\(t\)`-value represents the number of standard errors by which the estimate (e.g., `\(\beta\)`) deviates from the null hypothesis (usually 0).
-- The `\(p\)`-value indicates the area under the sampling distribution outside of `\(H_0 \pm t\)`. Conventionally, the `\(p\)`-value should be `\(&lt;0.05\)`.
+
+.font90[
+- Randomness prevents systematic bias, ensuring representative samples unless sample size is very small.
+- When random sampling isn't feasible, post-stratification weights can counterbalance bias.
+- Random sampling introduces sampling error, which affects reliability.
+- These errors follow a normal or t-distribution, depending on the sample size.
+- We can estimate sampling error from our data: `\(\hat{\sigma}\)`.
+
+
+- Using properties of normal and t-distributions, we can:
+- Estimate 95% confidence intervals to express uncertainty.
+- Conduct hypothesis tests to assess the likelihood of chance findings.
+
+
+- Hypothesis tests evaluate the null hypothesis `\((H_0)\)`, typically the opposite of what we're trying to demonstrate.
+- They calculate the probability ($p$-value) of observing our data if `\(H_0\)` were true.
+- The `\(t\)`-value represents how many standard errors `\(\hat{\sigma}\)` our estimate (e.g., `\(\hat{\beta}\)`) is from the null hypothesis (usually 0).
+- The `\(p\)`-value is the area under the sampling distribution outside `\(\pm t\)`. 
+- Conventionally, `\(p &lt; 0.05\)` is considered statistically significant.
+]
 
 ---
 class: inverse
 # Today's (important) R functions
-- `geom_smooth(method = "lm")`: Add OLS lines to scatter plots.
-- Most R functions have a `weights` argument.
-- `modelsummary()` allows you to design your regression tables in various ways.
+1. `geom_smooth(method = "lm")`
+  + Adds Ordinary Least Squares (OLS) regression lines to scatter plots
+  + Part of the ggplot2 package for data visualization
+
+
+2. Weighted analyses
+  + Most R functions include a weights argument
+  + Allows for incorporation of survey weights or other weighting schemes
+
+
+3. `modelsummary()`
+  + Versatile function for creating customized regression tables
+  + Offers various options for table design and output format
+
 ---
 # References
 

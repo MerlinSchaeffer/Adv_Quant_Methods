@@ -318,7 +318,7 @@ kable(dat, format = "html")
 
 .center[
 .content-box-green[
-What is the patriarchy-weighted percent <br> of "Yes"-votes?
+What is the percent <br> of "Yes"-votes (disregarding the weights)?
 ]
 ]
 ]
@@ -401,7 +401,8 @@ mod2 <- lm_robust(psppsgva ~ eduyrs, data = ESS, # Weighted
 # Nicely-formatted regression table
 modelsummary(list("Unweighted" = mod1, "Weighted" = mod2),
              statistic = NULL, # Don't report stat. inference
-             gof_map = c("nobs", "r.squared"), output = "kableExtra") # Only 2 models fit stats
+             gof_map = c("nobs", "r.squared"), # Only 2 models fit stats
+             output = "kableExtra") 
 ```
 
 .panel[.panel-name[Example]
@@ -439,7 +440,11 @@ knitr::include_graphics('https://www.business2community.com/wp-content/uploads/2
 
 .push-left[
 <br>
-OK, great: Randomness prohibits systematic biases and thus enables us to draw representative samples. If randomization has partly failed, we use post-stratification weights to counterbalance.
+OK, great: Randomness prohibits systematic biases.
+
+It thus enables us to draw representative samples. 
+
+If randomization has partly failed, we use post-stratification weights to counterbalance.
 
 **But doesn't this mean, I have randomness in my data** <br> (e.g., just by chance too many vegetarians or so) <br> **and thus still biased data?**
 ]
@@ -506,7 +511,7 @@ $\downarrow$
 ```{r, echo = FALSE, out.width='60%', fig.align='center'}
 knitr::include_graphics('https://ecampusontario.pressbooks.pub/app/uploads/sites/376/2019/02/70-959x1024.png')
 ```
-.backgrnote[.center[Random sampling ensures validity (i.e. unbiased), but it results in some unreliability (i.e. sampling error). The question is: How unreliable are the data?]]
+.backgrnote[.center[Random sampling ensures validity (i.e. unbiasedness), but it results in some unreliability (i.e. sampling error). <br> The question is: How unreliable are the data?]]
 ]
 ---
 # Sampling error $\sigma$ .font60[(aka sampling variability)]
@@ -560,9 +565,9 @@ ESS_sample <- ESS %>% sample_n(50) # Draw the sample.
 # Sampling error $\sigma$ .font60[(aka sampling variability)]
 
 .push-left[
-- **Lets assume, the Danish ESS with it's `r nrow(ESS)` respondents was our (unobservable super) population of interest.** .backgrnote[I thus don't use weights in this example ;)]
+- **Let's assume, the Danish ESS with its `r nrow(ESS)` respondents was our (unobservable super) population of interest.** .backgrnote[Thus no weights in this example ;)]
 
-- That would mean, we can *calculate* the true OLS regression line (in blue): $\beta = `r coef(lm(psppsgva ~ eduyrs, data = ESS))["eduyrs"]`$.
+- That would mean, we can *calculate* the true OLS regression line (in blue): An increase of education by 1-year, goes along with an increase in political efficacy of $\beta = `r coef(lm(psppsgva ~ eduyrs, data = ESS))["eduyrs"]`$.
 
 - Now I take a random sample of 50 persons.
 
@@ -583,9 +588,9 @@ sample1_ols1 +
 # Sampling error $\sigma$ .font60[(aka sampling variability)]
 
 .push-left[
-- **Lets assume, the Danish ESS with it's `r nrow(ESS)` respondents was our (unobservable super) population of interest.** .backgrnote[I thus don't use weights in this example ;)]
+- **Let's assume, the Danish ESS with its `r nrow(ESS)` respondents was our (unobservable super) population of interest.** .backgrnote[Thus no weights in this example ;)]
 
-- That would mean, we can *calculate* the true OLS regression line (in blue): $\beta = `r coef(lm(psppsgva ~ eduyrs, data = ESS))["eduyrs"]`$
+- That would mean, we can *calculate* the true OLS regression line (in blue): An increase of education by 1-year, goes along with an increase in political efficacy of $\beta = `r coef(lm(psppsgva ~ eduyrs, data = ESS))["eduyrs"]`$.
 
 - .alert[Let's take another random sample of 50 persons.]
 
@@ -645,7 +650,7 @@ ggplot(data = Samples, aes(y = psppsgva, x = eduyrs)) +
        x = "Years of education") +
   transition_states(factor(sample_nr),
                     transition_length = 10,
-                    state_length = 50) +
+                    state_length = 1000) +
   shadow_mark(alpha = 0.15, size = 0.1)
 ```
 ]
@@ -700,10 +705,9 @@ ggplot(count_data) +
 
 .font90[
 ```{r}
-# If assuming the Normal distribution
-# is correct, then 95% of the 
-# estimates of beta will lie in 
-# the interval:
+# Assuming the Normal distribution, 
+# 95% of the estimates of beta 
+# will lie in the interval:
 mean(beta_hat) - 1.96 * sd(beta_hat)
 mean(beta_hat) + 1.96 * sd(beta_hat)
 ```
@@ -723,10 +727,10 @@ Critical values depend on the degrees of freedom (df): Sample size $n$ minus the
 
 .font80[
 ```{r}
-# Critical value for 95%,
-# with df = 50 - 5:
+# Critical value for 95%, with df = 50 - 2:
 (crit_val <- qt(p = 0.975, df = 48))
 
+# Assuming the t-distribution,
 # 95% of the estimates of beta 
 # will lie in the interval
 mean(beta_hat) - crit_val * sd(beta_hat)
@@ -760,7 +764,9 @@ knitr::include_graphics('https://www.business2community.com/wp-content/uploads/2
 
 .push-left[
 <br>
-But if I can't sample the whole (unobservable super) population, then I surely can't draw thousands of 50 person samples.
+I can't sample the whole (super) population.
+
+But then I certainly can't draw thousands of $n=50$ samples either.
 ]
 
 ---
@@ -809,7 +815,8 @@ mod <- lm_robust( # OLS regression
 
 modelsummary( # Regression table
   list("Pol. efficacy" = mod),
-  gof_map = c("nobs", "r.squared"), output = "kableExtra")
+  gof_map = c("nobs", "r.squared"), 
+  output = "kableExtra")
 ```
 ]]
 
@@ -817,7 +824,7 @@ modelsummary( # Regression table
 
 .right-column[
 .push-left[
-Estimated sampling error based on our second 50-person sample using Gauss' formula for the standard error of an OLS regression coefficient, $\hat{\sigma}(\beta)=\sqrt{\frac{1}{n-2}\frac{\text{SD}(e)}{\text{SD}(x)}}$
+Estimated sampling error based on our initial 50-person sample using Gauss' formula for the standard error of an OLS regression coefficient: $$\hat{\sigma}(\beta)=\sqrt{\frac{1}{n-2}\frac{\text{SD}(e)}{\text{SD}(x)}}$$
 ]
 .push-right[
 ```{r}
@@ -828,7 +835,8 @@ mod2 <- lm_robust( # OLS regression
 
 modelsummary( # Regression table
   list("Pol. efficacy" = mod2),
-  gof_map = c("nobs", "r.squared"), output = "kableExtra")
+  gof_map = c("nobs", "r.squared"), 
+  output = "kableExtra")
 ```
 ]]
 
@@ -905,14 +913,14 @@ knitr::include_graphics('https://www.convinceandconvert.com/wp-content/uploads/2
 ```
 ]
 
-.push-right[
-> More educated people read more news and thus know about all the corruption. 
+.push-right[.font90[
+> Sure, more educated people may read more news, but that just means they're more aware of all the corruption. 
 
-> Certainly, their believe in political efficacy is no different!
+> Their belief in political efficacy isn't any different from anyone else's! 
 
-> That you find otherwise in your data is just a chance finding.
+> Your data showing otherwise is nothing more than a fluke - a statistical accident. Don't read too much into it.
 
-]]
+]]]
 
 ---
 
@@ -925,15 +933,15 @@ knitr::include_graphics('https://www.convinceandconvert.com/wp-content/uploads/2
 ```
 ]
 
-.push-right[
-> More educated people read more news and thus know about all the corruption. 
+.push-right[.font90[
+> Sure, more educated people may read more news, but that just means they're more aware of all the corruption. 
 
-> Certainly, their believe in political efficacy is no different!
+> Their belief in political efficacy isn't any different from anyone else's! 
 
-> That you find otherwise in your data is just a chance finding.
+> Your data showing otherwise is nothing more than a fluke - a statistical accident. Don't read too much into it.
 
 $\rightarrow \underbrace{H_{0}:}_{\text{Aka }H_{\text{0pponent  }} ;)}\beta_{\text{Years of education}} = 0$
-]]
+]]]
 
 ---
 layout: false
@@ -1033,13 +1041,20 @@ ggplot(data= data, aes(x = betas, y = density)) +
 ```
 ]
 .panel[.panel-name[t- and p-value]
-.push-left[
-- $t=\frac{\hat{\beta}}{\sigma}$: How many $\sigma$'s is $\hat{\beta}$ away from $H_{0}:\beta=0$?
+.push-left[.font70[
+1. $t$-statistic: $t=\frac{\hat{\beta}}{\hat{\sigma}}$
+  + Tells us how many standard errors $(\hat{\sigma})$ our estimated $\hat{\beta}$ is away from 0.
+  + "How far is our estimate from what we'd expect if there was no effect?"
 
 
-- $p$-value: The area outside $0 \pm t$
-  + $P(\hat{\beta}|\beta=0)$: The probability that we observe $\hat{\beta}$, although $\beta=0$ in reality.
-]
+2. $p$-value: Area under the sampling distribution in both tails outside $0 \pm t$
+  + $P(|\hat{\beta}| \geq \text{observed } \hat{\beta}\text{ } | \text{ } \beta = 0)$
+  + "If there truly was no effect, how likely would we be to see a result this extreme or more extreme?"
+  + A small $p$-value (typically < 0.05) suggests: observed result is unlikely under the null hypothesis.
+  + This doesn't prove $H_{1}$, but it provides evidence against $H_{0}$.
+
+
+]]
 .push-right[
 ```{r density2, out.width='90%', fig.height = 4, fig.width = 6, echo = FALSE}
 teh <- ols %>% tidy() %>% filter(term == "eduyrs") %>% select(statistic) %>% pull()
@@ -1118,23 +1133,44 @@ knitr::include_graphics('https://www.chalmers.se/_next/image/?url=https%3A%2F%2F
 ---
 class: inverse
 # Today's general lessons
-- Randomness prevents systematic bias, ensuring that random samples are representative unless the sample size (n) is very small.
-- In cases where random sampling is not feasible, we utilize post-stratification weights to counterbalance bias.
-- Random sampling introduces sampling error, which reduces reliability.
-- These errors follow a normal or $t$-distribution, depending on the sample size.
-- We can estimate the sampling error from our data using the standard error $(\hat{\sigma})$.
-- By leveraging our knowledge of the normal and $t$-distributions, we can estimate 95% confidence intervals to express uncertainty and conduct hypothesis tests to determine the likelihood of our findings being due to chance.
-- Hypothesis tests assess the null hypothesis ($H_0$), typically the opposite of what is being demonstrated.
-- They evaluate the probability ($p$-value) of observing the data when $H_0$ is true.
-- The $t$-value represents the number of standard errors by which the estimate (e.g., $\beta$) deviates from the null hypothesis (usually 0).
-- The $p$-value indicates the area under the sampling distribution outside of $H_0 \pm t$. Conventionally, the $p$-value should be $<0.05$.
+
+.font90[
+- Randomness prevents systematic bias, ensuring representative samples unless sample size is very small.
+- When random sampling isn't feasible, post-stratification weights can counterbalance bias.
+- Random sampling introduces sampling error, which affects reliability.
+- These errors follow a normal or t-distribution, depending on the sample size.
+- We can estimate sampling error from our data: $\hat{\sigma}$.
+
+
+- Using properties of normal and t-distributions, we can:
+- Estimate 95% confidence intervals to express uncertainty.
+- Conduct hypothesis tests to assess the likelihood of chance findings.
+
+
+- Hypothesis tests evaluate the null hypothesis $(H_0)$, typically the opposite of what we're trying to demonstrate.
+- They calculate the probability ($p$-value) of observing our data if $H_0$ were true.
+- The $t$-value represents how many standard errors $\hat{\sigma}$ our estimate (e.g., $\hat{\beta}$) is from the null hypothesis (usually 0).
+- The $p$-value is the area under the sampling distribution outside $\pm t$. 
+- Conventionally, $p < 0.05$ is considered statistically significant.
+]
 
 ---
 class: inverse
 # Today's (important) R functions
-- `geom_smooth(method = "lm")`: Add OLS lines to scatter plots.
-- Most R functions have a `weights` argument.
-- `modelsummary()` allows you to design your regression tables in various ways.
+1. `geom_smooth(method = "lm")`
+  + Adds Ordinary Least Squares (OLS) regression lines to scatter plots
+  + Part of the ggplot2 package for data visualization
+
+
+2. Weighted analyses
+  + Most R functions include a weights argument
+  + Allows for incorporation of survey weights or other weighting schemes
+
+
+3. `modelsummary()`
+  + Versatile function for creating customized regression tables
+  + Offers various options for table design and output format
+
 ---
 # References
 
