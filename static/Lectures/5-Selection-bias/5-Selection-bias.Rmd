@@ -84,7 +84,7 @@ class: inverse
 <br>
 .font200[**The Integration Paradox**]
 
-immigrants and their descendants with seemingly better access to mainstream middle-class society — as evidenced by their education, labor market success, length of residence, or generational status — often report more discrimination than those on the societal margins.
+immigrants and their descendants with seemingly better access to mainstream middle-class society <br>— as evidenced by their education, labor market success, length of residence, or generational status — <br> often report more discrimination than those on the societal margins.
 ]
 
 .push-right[
@@ -137,10 +137,11 @@ Why might this be problematic?
 --
 
 .right-column[
-Statements by the subjects of inquiry are important!
+Statements by research subjects are valuable,
+but they are .alert[not credible scientific evidence].
 
-
-But they are .alert[not credible scientific evidence.] $\rightarrow$ Many people have wrong ideas of how things affect them.
+$\rightarrow$️ Many people have inaccurate perceptions 
+   of what factors influence them.
 
 .left-column[
 ```{r, echo = FALSE, out.width='100%', fig.align='center'}
@@ -163,31 +164,40 @@ class: inverse middle center
 class: clear
 # Hypothesis $\rightarrow$ comparison
 
-Causal claims imply a .alert[counter factual]: Things would have been different, had $X$ (not) happened.
+Causal claims imply a .alert[counterfactual]: Things would have been different had X (not) happened.
 
-- $H_{1}:$ Media consumption increases immigrant minorities' reports of discrimination!
-  + .backgrnote[ 
-  $H_{0}:$ Media consumption *does not affect* on immigrant minorities' reports of discrimination.
-  ]
+$H_{1}:$ Media consumption *increases* how often immigrant minorities report discrimination.
+
+.backgrnote[
+$H_{0}:$ Media consumption *does not change* how often immigrant minorities report discrimination.]
 
 --
 
-$$\downarrow$$
+$$\Downarrow$$
 
-- $H_{1}: 0 < Avg_{n}[\text{Discrimination}|\text{Read news} = 1] - Avg_{n}[\text{Discrimination}|\text{Read news} = 0]$
- + .backgrnote[ 
- $H_{0}: 0 \geq Avg_{n}[\text{Discrimination}|\text{Read news} = 1] - Avg_{n}[\text{Discrimination}|\text{Read news} = 0]$
+$H_{1}: 0 < Avg_{n}[\text{Discrimination}|\text{Read news} = 1] - Avg_{n}[\text{Discrimination}|\text{Read news} = 0]$
+
+.font80[
+- The average reported discrimination for those who read news (Read news = 1) is greater than for those who don't (Read news = 0).
+- The difference between these two averages is positive $(> 0).$
+]
+ 
+.backgrnote[ 
+$H_{0}: 0 \geq Avg_{n}[\text{Discrimination}|\text{Read news} = 1] - Avg_{n}[\text{Discrimination}|\text{Read news} = 0]$
+
+- This formula states that the average reported discrimination for those who read news is less than or equal to those who don't.
+- The difference between these two averages is zero or negative $(\geq 0).$
  ]
  
 --
 
-.content-box-green[
+.content-box-green[.font80[
 .center[**What are the comparisons implied in the following examples?**]
 
 - **Marx**: Capitalist labor alienates people from engaging with their creative talents; capitalism thereby reduces mental health.
 
-- **Simmel**: Urbanization increases functional social relations and intensifies nervous stimulation; residents of cities are therefore rational and distant.
-]
+- **Simmel**: Urbanization increases impersonal relations nervous stimulation; residents of cities are therefore rational and distant.
+]]
 
 ---
 # Preparation
@@ -195,13 +205,13 @@ $$\downarrow$$
 .panelset[
 .panel[.panel-name[Packages for today's session]
 ```{r libraries}
-pacman::p_load(
-  tidyverse, # Data manipulation,
-  furniture, # For row-means,
-  ggplot2, # beautiful figures,
-  estimatr, # Regression for weighted data,
-  modelr, # Turn results of lm() into a tibble,
-  modelsummary) # for balance and regression tables.
+pacman::p_load( # Load several R packages using the pacman package manager
+  tidyverse,  # A collection of packages for data manipulation and visualization
+  ggplot2,    # Powerful package for creating static, animated and interactive visualizations
+  estimatr,   # Package for fast estimators for regression with weighted data
+  modelr,     # Provides functions for modelling and prediction
+  kableExtra, # Enhances table creation in R
+  modelsummary) # Creates tables and plots to summarize statistical models
 ```
 ]
 .panel[.panel-name[The APAX survey]
@@ -229,33 +239,44 @@ Discrimination means that a person is treated worse than others including specif
 ]
 
 .panel[.panel-name[Get the APAX data]
-.left-column[.font80[
-```{r results = FALSE}
+.push-left[.font80[
+```{r results = FALSE, echo = FALSE}
 # Read APAX data,
 load("../../../assets/APAX.RData") 
-APAX <- APAX %>% mutate(
-  # News in minutes,
+```
+
+```{r eval = FALSE}
+load("APAX.RData") # Load APAX dataset
+```
+
+```{r results = FALSE}
+APAX <- APAX %>% mutate( # Process APAX data
+  # Convert news consumption to minutes
+  # Example: 2 hours and 30 minutes becomes 2*60 + 30 = 150 minutes
   news = news_hrs*60 + news_mins, 
-  news_yn = case_when( # News Yes/No,
-    news < 15 ~ 0, # Less than 15  minutes,
-    news >= 15 ~ 1, # 15  minutes and more,
-    TRUE ~ as.numeric(NA)),
-  # Average discr. index across domains,
-  dis_index = rowmeans( #<<
-    dis_trainee, dis_job, dis_school, #<<
-    dis_house, dis_gov, dis_public, #<<
-    na.rm = TRUE), #<<
-  # Z-standardized discr. index.
-  z_dis_index = scale(dis_index) %>% 
-    as.numeric())
+  # Create binary variable for news consumption
+  news_yn = case_when(
+    news < 15 ~ 0,  # 0 if less than 15 minutes
+    news >= 15 ~ 1, # 1 if 15 minutes or more
+    TRUE ~ as.numeric(NA)), # Handle other cases as missing
+  # Calculate average discrimination index across multiple domains
+  dis_index = rowMeans( # Calculate the mean for each row (participant)
+    select(., # Choose specific discrimination columns from "." (APAX)
+           dis_trainee, dis_job, dis_school, 
+           dis_house, dis_gov, dis_public),
+    na.rm = TRUE), # Ignore NA values
+  # Standardize discrimination index
+  # scale() standardizes; as.numeric() converts to numeric vector
+  z_dis_index = scale(dis_index) %>% as.numeric()
+)
 ```
 ]]
 
-.right-column[
+.push-right[.font80[
 ```{r echo = FALSE}
 APAX
 ```
-]
+]]
 
 ]]
 
@@ -277,20 +298,23 @@ ggplot(data = APAX, aes(y = dis_index, x = news)) +
   theme(legend.position = "none")
 ```
 .content-box-green[
-How does this scatter plot test the comparison stated in $H_{1}$?
+How does this scatter plot test $H_{1}$?
 ]]
 
 --
 
-.push-right[
+.push-right[.fon80[
 ```{r naiv_OLS}
-ols <- lm_robust(dis_index ~ news_yn, 
+ols <- lm_robust(dis_index ~ news_yn, # Run weighted OLS
                  weight = gewFAKT, data = APAX)
-modelsummary(list("Discr." = ols), stars = TRUE,
-             gof_map = c("nobs", "r.squared"))
+
+modelsummary( # Create summary table of OLS results
+  list("Discr." = ols), # List of OLS model objects
+  stars = TRUE, # Indicate significance level
+  # Choose Goodness of Fit indicators
+  gof_map = c("nobs", "r.squared"), 
+  output = "kableExtra") # Format as HTML
 ```
-.content-box-green[
-What do we learn about $H_{1}$ here?
 ]]
 
 ---
