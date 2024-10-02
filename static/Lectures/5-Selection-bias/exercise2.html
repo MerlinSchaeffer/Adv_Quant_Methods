@@ -685,31 +685,51 @@ display: none;
 
 
 <ol style="list-style-type: decimal">
-<li><p>Together with your neighbor, draw a DAG of the effect of news
-consumption on support for anti-discrimination policies. Go through the
-APAX data and discuss which variables might be a confounder (i.e, a
-backdoor path). Add them to your DAG.</p></li>
-<li><p>In the APAX survey, we also asked respondents how their physical
-appearance is typically described in Germany, with answers ranging from
-White, over Black, to Asian. Test whether the variable on racial
-appearance is balanced across our binary news reading indicator. That
-is, are people who appear Asian read the news more often than those who
-appear white etc.? <em>What do you conclude from the balance
-table?</em></p></li>
+<li><p>Partner with a neighbor for this exercise. Together, you&#39;ll
+create a Directed Acyclic Graph (DAG) to explore the causal relationship
+between news consumption and support for anti-discrimination policies.
+Begin by drawing a simple DAG with two main nodes: &quot;News Consumption&quot;
+and &quot;Support for Anti-Discrimination Policies&quot;. Connect these with a
+directed arrow from &quot;News Consumption&quot; to &quot;Support for
+Anti-Discrimination Policies&quot;. Now, dive into the APAD dataset. Examine
+the variables available and discuss with your partner which ones might
+act as confounders in this relationship. Remember, a confounder is a
+variable that influences both news consumption and support for
+anti-discrimination policies. As you identify potential confounders, add
+them to your DAG. Draw appropriate arrows to show how each confounder
+relates to both news consumption and support for anti-discrimination
+policies. Reflect on your DAG: <em>How might the confounders you&#39;ve
+identified influence the relationship between news consumption and
+support for anti-discrimination policies?</em></p></li>
+<li><p>The APAX survey asked respondents how their physical appearance
+is typically described in Germany (e.g., White, Black, Asian) and
+collected data on their news reading habits. Investigate the
+relationship between racial appearance and news consumption: Conduct a
+balance test to determine if racial appearance is evenly distributed
+across the binary news reading indicator. For example, do those
+described as Asian read news more frequently than those described as
+White? <em>What do you conclude from the balance table?</em></p></li>
 </ol>
 <div class="webex-solution">
 <button>
 R solution -&gt; dont&#39; peak too early ;) !
 </button>
-<pre class="r"><code>APAX %&gt;%
-  # Select variables for which I want my balance test,
+<pre class="r"><code>APAD %&gt;% # Start with the APAD dataset, then pipe into
+  # Select only the variables needed for the balance test
   select(news_yn, appearance, gewFAKT) %&gt;%
-  rename(weights = gewFAKT) %&gt;% # Rename the weights variable!
-  datasummary_balance( # Make a balance table,
-    formula = ~ news_yn, # by Reading news Yes/No
-    data = . ,
-    title = &quot;Physical appearance of those who read news and those who don&#39;t&quot;) </code></pre>
-<table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
+  # Rename the weights variable so that the following
+  # command (datasummary_balance) automatically treats it as a weight
+  rename(weights = gewFAKT) %&gt;%
+  # Create a balance table
+  datasummary_balance(
+    # Specify the formula: compare groups based on news_yn (Yes/No news reading)
+    formula = ~ news_yn,
+    data = ., # Use the data piped in from the previous steps
+    # Provide a title for the balance table
+    title = &quot;Physical appearance of those who read news and those who don&#39;t&quot;,
+    output = &quot;kableExtra&quot; # Specify the output format as kableExtra
+  )</code></pre>
+<table class="table" style="color: black; width: auto !important; margin-left: auto; margin-right: auto;">
 <caption>
 Physical appearance of those who read news and those who don&#39;t
 </caption>
@@ -848,19 +868,17 @@ White
 </table>
 </div>
 <ol start="3" style="list-style-type: decimal">
-<li>Beyond the variables observed in APAX, consider with your neighbor
-which unobserved other confounding variables might exist and bias our
-estimate of the news effect. Here are some potential unobserved
-confounders that could bias our estimate of the causal effect of news
-consumption on support for anti-discrimination policies:</li>
+<li>Consider potential unobserved confounding variables that might bias
+our estimate of the effect of news consumption on support for
+anti-discrimination policies. Collaborate with a partner on this task.
+Brainstorm at least two unobserved confounders not captured in the APAD
+dataset. Consider factors that might influence both news consumption and
+attitudes towards anti-discrimination policies. <br>For each confounder
+you identify: Briefly explain how it might affect news consumption.
+Describe its potential impact on support for anti-discrimination
+policies. Discuss how it could bias our estimate of the news
+effect.</li>
 </ol>
-<ul>
-<li>Political ideology: People with different political ideologies may
-be more or less likely to read the news and to support
-anti-discrimination policies.</li>
-<li>Social networks: People who are connected to people who read the
-news may be more or less likely to read the news themselves.</li>
-</ul>
 
 <script>
 

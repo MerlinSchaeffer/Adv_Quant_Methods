@@ -4,7 +4,7 @@
     <title>Multiple Regression &amp;    Fundamentals of Causal Inference</title>
     <meta charset="utf-8" />
     <meta name="author" content="Merlin Schaeffer  Department of Sociology" />
-    <meta name="date" content="2024-09-30" />
+    <meta name="date" content="2024-10-02" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
     <script src="libs/tile-view/tile-view.js"></script>
@@ -29,7 +29,7 @@ class: center, middle, inverse, title-slide
 ### Merlin Schaeffer<br> Department of Sociology
 ]
 .date[
-### 2024-09-30
+### 2024-10-02
 ]
 
 ---
@@ -73,12 +73,12 @@ class: inverse
 &lt;br&gt;
 .font200[**The Integration Paradox**]
 
-immigrants and their descendants with seemingly better access to mainstream middle-class society &lt;br&gt;— as evidenced by their education, labor market success, length of residence, or generational status — &lt;br&gt; often report more discrimination than those on the societal margins.
+immigrants and their descendants with seemingly better access to mainstream middle-class society &lt;br&gt; — as evidenced by their education, labor market success, length of residence, or generational status — &lt;br&gt; often report more discrimination than those on the societal margins.
 ]
 
 .push-right[
 &lt;img src="img/Meta.png" width="85%" style="display: block; margin: auto;" /&gt;
-.font70[.center[*Source:* ]]]
+.font70[.center[*Source:* Schaeffer and Kas (2024)]]]
 
 ---
 class: inverse
@@ -96,7 +96,7 @@ class: inverse
 --
 
 .left-column[.center[.font110[
-**Does news media consumption** &lt;br&gt;&lt;br&gt; _**increase**_ &lt;br&gt;&lt;br&gt; **immigrant minorities' reports of discrimination?**
+**Does news media consumption** &lt;br&gt;&lt;br&gt; _**increase**_ &lt;br&gt;&lt;br&gt; **how often immigrant minorities' report discrimination?**
 ]]]
 
 ---
@@ -115,28 +115,28 @@ Why might this be problematic?
 --
 
 .right-column[
-Statements by research subjects are valuable,
+Statements by research subjects are valuable,&lt;br&gt;
 but they are .alert[not credible scientific evidence].
 
-`\(\rightarrow\)`️ Many people have inaccurate perceptions 
+`\(\rightarrow\)` People have inaccurate perceptions 
    of what factors influence them.
 
 .left-column[
-&lt;img src="https://feeds.abplive.com/onecms/images/uploaded-images/2021/07/02/498323a6432ea9753e6f84c1e92e5858_original.jpg" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="https://www.unhcr.org/sites/default/files/legacy-images/5d7642403.jpg" width="100%" style="display: block; margin: auto;" /&gt;
 ]
 .right-column[
-&lt;img src="./img/Neugebauer.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="./img/ESR.png" width="78%" style="display: block; margin: auto;" /&gt;
 ]
 
 ]
 
 ---
 class: inverse middle center
-# Hypothesis `\(\rightarrow\)` comparison
+# Hypothesis `\(\rightarrow\)` Comparison
 
 ---
 class: clear
-# Hypothesis `\(\rightarrow\)` comparison
+# Hypothesis `\(\rightarrow\)` Comparison
 
 Causal claims imply a .alert[counterfactual]: Things would have been different had X (not) happened.
 
@@ -189,42 +189,42 @@ pacman::p_load( # Load several R packages using the pacman package manager
   modelsummary) # Creates tables and plots to summarize statistical models
 ```
 ]
-.panel[.panel-name[The APAX survey]
-.left-column[
-- PI: Merlin Schaeffer;&lt;br&gt; Postdoc: Judith Kas.
+.panel[.panel-name[The APAD survey]
+.left-column[.font80[
+- Schaeffer, Kas, and Hagedorn (2023)
 - 1093 Immigrants and children of immigrants.
 - Berlin, Hamburg, Munich, Frankfurt, and Cologne.
-- Interviewed in August 2021.
-- Financed by [German Research Council](https://gepris.dfg.de/gepris/projekt/428878477?language=en)
-]
+- Interviewed August 2021.
+- Financed by [German Research Council (DFG)](https://gepris.dfg.de/gepris/projekt/428878477?language=en)
+]]
 
 .right-column[.font80[
 1. &gt; On a typical day, about how much time do you spend watching, reading, or listening to news about politics and current affairs? *Please give your answer in hours and then minutes.*
 
 2. &gt; Now we would like to ask you about discrimination. How often were you personally discriminated in the following situations here in Germany? .backgrnote[
 Discrimination means that a person is treated worse than others including specific reasons for this behavior and no factual justification. People use different modes of discrimination like insult, ostracism, or sexual harassment. Rules and laws disadvantaging people are also discrimination.]
-&gt; ...When looking for work or an apprenticeship&lt;br&gt;
-&gt; ...At work / in professional life&lt;br&gt;
-&gt; ...While attending school or higher education&lt;br&gt;
-&gt; ...When looking for housing&lt;br&gt;
-&gt; ...When having contact with government officials or public administrators&lt;br&gt;
-&gt; ...When you were out in public during your free time&lt;br&gt;&lt;br&gt;
+&gt; ... When looking for work or an apprenticeship&lt;br&gt;
+&gt; ... At work / in professional life&lt;br&gt;
+&gt; ... While attending school or higher education&lt;br&gt;
+&gt; ... When looking for housing&lt;br&gt;
+&gt; ... When having contact with government officials or public administrators&lt;br&gt;
+&gt; ... When you were out in public during your free time&lt;br&gt;&lt;br&gt;
 &gt; (1) Never, (2) Rarely, (3) Sometimes, (4) Often, (5) Very often&lt;br&gt;
 ]]
 ]
 
-.panel[.panel-name[Get the APAX data]
+.panel[.panel-name[Get the APAD data]
 .push-left[.font80[
 
 
 
 ``` r
-load("APAX.RData") # Load APAX dataset
+load("APAD.RData") # Load APAD dataset
 ```
 
 
 ``` r
-APAX &lt;- APAX %&gt;% mutate( # Process APAX data
+APAD &lt;- APAD %&gt;% mutate( # Process APAD data
   # Convert news consumption to minutes
   # Example: 2 hours and 30 minutes becomes 2*60 + 30 = 150 minutes
   news = news_hrs*60 + news_mins, 
@@ -235,7 +235,7 @@ APAX &lt;- APAX %&gt;% mutate( # Process APAX data
     TRUE ~ as.numeric(NA)), # Handle other cases as missing
   # Calculate average discrimination index across multiple domains
   dis_index = rowMeans( # Calculate the mean for each row (participant)
-    select(., # Choose specific discrimination columns from "." (APAX)
+    select(., # Choose specific discrimination columns from "." (APAD)
            dis_trainee, dis_job, dis_school, 
            dis_house, dis_gov, dis_public),
     na.rm = TRUE), # Ignore NA values
@@ -247,6 +247,7 @@ APAX &lt;- APAX %&gt;% mutate( # Process APAX data
 ]]
 
 .push-right[.font80[
+&lt;br&gt;
 
 ```
 # # A tibble: 1,093 × 24
@@ -290,7 +291,7 @@ How does this scatter plot test `\(H_{1}\)`?
 
 ``` r
 ols &lt;- lm_robust(dis_index ~ news_yn, # Run weighted OLS
-                 weight = gewFAKT, data = APAX)
+                 weight = gewFAKT, data = APAD)
 
 modelsummary( # Create summary table of OLS results
   list("Discr." = ols), # List of OLS model objects
@@ -300,7 +301,7 @@ modelsummary( # Create summary table of OLS results
   output = "kableExtra") # Format as HTML
 ```
 
-&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+&lt;table style="NAborder-bottom: 0; color: black; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
  &lt;thead&gt;
   &lt;tr&gt;
    &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
@@ -344,7 +345,7 @@ modelsummary( # Create summary table of OLS results
 # Small recap .font60[Hypotheses tests, *t*- and, *p*-values]
 
 .left-column[
-&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+&lt;table style="NAborder-bottom: 0; color: black; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
  &lt;thead&gt;
   &lt;tr&gt;
    &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
@@ -429,11 +430,11 @@ class: inverse middle center
 # Potential outcomes
 ## The Neyman–Rubin framework of causality
 
-&gt; The Rubin causal model is based on the idea of potential outcomes. For example, a person would have a particular income at age 40 if they had attended college, whereas they would have a different income at age 40 if they had not attended college. To measure the causal effect of going to college for this person, we need to compare the outcome for the same individual in both alternative futures. Since it is impossible to see both potential outcomes at once, one of the potential outcomes is always missing. This dilemma is the "fundamental problem of causal inference"
+&gt; The Neyman–Rubin causal model is based on the idea of potential outcomes. For example, a person would have a particular income at age 40 if they had attended college, whereas they would have a different income at age 40 if they had not attended college. To measure the causal effect of going to college for this person, we need to compare the outcome for the same individual in both alternative futures. Since it is impossible to see both potential outcomes at once, one of the potential outcomes is always missing. This dilemma is the "fundamental problem of causal inference"
 
 &gt; -- *Source*: [.white[Wikipedia]](https://en.wikipedia.org/wiki/Rubin_causal_model)
 ---
-# Potential outcomes .font60[Ferda's personal news effect]
+# Potential outcomes .font60[Ferda's *personal causl effect*]
 
 .push-left[
 `\(\text{News effect}_{\text{Ferda}} = \underbrace{\text{Discrimination}_{1, \text{Ferda}}}_{\text{Read news} = 1} - \underbrace{\text{Discrimination}_{0, \text{Ferda}}}_{\text{Read news} = 0}.\)`
@@ -456,12 +457,12 @@ class: center inverse
 
 `$$Avg_{n}[Y_{1i}-Y_{0i}] = \frac{1}{n} \displaystyle\sum_{i=1}^{n}Y_{1i} - \frac{1}{n} \displaystyle\sum_{i=1}^{n}Y_{0i}.$$`
 
-.left[
+
 .push-left[
-The average causal effect is the average of all personal causal effects in your sample!
+The average causal effect is &lt;br&gt; *the average of all personal causal effects* &lt;br&gt; in your sample!
 ]
 
-.push-right[
+.push-right[.font80[
 For example, the average causal effect of reading the news compares discrimination for everyone in the sample in the hypothetical scenario that they all read the news, to the discrimination for everyone in the sample in the hypothetical scenario that they did not read the news.
 ]]
 
@@ -498,8 +499,7 @@ layout: true
 -----------------------|:----:|:----:
 `\(Y_{0}\)`: Outcome without news | .gray[2 (Rarely)]    | 5&lt;br&gt;(V.often)   
 `\(Y_{1}\)`: Outcome with news    | 4 (Often)   | .gray[5&lt;br&gt;(V.often)]    
-True news effect          | .gray[+2] | .gray[0]    
-Actual news          | 1    | 0    
+True news effect          | .gray[+2] | .gray[0]
 ]]
 
 ---
@@ -535,7 +535,10 @@ Why is it misleading to compare Ferda to Tuki?
 
 .content-box-red[.center[
 **Selection bias**: `\(Y_{0, \text{Ferda}} \neq Y_{0, \text{Tuki}}\)`
-`\(\Rightarrow\)` Tuki's *baseline* &lt;br&gt; (i.e., no news) to report discrimination &lt;br&gt; is higher than Ferda's!
+
+`\(\Downarrow\)`
+
+Tuki's *baseline* (i.e., no news) to report discrimination &lt;br&gt; is higher than Ferda's!
 ]]]
 
 ---
@@ -548,7 +551,7 @@ layout: false
 .center[**Observed outcomes**]
 
 - `\(Y_{1i}|D_{i} = 1\)`: Outcome of treated, if treated.
-  + .font70[Observed discrimination among those who read news.]
+  + .font70[Observed discrimination among those who read news.&lt;br&gt;&lt;br&gt;]
 
 
 - `\(Y_{0i}|D_{i} = 0\)`: Outcome of non-treated, if not treated.
@@ -559,24 +562,25 @@ layout: false
 .center[**Potential outcomes**]
 
 - `\(Y_{0i}|D_{i} = 1\)`: Outcome of treated, if not treated.
-  + .font70[Observed discrimination among those who read news,&lt;br&gt; *if they had not read news*.]
+  + .font70[Potential discrimination among those who read news,&lt;br&gt; *if they had not read news*.]
 
 
 - `\(Y_{1i}|D_{i} = 0\)`: Outcome of non-treated, if treated.
-  + .font70[Observed discrimination among those who don't read news,&lt;br&gt; *if they had read it news*.]
+  + .font70[Potential discrimination among those who don't read news,&lt;br&gt; *if they had read it news*.]
 ]]
 
 ---
-# Differences between groups
+# Observed differences between groups
 
-`$$Avg_{n}[Y_{1i}|D_{i} = 1] - Avg_{n}[Y_{0i}|D_{i} = 0]$$`
+`$$Avg_{n}[Y_{1i}-Y_{0i}] \neq Avg_{n}[Y_{1i}|D_{i} = 1] - Avg_{n}[Y_{0i}|D_{i} = 0]$$`
+
+&lt;br&gt;
+&lt;br&gt;
 .push-left[
-&lt;img src="https://vitaliscounseling.com/wp-content/uploads/2020/12/compare-643305_1280.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="https://www.rbgcal.com/wp-content/uploads/2018/01/Network-Comparison.png" width="70%" style="display: block; margin: auto;" /&gt;
 ]
 .push-right[
-Differences between groups are, most of the time, a comparison of apples (i.e. Ferda) to oranges (i.e. Tuki). 
-
-They do not tell us the average causal effect: `\(Avg_{n}[Y_{1i}-Y_{0i}]\)`!
+Usually, observed differences between groups do not tell us the average causal effect: `\(Avg_{n}[Y_{1i}-Y_{0i}]\)`!
 ]
 ---
 # Why? Selection bias!
@@ -607,251 +611,119 @@ That is, if immigrant minorities who read the news had not read them, would they
 .panel[.panel-name[R code]
 
 ``` r
-APAX %&gt;%
-  # Select variables for which I want my balance test,
+APAD %&gt;% # Start with the APAD dataset, then pipe
+  # Select specific variables for the balance test
   select(news_yn, age, nbh_exposed, imor, german, gewFAKT) %&gt;%
-* rename(weights = gewFAKT) %&gt;% # Rename the weights variable!
-* datasummary_balance( # Make a balance table,
-*   formula = ~ news_yn, # by Reading news Yes/No
-*   data = . , # Pipe APAX data here
-*   title = "Socio-demographic characterisitcs of those who read news and those who do not"
+* # Rename the weights variable so that the following
+* # command (datasummary_balance) automatically treats it as a weight
+* rename(weights = gewFAKT) %&gt;%
+* # Create a balance table
+* datasummary_balance(
+*   # Formula specifies to compare groups based on news_yn
+*   formula = ~ news_yn,
+*   data = ., # Use the data piped in from above
+*   # Provide a title for the table
+*   title = "Socio-demographic characteristics of those who read news and those who do not",
+*   output = "kableExtra"# Specify the output format as kableExtra
 * )
 ```
 
-- Note that I `rename(weights = gewFAKT)`
-  + Thereby `datasummary_balance()` automatically treats this variable as a weight.
 ]
 .panel[.panel-name[Balance table]
-
-```{=html}
-&lt;!-- preamble start --&gt;
-
-    &lt;script&gt;
-      function styleCell_qfqqp9p0dptkccp7ur0k(i, j, css_id) {
-        var table = document.getElementById("tinytable_qfqqp9p0dptkccp7ur0k");
-        table.rows[i].cells[j].classList.add(css_id);
-      }
-      function insertSpanRow(i, colspan, content) {
-        var table = document.getElementById('tinytable_qfqqp9p0dptkccp7ur0k');
-        var newRow = table.insertRow(i);
-        var newCell = newRow.insertCell(0);
-        newCell.setAttribute("colspan", colspan);
-        // newCell.innerText = content;
-        // this may be unsafe, but innerText does not interpret &lt;br&gt;
-        newCell.innerHTML = content;
-      }
-      function spanCell_qfqqp9p0dptkccp7ur0k(i, j, rowspan, colspan) {
-        var table = document.getElementById("tinytable_qfqqp9p0dptkccp7ur0k");
-        const targetRow = table.rows[i];
-        const targetCell = targetRow.cells[j];
-        for (let r = 0; r &lt; rowspan; r++) {
-          // Only start deleting cells to the right for the first row (r == 0)
-          if (r === 0) {
-            // Delete cells to the right of the target cell in the first row
-            for (let c = colspan - 1; c &gt; 0; c--) {
-              if (table.rows[i + r].cells[j + c]) {
-                table.rows[i + r].deleteCell(j + c);
-              }
-            }
-          }
-          // For rows below the first, delete starting from the target column
-          if (r &gt; 0) {
-            for (let c = colspan - 1; c &gt;= 0; c--) {
-              if (table.rows[i + r] &amp;&amp; table.rows[i + r].cells[j]) {
-                table.rows[i + r].deleteCell(j);
-              }
-            }
-          }
-        }
-        // Set rowspan and colspan of the target cell
-        targetCell.rowSpan = rowspan;
-        targetCell.colSpan = colspan;
-      }
-window.addEventListener('load', function () { styleCell_qfqqp9p0dptkccp7ur0k(0, 0, 'tinytable_css_idrltqrtm7nl4ke7x3epwh') })
-window.addEventListener('load', function () { styleCell_qfqqp9p0dptkccp7ur0k(0, 1, 'tinytable_css_idrltqrtm7nl4ke7x3epwh') })
-window.addEventListener('load', function () { styleCell_qfqqp9p0dptkccp7ur0k(0, 2, 'tinytable_css_idgf3100udd777mh7891i0') })
-window.addEventListener('load', function () { styleCell_qfqqp9p0dptkccp7ur0k(0, 3, 'tinytable_css_idgf3100udd777mh7891i0') })
-window.addEventListener('load', function () { styleCell_qfqqp9p0dptkccp7ur0k(0, 4, 'tinytable_css_id1ktgp9qoktq4jltyqe9w') })
-window.addEventListener('load', function () { styleCell_qfqqp9p0dptkccp7ur0k(0, 5, 'tinytable_css_id1ktgp9qoktq4jltyqe9w') })
-window.addEventListener('load', function () { styleCell_qfqqp9p0dptkccp7ur0k(0, 6, 'tinytable_css_id1ktgp9qoktq4jltyqe9w') })
-window.addEventListener('load', function () { styleCell_qfqqp9p0dptkccp7ur0k(0, 7, 'tinytable_css_id1ktgp9qoktq4jltyqe9w') })
-window.addEventListener('load', function () { styleCell_qfqqp9p0dptkccp7ur0k(1, 0, 'tinytable_css_id0nha2taehpdh99rep6uz') })
-window.addEventListener('load', function () { styleCell_qfqqp9p0dptkccp7ur0k(1, 1, 'tinytable_css_id0nha2taehpdh99rep6uz') })
-window.addEventListener('load', function () { styleCell_qfqqp9p0dptkccp7ur0k(1, 2, 'tinytable_css_id6oyg62zfxxwpeha15ecv') })
-window.addEventListener('load', function () { styleCell_qfqqp9p0dptkccp7ur0k(1, 3, 'tinytable_css_id6oyg62zfxxwpeha15ecv') })
-window.addEventListener('load', function () { styleCell_qfqqp9p0dptkccp7ur0k(1, 4, 'tinytable_css_id6oyg62zfxxwpeha15ecv') })
-window.addEventListener('load', function () { styleCell_qfqqp9p0dptkccp7ur0k(1, 5, 'tinytable_css_id6oyg62zfxxwpeha15ecv') })
-window.addEventListener('load', function () { styleCell_qfqqp9p0dptkccp7ur0k(1, 6, 'tinytable_css_id6oyg62zfxxwpeha15ecv') })
-window.addEventListener('load', function () { styleCell_qfqqp9p0dptkccp7ur0k(1, 7, 'tinytable_css_id6oyg62zfxxwpeha15ecv') })
-window.addEventListener('load', function () { styleCell_qfqqp9p0dptkccp7ur0k(2, 0, 'tinytable_css_ida8hyomqyxw1j35w9zuf1') })
-window.addEventListener('load', function () { styleCell_qfqqp9p0dptkccp7ur0k(2, 1, 'tinytable_css_ida8hyomqyxw1j35w9zuf1') })
-window.addEventListener('load', function () { styleCell_qfqqp9p0dptkccp7ur0k(2, 2, 'tinytable_css_idgktab6msoo5szvw2h7lh') })
-window.addEventListener('load', function () { styleCell_qfqqp9p0dptkccp7ur0k(2, 3, 'tinytable_css_idgktab6msoo5szvw2h7lh') })
-window.addEventListener('load', function () { styleCell_qfqqp9p0dptkccp7ur0k(2, 4, 'tinytable_css_idgktab6msoo5szvw2h7lh') })
-window.addEventListener('load', function () { styleCell_qfqqp9p0dptkccp7ur0k(2, 5, 'tinytable_css_idgktab6msoo5szvw2h7lh') })
-window.addEventListener('load', function () { styleCell_qfqqp9p0dptkccp7ur0k(2, 6, 'tinytable_css_idgktab6msoo5szvw2h7lh') })
-window.addEventListener('load', function () { styleCell_qfqqp9p0dptkccp7ur0k(2, 7, 'tinytable_css_idgktab6msoo5szvw2h7lh') })
-window.addEventListener('load', function () { styleCell_qfqqp9p0dptkccp7ur0k(3, 0, 'tinytable_css_id5978h3ijexx8lvz3b0nx') })
-window.addEventListener('load', function () { styleCell_qfqqp9p0dptkccp7ur0k(3, 1, 'tinytable_css_id5978h3ijexx8lvz3b0nx') })
-window.addEventListener('load', function () { styleCell_qfqqp9p0dptkccp7ur0k(3, 2, 'tinytable_css_idd7x750kh0v1pkmf43x1c') })
-window.addEventListener('load', function () { styleCell_qfqqp9p0dptkccp7ur0k(3, 3, 'tinytable_css_idd7x750kh0v1pkmf43x1c') })
-window.addEventListener('load', function () { styleCell_qfqqp9p0dptkccp7ur0k(3, 4, 'tinytable_css_idd7x750kh0v1pkmf43x1c') })
-window.addEventListener('load', function () { styleCell_qfqqp9p0dptkccp7ur0k(3, 5, 'tinytable_css_idd7x750kh0v1pkmf43x1c') })
-window.addEventListener('load', function () { styleCell_qfqqp9p0dptkccp7ur0k(3, 6, 'tinytable_css_idd7x750kh0v1pkmf43x1c') })
-window.addEventListener('load', function () { styleCell_qfqqp9p0dptkccp7ur0k(3, 7, 'tinytable_css_idd7x750kh0v1pkmf43x1c') })
-window.addEventListener('load', function () { styleCell_qfqqp9p0dptkccp7ur0k(4, 0, 'tinytable_css_ida8hyomqyxw1j35w9zuf1') })
-window.addEventListener('load', function () { styleCell_qfqqp9p0dptkccp7ur0k(4, 1, 'tinytable_css_ida8hyomqyxw1j35w9zuf1') })
-window.addEventListener('load', function () { styleCell_qfqqp9p0dptkccp7ur0k(4, 2, 'tinytable_css_idgktab6msoo5szvw2h7lh') })
-window.addEventListener('load', function () { styleCell_qfqqp9p0dptkccp7ur0k(4, 3, 'tinytable_css_idgktab6msoo5szvw2h7lh') })
-window.addEventListener('load', function () { styleCell_qfqqp9p0dptkccp7ur0k(4, 4, 'tinytable_css_idgktab6msoo5szvw2h7lh') })
-window.addEventListener('load', function () { styleCell_qfqqp9p0dptkccp7ur0k(4, 5, 'tinytable_css_idgktab6msoo5szvw2h7lh') })
-window.addEventListener('load', function () { styleCell_qfqqp9p0dptkccp7ur0k(4, 6, 'tinytable_css_idgktab6msoo5szvw2h7lh') })
-window.addEventListener('load', function () { styleCell_qfqqp9p0dptkccp7ur0k(4, 7, 'tinytable_css_idgktab6msoo5szvw2h7lh') })
-window.addEventListener('load', function () { styleCell_qfqqp9p0dptkccp7ur0k(5, 0, 'tinytable_css_ida8hyomqyxw1j35w9zuf1') })
-window.addEventListener('load', function () { styleCell_qfqqp9p0dptkccp7ur0k(5, 1, 'tinytable_css_ida8hyomqyxw1j35w9zuf1') })
-window.addEventListener('load', function () { styleCell_qfqqp9p0dptkccp7ur0k(5, 2, 'tinytable_css_idgktab6msoo5szvw2h7lh') })
-window.addEventListener('load', function () { styleCell_qfqqp9p0dptkccp7ur0k(5, 3, 'tinytable_css_idgktab6msoo5szvw2h7lh') })
-window.addEventListener('load', function () { styleCell_qfqqp9p0dptkccp7ur0k(5, 4, 'tinytable_css_idgktab6msoo5szvw2h7lh') })
-window.addEventListener('load', function () { styleCell_qfqqp9p0dptkccp7ur0k(5, 5, 'tinytable_css_idgktab6msoo5szvw2h7lh') })
-window.addEventListener('load', function () { styleCell_qfqqp9p0dptkccp7ur0k(5, 6, 'tinytable_css_idgktab6msoo5szvw2h7lh') })
-window.addEventListener('load', function () { styleCell_qfqqp9p0dptkccp7ur0k(5, 7, 'tinytable_css_idgktab6msoo5szvw2h7lh') })
-window.addEventListener('load', function () { styleCell_qfqqp9p0dptkccp7ur0k(6, 0, 'tinytable_css_ida8hyomqyxw1j35w9zuf1') })
-window.addEventListener('load', function () { styleCell_qfqqp9p0dptkccp7ur0k(6, 1, 'tinytable_css_ida8hyomqyxw1j35w9zuf1') })
-window.addEventListener('load', function () { styleCell_qfqqp9p0dptkccp7ur0k(6, 2, 'tinytable_css_idgktab6msoo5szvw2h7lh') })
-window.addEventListener('load', function () { styleCell_qfqqp9p0dptkccp7ur0k(6, 3, 'tinytable_css_idgktab6msoo5szvw2h7lh') })
-window.addEventListener('load', function () { styleCell_qfqqp9p0dptkccp7ur0k(6, 4, 'tinytable_css_idgktab6msoo5szvw2h7lh') })
-window.addEventListener('load', function () { styleCell_qfqqp9p0dptkccp7ur0k(6, 5, 'tinytable_css_idgktab6msoo5szvw2h7lh') })
-window.addEventListener('load', function () { styleCell_qfqqp9p0dptkccp7ur0k(6, 6, 'tinytable_css_idgktab6msoo5szvw2h7lh') })
-window.addEventListener('load', function () { styleCell_qfqqp9p0dptkccp7ur0k(6, 7, 'tinytable_css_idgktab6msoo5szvw2h7lh') })
-window.addEventListener('load', function () { styleCell_qfqqp9p0dptkccp7ur0k(7, 0, 'tinytable_css_ida8hyomqyxw1j35w9zuf1') })
-window.addEventListener('load', function () { styleCell_qfqqp9p0dptkccp7ur0k(7, 1, 'tinytable_css_ida8hyomqyxw1j35w9zuf1') })
-window.addEventListener('load', function () { styleCell_qfqqp9p0dptkccp7ur0k(7, 2, 'tinytable_css_idgktab6msoo5szvw2h7lh') })
-window.addEventListener('load', function () { styleCell_qfqqp9p0dptkccp7ur0k(7, 3, 'tinytable_css_idgktab6msoo5szvw2h7lh') })
-window.addEventListener('load', function () { styleCell_qfqqp9p0dptkccp7ur0k(7, 4, 'tinytable_css_idgktab6msoo5szvw2h7lh') })
-window.addEventListener('load', function () { styleCell_qfqqp9p0dptkccp7ur0k(7, 5, 'tinytable_css_idgktab6msoo5szvw2h7lh') })
-window.addEventListener('load', function () { styleCell_qfqqp9p0dptkccp7ur0k(7, 6, 'tinytable_css_idgktab6msoo5szvw2h7lh') })
-window.addEventListener('load', function () { styleCell_qfqqp9p0dptkccp7ur0k(7, 7, 'tinytable_css_idgktab6msoo5szvw2h7lh') })
-window.addEventListener('load', function () { styleCell_qfqqp9p0dptkccp7ur0k(8, 0, 'tinytable_css_ida8hyomqyxw1j35w9zuf1') })
-window.addEventListener('load', function () { styleCell_qfqqp9p0dptkccp7ur0k(8, 1, 'tinytable_css_ida8hyomqyxw1j35w9zuf1') })
-window.addEventListener('load', function () { styleCell_qfqqp9p0dptkccp7ur0k(8, 2, 'tinytable_css_idgktab6msoo5szvw2h7lh') })
-window.addEventListener('load', function () { styleCell_qfqqp9p0dptkccp7ur0k(8, 3, 'tinytable_css_idgktab6msoo5szvw2h7lh') })
-window.addEventListener('load', function () { styleCell_qfqqp9p0dptkccp7ur0k(8, 4, 'tinytable_css_idgktab6msoo5szvw2h7lh') })
-window.addEventListener('load', function () { styleCell_qfqqp9p0dptkccp7ur0k(8, 5, 'tinytable_css_idgktab6msoo5szvw2h7lh') })
-window.addEventListener('load', function () { styleCell_qfqqp9p0dptkccp7ur0k(8, 6, 'tinytable_css_idgktab6msoo5szvw2h7lh') })
-window.addEventListener('load', function () { styleCell_qfqqp9p0dptkccp7ur0k(8, 7, 'tinytable_css_idgktab6msoo5szvw2h7lh') })
-    &lt;/script&gt;
-
-    &lt;style&gt;
-    .table td.tinytable_css_idrltqrtm7nl4ke7x3epwh, .table th.tinytable_css_idrltqrtm7nl4ke7x3epwh {  text-align: center;  text-align: left; }
-    .table td.tinytable_css_idgf3100udd777mh7891i0, .table th.tinytable_css_idgf3100udd777mh7891i0 {  text-align: center;  text-align: right;  border-bottom: solid 0.05em #d3d8dc; }
-    .table td.tinytable_css_id1ktgp9qoktq4jltyqe9w, .table th.tinytable_css_id1ktgp9qoktq4jltyqe9w {  text-align: center;  text-align: right; }
-    .table td.tinytable_css_id0nha2taehpdh99rep6uz, .table th.tinytable_css_id0nha2taehpdh99rep6uz {  text-align: left;  border-bottom: solid 0.1em #d3d8dc; }
-    .table td.tinytable_css_id6oyg62zfxxwpeha15ecv, .table th.tinytable_css_id6oyg62zfxxwpeha15ecv {  text-align: right;  border-bottom: solid 0.1em #d3d8dc; }
-    .table td.tinytable_css_ida8hyomqyxw1j35w9zuf1, .table th.tinytable_css_ida8hyomqyxw1j35w9zuf1 {  text-align: left; }
-    .table td.tinytable_css_idgktab6msoo5szvw2h7lh, .table th.tinytable_css_idgktab6msoo5szvw2h7lh {  text-align: right; }
-    .table td.tinytable_css_id5978h3ijexx8lvz3b0nx, .table th.tinytable_css_id5978h3ijexx8lvz3b0nx {  border-bottom: solid 0.05em black;  text-align: left; }
-    .table td.tinytable_css_idd7x750kh0v1pkmf43x1c, .table th.tinytable_css_idd7x750kh0v1pkmf43x1c {  border-bottom: solid 0.05em black;  text-align: right; }
-    &lt;/style&gt;
-    &lt;div class="container"&gt;
-      &lt;table class="table table-borderless" id="tinytable_qfqqp9p0dptkccp7ur0k" style="width: auto; margin-left: auto; margin-right: auto;" data-quarto-disable-processing='true'&gt;
-        &lt;thead&gt;
+&lt;table class="table" style="color: black; width: auto !important; margin-left: auto; margin-right: auto;"&gt;
+&lt;caption&gt;Socio-demographic characteristics of those who read news and those who do not&lt;/caption&gt;
+ &lt;thead&gt;
 &lt;tr&gt;
-&lt;th scope="col" align="center" colspan=1&gt; &lt;/th&gt;
-&lt;th scope="col" align="center" colspan=1&gt; &lt;/th&gt;
-&lt;th scope="col" align="center" colspan=2&gt;0&lt;/th&gt;
-&lt;th scope="col" align="center" colspan=2&gt;1&lt;/th&gt;
-&lt;th scope="col" align="center" colspan=1&gt; &lt;/th&gt;
-&lt;th scope="col" align="center" colspan=1&gt; &lt;/th&gt;
+&lt;th style="empty-cells: hide;border-bottom:hidden;" colspan="2"&gt;&lt;/th&gt;
+&lt;th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="2"&gt;&lt;div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; "&gt;0&lt;/div&gt;&lt;/th&gt;
+&lt;th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="2"&gt;&lt;div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; "&gt;1&lt;/div&gt;&lt;/th&gt;
+&lt;th style="empty-cells: hide;border-bottom:hidden;" colspan="2"&gt;&lt;/th&gt;
 &lt;/tr&gt;
-        &lt;caption&gt;Socio-demographic characterisitcs of those who read news and those who do not&lt;/caption&gt;
-              &lt;tr&gt;
-                &lt;th scope="col"&gt; &lt;/th&gt;
-                &lt;th scope="col"&gt;  &lt;/th&gt;
-                &lt;th scope="col"&gt;Mean&lt;/th&gt;
-                &lt;th scope="col"&gt;Std. Dev.&lt;/th&gt;
-                &lt;th scope="col"&gt;Mean&lt;/th&gt;
-                &lt;th scope="col"&gt;Std. Dev.&lt;/th&gt;
-                &lt;th scope="col"&gt;Diff. in Means&lt;/th&gt;
-                &lt;th scope="col"&gt;Std. Error&lt;/th&gt;
-              &lt;/tr&gt;
-        &lt;/thead&gt;
-        
-        &lt;tbody&gt;
-                &lt;tr&gt;
-                  &lt;td&gt;age        &lt;/td&gt;
-                  &lt;td&gt;                  &lt;/td&gt;
-                  &lt;td&gt;36.7&lt;/td&gt;
-                  &lt;td&gt;12.3&lt;/td&gt;
-                  &lt;td&gt;43.8&lt;/td&gt;
-                  &lt;td&gt;15.4&lt;/td&gt;
-                  &lt;td&gt;7.1&lt;/td&gt;
-                  &lt;td&gt;2.2&lt;/td&gt;
-                &lt;/tr&gt;
-                &lt;tr&gt;
-                  &lt;td&gt;nbh_exposed&lt;/td&gt;
-                  &lt;td&gt;                  &lt;/td&gt;
-                  &lt;td&gt;4.2 &lt;/td&gt;
-                  &lt;td&gt;0.8 &lt;/td&gt;
-                  &lt;td&gt;4.2 &lt;/td&gt;
-                  &lt;td&gt;1.0 &lt;/td&gt;
-                  &lt;td&gt;0.0&lt;/td&gt;
-                  &lt;td&gt;0.1&lt;/td&gt;
-                &lt;/tr&gt;
-                &lt;tr&gt;
-                  &lt;td&gt;           &lt;/td&gt;
-                  &lt;td&gt;                  &lt;/td&gt;
-                  &lt;td&gt;N   &lt;/td&gt;
-                  &lt;td&gt;Pct.&lt;/td&gt;
-                  &lt;td&gt;N   &lt;/td&gt;
-                  &lt;td&gt;Pct.&lt;/td&gt;
-                  &lt;td&gt;   &lt;/td&gt;
-                  &lt;td&gt;   &lt;/td&gt;
-                &lt;/tr&gt;
-                &lt;tr&gt;
-                  &lt;td&gt;imor       &lt;/td&gt;
-                  &lt;td&gt;Child of immigrant&lt;/td&gt;
-                  &lt;td&gt;64  &lt;/td&gt;
-                  &lt;td&gt;29.4&lt;/td&gt;
-                  &lt;td&gt;399 &lt;/td&gt;
-                  &lt;td&gt;45.6&lt;/td&gt;
-                  &lt;td&gt;   &lt;/td&gt;
-                  &lt;td&gt;   &lt;/td&gt;
-                &lt;/tr&gt;
-                &lt;tr&gt;
-                  &lt;td&gt;           &lt;/td&gt;
-                  &lt;td&gt;Immigrant         &lt;/td&gt;
-                  &lt;td&gt;154 &lt;/td&gt;
-                  &lt;td&gt;70.6&lt;/td&gt;
-                  &lt;td&gt;476 &lt;/td&gt;
-                  &lt;td&gt;54.4&lt;/td&gt;
-                  &lt;td&gt;   &lt;/td&gt;
-                  &lt;td&gt;   &lt;/td&gt;
-                &lt;/tr&gt;
-                &lt;tr&gt;
-                  &lt;td&gt;german     &lt;/td&gt;
-                  &lt;td&gt;Ja                &lt;/td&gt;
-                  &lt;td&gt;89  &lt;/td&gt;
-                  &lt;td&gt;40.8&lt;/td&gt;
-                  &lt;td&gt;561 &lt;/td&gt;
-                  &lt;td&gt;64.1&lt;/td&gt;
-                  &lt;td&gt;   &lt;/td&gt;
-                  &lt;td&gt;   &lt;/td&gt;
-                &lt;/tr&gt;
-                &lt;tr&gt;
-                  &lt;td&gt;           &lt;/td&gt;
-                  &lt;td&gt;Nein              &lt;/td&gt;
-                  &lt;td&gt;129 &lt;/td&gt;
-                  &lt;td&gt;59.2&lt;/td&gt;
-                  &lt;td&gt;314 &lt;/td&gt;
-                  &lt;td&gt;35.9&lt;/td&gt;
-                  &lt;td&gt;   &lt;/td&gt;
-                  &lt;td&gt;   &lt;/td&gt;
-                &lt;/tr&gt;
-        &lt;/tbody&gt;
-      &lt;/table&gt;
-    &lt;/div&gt;
-&lt;!-- hack to avoid NA insertion in last line --&gt;
-```
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt;    &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Mean &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Std. Dev. &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Mean &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Std. Dev. &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Diff. in Means &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Std. Error &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; age &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 36.7 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 12.3 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 43.8 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 15.4 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 7.1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2.2 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt; nbh_exposed &lt;/td&gt;
+   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:right;box-shadow: 0px 1.5px"&gt; 4.2 &lt;/td&gt;
+   &lt;td style="text-align:right;box-shadow: 0px 1.5px"&gt; 0.8 &lt;/td&gt;
+   &lt;td style="text-align:right;box-shadow: 0px 1.5px"&gt; 4.2 &lt;/td&gt;
+   &lt;td style="text-align:right;box-shadow: 0px 1.5px"&gt; 1.0 &lt;/td&gt;
+   &lt;td style="text-align:right;box-shadow: 0px 1.5px"&gt; 0.0 &lt;/td&gt;
+   &lt;td style="text-align:right;box-shadow: 0px 1.5px"&gt; 0.1 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; N &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; Pct. &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; N &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; Pct. &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt;  &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; imor &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Child of immigrant &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 64 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 29.4 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 399 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 45.6 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt;  &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Immigrant &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 154 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 70.6 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 476 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 54.4 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt;  &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; german &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Ja &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 89 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 40.8 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 561 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 64.1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt;  &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Nein &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 129 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 59.2 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 314 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 35.9 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt;  &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
 
 ]]
 
@@ -882,7 +754,7 @@ layout: true
 .push-right[
 &lt;img src="5-Selection-bias_files/figure-html/DAG1-1.png" width="40%" style="display: block; margin: auto;" /&gt;
 .backgrnote[
-The red bi-directed arrow is officially not part of the DAG, but helps you see that the correlation between `\(D\)` and `\(Y\)` is not causal because of `\(C\)`.
+The red bi-directed arrow is officially not part of the DAG. But helps it helps us to understand that the correlation between `\(Y\)` and `\(D\)` is not causal in nature. The reason for this non-causal relationship is the existence of a backdoor path. The backdoor path is opened by variable C, which influences both D and Y.
 ]]
 
 ---
@@ -891,8 +763,8 @@ The red bi-directed arrow is officially not part of the DAG, but helps you see t
 &lt;img src="5-Selection-bias_files/figure-html/DAG2-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 
 .backgrnote[
-The red bi-directed arrow is officially not part of the DAG, but helps you see that the correlation between read news and perceived discrimination is biased because immigrant minorities who obtained German citizenship read news more often than those who are foreign citizens.]
-]
+The red bi-directed arrow is officially not part of the DAG. But helps it helps us to understand that the correlation between Discrimination and Reading the news is not causal in nature. The reason for this non-causal relationship is the existence of a backdoor path. The backdoor path is opened by German citizenship, which influences whether people read the news but also how much discrimination they experience.
+]]
 
 ---
 layout: false
@@ -958,7 +830,7 @@ class: inverse
 class: inverse
 # Today's (important) functions
 
-1. `funiture::rowmeans()`: Combine several variables to an additive index;  the variable must be measured in the same units.
+1. `rowMeans()`: Combine several variables to an additive index;  the variable must be measured in the same units.
 2. `modelsummary::datasummary_balance()`: Make a balance table.
 
 ---
@@ -971,6 +843,12 @@ Publishing, pp. 272-286.
 
 Pearl, J., M. Glymour, and N. P. Jewell (2016). _Causal Inference in Statistics - A Primer_. 1.th ed.
 Chichester, West Sussex: Wiley.
+
+Schaeffer, M. and J. Kas (2024). "The integration paradox: Does awareness of the extent of
+ethno-racial discrimination increase reports of discrimination?" In: _Political Psychology_.
+
+Schaeffer, M., J. Kas, and P. Hagedorn (2023). "The Association between Actual and Perceived
+Discrimination (APAD): Technical Report". In: _SocArXiv_.
 
 Steinmann, J. (2019). "The paradox of integration: why do higher educated new immigrants perceive more
 discrimination in Germany?" In: _Journal of Ethnic and Migration Studies_, pp. 1377-1400.

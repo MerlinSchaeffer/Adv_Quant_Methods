@@ -16,79 +16,113 @@ library(tidyverse)
 library(essentials)
 ```
 
-1. Download the APAX survey from Absalon and replicate my operationalization of the variables.
+1. Download the APAD survey dataset from Absalon. Replicate the variable preparation steps as demonstrated in my slides.
   
 `r hide("R solution -> dont' peak too early ;) !")`
 ```{r}
-pacman::p_load(
-  tidyverse, # Data manipulation,
-  furniture, # For row-means,
-  ggplot2, # beautiful figures,
-  estimatr, # Regression for weighted data,
-  modelr, # Turn results of lm() into a tibble,
-  modelsummary) # for balance and regression tables.
+# 1. Load packages
+pacman::p_load( # Load several R packages using the pacman package manager
+  tidyverse,  # A collection of packages for data manipulation and visualization
+  ggplot2,    # Powerful package for creating static, animated and interactive visualizations
+  estimatr,   # Package for fast estimators for regression with weighted data
+  modelr,     # Provides functions for modelling and prediction
+  kableExtra, # Enhances table creation in R
+  modelsummary) # Creates tables and plots to summarize statistical models
+```
 
-# 1. read the APAX data
-load("../../../assets/APAX.Rdata") # Read APAX data,
-APAX <- APAX %>% mutate(
-  # News in minutes,
+```{r echo = FALSE}
+# 2. read the APAX data
+load("../../../assets/APAD.Rdata") # Read APAX data,
+```
+
+```{r eval = FALSE}
+# 2. read the APAX data
+load("APAD.Rdata") # Read APAX data,
+```
+
+```{r}
+# 3. Process APAD data
+APAD <- APAD %>% mutate( # Process APAD data
+  # Convert news consumption to minutes
+  # Example: 2 hours and 30 minutes becomes 2*60 + 30 = 150 minutes
   news = news_hrs*60 + news_mins, 
-  news_yn = case_when( # News Yes/No,
-    news < 15 ~ 0, # Less than 15  minutes,
-    news >= 15 ~ 1, # 15  minutes and more,
-    TRUE ~ as.numeric(NA)),
-  # Average discrimination index across domains,
-  dis_index = rowmeans( #<<
-    dis_trainee, dis_job, dis_school, #<<
-    dis_house, dis_gov, dis_public, #<<
-    na.rm = TRUE), #<<
-  # Z-standardized discrimination index.
-  z_dis_index = scale(dis_index) %>% 
-    as.numeric())
+  # Create binary variable for news consumption
+  news_yn = case_when(
+    news < 15 ~ 0,  # 0 if less than 15 minutes
+    news >= 15 ~ 1, # 1 if 15 minutes or more
+    TRUE ~ as.numeric(NA)), # Handle other cases as missing
+  # Calculate average discrimination index across multiple domains
+  dis_index = rowMeans( # Calculate the mean for each row (participant)
+    select(., # Choose specific discrimination columns from "." (APAX)
+           dis_trainee, dis_job, dis_school, 
+           dis_house, dis_gov, dis_public),
+    na.rm = TRUE), # Ignore NA values
+  # Standardize discrimination index
+  # scale() standardizes; as.numeric() converts to numeric vector
+  z_dis_index = scale(dis_index) %>% as.numeric()
+)
 ```
 `r unhide()`
 
-2. The APAX data contains a variable antidiscr_law on support for anti-discrimination policy. It asks respondents how good or bad they think it is for a country to have a law against ethnic discrimination in the workplace. The answer categories are: (1) Very bad, (2) Bad, (3) So/so, (4) Good, (5) Very good. Make a scatter plot to see whether time spent on reading news predicts more support for anti-discrimination policies. The plot should contain a 95% confidence interval for the OLS line. Make sure to use weights and to express weights as size of the scattered dots. *What does the naïv analysis suggest?*
+2. The APAD data contains a variable `antidiscr_law`. It asks respondents how good or bad they think it is for a country to have a law against ethnic discrimination in the workplace. The answer categories are: (1) Very bad, (2) Bad, (3) So/so, (4) Good, (5) Very good. <br> Create a scatter plot to examine whether time spent on reading news predicts more support for anti-discrimination policies. The plot should have time spent reading news on the x-axis and the `antidiscr_law` variable on the y-axis. Include a 95% confidence interval for the OLS (Ordinary Least Squares) regression line. Make sure to use weights (here called `gewFAKT`) and express weights as the size of the scattered dots. <br> Label your axes appropriately and include a title for your plot. After creating the plot, analyze your results: *What does this initial analysis suggest about the relationship between time spent reading news and support for anti-discrimination policies? Are there any limitations or potential issues with this analysis that you can identify?*
 
 `r hide("R solution -> dont' peak too early ;) !")`
 ```{r}
-ggplot(data = APAX, aes(y = antidiscr_law, x = news)) +
+# Create a ggplot object with APAD dataset
+ggplot(data = APAD, aes(y = antidiscr_law, x = news)) +
+  # Add scatter plot points, size based on weights, with transparency
   geom_point(aes(size = gewFAKT), alpha = 1/3) +
+  # Add weighted linear regression line with confidence interval
   geom_smooth(aes(weight = gewFAKT), method = "lm") +
+  # Customize y-axis to show text labels instead of numbers
   scale_y_continuous(breaks = 1:5, labels = c("Very bad", "Bad", "So/so", "Good", "Very good")) +
+  # Add labels for x and y axes
   labs(y = "How good is a law against ethnic discrimination?", x = "Daily minutes of news consumption") +
+  # Use a minimal theme for clean appearance
   theme_minimal() +
+  # Remove the legend (for the size of points)
   theme(legend.position = "none")
 ```
 `r unhide()`
 
-3. A day has only 1440 minutes. Thus some people's answers are clearly wrong. Recode all who read news more than 4 hours to 4 hours of news consumption. Then make the plot again. *What does the naïv analysis suggest now?*
+3. Now, consider that a day has only 1440 minutes (24 hours). Some respondents may have reported unrealistic amounts of time spent reading news. To address this, recode all responses indicating more than 4 hours of daily news consumption to 4 hours. Then, create the scatter plot again using this recoded data. <br> Compare this new plot to your original one. *How does this data cleaning step affect your analysis?* What does this revised analysis suggest about the relationship between time spent reading news and support for anti-discrimination policies? Discuss any changes you observe and consider why they might have occurred.
 
 `r hide("R solution -> dont' peak too early ;) !")`
 ```{r}
-APAX <- APAX %>%
+# Data cleaning: Recode news consumption values
+APAD <- APAD %>%
   mutate(
     news = case_when(
-      # 4 hours = 240 minutes.
+      # If news consumption > 240 minutes (4 hours), cap it at 240
       news > 240 ~ 240,
+      # Otherwise, keep the original value
       TRUE ~ news))
 
-ggplot(data = APAX, aes(y = antidiscr_law, x = news)) +
+# Create a ggplot object with the cleaned APAX dataset
+ggplot(data = APAD, aes(y = antidiscr_law, x = news)) +
+  # Add scatter plot points, size based on weights, with transparency
   geom_point(aes(size = gewFAKT), alpha = 1/3) +
+  # Add weighted linear regression line with confidence interval
   geom_smooth(aes(weight = gewFAKT), method = "lm") +
+  # Customize y-axis to show text labels instead of numbers
   scale_y_continuous(breaks = 1:5, labels = c("Very bad", "Bad", "So/so", "Good", "Very good")) +
+  # Add labels for x and y axes
   labs(y = "How good is a law against ethnic discrimination?", x = "Daily minutes of news consumption") +
+  # Use a minimal theme for clean appearance
   theme_minimal() +
+  # Remove the legend (for the size of points)
   theme(legend.position = "none")
 ```
 `r unhide()`
 
 ```{r naiv_OLS, include = FALSE}
+# Run a weighted linear regression
 ols <- lm_robust(antidiscr_law ~ news_yn, 
-                 weight = gewFAKT, data = APAX)
+                 weight = gewFAKT, data = APAD)
 
+# Create a summary table of the regression results
 modelsummary(list("Anti-discr. law" = ols), stars = TRUE,
-             gof_map = c("nobs", "r.squared"))
+             gof_map = c("nobs", "r.squared"), output = "kableExtra")
 ```
 
 ```{r include = FALSE}
@@ -97,7 +131,15 @@ se <- vcov(ols) %>% diag()
 se <- se["news_yn"] %>% sqrt() %>% round(., 3) %>% as.scalar()
 ```
 
-4. Use the binary news consumption variable and run an OLS regression. How much more or less do news readers support a law against ethnic discrimination? `r fitb(coef, width = "5")` What is the estimated standard error of this $\hat{\beta}$? `r fitb(se, width = "5")`. *What do these two statistics suggest about the naïv comparison?*
+4. For the final part of this analysis, use the binary news consumption variable (where respondents are classified as either news readers or non-news readers) and run a weighted OLS regression. Answer the following questions:
+
+- *How much more or less do news readers support a law against ethnic discrimination compared to non-news readers?* `r fitb(coef, width = "5")`
+
+- *What is the estimated standard error of this coefficient*? `r fitb(se, width = "5")`
+[Enter the standard error here: `r fitb(se, width = "5")`
+
+Interpret these results: What do the coefficient and its standard error suggest about the relationship between news consumption and support for anti-discrimination laws? How does this compare to your earlier analyses using the continuous measure of news consumption?
+
 `r hide("R solution -> dont' peak too early ;) !")`
 ```{r ref.label="naiv_OLS"}
 ```

@@ -84,14 +84,14 @@ class: inverse
 <br>
 .font200[**The Integration Paradox**]
 
-immigrants and their descendants with seemingly better access to mainstream middle-class society <br>— as evidenced by their education, labor market success, length of residence, or generational status — <br> often report more discrimination than those on the societal margins.
+immigrants and their descendants with seemingly better access to mainstream middle-class society <br> — as evidenced by their education, labor market success, length of residence, or generational status — <br> often report more discrimination than those on the societal margins.
 ]
 
 .push-right[
 ```{r, echo = FALSE, out.width='85%', fig.align='center'}
 knitr::include_graphics('img/Meta.png')
 ```
-.font70[.center[*Source:* `r Citet(myBib, "schaeffer_integration_2023")`]]]
+.font70[.center[*Source:* `r Citet(myBib, "schaeffer_integration_2024")`]]]
 
 ---
 class: inverse
@@ -116,7 +116,7 @@ knitr::include_graphics('img/Steinmann3.png')
 --
 
 .left-column[.center[.font110[
-**Does news media consumption** <br><br> _**increase**_ <br><br> **immigrant minorities' reports of discrimination?**
+**Does news media consumption** <br><br> _**increase**_ <br><br> **how often immigrant minorities' report discrimination?**
 ]]]
 
 ---
@@ -137,20 +137,20 @@ Why might this be problematic?
 --
 
 .right-column[
-Statements by research subjects are valuable,
+Statements by research subjects are valuable,<br>
 but they are .alert[not credible scientific evidence].
 
-$\rightarrow$️ Many people have inaccurate perceptions 
+$\rightarrow$ People have inaccurate perceptions 
    of what factors influence them.
 
 .left-column[
 ```{r, echo = FALSE, out.width='100%', fig.align='center'}
-knitr::include_graphics('https://feeds.abplive.com/onecms/images/uploaded-images/2021/07/02/498323a6432ea9753e6f84c1e92e5858_original.jpg')
+knitr::include_graphics('https://www.unhcr.org/sites/default/files/legacy-images/5d7642403.jpg')
 ```
 ]
 .right-column[
-```{r, echo = FALSE, out.width='100%', fig.align='center'}
-knitr::include_graphics('./img/Neugebauer.png')
+```{r, echo = FALSE, out.width='78%', fig.align='center'}
+knitr::include_graphics('./img/ESR.png')
 ```
 ]
 
@@ -158,11 +158,11 @@ knitr::include_graphics('./img/Neugebauer.png')
 
 ---
 class: inverse middle center
-# Hypothesis $\rightarrow$ comparison
+# Hypothesis $\rightarrow$ Comparison
 
 ---
 class: clear
-# Hypothesis $\rightarrow$ comparison
+# Hypothesis $\rightarrow$ Comparison
 
 Causal claims imply a .alert[counterfactual]: Things would have been different had X (not) happened.
 
@@ -214,43 +214,43 @@ pacman::p_load( # Load several R packages using the pacman package manager
   modelsummary) # Creates tables and plots to summarize statistical models
 ```
 ]
-.panel[.panel-name[The APAX survey]
-.left-column[
-- PI: Merlin Schaeffer;<br> Postdoc: Judith Kas.
+.panel[.panel-name[The APAD survey]
+.left-column[.font80[
+- `r Citet(myBib, "schaeffer_association_2023")`
 - 1093 Immigrants and children of immigrants.
 - Berlin, Hamburg, Munich, Frankfurt, and Cologne.
-- Interviewed in August 2021.
-- Financed by [German Research Council](https://gepris.dfg.de/gepris/projekt/428878477?language=en)
-]
+- Interviewed August 2021.
+- Financed by [German Research Council (DFG)](https://gepris.dfg.de/gepris/projekt/428878477?language=en)
+]]
 
 .right-column[.font80[
 1. > On a typical day, about how much time do you spend watching, reading, or listening to news about politics and current affairs? *Please give your answer in hours and then minutes.*
 
 2. > Now we would like to ask you about discrimination. How often were you personally discriminated in the following situations here in Germany? .backgrnote[
 Discrimination means that a person is treated worse than others including specific reasons for this behavior and no factual justification. People use different modes of discrimination like insult, ostracism, or sexual harassment. Rules and laws disadvantaging people are also discrimination.]
-> ...When looking for work or an apprenticeship<br>
-> ...At work / in professional life<br>
-> ...While attending school or higher education<br>
-> ...When looking for housing<br>
-> ...When having contact with government officials or public administrators<br>
-> ...When you were out in public during your free time<br><br>
+> ... When looking for work or an apprenticeship<br>
+> ... At work / in professional life<br>
+> ... While attending school or higher education<br>
+> ... When looking for housing<br>
+> ... When having contact with government officials or public administrators<br>
+> ... When you were out in public during your free time<br><br>
 > (1) Never, (2) Rarely, (3) Sometimes, (4) Often, (5) Very often<br>
 ]]
 ]
 
-.panel[.panel-name[Get the APAX data]
+.panel[.panel-name[Get the APAD data]
 .push-left[.font80[
 ```{r results = FALSE, echo = FALSE}
-# Read APAX data,
-load("../../../assets/APAX.RData") 
+# Read APAD data,
+load("../../../assets/APAD.RData") 
 ```
 
 ```{r eval = FALSE}
-load("APAX.RData") # Load APAX dataset
+load("APAD.RData") # Load APAD dataset
 ```
 
 ```{r results = FALSE}
-APAX <- APAX %>% mutate( # Process APAX data
+APAD <- APAD %>% mutate( # Process APAD data
   # Convert news consumption to minutes
   # Example: 2 hours and 30 minutes becomes 2*60 + 30 = 150 minutes
   news = news_hrs*60 + news_mins, 
@@ -261,7 +261,7 @@ APAX <- APAX %>% mutate( # Process APAX data
     TRUE ~ as.numeric(NA)), # Handle other cases as missing
   # Calculate average discrimination index across multiple domains
   dis_index = rowMeans( # Calculate the mean for each row (participant)
-    select(., # Choose specific discrimination columns from "." (APAX)
+    select(., # Choose specific discrimination columns from "." (APAD)
            dis_trainee, dis_job, dis_school, 
            dis_house, dis_gov, dis_public),
     na.rm = TRUE), # Ignore NA values
@@ -273,8 +273,9 @@ APAX <- APAX %>% mutate( # Process APAX data
 ]]
 
 .push-right[.font80[
+<br>
 ```{r echo = FALSE}
-APAX
+APAD
 ```
 ]]
 
@@ -289,7 +290,7 @@ class: inverse middle center
 
 .push-left[
 ```{r naiv, out.width = "98%", fig.height = 3.5, fig.width = 5, echo = FALSE}
-ggplot(data = APAX, aes(y = dis_index, x = news)) +
+ggplot(data = APAD, aes(y = dis_index, x = news)) +
   geom_point(aes(size = gewFAKT), alpha = 1/3) +
   geom_smooth(aes(weight = gewFAKT), method = "lm") +
   scale_y_continuous(breaks = 1:5, labels = c("Never", "Rarely", "Sometimes", "Often", "Very often")) +
@@ -306,7 +307,7 @@ How does this scatter plot test $H_{1}$?
 .push-right[.fon80[
 ```{r naiv_OLS}
 ols <- lm_robust(dis_index ~ news_yn, # Run weighted OLS
-                 weight = gewFAKT, data = APAX)
+                 weight = gewFAKT, data = APAD)
 
 modelsummary( # Create summary table of OLS results
   list("Discr." = ols), # List of OLS model objects
@@ -404,11 +405,11 @@ class: inverse middle center
 # Potential outcomes
 ## The Neyman–Rubin framework of causality
 
-> The Rubin causal model is based on the idea of potential outcomes. For example, a person would have a particular income at age 40 if they had attended college, whereas they would have a different income at age 40 if they had not attended college. To measure the causal effect of going to college for this person, we need to compare the outcome for the same individual in both alternative futures. Since it is impossible to see both potential outcomes at once, one of the potential outcomes is always missing. This dilemma is the "fundamental problem of causal inference"
+> The Neyman–Rubin causal model is based on the idea of potential outcomes. For example, a person would have a particular income at age 40 if they had attended college, whereas they would have a different income at age 40 if they had not attended college. To measure the causal effect of going to college for this person, we need to compare the outcome for the same individual in both alternative futures. Since it is impossible to see both potential outcomes at once, one of the potential outcomes is always missing. This dilemma is the "fundamental problem of causal inference"
 
 > -- *Source*: [.white[Wikipedia]](https://en.wikipedia.org/wiki/Rubin_causal_model)
 ---
-# Potential outcomes .font60[Ferda's personal news effect]
+# Potential outcomes .font60[Ferda's *personal causl effect*]
 
 .push-left[
 $\text{News effect}_{\text{Ferda}} = \underbrace{\text{Discrimination}_{1, \text{Ferda}}}_{\text{Read news} = 1} - \underbrace{\text{Discrimination}_{0, \text{Ferda}}}_{\text{Read news} = 0}.$
@@ -433,12 +434,12 @@ class: center inverse
 
 $$Avg_{n}[Y_{1i}-Y_{0i}] = \frac{1}{n} \displaystyle\sum_{i=1}^{n}Y_{1i} - \frac{1}{n} \displaystyle\sum_{i=1}^{n}Y_{0i}.$$
 
-.left[
+
 .push-left[
-The average causal effect is the average of all personal causal effects in your sample!
+The average causal effect is <br> *the average of all personal causal effects* <br> in your sample!
 ]
 
-.push-right[
+.push-right[.font80[
 For example, the average causal effect of reading the news compares discrimination for everyone in the sample in the hypothetical scenario that they all read the news, to the discrimination for everyone in the sample in the hypothetical scenario that they did not read the news.
 ]]
 
@@ -479,8 +480,7 @@ knitr::include_graphics('https://live.staticflickr.com/3181/2720702285_026ca43aa
 -----------------------|:----:|:----:
 $Y_{0}$: Outcome without news | .gray[2 (Rarely)]    | 5<br>(V.often)   
 $Y_{1}$: Outcome with news    | 4 (Often)   | .gray[5<br>(V.often)]    
-True news effect          | .gray[+2] | .gray[0]    
-Actual news          | 1    | 0    
+True news effect          | .gray[+2] | .gray[0]
 ]]
 
 ---
@@ -516,7 +516,10 @@ $$\begin{equation} \begin{split}
 
 .content-box-red[.center[
 **Selection bias**: $Y_{0, \text{Ferda}} \neq Y_{0, \text{Tuki}}$
-$\Rightarrow$ Tuki's *baseline* <br> (i.e., no news) to report discrimination <br> is higher than Ferda's!
+
+$\Downarrow$
+
+Tuki's *baseline* (i.e., no news) to report discrimination <br> is higher than Ferda's!
 ]]]
 
 ---
@@ -529,7 +532,7 @@ $$\begin{equation} D_{i}=\begin{cases} 1, & \text{if}\ i = \text{Reads news} \\ 
 .center[**Observed outcomes**]
 
 - $Y_{1i}|D_{i} = 1$: Outcome of treated, if treated.
-  + .font70[Observed discrimination among those who read news.]
+  + .font70[Observed discrimination among those who read news.<br><br>]
 
 
 - $Y_{0i}|D_{i} = 0$: Outcome of non-treated, if not treated.
@@ -540,26 +543,27 @@ $$\begin{equation} D_{i}=\begin{cases} 1, & \text{if}\ i = \text{Reads news} \\ 
 .center[**Potential outcomes**]
 
 - $Y_{0i}|D_{i} = 1$: Outcome of treated, if not treated.
-  + .font70[Observed discrimination among those who read news,<br> *if they had not read news*.]
+  + .font70[Potential discrimination among those who read news,<br> *if they had not read news*.]
 
 
 - $Y_{1i}|D_{i} = 0$: Outcome of non-treated, if treated.
-  + .font70[Observed discrimination among those who don't read news,<br> *if they had read it news*.]
+  + .font70[Potential discrimination among those who don't read news,<br> *if they had read it news*.]
 ]]
 
 ---
-# Differences between groups
+# Observed differences between groups
 
-$$Avg_{n}[Y_{1i}|D_{i} = 1] - Avg_{n}[Y_{0i}|D_{i} = 0]$$
+$$Avg_{n}[Y_{1i}-Y_{0i}] \neq Avg_{n}[Y_{1i}|D_{i} = 1] - Avg_{n}[Y_{0i}|D_{i} = 0]$$
+
+<br>
+<br>
 .push-left[
-```{r, echo = FALSE, out.width='100%', fig.align='center'}
-knitr::include_graphics('https://vitaliscounseling.com/wp-content/uploads/2020/12/compare-643305_1280.png')
+```{r, echo = FALSE, out.width='70%', fig.align='center'}
+knitr::include_graphics('https://www.rbgcal.com/wp-content/uploads/2018/01/Network-Comparison.png')
 ```
 ]
 .push-right[
-Differences between groups are, most of the time, a comparison of apples (i.e. Ferda) to oranges (i.e. Tuki). 
-
-They do not tell us the average causal effect: $Avg_{n}[Y_{1i}-Y_{0i}]$!
+Usually, observed differences between groups do not tell us the average causal effect: $Avg_{n}[Y_{1i}-Y_{0i}]$!
 ]
 ---
 # Why? Selection bias!
@@ -589,19 +593,23 @@ That is, if immigrant minorities who read the news had not read them, would they
 .panelset[
 .panel[.panel-name[R code]
 ```{r balance1, results = FALSE}
-APAX %>%
-  # Select variables for which I want my balance test,
+APAD %>% # Start with the APAD dataset, then pipe
+  # Select specific variables for the balance test
   select(news_yn, age, nbh_exposed, imor, german, gewFAKT) %>%
-  rename(weights = gewFAKT) %>% # Rename the weights variable! #<<
-  datasummary_balance( # Make a balance table, #<<
-    formula = ~ news_yn, # by Reading news Yes/No #<< 
-    data = . , # Pipe APAX data here #<<
-    title = "Socio-demographic characterisitcs of those who read news and those who do not" #<<
+  # Rename the weights variable so that the following #<<
+  # command (datasummary_balance) automatically treats it as a weight #<<
+  rename(weights = gewFAKT) %>% #<<
+  # Create a balance table #<<
+  datasummary_balance( #<<
+    # Formula specifies to compare groups based on news_yn #<<
+    formula = ~ news_yn, #<<
+    data = ., # Use the data piped in from above #<<
+    # Provide a title for the table #<<
+    title = "Socio-demographic characteristics of those who read news and those who do not", #<<
+    output = "kableExtra"# Specify the output format as kableExtra #<<
   ) #<<
 ```
 
-- Note that I `rename(weights = gewFAKT)`
-  + Thereby `datasummary_balance()` automatically treats this variable as a weight.
 ]
 .panel[.panel-name[Balance table]
 ```{r ref.label = "balance1", echo = FALSE}
@@ -655,7 +663,7 @@ layout: true
 \end{tikzpicture}
 ```
 .backgrnote[
-The red bi-directed arrow is officially not part of the DAG, but helps you see that the correlation between $D$ and $Y$ is not causal because of $C$.
+The red bi-directed arrow is officially not part of the DAG. But helps it helps us to understand that the correlation between $Y$ and $D$ is not causal in nature. The reason for this non-causal relationship is the existence of a backdoor path. The backdoor path is opened by variable C, which influences both D and Y.
 ]]
 
 ---
@@ -675,7 +683,7 @@ The red bi-directed arrow is officially not part of the DAG, but helps you see t
 \sffamily
     \node[state] (1) at (0,0) {German citizen};
     \node[state] (2) [below = of 1] {Read news};
-    \node[state] (3) [right = of 2] {Perc. discrimination};
+    \node[state] (3) [right = of 2] {Discrimination};
 
     \path (1) edge  (2);
     \path[bidirected] (2) edge[red, bend right=50] (3);
@@ -684,8 +692,8 @@ The red bi-directed arrow is officially not part of the DAG, but helps you see t
 ```
 
 .backgrnote[
-The red bi-directed arrow is officially not part of the DAG, but helps you see that the correlation between read news and perceived discrimination is biased because immigrant minorities who obtained German citizenship read news more often than those who are foreign citizens.]
-]
+The red bi-directed arrow is officially not part of the DAG. But helps it helps us to understand that the correlation between Discrimination and Reading the news is not causal in nature. The reason for this non-causal relationship is the existence of a backdoor path. The backdoor path is opened by German citizenship, which influences whether people read the news but also how much discrimination they experience.
+]]
 
 ---
 layout: false
@@ -754,7 +762,7 @@ class: inverse
 class: inverse
 # Today's (important) functions
 
-1. `funiture::rowmeans()`: Combine several variables to an additive index;  the variable must be measured in the same units.
+1. `rowMeans()`: Combine several variables to an additive index;  the variable must be measured in the same units.
 2. `modelsummary::datasummary_balance()`: Make a balance table.
 
 ---
