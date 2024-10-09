@@ -15,46 +15,57 @@ library(webexercises)
 library(tidyverse)
 library(essentials)
 
-pacman::p_load(
-  tidyverse, # Data manipulation,
-  furniture, # For row-means,
-  ggplot2, # beautiful figures,
-  estimatr, # Regression for weighted data,
-  modelr, # Turn results of lm() into a tibble,
-  modelsummary) # for balance and regression tables.
+# 1. Load packages
+pacman::p_load( # Load several R packages using the pacman package manager
+  tidyverse,  # A collection of packages for data manipulation and visualization
+  ggplot2,    # Powerful package for creating static, animated and interactive visualizations
+  estimatr,   # Package for fast estimators for regression with weighted data
+  modelr,     # Provides functions for modelling and prediction
+  kableExtra, # Enhances table creation in R
+  modelsummary) # Creates tables and plots to summarize statistical models
 
-# 1. read the APAX data
-load("../../../assets/APAX.Rdata") # Read APAX data,
-APAX <- APAX %>% mutate(
-  # News in minutes,
+# 2. read the APAD data
+load("../../../assets/APAD.Rdata") # Read APAD data,
+
+# 3. Process APAD data
+APAD <- APAD %>% mutate( # Process APAD data
+  # Convert news consumption to minutes
+  # Example: 2 hours and 30 minutes becomes 2*60 + 30 = 150 minutes
   news = news_hrs*60 + news_mins, 
-  news_yn = case_when( # News Yes/No,
-    news < 10 ~ 0, # Less than 15  minutes,
-    news > 14 ~ 1, # More than 15  minutes,
-    TRUE ~ as.numeric(NA)),
-  # Average discrimination index across domains,
-  dis_index = rowmeans( #<<
-    dis_trainee, dis_job, dis_school, #<<
-    dis_house, dis_gov, dis_public, #<<
-    na.rm = TRUE), #<<
-  # Z-standardized discrimination index.
-  z_dis_index = scale(dis_index) %>% 
-    as.numeric())
+  # Create binary variable for news consumption
+  news_yn = case_when(
+    news < 15 ~ 0,  # 0 if less than 15 minutes
+    news >= 15 ~ 1, # 1 if 15 minutes or more
+    TRUE ~ as.numeric(NA)), # Handle other cases as missing
+  # Calculate average discrimination index across multiple domains
+  dis_index = rowMeans( # Calculate the mean for each row (participant)
+    select(., # Choose specific discrimination columns from "." (APAD)
+           dis_trainee, dis_job, dis_school, 
+           dis_house, dis_gov, dis_public),
+    na.rm = TRUE), # Ignore NA values
+  # Standardize discrimination index
+  # scale() standardizes; as.numeric() converts to numeric vector
+  z_dis_index = scale(dis_index) %>% as.numeric()
+)
 ```
 
 
-1. The APAX data also contains a variable `antidiscr_law` on support for anti-discrimination policy: "How good or bad is it for a country to have a law against ethnic discrimination in the work place?". The answer categories are: (1) Very bad, (2) Bad, (3) So/so, (4) Good, (5) Very good. Use the APAX survey experiment to estimate the causal effect of reading a news article about discrimination on support for anti-discrimination policy. Estimate z-standardized effects,
+1.  The APAD data contains a variable `antidiscr_law`. It asks respondents how good or bad they think it is for a country to have a law against ethnic discrimination in the workplace. The answer categories are: (1) Very bad, (2) Bad, (3) So/so, (4) Good, (5) Very good. <br> Use the APAD survey experiment to estimate the causal effect of reading a news article about discrimination on support for anti-discrimination policy. Estimate z-standardized effects.
 `r hide("R solution -> dont' peak too early ;) !")`
 ```{r}
-APAX <- APAX %>%
-  mutate(
+APAD <- APAD %>%
+  mutate( # Standardize 'antidiscr_law' variable
     z_antidiscr_law = scale(antidiscr_law) %>% as.numeric())
+    
 
-zols <- lm_robust(z_antidiscr_law ~ article, 
-                 weight = gewFAKT, data = APAX)
+zols <- lm_robust(# Weighted regression: 
+  z_antidiscr_law ~ article, # Effect of 'article' on standardized discrimination
+  weight = gewFAKT, data = APAD) # Specify weights and data
 
-modelsummary(list("Anti-discr. law" = zols), stars = TRUE,
-             gof_map = c("nobs", "r.squared"))
+
+modelsummary( # Summarize regression results with stars and fit statistics
+  list("Anti-discr. law" = zols), stars = TRUE,
+  gof_map = c("nobs", "r.squared"))
 ```
 `r unhide()`
 
@@ -76,27 +87,27 @@ se <- se["articleTreat_2"] %>% sqrt() %>% round(., 3) %>% as.scalar()
 4. Make a coeffient plot to visualize these results. Use an AI like ChatGPT or Google Bard to help you if you get stuck.
 `r hide("R solution -> dont' peak too early ;) !")`
 ```{r}
-(plotdata <- zols %>%
-   tidy() %>% # Turn results into a tibble,
-   mutate( # Rename variables for the plot.
-     term = case_when(
-       term == "articleTreat_1" ~ "Discrimination",
-       term == "articleTreat_2" ~ "Integration",
-       term == "(Intercept)" ~ "Intercept")))
+(plotdata <- zols %>% # Prepare data for plotting
+  tidy() %>% # Convert regression results to a tidy data frame
+  filter(term != "(Intercept)") %>% # Remove the intercept term
+  mutate( # Rename treatment variables for clarity
+    term = case_when(
+      term == "articleTreat_1" ~ "Discrimination",
+      term == "articleTreat_2" ~ "Acculturation")))
 
-ggplot(data = plotdata %>% filter(term != "Intercept"),
-       aes(y = estimate, x = term)) +
-  # Point with error-bars,
+# Create the plot
+ggplot(data = plotdata, aes(y = estimate, x = term)) +
   geom_hline(yintercept = 0, color = "orange", 
-             lty = "dashed") +
-  geom_pointrange(aes(min = conf.low, max = conf.high)) +
-  coord_flip() + # Flip Y- & X-Axis,
-  labs(
-    title = "Causal effect of news articles", 
-    x = "Article on",
-    # Write Greek beta into axis title.
-    y = "Comparison to control group (article on Venus) 
-    in standard deviations") + 
-  theme_minimal()
+             lty = "dashed") + # Add a horizontal line at y=0
+  # Plot point estimates and confidence intervals
+  geom_pointrange(aes(min = conf.low, max = conf.high)) + 
+  coord_flip() + # Flip coordinates for horizontal display
+  labs(title = "Causal effect of news articles", 
+       x = "Article on",
+       y = "Comparison to control group (article on Venus) 
+    in standard deviations",
+    caption = "Note: Results are based on a weighted OLS with robust standard errors.
+    N = 1085, and R2 = 0.012.") + 
+  theme_minimal() # Use a minimal theme for clean appearance
 ```
 `r unhide()`

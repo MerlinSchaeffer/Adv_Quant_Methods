@@ -17,55 +17,76 @@ set.seed(831983)
 ```
 
 
-1. Use the APAX data and replicate my operationalization of the variables.
+1. Use APAD survey dataset from Absalon. Replicate the variable preparation steps as demonstrated in my slides.
 `r hide("R solution -> dont' peak too early ;) !")`
 ```{r}
-pacman::p_load(
-  tidyverse, # Data manipulation,
-  furniture, # For row-means,
-  ggplot2, # beautiful figures,
-  estimatr, # Regression for weighted data,
-  modelr, # Turn results of lm() into a tibble,
-  modelsummary) # for balance and regression tables.
+# 1. Load packages
+pacman::p_load( # Load several R packages using the pacman package manager
+  tidyverse,  # A collection of packages for data manipulation and visualization
+  ggplot2,    # Powerful package for creating static, animated and interactive visualizations
+  estimatr,   # Package for fast estimators for regression with weighted data
+  modelr,     # Provides functions for modelling and prediction
+  kableExtra, # Enhances table creation in R
+  modelsummary) # Creates tables and plots to summarize statistical models
+```
 
-# 1. read the APAX data
-load("../../../assets/APAX.Rdata") # Read APAX data,
-APAX <- APAX %>% mutate(
-  # News in minutes,
+```{r echo = FALSE}
+# 2. read the APAD data
+load("../../../assets/APAD.Rdata") # Read APAD data,
+```
+
+```{r eval = FALSE}
+# 2. read the APAD data
+load("APAD.Rdata") # Read APAD data,
+```
+
+```{r}
+# 3. Process APAD data
+APAD <- APAD %>% mutate( # Process APAD data
+  # Convert news consumption to minutes
+  # Example: 2 hours and 30 minutes becomes 2*60 + 30 = 150 minutes
   news = news_hrs*60 + news_mins, 
-  news_yn = case_when( # News Yes/No,
-    news < 10 ~ 0, # Less than 15  minutes,
-    news > 14 ~ 1, # More than 15  minutes,
-    TRUE ~ as.numeric(NA)),
-  # Average discrimination index across domains,
-  dis_index = rowmeans( #<<
-    dis_trainee, dis_job, dis_school, #<<
-    dis_house, dis_gov, dis_public, #<<
-    na.rm = TRUE), #<<
-  # Z-standardized discrimination index.
-  z_dis_index = scale(dis_index) %>% 
-    as.numeric())
+  # Create binary variable for news consumption
+  news_yn = case_when(
+    news < 15 ~ 0,  # 0 if less than 15 minutes
+    news >= 15 ~ 1, # 1 if 15 minutes or more
+    TRUE ~ as.numeric(NA)), # Handle other cases as missing
+  # Calculate average discrimination index across multiple domains
+  dis_index = rowMeans( # Calculate the mean for each row (participant)
+    select(., # Choose specific discrimination columns from "." (APAD)
+           dis_trainee, dis_job, dis_school, 
+           dis_house, dis_gov, dis_public),
+    na.rm = TRUE), # Ignore NA values
+  # Standardize discrimination index
+  # scale() standardizes; as.numeric() converts to numeric vector
+  z_dis_index = scale(dis_index) %>% as.numeric()
+)
 ```
 `r unhide()`
 
-2. Make a new variable called `APAX$candy`, which randomly "gives" candy to half of the respondents. Use the `rbinom()` function to do so. Use the help function `?rbinom()`, google "R rbinom()", or use an AI like ChatGPT or Google-Bard to learn what the function does and how it works.
+2. Create a new variable called `APAD$candy` that simulates randomly "giving" candy to half of the respondents in your dataset. Follow these steps: a) Use the `rbinom()` function to generate this variable. b) To understand how `rbinom()` works, you can Use R's built-in help function by typing `?rbinom()` in the console, search online for "R rbinom() examples", or use an AI assistant like ChatGPT or Google Gemini for an explanation. c) Make sure your code assigns a value of 1 (representing "received candy") to approximately 50% of the respondents, and 0 to the others. 
+
 `r hide("R solution -> dont' peak too early ;) !")`
 ```{r}
-APAX <- APAX %>% mutate(
-  candy = rbinom(nrow(APAX), size = 1, prob = 0.5))
+APAD <- APAD %>% mutate( # Add new 'candy' variable to APAD dataset
+  candy = rbinom( # Generate random binary values (0 or 1)
+    nrow(APAD), # One value per row
+    size = 1, # Each trial has two outcomes
+    prob = 0.5)) # 50% chance of getting 1 (candy)
 ```
 `r unhide()`
 
-3. In the APAX survey, we also asked respondents about their gender and how their physical appearance is typically described in Germany, with answers ranging from White, over Black, to Asian. Test whether APAX respondents got `candy` regardless of their gender and their racial appearance. That is, did people who appear Asian get candy more often than those who appear white etc.? *What do you conclude from the balance table*? *Also, which groups seem rather well, and which ones seem less well balanced*?
+3. In the APAD survey, we also asked respondents about their gender and how their physical appearance is typically described in Germany, with answers ranging from White, over Black, to Asian. Investigate the relationship between racial appearance and news consumption: Conduct a balance test to determine if racial appearance is evenly distributed across getting candy. *What do you conclude from the balance table*? *Also, which groups seem rather well, and which ones seem less well balanced*?
+
 `r hide("R solution -> dont' peak too early ;) !")`
 ```{r}
-APAX %>%
+APAD %>%
   # Select variables for which I want my balance test,
   select(candy, appearance, gender, gewFAKT) %>%
   rename(weights = gewFAKT) %>% # Rename the weights variable!
   datasummary_balance( # Make a balance table,
     formula = ~ candy, # by candy Yes/No
-    data = . , # Pipe the APAX data here #<<
+    data = . , # Pipe the APAD data here #<<
     title = "Gender and physical appearance of those who got candy and those who didn't") 
 ```
 `r unhide()`

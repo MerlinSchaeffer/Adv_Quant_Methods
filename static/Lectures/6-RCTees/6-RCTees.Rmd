@@ -98,77 +98,88 @@ knitr::include_graphics('img/Steinmann3.png')
 .panelset[
 .panel[.panel-name[Packages for today's session]
 ```{r libraries}
-pacman::p_load(
-  tidyverse, # Data manipulation,
-  furniture, # For row-means,
-  ggplot2, # beautiful figures,
-  estimatr, # Regression for weighted data,
-  modelr, # Turn results of lm() into a tibble,
-  modelsummary) # for balance and regression tables.
+pacman::p_load( # Load several R packages using the pacman package manager
+  tidyverse,  # A collection of packages for data manipulation and visualization
+  ggplot2,    # Powerful package for creating static, animated and interactive visualizations
+  estimatr,   # Package for fast estimators for regression with weighted data
+  modelr,     # Provides functions for modelling and prediction
+  kableExtra, # Enhances table creation in R
+  modelsummary) # Creates tables and plots to summarize statistical models
 ```
 ]
-.panel[.panel-name[The APAX survey]
-.left-column[
-- PI: Merlin Schaeffer;<br> Postdoc: Judith Kas.
+.panel[.panel-name[The APAD survey]
+.left-column[.font80[
+- `r Citet(myBib, "schaeffer_association_2023")`
 - 1093 Immigrants and children of immigrants.
 - Berlin, Hamburg, Munich, Frankfurt, and Cologne.
-- Interviewed in August 2021.
-- Financed by [German Research Council](https://gepris.dfg.de/gepris/projekt/428878477?language=en)
-]
+- Interviewed August 2021.
+- Financed by [German Research Council (DFG)](https://gepris.dfg.de/gepris/projekt/428878477?language=en)
+]]
 
 .right-column[.font80[
 1. > On a typical day, about how much time do you spend watching, reading, or listening to news about politics and current affairs? *Please give your answer in hours and then minutes.*
 
 2. > Now we would like to ask you about discrimination. How often were you personally discriminated in the following situations here in Germany? .backgrnote[
 Discrimination means that a person is treated worse than others including specific reasons for this behavior and no factual justification. People use different modes of discrimination like insult, ostracism, or sexual harassment. Rules and laws disadvantaging people are also discrimination.]
-> ...When looking for work or an apprenticeship<br>
-> ...At work / in professional life<br>
-> ...While attending school or higher education<br>
-> ...When looking for housing<br>
-> ...When having contact with government officials or public administrators<br>
-> ...When you were out in public during your free time<br><br>
+> ... When looking for work or an apprenticeship<br>
+> ... At work / in professional life<br>
+> ... While attending school or higher education<br>
+> ... When looking for housing<br>
+> ... When having contact with government officials or public administrators<br>
+> ... When you were out in public during your free time<br><br>
 > (1) Never, (2) Rarely, (3) Sometimes, (4) Often, (5) Very often<br>
 ]]
 ]
 
-.panel[.panel-name[Get the APAX data]
-.left-column[.font80[
+.panel[.panel-name[Get the APAD data]
+.push-left[.font80[
+```{r results = FALSE, echo = FALSE}
+# Read APAD data,
+load("../../../assets/APAD.RData") 
+```
+
+```{r eval = FALSE}
+load("APAD.RData") # Load APAD dataset
+```
+
 ```{r results = FALSE}
-# Read APAX data,
-load("../../../assets/APAX.RData") 
-APAX <- APAX %>% mutate(
-  # News in minutes,
+APAD <- APAD %>% mutate( # Process APAD data
+  # Convert news consumption to minutes
+  # Example: 2 hours and 30 minutes becomes 2*60 + 30 = 150 minutes
   news = news_hrs*60 + news_mins, 
-  news_yn = case_when( # News Yes/No,
-    news < 15 ~ 0, # Less than 15  minutes,
-    news >= 15 ~ 1, # 15  minutes and more,
-    TRUE ~ as.numeric(NA)),
-  # Average discr. index across domains,
-  dis_index = rowmeans( #<<
-    dis_trainee, dis_job, dis_school, #<<
-    dis_house, dis_gov, dis_public, #<<
-    na.rm = TRUE), #<<
-  # Z-standardized discr. index.
-  z_dis_index = scale(dis_index) %>% 
-    as.numeric())
+  # Create binary variable for news consumption
+  news_yn = case_when(
+    news < 15 ~ 0,  # 0 if less than 15 minutes
+    news >= 15 ~ 1, # 1 if 15 minutes or more
+    TRUE ~ as.numeric(NA)), # Handle other cases as missing
+  # Calculate average discrimination index across multiple domains
+  dis_index = rowMeans( # Calculate the mean for each row (participant)
+    select(., # Choose specific discrimination columns from "." (APAD)
+           dis_trainee, dis_job, dis_school, 
+           dis_house, dis_gov, dis_public),
+    na.rm = TRUE), # Ignore NA values
+  # Standardize discrimination index
+  # scale() standardizes; as.numeric() converts to numeric vector
+  z_dis_index = scale(dis_index) %>% as.numeric()
+)
 ```
 ]]
 
-.right-column[
+.push-right[.font80[
+<br>
 ```{r echo = FALSE}
-APAX
+APAD
 ```
-]
-
 ]]
 
+]]
 
 ---
 # Fruitless\naïv comparison
 
 .push-left[
 ```{r naiv, out.width = "98%", fig.height = 3.5, fig.width = 5, echo = FALSE}
-ggplot(data = APAX, aes(y = dis_index, x = news)) +
+ggplot(data = APAD, aes(y = dis_index, x = news)) +
   geom_point(aes(size = gewFAKT), alpha = 1/3) +
   geom_smooth(aes(weight = gewFAKT), method = "lm") +
   scale_y_continuous(breaks = 1:5, labels = c("Never", "Rarely", "Sometimes", "Often", "Very often")) +
@@ -180,14 +191,19 @@ ggplot(data = APAX, aes(y = dis_index, x = news)) +
 
 --
 
-.push-right[
+.push-right[.font80[
 ```{r naiv_OLS}
-ols <- lm_robust(dis_index ~ news_yn, 
-                 weight = gewFAKT, data = APAX)
-modelsummary(list("Discr." = ols), stars = TRUE,
-             gof_map = c("nobs", "r.squared"))
+ols <- lm_robust(dis_index ~ news_yn, # Run weighted OLS
+                 weight = gewFAKT, data = APAD)
+
+modelsummary( # Create summary table of OLS results
+  list("Discr." = ols), # List of OLS model objects
+  stars = TRUE, # Indicate significance level
+  # Choose Goodness of Fit indicators
+  gof_map = c("nobs", "r.squared"), 
+  output = "kableExtra") # Format as HTML
 ```
-]
+]]
 
 ---
 # Why? Selection bias!
@@ -209,19 +225,23 @@ $\rightarrow$ The difference in $Avg_{n}(Y_{0i})$, the baseline of the outcome, 
 .panelset[
 .panel[.panel-name[R code]
 ```{r balance1, results = FALSE}
-APAX %>%
-  # Select variables for which I want my balance test,
+APAD %>% # Start with the APAD dataset, then pipe
+  # Select specific variables for the balance test
   select(news_yn, age, nbh_exposed, imor, german, gewFAKT) %>%
-  rename(weights = gewFAKT) %>% # Rename the weights variable! #<<
-  datasummary_balance( # Make a balance table, #<<
-    formula = ~ news_yn, # by Reading news Yes/No #<< 
-    data = . , # Pipe APAX data here #<<
-    title = "Socio-demographic characterisitcs of those who read news and those who do not" #<<
+  # Rename the weights variable so that the following #<<
+  # command (datasummary_balance) automatically treats it as a weight #<<
+  rename(weights = gewFAKT) %>% #<<
+  # Create a balance table #<<
+  datasummary_balance( #<<
+    # Formula specifies to compare groups based on news_yn #<<
+    formula = ~ news_yn, #<<
+    data = ., # Use the data piped in from above #<<
+    # Provide a title for the table #<<
+    title = "Socio-demographic characteristics of those who read news and those who do not", #<<
+    output = "kableExtra"# Specify the output format as kableExtra #<<
   ) #<<
 ```
 
-- Note that I `rename(weights = gewFAKT)`
-  + Thereby `datasummary_balance()` automatically treats this variable as a weight.
 ]
 .panel[.panel-name[Balance table]
 ```{r ref.label = "balance1", echo = FALSE}
@@ -232,7 +252,7 @@ APAX %>%
 # Directed Acyclical Graphs (DAG)
 
 
-```{tikz, DAG2,  echo = FALSE, out.width='80%'}
+```{tikz, DAG2,  echo = FALSE, out.width='70%'}
 \usetikzlibrary{shapes,decorations,arrows,calc,arrows.meta,fit,positioning}
 \tikzset{
     -Latex,auto,node distance =1 cm and 1 cm,semithick,
@@ -246,17 +266,17 @@ APAX %>%
 \sffamily
     \node[state] (1) at (0,0) {German citizen};
     \node[state] (2) [below = of 1] {Read news};
-    \node[state] (3) [right = of 2] {Perc. discrimination};
+    \node[state] (3) [right = of 2] {Discrimination};
 
     \path (1) edge  (2);
-    \path (2) edge (3);
     \path[bidirected] (2) edge[red, bend right=50] (3);
     \path (1) edge (3);
 \end{tikzpicture}
 ```
 
 .backgrnote[
-The red bi-directed arrow is officially not part of the DAG, but helps you see that the correlation between read news and perceived discrimination is biased because immigrant minorities who obtained German citizenship read news more often than those who are foreign citizens.]
+The red bi-directed arrow is officially not part of the DAG. But helps it helps us to understand that the correlation between Discrimination and Reading the news is not causal in nature. The reason for this non-causal relationship is the existence of a backdoor path. The backdoor path is opened by German citizenship, which influences whether people read the news but also how much discrimination they experience.
+]
 
 ---
 class: inverse middle center
@@ -271,7 +291,7 @@ layout: true
 
 - Thereby *we* control, who gets $D$ and who does not!
 
-```{r, echo = FALSE, out.width='67%', fig.align='center'}
+```{r, echo = FALSE, out.width='80%', fig.align='center'}
 knitr::include_graphics('./img/randomization1.png')
 ```
 ]
@@ -279,7 +299,7 @@ knitr::include_graphics('./img/randomization1.png')
 ---
 
 .push-right[
-```{tikz, DAG3,  echo = FALSE, out.width='70%'}
+```{tikz, DAG3,  echo = FALSE, out.width='80%'}
 \usetikzlibrary{shapes,decorations,arrows,calc,arrows.meta,fit,positioning}
 \tikzset{
   -Latex,auto,node distance =1 cm and 1 cm,semithick,
@@ -312,13 +332,13 @@ knitr::include_graphics('./img/randomization1.png')
 ```
 
 .content-box-green[.center[
-How can we $\color{red}{I}$ntervene to ensure that there is no correlation between the treatment $D$ and any confounders $C$?
+How can we $\color{red}{I}$ntervene to eliminate correlation between the treatment $D$ and potential confounders $C$?
 ]]]
 
 ---
 layout: false
 class: middle center
-background-image: url("https://www.hamburg.de/image/11697454/16x9/990/557/eb0cc277f71ad30827132ae22b31c270/Yg/lakritz-von-dropje.jpg")
+background-image: url("https://gummibaerenland.de/cdn/shop/products/212669_lakritz_schnecken_1.jpg?v=1649245056&width=1200")
 background-position: center
 background-size: cover
 
@@ -365,8 +385,8 @@ knitr::include_graphics('./img/randomization2.png')
 ```
 
 - We .alert[randomly] decide, who gets: 
-  + $\text{Read news = 0} \rightarrow$ *control group*, 
-  + $\text{Read news = 1} \rightarrow$ *treatment group*.
+  + $\text{Read news = 0} \rightarrow$ *Control* group, 
+  + $\text{Read news = 1} \rightarrow$ *Treatment* group.
 ]
 
 ---
@@ -376,10 +396,12 @@ knitr::include_graphics('./img/randomization2.png')
 .push-right[
 
 ```{r, echo = FALSE, out.width='70%', fig.align='center'}
-knitr::include_graphics('https://lotterylab.s3.amazonaws.com/summernoteimages/606ffa6b3468c.gif')
+knitr::include_graphics('https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExaGJzdDlrMXNwNTFtNHlpd3ppM2p6NmVsYjBmZGczOXJyNnBmdzFoOSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/Ps8XflhsT5EVa/giphy.webp')
 ```
 
-Remember, randomization is "fair": Everyone has the same probability to be part of the treatment or control group, .alert[regardless of who they are]!
+Remember, randomization is "fair": 
+
+Everyone has the same probability to be part of the treatment or control group, .alert[regardless of who they are]!
 
 .content-box-green[
 Why does this result in equal $Y_{0i}$ baselines?
@@ -424,7 +446,7 @@ If we *randomly* divide subjects into treatment and control groups, .alert[they 
 
 .push-right[
 
-$$\begin{equation}\begin{split} &  \underbrace{E[Y_{1i}|D=1] - E[Y_{0i}|D=0]}_{\text{Comparison between treatment anc control group}} \\  \\ & = E[\color{red}{Y_{0i} + \kappa} |D=1] - E[Y_{0i}|D=0], \\ \\ &= \color{red}{\kappa} + \underbrace{E[Y_{0i} |D=1] - E[Y_{0i}|D=0]}_{\underbrace{0}_{\text{(if randomization has worked)}}}, \\ \\ & = \underbrace{\color{red}{\kappa}.}_{\text{The average causal effect}} \end{split}\end{equation}$$
+$$\begin{equation}\begin{split} &  \underbrace{E[Y_{1i}|D=1] - E[Y_{0i}|D=0]}_{\text{Comparison between treatment and control group}} \\  \\ & = E[Y_{0i} + \color{red}{\kappa} |D=1] - E[Y_{0i}|D=0], \\ \\ &= \color{red}{\kappa} + \underbrace{E[Y_{0i} |D=1] - E[Y_{0i}|D=0]}_{\underbrace{0}_{\text{Selection bias (if randomization has worked)}}}, \\ \\ & = \underbrace{\color{red}{\kappa}.}_{\text{The average causal effect}} \end{split}\end{equation}$$
 ]
 
 
@@ -432,7 +454,7 @@ $$\begin{equation}\begin{split} &  \underbrace{E[Y_{1i}|D=1] - E[Y_{0i}|D=0]}_{\
 # RCTs and DAGs
 
 .left-column[
-Because of the randomization, there is no backdoor path. <br><br> $\rightarrow$ no path from $I$ to $Y$ that starts with an arrow into $I$.
+Because of the randomization, there is no backdoor path. That is, no path from $I$ to $Y$ that starts with an arrow into $I$.
 
 $\Rightarrow$ No selection/confounder bias!
 
@@ -450,9 +472,9 @@ class: clear
 .push-left[
 <br>
 
-.font160[.center[**APAX survey experiment**]]
+.font160[.center[**APAD survey experiment**]]
 
-We asked APAX subjects to read a news article.
+We asked APAD subjects to read a news article.
 
 ```{r, echo = FALSE, out.width='80%', fig.align='center'}
 knitr::include_graphics('./img/randomization2.png')
@@ -462,11 +484,11 @@ knitr::include_graphics('./img/randomization2.png')
 
 We .alert[randomly] decided, who got:
 
-  + Venus $\rightarrow$ *control group*, 
+  + Venus $\rightarrow$ *Control* group, 
   
-  + Discrimination $\rightarrow$ *treatment group 1*,
+  + Discrimination $\rightarrow$ **_Treatment_ group 1**,
   
-  + Acculturation $\rightarrow$ *treatment group 2*.
+  + Acculturation $\rightarrow$ **_Treatment_ group 2**.
 ]
 
 ---
@@ -504,15 +526,21 @@ layout: false
 ]
 .panel[.panel-name[Balance table (RCT news)]
 ```{r balance2, echo = FALSE}
-APAX %>%
-  # Select variables for which I want my balance test,
-  select(article, news_yn, age, nbh_exposed, imor, german, gewFAKT) %>%
-  rename(weights = gewFAKT) %>% # Rename the weights variable! 
-  datasummary_balance( # Make a balance table,
-    formula = ~ article, # by treatment/control #<< 
-    data = . , # pipe APAx data here #<<
-    title = "Socio-demographic characterisitcs by treatment and control"
-  )
+APAD %>% # Start with the APAD dataset, then pipe
+  # Select specific variables for the balance test
+  select(article,news_yn, age, nbh_exposed, imor, german, gewFAKT) %>%
+  # Rename the weights variable so that the following #<<
+  # command (datasummary_balance) automatically treats it as a weight #<<
+  rename(weights = gewFAKT) %>% #<<
+  # Create a balance table #<<
+  datasummary_balance( #<<
+    # Formula specifies to compare groups based on treatment/control  #<<
+    formula = ~ article, #<<
+    data = ., # Use the data piped in from above #<<
+    # Provide a title for the table #<<
+    title = "Socio-demographic characteristics of those who read news and those who do not", #<<
+    output = "kableExtra"# Specify the output format as kableExtra #<<
+  ) #<<
 ```
 ]
 
@@ -524,22 +552,26 @@ APAX %>%
 ---
 # Causal effect of news articles
 
-.push-left[.font90[
+.push-left[.font80[
 <br>
 
 ```{r OLS_causal, results = 'hide'}
-# Run OLS regression to analyze the survey RCT.
+# Weighted OLS to analyze survey RCT.
 ols <- lm_robust(dis_index ~ article, 
-                 weight = gewFAKT, data = APAX)
+                 weight = gewFAKT, data = APAD)
+# Weighted and z-standardized OLS to analyze survey RCT.
 zols <- lm_robust(z_dis_index ~ article, 
-                  weight = gewFAKT, data = APAX)
+                  weight = gewFAKT, data = APAD)
 
-modelsummary( # Regression table
-  list("Discr." = ols, "Z-Discr." = zols), stars = TRUE,
+modelsummary( # Formatted table comparing both OLS models
+  list("Discr." = ols, "Z-Discr." = zols), # List of models
+  stars = TRUE, # Show significance stars
   coef_map = c("(Intercept)" = "Intercept (Venus control)", 
                "articleTreat_1" = "Article on discrimination", 
                "articleTreat_2" = "Article on Acculturation"),
-  gof_map = c("nobs", "r.squared"))
+  # 'coef_map' renames coefficients for clarity
+  gof_map = c("nobs", "r.squared"), # Goodness-of-fit
+  output = "kableExtra") # Output format for the table
 ```
 ]]
 
@@ -558,26 +590,28 @@ modelsummary( # Regression table
 .panelset[
 .panel[.panel-name[R code]
 ```{r Coefplot, fig.show='hide'}
-plotdata <- zols %>%
-  tidy() %>% # Turn results into a tibble,
-  filter(term != "(Intercept)") %>% # Delete intercept from the data,
-  mutate( # Rename variables for the plot.
+plotdata <- zols %>% # Prepare data for plotting
+  tidy() %>% # Convert regression results to a tidy data frame
+  filter(term != "(Intercept)") %>% # Remove the intercept term
+  mutate( # Rename treatment variables for clarity
     term = case_when(
       term == "articleTreat_1" ~ "Discrimination",
       term == "articleTreat_2" ~ "Acculturation"))
 
-ggplot(data = plotdata,  aes(y = estimate, x = term)) +
+# Create the plot
+ggplot(data = plotdata, aes(y = estimate, x = term)) +
   geom_hline(yintercept = 0, color = "orange", 
-             lty = "dashed") +
-  geom_pointrange(aes(min = conf.low, max = conf.high)) +
-  coord_flip() + # Flip Y- & X-Axis,
+             lty = "dashed") + # Add a horizontal line at y=0
+  # Plot point estimates and confidence intervals
+  geom_pointrange(aes(min = conf.low, max = conf.high)) + 
+  coord_flip() + # Flip coordinates for horizontal display
   labs(title = "Causal effect of news articles", 
        x = "Article on",
        y = "Comparison to control group (article on Venus) 
     in standard deviations",
-    caption = "Note: Resultaterne er baseret på en vægtet OLS-regression med robuste standardfejl.
-    N = 1085, og R2= 0.012.") + 
-  theme_minimal()
+    caption = "Note: Results are based on a weighted OLS with robust standard errors.
+    N = 1085, and R2 = 0.012.") + 
+  theme_minimal() # Use a minimal theme for clean appearance
 ```
 ]
 
@@ -590,16 +624,21 @@ ggplot(data = plotdata,  aes(y = estimate, x = term)) +
 ---
 # Learning goal achieved!
 
-.left-column[
-News media consumption *increases* immigrant minorities' reports of discrimination! .backgrnote[
-
-  + If the news report about ethno-racial discrimination ...
-]]
-
-.right-column[
-```{r ref.label = "Coefplot", out.width='90%', fig.height = 3, fig.width = 6, echo = FALSE, results = FALSE}
+.push-left[
+```{r, echo = FALSE, out.width='75%'}
+knitr::include_graphics('./img/SchaefferKas.png')
 ```
+.backgrnote[.center[*Source:* `r Citet(myBib, "schaeffer_integration_2024")`]]
 ]
+
+.push-right[
+.center[.font80[Effects of experimentally induced awareness of discrimination]]
+```{r, echo = FALSE, out.width='70%'}
+knitr::include_graphics('https://onlinelibrary.wiley.com/cms/asset/9a6ef318-ef35-4789-8c8a-6bccadf24f18/pops13027-fig-0001-m.jpg')
+```
+.backgrnote[.font70[
+Point estimates with 90 and 95% confidence intervals based on post-stratification weighted OLS regression with (cluster-)robust standard errors.
+]]]
 
 ---
 class: middle clear

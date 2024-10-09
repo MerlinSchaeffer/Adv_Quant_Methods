@@ -4,7 +4,7 @@
     <title>Multiple Regression &amp;    Fundamentals of Causal Inference</title>
     <meta charset="utf-8" />
     <meta name="author" content="Merlin Schaeffer  Department of Sociology" />
-    <meta name="date" content="2023-10-11" />
+    <meta name="date" content="2024-10-09" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
     <script src="libs/tile-view/tile-view.js"></script>
@@ -29,7 +29,7 @@ class: center, middle, inverse, title-slide
 ### Merlin Schaeffer<br> Department of Sociology
 ]
 .date[
-### 2023-10-11
+### 2024-10-09
 ]
 
 ---
@@ -80,65 +80,75 @@ class: inverse
 .panelset[
 .panel[.panel-name[Packages for today's session]
 
-```r
-pacman::p_load(
-  tidyverse, # Data manipulation,
-  furniture, # For row-means,
-  ggplot2, # beautiful figures,
-  estimatr, # Regression for weighted data,
-  modelr, # Turn results of lm() into a tibble,
-  modelsummary) # for balance and regression tables.
+``` r
+pacman::p_load( # Load several R packages using the pacman package manager
+  tidyverse,  # A collection of packages for data manipulation and visualization
+  ggplot2,    # Powerful package for creating static, animated and interactive visualizations
+  estimatr,   # Package for fast estimators for regression with weighted data
+  modelr,     # Provides functions for modelling and prediction
+  kableExtra, # Enhances table creation in R
+  modelsummary) # Creates tables and plots to summarize statistical models
 ```
 ]
-.panel[.panel-name[The APAX survey]
-.left-column[
-- PI: Merlin Schaeffer;&lt;br&gt; Postdoc: Judith Kas.
+.panel[.panel-name[The APAD survey]
+.left-column[.font80[
+- Schaeffer, Kas, and Hagedorn (2023)
 - 1093 Immigrants and children of immigrants.
 - Berlin, Hamburg, Munich, Frankfurt, and Cologne.
-- Interviewed in August 2021.
-- Financed by [German Research Council](https://gepris.dfg.de/gepris/projekt/428878477?language=en)
-]
+- Interviewed August 2021.
+- Financed by [German Research Council (DFG)](https://gepris.dfg.de/gepris/projekt/428878477?language=en)
+]]
 
 .right-column[.font80[
 1. &gt; On a typical day, about how much time do you spend watching, reading, or listening to news about politics and current affairs? *Please give your answer in hours and then minutes.*
 
 2. &gt; Now we would like to ask you about discrimination. How often were you personally discriminated in the following situations here in Germany? .backgrnote[
 Discrimination means that a person is treated worse than others including specific reasons for this behavior and no factual justification. People use different modes of discrimination like insult, ostracism, or sexual harassment. Rules and laws disadvantaging people are also discrimination.]
-&gt; ...When looking for work or an apprenticeship&lt;br&gt;
-&gt; ...At work / in professional life&lt;br&gt;
-&gt; ...While attending school or higher education&lt;br&gt;
-&gt; ...When looking for housing&lt;br&gt;
-&gt; ...When having contact with government officials or public administrators&lt;br&gt;
-&gt; ...When you were out in public during your free time&lt;br&gt;&lt;br&gt;
+&gt; ... When looking for work or an apprenticeship&lt;br&gt;
+&gt; ... At work / in professional life&lt;br&gt;
+&gt; ... While attending school or higher education&lt;br&gt;
+&gt; ... When looking for housing&lt;br&gt;
+&gt; ... When having contact with government officials or public administrators&lt;br&gt;
+&gt; ... When you were out in public during your free time&lt;br&gt;&lt;br&gt;
 &gt; (1) Never, (2) Rarely, (3) Sometimes, (4) Often, (5) Very often&lt;br&gt;
 ]]
 ]
 
-.panel[.panel-name[Get the APAX data]
-.left-column[.font80[
+.panel[.panel-name[Get the APAD data]
+.push-left[.font80[
 
-```r
-# Read APAX data,
-load("../../../assets/APAX.RData") 
-APAX &lt;- APAX %&gt;% mutate(
-  # News in minutes,
+
+
+``` r
+load("APAD.RData") # Load APAD dataset
+```
+
+
+``` r
+APAD &lt;- APAD %&gt;% mutate( # Process APAD data
+  # Convert news consumption to minutes
+  # Example: 2 hours and 30 minutes becomes 2*60 + 30 = 150 minutes
   news = news_hrs*60 + news_mins, 
-  news_yn = case_when( # News Yes/No,
-    news &lt; 15 ~ 0, # Less than 15  minutes,
-    news &gt;= 15 ~ 1, # 15  minutes and more,
-    TRUE ~ as.numeric(NA)),
-  # Average discr. index across domains,
-* dis_index = rowmeans(
-*   dis_trainee, dis_job, dis_school,
-*   dis_house, dis_gov, dis_public,
-*   na.rm = TRUE),
-  # Z-standardized discr. index.
-  z_dis_index = scale(dis_index) %&gt;% 
-    as.numeric())
+  # Create binary variable for news consumption
+  news_yn = case_when(
+    news &lt; 15 ~ 0,  # 0 if less than 15 minutes
+    news &gt;= 15 ~ 1, # 1 if 15 minutes or more
+    TRUE ~ as.numeric(NA)), # Handle other cases as missing
+  # Calculate average discrimination index across multiple domains
+  dis_index = rowMeans( # Calculate the mean for each row (participant)
+    select(., # Choose specific discrimination columns from "." (APAD)
+           dis_trainee, dis_job, dis_school, 
+           dis_house, dis_gov, dis_public),
+    na.rm = TRUE), # Ignore NA values
+  # Standardize discrimination index
+  # scale() standardizes; as.numeric() converts to numeric vector
+  z_dis_index = scale(dis_index) %&gt;% as.numeric()
+)
 ```
 ]]
 
-.right-column[
+.push-right[.font80[
+&lt;br&gt;
 
 ```
 # # A tibble: 1,093 × 24
@@ -159,10 +169,9 @@ APAX &lt;- APAX %&gt;% mutate(
 # #   article &lt;chr&gt;, ment_happy &lt;dbl&gt;, leftright &lt;dbl&gt;, gen_trust &lt;dbl&gt;, news &lt;dbl&gt;, news_yn &lt;dbl&gt;,
 # #   z_dis_index &lt;dbl&gt;
 ```
-]
-
 ]]
 
+]]
 
 ---
 # Fruitless\naïv comparison
@@ -173,16 +182,21 @@ APAX &lt;- APAX %&gt;% mutate(
 
 --
 
-.push-right[
+.push-right[.font80[
 
-```r
-ols &lt;- lm_robust(dis_index ~ news_yn, 
-                 weight = gewFAKT, data = APAX)
-modelsummary(list("Discr." = ols), stars = TRUE,
-             gof_map = c("nobs", "r.squared"))
+``` r
+ols &lt;- lm_robust(dis_index ~ news_yn, # Run weighted OLS
+                 weight = gewFAKT, data = APAD)
+
+modelsummary( # Create summary table of OLS results
+  list("Discr." = ols), # List of OLS model objects
+  stars = TRUE, # Indicate significance level
+  # Choose Goodness of Fit indicators
+  gof_map = c("nobs", "r.squared"), 
+  output = "kableExtra") # Format as HTML
 ```
 
-&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+&lt;table style="NAborder-bottom: 0; color: black; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
  &lt;thead&gt;
   &lt;tr&gt;
    &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
@@ -220,7 +234,7 @@ modelsummary(list("Discr." = ols), stars = TRUE,
 &lt;/table&gt;
 
 
-]
+]]
 
 ---
 # Why? Selection bias!
@@ -242,24 +256,28 @@ modelsummary(list("Discr." = ols), stars = TRUE,
 .panelset[
 .panel[.panel-name[R code]
 
-```r
-APAX %&gt;%
-  # Select variables for which I want my balance test,
+``` r
+APAD %&gt;% # Start with the APAD dataset, then pipe
+  # Select specific variables for the balance test
   select(news_yn, age, nbh_exposed, imor, german, gewFAKT) %&gt;%
-* rename(weights = gewFAKT) %&gt;% # Rename the weights variable!
-* datasummary_balance( # Make a balance table,
-*   formula = ~ news_yn, # by Reading news Yes/No
-*   data = . , # Pipe APAX data here
-*   title = "Socio-demographic characterisitcs of those who read news and those who do not"
+* # Rename the weights variable so that the following
+* # command (datasummary_balance) automatically treats it as a weight
+* rename(weights = gewFAKT) %&gt;%
+* # Create a balance table
+* datasummary_balance(
+*   # Formula specifies to compare groups based on news_yn
+*   formula = ~ news_yn,
+*   data = ., # Use the data piped in from above
+*   # Provide a title for the table
+*   title = "Socio-demographic characteristics of those who read news and those who do not",
+*   output = "kableExtra"# Specify the output format as kableExtra
 * )
 ```
 
-- Note that I `rename(weights = gewFAKT)`
-  + Thereby `datasummary_balance()` automatically treats this variable as a weight.
 ]
 .panel[.panel-name[Balance table]
-&lt;table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;"&gt;
-&lt;caption&gt;Socio-demographic characterisitcs of those who read news and those who do not&lt;/caption&gt;
+&lt;table class="table" style="color: black; width: auto !important; margin-left: auto; margin-right: auto;"&gt;
+&lt;caption&gt;Socio-demographic characteristics of those who read news and those who do not&lt;/caption&gt;
  &lt;thead&gt;
 &lt;tr&gt;
 &lt;th style="empty-cells: hide;border-bottom:hidden;" colspan="2"&gt;&lt;/th&gt;
@@ -359,10 +377,11 @@ APAX %&gt;%
 # Directed Acyclical Graphs (DAG)
 
 
-&lt;img src="6-RCTees_files/figure-html/DAG2-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+&lt;img src="6-RCTees_files/figure-html/DAG2-1.png" width="70%" style="display: block; margin: auto;" /&gt;
 
 .backgrnote[
-The red bi-directed arrow is officially not part of the DAG, but helps you see that the correlation between read news and perceived discrimination is biased because immigrant minorities who obtained German citizenship read news more often than those who are foreign citizens.]
+The red bi-directed arrow is officially not part of the DAG. But helps it helps us to understand that the correlation between Discrimination and Reading the news is not causal in nature. The reason for this non-causal relationship is the existence of a backdoor path. The backdoor path is opened by German citizenship, which influences whether people read the news but also how much discrimination they experience.
+]
 
 ---
 class: inverse middle center
@@ -377,29 +396,29 @@ layout: true
 
 - Thereby *we* control, who gets `\(D\)` and who does not!
 
-&lt;img src="./img/randomization1.png" width="67%" style="display: block; margin: auto;" /&gt;
+&lt;img src="./img/randomization1.png" width="80%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
 
 .push-right[
-&lt;img src="6-RCTees_files/figure-html/DAG3-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+&lt;img src="6-RCTees_files/figure-html/DAG3-1.png" width="80%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
 
 
 .push-right[
-&lt;img src="6-RCTees_files/figure-html/unnamed-chunk-10-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+&lt;img src="6-RCTees_files/figure-html/unnamed-chunk-12-1.png" width="70%" style="display: block; margin: auto;" /&gt;
 
 .content-box-green[.center[
-How can we `\(\color{red}{I}\)`ntervene to ensure that there is no correlation between the treatment `\(D\)` and any confounders `\(C\)`?
+How can we `\(\color{red}{I}\)`ntervene to eliminate correlation between the treatment `\(D\)` and potential confounders `\(C\)`?
 ]]]
 
 ---
 layout: false
 class: middle center
-background-image: url("https://www.hamburg.de/image/11697454/16x9/990/557/eb0cc277f71ad30827132ae22b31c270/Yg/lakritz-von-dropje.jpg")
+background-image: url("https://gummibaerenland.de/cdn/shop/products/212669_lakritz_schnecken_1.jpg?v=1649245056&amp;width=1200")
 background-position: center
 background-size: cover
 
@@ -442,8 +461,8 @@ layout: true
 &lt;img src="./img/randomization2.png" width="100%" style="display: block; margin: auto;" /&gt;
 
 - We .alert[randomly] decide, who gets: 
-  + `\(\text{Read news = 0} \rightarrow\)` *control group*, 
-  + `\(\text{Read news = 1} \rightarrow\)` *treatment group*.
+  + `\(\text{Read news = 0} \rightarrow\)` *Control* group, 
+  + `\(\text{Read news = 1} \rightarrow\)` *Treatment* group.
 ]
 
 ---
@@ -452,9 +471,11 @@ layout: true
 
 .push-right[
 
-&lt;img src="https://lotterylab.s3.amazonaws.com/summernoteimages/606ffa6b3468c.gif" width="70%" style="display: block; margin: auto;" /&gt;
+&lt;img src="https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExaGJzdDlrMXNwNTFtNHlpd3ppM2p6NmVsYjBmZGczOXJyNnBmdzFoOSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/Ps8XflhsT5EVa/giphy.webp" width="70%" style="display: block; margin: auto;" /&gt;
 
-Remember, randomization is "fair": Everyone has the same probability to be part of the treatment or control group, .alert[regardless of who they are]!
+Remember, randomization is "fair": 
+
+Everyone has the same probability to be part of the treatment or control group, .alert[regardless of who they are]!
 
 .content-box-green[
 Why does this result in equal `\(Y_{0i}\)` baselines?
@@ -495,7 +516,7 @@ If we *randomly* divide subjects into treatment and control groups, .alert[they 
 
 .push-right[
 
-`$$\begin{equation}\begin{split} &amp;  \underbrace{E[Y_{1i}|D=1] - E[Y_{0i}|D=0]}_{\text{Comparison between treatment anc control group}} \\  \\ &amp; = E[\color{red}{Y_{0i} + \kappa} |D=1] - E[Y_{0i}|D=0], \\ \\ &amp;= \color{red}{\kappa} + \underbrace{E[Y_{0i} |D=1] - E[Y_{0i}|D=0]}_{\underbrace{0}_{\text{(if randomization has worked)}}}, \\ \\ &amp; = \underbrace{\color{red}{\kappa}.}_{\text{The average causal effect}} \end{split}\end{equation}$$`
+`$$\begin{equation}\begin{split} &amp;  \underbrace{E[Y_{1i}|D=1] - E[Y_{0i}|D=0]}_{\text{Comparison between treatment and control group}} \\  \\ &amp; = E[Y_{0i} + \color{red}{\kappa} |D=1] - E[Y_{0i}|D=0], \\ \\ &amp;= \color{red}{\kappa} + \underbrace{E[Y_{0i} |D=1] - E[Y_{0i}|D=0]}_{\underbrace{0}_{\text{Selection bias (if randomization has worked)}}}, \\ \\ &amp; = \underbrace{\color{red}{\kappa}.}_{\text{The average causal effect}} \end{split}\end{equation}$$`
 ]
 
 
@@ -503,7 +524,7 @@ If we *randomly* divide subjects into treatment and control groups, .alert[they 
 # RCTs and DAGs
 
 .left-column[
-Because of the randomization, there is no backdoor path. &lt;br&gt;&lt;br&gt; `\(\rightarrow\)` no path from `\(I\)` to `\(Y\)` that starts with an arrow into `\(I\)`.
+Because of the randomization, there is no backdoor path. That is, no path from `\(I\)` to `\(Y\)` that starts with an arrow into `\(I\)`.
 
 `\(\Rightarrow\)` No selection/confounder bias!
 
@@ -511,7 +532,7 @@ Because of the randomization, there is no backdoor path. &lt;br&gt;&lt;br&gt; `\
 ]
 
 .right-column[
-&lt;img src="6-RCTees_files/figure-html/unnamed-chunk-16-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+&lt;img src="6-RCTees_files/figure-html/unnamed-chunk-18-1.png" width="70%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -520,9 +541,9 @@ class: clear
 .push-left[
 &lt;br&gt;
 
-.font160[.center[**APAX survey experiment**]]
+.font160[.center[**APAD survey experiment**]]
 
-We asked APAX subjects to read a news article.
+We asked APAD subjects to read a news article.
 
 &lt;img src="./img/randomization2.png" width="80%" style="display: block; margin: auto;" /&gt;
 
@@ -530,11 +551,11 @@ We asked APAX subjects to read a news article.
 
 We .alert[randomly] decided, who got:
 
-  + Venus `\(\rightarrow\)` *control group*, 
+  + Venus `\(\rightarrow\)` *Control* group, 
   
-  + Discrimination `\(\rightarrow\)` *treatment group 1*,
+  + Discrimination `\(\rightarrow\)` **_Treatment_ group 1**,
   
-  + Acculturation `\(\rightarrow\)` *treatment group 2*.
+  + Acculturation `\(\rightarrow\)` **_Treatment_ group 2**.
 ]
 
 ---
@@ -561,8 +582,8 @@ layout: false
 
 .panelset[
 .panel[.panel-name[Balance table (surveyed news reading)]
-&lt;table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;"&gt;
-&lt;caption&gt;Socio-demographic characterisitcs of those who read news and those who do not&lt;/caption&gt;
+&lt;table class="table" style="color: black; width: auto !important; margin-left: auto; margin-right: auto;"&gt;
+&lt;caption&gt;Socio-demographic characteristics of those who read news and those who do not&lt;/caption&gt;
  &lt;thead&gt;
 &lt;tr&gt;
 &lt;th style="empty-cells: hide;border-bottom:hidden;" colspan="2"&gt;&lt;/th&gt;
@@ -658,8 +679,8 @@ layout: false
 
 ]
 .panel[.panel-name[Balance table (RCT news)]
-&lt;table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;"&gt;
-&lt;caption&gt;Socio-demographic characterisitcs by treatment and control&lt;/caption&gt;
+&lt;table class="table" style="color: black; width: auto !important; margin-left: auto; margin-right: auto;"&gt;
+&lt;caption&gt;Socio-demographic characteristics of those who read news and those who do not&lt;/caption&gt;
  &lt;thead&gt;
 &lt;tr&gt;
 &lt;th style="empty-cells: hide;border-bottom:hidden;" colspan="2"&gt;&lt;/th&gt;
@@ -767,39 +788,49 @@ layout: false
 
 .panel[.panel-name[R code]
 
-```r
-APAX %&gt;%
-  # Select variables for which I want my balance test,
-  select(article, news_yn, age, nbh_exposed, imor, german, gewFAKT) %&gt;%
-  rename(weights = gewFAKT) %&gt;% # Rename the weights variable! 
-  datasummary_balance( # Make a balance table,
-*   formula = ~ article, # by treatment/control
-*   data = . , # pipe APAx data here
-    title = "Socio-demographic characterisitcs by treatment and control"
-  )
+``` r
+APAD %&gt;% # Start with the APAD dataset, then pipe
+  # Select specific variables for the balance test
+  select(article,news_yn, age, nbh_exposed, imor, german, gewFAKT) %&gt;%
+* # Rename the weights variable so that the following
+* # command (datasummary_balance) automatically treats it as a weight
+* rename(weights = gewFAKT) %&gt;%
+* # Create a balance table
+* datasummary_balance(
+*   # Formula specifies to compare groups based on treatment/control
+*   formula = ~ article,
+*   data = ., # Use the data piped in from above
+*   # Provide a title for the table
+*   title = "Socio-demographic characteristics of those who read news and those who do not",
+*   output = "kableExtra"# Specify the output format as kableExtra
+* )
 ```
 ]]
 
 ---
 # Causal effect of news articles
 
-.push-left[.font90[
+.push-left[.font80[
 &lt;br&gt;
 
 
-```r
-# Run OLS regression to analyze the survey RCT.
+``` r
+# Weighted OLS to analyze survey RCT.
 ols &lt;- lm_robust(dis_index ~ article, 
-                 weight = gewFAKT, data = APAX)
+                 weight = gewFAKT, data = APAD)
+# Weighted and z-standardized OLS to analyze survey RCT.
 zols &lt;- lm_robust(z_dis_index ~ article, 
-                  weight = gewFAKT, data = APAX)
+                  weight = gewFAKT, data = APAD)
 
-modelsummary( # Regression table
-  list("Discr." = ols, "Z-Discr." = zols), stars = TRUE,
+modelsummary( # Formatted table comparing both OLS models
+  list("Discr." = ols, "Z-Discr." = zols), # List of models
+  stars = TRUE, # Show significance stars
   coef_map = c("(Intercept)" = "Intercept (Venus control)", 
                "articleTreat_1" = "Article on discrimination", 
                "articleTreat_2" = "Article on Acculturation"),
-  gof_map = c("nobs", "r.squared"))
+  # 'coef_map' renames coefficients for clarity
+  gof_map = c("nobs", "r.squared"), # Goodness-of-fit
+  output = "kableExtra") # Output format for the table
 ```
 ]]
 
@@ -808,7 +839,7 @@ modelsummary( # Regression table
 .push-right[
 &lt;br&gt;
 
-&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+&lt;table style="NAborder-bottom: 0; color: black; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
  &lt;thead&gt;
   &lt;tr&gt;
    &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
@@ -871,47 +902,51 @@ modelsummary( # Regression table
 .panelset[
 .panel[.panel-name[R code]
 
-```r
-plotdata &lt;- zols %&gt;%
-  tidy() %&gt;% # Turn results into a tibble,
-  filter(term != "(Intercept)") %&gt;% # Delete intercept from the data,
-  mutate( # Rename variables for the plot.
+``` r
+plotdata &lt;- zols %&gt;% # Prepare data for plotting
+  tidy() %&gt;% # Convert regression results to a tidy data frame
+  filter(term != "(Intercept)") %&gt;% # Remove the intercept term
+  mutate( # Rename treatment variables for clarity
     term = case_when(
       term == "articleTreat_1" ~ "Discrimination",
       term == "articleTreat_2" ~ "Acculturation"))
 
-ggplot(data = plotdata,  aes(y = estimate, x = term)) +
+# Create the plot
+ggplot(data = plotdata, aes(y = estimate, x = term)) +
   geom_hline(yintercept = 0, color = "orange", 
-             lty = "dashed") +
-  geom_pointrange(aes(min = conf.low, max = conf.high)) +
-  coord_flip() + # Flip Y- &amp; X-Axis,
+             lty = "dashed") + # Add a horizontal line at y=0
+  # Plot point estimates and confidence intervals
+  geom_pointrange(aes(min = conf.low, max = conf.high)) + 
+  coord_flip() + # Flip coordinates for horizontal display
   labs(title = "Causal effect of news articles", 
        x = "Article on",
        y = "Comparison to control group (article on Venus) 
     in standard deviations",
-    caption = "Note: Resultaterne er baseret på en vægtet OLS-regression med robuste standardfejl.
-    N = 1085, og R2= 0.012.") + 
-  theme_minimal()
+    caption = "Note: Results are based on a weighted OLS with robust standard errors.
+    N = 1085, and R2 = 0.012.") + 
+  theme_minimal() # Use a minimal theme for clean appearance
 ```
 ]
 
 
 .panel[.panel-name[Plot]
-&lt;img src="6-RCTees_files/figure-html/unnamed-chunk-24-1.png" width="65%" style="display: block; margin: auto;" /&gt;
+&lt;img src="6-RCTees_files/figure-html/unnamed-chunk-26-1.png" width="65%" style="display: block; margin: auto;" /&gt;
 ]]
 
 ---
 # Learning goal achieved!
 
-.left-column[
-News media consumption *increases* immigrant minorities' reports of discrimination! .backgrnote[
-
-  + If the news report about ethno-racial discrimination ...
-]]
-
-.right-column[
-&lt;img src="6-RCTees_files/figure-html/unnamed-chunk-25-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+.push-left[
+&lt;img src="./img/SchaefferKas.png" width="75%" style="display: block; margin: auto;" /&gt;
+.backgrnote[.center[*Source:* Schaeffer and Kas (2024)]]
 ]
+
+.push-right[
+.center[.font80[Effects of experimentally induced awareness of discrimination]]
+&lt;img src="https://onlinelibrary.wiley.com/cms/asset/9a6ef318-ef35-4789-8c8a-6bccadf24f18/pops13027-fig-0001-m.jpg" width="70%" style="display: block; margin: auto;" /&gt;
+.backgrnote[.font70[
+Point estimates with 90 and 95% confidence intervals based on post-stratification weighted OLS regression with (cluster-)robust standard errors.
+]]]
 
 ---
 class: middle clear
@@ -942,6 +977,12 @@ class: inverse
 .font80[
 Polack, F. P., S. J. Thomas, N. Kitchin, et al. (2020). "Safety and Efficacy of the BNT162b2 mRNA
 Covid-19 Vaccine". In: _New England Journal of Medicine_, pp. 2603-2615.
+
+Schaeffer, M. and J. Kas (2024). "The integration paradox: Does awareness of the extent of
+ethno-racial discrimination increase reports of discrimination?" In: _Political Psychology_.
+
+Schaeffer, M., J. Kas, and P. Hagedorn (2023). "The Association between Actual and Perceived
+Discrimination (APAD): Technical Report". In: _SocArXiv_.
 
 Steinmann, J. (2019). "The paradox of integration: why do higher educated new immigrants perceive more
 discrimination in Germany?" In: _Journal of Ethnic and Migration Studies_, pp. 1377-1400.
