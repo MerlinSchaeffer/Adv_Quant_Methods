@@ -4,7 +4,7 @@
     <title>Multiple Regression &amp;    Fundamentals of Causal Inference</title>
     <meta charset="utf-8" />
     <meta name="author" content="Merlin Schaeffer  Department of Sociology" />
-    <meta name="date" content="2023-10-25" />
+    <meta name="date" content="2024-10-22" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
     <script src="libs/tile-view/tile-view.js"></script>
@@ -27,7 +27,7 @@ class: center, middle, inverse, title-slide
 ### Merlin Schaeffer<br> Department of Sociology
 ]
 .date[
-### 2023-10-25
+### 2024-10-22
 ]
 
 ---
@@ -97,14 +97,17 @@ class: inverse middle center
 &lt;img src="./img/randomization2.png" width="60%" style="display: block; margin: auto;" /&gt;
 
 If we *randomly* divide subjects into treatment and control groups, .alert[they come from the same underlying population]. 
-  &lt;br&gt; &lt;br&gt; `\(\rightarrow\)` They will be similar, on average, *in every way*;&lt;br&gt; **including their `\(Y_{0}\)` **!
-  &lt;br&gt; &lt;br&gt; `\(\rightarrow E[Y_{0i}|D=1] = E[Y_{0i}|D=0]\)`!
+    &lt;br&gt; &lt;br&gt; `\(\rightarrow\)` They will be similar, on average, *in every way*;&lt;br&gt; **including their `\(Y_{0}\)` **!
+    &lt;br&gt; &lt;br&gt; `\(\rightarrow E[Y_{0i}|D=1] = E[Y_{0i}|D=0]\)`!
+    
+**Beware**, in practice randomization can fail, especially if your sample is small.
 ]
 
 .push-right[
 
-`$$\begin{equation}\begin{split} &amp;  \underbrace{E[Y_{1i}|D=1] - E[Y_{0i}|D=0]}_{\text{Comparison between treatment anc control group}} \\  \\ &amp; = E[\color{red}{Y_{0i} + \kappa} |D=1] - E[Y_{0i}|D=0], \\ \\ &amp;= \color{red}{\kappa} + \underbrace{E[Y_{0i} |D=1] - E[Y_{0i}|D=0]}_{\underbrace{0}_{\text{(if randomization has worked)}}}, \\ \\ &amp; = \underbrace{\color{red}{\kappa}.}_{\text{The average causal effect}} \end{split}\end{equation}$$`
+`$$\begin{equation}\begin{split} &amp;  \underbrace{E[Y_{1i}|D=1] - E[Y_{0i}|D=0]}_{\text{Comparison between treatment and control group}} \\  \\ &amp; = E[Y_{0i} + \color{red}{\kappa} |D=1] - E[Y_{0i}|D=0], \\ \\ &amp;= \color{red}{\kappa} + \underbrace{E[Y_{0i} |D=1] - E[Y_{0i}|D=0]}_{\underbrace{0}_{\text{Selection bias (if randomization has worked)}}}, \\ \\ &amp; = \underbrace{\color{red}{\kappa}.}_{\text{The average causal effect}} \end{split}\end{equation}$$`
 ]
+
 
 ---
 # But that is impossible and un-ethical!
@@ -129,7 +132,7 @@ class: clear
 .left-column[
 &lt;br&gt;
 
-&lt;img src="https://sociology.fas.harvard.edu/sites/hwpi.harvard.edu/files/styles/profile_full/public/sociology/files/legeiwe_headshot_for_crop_1_0.jpg?m=1689020156&amp;itok=ESF3upCN" width="45%" style="display: block; margin: auto;" /&gt;
+&lt;img src="https://news.harvard.edu/gazette/wp-content/uploads/2019/04/031319_Lewegie_103_2500.jpg" width="100%" style="display: block; margin: auto;" /&gt;
 
 ### My friend Joscha 
 
@@ -153,14 +156,17 @@ In comparison to a normal RCT, this allows for:
 
 &gt; -- Snow (1856)
 
-&lt;img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/John_Snow_memorial_and_pub.jpg/1024px-John_Snow_memorial_and_pub.jpg" width="30%" style="display: block; margin: auto;" /&gt;
-
-]
+.push-left[
+&lt;img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Dr_John_Snow_%2824023399742%29.jpg/1280px-Dr_John_Snow_%2824023399742%29.jpg" width="100%" style="display: block; margin: auto;" /&gt;
+] 
+.push-right[
+&lt;img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cd/Pump_Handle_-_John_Snow_.jpg/450px-Pump_Handle_-_John_Snow_.jpg" width="68%" style="display: block; margin: auto;" /&gt;
+]]
 
 .push-right[.center[
-The first natural experiment: &lt;br&gt;
+**The first natural experiment:** &lt;br&gt;
 The cause of Cholera]
-&lt;img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/Snow-cholera-map-1.jpg/1920px-Snow-cholera-map-1.jpg" width="80%" style="display: block; margin: auto;" /&gt;
+&lt;img src="https://i.guim.co.uk/img/static/sys-images/Guardian/Pix/pictures/2013/3/14/1363276040034/John-Snows-cholera-map-of-008.jpg?width=620&amp;dpr=1&amp;s=none&amp;crop=none" width="90%" style="display: block; margin: auto;" /&gt;
 .center[.backgrnote[*Source:* Snow (1856)]]
 ]
 ---
@@ -200,7 +206,7 @@ The cause of Cholera]
 .left-column[
 `$$E[Y_{0i}|D=1] = E[Y_{0i}|D=0]?$$`
 
-&lt;img src="7-NatExp-IV1_files/figure-html/unnamed-chunk-12-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="7-NatExp-IV1_files/figure-html/unnamed-chunk-13-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]
 
 .right-column[
@@ -214,9 +220,9 @@ The cause of Cholera]
 .push-left[.content-box-red[
 .font120[.center[**Internal validity**]]
 
-With an RCT, we have control treatment assignment and thus know that the intervention `\(I\)` was randomly assigned.
+With an RCT, we control treatment assignment and thus know that the intervention `\(I\)` was randomly assigned.
 
-&lt;img src="7-NatExp-IV1_files/figure-html/unnamed-chunk-14-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+&lt;img src="7-NatExp-IV1_files/figure-html/unnamed-chunk-15-1.png" width="70%" style="display: block; margin: auto;" /&gt;
 ]]
 
 --
@@ -236,9 +242,9 @@ With a natural experiment, we can study a real event `\(E\)` and not some artifi
 .left-column[.content-box-blue[
 Analyzing a natural experiment does not necessarily involve much statistical sophistication; often simple OLS suffices.
 
-*But finding one is as tough as finding truffles; you got to be lucky!*
+*But finding one is as tough as finding truffles!*
 
-.center[**_Are you such a &lt;br&gt;lucky truffle pig?_**]
+.center[Are you such a &lt;br&gt;lucky truffle pig?]
 ]]
 
 .right-column[
@@ -250,7 +256,7 @@ class: clear
 # Learning goal 1 .font60[Terror attacks can increase xenophobia]
 
 .right-column[
-&lt;img src="./img/Joscha4.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="./img/Joscha4.png" width="60%" style="display: block; margin: auto;" /&gt;
 .center[.backgrnote[*Source:* Legewie (2013)]]
 ]
 
@@ -259,11 +265,9 @@ class: clear
 .left-column[.content-box-green[.center[
 My friend Joscha &lt;br&gt; is a truffle pig ;)
 
-Based on the idea that the day of a survey interview is random, he could estimate the causal effect of the Bali 2002 terror attack.
+Based on the idea that the day of a survey interview is random, he could estimate the causal effect of the Bali 2002 terror attack on xenophobic attitdes in several European countries.
 
-Do you want to learn what Joscha has to say about:
-
-*Why was there an effect in Portugal, but not in the UK?* 
+But why was there an effect in Portugal, but not in the UK?
 
 Read his article ;)
 ]]]
@@ -314,10 +318,10 @@ class: inverse middle center
 
 ---
 layout: true
-# Intention to treat `\(\neq\)` treatment
+# Intention to treat (ITT) `\(\neq\)` treatment
 
 .left-column[
-&lt;img src="https://i.ytimg.com/vi/h5MD2ptO998/maxresdefault.jpg" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="https://i.ytimg.com/vi/3L8wc_Nd9kM/sddefault.jpg" width="100%" style="display: block; margin: auto;" /&gt;
 
 &lt;img src="7-NatExp-IV1_files/figure-html/DAG3-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]
@@ -364,9 +368,7 @@ layout: false
 
 `$$\begin{equation}\begin{split} &amp; |r_{I,D}| = 1 \\ &amp;\rightarrow I = D! \end{split}\end{equation}$$`
 
-The absolute correlation between intervention `\(I\)` and predictor of interest `\(D\)` is 1, making them practically the same thing.
-&lt;br&gt;
-&lt;br&gt;
+The correlation between intervention `\(I\)` and predictor of interest `\(D\)` is 1, making them practically the same thing.
 
 &lt;img src="7-NatExp-IV1_files/figure-html/DAG4-1.png" width="70%" style="display: block; margin: auto;" /&gt;
 ]]
@@ -378,7 +380,7 @@ The absolute correlation between intervention `\(I\)` and predictor of interest 
 
 `$$\begin{equation}\begin{split} &amp; |r_{Z, D}| &lt; 1 \\ &amp;\rightarrow Z \neq D! \end{split}\end{equation}$$`
 
-The absolute correlation between intervention `\(Z\)` and predictor of interest `\(D\)` is smaller than 1, which induces some random variation into `\(D\)`.
+The correlation between intervention `\(Z\)` and predictor of interest `\(D\)` is smaller than 1, which induces some random variation into `\(D\)`.
 
 
 &lt;img src="7-NatExp-IV1_files/figure-html/DAG5-1.png" width="70%" style="display: block; margin: auto;" /&gt;
@@ -395,40 +397,51 @@ layout: true
 
 .left-column[.content-box-red[
 .center[**3 Requirements**]
-1. *First stage*: Instrument has causal effect on `\(D_{i}\)`.
+1. *First stage*: Instrument `\(Z_{i}\)` has causal effect on `\(D_{i}\)`.
 
-2. *Randomization*: Instrument is randomly assigned (RCT or natural experiment).
+2. *Randomization*: Instrument `\(Z_{i}\)` is randomly assigned (RCT or natural experiment).
 
-3. *Exclusion restriction*: Instrument affects outcome `\(Y_{i}\)` **_only_** through its effect on `\(D_{i}\)`.
+3. *Exclusion restriction*: Instrument `\(Z_{i}\)` affects outcome `\(Y_{i}\)` **_only_** through its effect on `\(D_{i}\)`.
 ]]
 
 ---
 .right-column[
-&lt;img src="7-NatExp-IV1_files/figure-html/unnamed-chunk-24-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+&lt;img src="7-NatExp-IV1_files/figure-html/unnamed-chunk-25-1.png" width="70%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
 
 .right-column[
-&lt;img src="7-NatExp-IV1_files/figure-html/DAG6-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+.center[**Violated exclusion restriction**]
+&lt;img src="7-NatExp-IV1_files/figure-html/DAG6-1.png" width="80%" style="display: block; margin: auto;" /&gt;
 ]
 
 
 ---
 
 .right-column[
-&lt;img src="7-NatExp-IV1_files/figure-html/DAG7-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+.center[**"Instrumenting" the effect of interest**]
+&lt;img src="7-NatExp-IV1_files/figure-html/DAG7-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+]
 
-`$$\underbrace{\kappa_{\text{Win lottery}\rightarrow\text{Income}}}_{1624\text{ Dollar}} = \underbrace{\kappa_{\text{Win lottery}\rightarrow\text{Moving}}}_{0.4766} \times \underbrace{\kappa_{\text{Moving}\rightarrow\text{Income}}}_{?}$$`
+---
+
+.right-column[
+.center[**"Instrumenting" the effect of interest**]
+&lt;img src="7-NatExp-IV1_files/figure-html/unnamed-chunk-26-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+`$$\underbrace{\kappa_{\text{Win lottery}\rightarrow\text{Moving}}}_{0.4766} \times \color{red}{\underbrace{\kappa_{\text{Moving}\rightarrow\text{Income}}}_{?}} = \underbrace{\kappa_{\text{Win lottery}\rightarrow\text{Income}}}_{1624\text{ Dollar}}$$`
 
 ]
 
 ---
 
 .right-column[
-&lt;img src="7-NatExp-IV1_files/figure-html/unnamed-chunk-25-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+.center[**"Instrumenting" the effect of interest**]
+&lt;img src="7-NatExp-IV1_files/figure-html/unnamed-chunk-27-1.png" width="80%" style="display: block; margin: auto;" /&gt;
 
-`$$\begin{equation}\begin{split} &amp; \underbrace{\kappa_{\text{Win lottery}\rightarrow\text{Income}}}_{1624\text{ Dollar}} = \underbrace{\kappa_{\text{Win lottery}\rightarrow\text{Moving}}}_{0.4766} \times \underbrace{\kappa_{\text{Moving}\rightarrow\text{Income}}}_{?} \\ \\ &amp; \frac{\kappa_{\text{Win lottery}\rightarrow\text{Income}}}{\kappa_{\text{Win lottery}\rightarrow\text{Moving}}} = \underbrace{\kappa_{\text{Moving}\rightarrow\text{Income}}}_{?} \end{split}\end{equation}$$`
+
+`$$\begin{equation}\begin{split} \underbrace{\kappa_{\text{Win lottery}\rightarrow\text{Moving}}}_{0.4766} \times &amp; \color{red}{\underbrace{\kappa_{\text{Moving}\rightarrow\text{Income}}}_{?}} = \underbrace{\kappa_{\text{Win lottery}\rightarrow\text{Income}}}_{1624\text{ Dollar}} \\ \\ &amp; \color{red}{\underbrace{\kappa_{\text{Moving}\rightarrow\text{Income}}}_{?}} = \frac{\kappa_{\text{Win lottery}\rightarrow\text{Income}}}{\kappa_{\text{Win lottery}\rightarrow\text{Moving}}} \end{split}\end{equation}$$`
 ]
 ---
 layout: false
@@ -448,7 +461,7 @@ layout: false
 
 .push-right[.content-box-blue[
 .center[**The exclusion restriction matters!**&lt;br&gt;(but we cannot test it)]
-&lt;img src="7-NatExp-IV1_files/figure-html/unnamed-chunk-26-1.png" width="65%" style="display: block; margin: auto;" /&gt;
+&lt;img src="7-NatExp-IV1_files/figure-html/unnamed-chunk-28-1.png" width="65%" style="display: block; margin: auto;" /&gt;
 
 `$$\frac{1624}{0.4766} = \frac{\rho}{\phi} = \lambda \color{red}{+ ?}$$`
 .center[.alert[
@@ -460,7 +473,7 @@ layout: false
 # IV is LATE .font60[Local Average Treatment Effect]
 
 .push-left[
-&lt;img src="7-NatExp-IV1_files/figure-html/unnamed-chunk-27-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+&lt;img src="7-NatExp-IV1_files/figure-html/unnamed-chunk-29-1.png" width="70%" style="display: block; margin: auto;" /&gt;
 
 **First Stage:** `\(E[D_{i}|Z_{i}=1]-E[D_{i}|Z_{i}=0]; \text{call this }\phi.\)`
 
@@ -478,7 +491,7 @@ layout: false
 # IV is LATE .font60[Local Average Treatment Effect]
 
 .push-left[
-&lt;img src="7-NatExp-IV1_files/figure-html/unnamed-chunk-28-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+&lt;img src="7-NatExp-IV1_files/figure-html/unnamed-chunk-30-1.png" width="70%" style="display: block; margin: auto;" /&gt;
 
 **First Stage:** `\(E[D_{i}|Z_{i}=1]-E[D_{i}|Z_{i}=0]; \text{call this }\phi.\)`
 
@@ -488,7 +501,7 @@ layout: false
 ]
 
 .push-right[
-&lt;img src="7-NatExp-IV1_files/figure-html/unnamed-chunk-29-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+&lt;img src="7-NatExp-IV1_files/figure-html/unnamed-chunk-31-1.png" width="90%" style="display: block; margin: auto;" /&gt;
 
 **IV is LATE**: Never- &amp; Always-taker don't respond to our intention to treat them. IV tells us nothing about them, but only about compliers.
 
@@ -502,7 +515,7 @@ class: clear
 .left-column[
 `\(\lambda = \frac{\rho}{\phi} = \frac{E[Y_{i}|Z_{i}=1]-E[Y_{i}|Z_{i}=0]}{E[D_{i}|Z_{i}=1]-E[D_{i}|Z_{i}=0]}.\)`
 
-&lt;img src="7-NatExp-IV1_files/figure-html/unnamed-chunk-30-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+&lt;img src="7-NatExp-IV1_files/figure-html/unnamed-chunk-32-1.png" width="70%" style="display: block; margin: auto;" /&gt;
 ]
 .right-column[
 &lt;img src="./img/Chetty_3.png" width="100%" style="display: block; margin: auto;" /&gt;

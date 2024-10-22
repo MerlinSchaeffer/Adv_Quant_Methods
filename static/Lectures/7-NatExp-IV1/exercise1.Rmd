@@ -55,7 +55,7 @@ ESS <- read_dta("../../../assets/Legewie_ESS_02.dta") %>%
     facntr = as_factor(facntr),
     # Weights
     pspwght = pweight * dweight) %>%
-  # Sample restriction        
+  # Sample restriction: Keep only cases from Portugal!        
   filter(str_detect(cntry, "PT") & # Countries
            # Mainstream members (i.e. immigrant origin)
            brncntr == "yes" & mocntr == "yes" &  facntr == "yes") %>%
@@ -91,20 +91,27 @@ se <- se["treatAfter the attack"] %>% sqrt() %>% round(., 3) %>% as.scalar()
 `r hide("R solution -> dont' peak to early ;) !")`
 ```{r}
 plotdata_PT <- ols_pt %>%
-  tidy() %>% # Turn into tibble
-  filter(term != "(Intercept)") %>% # Delete intercept from data
+  tidy() %>% # Convert regression output to tidy data frame
+  filter(term != "(Intercept)") %>% # Remove the intercept row from results
   mutate(
     term = case_when(
-      term == "treatAfter the attack" ~ "After the attack"))
+      term == "treatAfter the attack" ~ "After the attack"))  # Rename treatment variable for plot
 
-ggplot(data = plotdata_PT, aes(y = estimate, x = term, ymin = conf.low, ymax = conf.high)) +
-  geom_hline(yintercept = 0, color = "red", lty = "dashed") + 
-  geom_pointrange() + 
-  coord_flip() +
-  theme_minimal() + 
-  labs(title = "Causal effect of Bali 2002 terror attack",
-    x = "", y =  "Difference in xenophobia compared to before the attack
-    (in standard deviations)")
+# Create plot using ggplot2
+ggplot(data = plotdata_PT, 
+       # Set main aesthetics: effect size on y, term on x
+       aes(y = estimate, x = term, 
+           ymin = conf.low, ymax = conf.high)) +  # Add confidence intervals
+  geom_hline(yintercept = 0, color = "red",  # Add horizontal line at y=0 for reference
+             lty = "dashed") + 
+  geom_pointrange() + # Plot point estimates with confidence intervals
+  coord_flip() + # Flip coordinates to make horizontal plot
+  theme_minimal() + # Use minimal theme for clean look
+  # Add title and axis labels
+  labs(title = "Causal effect of Bali 2002 terror attack",  
+       x = "", 
+       y = "Difference in xenophobia compared to before the attack
+       (in standard deviations)")
 ```
 `r unhide()`
 
@@ -134,7 +141,7 @@ ESS <- read_dta("../../../assets/Legewie_ESS_02.dta") %>%
     facntr = as_factor(facntr),
     # Weights
     pspwght = pweight * dweight) %>%
-  # Sample restriction        
+  # Sample restriction: Keep only cases from Portugal or Sweden!        
   filter(str_detect(cntry, "PT|SE") & # Countries
            # Mainstream members (i.e. immigrant origin)
            brncntr == "yes" & mocntr == "yes" &  facntr == "yes") %>%
@@ -156,7 +163,7 @@ modelsummary(list("Xeno SE" = ols_se), stars = TRUE,
 coefSE <- coef(ols_se)["treatAfter the attack"] %>% round(., 3) %>% as.scalar()
 ```
 
-4. Adapt the data preparation code so that the sample also entails Swedes in addition to Portuguese respondents. The causal effect of the Bali 2002 terror attack among Swedes is `r fitb(coefSE, width = "5")` and `r mcq(c("Significant", "Statistically significant", answer = "Not statistically significant"))`.
+4. Adapt the data preparation code under "# Sample restriction: ..." so that the sample also entails Swedes in addition to Portuguese respondents. To estimate the causal effect of the Bali 2002 terror attack among Swedes use `data = ESS %>% filter(cntry == "SE")` in your `lm_robust()` code. The causal effect of the Bali 2002 terror attack among Swedes is `r fitb(coefSE, width = "5")` and `r mcq(c("Significant", "Statistically significant", answer = "Not statistically significant"))`.
 `r hide("R solution -> dont' peak to early ;) !")`
 ```{r ref.label = "olsSE"}
 ```
@@ -166,26 +173,28 @@ coefSE <- coef(ols_se)["treatAfter the attack"] %>% round(., 3) %>% as.scalar()
 `r hide("R solution -> dont' peak to early ;) !")`
 ```{r}
 plotdata_SE <- ols_se %>%
-  tidy() %>% # Turn into tibble
-  filter(term != "(Intercept)") %>% # Delete intercept from data
-  mutate(
-    term = case_when(
-      term == "treatAfter the attack" ~ "After the attack"))
+ tidy() %>% # Convert regression output to tidy data frame
+ filter(term != "(Intercept)") %>% # Remove the intercept row from results
+ mutate(
+   term = case_when(
+     term == "treatAfter the attack" ~ "After the attack")) # Rename treatment variable for plot
 
-plotdata <- bind_rows(plotdata_SE, plotdata_PT, .id = "cntry") %>%
-  mutate(
-    cntry = case_when(
-      cntry == 1 ~ "Sweden",
-      cntry == 2 ~ "Portugal"))
+plotdata <- bind_rows(plotdata_SE, plotdata_PT, .id = "cntry") %>% # Combine Swedish and Portuguese data
+ mutate(
+   cntry = case_when(
+     cntry == 1 ~ "Sweden", # Label country code 1 as Sweden
+     cntry == 2 ~ "Portugal")) # Label country code 2 as Portugal
 
-ggplot(data = plotdata, aes(y = estimate, x = reorder(cntry, estimate), 
-                            ymin = conf.low, ymax = conf.high)) +
-  geom_hline(yintercept = 0, color = "red", lty = "dashed") + 
-  geom_pointrange() + 
-  coord_flip() +
-  theme_minimal() + 
-  labs(title = "Causal effect of Bali 2002 terror attack",
-    x = "", y =  "Difference in xenophobia compared to before the attack
-    (in standard deviations)")
+ggplot(data = plotdata, 
+      aes(y = estimate, x = reorder(cntry, estimate), # Create plot, order countries by effect size
+          ymin = conf.low, ymax = conf.high)) + # Add confidence intervals
+ geom_hline(yintercept = 0, color = "red", lty = "dashed") + # Add reference line at zero
+ geom_pointrange() + # Plot point estimates with confidence intervals
+ coord_flip() + # Flip coordinates to make horizontal plot
+ theme_minimal() + # Use minimal theme for clean look
+ labs(title = "Causal effect of Bali 2002 terror attack", # Add title and axis labels
+   x = "", 
+   y = "Difference in xenophobia compared to before the attack
+   (in standard deviations)")
 ```
 `r unhide()`

@@ -29,55 +29,54 @@ pacman::p_load(
 data("mdve", package = "masteringmetrics")
 ```
 
-1. The variable `T_RANDOM` contains the information about which strategy the police offers where supposed to use for the respective domestic violence emergency call: 1 indicates "Arrest", 2 "Advise to stop", 3 "Suspect Told to Leave", and 4 "Other". By contrast, the variable `T_FINAL` contains the information about what the police officers actually did when arriving at the scene. Recode the two variables into a respective factor variable, which combines 2 & 3 into a category "Coddle" versus 1 "Arrested", and 4 as `NA`. Make "Arrested" the reference.
+1. The variable `T_RANDOM` contains the information about which strategy the police officers where supposed to use for the respective domestic violence emergency call: 1 indicates "Arrest", 2 "Advise to stop", 3 "Suspect Told to Leave", and 4 "Other". By contrast, the variable `T_FINAL` contains the information about what the police officers actually did when arriving at the scene. Recode the two variables into a respective factor variable, which combines 2 & 3 into a category "Coddle" versus 1 "Arrested", and 4 as `NA`. Make "Arrested" the reference. After recoding, create a cross-tabulation of the two variables.
 
 How many police officers complied to the strategy that was *randomly* assigned to them? `r fitb(268, width = "3")`
 
 `r hide("R solution -> dont' peak to early ;) !")`
 ```{r}
 mdve <- mdve %>%
-  # Recode into factor variables with two categories
-  mutate( 
-    T_RANDOM = case_when(
-      T_RANDOM == 2 | T_RANDOM == 3 ~ "Coddle!",
-      T_RANDOM == 1 ~ "Arrest!",
-      TRUE ~ as.character(NA)) %>% fct_relevel("Arrest!"),
-    T_FINAL = case_when(
-      T_FINAL == 2 | T_FINAL == 3 ~ "Coddled",
-      T_FINAL == 1 ~ "Arrested",
-      TRUE ~ as.character(NA)) %>% fct_relevel("Arrested"))
+ mutate( # Recode into factor variables with two categories
+   T_RANDOM = case_when(
+     T_RANDOM == 2 | T_RANDOM == 3 ~ "Coddle!", # Combine categories 2 and 3 into "Coddle!"
+     T_RANDOM == 1 ~ "Arrest!", # Category 1 becomes "Arrest!"
+     TRUE ~ as.character(NA)) %>% # All other values become NA
+     fct_relevel("Arrest!"), # Make "Arrest!" the reference level
+   T_FINAL = case_when(
+     T_FINAL == 2 | T_FINAL == 3 ~ "Coddled", # Combine categories 2 and 3 into "Coddled"
+     T_FINAL == 1 ~ "Arrested", # Category 1 becomes "Arrested"
+     TRUE ~ as.character(NA)) %>% # All other values become NA
+     fct_relevel("Arrested")) # Make "Arrested" the reference level
 
-# Make frequency table
 mdve %>%
-  select(T_RANDOM, T_FINAL) %>%
-  table()
+ select(T_RANDOM, T_FINAL) %>% # Select only the treatment variables
+ table() # Create a cross-tabulation of the two variables
 
 # Compliers:
 91 + 177
 ```
 `r unhide()`
 
-2. The variable `S_RACE` indicates the subject's (i.e. the person accused of domestic violence) race. The categories used by the police back in '81 where: 1 "White", 2 "Black", 3 "Indian", 4 "Asian", 5 "Hispanic", as well as sevel small other categories. Did the randomization work, or where certain groups more likely to face a police officers who got advised to arrest/coddle them? `r mcq(c("No, there is strong imbalance in the absolute frequencies", "Yes, the proprotions of the different groups are pretty similar across the two strategies", answer = "For 'Indians' the balance looks pretty off"))`.
+2. The variable `S_RACE` indicates the subject's (i.e. the person accused of domestic violence) race. The categories used by the police back in '81 where: 1 "White", 2 "Black", 3 "Indian", 4 "Asian", 5 "Hispanic", as well as sevel small other categories. Now make a balance table. Did the randomization work, or where certain groups more likely to face a police officers who got advised to arrest/coddle them? `r mcq(c("No, there is strong imbalance in the absolute frequencies", "Yes, the proprotions of the different groups are pretty similar across the two strategies", answer = "For 'Indians' the balance looks pretty off"))`.
 
 `r hide("R solution -> dont' peak to early ;) !")`
 ```{r}
 mdve <- mdve %>%
-  mutate( # Recode race variable
-    S_RACE = case_when(
-      S_RACE == 1 ~ "White",
-      S_RACE == 2 ~ "Black",
-      S_RACE == 3 ~ "Indian",
-      S_RACE == 4 ~ "Asian",
-      S_RACE == 5 ~ "Hispanic",
-      TRUE ~ "Other"))
+ mutate( # Recode race variable
+   S_RACE = case_when(
+     S_RACE == 1 ~ "White", # Code 1 becomes "White"
+     S_RACE == 2 ~ "Black", # Code 2 becomes "Black"
+     S_RACE == 3 ~ "Indian", # Code 3 becomes "Indian"
+     S_RACE == 4 ~ "Asian", # Code 4 becomes "Asian"
+     S_RACE == 5 ~ "Hispanic", # Code 5 becomes "Hispanic"
+     TRUE ~ "Other")) # All other values become "Other"
 
 mdve %>%
-  # Select variables for which I want my balance test,
-  select(T_RANDOM, S_RACE) %>%
-  datasummary_balance( # Make a balance table,
-    formula = ~ T_RANDOM, # by police strategy
-    data = . ,
-    title = "Subject's race by assigned policing strategy") 
+ select(T_RANDOM, S_RACE) %>% # Select treatment and race variables for balance test
+ datasummary_balance( # Create a balance table
+   formula = ~ T_RANDOM, # Compare race distribution across treatment groups
+   data = ., # Use the piped data
+   title = "Subject's race by assigned policing strategy") # Add descriptive title
 ```
 `r unhide()`
 
@@ -86,38 +85,38 @@ mdve %>%
 `r hide("R solution -> dont' peak to early ;) !")`
 ```{r}
 mdve %>%
-  # Select variables for which I want my balance test,
-  select(T_FINAL, S_RACE) %>%
-  datasummary_balance( # Make a balance table,
-    formula = ~ T_FINAL, # by police strategy
-    data = . ,
-    title = "Subject's race by assigned policing strategy") 
+ select(T_FINAL, S_RACE) %>% # Select treatment outcome and race variables for balance test
+ datasummary_balance( # Create a balance table
+   formula = ~ T_FINAL, # Compare race distribution across actual treatment groups
+   data = ., # Use the piped data
+   title = "Subject's race by assigned policing strategy") # Add descriptive title
 ```
 `r unhide()`
 
 ```{r first_stage, include = FALSE}
 mdve <- mdve %>%
-  mutate(
-    T_FINAL_01 = case_when(
-      T_FINAL == "Arrested" ~ 0,
-      T_FINAL == "Coddled" ~ 1))
+ mutate(
+   T_FINAL_01 = case_when(
+     T_FINAL == "Arrested" ~ 0, # Code "Arrested" as 0
+     T_FINAL == "Coddled" ~ 1)) # Code "Coddled" as 1
 
-ols <- lm_robust(T_FINAL_01 ~ T_RANDOM, data = mdve)
+ols <- lm_robust(T_FINAL_01 ~ T_RANDOM, data = mdve) # Run robust linear regression of actual on assigned treatment
 
-modelsummary(list("Repeat violence" = ols), stars = TRUE,
-             gof_map = c("nobs", "r.squared"))
+modelsummary(list("Repeat violence" = ols), # Create summary table of regression results
+            stars = TRUE, # Add significance stars
+            gof_map = c("nobs", "r.squared")) # Show only number of observations and R-squared as model fit statistics
 ```
 
 ```{r include = FALSE}
 coef <- coef(ols, digits = 3)["T_RANDOMCoddle!"] %>% as.scalar()
 ```
-4. How much higher was the probability that police officers would "coddle" a subject rather than arrest them, if they were randomly told to do so? `r fitb(coef, width = "3")` (complete decimals). In IV language, this is called the `r mcq(c("Reduced form", answer = "First stage", "LATE estimate"))`.
+4. How much higher was the probability that police officers would "coddle" a subject rather than arrest them, if they were randomly told to do so? `r fitb(coef, width = "3")` (three decimals). In IV language, this is called the `r mcq(c("Reduced form", answer = "First stage", "LATE estimate"))`.
 `r hide("R solution -> dont' peak to early ;) !")` 
 ```{r ref.label = "first_stage"}
 ```
 `r unhide()`
 
-5. According to Sherman and Berk (1984, see also Angrist and Pischke's "Mastering Metrics"), the probability that a subject would repeat to assault their partner at home was **0.114** higher when the police officers were *randomly* told to cuddle, as compared to when they were told to arrest (regardless of what they actually did at the scene). In IV language, this is called the `r mcq(c(answer = "Reduced form", "First stage", "LATE estimate"))`.
+5. According to Sherman and Berk (1984, see also Angrist and Pischke's "Mastering Metrics"), the probability that a subject would repeat to assault their partner at home was **0.114** higher when the police officers were *randomly* told to coddle, as compared to when they were told to arrest (regardless of what they actually did at the scene). In IV language, this is called the `r mcq(c(answer = "Reduced form", "First stage", "LATE estimate"))`.
 
 6. Based on the above information, what is the IV estimate of the local average causal effect of coddling subjects who are accused of domestic violence on the probability that they repeat to assault their partner? It is: `r fitb(0.14, width = "4")` (two decimals).
 `r hide("R solution -> dont' peak to early ;) !")`

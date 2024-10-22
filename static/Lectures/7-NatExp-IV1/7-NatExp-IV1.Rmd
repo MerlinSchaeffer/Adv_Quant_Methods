@@ -117,14 +117,17 @@ knitr::include_graphics('./img/randomization2.png')
 ```
 
 If we *randomly* divide subjects into treatment and control groups, .alert[they come from the same underlying population]. 
-  <br> <br> $\rightarrow$ They will be similar, on average, *in every way*;<br> **including their $Y_{0}$ **!
-  <br> <br> $\rightarrow E[Y_{0i}|D=1] = E[Y_{0i}|D=0]$!
+    <br> <br> $\rightarrow$ They will be similar, on average, *in every way*;<br> **including their $Y_{0}$ **!
+    <br> <br> $\rightarrow E[Y_{0i}|D=1] = E[Y_{0i}|D=0]$!
+    
+**Beware**, in practice randomization can fail, especially if your sample is small.
 ]
 
 .push-right[
 
-$$\begin{equation}\begin{split} &  \underbrace{E[Y_{1i}|D=1] - E[Y_{0i}|D=0]}_{\text{Comparison between treatment anc control group}} \\  \\ & = E[\color{red}{Y_{0i} + \kappa} |D=1] - E[Y_{0i}|D=0], \\ \\ &= \color{red}{\kappa} + \underbrace{E[Y_{0i} |D=1] - E[Y_{0i}|D=0]}_{\underbrace{0}_{\text{(if randomization has worked)}}}, \\ \\ & = \underbrace{\color{red}{\kappa}.}_{\text{The average causal effect}} \end{split}\end{equation}$$
+$$\begin{equation}\begin{split} &  \underbrace{E[Y_{1i}|D=1] - E[Y_{0i}|D=0]}_{\text{Comparison between treatment and control group}} \\  \\ & = E[Y_{0i} + \color{red}{\kappa} |D=1] - E[Y_{0i}|D=0], \\ \\ &= \color{red}{\kappa} + \underbrace{E[Y_{0i} |D=1] - E[Y_{0i}|D=0]}_{\underbrace{0}_{\text{Selection bias (if randomization has worked)}}}, \\ \\ & = \underbrace{\color{red}{\kappa}.}_{\text{The average causal effect}} \end{split}\end{equation}$$
 ]
+
 
 ---
 # But that is impossible and un-ethical!
@@ -171,8 +174,8 @@ class: clear
 .left-column[
 <br>
 
-```{r, echo = FALSE, out.width='45%'}
-knitr::include_graphics('https://sociology.fas.harvard.edu/sites/hwpi.harvard.edu/files/styles/profile_full/public/sociology/files/legeiwe_headshot_for_crop_1_0.jpg?m=1689020156&itok=ESF3upCN')
+```{r, echo = FALSE, out.width='100%'}
+knitr::include_graphics('https://news.harvard.edu/gazette/wp-content/uploads/2019/04/031319_Lewegie_103_2500.jpg')
 ```
 
 ### My friend Joscha 
@@ -199,17 +202,22 @@ In comparison to a normal RCT, this allows for:
 
 > -- `r Citet(myBib, "snow_mode_1856")`
 
-```{r, echo = FALSE, out.width='30%'}
-knitr::include_graphics('https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/John_Snow_memorial_and_pub.jpg/1024px-John_Snow_memorial_and_pub.jpg')
+.push-left[
+```{r, echo = FALSE, out.width='100%'}
+knitr::include_graphics('https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Dr_John_Snow_%2824023399742%29.jpg/1280px-Dr_John_Snow_%2824023399742%29.jpg')
 ```
-
-]
+] 
+.push-right[
+```{r, echo = FALSE, out.width='68%'}
+knitr::include_graphics('https://upload.wikimedia.org/wikipedia/commons/thumb/c/cd/Pump_Handle_-_John_Snow_.jpg/450px-Pump_Handle_-_John_Snow_.jpg')
+```
+]]
 
 .push-right[.center[
-The first natural experiment: <br>
+**The first natural experiment:** <br>
 The cause of Cholera]
-```{r, echo = FALSE, out.width='80%'}
-knitr::include_graphics('https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/Snow-cholera-map-1.jpg/1920px-Snow-cholera-map-1.jpg')
+```{r, echo = FALSE, out.width='90%'}
+knitr::include_graphics('https://i.guim.co.uk/img/static/sys-images/Guardian/Pix/pictures/2013/3/14/1363276040034/John-Snows-cholera-map-of-008.jpg?width=620&dpr=1&s=none&crop=none')
 ```
 .center[.backgrnote[*Source:* `r Citet(myBib, "snow_mode_1856")`]]
 ]
@@ -272,7 +280,7 @@ knitr::include_graphics('./img/Joscha3.png')
 .push-left[.content-box-red[
 .font120[.center[**Internal validity**]]
 
-With an RCT, we have control treatment assignment and thus know that the intervention $I$ was randomly assigned.
+With an RCT, we control treatment assignment and thus know that the intervention $I$ was randomly assigned.
 
 ```{tikz, ref.label = "DAG1", echo = FALSE, out.width='70%'}
 ```
@@ -318,9 +326,9 @@ With a natural experiment, we can study a real event $E$ and not some artificial
 .left-column[.content-box-blue[
 Analyzing a natural experiment does not necessarily involve much statistical sophistication; often simple OLS suffices.
 
-*But finding one is as tough as finding truffles; you got to be lucky!*
+*But finding one is as tough as finding truffles!*
 
-.center[**_Are you such a <br>lucky truffle pig?_**]
+.center[Are you such a <br>lucky truffle pig?]
 ]]
 
 .right-column[
@@ -334,7 +342,7 @@ class: clear
 # Learning goal 1 .font60[Terror attacks can increase xenophobia]
 
 .right-column[
-```{r, echo = FALSE, out.width='100%'}
+```{r, echo = FALSE, out.width='60%'}
 knitr::include_graphics('./img/Joscha4.png')
 ```
 .center[.backgrnote[*Source:* `r Citet(myBib, "legewie_terrorist_2013")`]]
@@ -345,11 +353,9 @@ knitr::include_graphics('./img/Joscha4.png')
 .left-column[.content-box-green[.center[
 My friend Joscha <br> is a truffle pig ;)
 
-Based on the idea that the day of a survey interview is random, he could estimate the causal effect of the Bali 2002 terror attack.
+Based on the idea that the day of a survey interview is random, he could estimate the causal effect of the Bali 2002 terror attack on xenophobic attitdes in several European countries.
 
-Do you want to learn what Joscha has to say about:
-
-*Why was there an effect in Portugal, but not in the UK?* 
+But why was there an effect in Portugal, but not in the UK?
 
 Read his article ;)
 ]]]
@@ -406,11 +412,11 @@ knitr::include_graphics('https://media.npr.org/assets/news/2010/12/06/chicago-17
 
 ---
 layout: true
-# Intention to treat $\neq$ treatment
+# Intention to treat (ITT) $\neq$ treatment
 
 .left-column[
 ```{r, echo = FALSE, out.width='100%'}
-knitr::include_graphics('https://i.ytimg.com/vi/h5MD2ptO998/maxresdefault.jpg')
+knitr::include_graphics('https://i.ytimg.com/vi/3L8wc_Nd9kM/sddefault.jpg')
 ```
 
 ```{tikz, DAG3, echo = FALSE, out.width='100%'}
@@ -486,9 +492,7 @@ layout: false
 
 $$\begin{equation}\begin{split} & |r_{I,D}| = 1 \\ &\rightarrow I = D! \end{split}\end{equation}$$
 
-The absolute correlation between intervention $I$ and predictor of interest $D$ is 1, making them practically the same thing.
-<br>
-<br>
+The correlation between intervention $I$ and predictor of interest $D$ is 1, making them practically the same thing.
 
 ```{tikz, DAG4, echo = FALSE, out.width='70%'}
 \usetikzlibrary{shapes,decorations,arrows,calc,arrows.meta,fit,positioning,quotes}
@@ -522,7 +526,7 @@ The absolute correlation between intervention $I$ and predictor of interest $D$ 
 
 $$\begin{equation}\begin{split} & |r_{Z, D}| < 1 \\ &\rightarrow Z \neq D! \end{split}\end{equation}$$
 
-The absolute correlation between intervention $Z$ and predictor of interest $D$ is smaller than 1, which induces some random variation into $D$.
+The correlation between intervention $Z$ and predictor of interest $D$ is smaller than 1, which induces some random variation into $D$.
 
 
 ```{tikz, DAG5, echo = FALSE, out.width='70%'}
@@ -561,11 +565,11 @@ layout: true
 
 .left-column[.content-box-red[
 .center[**3 Requirements**]
-1. *First stage*: Instrument has causal effect on $D_{i}$.
+1. *First stage*: Instrument $Z_{i}$ has causal effect on $D_{i}$.
 
-2. *Randomization*: Instrument is randomly assigned (RCT or natural experiment).
+2. *Randomization*: Instrument $Z_{i}$ is randomly assigned (RCT or natural experiment).
 
-3. *Exclusion restriction*: Instrument affects outcome $Y_{i}$ **_only_** through its effect on $D_{i}$.
+3. *Exclusion restriction*: Instrument $Z_{i}$ affects outcome $Y_{i}$ **_only_** through its effect on $D_{i}$.
 ]]
 
 ---
@@ -577,7 +581,8 @@ layout: true
 ---
 
 .right-column[
-```{tikz, DAG6, echo = FALSE, out.width='100%'}
+.center[**Violated exclusion restriction**]
+```{tikz, DAG6, echo = FALSE, out.width='80%'}
 \usetikzlibrary{shapes,decorations,arrows,calc,arrows.meta,fit,positioning,quotes}
 \tikzset{
   -Latex,auto,node distance =1 cm and 1 cm,semithick,
@@ -594,7 +599,7 @@ layout: true
 \node[state] (3) [above = of 2, align = center] {E.g.\ optimistic \\ personality};
 \node[state] (4) [right = of 2, align = center] {Income \\ as adult};
 
-\path (1) [red] edge ["0.4766"] (2);
+\path (1) edge ["0.4766"] (2);
 \path (1) [red] edge ["?"] (3);
 \path (2) edge (4);
 \path (3) edge [red] (4);
@@ -607,7 +612,8 @@ layout: true
 ---
 
 .right-column[
-```{tikz, DAG7, echo = FALSE, out.width='100%'}
+.center[**"Instrumenting" the effect of interest**]
+```{tikz, DAG7, echo = FALSE, out.width='80%'}
 \usetikzlibrary{shapes,decorations,arrows,calc,arrows.meta,fit,positioning,quotes}
 \tikzset{
   -Latex,auto,node distance =1 cm and 1 cm,semithick,
@@ -619,29 +625,39 @@ layout: true
 
 \begin{tikzpicture}
 \sffamily
-\node[state] (1) [red, align = center] at (0,0) {Win \\ lottery};
-\node[state] (2) [right = of 1, align = center] {Moving out \\ of poverty};
+\node[state] (1) [align = center] at (0,0) {Win \\ lottery};
+\node[state] (2) [red, right = of 1, align = center] {Moving out \\ of poverty};
 \node[state] (3) [above = of 2, align = center] {E.g.\ optimistic \\ personality};
 \node[state] (4) [right = of 2, align = center] {Income \\ as adult};
 
-\path (1) [red] edge ["0.4766"] (2);
-\path (2) edge ["?"] (4);
+\path (1) edge ["0.4766"] (2);
+\path (2) [red] edge ["?"] (4);
 \path (3) edge [dashed] (4);
 \path (3) edge [dashed] (2);
 \end{tikzpicture}
 ```
+]
 
-$$\underbrace{\kappa_{\text{Win lottery}\rightarrow\text{Income}}}_{1624\text{ Dollar}} = \underbrace{\kappa_{\text{Win lottery}\rightarrow\text{Moving}}}_{0.4766} \times \underbrace{\kappa_{\text{Moving}\rightarrow\text{Income}}}_{?}$$
+---
+
+.right-column[
+.center[**"Instrumenting" the effect of interest**]
+```{tikz, ref.label = "DAG7", echo = FALSE, out.width='80%'}
+```
+
+$$\underbrace{\kappa_{\text{Win lottery}\rightarrow\text{Moving}}}_{0.4766} \times \color{red}{\underbrace{\kappa_{\text{Moving}\rightarrow\text{Income}}}_{?}} = \underbrace{\kappa_{\text{Win lottery}\rightarrow\text{Income}}}_{1624\text{ Dollar}}$$
 
 ]
 
 ---
 
 .right-column[
-```{tikz, ref.label = "DAG7", echo = FALSE, out.width='100%'}
+.center[**"Instrumenting" the effect of interest**]
+```{tikz, ref.label = "DAG7", echo = FALSE, out.width='80%'}
 ```
 
-$$\begin{equation}\begin{split} & \underbrace{\kappa_{\text{Win lottery}\rightarrow\text{Income}}}_{1624\text{ Dollar}} = \underbrace{\kappa_{\text{Win lottery}\rightarrow\text{Moving}}}_{0.4766} \times \underbrace{\kappa_{\text{Moving}\rightarrow\text{Income}}}_{?} \\ \\ & \frac{\kappa_{\text{Win lottery}\rightarrow\text{Income}}}{\kappa_{\text{Win lottery}\rightarrow\text{Moving}}} = \underbrace{\kappa_{\text{Moving}\rightarrow\text{Income}}}_{?} \end{split}\end{equation}$$
+
+$$\begin{equation}\begin{split} \underbrace{\kappa_{\text{Win lottery}\rightarrow\text{Moving}}}_{0.4766} \times & \color{red}{\underbrace{\kappa_{\text{Moving}\rightarrow\text{Income}}}_{?}} = \underbrace{\kappa_{\text{Win lottery}\rightarrow\text{Income}}}_{1624\text{ Dollar}} \\ \\ & \color{red}{\underbrace{\kappa_{\text{Moving}\rightarrow\text{Income}}}_{?}} = \frac{\kappa_{\text{Win lottery}\rightarrow\text{Income}}}{\kappa_{\text{Win lottery}\rightarrow\text{Moving}}} \end{split}\end{equation}$$
 ]
 ---
 layout: false
