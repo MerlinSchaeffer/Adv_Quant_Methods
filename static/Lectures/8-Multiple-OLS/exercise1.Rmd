@@ -55,6 +55,7 @@ ESS <- read_dta("../../../assets/Legewie_ESS_02.dta") %>%
     mocntr = as_factor(mocntr),
     facntr = as_factor(facntr),
     #######################################
+    ############## New code ###############
     # Age
     age = int_year - yrbrn, #<<
     # Gender
@@ -78,7 +79,6 @@ ESS <- read_dta("../../../assets/Legewie_ESS_02.dta") %>%
   drop_na() # Delete cases with missing values.
 ```
 `r unhide()`
-
 
 ```{r olsPT, include = FALSE}
 # Estimate the controlled treatment effect with multiple OLS
@@ -105,7 +105,7 @@ se <- se["treatAfter the attack"] %>% sqrt() %>% round(., 3) %>% as.scalar()
 
 3. Is the effects statistically significant? Yes, the standard error is `r fitb(se, width = "5")` and thus less than half the size of the estimated causal effect. This implies the *t*-value is larger than the conventional threshold of `r fitb(1.96, width = "4")`.
 
-4. Also estimate the bivariate unadjusted effect and make a coefficient plot of the two results; don't report the intercept. Use `bind_rows(..., .id = "controlled")` to combine both into one tibble. What do we learn by comparing the two estimates? `r mcq(c("Bot much, both effects are significant.", answer = "The bivariate effect is a bit too large; there was some selection into treatment that introduced omitted variable bias", "The result from multiple OLS is more uncertain and hence less trustworthy"))`.
+4. Also estimate the bivariate un-adjusted effect and make a coefficient plot of the two results; don't report the intercept. Use `bind_rows(..., .id = "adjusted")` to combine both into one tibble. What do we learn by comparing the two estimates? `r mcq(c("Bot much, both effects are significant.", answer = "The bivariate effect is a bit too large; there was some selection into treatment that introduced omitted variable bias", "The result from multiple OLS is more uncertain and hence less trustworthy"))`.
 
 `r hide("R solution -> dont' peak to early ;) !")`
 ```{r}
@@ -114,25 +114,25 @@ ols_pt_biv <- lm_robust(anti_immi ~ treat,
                         data = ESS %>% filter(cntry == "PT"), 
                         weights = pspwght)
 
-# Add estimation results in to tibble
-plotdata <- bind_rows(
-  tidy(ols_pt_biv), 
-  tidy(ols_pt_adj), 
-  .id = "adjusted") %>%
-  mutate(
-    adjusted = case_when(
-      adjusted == 1 ~ "Bivariate",
-      adjusted == 2 ~ "Adjusted")) %>%
-  filter(term == "treatAfter the attack")
+# Add estimation results in to tibble 
+plotdata <- bind_rows(  # Combine the results from the two models 
+  tidy(ols_pt_biv),     # Extract results from the bivariate model
+  tidy(ols_pt_adj),     # Extract results from the adjusted model
+  .id = "adjusted") %>%  # Create a variable named "adjusted" to distinguish between the models
+  mutate(               # Create a new variable with more descriptive labels
+    adjusted = case_when( 
+      adjusted == 1 ~ "Bivariate",  # Label the bivariate model as "Bivariate"
+      adjusted == 2 ~ "Adjusted")) %>%  # Label the adjusted model as "Adjusted"
+  filter(term == "treatAfter the attack")  # Keep only the row with the treatment effect
 
 ggplot(data = plotdata, aes(y = estimate, x = adjusted, ymin = conf.low, ymax = conf.high)) +
-  geom_hline(yintercept = 0, color = "red", lty = "dashed") + 
-  geom_pointrange() + 
-  coord_flip() +
-  theme_minimal() + 
-  labs(title = "Causal effect of Bali 2002 terror attack among the Portuguese",
-    x = "", y =  "Difference in xenophobia compared to before the attack
-    (in standard deviations)")
+  geom_hline(yintercept = 0, color = "red", lty = "dashed") + # Add a horizontal line at zero 
+  geom_pointrange() +                                         # Create a point range plot (estimates with confidence intervals)
+  coord_flip() +                                              # Flip the x and y axes
+  theme_minimal() +                                          # Use a minimal theme
+  labs(title = "Causal effect of Bali 2002 terror attack among the Portuguese",  # Add a title
+       x = "", y = "Difference in xenophobia compared to before the attack
+       (in standard deviations)")            
 ```
 `r unhide()`
 
@@ -151,7 +151,7 @@ modelsummary(list("Xeno FI" = ols_fi_adj), stars = TRUE,
 coefFI <- coef(ols_fi_adj)["treatAfter the attack"] %>% round(., 3) %>% as.scalar()
 ```
 
-5. The adjusted causal effect of the Bali 2002 terror attack among Finns is `r fitb(coefFI, width = "5")` and `r mcq(c("Significant", "Statistically significant", answer = "Not statistically significant"))`.
+5. The adjusted causal effect of the Bali 2002 terror attack among Finns is `r fitb(coefFI, width = "3")` and `r mcq(c("Significant", "Statistically significant", answer = "Not statistically significant"))`.
 `r hide("R solution -> dont' peak to early ;) !")`
 ```{r ref.label = "olsSE"}
 ```

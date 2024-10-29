@@ -4,7 +4,7 @@
     <title>Multiple Regression &amp;    Fundamentals of Causal Inference</title>
     <meta charset="utf-8" />
     <meta name="author" content="Merlin Schaeffer  Department of Sociology" />
-    <meta name="date" content="2023-11-01" />
+    <meta name="date" content="2024-10-29" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
     <script src="libs/tile-view/tile-view.js"></script>
@@ -23,13 +23,13 @@ class: center, middle, inverse, title-slide
 # Multiple Regression &amp; <br><br> Fundamentals of Causal Inference
 ]
 .subtitle[
-## 8. Multiple OLS regression: Adjusting randomized interventions for <em>observed</em> confounders
+## 8. Multiple OLS regression:<br> Adjusting for <em>observed</em> confounders
 ]
 .author[
 ### Merlin Schaeffer<br> Department of Sociology
 ]
 .date[
-### 2023-11-01
+### 2024-10-29
 ]
 
 ---
@@ -57,22 +57,206 @@ class: clear
 class: inverse middle
 # Today's schedule
 
-1. **Today's 1st research question**: Terrorist attacks and xenophobia re-visited.
+1. **Today's 1st research question**: Zero-tolerance for domestic violence re-visited.
+  + Recap of IV
+  
+2. **Today's 2nd research question**: Terrorist attacks and xenophobia re-visited.
 
-2. **Multiple OLS**
+3. **Multiple OLS**
   
   + Omitted variable bias
   + Frisch-Waugh Theorem
   + Estimation
+  
+---
+layout: true
+# IV .font70[Zero-tolerance for domestic violence?]
 
-3. **IV &amp; Multiple OLS**
+.left-column[
+&lt;img src="https://images.theconversation.com/files/325865/original/file-20200406-6044-hao5gp.jpg?ixlib=rb-1.1.0&amp;q=45&amp;auto=format&amp;w=1200&amp;h=675.0&amp;fit=crop" width="80%" style="display: block; margin: auto;" /&gt;&lt;img src="https://indblik.dk/wp-content/uploads/2021/06/41648075864_b1450a1d67_k.jpg" width="80%" style="display: block; margin: auto;" /&gt;
+]
 
-4. **Today's 2nd research question**: Zero-tolerance for domestic violence re-visited.
-  + Multiple OLS to the rescue
+---
+
+.right-column[
+&lt;iframe src='https://en.wikipedia.org/wiki/Minneapolis_Domestic_Violence_Experiment' width='700' height='550' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+]
+
+---
+
+.right-column[
+"[...] the pains of punishment deter people from repeating the crimes for which they are punished, especially when punishment is certain, swift and severe." 
+
+.center[versus]
+
+"[...] punishment often makes individuals more likely to commit crimes because of altered interactional structures, foreclosed legal opportunities and secondary deviance."
+&gt; -- .center[.backgrnote[*Source:* Sherman and Berk (1984)]]
+
+.center[**Does punishment increase repeat domestic abuse?**]
+]
+
+---
+layout: false
+# Compliance among police officers
+
+.panelset[
+.panel[.panel-name[Intention to treat]
+.push-left[
+&lt;br&gt;
+&lt;br&gt;
+
+
+
+|       | Actually arrested| Actually coddled|
+|:------|-----------------:|----------------:|
+|Arrest |                91|                1|
+|Coddle |                45|              177|
+
+
+]
+.push-right[
+&lt;img src="https://s.abcnews.com/images/US/minneapolis-police-department-chief-search-medaria-arradondo-04-gty-llr-220621_1655836848859_hpMain_16x9_992.jpg" width="80%" style="display: block; margin: auto;" /&gt;
+]
+]
+.panel[.panel-name[R code]
+
+``` r
+# Load the data from the Minneapolis Domestic Violence Experiment
+data("mdve", package = "masteringmetrics")
+
+mdve &lt;- mdve %&gt;%
+ mutate( # Recode into factor variables with two categories
+   T_RANDOM = case_when(
+     T_RANDOM == 2 | T_RANDOM == 3 ~ "Coddle", # Combine categories 2 and 3 into "Coddle"
+     T_RANDOM == 1 ~ "Arrest", # Category 1 becomes "Arrest"
+     TRUE ~ as.character(NA)) %&gt;% # All other values become NA
+     fct_relevel("Arrest"), # Make "Arrest" the reference level
+   T_FINAL = case_when(
+     T_FINAL == 2 | T_FINAL == 3 ~ "Actually coddled", # Combine categories 2 and 3 into "Actually coddled"
+     T_FINAL == 1 ~ "Actually arrested", # Category 1 becomes "Actually arrested"
+     TRUE ~ as.character(NA)) %&gt;% # All other values become NA
+     fct_relevel("Actually arrested")) # Make "Actually arrested" the reference level
+
+mdve %&gt;%
+ select(T_RANDOM, T_FINAL) %&gt;% # Select only the treatment variables
+ table() %&gt;% kable() # Create a cross-tabulation of the two variables
+```
+]]
+
+---
+layout: false
+# IV .font60[to the rescue]
+
+.left-column[.content-box-red[
+.center[**3 Requirements**]
+1. *First stage*: Instrument `\(Z_{i}\)` has causal effect on `\(D_{i}\)`.
+
+2. *Randomization*: Instrument `\(Z_{i}\)` is randomly assigned (RCT or natural experiment).
+
+3. *Exclusion restriction*: Instrument `\(Z_{i}\)` affects outcome `\(Y_{i}\)` **_only_** through its effect on `\(D_{i}\)`.
+]]
+
+.right-column[
+&lt;br&gt;
+
+.push-left[
+&lt;img src="8-Multiple-OLS_files/figure-html/DAG8-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
+.push-right[
+&lt;img src="8-Multiple-OLS_files/figure-html/DAG9-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]]
+
+**Reduced Form:** `\(\beta_{Z \rightarrow Y} = E[Y_{i}|Z_{i}=1]-E[Y_{i}|Z_{i}=0]; \text{call this }\rho.\)`
+
+**First Stage:** `\(\beta_{Z \rightarrow D} = E[D_{i}|Z_{i}=1]-E[D_{i}|Z_{i}=0]; \text{call this }\phi.\)`
+
+**IV Estimator of** `\(\lambda = \frac{\beta_{Z \rightarrow Y}}{\beta_{Z \rightarrow D}} = \frac{E[Y_{i}|Z_{i}=1]-E[Y_{i}|Z_{i}=0]}{E[D_{i}|Z_{i}=1]-E[D_{i}|Z_{i}=0]} = \frac{\rho}{\phi}.\)`
+
+---
+# IV .font60[to the rescue]
+
+.push-right[
+.panelset[
+.panel[.panel-name[First Stage].font90[
+&lt;table style="NAborder-bottom: 0; color: black; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; First stage &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.011 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.011) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; T_RANDOMCoddle &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.786*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.029) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 314 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.522 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
+&lt;sup&gt;&lt;/sup&gt; + p &amp;lt; 0.1, * p &amp;lt; 0.05, ** p &amp;lt; 0.01, *** p &amp;lt; 0.001&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;
+&lt;/table&gt;
+
+
+]]
+.panel[.panel-name[R code]
+
+``` r
+mdve &lt;- mdve %&gt;%
+  mutate( # Code binary D
+    T_FINAL_01 = case_when(
+    # Code "Actually Arrested" as 0
+    T_FINAL == "Actually arrested" ~ 0, 
+    # Code "Actually Coddled" as 1
+    T_FINAL == "Actually coddled" ~ 1)) 
+
+# First stage OLS
+first_stg &lt;- lm_robust(T_FINAL_01 ~ T_RANDOM, 
+                        data = mdve)
+
+# Regression table
+modelsummary(list("First stage" = first_stg), 
+             stars = TRUE,
+             gof_map = c("nobs", "r.squared"), 
+             output = "kableExtra")
+```
+]]]
+
+.push-left[
+.push-left[
+&lt;img src="8-Multiple-OLS_files/figure-html/unnamed-chunk-6-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
+.push-right[
+&lt;img src="8-Multiple-OLS_files/figure-html/unnamed-chunk-7-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]]
+
+**Reduced Form:** `\(\rho = 0.114\)` .backgrnote[According to Sherman and Berk (1984).]
+
+**First Stage:** `\(\phi = NA.\)`
+
+**IV Estimator of LATE:** `\(\lambda = \frac{\rho}{\phi} = \frac{E[Y_{i}|Z_{i}=1]-E[Y_{i}|Z_{i}=0]}{E[D_{i}|Z_{i}=1]-E[D_{i}|Z_{i}=0]} = \underline{\underline{NA}} \color{red}{|\text{Complier}_{i}=1}.\)`
 
 ---
 class: inverse middle center
-# Research question 1 of the day
+# Research question two of the day
 
 .right-column[
 &lt;img src="https://api.time.com/wp-content/uploads/2019/07/gettyimages-1064896696.jpg" width="60%" style="display: block; margin: auto;" /&gt;&lt;img src="https://www.brookings.edu/wp-content/uploads/2019/07/Denmark.jpg?w=1200&amp;h=630&amp;crop=1" width="60%" style="display: block; margin: auto;" /&gt;
@@ -94,12 +278,15 @@ class: inverse middle center
 &lt;img src="./img/randomization2.png" width="60%" style="display: block; margin: auto;" /&gt;
 
 If we *randomly* divide subjects into treatment and control groups, .alert[they come from the same underlying population]. 
-  &lt;br&gt; &lt;br&gt; `\(\rightarrow\)` They will be similar, on average, *in every way*;&lt;br&gt; **including their `\(Y_{0}\)` **!
-  &lt;br&gt; &lt;br&gt; `\(\rightarrow E[Y_{0i}|D=1] = E[Y_{0i}|D=0]\)`!
+    &lt;br&gt; &lt;br&gt; `\(\rightarrow\)` They will be similar, on average, *in every way*;&lt;br&gt; **including their `\(Y_{0}\)` **!
+    &lt;br&gt; &lt;br&gt; `\(\rightarrow E[Y_{0i}|D=1] = E[Y_{0i}|D=0]\)`!
+    
+**Beware**, in practice randomization can fail, especially if your sample is small.
 ]
 
 .push-right[
-&lt;img src="8-Multiple-OLS_files/figure-html/DAG_RCT-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+
+`$$\begin{equation}\begin{split} &amp;  \underbrace{E[Y_{1i}|D=1] - E[Y_{0i}|D=0]}_{\text{Comparison between treatment and control group}} \\  \\ &amp; = E[Y_{0i} + \color{red}{\kappa} |D=1] - E[Y_{0i}|D=0], \\ \\ &amp;= \color{red}{\kappa} + \underbrace{E[Y_{0i} |D=1] - E[Y_{0i}|D=0]}_{\underbrace{0}_{\text{Selection bias (if randomization has worked)}}}, \\ \\ &amp; = \underbrace{\color{red}{\kappa}.}_{\text{The average causal effect}} \end{split}\end{equation}$$`
 ]
 
 ---
@@ -147,22 +334,22 @@ layout: false
 &lt;img src="./img/Joscha3.png" width="100%" style="display: block; margin: auto;" /&gt;
 .center[.backgrnote[*Source:* Legewie (2013)]]
 
-&gt; [Across all countries] The treatment group is on average slightly younger, and the proportion of people who are retired and who work from home is lower. 
+"[Across all countries] The treatment group is on average slightly younger, and the proportion of people who are retired and who work from home is lower." 
 
-&gt; -- Legewie (2013, page 1211).
+-- Legewie (2013, page 1211).
 
 ]
 
 ---
 class: clear
-# Age as confounder? .font70[(i.e., Age-based selection into treatment?)]
+# Example: Age as confounder
 
 .left-column[
-On average, xenophobia increases with age.
+1. On average, xenophobia increases with age.
 
-The older a respondent, the more likely they are part of the control group (i.e., not exposed to Bali attack).
+2. The younger a respondent, the more likely they are exposed to the Bali attack.
 
-`\(\rightarrow E[Y_{0i}|D=0] \color{red}{&gt;} E[Y_{0i}|D=1]\)` 
+`\(\Rightarrow E[Y_{0i}|D=0] \color{red}{&gt;} E[Y_{0i}|D=1]\)` 
 
 .backgrnote[
 Note that in Portugal, older respondents were more likely to be in the treatment group.
@@ -172,10 +359,9 @@ Note that in Portugal, older respondents were more likely to be in the treatment
 .right-column[
 &lt;img src="8-Multiple-OLS_files/figure-html/DAG_Age-1.png" width="80%" style="display: block; margin: auto;" /&gt;
 
-.content-box-green[
-What kind of bias does this imply for our causal terrorist attack estimate? Is it our estimate most likely too large or too small?
-]
-]
+.content-box-green[.center[
+What kind of bias does this imply for our terrorist-attack estimate? Is our estimate likely too large or too small?
+]]]
 
 ---
 class: inverse middle center
@@ -185,12 +371,12 @@ class: inverse middle center
 `$$y_{i} = \alpha + \beta_{1}x_{1} + \beta_{2}x_{2} + \ldots + \beta_{k}x_{k} + \epsilon_{i}$$`
 
 ---
-# Setup and simulated toy data
+# A Simulated Example
 
 .panelset[
 .panel[.panel-name[Packages]
 
-```r
+``` r
 pacman::p_load(
   tidyverse, # Data manipulation,
   haven, # Read Stata data,
@@ -206,55 +392,57 @@ pacman::p_load(
 
 
 
-```r
-# Simulate random normally/gauss-distributed age.
+``` r
 toydat &lt;- tibble( 
-  age = rnorm(n = 500, mean = 45, sd = 10))
+  age = rnorm( # Simulate random gauss-distributed age
+  n = 500, # for 500 ficticious people,
+  mean = 40, # Average age 45,
+  sd = 5)) # SD of 10 years.
 ```
 ]
 
 .push-right[
-&lt;img src="8-Multiple-OLS_files/figure-html/unnamed-chunk-10-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+&lt;img src="8-Multiple-OLS_files/figure-html/unnamed-chunk-16-1.png" width="80%" style="display: block; margin: auto;" /&gt;
 ]]
 .panel[.panel-name[Exposure to terror]
-.push-left[.font80[
+.push-left[.font70[
 
-```r
+``` r
 toydat &lt;- toydat %&gt;% 
   mutate( # Day of interview: Age + random.
-    int_day = (-0.05*age) + rnorm(n = 500, mean = 0, sd = 1),
-    bali = case_when( # Bali: After mean survey period.
+    int_day = (-0.1*age) + rnorm(n = 500, mean = 0, sd = 1),
+    bali = case_when( # Bali: After mean int_day (survey period).
       int_day &lt; mean(int_day) ~ 0,
       int_day &gt;= mean(int_day) ~ 1))
 
 ols &lt;- lm_robust(bali ~ age, data = toydat)
 modelsummary(list("Day of Int." = ols), stars = TRUE,
-             gof_map = c("nobs", "r.squared"))
+             gof_map = c("nobs", "r.squared"), output = "kableExtra")
 ```
 
-&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+&lt;table style="NAborder-bottom: 0; color: black; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
  &lt;thead&gt;
   &lt;tr&gt;
    &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
-   &lt;th style="text-align:center;"&gt;  Day of Int. &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; &amp;amp;nbsp;Day of Int. &lt;/th&gt;
   &lt;/tr&gt;
  &lt;/thead&gt;
 &lt;tbody&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 1.299*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 1.917*** &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (0.090) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.157) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; age &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; −0.018*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −0.035*** &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.002) &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.004) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
@@ -272,25 +460,24 @@ modelsummary(list("Day of Int." = ols), stars = TRUE,
 
 ]]
 .push-right[
-&lt;img src="8-Multiple-OLS_files/figure-html/unnamed-chunk-12-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+&lt;img src="8-Multiple-OLS_files/figure-html/unnamed-chunk-18-1.png" width="80%" style="display: block; margin: auto;" /&gt;
 ]
 ]
 .panel[.panel-name[Xenophobia]
 .push-left[
 
-```r
-# Because I simulate these data,
-# I define and thus KNOW the truth!! 
-# Xenophobia is a linear function of:
-# exposure to Bali, and age, and a random part.
+``` r
+# Because I simulate the data for this example,
+# I define: Xenophobia is a linear function of:
+# exposure to Bali, age, and a random part.
 toydat &lt;- toydat %&gt;%
   mutate(
-*   xeno = (0.3 * bali) + (0.05 * age) +
-*     rnorm(n = 500, mean = 0, sd = 1))
+*   xeno = (1 * bali) + (0.3 * age) +
+      rnorm(n = 500, mean = 0, sd = 1))
 ```
 ]
 .push-right[
-&lt;img src="8-Multiple-OLS_files/figure-html/unnamed-chunk-14-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+&lt;img src="8-Multiple-OLS_files/figure-html/unnamed-chunk-20-1.png" width="80%" style="display: block; margin: auto;" /&gt;
 ]]]
 
 ---
@@ -298,7 +485,7 @@ toydat &lt;- toydat %&gt;%
 
 .push-left[
 
-```r
+``` r
 # Bivariate OLS
 ols_bi &lt;- lm_robust(xeno ~ bali, data = toydat)
 
@@ -306,17 +493,20 @@ ols_bi &lt;- lm_robust(xeno ~ bali, data = toydat)
 ols_mult &lt;- lm_robust(xeno ~ bali + age, data = toydat)
 
 # Regression table of both results
-modelsummary(list("Biv. OLS" = ols_bi, "Mult. OLS" = ols_mult), stars = TRUE,
-             gof_map = c("nobs", "r.squared"))
+modelsummary(list(
+              "Biv. OLS" = ols_bi, 
+              "Mult. OLS" = ols_mult), 
+              stars = TRUE, 
+              gof_map = c("nobs", "r.squared"), 
+              output = "kableExtra")
 ```
 
 .content-box-green[
-Which one of the two models is correct?
-]
-]
+Which of the two models is correct?
+]]
 
 .push-right[
-&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+&lt;table style="NAborder-bottom: 0; color: black; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
  &lt;thead&gt;
   &lt;tr&gt;
    &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
@@ -327,33 +517,33 @@ Which one of the two models is correct?
 &lt;tbody&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 2.436*** &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.663* &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 12.495*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 1.123* &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (0.070) &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (0.264) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.101) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.447) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; bali &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.099 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.325*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.185 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 1.025*** &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (0.095) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.141) &lt;/td&gt;
    &lt;td style="text-align:center;"&gt; (0.096) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; age &lt;/td&gt;
    &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.037*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.274*** &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
    &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.005) &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.011) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
@@ -362,8 +552,8 @@ Which one of the two models is correct?
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.002 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.096 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.003 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.589 &lt;/td&gt;
   &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
@@ -375,39 +565,32 @@ Which one of the two models is correct?
 
 ---
 class: clear
-# Omitted variable bias .font60[aka selection/confounder bias]
+# Omitted variable (selection/confounder) bias
 
 .push-right[
-&lt;img src="8-Multiple-OLS_files/figure-html/unnamed-chunk-16-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+&lt;img src="8-Multiple-OLS_files/figure-html/unnamed-chunk-22-1.png" width="70%" style="display: block; margin: auto;" /&gt;
 ]
 
 
 .push-left[
-.center[When we compare Xenophobia between those with Bali = 0 to those with Bali = 1 in our simulated toy data:]
+.center[When we compare Xenophobia between those exposed to Bali and those who were not:]
 
-1. We .alert[know] that one part of the difference is the causal effect `\(\beta_{\text{sample}} = 0.3 + \underbrace{\sigma_{\text{sample}}}_{\text{sampling error}} = 0.325\)`.
+1. We .alert[know] that one part of the difference is the causal effect `\(\beta_{\text{sample}} = 1 + \underbrace{\sigma}_{\text{Sampling error}} = 1.025\)`.
 
 .content-box-green[
-- Why do we .alert[know] that in this specific case?
+- Why do we .alert[know] that in this example?
 
-- What else is different between those with Bali = 0 compared to those with Bali = 1?
+- What else is different between those exposed to Bali and those who were not?
 ]]
 
 ---
 class: clear
-# Omitted variable bias .font60[aka selection/confounder bias]
+# Omitted variable (selection/confounder) bias
 
 .push-right[
-&lt;img src="8-Multiple-OLS_files/figure-html/unnamed-chunk-17-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+&lt;img src="8-Multiple-OLS_files/figure-html/unnamed-chunk-23-1.png" width="70%" style="display: block; margin: auto;" /&gt;
 .font80[
-
-```r
-ols_age &lt;- lm_robust(age ~ bali, data = toydat)
-modelsummary(list("Age" = ols_age), stars = TRUE,
-             gof_map = c("nobs", "r.squared"))
-```
-
-&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+&lt;table style="NAborder-bottom: 0; color: black; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
  &lt;thead&gt;
   &lt;tr&gt;
    &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
@@ -417,19 +600,19 @@ modelsummary(list("Age" = ols_age), stars = TRUE,
 &lt;tbody&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 48.092*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 41.546*** &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (0.579) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.289) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; bali &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; −6.141*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −3.070*** &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.790) &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.395) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
@@ -450,23 +633,23 @@ modelsummary(list("Age" = ols_age), stars = TRUE,
 .push-left[
 .center[When we compare Xenophobia between those with Bali = 0 to those with Bali = 1 in our simulated toy data:]
 
-1. We .alert[know] that one part of the difference is the causal effect `\(\beta_{\text{sample}} = 0.3 + \sigma_{\text{sample}} = 0.325\)`.
+1. We .alert[know] that one part of the difference is the causal effect `\(\beta_{\text{sample}} = 1 + \underbrace{\sigma}_{\text{Sampling error}} = 1.025\)`.
 
-2. We compare between people who have an average age difference of -6.141 years.
+2. We compare between people who have an average age difference of `\(\beta_{E \rightarrow C} = -3.07\)` years.
 
 .content-box-green[
-On average, to how much Xenophobia do -6.141 years of age amount?
+On average, to how much Xenophobia do -3.07 years of age amount?
 ]
 ]
 
 ---
 class: clear
-# Omitted variable bias .font60[aka selection/confounder bias]
+# Omitted variable (selection/confounder) bias
 
 .push-right[
-&lt;img src="8-Multiple-OLS_files/figure-html/unnamed-chunk-19-1.png" width="70%" style="display: block; margin: auto;" /&gt;
-
-&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+&lt;img src="8-Multiple-OLS_files/figure-html/unnamed-chunk-25-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+.font80[
+&lt;table style="NAborder-bottom: 0; color: black; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
  &lt;thead&gt;
   &lt;tr&gt;
    &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
@@ -477,33 +660,33 @@ class: clear
 &lt;tbody&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 2.436*** &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.663* &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 12.495*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 1.123* &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (0.070) &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (0.264) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.101) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.447) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; bali &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.099 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.325*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.185 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 1.025*** &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (0.095) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.141) &lt;/td&gt;
    &lt;td style="text-align:center;"&gt; (0.096) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; age &lt;/td&gt;
    &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.037*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.274*** &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
    &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.005) &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.011) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
@@ -512,8 +695,8 @@ class: clear
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.002 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.096 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.003 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.589 &lt;/td&gt;
   &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
@@ -521,18 +704,18 @@ class: clear
 &lt;/table&gt;
 
 
-]
+]]
 
 .push-left[
 .center[When we compare Xenophobia between those with Bali = 0 to those with Bali = 1 in our simulated toy data:]
 
-1. We .alert[know] that one part of the difference is the causal effect `\(\beta_{\text{sample}} = 0.3 + \sigma_{\text{sample}} = 0.325\)`.
+1. We .alert[know] that one part of the difference is the causal effect `\(\beta_{\text{sample}} = 1 + \underbrace{\sigma}_{\text{Sampling error}} = 1.025\)`.
 
-2. We compare between people who have an average age difference of -6.141 years.
+2. We compare between people who have an average age difference of `\(\beta_{E \rightarrow C} = -3.07\)` years.
 
-Because of this age difference, Xenophobia should additionally differ by:
+.font80[Because of this age difference, Xenophobia additionally differs by:]
 
-`\(\begin{equation}\begin{split} &amp; -6.141 \times (0.05+\sigma_{\text{Sample}}) \\ = &amp; -6.141 \times 0.037, \\ = &amp; -0.226. \end{split}\end{equation}\)`
+`\(\begin{equation}\begin{split} &amp; -3.07 \times (0.3 + \sigma) \\ = &amp; -3.07 \times 0.274, \\ = &amp; -0.84. \end{split}\end{equation}\)`
 
 .content-box-green[
 What is the result if we take 1. and 2. together?
@@ -546,14 +729,16 @@ What is the result if we take 1. and 2. together?
 .content-box-red[
 &lt;img src="8-Multiple-OLS_files/figure-html/DAG_OMV-1.png" width="40%" style="display: block; margin: auto;" /&gt;
 
-`$$\tilde{\beta}_{Y \leftarrow D} = \beta_{Y \leftarrow D} + \underbrace{(\beta_{Y \leftarrow C} \times \beta_{C \leftarrow D})}_{\text{Omitted Variable Bias}}$$`
+`$$\tilde{\beta}_{D \rightarrow Y} = \beta_{D \rightarrow Y} + \underbrace{(\beta_{C \rightarrow Y} \times \beta_{D \rightarrow C})}_{\text{Omitted Variable Bias (OVB)}}$$`
 ]]
 
 --
 
 .push-right[
+&lt;br&gt;
+
 .font90[
-&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+&lt;table style="NAborder-bottom: 0; color: black; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
  &lt;thead&gt;
   &lt;tr&gt;
    &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
@@ -564,33 +749,33 @@ What is the result if we take 1. and 2. together?
 &lt;tbody&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 2.436*** &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.663* &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 12.495*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 1.123* &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (0.070) &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (0.264) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.101) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.447) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; bali &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.099 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.325*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.185 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 1.025*** &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (0.095) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.141) &lt;/td&gt;
    &lt;td style="text-align:center;"&gt; (0.096) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; age &lt;/td&gt;
    &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.037*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.274*** &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
    &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.005) &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.011) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
@@ -599,8 +784,8 @@ What is the result if we take 1. and 2. together?
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.002 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.096 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.003 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.589 &lt;/td&gt;
   &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
@@ -609,7 +794,7 @@ What is the result if we take 1. and 2. together?
 
 
 ]
-`$$0.099 = 0.325 + \underbrace{(0.037 \times -6.141)}_{-0.226}$$`
+`$$0.185 = 1.025 + \underbrace{(\underbrace{0.274}_{\beta_{C \rightarrow Y}} \times \underbrace{-3.07}_{\beta_{D \rightarrow C}})}_{\text{OVB} = -0.84}$$`
 ]
 
 ---
@@ -621,21 +806,24 @@ class: inverse middle
 ]
 
 .push-right[
-OK great, but how does multiple OLS get the correct `\(\beta_{Y \leftarrow D}\)` that is not biased by omitted `\(C\)`?
+But how does multiple OLS get the correct `\(\beta_{Y \leftarrow D}\)`?
 ]
+
+---
+class: inverse middle center
+# Break
+
+&lt;iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
 
 ---
 layout: true
 # Frisch-Waugh Theorem
 
 .left-column[
-It partials out/controlls for:
-  1. `\(\beta_{Y \leftarrow C}\)`
-  2. `\(\beta_{D \leftarrow C}\)`
-  
-Frisch and Waugh (1933) proved that the way multiple OLS achieves this is mathematically equivalent to three steps.
+Frisch and Waugh (1933) demonstrated that "controlling" for a confounder is mathematically equivalent to a three-step procedure.
 
-&lt;img src="8-Multiple-OLS_files/figure-html/DAG_FrischWaugh-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+&lt;img src="8-Multiple-OLS_files/figure-html/DAG_FrischWaugh-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+.backgrnote[The double circle indicates that we control for a confounder, thereby effectively closing that backdoor path.]
 ]
 
 ---
@@ -649,32 +837,34 @@ Frisch and Waugh (1933) proved that the way multiple OLS achieves this is mathem
 .push-left[
 .font80[
 
-```r
+``` r
 # Regress xeno on age,
 (toydat &lt;- lm_robust(xeno ~ age, data = toydat) %&gt;%
    # Get residuals,
    add_residuals(toydat, model = .) %&gt;% 
-   # Rename residuals.
-   rename(e_xeno = resid)) 
+   rename(e_xeno = resid)) # Rename residuals.
 # # A tibble: 500 × 5
-#      age int_day  bali   xeno e_xeno
-#    &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;
-#  1  50.0  -2.15      1  2.48  -0.157
-#  2  55.6  -3.35      0  1.77  -1.05 
-#  3  50.4  -1.14      1  3.49   0.839
-#  4  39.1  -2.65      0  1.71  -0.590
-#  5  59.9  -4.05      0  1.58  -1.37 
-#  6  58.9  -2.53      0  3.40   0.483
-#  7  38.4  -1.89      1  2.16  -0.119
-#  8  53.3  -2.80      0 -0.285 -3.03 
-#  9  28.4  -0.373     1  1.21  -0.756
-# 10  37.9  -1.06      1  2.60   0.330
+#      age int_day  bali  xeno e_xeno
+#    &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;
+#  1  42.5   -3.90     1  13.4  0.251
+#  2  45.3   -5.10     0  12.6 -1.27 
+#  3  42.7   -2.89     1  14.5  1.25 
+#  4  37.1   -4.40     0  10.9 -1.02 
+#  5  47.5   -5.80     0  12.8 -1.54 
+#  6  47.0   -4.28     0  14.5  0.300
+#  7  36.7   -3.64     1  12.0  0.146
+#  8  44.1   -4.55     0  10.3 -3.28 
+#  9  31.7   -2.12     1  10.0 -0.615
+# 10  36.5   -2.81     1  12.3  0.588
 # # ℹ 490 more rows
 ```
 ]]
 .push-right[
 &lt;img src="8-Multiple-OLS_files/figure-html/residuals-1.png" width="100%" style="display: block; margin: auto;" /&gt;
-]]
+]
+.content-box-green[.center[
+What is `e_xeno`?
+]]]
 
 ---
 
@@ -685,32 +875,34 @@ Frisch and Waugh (1933) proved that the way multiple OLS achieves this is mathem
 .push-left[
 .font80[
 
-```r
+``` r
 # Regress xeno on age,
 (toydat &lt;- lm_robust(bali ~ age, data = toydat) %&gt;%
    # Get residuals,
    add_residuals(toydat, model = .) %&gt;%
-   # Rename residuals.
-   rename(e_bali = resid))
+   rename(e_bali = resid)) # Rename residuals.
 # # A tibble: 500 × 6
-#      age int_day  bali   xeno e_xeno e_bali
-#    &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;
-#  1  50.0  -2.15      1  2.48  -0.157  0.582
-#  2  55.6  -3.35      0  1.77  -1.05  -0.318
-#  3  50.4  -1.14      1  3.49   0.839  0.590
-#  4  39.1  -2.65      0  1.71  -0.590 -0.609
-#  5  59.9  -4.05      0  1.58  -1.37  -0.243
-#  6  58.9  -2.53      0  3.40   0.483 -0.261
-#  7  38.4  -1.89      1  2.16  -0.119  0.378
-#  8  53.3  -2.80      0 -0.285 -3.03  -0.360
-#  9  28.4  -0.373     1  1.21  -0.756  0.201
-# 10  37.9  -1.06      1  2.60   0.330  0.369
+#      age int_day  bali  xeno e_xeno e_bali
+#    &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;
+#  1  42.5   -3.90     1  13.4  0.251  0.582
+#  2  45.3   -5.10     0  12.6 -1.27  -0.318
+#  3  42.7   -2.89     1  14.5  1.25   0.590
+#  4  37.1   -4.40     0  10.9 -1.02  -0.609
+#  5  47.5   -5.80     0  12.8 -1.54  -0.243
+#  6  47.0   -4.28     0  14.5  0.300 -0.261
+#  7  36.7   -3.64     1  12.0  0.146  0.378
+#  8  44.1   -4.55     0  10.3 -3.28  -0.360
+#  9  31.7   -2.12     1  10.0 -0.615  0.201
+# 10  36.5   -2.81     1  12.3  0.588  0.369
 # # ℹ 490 more rows
 ```
 ]]
 .push-right[
 &lt;img src="8-Multiple-OLS_files/figure-html/residuals2-1.png" width="100%" style="display: block; margin: auto;" /&gt;
-]]
+]
+.content-box-green[.center[
+What is `e_bali`?
+]]]
 
 ---
 
@@ -719,21 +911,24 @@ Frisch and Waugh (1933) proved that the way multiple OLS achieves this is mathem
 **Step 3: Regress `\(e_{D}\)` on `\(e_{C}\)`.**
 ]
 .push-left[
-.font80[
+.font70[
 
-```r
+``` r
 # Regress xeno on age,
-ols_e &lt;- lm_robust(e_xeno ~ e_bali, data = toydat)
+ols_e &lt;- lm_robust(e_xeno ~ e_bali,
+                    data = toydat)
 
-modelsummary(list("Resid. Xeno" = ols_e), stars = TRUE,
-             gof_map = c("nobs", "r.squared"))
+modelsummary(list("Resid. Xeno" = ols_e), 
+            stars = TRUE,
+            gof_map = c("nobs", "r.squared"), 
+            output = "kableExtra")
 ```
 
-&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+&lt;table style="NAborder-bottom: 0; color: black; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
  &lt;thead&gt;
   &lt;tr&gt;
    &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
-   &lt;th style="text-align:center;"&gt;  Resid. Xeno &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; &amp;amp;nbsp;Resid. Xeno &lt;/th&gt;
   &lt;/tr&gt;
  &lt;/thead&gt;
 &lt;tbody&gt;
@@ -747,7 +942,7 @@ modelsummary(list("Resid. Xeno" = ols_e), stars = TRUE,
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; e_bali &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.325*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 1.025*** &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
@@ -759,7 +954,7 @@ modelsummary(list("Resid. Xeno" = ols_e), stars = TRUE,
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.023 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.187 &lt;/td&gt;
   &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
@@ -779,20 +974,20 @@ class: inverse center
 # Why multiple OLS
 
 .push-left[.left[
-- Allows us to estimate `\(\beta_{Y \leftarrow D}\)`, partialling out/controlling for **_observed_** confounding variables.
+- Allows estimation of `\(\beta_{D \rightarrow Y}\)`, controlling for **_observed_** confounding variables.
 
-- **_If all confounders are observed without measurement error_**, multiple OLS can thus identify the average causal effect `\(\kappa_{Y \leftarrow D}\)`.
+- Multiple OLS can identify the average causal effect `\(\kappa_{D \rightarrow Y}\)` if it blocks all backdoor paths.
 
-&lt;img src="8-Multiple-OLS_files/figure-html/unnamed-chunk-26-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+&lt;img src="8-Multiple-OLS_files/figure-html/unnamed-chunk-32-1.png" width="60%" style="display: block; margin: auto;" /&gt;
 ]]
 
 --
 
-.push-right[.left[
+.push-right[.left[.font80[
 - You can think of multiple OLS as down-weighting typical cases (e.g. young people exposed to Bali) and up-weighting untypical cases (older people exposed to Bali)
 
 - Because of this weighting, multiple OLS increases the random variation in `\(D\)`.
-]
+]]
 
 &lt;img src="8-Multiple-OLS_files/figure-html/residuals2-1.png" width="60%" style="display: block; margin: auto;" /&gt;
 ]
@@ -819,8 +1014,55 @@ The best (now multidimensional) "line" is defined by an overall intercept `\(\al
 .push-right[
 .center[**Frisch-Waugh as DAG**]
 
-&lt;img src="8-Multiple-OLS_files/figure-html/unnamed-chunk-27-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+&lt;img src="8-Multiple-OLS_files/figure-html/unnamed-chunk-33-1.png" width="60%" style="display: block; margin: auto;" /&gt;
 
+]
+
+---
+class: clear
+# Can multiple OLS fix broken interventions?
+
+.push-left[.content-box-green[
+
+&lt;img src="8-Multiple-OLS_files/figure-html/unnamed-chunk-34-1.png" width="40%" style="display: block; margin: auto;" /&gt;
+
+- OLS can statistically balance **_observed_** confounders, even after the data has been collected.
+]]
+
+.push-right[.content-box-red[
+
+&lt;img src="8-Multiple-OLS_files/figure-html/DAG_FrischWaugh2-1.png" width="40%" style="display: block; margin: auto;" /&gt;
+
+- If **_observed_** confounders are imbalanced, *maybe more is broken than what we have observed?*
+]]
+
+---
+# Pre- versus post-treatment controls
+
+.center[Time of measurement helps to decide whether a variable is a confounder or a mechanism/mediator.&lt;br&gt; But generally, you can only rely on sound logical reasoning. .alert[Don't control for mechanisms/mediators.]]
+
+.push-left[.content-box-green[
+.center[**Pre-treatment**]
+&lt;img src="8-Multiple-OLS_files/figure-html/unnamed-chunk-35-1.png" width="40%" style="display: block; margin: auto;" /&gt;
+
+- *Potential confounders*: Variables that are **_causally prior to the treatment_**.
+]]
+
+.push-left[.content-box-red[
+.center[**Post-treatment**]
+&lt;img src="8-Multiple-OLS_files/figure-html/DAG_mediator-1.png" width="40%" style="display: block; margin: auto;" /&gt;
+- *Potential mechanisms/mediators*: Variables that are potentially **_a result of the treatment_**.
+]]
+
+---
+# Group work
+
+.content-box-green[
+1. Download the "Sesame-variables.doc" file from Absalon. Recall that our outcome was "postlet", the randomized intervention was "encouraged", and the treatment of interest was "watched".
+
+2. Identify variables that should ideally be balanced, and if they are not, should be controlled for as pre-treatment confounders.
+
+3. Identify variables that we should definitely not control for because they are post-treatment mechanisms or even alternative measures of the outcome we are interested in.
 ]
 
 ---
@@ -837,7 +1079,7 @@ The best (now multidimensional) "line" is defined by an overall intercept `\(\al
 - What does it suggest about the direction of the omitted age bias among Portuguese? (Assuming that xenophobia also increases with age in Portugal?)
 ]]
 .right-panel[
-&lt;table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;"&gt;
+&lt;table class="table" style="color: black; width: auto !important; margin-left: auto; margin-right: auto;"&gt;
 &lt;caption&gt;Xeno and age by those who were (not) exposed to Bali&lt;/caption&gt;
  &lt;thead&gt;
 &lt;tr&gt;
@@ -882,7 +1124,7 @@ The best (now multidimensional) "line" is defined by an overall intercept `\(\al
 ]]
 .panel[.panel-name[R code]
 
-```r
+``` r
 ESS %&gt;%
   # Focus on Portuguese respondents
   filter(cntry == "PT") %&gt;%
@@ -892,7 +1134,8 @@ ESS %&gt;%
 * datasummary_balance( # Make a balance table,
 *   formula = ~ treat, # by exposure to Bali
 *   data = . ,
-*   title = "Xeno and age by those who were (not) exposed to Bali")
+*   title = "Xeno and age by those who were (not) exposed to Bali",
+    output = "kableExtra") # Specify the output format as kableExtra 
 ```
 ]]
 
@@ -901,7 +1144,7 @@ class: clear
 # Controlling for *observed* confounders
 
 .left-column[
-- Alternative names for "controlling for `\(X\)`": 
+Alternative names for "controlling for `\(X\)`": 
   + Partialling out `\(X\)`,
   + Adjusted for `\(X\)`,
   + Conditional on `\(X\)`.
@@ -919,7 +1162,7 @@ class: clear
 .push-left[
 .font80[
 
-```r
+``` r
 # Estimate the treatment effect with OLS
 ols_pt_bi &lt;- lm_robust(anti_immi ~ treat, weights = pspwght,
                        data = ESS %&gt;% filter(cntry == "PT"))
@@ -927,10 +1170,10 @@ ols_pt_mult &lt;- lm_robust(anti_immi ~ treat + age, weights = pspwght,
                          data = ESS %&gt;% filter(cntry == "PT"))
 # Report results in a nicely-formatted table
 modelsummary(list("Biv. OLS" = ols_pt_bi, "Mult. OLS" = ols_pt_mult), stars = TRUE,
-             gof_map = c("nobs", "r.squared"))
+             gof_map = c("nobs", "r.squared"), output = "kableExtra")
 ```
 
-&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+&lt;table style="NAborder-bottom: 0; color: black; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
  &lt;thead&gt;
   &lt;tr&gt;
    &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
@@ -994,11 +1237,11 @@ modelsummary(list("Biv. OLS" = ols_pt_bi, "Mult. OLS" = ols_pt_mult), stars = TR
 
 
 
-`$$\tilde{\beta}_{y \leftarrow D} = \underbrace{0.313}_{\beta_{y \leftarrow D}} + \underbrace{(2.6 \times 0.006)}_{\text{OVB}} = 0.33$$`
+`$$\tilde{\beta}_{D \rightarrow Y} = \underbrace{0.313}_{\beta_{D \rightarrow Y}} + \underbrace{(\underbrace{2.6}_{\beta_{D \rightarrow C}} \times \underbrace{0.006}_{\beta_{C \rightarrow Y}})}_{\text{OVB}} = 0.33$$`
 ]
 .panel[.panel-name[R code]
 
-```r
+``` r
 bind_rows(ols_pt_bi %&gt;% tidy(),
           ols_pt_mult %&gt;% tidy(),
           .id = "model") %&gt;%
@@ -1032,7 +1275,7 @@ class: clear
 ]
 
 .left-column[
-These results are adjusted for several further variables. After the break, it's your turn to repliacte that.
+These results are adjusted for several further variables. Now it's your turn to repliacte that.
 ]
 
 ---
@@ -1055,460 +1298,6 @@ class: middle clear
 &lt;iframe src='exercise1.html' width='1000' height='600' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
 ]
 
----
-layout: true
-# Zero-tolerance for domestic violence?
-
-.left-column[
-&lt;img src="https://images.theconversation.com/files/325865/original/file-20200406-6044-hao5gp.jpg?ixlib=rb-1.1.0&amp;q=45&amp;auto=format&amp;w=1200&amp;h=675.0&amp;fit=crop" width="80%" style="display: block; margin: auto;" /&gt;&lt;img src="https://indblik.dk/wp-content/uploads/2021/06/41648075864_b1450a1d67_k.jpg" width="80%" style="display: block; margin: auto;" /&gt;
-]
-
----
-
-.right-column[
-&lt;iframe src='https://en.wikipedia.org/wiki/Minneapolis_Domestic_Violence_Experiment' width='700' height='550' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
-]
-
----
-
-.right-column[
-&gt; [...] the pains of punishment deter people from repeating the crimes for which they are punished, especially when punishment is certain, swift and severe. 
-
-.center[versus]
-
-&gt; [...] punishment often makes individuals more likely to commit crimes because of altered interactional structures, foreclosed legal opportunities and secondary deviance
-&gt; -- .center[.backgrnote[*Source:* Sherman and Berk (1984)]]
-
-.center[**Does punishment increase repeat domestic abuse?**]
-]
-
----
-layout: false
-# Compliance among police officers
-
-.panelset[
-.panel[.panel-name[Intention to treat]
-.push-left[
-&lt;br&gt;
-&lt;br&gt;
-
-&lt;table&gt;
- &lt;thead&gt;
-  &lt;tr&gt;
-   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
-   &lt;th style="text-align:right;"&gt; Arrested &lt;/th&gt;
-   &lt;th style="text-align:right;"&gt; Coddled &lt;/th&gt;
-  &lt;/tr&gt;
- &lt;/thead&gt;
-&lt;tbody&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; Arrest! &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 91 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; Coddle! &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 45 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 177 &lt;/td&gt;
-  &lt;/tr&gt;
-&lt;/tbody&gt;
-&lt;/table&gt;
-
-
-]
-.push-right[
-&lt;img src="https://s.abcnews.com/images/US/minneapolis-police-department-chief-search-medaria-arradondo-04-gty-llr-220621_1655836848859_hpMain_16x9_992.jpg" width="80%" style="display: block; margin: auto;" /&gt;
-]
-]
-.panel[.panel-name[R code]
-
-```r
-# Load the data from the Minneapolis Domestic Violence Experiment
-data("mdve", package = "masteringmetrics")
-
-mdve &lt;- mdve %&gt;%
-  # Recode intention and actual treatment 
-  # into factor variables with two categories
-  mutate( 
-    T_RANDOM = case_when(
-      T_RANDOM == 2 | T_RANDOM == 3 ~ "Coddle!",
-      T_RANDOM == 1 ~ "Arrest!",
-      TRUE ~ as.character(NA)) %&gt;% fct_relevel("Arrest!"),
-    T_FINAL = case_when(
-      T_FINAL == 2 | T_FINAL == 3 ~ "Coddled",
-      T_FINAL == 1 ~ "Arrested",
-      TRUE ~ as.character(NA)) %&gt;% fct_relevel("Arrested"))
-
-# Make frequency table
-mdve %&gt;%
-  select(T_RANDOM, T_FINAL) %&gt;%
-  table() %&gt;% kable()
-```
-]]
-
----
-# RCTs vs ITTs
-
-.push-left[.content-box-red[
-.font120[.center[**RCT**]]
-
-`$$\begin{equation}\begin{split} &amp; |r_{I,D}| = 1 \\ &amp;\rightarrow I = D! \end{split}\end{equation}$$`
-
-That is, the absolute correlation between intervention `\(I\)` and predictor of interest `\(D\)` is 1, making them practically the same thing.
-&lt;br&gt;
-&lt;br&gt;
-
-&lt;img src="8-Multiple-OLS_files/figure-html/DAG4-1.png" width="70%" style="display: block; margin: auto;" /&gt;
-]]
-
---
-
-.push-left[.content-box-blue[
-.font120[.center[**ITT**]]
-
-`$$\begin{equation}\begin{split} &amp; |r_{Z, D}| &lt; 1 \\ &amp;\rightarrow Z \neq D! \end{split}\end{equation}$$`
-
-That is, the absolute correlation between intervention `\(Z\)` and predictor of interest `\(D\)` is smaller than 1, inducing some portion of random variation into `\(D\)`.
-
-
-&lt;img src="8-Multiple-OLS_files/figure-html/DAG5-1.png" width="70%" style="display: block; margin: auto;" /&gt;
-]]
-
----
-layout: false
-# IV .font60[to the rescue]
-
-.left-column[.content-box-red[
-.center[**3 Requirements**]
-1. *First stage*: Instrument has causal effect on outcome `\(D_{i}\)`.
-
-2. *Randomization*: Instrument is randomly assigned (RCT or natural experiment).
-
-3. *Exclusion restriction*: Instrument affects outcome `\(Y_{i}\)` **_only_** through its effect on `\(D\)`.
-  + In practice very difficult to test
-]]
-
-.right-column[
-&lt;img src="8-Multiple-OLS_files/figure-html/DAG8-1.png" width="70%" style="display: block; margin: auto;" /&gt;
-
-**First Stage:** `\(E[D_{i}|Z_{i}=1]-E[D_{i}|Z_{i}=0]; \text{call this }\phi.\)`
-
-**Reduced Form:** `\(E[Y_{i}|Z_{i}=1]-E[Y_{i}|Z_{i}=0]; \text{call this }\rho.\)`
-
-**IV Estimator of LATE:** `\(\lambda = \frac{\rho}{\phi} = \frac{E[Y_{i}|Z_{i}=1]-E[Y_{i}|Z_{i}=0]}{E[D_{i}|Z_{i}=1]-E[D_{i}|Z_{i}=0]} \color{red}{= E[Y_{1i}-Y_{0i}|\text{Complier}_{i}=1]}.\)`
-]
-
----
-# IV .font60[to the rescue]
-
-.push-right[
-.panelset[
-.panel[.panel-name[First Stage].font90[
-&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
- &lt;thead&gt;
-  &lt;tr&gt;
-   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
-   &lt;th style="text-align:center;"&gt; First stage &lt;/th&gt;
-  &lt;/tr&gt;
- &lt;/thead&gt;
-&lt;tbody&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.011 &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (0.011) &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; T_RANDOMCoddle! &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.786*** &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.029) &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 314 &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.522 &lt;/td&gt;
-  &lt;/tr&gt;
-&lt;/tbody&gt;
-&lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
-&lt;sup&gt;&lt;/sup&gt; + p &amp;lt; 0.1, * p &amp;lt; 0.05, ** p &amp;lt; 0.01, *** p &amp;lt; 0.001&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;
-&lt;/table&gt;
-
-
-]]
-.panel[.panel-name[R code]
-
-```r
-mdve &lt;- mdve %&gt;%
-  mutate( # Prepare binary outcome.
-    T_FINAL_01 = case_when(
-      T_FINAL == "Arrested" ~ 0,
-      T_FINAL == "Coddled" ~ 1))
-
-# First stage OLS (i.e., linear probability model)
-first_stg &lt;- lm_robust(T_FINAL_01 ~ T_RANDOM, 
-                       data = mdve)
-
-# Regression table
-modelsummary(list("First stage" = first_stg), stars = TRUE,
-             gof_map = c("nobs", "r.squared"))
-```
-]]]
-
-.push-left[
-&lt;img src="8-Multiple-OLS_files/figure-html/unnamed-chunk-38-1.png" width="70%" style="display: block; margin: auto;" /&gt;
-
-**First Stage:** `\(0.786; \text{call this }\phi.\)`
-
-**Reduced Form:** `\(0.114; \text{call this }\rho.\)`&lt;br&gt;.backgrnote[According to Sherman and Berk (1984).]
-
-**IV Estimator of LATE:** `\(\lambda = \frac{\rho}{\phi} = \frac{E[Y_{i}|Z_{i}=1]-E[Y_{i}|Z_{i}=0]}{E[D_{i}|Z_{i}=1]-E[D_{i}|Z_{i}=0]} = \underline{\underline{0.145}} \color{red}{|\text{Complier}_{i}=1}.\)`
-]
-
----
-layout: true
-# What if .font70[the instrument wasn't random?]
-
-.push-right[
-.panelset[
-.panel[.panel-name[Confounded first stage?]
-&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
- &lt;thead&gt;
-  &lt;tr&gt;
-   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
-   &lt;th style="text-align:center;"&gt; Z &lt;/th&gt;
-   &lt;th style="text-align:center;"&gt; D &lt;/th&gt;
-  &lt;/tr&gt;
- &lt;/thead&gt;
-&lt;tbody&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.741*** &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.004 &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; S_RACEAsian &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.259*** &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.211*** &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; S_RACEBlack &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; −0.032 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.010 &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; S_RACEHispanic &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.134 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.009 &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; S_RACEIndian &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; −0.114 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.005 &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; S_RACEOther &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.059 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.157* &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt; T_RANDOM_01 &lt;/td&gt;
-   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; 0.785*** &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 330 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 314 &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.013 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.524 &lt;/td&gt;
-  &lt;/tr&gt;
-&lt;/tbody&gt;
-&lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
-&lt;sup&gt;&lt;/sup&gt; + p &amp;lt; 0.1, * p &amp;lt; 0.05, ** p &amp;lt; 0.01, *** p &amp;lt; 0.001&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;
-&lt;/table&gt;
-
-
-]
-
-.panel[.panel-name[R code]
-.font90[
-
-```r
-mdve &lt;- mdve %&gt;%
-  mutate( # Prepare binary outcome.
-    T_RANDOM_01 = case_when(
-      T_RANDOM == "Arrest!" ~ 0,
-      T_RANDOM == "Coddle!" ~ 1),
-    # Recode race variable
-    S_RACE = case_when(
-      S_RACE == 1 ~ "White",
-      S_RACE == 2 ~ "Black",
-      S_RACE == 3 ~ "Indian",
-      S_RACE == 4 ~ "Asian",
-      S_RACE == 5 ~ "Hispanic",
-      TRUE ~ "Other") %&gt;% fct_relevel("White"))
-
-# Randomization violated?
-ols_zc &lt;- lm_robust(T_RANDOM_01 ~ S_RACE, data = mdve)
-ols_dc &lt;- lm_robust(T_FINAL_01 ~ S_RACE + T_RANDOM_01, data = mdve)
-
-# Regression table
-modelsummary(list("Z" = ols_zc, "D" = ols_dc), stars = TRUE, 
-             statistic = NULL, gof_map = c("nobs", "r.squared"))
-```
-]
-]]]
-
----
-
-.push-left[
-&lt;img src="8-Multiple-OLS_files/figure-html/DAG9-1.png" width="70%" style="display: block; margin: auto;" /&gt;
-
-.content-box-green[
-- What do the two regression suggest?
-
-- Why did I adjust the differences in `\(D\)` across ethnic groups for `\(Z\)`?
-
-- Could the differences across groups be a problem?
-]]
-
----
-
-.push-left[
-&lt;img src="8-Multiple-OLS_files/figure-html/unnamed-chunk-40-1.png" width="60%" style="display: block; margin: auto;" /&gt;
-
-.content-box-red[
-- Because randomization failed for Asian suspects, and officers were more likely to coddle Asian suspects (ignoring the intervention): **Ethnicity introduces OVB to `\(\phi\)`.**
-
-
-- **Ethnicity may also introduce OVB to `\(\lambda\)`**, if Asian suspects have different repeat domestic violence rates. Unfortunately, the accessible data do not entail `\(Y\)`, so we cannot check and correct for this.
-]]
-
----
-layout: false
-# Multiple OLS .font70[to the rescue!]
-
-.push-right[
-.center[Adjusted first stage .alert[and reduced form!]]
-&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
- &lt;thead&gt;
-  &lt;tr&gt;
-   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
-   &lt;th style="text-align:center;"&gt; D &lt;/th&gt;
-  &lt;/tr&gt;
- &lt;/thead&gt;
-&lt;tbody&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.004 &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; S_RACEAsian &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.211*** &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; S_RACEBlack &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.010 &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; S_RACEHispanic &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.009 &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; S_RACEIndian &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.005 &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; S_RACEOther &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.157* &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt; T_RANDOM_01 &lt;/td&gt;
-   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; 0.785*** &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 314 &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.524 &lt;/td&gt;
-  &lt;/tr&gt;
-&lt;/tbody&gt;
-&lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
-&lt;sup&gt;&lt;/sup&gt; + p &amp;lt; 0.1, * p &amp;lt; 0.05, ** p &amp;lt; 0.01, *** p &amp;lt; 0.001&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;
-&lt;/table&gt;
-
-
-]
-
-.push-left[
-&lt;img src="8-Multiple-OLS_files/figure-html/DAG10-1.png" width="70%" style="display: block; margin: auto;" /&gt;
-
-.alert[Adjusted] **First Stage:** `\(0.785; \text{call this }\phi|C.\)`
-
-.alert[Adjusted] **Reduced Form:** `\(\color{red}{?}; \text{call this }\rho|C.\)`&lt;br&gt;.backgrnote[According to Sherman and Berk (1984).]
-
-**Adjusted IV Estimator of LATE:** `\(\lambda = \frac{\rho|C}{\phi|C} = \frac{\color{red}{?}}{0.785} \color{red}{|\text{Complier}_{i}=1}.\)`
-]
-
----
-class: clear
-# Can multiple OLS fix broken interventions?
-
-.push-left[.content-box-green[
-
-&lt;img src="8-Multiple-OLS_files/figure-html/unnamed-chunk-41-1.png" width="40%" style="display: block; margin: auto;" /&gt;
-
-- OLS can statistically balance **_observed_** confounders, even after the data has been finally collected.
-]]
-
-.push-right[.content-box-red[
-
-&lt;img src="8-Multiple-OLS_files/figure-html/DAG_FrischWaugh2-1.png" width="40%" style="display: block; margin: auto;" /&gt;
-
-- If **_observed_** confounders are imbalanced, *maybe more is broken that we have not observed?*
-]]
-
----
-# Pre- versus post-treatment controls
-
-.center.alert[Time of measurement helps to decide whether a variable is a confounder or a mechanism/mediator.&lt;br&gt; But generally, you can only rely on sound logical reasoning!]
-
-.push-left[.content-box-green[
-.center[**Pre-treatment**]
-&lt;img src="8-Multiple-OLS_files/figure-html/unnamed-chunk-42-1.png" width="40%" style="display: block; margin: auto;" /&gt;
-
-- *Potential confounders*: Variables that are **_causally prior to the treatment_**.
-]]
-
-.push-left[.content-box-red[
-.center[**Post-treatment**]
-&lt;img src="8-Multiple-OLS_files/figure-html/DAG_mediator-1.png" width="40%" style="display: block; margin: auto;" /&gt;
-- *Potential mechanisms/mediators*: Variables that are potentially **_a result of the treatment_**.
-]]
-
----
-# Group work
-
-.content-box-green[
-1. Download the "Sesame-variables.doc" file from Absalon. Recall that our outcome was "postlet", the randomized intervention was "encouraged", and the treatment of interest was "watched".
-
-2. Identify variables that should ideally be balanced, and if they are not, should be controlled for as pre-treatment confounders.
-
-3. Identify variables that we should definitely not control for because they are post-treatment mechanisms or even alternative measures of the outcome we are interested in.
-]
 
 ---
 class: inverse

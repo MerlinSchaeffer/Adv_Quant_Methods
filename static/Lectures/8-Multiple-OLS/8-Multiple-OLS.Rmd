@@ -1,6 +1,6 @@
 ---
 title: "Multiple Regression & <br><br> Fundamentals of Causal Inference"
-subtitle: "8. Multiple OLS regression: Adjusting randomized interventions for *observed* confounders"
+subtitle: "8. Multiple OLS regression:<br> Adjusting for *observed* confounders"
 author: "Merlin Schaeffer<br> Department of Sociology"
 date: "`r Sys.Date()`"
 output: 
@@ -24,6 +24,14 @@ library(modelr)
 library(webexercises) # Small web-based answer scales.
 library(equatiomatic) # Regression equations from model objects.
 library(essentials)
+pacman::p_load(
+  tidyverse, # Data manipulation,
+  haven, # Read Stata data,
+  furniture, # For row-means,
+  ggplot2, # beautiful figures,
+  estimatr, # Regression for weighted data,
+  modelr, # Turn results of lm() into a tibble,
+  modelsummary) # for balance and regression tables.
 
 options(htmltools.preserve.raw = FALSE, tikzDefaultEngine = "xetex",
         htmltools.dir.version = FALSE, servr.interval = 0.5, width = 115, digits = 3)
@@ -72,7 +80,7 @@ class: clear
 \node[state] (3) [dashed, above = of 2] {$C$};
 \node[state] (4) [right = of 2] {$Y$};
 
-\path (1) edge [red, "$|r|$"] (2);
+\path (1) edge [red, "$r$"] (2);
 \path (2) edge (4);
 \path (3) edge [dashed] (4);
 \path (3) edge [dashed] (2);
@@ -85,39 +93,31 @@ class: clear
 \usetikzlibrary{trees}
 
 \tikzset{
-  el/.style = {inner sep=2pt, align=left, sloped},
+  el/.style = {inner sep=2pt, align=center, sloped},
   level distance=1.5cm,
-  level 1/.style={sibling distance=6.5cm},
-  level 2/.style={sibling distance=3cm},
-  level 3/.style={sibling distance=1.5cm},
+  level 1/.style={sibling distance=8cm},
+  level 2/.style={sibling distance=5cm},
   node/.style={align=center,anchor=north}
 }
 
 \tikzstyle{bag} = [align=center]
 
 \begin{tikzpicture}
-  \node[bag] {Randomized \\ $I$ntervention of, or $E$xposure to \\ $D$}
-    child {node[bag] {Researcher\\randomized $I$}
-      child {node[bag] {$|r|_{D \leftarrow I} = 1$}
+  \node[bag] {Randomized \\ Researcher $I$ntervention \\ or Natural $E$xposure}
+      child {node[bag] {$|r|_{I/E \rightarrow D} = 1$ \\ \footnotesize{\color{gray}{$(\Rightarrow I/E = D)$}}}
         child {node[bag] {Randomized \\ Controlled \\ Trial (RCT)}
-          child {node[bag] {Bivariate \\ OLS}}
+          child {node[bag] {Bivariate \\ OLS}
+            child {node[bag] {Averge Causal \\ Effect of $D$}}
+          }
         }
       }
-      child {node[bag] {$|r|_{D \leftarrow I} < 1$}
-        child {node[bag] {Intention to \\ Treat Design (ITT)}
-          child {node[bag] {Instrument \\ Variable (IV)}}
+      child {node[bag] {$|r|_{I/E \rightarrow D} < 1$ \\ \footnotesize{\color{gray}{$(\Rightarrow I/E \neq D)$}}}
+        child {node[bag] {Intention to \\ Treat Design}
+            child {node[bag] {Bivariate \\ OLS}
+          child {node[bag] {Causal Intention \\ to Treat Effect (ITT) \\ of $I/E$}}
         }
-      }
-    }
-    child {node[bag] {"Nature" \\ randomized $E$}
-    child {node[bag] {$|r|_{D \leftarrow E} = 1$}
-      child {node[bag] {Natural \\ Expriment}
-        child {node[bag] {Bivariate \\ OLS}}
-      }
-    }
-      child {node[bag] {$|r|_{D \leftarrow E} < 1$}
-        child {node[bag] {Natural \\ Expriment}
-          child {node[bag] {Instrument \\ Variable (IV)}}
+          child {node[bag] {Instrument \\ Variable (IV)}
+          child {node[bag] {Local Avergae \\ Treatment Effect of $D$ \\ among Complyers (LATE) }}
         }
       }
     };
@@ -129,22 +129,210 @@ class: clear
 class: inverse middle
 # Today's schedule
 
-1. **Today's 1st research question**: Terrorist attacks and xenophobia re-visited.
+1. **Today's 1st research question**: Zero-tolerance for domestic violence re-visited.
+  + Recap of IV
+  
+2. **Today's 2nd research question**: Terrorist attacks and xenophobia re-visited.
 
-2. **Multiple OLS**
+3. **Multiple OLS**
   
   + Omitted variable bias
   + Frisch-Waugh Theorem
   + Estimation
+  
+---
+layout: true
+# IV .font70[Zero-tolerance for domestic violence?]
 
-3. **IV & Multiple OLS**
+.left-column[
+```{r, echo = FALSE, out.width='80%'}
+knitr::include_graphics('https://images.theconversation.com/files/325865/original/file-20200406-6044-hao5gp.jpg?ixlib=rb-1.1.0&q=45&auto=format&w=1200&h=675.0&fit=crop')
+knitr::include_graphics('https://indblik.dk/wp-content/uploads/2021/06/41648075864_b1450a1d67_k.jpg')
+```
+]
 
-4. **Today's 2nd research question**: Zero-tolerance for domestic violence re-visited.
-  + Multiple OLS to the rescue
+---
+
+.right-column[
+<iframe src='https://en.wikipedia.org/wiki/Minneapolis_Domestic_Violence_Experiment' width='700' height='550' frameborder='0' scrolling='yes'></iframe>
+]
+
+---
+
+.right-column[
+"[...] the pains of punishment deter people from repeating the crimes for which they are punished, especially when punishment is certain, swift and severe." 
+
+.center[versus]
+
+"[...] punishment often makes individuals more likely to commit crimes because of altered interactional structures, foreclosed legal opportunities and secondary deviance."
+> -- .center[.backgrnote[*Source:* `r Citet(myBib, "sherman_specific_1984")`]]
+
+.center[**Does punishment increase repeat domestic abuse?**]
+]
+
+---
+layout: false
+# Compliance among police officers
+
+.panelset[
+.panel[.panel-name[Intention to treat]
+.push-left[
+<br>
+<br>
+
+```{r itt_tab, echo = FALSE, results = 'asis'}
+# Load the data from the Minneapolis Domestic Violence Experiment
+data("mdve", package = "masteringmetrics")
+
+mdve <- mdve %>%
+ mutate( # Recode into factor variables with two categories
+   T_RANDOM = case_when(
+     T_RANDOM == 2 | T_RANDOM == 3 ~ "Coddle", # Combine categories 2 and 3 into "Coddle"
+     T_RANDOM == 1 ~ "Arrest", # Category 1 becomes "Arrest"
+     TRUE ~ as.character(NA)) %>% # All other values become NA
+     fct_relevel("Arrest"), # Make "Arrest" the reference level
+   T_FINAL = case_when(
+     T_FINAL == 2 | T_FINAL == 3 ~ "Actually coddled", # Combine categories 2 and 3 into "Actually coddled"
+     T_FINAL == 1 ~ "Actually arrested", # Category 1 becomes "Actually arrested"
+     TRUE ~ as.character(NA)) %>% # All other values become NA
+     fct_relevel("Actually arrested")) # Make "Actually arrested" the reference level
+
+mdve %>%
+ select(T_RANDOM, T_FINAL) %>% # Select only the treatment variables
+ table() %>% kable() # Create a cross-tabulation of the two variables
+```
+]
+.push-right[
+```{r, echo = FALSE, out.width='80%'}
+knitr::include_graphics('https://s.abcnews.com/images/US/minneapolis-police-department-chief-search-medaria-arradondo-04-gty-llr-220621_1655836848859_hpMain_16x9_992.jpg')
+```
+]
+]
+.panel[.panel-name[R code]
+```{r ref.label = "itt_tab", eval = FALSE}
+```
+]]
+
+---
+layout: false
+# IV .font60[to the rescue]
+
+.left-column[.content-box-red[
+.center[**3 Requirements**]
+1. *First stage*: Instrument $Z_{i}$ has causal effect on $D_{i}$.
+
+2. *Randomization*: Instrument $Z_{i}$ is randomly assigned (RCT or natural experiment).
+
+3. *Exclusion restriction*: Instrument $Z_{i}$ affects outcome $Y_{i}$ **_only_** through its effect on $D_{i}$.
+]]
+
+.right-column[
+<br>
+
+.push-left[
+```{tikz, DAG8, echo = FALSE, out.width='100%'}
+\usetikzlibrary{shapes,decorations,arrows,calc,arrows.meta,fit,positioning,quotes}
+\tikzset{
+  -Latex,auto,node distance =1 cm and 1 cm,semithick,
+  state/.style ={ellipse, draw, minimum width = 0.7 cm},
+  point/.style = {circle, draw, inner sep=0.04cm,fill,node contents={}},
+  bidirected/.style={Latex-Latex, dashed},
+  el/.style = {inner sep=2pt, align=left, sloped}
+}
+
+\begin{tikzpicture}
+\sffamily
+\node[state] (1) at (0,0) {$Z$};
+\node[state] (2) at (1.5,1.4) {$C$};
+\node[state] (3) at (3,0) {$Y$};
+
+\path (1) edge ["$\rho$"] (3);
+\path (2) edge [dashed] (3);
+\end{tikzpicture}
+```
+]
+.push-right[
+```{tikz, DAG9, echo = FALSE, out.width='100%'}
+\usetikzlibrary{shapes,decorations,arrows,calc,arrows.meta,fit,positioning,quotes}
+\tikzset{
+  -Latex,auto,node distance =1 cm and 1 cm,semithick,
+  state/.style ={ellipse, draw, minimum width = 0.7 cm},
+  point/.style = {circle, draw, inner sep=0.04cm,fill,node contents={}},
+  bidirected/.style={Latex-Latex, dashed},
+  el/.style = {inner sep=2pt, align=left, sloped}
+}
+
+\begin{tikzpicture}
+\sffamily
+\node[state] (1) at (0,0) {$Z$};
+\node[state] (2) [red] [right = of 1] {$D$};
+\node[state] (3) [above = of 2] {$C$};
+\node[state] (4) [right = of 2] {$Y$};
+
+\path (1) edge ["$\phi$"] (2);
+\path (2) [red] edge ["$\lambda$"](4);
+\path (3) edge [dashed] (4);
+\path (3) edge [dashed] (2);
+\end{tikzpicture}
+```
+]]
+
+**Reduced Form:** $\beta_{Z \rightarrow Y} = E[Y_{i}|Z_{i}=1]-E[Y_{i}|Z_{i}=0]; \text{call this }\rho.$
+
+**First Stage:** $\beta_{Z \rightarrow D} = E[D_{i}|Z_{i}=1]-E[D_{i}|Z_{i}=0]; \text{call this }\phi.$
+
+**IV Estimator of** $\lambda = \frac{\beta_{Z \rightarrow Y}}{\beta_{Z \rightarrow D}} = \frac{E[Y_{i}|Z_{i}=1]-E[Y_{i}|Z_{i}=0]}{E[D_{i}|Z_{i}=1]-E[D_{i}|Z_{i}=0]} = \frac{\rho}{\phi}.$
+
+---
+# IV .font60[to the rescue]
+
+.push-right[
+.panelset[
+.panel[.panel-name[First Stage].font90[
+```{r first_stg, echo = FALSE, results = 'asis'}
+mdve <- mdve %>%
+  mutate( # Code binary D
+    T_FINAL_01 = case_when(
+    # Code "Actually Arrested" as 0
+    T_FINAL == "Actually arrested" ~ 0, 
+    # Code "Actually Coddled" as 1
+    T_FINAL == "Actually coddled" ~ 1)) 
+
+# First stage OLS
+first_stg <- lm_robust(T_FINAL_01 ~ T_RANDOM, 
+                        data = mdve)
+
+# Regression table
+modelsummary(list("First stage" = first_stg), 
+             stars = TRUE,
+             gof_map = c("nobs", "r.squared"), 
+             output = "kableExtra")
+```
+]]
+.panel[.panel-name[R code]
+```{r ref.label = "first_stg", eval = FALSE}
+```
+]]]
+
+.push-left[
+.push-left[
+```{tikz, ref.label = "DAG8", echo = FALSE, out.width='100%'}
+```
+]
+.push-right[
+```{tikz, ref.label = "DAG9", echo = FALSE, out.width='100%'}
+```
+]]
+
+**Reduced Form:** $\rho = 0.114$ .backgrnote[According to `r Citet(myBib, "sherman_specific_1984")`.]
+
+**First Stage:** $\phi = `r coef(first_stg)["T_RANDOMCoddle!"]`.$
+
+**IV Estimator of LATE:** $\lambda = \frac{\rho}{\phi} = \frac{E[Y_{i}|Z_{i}=1]-E[Y_{i}|Z_{i}=0]}{E[D_{i}|Z_{i}=1]-E[D_{i}|Z_{i}=0]} = \underline{\underline{`r 0.114 / coef(first_stg)["T_RANDOMCoddle!"]`}} \color{red}{|\text{Complier}_{i}=1}.$
 
 ---
 class: inverse middle center
-# Research question 1 of the day
+# Research question two of the day
 
 .right-column[
 ```{r, echo = FALSE, out.width='60%'}
@@ -171,34 +359,15 @@ knitr::include_graphics('./img/randomization2.png')
 ```
 
 If we *randomly* divide subjects into treatment and control groups, .alert[they come from the same underlying population]. 
-  <br> <br> $\rightarrow$ They will be similar, on average, *in every way*;<br> **including their $Y_{0}$ **!
-  <br> <br> $\rightarrow E[Y_{0i}|D=1] = E[Y_{0i}|D=0]$!
+    <br> <br> $\rightarrow$ They will be similar, on average, *in every way*;<br> **including their $Y_{0}$ **!
+    <br> <br> $\rightarrow E[Y_{0i}|D=1] = E[Y_{0i}|D=0]$!
+    
+**Beware**, in practice randomization can fail, especially if your sample is small.
 ]
 
 .push-right[
-```{tikz, DAG_RCT, echo = FALSE, out.width='70%'}
-\usetikzlibrary{shapes,decorations,arrows,calc,arrows.meta,fit,positioning,quotes}
-\tikzset{
-  -Latex,auto,node distance =1 cm and 1 cm,semithick,
-  state/.style ={ellipse, draw, minimum width = 0.7 cm},
-  point/.style = {circle, draw, inner sep=0.04cm,fill,node contents={}},
-  bidirected/.style={Latex-Latex,dashed},
-  el/.style = {inner sep=2pt, align=left, sloped}
-}
 
-\begin{tikzpicture}
-\sffamily
-\node[state] (1) [red] at (0,0) {$I$};
-\node[state] (2) [right = of 1] {$D$};
-\node[state] (3) [dashed, above = of 2] {$C$};
-\node[state] (4) [right = of 2] {$Y$};
-
-\path (1) [red] edge ["$|r|=1$"] (2);
-\path (2) edge (4);
-\path (3) edge [dashed] (4);
-\path (3) edge [dashed] (2);
-\end{tikzpicture}
-```
+$$\begin{equation}\begin{split} &  \underbrace{E[Y_{1i}|D=1] - E[Y_{0i}|D=0]}_{\text{Comparison between treatment and control group}} \\  \\ & = E[Y_{0i} + \color{red}{\kappa} |D=1] - E[Y_{0i}|D=0], \\ \\ &= \color{red}{\kappa} + \underbrace{E[Y_{0i} |D=1] - E[Y_{0i}|D=0]}_{\underbrace{0}_{\text{Selection bias (if randomization has worked)}}}, \\ \\ & = \underbrace{\color{red}{\kappa}.}_{\text{The average causal effect}} \end{split}\end{equation}$$
 ]
 
 ---
@@ -257,15 +426,13 @@ $$E[Y_{0i}|D=1] = E[Y_{0i}|D=0]?$$
 
 \begin{tikzpicture}
 \sffamily
-\node[state] (1) [red] at (0,0) {$E$};
-\node[state] (2) [right = of 1] {$D$};
-\node[state] (3) [red, dashed, above = of 2] {$C$};
-\node[state] (4) [right = of 2] {$Y$};
+\node[state] (1) at (0,0) {$E\color{gray}{=D}$};
+\node[state] (2) [red, dashed] at (1.5,1.5) {$C$};
+\node[state] (3) at (3,0) {$Y$};
 
-\path (1) [red] edge (2);
-\path (3) edge [red, dashed, "?"] (1);
-\path (2) edge (4);
-\path (3) edge [red, dashed] (4);
+\path (1) edge (3);
+\path (2) edge [red, dashed] (1);
+\path (2) edge [red, dashed] (3);
 \end{tikzpicture}
 ```
 ]
@@ -276,22 +443,22 @@ knitr::include_graphics('./img/Joscha3.png')
 ```
 .center[.backgrnote[*Source:* `r Citet(myBib, "legewie_terrorist_2013")`]]
 
-> [Across all countries] The treatment group is on average slightly younger, and the proportion of people who are retired and who work from home is lower. 
+"[Across all countries] The treatment group is on average slightly younger, and the proportion of people who are retired and who work from home is lower." 
 
-> -- `r Citet(myBib, "legewie_terrorist_2013", after = ", page 1211")`.
+-- `r Citet(myBib, "legewie_terrorist_2013", after = ", page 1211")`.
 
 ]
 
 ---
 class: clear
-# Age as confounder? .font70[(i.e., Age-based selection into treatment?)]
+# Example: Age as confounder
 
 .left-column[
-On average, xenophobia increases with age.
+1. On average, xenophobia increases with age.
 
-The older a respondent, the more likely they are part of the control group (i.e., not exposed to Bali attack).
+2. The younger a respondent, the more likely they are exposed to the Bali attack.
 
-$\rightarrow E[Y_{0i}|D=0] \color{red}{>} E[Y_{0i}|D=1]$ 
+$\Rightarrow E[Y_{0i}|D=0] \color{red}{>} E[Y_{0i}|D=1]$ 
 
 .backgrnote[
 Note that in Portugal, older respondents were more likely to be in the treatment group.
@@ -311,22 +478,19 @@ $\rightarrow E[Y_{0i}|D=0] \color{red}{<} E[Y_{0i}|D=1]$
 
 \begin{tikzpicture}
 \sffamily
-\node[state, align = center] (1) [red] at (0,0) {Day of \\ interview};
-\node[state, align = center] (2) [right = of 1] {Exp. to \\ Bali};
-\node[state] (3) [red, dashed, above = of 2] {Age};
-\node[state] (4) [right = of 2] {Xeno};
+\node[state, align = center] (1) at (0,0) {Day of interview \\ $\text{\color{gray}{= Exp. to Bali}}$};
+\node[state] (2) [red, dashed] at (4,4) {Age};
+\node[state] (3) at (8,0) {Xenophobia};
 
-\path (1) edge [red] (2);
-\path (3) edge [red, dashed] (1);
-\path (2) edge (4);
-\path (3) edge [red, dashed] (4);
+\path (1) edge (3);
+\path (2) edge [red, dashed] (1);
+\path (2) edge [red, dashed] (3);
 \end{tikzpicture}
 ```
 
-.content-box-green[
-What kind of bias does this imply for our causal terrorist attack estimate? Is it our estimate most likely too large or too small?
-]
-]
+.content-box-green[.center[
+What kind of bias does this imply for our terrorist-attack estimate? Is our estimate likely too large or too small?
+]]]
 
 ---
 class: inverse middle center
@@ -336,7 +500,7 @@ class: inverse middle center
 $$y_{i} = \alpha + \beta_{1}x_{1} + \beta_{2}x_{2} + \ldots + \beta_{k}x_{k} + \epsilon_{i}$$
 
 ---
-# Setup and simulated toy data
+# A Simulated Example
 
 .panelset[
 .panel[.panel-name[Packages]
@@ -358,9 +522,11 @@ set.seed(831983)
 ```
 
 ```{r}
-# Simulate random normally/gauss-distributed age.
 toydat <- tibble( 
-  age = rnorm(n = 500, mean = 45, sd = 10))
+  age = rnorm( # Simulate random gauss-distributed age
+  n = 500, # for 500 ficticious people,
+  mean = 40, # Average age 45,
+  sd = 5)) # SD of 10 years.
 ```
 ]
 
@@ -372,18 +538,18 @@ ggplot(data = toydat) +
 ```
 ]]
 .panel[.panel-name[Exposure to terror]
-.push-left[.font80[
+.push-left[.font70[
 ```{r}
 toydat <- toydat %>% 
   mutate( # Day of interview: Age + random.
-    int_day = (-0.05*age) + rnorm(n = 500, mean = 0, sd = 1),
-    bali = case_when( # Bali: After mean survey period.
+    int_day = (-0.1*age) + rnorm(n = 500, mean = 0, sd = 1),
+    bali = case_when( # Bali: After mean int_day (survey period).
       int_day < mean(int_day) ~ 0,
       int_day >= mean(int_day) ~ 1))
 
 ols <- lm_robust(bali ~ age, data = toydat)
 modelsummary(list("Day of Int." = ols), stars = TRUE,
-             gof_map = c("nobs", "r.squared"))
+             gof_map = c("nobs", "r.squared"), output = "kableExtra")
 ```
 ]]
 .push-right[
@@ -399,14 +565,13 @@ ggplot(data = toydat, aes(y = bali, x = age)) +
 .panel[.panel-name[Xenophobia]
 .push-left[
 ```{r}
-# Because I simulate these data,
-# I define and thus KNOW the truth!! 
-# Xenophobia is a linear function of:
-# exposure to Bali, and age, and a random part.
+# Because I simulate the data for this example,
+# I define: Xenophobia is a linear function of:
+# exposure to Bali, age, and a random part.
 toydat <- toydat %>%
   mutate(
-    xeno = (0.3 * bali) + (0.05 * age) + #<<
-      rnorm(n = 500, mean = 0, sd = 1)) #<<
+    xeno = (1 * bali) + (0.3 * age) + #<<
+      rnorm(n = 500, mean = 0, sd = 1))
 ```
 ]
 .push-right[
@@ -429,14 +594,17 @@ ols_bi <- lm_robust(xeno ~ bali, data = toydat)
 ols_mult <- lm_robust(xeno ~ bali + age, data = toydat)
 
 # Regression table of both results
-modelsummary(list("Biv. OLS" = ols_bi, "Mult. OLS" = ols_mult), stars = TRUE,
-             gof_map = c("nobs", "r.squared"))
+modelsummary(list(
+              "Biv. OLS" = ols_bi, 
+              "Mult. OLS" = ols_mult), 
+              stars = TRUE, 
+              gof_map = c("nobs", "r.squared"), 
+              output = "kableExtra")
 ```
 
 .content-box-green[
-Which one of the two models is correct?
-]
-]
+Which of the two models is correct?
+]]
 
 .push-right[
 ```{r ref.label = "OLS", echo  = FALSE, results = 'asis'}
@@ -445,7 +613,7 @@ Which one of the two models is correct?
 
 ---
 class: clear
-# Omitted variable bias .font60[aka selection/confounder bias]
+# Omitted variable (selection/confounder) bias
 
 .push-right[
 ```{tikz, ref.label = "DAG_Age", echo = FALSE, out.width='70%'}
@@ -454,37 +622,37 @@ class: clear
 
 
 .push-left[
-.center[When we compare Xenophobia between those with Bali = 0 to those with Bali = 1 in our simulated toy data:]
+.center[When we compare Xenophobia between those exposed to Bali and those who were not:]
 
-1. We .alert[know] that one part of the difference is the causal effect $\beta_{\text{sample}} = 0.3 + \underbrace{\sigma_{\text{sample}}}_{\text{sampling error}} = `r coef(ols_mult)["bali"]`$.
+1. We .alert[know] that one part of the difference is the causal effect $\beta_{\text{sample}} = 1 + \underbrace{\sigma}_{\text{Sampling error}} = `r coef(ols_mult)["bali"]`$.
 
 .content-box-green[
-- Why do we .alert[know] that in this specific case?
+- Why do we .alert[know] that in this example?
 
-- What else is different between those with Bali = 0 compared to those with Bali = 1?
+- What else is different between those exposed to Bali and those who were not?
 ]]
 
 ---
 class: clear
-# Omitted variable bias .font60[aka selection/confounder bias]
+# Omitted variable (selection/confounder) bias
 
 .push-right[
 ```{tikz, ref.label = "DAG_Age", echo = FALSE, out.width='70%'}
 ```
 .font80[
-```{r}
+```{r echo = FALSE}
 ols_age <- lm_robust(age ~ bali, data = toydat)
 modelsummary(list("Age" = ols_age), stars = TRUE,
-             gof_map = c("nobs", "r.squared"))
+             gof_map = c("nobs", "r.squared"), output = "kableExtra")
 ```
 ]]
 
 .push-left[
 .center[When we compare Xenophobia between those with Bali = 0 to those with Bali = 1 in our simulated toy data:]
 
-1. We .alert[know] that one part of the difference is the causal effect $\beta_{\text{sample}} = 0.3 + \sigma_{\text{sample}} = `r coef(ols_mult)["bali"]`$.
+1. We .alert[know] that one part of the difference is the causal effect $\beta_{\text{sample}} = 1 + \underbrace{\sigma}_{\text{Sampling error}} = `r coef(ols_mult)["bali"]`$.
 
-2. We compare between people who have an average age difference of `r coef(ols_age)["bali"]` years.
+2. We compare between people who have an average age difference of $\beta_{E \rightarrow C} = `r coef(ols_age)["bali"]`$ years.
 
 .content-box-green[
 On average, to how much Xenophobia do `r coef(ols_age)["bali"]` years of age amount?
@@ -493,26 +661,26 @@ On average, to how much Xenophobia do `r coef(ols_age)["bali"]` years of age amo
 
 ---
 class: clear
-# Omitted variable bias .font60[aka selection/confounder bias]
+# Omitted variable (selection/confounder) bias
 
 .push-right[
 ```{tikz, ref.label = "DAG_Age", echo = FALSE, out.width='70%'}
 ```
-
+.font80[
 ```{r ref.label = "OLS", echo  = FALSE, results = 'asis'}
 ```
-]
+]]
 
 .push-left[
 .center[When we compare Xenophobia between those with Bali = 0 to those with Bali = 1 in our simulated toy data:]
 
-1. We .alert[know] that one part of the difference is the causal effect $\beta_{\text{sample}} = 0.3 + \sigma_{\text{sample}} = `r coef(ols_mult)["bali"]`$.
+1. We .alert[know] that one part of the difference is the causal effect $\beta_{\text{sample}} = 1 + \underbrace{\sigma}_{\text{Sampling error}} = `r coef(ols_mult)["bali"]`$.
 
-2. We compare between people who have an average age difference of `r coef(ols_age)["bali"]` years.
+2. We compare between people who have an average age difference of $\beta_{E \rightarrow C} = `r coef(ols_age)["bali"]`$ years.
 
-Because of this age difference, Xenophobia should additionally differ by:
+.font80[Because of this age difference, Xenophobia additionally differs by:]
 
-$\begin{equation}\begin{split} & `r coef(ols_age)["bali"]` \times (0.05+\sigma_{\text{Sample}}) \\ = & `r coef(ols_age)["bali"]` \times `r coef(ols_mult)["age"]`, \\ = & `r coef(ols_age)["bali"] * coef(ols_mult)["age"]`. \end{split}\end{equation}$
+$\begin{equation}\begin{split} & `r coef(ols_age)["bali"]` \times (0.3 + \sigma) \\ = & `r coef(ols_age)["bali"]` \times `r coef(ols_mult)["age"]`, \\ = & `r coef(ols_age)["bali"] * coef(ols_mult)["age"]`. \end{split}\end{equation}$
 
 .content-box-green[
 What is the result if we take 1. and 2. together?
@@ -546,17 +714,19 @@ What is the result if we take 1. and 2. together?
 \end{tikzpicture}
 ```
 
-$$\tilde{\beta}_{Y \leftarrow D} = \beta_{Y \leftarrow D} + \underbrace{(\beta_{Y \leftarrow C} \times \beta_{C \leftarrow D})}_{\text{Omitted Variable Bias}}$$
+$$\tilde{\beta}_{D \rightarrow Y} = \beta_{D \rightarrow Y} + \underbrace{(\beta_{C \rightarrow Y} \times \beta_{D \rightarrow C})}_{\text{Omitted Variable Bias (OVB)}}$$
 ]]
 
 --
 
 .push-right[
+<br>
+
 .font90[
 ```{r ref.label = "OLS", echo  = FALSE, results = 'asis'}
 ```
 ]
-$$`r coef(ols_bi)["bali"]` = `r coef(ols_mult)["bali"]` + \underbrace{(`r coef(ols_mult)["age"]` \times `r coef(ols_age)["bali"]`)}_{`r coef(ols_mult)["age"] * coef(ols_age)["bali"]`}$$
+$$`r coef(ols_bi)["bali"]` = `r coef(ols_mult)["bali"]` + \underbrace{(\underbrace{`r coef(ols_mult)["age"]`}_{\beta_{C \rightarrow Y}} \times \underbrace{`r coef(ols_age)["bali"]`}_{\beta_{D \rightarrow C}})}_{\text{OVB} = `r coef(ols_mult)["age"] * coef(ols_age)["bali"]`}$$
 ]
 
 ---
@@ -570,21 +740,23 @@ knitr::include_graphics('https://st.depositphotos.com/1654249/2526/i/600/deposit
 ]
 
 .push-right[
-OK great, but how does multiple OLS get the correct $\beta_{Y \leftarrow D}$ that is not biased by omitted $C$?
+But how does multiple OLS get the correct $\beta_{Y \leftarrow D}$?
 ]
+
+---
+class: inverse middle center
+# Break
+
+<iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'></iframe>
 
 ---
 layout: true
 # Frisch-Waugh Theorem
 
 .left-column[
-It partials out/controlls for:
-  1. $\beta_{Y \leftarrow C}$
-  2. $\beta_{D \leftarrow C}$
-  
-`r Citet(myBib, "frisch_partial_1933")` proved that the way multiple OLS achieves this is mathematically equivalent to three steps.
+`r Citet(myBib, "frisch_partial_1933")` demonstrated that "controlling" for a confounder is mathematically equivalent to a three-step procedure.
 
-```{tikz, DAG_FrischWaugh, echo = FALSE, out.width='70%'}
+```{tikz, DAG_FrischWaugh, echo = FALSE, out.width='60%'}
 \usetikzlibrary{shapes,decorations,arrows,calc,arrows.meta,fit,positioning,quotes}
 \tikzset{
   -Latex,auto,node distance =1 cm and 1 cm,semithick,
@@ -605,6 +777,7 @@ It partials out/controlls for:
 \path (2) edge [gray, dashed] (3);
 \end{tikzpicture}
 ```
+.backgrnote[The double circle indicates that we control for a confounder, thereby effectively closing that backdoor path.]
 ]
 
 ---
@@ -622,8 +795,7 @@ It partials out/controlls for:
 (toydat <- lm_robust(xeno ~ age, data = toydat) %>%
    # Get residuals,
    add_residuals(toydat, model = .) %>% 
-   # Rename residuals.
-   rename(e_xeno = resid)) 
+   rename(e_xeno = resid)) # Rename residuals.
 ```
 ]]
 .push-right[
@@ -638,7 +810,10 @@ ggplot(data = toydat_plot, mapping = aes(y = xeno, x = age)) +
   geom_smooth(method = "lm", se = FALSE) +
   theme_minimal()
 ```
-]]
+]
+.content-box-green[.center[
+What is `e_xeno`?
+]]]
 
 ---
 
@@ -653,8 +828,7 @@ ggplot(data = toydat_plot, mapping = aes(y = xeno, x = age)) +
 (toydat <- lm_robust(bali ~ age, data = toydat) %>%
    # Get residuals,
    add_residuals(toydat, model = .) %>%
-   # Rename residuals.
-   rename(e_bali = resid))
+   rename(e_bali = resid)) # Rename residuals.
 ```
 ]]
 .push-right[
@@ -675,7 +849,10 @@ ggplot(data = toydat_plot, mapping = aes(y = bali, x = age)) +
   geom_smooth(method = "lm", se = FALSE) +
   theme_minimal()
 ```
-]]
+]
+.content-box-green[.center[
+What is `e_bali`?
+]]]
 
 ---
 
@@ -684,13 +861,16 @@ ggplot(data = toydat_plot, mapping = aes(y = bali, x = age)) +
 **Step 3: Regress $e_{D}$ on $e_{C}$.**
 ]
 .push-left[
-.font80[
+.font70[
 ```{r}
 # Regress xeno on age,
-ols_e <- lm_robust(e_xeno ~ e_bali, data = toydat)
+ols_e <- lm_robust(e_xeno ~ e_bali,
+                    data = toydat)
 
-modelsummary(list("Resid. Xeno" = ols_e), stars = TRUE,
-             gof_map = c("nobs", "r.squared"))
+modelsummary(list("Resid. Xeno" = ols_e), 
+            stars = TRUE,
+            gof_map = c("nobs", "r.squared"), 
+            output = "kableExtra")
 ```
 ]]
 .push-right[
@@ -709,9 +889,9 @@ class: inverse center
 # Why multiple OLS
 
 .push-left[.left[
-- Allows us to estimate $\beta_{Y \leftarrow D}$, partialling out/controlling for **_observed_** confounding variables.
+- Allows estimation of $\beta_{D \rightarrow Y}$, controlling for **_observed_** confounding variables.
 
-- **_If all confounders are observed without measurement error_**, multiple OLS can thus identify the average causal effect $\kappa_{Y \leftarrow D}$.
+- Multiple OLS can identify the average causal effect $\kappa_{D \rightarrow Y}$ if it blocks all backdoor paths.
 
 ```{r ref.label = "residuals3", out.width='60%', fig.height = 4, fig.width = 5, results = FALSE, echo = FALSE}
 ```
@@ -719,11 +899,11 @@ class: inverse center
 
 --
 
-.push-right[.left[
+.push-right[.left[.font80[
 - You can think of multiple OLS as down-weighting typical cases (e.g. young people exposed to Bali) and up-weighting untypical cases (older people exposed to Bali)
 
 - Because of this weighting, multiple OLS increases the random variation in $D$.
-]
+]]
 
 ```{r residuals2, out.width='60%', fig.height = 4, fig.width = 5, results = FALSE, echo = FALSE}
 ```
@@ -755,6 +935,100 @@ $$\begin{align*}
 
 ```
 
+]
+
+---
+class: clear
+# Can multiple OLS fix broken interventions?
+
+.push-left[.content-box-green[
+
+```{tikz, ref.label = "DAG_FrischWaugh", echo = FALSE, out.width = '40%'}
+
+```
+
+- OLS can statistically balance **_observed_** confounders, even after the data has been collected.
+]]
+
+.push-right[.content-box-red[
+
+```{tikz, DAG_FrischWaugh2, echo = FALSE, out.width = '40%'}
+\usetikzlibrary{shapes,decorations,arrows,calc,arrows.meta,fit,positioning,quotes}
+\tikzset{
+  -Latex,auto,node distance =1 cm and 1 cm,semithick,
+  state/.style ={ellipse, draw, minimum width = 0.7 cm},
+  point/.style = {circle, draw, inner sep=0.04cm,fill,node contents={}},
+  bidirected/.style={Latex-Latex,dashed},
+  el/.style = {inner sep=2pt, align=left, sloped}
+}
+
+\begin{tikzpicture}
+\sffamily
+\node[state, align = center] (1) at (0,0) {$D$};
+\node[state] (2) [gray, double, above = of 1] {$C_{1}$};
+\node[state] (3) [right = of 1] {$Y$};
+\node[state] (4) [dashed, above = of 3] {$C_{2}$};
+
+\path (1) edge (3);
+\path (2) edge [gray, dashed] (1);
+\path (2) edge [gray, dashed] (3);
+\path (4) edge [dashed] (1);
+\path (4) edge [dashed] (3);
+\end{tikzpicture}
+```
+
+- If **_observed_** confounders are imbalanced, *maybe more is broken than what we have observed?*
+]]
+
+---
+# Pre- versus post-treatment controls
+
+.center[Time of measurement helps to decide whether a variable is a confounder or a mechanism/mediator.<br> But generally, you can only rely on sound logical reasoning. .alert[Don't control for mechanisms/mediators.]]
+
+.push-left[.content-box-green[
+.center[**Pre-treatment**]
+```{tikz, ref.label = "DAG_FrischWaugh", echo = FALSE, out.width = '40%'}
+
+```
+
+- *Potential confounders*: Variables that are **_causally prior to the treatment_**.
+]]
+
+.push-left[.content-box-red[
+.center[**Post-treatment**]
+```{tikz, DAG_mediator, echo = FALSE, out.width = '40%'}
+\usetikzlibrary{shapes,decorations,arrows,calc,arrows.meta,fit,positioning,quotes}
+\tikzset{
+  -Latex,auto,node distance =1 cm and 1 cm,semithick,
+  state/.style ={ellipse, draw, minimum width = 0.7 cm},
+  point/.style = {circle, draw, inner sep=0.04cm,fill,node contents={}},
+  bidirected/.style={Latex-Latex,dashed},
+  el/.style = {inner sep=2pt, align=left, sloped}
+}
+
+\begin{tikzpicture}
+\sffamily
+\node[state, align = center] (1) at (0,0) {$D$};
+\node[state] (2) [right = of 1] {$Y$};
+\node[state] (3) [gray, double, above = of 2] {$M$};
+
+\path (1) edge (2);
+\path (1) edge (3);
+\path (3) edge (2);
+\end{tikzpicture}
+```
+- *Potential mechanisms/mediators*: Variables that are potentially **_a result of the treatment_**.
+]]
+
+---
+# Group work
+
+.content-box-green[
+1. Download the "Sesame-variables.doc" file from Absalon. Recall that our outcome was "postlet", the randomized intervention was "encouraged", and the treatment of interest was "watched".
+
+2. Identify variables that should ideally be balanced, and if they are not, should be controlled for as pre-treatment confounders.
+
+3. Identify variables that we should definitely not control for because they are post-treatment mechanisms or even alternative measures of the outcome we are interested in.
 ]
 
 ---
@@ -820,7 +1094,8 @@ ESS %>%
   datasummary_balance( # Make a balance table, #<<
     formula = ~ treat, # by exposure to Bali #<< 
     data = . , #<<
-    title = "Xeno and age by those who were (not) exposed to Bali") #<<
+    title = "Xeno and age by those who were (not) exposed to Bali", #<<
+    output = "kableExtra") # Specify the output format as kableExtra 
 ```
 ]]
 .panel[.panel-name[R code]
@@ -833,7 +1108,7 @@ class: clear
 # Controlling for *observed* confounders
 
 .left-column[
-- Alternative names for "controlling for $X$": 
+Alternative names for "controlling for $X$": 
   + Partialling out $X$,
   + Adjusted for $X$,
   + Conditional on $X$.
@@ -860,7 +1135,7 @@ ols_pt_mult <- lm_robust(anti_immi ~ treat + age, weights = pspwght,
                          data = ESS %>% filter(cntry == "PT"))
 # Report results in a nicely-formatted table
 modelsummary(list("Biv. OLS" = ols_pt_bi, "Mult. OLS" = ols_pt_mult), stars = TRUE,
-             gof_map = c("nobs", "r.squared"))
+             gof_map = c("nobs", "r.squared"), output = "kableExtra")
 ```
 ]]
 
@@ -893,7 +1168,7 @@ bind_rows(ols_pt_bi %>% tidy(),
 ols_bias <- lm_robust(age ~ treat, data = ESS %>% filter(cntry == "PT"), weights = pspwght)
 ```
 
-$$\tilde{\beta}_{y \leftarrow D} = \underbrace{`r coef(ols_pt_mult)["treatAfter Bali"]`}_{\beta_{y \leftarrow D}} + \underbrace{(`r round(coef(ols_bias)["treatAfter Bali"], digits = 1)` \times `r coef(ols_pt_mult)["age"]`)}_{\text{OVB}} = `r coef(ols_pt_mult)["treatAfter Bali"] + ( coef(ols_bias)["treatAfter Bali"] * coef(ols_pt_mult)["age"] )`$$
+$$\tilde{\beta}_{D \rightarrow Y} = \underbrace{`r coef(ols_pt_mult)["treatAfter Bali"]`}_{\beta_{D \rightarrow Y}} + \underbrace{(\underbrace{`r round(coef(ols_bias)["treatAfter Bali"], digits = 1)`}_{\beta_{D \rightarrow C}} \times \underbrace{`r coef(ols_pt_mult)["age"]`}_{\beta_{C \rightarrow Y}})}_{\text{OVB}} = `r coef(ols_pt_mult)["treatAfter Bali"] + ( coef(ols_bias)["treatAfter Bali"] * coef(ols_pt_mult)["age"] )`$$
 ]
 .panel[.panel-name[R code]
 ```{r ref.label = "coefplotPT", eval = FALSE}
@@ -913,7 +1188,7 @@ knitr::include_graphics('./img/Joscha4.png')
 ]
 
 .left-column[
-These results are adjusted for several further variables. After the break, it's your turn to repliacte that.
+These results are adjusted for several further variables. Now it's your turn to repliacte that.
 ]
 
 ---
@@ -938,463 +1213,6 @@ knitr::include_graphics('https://www.latentview.com/wp-content/uploads/2016/04/L
 <iframe src='exercise1.html' width='1000' height='600' frameborder='0' scrolling='yes'></iframe>
 ]
 
----
-layout: true
-# Zero-tolerance for domestic violence?
-
-.left-column[
-```{r, echo = FALSE, out.width='80%'}
-knitr::include_graphics('https://images.theconversation.com/files/325865/original/file-20200406-6044-hao5gp.jpg?ixlib=rb-1.1.0&q=45&auto=format&w=1200&h=675.0&fit=crop')
-knitr::include_graphics('https://indblik.dk/wp-content/uploads/2021/06/41648075864_b1450a1d67_k.jpg')
-```
-]
-
----
-
-.right-column[
-<iframe src='https://en.wikipedia.org/wiki/Minneapolis_Domestic_Violence_Experiment' width='700' height='550' frameborder='0' scrolling='yes'></iframe>
-]
-
----
-
-.right-column[
-> [...] the pains of punishment deter people from repeating the crimes for which they are punished, especially when punishment is certain, swift and severe. 
-
-.center[versus]
-
-> [...] punishment often makes individuals more likely to commit crimes because of altered interactional structures, foreclosed legal opportunities and secondary deviance
-> -- .center[.backgrnote[*Source:* `r Citet(myBib, "sherman_specific_1984")`]]
-
-.center[**Does punishment increase repeat domestic abuse?**]
-]
-
----
-layout: false
-# Compliance among police officers
-
-.panelset[
-.panel[.panel-name[Intention to treat]
-.push-left[
-<br>
-<br>
-
-```{r itt_tab, echo = FALSE, results = 'asis'}
-# Load the data from the Minneapolis Domestic Violence Experiment
-data("mdve", package = "masteringmetrics")
-
-mdve <- mdve %>%
-  # Recode intention and actual treatment 
-  # into factor variables with two categories
-  mutate( 
-    T_RANDOM = case_when(
-      T_RANDOM == 2 | T_RANDOM == 3 ~ "Coddle!",
-      T_RANDOM == 1 ~ "Arrest!",
-      TRUE ~ as.character(NA)) %>% fct_relevel("Arrest!"),
-    T_FINAL = case_when(
-      T_FINAL == 2 | T_FINAL == 3 ~ "Coddled",
-      T_FINAL == 1 ~ "Arrested",
-      TRUE ~ as.character(NA)) %>% fct_relevel("Arrested"))
-
-# Make frequency table
-mdve %>%
-  select(T_RANDOM, T_FINAL) %>%
-  table() %>% kable()
-```
-]
-.push-right[
-```{r, echo = FALSE, out.width='80%'}
-knitr::include_graphics('https://s.abcnews.com/images/US/minneapolis-police-department-chief-search-medaria-arradondo-04-gty-llr-220621_1655836848859_hpMain_16x9_992.jpg')
-```
-]
-]
-.panel[.panel-name[R code]
-```{r ref.label = "itt_tab", eval = FALSE}
-```
-]]
-
----
-# RCTs vs ITTs
-
-.push-left[.content-box-red[
-.font120[.center[**RCT**]]
-
-$$\begin{equation}\begin{split} & |r_{I,D}| = 1 \\ &\rightarrow I = D! \end{split}\end{equation}$$
-
-That is, the absolute correlation between intervention $I$ and predictor of interest $D$ is 1, making them practically the same thing.
-<br>
-<br>
-
-```{tikz, DAG4, echo = FALSE, out.width='70%'}
-\usetikzlibrary{shapes,decorations,arrows,calc,arrows.meta,fit,positioning,quotes}
-\tikzset{
-  -Latex,auto,node distance =1 cm and 1 cm,semithick,
-  state/.style ={ellipse, draw, minimum width = 0.7 cm},
-  point/.style = {circle, draw, inner sep=0.04cm,fill,node contents={}},
-  bidirected/.style={Latex-Latex,dashed},
-  el/.style = {inner sep=2pt, align=left, sloped}
-}
-
-\begin{tikzpicture}
-\sffamily
-\node[state] (1) [red] at (0,0) {$I$};
-\node[state] (2) [right = of 1] {$D$};
-\node[state] (3) [dashed, above = of 2] {$C$};
-\node[state] (4) [right = of 2] {$Y$};
-
-\path (1) [red] edge ["$|r|=1$"] (2);
-\path (2) edge (4);
-\path (3) edge [dashed] (4);
-\path (3) edge [dashed] (2);
-\end{tikzpicture}
-```
-]]
-
---
-
-.push-left[.content-box-blue[
-.font120[.center[**ITT**]]
-
-$$\begin{equation}\begin{split} & |r_{Z, D}| < 1 \\ &\rightarrow Z \neq D! \end{split}\end{equation}$$
-
-That is, the absolute correlation between intervention $Z$ and predictor of interest $D$ is smaller than 1, inducing some portion of random variation into $D$.
-
-
-```{tikz, DAG5, echo = FALSE, out.width='70%'}
-\usetikzlibrary{shapes,decorations,arrows,calc,arrows.meta,fit,positioning,quotes}
-\tikzset{
-  -Latex,auto,node distance =1 cm and 1 cm,semithick,
-  state/.style ={ellipse, draw, minimum width = 0.7 cm},
-  point/.style = {circle, draw, inner sep=0.04cm,fill,node contents={}},
-  bidirected/.style={Latex-Latex, dashed},
-  el/.style = {inner sep=2pt, align=left, sloped}
-}
-
-\begin{tikzpicture}
-\sffamily
-\node[state] (1) [red] at (0,0) {$Z$};
-\node[state] (2) [right = of 1] {$D$};
-\node[state] (3) [dashed, above = of 2] {$C$};
-\node[state] (4) [right = of 2] {$Y$};
-
-\path (1) [red] edge ["$|r|<1$"] (2);
-\path (2) edge (4);
-\path (3) edge [dashed] (4);
-\path (3) edge [dashed] (2);
-\end{tikzpicture}
-```
-]]
-
----
-layout: false
-# IV .font60[to the rescue]
-
-.left-column[.content-box-red[
-.center[**3 Requirements**]
-1. *First stage*: Instrument has causal effect on outcome $D_{i}$.
-
-2. *Randomization*: Instrument is randomly assigned (RCT or natural experiment).
-
-3. *Exclusion restriction*: Instrument affects outcome $Y_{i}$ **_only_** through its effect on $D$.
-  + In practice very difficult to test
-]]
-
-.right-column[
-```{tikz, DAG8, echo = FALSE, out.width='70%'}
-\usetikzlibrary{shapes,decorations,arrows,calc,arrows.meta,fit,positioning,quotes}
-\tikzset{
-  -Latex,auto,node distance =1 cm and 1 cm,semithick,
-  state/.style ={ellipse, draw, minimum width = 0.7 cm},
-  point/.style = {circle, draw, inner sep=0.04cm,fill,node contents={}},
-  bidirected/.style={Latex-Latex, dashed},
-  el/.style = {inner sep=2pt, align=left, sloped}
-}
-
-\begin{tikzpicture}
-\sffamily
-\node[state] (1) [red] at (0,0) {$Z$};
-\node[state] (2) [right = of 1] {$D$};
-\node[state] (3) [dashed, above = of 2] {$C$};
-\node[state] (4) [right = of 2] {$Y$};
-
-\path (1) [red] edge ["$\phi$"] (2);
-\path (2) edge ["$\lambda$"](4);
-\path (3) edge [dashed] (4);
-\path (3) edge [dashed] (2);
-\end{tikzpicture}
-```
-
-**First Stage:** $E[D_{i}|Z_{i}=1]-E[D_{i}|Z_{i}=0]; \text{call this }\phi.$
-
-**Reduced Form:** $E[Y_{i}|Z_{i}=1]-E[Y_{i}|Z_{i}=0]; \text{call this }\rho.$
-
-**IV Estimator of LATE:** $\lambda = \frac{\rho}{\phi} = \frac{E[Y_{i}|Z_{i}=1]-E[Y_{i}|Z_{i}=0]}{E[D_{i}|Z_{i}=1]-E[D_{i}|Z_{i}=0]} \color{red}{= E[Y_{1i}-Y_{0i}|\text{Complier}_{i}=1]}.$
-]
-
----
-# IV .font60[to the rescue]
-
-.push-right[
-.panelset[
-.panel[.panel-name[First Stage].font90[
-```{r first_stg, echo = FALSE, results = 'asis'}
-mdve <- mdve %>%
-  mutate( # Prepare binary outcome.
-    T_FINAL_01 = case_when(
-      T_FINAL == "Arrested" ~ 0,
-      T_FINAL == "Coddled" ~ 1))
-
-# First stage OLS (i.e., linear probability model)
-first_stg <- lm_robust(T_FINAL_01 ~ T_RANDOM, 
-                       data = mdve)
-
-# Regression table
-modelsummary(list("First stage" = first_stg), stars = TRUE,
-             gof_map = c("nobs", "r.squared"))
-```
-]]
-.panel[.panel-name[R code]
-```{r ref.label = "first_stg", eval = FALSE}
-```
-]]]
-
-.push-left[
-```{tikz, ref.label = "DAG8", echo = FALSE, out.width='70%'}
-```
-
-**First Stage:** $`r coef(first_stg)["T_RANDOMCoddle!"]`; \text{call this }\phi.$
-
-**Reduced Form:** $0.114; \text{call this }\rho.$<br>.backgrnote[According to `r Citet(myBib, "sherman_specific_1984")`.]
-
-**IV Estimator of LATE:** $\lambda = \frac{\rho}{\phi} = \frac{E[Y_{i}|Z_{i}=1]-E[Y_{i}|Z_{i}=0]}{E[D_{i}|Z_{i}=1]-E[D_{i}|Z_{i}=0]} = \underline{\underline{`r 0.114 / coef(first_stg)["T_RANDOMCoddle!"]`}} \color{red}{|\text{Complier}_{i}=1}.$
-]
-
----
-layout: true
-# What if .font70[the instrument wasn't random?]
-
-.push-right[
-.panelset[
-.panel[.panel-name[Confounded first stage?]
-```{r ols_ycd, echo = FALSE, results = 'asis'}
-mdve <- mdve %>%
-  mutate( # Prepare binary outcome.
-    T_RANDOM_01 = case_when(
-      T_RANDOM == "Arrest!" ~ 0,
-      T_RANDOM == "Coddle!" ~ 1),
-    # Recode race variable
-    S_RACE = case_when(
-      S_RACE == 1 ~ "White",
-      S_RACE == 2 ~ "Black",
-      S_RACE == 3 ~ "Indian",
-      S_RACE == 4 ~ "Asian",
-      S_RACE == 5 ~ "Hispanic",
-      TRUE ~ "Other") %>% fct_relevel("White"))
-
-# Randomization violated?
-ols_zc <- lm_robust(T_RANDOM_01 ~ S_RACE, data = mdve)
-ols_dc <- lm_robust(T_FINAL_01 ~ S_RACE + T_RANDOM_01, data = mdve)
-
-# Regression table
-modelsummary(list("Z" = ols_zc, "D" = ols_dc), stars = TRUE, 
-             statistic = NULL, gof_map = c("nobs", "r.squared"))
-```
-]
-
-.panel[.panel-name[R code]
-.font90[
-```{r, ref.label = "ols_ycd", eval = FALSE}
-```
-]
-]]]
-
----
-
-.push-left[
-```{tikz, DAG9, echo = FALSE, out.width='70%'}
-\usetikzlibrary{shapes,decorations,arrows,calc,arrows.meta,fit,positioning,quotes}
-\tikzset{
-  -Latex,auto,node distance =1 cm and 1 cm,semithick,
-  state/.style ={ellipse, draw, minimum width = 0.7 cm},
-  point/.style = {circle, draw, inner sep=0.04cm,fill,node contents={}},
-  bidirected/.style={Latex-Latex, dashed},
-  el/.style = {inner sep=2pt, align=left, sloped}
-}
-
-\begin{tikzpicture}
-\sffamily
-\node[state] (1) [red] at (0,0) {$Z$};
-\node[state] (2) [right = of 1] {$D$};
-\node[state] (3) [dashed, red, above = of 1] {$C$};
-\node[state] (4) [right = of 2] {$Y$};
-
-\path (1) edge ["$\phi$"] (2);
-\path (3) edge [red, dashed] (1);
-\path (3) edge [red, dashed] (2);
-\path (2) edge ["$\lambda$"](4);
-\path (3) edge [red, dashed] (4);
-\end{tikzpicture}
-```
-
-.content-box-green[
-- What do the two regression suggest?
-
-- Why did I adjust the differences in $D$ across ethnic groups for $Z$?
-
-- Could the differences across groups be a problem?
-]]
-
----
-
-.push-left[
-```{tikz, ref.label = "DAG9", echo = FALSE, out.width='60%'}
-```
-
-.content-box-red[
-- Because randomization failed for Asian suspects, and officers were more likely to coddle Asian suspects (ignoring the intervention): **Ethnicity introduces OVB to $\phi$.**
-
-
-- **Ethnicity may also introduce OVB to $\lambda$**, if Asian suspects have different repeat domestic violence rates. Unfortunately, the accessible data do not entail $Y$, so we cannot check and correct for this.
-]]
-
----
-layout: false
-# Multiple OLS .font70[to the rescue!]
-
-.push-right[
-.center[Adjusted first stage .alert[and reduced form!]]
-```{r ols_ycd2, echo = FALSE, results = 'asis'}
-# Regression table
-modelsummary(list("D" = ols_dc), stars = TRUE, 
-             statistic = NULL, gof_map = c("nobs", "r.squared"))
-```
-]
-
-.push-left[
-```{tikz, DAG10, echo = FALSE, out.width='70%'}
-\usetikzlibrary{shapes,decorations,arrows,calc,arrows.meta,fit,positioning,quotes}
-\tikzset{
-  -Latex,auto,node distance =1 cm and 1 cm,semithick,
-  state/.style ={ellipse, draw, minimum width = 0.7 cm},
-  point/.style = {circle, draw, inner sep=0.04cm,fill,node contents={}},
-  bidirected/.style={Latex-Latex, dashed},
-  el/.style = {inner sep=2pt, align=left, sloped}
-}
-
-\begin{tikzpicture}
-\sffamily
-\node[state] (1) [red] at (0,0) {$Z$};
-\node[state] (2) [right = of 1] {$D$};
-\node[state] (3) [double, gray, above = of 1] {$C$};
-\node[state] (4) [right = of 2] {$Y$};
-
-\path (1) edge ["$\phi$"] (2);
-\path (3) edge [gray, dashed] (1);
-\path (3) edge [gray, dashed] (2);
-\path (2) edge ["$\lambda$"](4);
-\path (3) edge [red, dashed] (4);
-\end{tikzpicture}
-```
-
-.alert[Adjusted] **First Stage:** $`r coef(ols_dc)["T_RANDOM_01"]`; \text{call this }\phi|C.$
-
-.alert[Adjusted] **Reduced Form:** $\color{red}{?}; \text{call this }\rho|C.$<br>.backgrnote[According to `r Citet(myBib, "sherman_specific_1984")`.]
-
-**Adjusted IV Estimator of LATE:** $\lambda = \frac{\rho|C}{\phi|C} = \frac{\color{red}{?}}{`r coef(ols_dc)["T_RANDOM_01"]`} \color{red}{|\text{Complier}_{i}=1}.$
-]
-
----
-class: clear
-# Can multiple OLS fix broken interventions?
-
-.push-left[.content-box-green[
-
-```{tikz, ref.label = "DAG_FrischWaugh", echo = FALSE, out.width = '40%'}
-
-```
-
-- OLS can statistically balance **_observed_** confounders, even after the data has been finally collected.
-]]
-
-.push-right[.content-box-red[
-
-```{tikz, DAG_FrischWaugh2, echo = FALSE, out.width = '40%'}
-\usetikzlibrary{shapes,decorations,arrows,calc,arrows.meta,fit,positioning,quotes}
-\tikzset{
-  -Latex,auto,node distance =1 cm and 1 cm,semithick,
-  state/.style ={ellipse, draw, minimum width = 0.7 cm},
-  point/.style = {circle, draw, inner sep=0.04cm,fill,node contents={}},
-  bidirected/.style={Latex-Latex,dashed},
-  el/.style = {inner sep=2pt, align=left, sloped}
-}
-
-\begin{tikzpicture}
-\sffamily
-\node[state, align = center] (1) at (0,0) {$D$};
-\node[state] (2) [gray, double, above = of 1] {$C_{1}$};
-\node[state] (3) [right = of 1] {$Y$};
-\node[state] (4) [dashed, above = of 3] {$C_{2}$};
-
-\path (1) edge (3);
-\path (2) edge [gray, dashed] (1);
-\path (2) edge [gray, dashed] (3);
-\path (4) edge [dashed] (1);
-\path (4) edge [dashed] (3);
-\end{tikzpicture}
-```
-
-- If **_observed_** confounders are imbalanced, *maybe more is broken that we have not observed?*
-]]
-
----
-# Pre- versus post-treatment controls
-
-.center.alert[Time of measurement helps to decide whether a variable is a confounder or a mechanism/mediator.<br> But generally, you can only rely on sound logical reasoning!]
-
-.push-left[.content-box-green[
-.center[**Pre-treatment**]
-```{tikz, ref.label = "DAG_FrischWaugh", echo = FALSE, out.width = '40%'}
-
-```
-
-- *Potential confounders*: Variables that are **_causally prior to the treatment_**.
-]]
-
-.push-left[.content-box-red[
-.center[**Post-treatment**]
-```{tikz, DAG_mediator, echo = FALSE, out.width = '40%'}
-\usetikzlibrary{shapes,decorations,arrows,calc,arrows.meta,fit,positioning,quotes}
-\tikzset{
-  -Latex,auto,node distance =1 cm and 1 cm,semithick,
-  state/.style ={ellipse, draw, minimum width = 0.7 cm},
-  point/.style = {circle, draw, inner sep=0.04cm,fill,node contents={}},
-  bidirected/.style={Latex-Latex,dashed},
-  el/.style = {inner sep=2pt, align=left, sloped}
-}
-
-\begin{tikzpicture}
-\sffamily
-\node[state, align = center] (1) at (0,0) {$D$};
-\node[state] (2) [right = of 1] {$Y$};
-\node[state] (3) [gray, double, above = of 2] {$M$};
-
-\path (1) edge (2);
-\path (1) edge (3);
-\path (3) edge (2);
-\end{tikzpicture}
-```
-- *Potential mechanisms/mediators*: Variables that are potentially **_a result of the treatment_**.
-]]
-
----
-# Group work
-
-.content-box-green[
-1. Download the "Sesame-variables.doc" file from Absalon. Recall that our outcome was "postlet", the randomized intervention was "encouraged", and the treatment of interest was "watched".
-
-2. Identify variables that should ideally be balanced, and if they are not, should be controlled for as pre-treatment confounders.
-
-3. Identify variables that we should definitely not control for because they are post-treatment mechanisms or even alternative measures of the outcome we are interested in.
-]
 
 ---
 class: inverse
