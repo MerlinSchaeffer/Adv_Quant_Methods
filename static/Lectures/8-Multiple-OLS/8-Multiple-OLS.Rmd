@@ -165,7 +165,8 @@ knitr::include_graphics('https://indblik.dk/wp-content/uploads/2021/06/416480758
 .center[versus]
 
 "[...] punishment often makes individuals more likely to commit crimes because of altered interactional structures, foreclosed legal opportunities and secondary deviance."
-> -- .center[.backgrnote[*Source:* `r Citet(myBib, "sherman_specific_1984")`]]
+
+-- *Source:* `r Citet(myBib, "sherman_specific_1984")`
 
 .center[**Does punishment increase repeat domestic abuse?**]
 ]
@@ -275,13 +276,14 @@ layout: false
 \path (3) edge [dashed] (2);
 \end{tikzpicture}
 ```
-]]
-
-**Reduced Form:** $\beta_{Z \rightarrow Y} = E[Y_{i}|Z_{i}=1]-E[Y_{i}|Z_{i}=0]; \text{call this }\rho.$
+]
+.font60[.]
+**Reduced Form (or ITT):** $\beta_{Z \rightarrow Y} = E[Y_{i}|Z_{i}=1]-E[Y_{i}|Z_{i}=0]; \text{call this }\rho.$
 
 **First Stage:** $\beta_{Z \rightarrow D} = E[D_{i}|Z_{i}=1]-E[D_{i}|Z_{i}=0]; \text{call this }\phi.$
 
 **IV Estimator of** $\lambda = \frac{\beta_{Z \rightarrow Y}}{\beta_{Z \rightarrow D}} = \frac{E[Y_{i}|Z_{i}=1]-E[Y_{i}|Z_{i}=0]}{E[D_{i}|Z_{i}=1]-E[D_{i}|Z_{i}=0]} = \frac{\rho}{\phi}.$
+]
 
 ---
 # IV .font60[to the rescue]
@@ -322,13 +324,15 @@ modelsummary(list("First stage" = first_stg),
 .push-right[
 ```{tikz, ref.label = "DAG9", echo = FALSE, out.width='100%'}
 ```
-]]
+]
+.font60[.]
 
-**Reduced Form:** $\rho = 0.114$ .backgrnote[According to `r Citet(myBib, "sherman_specific_1984")`.]
+**Reduced Form (or ITT):** $\rho = 0.114$ .backgrnote[According to `r Citet(myBib, "sherman_specific_1984")`.]
 
-**First Stage:** $\phi = `r coef(first_stg)["T_RANDOMCoddle!"]`.$
+**First Stage:** $\phi = `r coef(first_stg)["T_RANDOMCoddle"]`.$
 
-**IV Estimator of LATE:** $\lambda = \frac{\rho}{\phi} = \frac{E[Y_{i}|Z_{i}=1]-E[Y_{i}|Z_{i}=0]}{E[D_{i}|Z_{i}=1]-E[D_{i}|Z_{i}=0]} = \underline{\underline{`r 0.114 / coef(first_stg)["T_RANDOMCoddle!"]`}} \color{red}{|\text{Complier}_{i}=1}.$
+**IV Estimator of LATE:** $\lambda = \frac{\rho}{\phi} = \frac{E[Y_{i}|Z_{i}=1]-E[Y_{i}|Z_{i}=0]}{E[D_{i}|Z_{i}=1]-E[D_{i}|Z_{i}=0]} = \underline{\underline{`r 0.114 / coef(first_stg)["T_RANDOMCoddle"]`}} \color{red}{|\text{Complier}_{i}=1}.$
+]
 
 ---
 class: inverse middle center
@@ -390,7 +394,10 @@ knitr::include_graphics('https://www.wzb.eu/files/styles/4_column_content_lg/pub
 knitr::include_graphics('./img/Joscha2.png')
 ```
 .center[.backgrnote[*Source:* `r Citet(myBib, "legewie_terrorist_2013")`]]
-]
+
+.content-box-green[.center[
+What are the two key assumptions that ensure the comparability of treatment and control groups?
+]]]
 
 ---
 
@@ -543,12 +550,11 @@ ggplot(data = toydat) +
 toydat <- toydat %>% 
   mutate( # Day of interview: Age + random.
     int_day = (-0.1*age) + rnorm(n = 500, mean = 0, sd = 1),
-    bali = case_when( # Bali: After mean int_day (survey period).
-      int_day < mean(int_day) ~ 0,
-      int_day >= mean(int_day) ~ 1))
+    bali = case_when(int_day < mean(int_day) ~ 0, # Not Bali: Before mean int_day
+      int_day >= mean(int_day) ~ 1)) # Bali: After mean int_day.
 
 ols <- lm_robust(bali ~ age, data = toydat)
-modelsummary(list("Day of Int." = ols), stars = TRUE,
+modelsummary(list("Day of Interview" = ols), stars = TRUE,
              gof_map = c("nobs", "r.squared"), output = "kableExtra")
 ```
 ]]
@@ -569,9 +575,8 @@ ggplot(data = toydat, aes(y = bali, x = age)) +
 # I define: Xenophobia is a linear function of:
 # exposure to Bali, age, and a random part.
 toydat <- toydat %>%
-  mutate(
-    xeno = (1 * bali) + (0.3 * age) + #<<
-      rnorm(n = 500, mean = 0, sd = 1))
+  mutate(xeno = (1 * bali) + (0.3 * age) + #<<
+        rnorm(n = 500, mean = 0, sd = 1))
 ```
 ]
 .push-right[
@@ -858,7 +863,7 @@ What is `e_bali`?
 
 .right-column[
 .center[
-**Step 3: Regress $e_{D}$ on $e_{C}$.**
+**Step 3: Regress $e_{Y}$ on $e_{D}$.**
 ]
 .push-left[
 .font70[
@@ -867,7 +872,8 @@ What is `e_bali`?
 ols_e <- lm_robust(e_xeno ~ e_bali,
                     data = toydat)
 
-modelsummary(list("Resid. Xeno" = ols_e), 
+modelsummary(list(
+              "Resid. OLS" = ols_e), 
             stars = TRUE,
             gof_map = c("nobs", "r.squared"), 
             output = "kableExtra")
@@ -981,57 +987,6 @@ class: clear
 ]]
 
 ---
-# Pre- versus post-treatment controls
-
-.center[Time of measurement helps to decide whether a variable is a confounder or a mechanism/mediator.<br> But generally, you can only rely on sound logical reasoning. .alert[Don't control for mechanisms/mediators.]]
-
-.push-left[.content-box-green[
-.center[**Pre-treatment**]
-```{tikz, ref.label = "DAG_FrischWaugh", echo = FALSE, out.width = '40%'}
-
-```
-
-- *Potential confounders*: Variables that are **_causally prior to the treatment_**.
-]]
-
-.push-left[.content-box-red[
-.center[**Post-treatment**]
-```{tikz, DAG_mediator, echo = FALSE, out.width = '40%'}
-\usetikzlibrary{shapes,decorations,arrows,calc,arrows.meta,fit,positioning,quotes}
-\tikzset{
-  -Latex,auto,node distance =1 cm and 1 cm,semithick,
-  state/.style ={ellipse, draw, minimum width = 0.7 cm},
-  point/.style = {circle, draw, inner sep=0.04cm,fill,node contents={}},
-  bidirected/.style={Latex-Latex,dashed},
-  el/.style = {inner sep=2pt, align=left, sloped}
-}
-
-\begin{tikzpicture}
-\sffamily
-\node[state, align = center] (1) at (0,0) {$D$};
-\node[state] (2) [right = of 1] {$Y$};
-\node[state] (3) [gray, double, above = of 2] {$M$};
-
-\path (1) edge (2);
-\path (1) edge (3);
-\path (3) edge (2);
-\end{tikzpicture}
-```
-- *Potential mechanisms/mediators*: Variables that are potentially **_a result of the treatment_**.
-]]
-
----
-# Group work
-
-.content-box-green[
-1. Download the "Sesame-variables.doc" file from Absalon. Recall that our outcome was "postlet", the randomized intervention was "encouraged", and the treatment of interest was "watched".
-
-2. Identify variables that should ideally be balanced, and if they are not, should be controlled for as pre-treatment confounders.
-
-3. Identify variables that we should definitely not control for because they are post-treatment mechanisms or even alternative measures of the outcome we are interested in.
-]
-
----
 # Back to Bali .font70[The Portuguese subsample]
 
 ```{r include = FALSE}
@@ -1143,25 +1098,24 @@ modelsummary(list("Biv. OLS" = ols_pt_bi, "Mult. OLS" = ols_pt_mult), stars = TR
 .panelset[
 .panel[.panel-name[Coefficient plot]
 ```{r coefplotPT,  out.width='90%', fig.height = 4, fig.width = 6.5, results = FALSE, echo = FALSE}
-bind_rows(ols_pt_bi %>% tidy(),
-          ols_pt_mult %>% tidy(),
-          .id = "model") %>%
-  filter(term == "treatAfter Bali") %>%
-  mutate(model = case_when(
+bind_rows(ols_pt_bi %>% tidy(),  # Combine the tidy output of two models 
+          ols_pt_mult %>% tidy(),  # ...
+          .id = "model") %>%  # Add an identifier for each model
+  filter(term == "treatAfter Bali") %>%  # Select the row corresponding to the treatment effect
+  mutate(model = case_when(  # Change the model identifier to more informative labels
     model == 1 ~ "Bivariate",
     model == 2 ~ "Adjusted for age")) %>%
-  ggplot(aes(y = estimate, x = model, 
-             ymin = conf.low, ymax = conf.high)) +
-  geom_hline(yintercept = 0, 
-             color = "orange", lty = "dashed") +
-  geom_pointrange() +
-  coord_flip() +
+  ggplot(aes(y = estimate, x = model,  # Set up the plot with estimate on the y-axis and model on the x-axis
+             ymin = conf.low, ymax = conf.high)) +  # Specify the confidence intervals
+  geom_hline(yintercept = 0,  # Add a horizontal line at zero
+             color = "orange", lty = "dashed") +  # ...
+  geom_pointrange() +  # Add points with confidence intervals
+  coord_flip() +  # Flip the coordinates
   labs(
-    title = "Causal effect of Bali 2002 terror attack among the Portugese",
-    y = "Standardized difference in xenophobia
-    compared to respondents interviewed before the attack",
-    x = "") +
-  theme_minimal()
+    title = "Causal effect of Bali 2002 terror attack among the Portugese",  # Add a title
+    y = "Standardized difference in xenophobia\ncompared to respondents interviewed before the attack",  # Add a y-axis label
+    x = "") +  # Remove the x-axis label
+  theme_minimal()  # Use a minimal theme
 ```
 
 ```{r include = FALSE}
@@ -1181,7 +1135,7 @@ class: clear
 # Learning goal 1 .font60[Terror attacks can increase xenophobia]
 
 .right-column[
-```{r, echo = FALSE, out.width='100%'}
+```{r, echo = FALSE, out.width='60%'}
 knitr::include_graphics('./img/Joscha4.png')
 ```
 .center[.backgrnote[*Source:* `r Citet(myBib, "legewie_terrorist_2013")`]]
