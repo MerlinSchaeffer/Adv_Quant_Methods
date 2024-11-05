@@ -46,14 +46,13 @@ xaringanExtra::use_panelset()
 
 .font130[.center[Use data to discover patterns, <br> and the .alert[social mechanisms that bring them about.]]]
 
-```{r, echo = FALSE, out.width='70%', fig.align='center'}
-knitr::include_graphics('https://liu.se/-/media/istock-501261958.jpg?mw=1120&mh=1120&hash=DA8977CCE6A6E600AE80A40CFEE771C9')
+```{r, echo = FALSE, out.width='50%', fig.align='center'}
+knitr::include_graphics('https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgykJbXZbwIX-nd1oVOyzmEfj09ho8aQ4HBhfMH27t6YeTYSBevfrD2DFTEQSe7e3UwaVnv-fAJAOVpjW2pSGfG2QNrgHfkTmFtRWK4VXl6KmWK6vVlLud0DRU6lFXAqBF7iij420oOTLFh/s1600/photo.JPG')
 ```
 
 ---
 class: inverse middle center
 # Today's schedule
-
 
 ```{tikz, Tree1, echo = FALSE, out.width='70%'}
 \usetikzlibrary{trees}
@@ -97,14 +96,12 @@ class: clear
 
 
 - We use multiple OLS to block backdoor paths \ control for confounders.
-- Pre-treatment variables can only have an arrow into $D$.
 ]
 .content-box-blue[
 - **Mechanisms/mediators**: Any path from $D$ to $Y$ that starts with an arrow **out of** $D$; here $M$ lies on the causal path $D\rightarrow M \rightarrow Y$ and is thus a **mediator**.
 
 
-- If we use multiple OLS to block $M$, we do not estimate the causal effect of $D$, but only a part of it.
-- Post-treatment variables could be mediators.
+- If we use multiple OLS to block $M$, we do not estimate the overall causal effect of $D$,<br> but only a part of it.
 ]]]
 
 .push-right[
@@ -121,7 +118,7 @@ class: clear
 \begin{tikzpicture}
 \sffamily
 \node[state, align = center] (1) at (0,0) {$D$};
-\node[state] (2) at (-1,1.2) [gray, double] {$C$};
+\node[state] (2) at (-1,1.2) [gray, dashed] {$C$};
 \node[state] (3) at (1,-1) {$M$};
 \node[state] (4) [right = of 1] {$Y$};
 
@@ -138,15 +135,93 @@ class: clear
 # Confounders versus Mediators
 
 .content-box-red[
-If we want to improve comparisons to get as close as possible to the causal effect $D \rightarrow Y$, then we need to control for all observed confounders, but she **avoid controlling for any mediators!**
+If we want to get closer to the overall causal effect $D \rightarrow Y$, we need to control for observed confounders. *But must not control for any mediators!*
 ]
 
 .content-box-blue[
-But for some research questions, controlling for mediators can make sense. Sometimes we can be interested in effect $D \rightarrow Y$, or the association $r_{y,x}$, that does not run through $M$. 
+But for some research questions, controlling for mediators can make sense. Sometimes we are interested in the partial effect $D \rightarrow Y$ that does not run through $M$.
 ]
 
 ---
-# Confounders versus mediators
+# A clear case of mediation
+
+.panelset[
+.panel[.panel-name[The ESS]
+.font80[
+```{r}
+pacman::p_load(
+  tidyverse,  # Load the tidyverse package for data manipulation
+  haven,  # Load the haven package to handle labelled data (like SPSS files)
+  ggplot2,  # Load the ggplot2 package for creating beautiful figures
+  estimatr,  # Load the estimatr package for regression with weighted data
+  essentials,  # Load the essentials package 
+  modelsummary)  # Load the modelsummary package for creating nice regression tables
+
+# 1. read the ESS round 9 data
+ESS <- read_spss("../../../assets/ESS9e03_1.sav") %>%  # Read the SPSS data file
+  filter(cntry == "DK") %>%  # Keep only the data for Denmark
+  select(idno, pspwght, gndr, eduyrs, agea,  # Select specific variables
+         psppsgva, grspnum, infqbst, wkhct) %>% 
+  mutate(psppsgva = zap_labels(psppsgva),  # Remove labels from 'psppsgva' and convert to numeric
+         grspnum = zap_labels(grspnum),  # Remove labels from 'grspnum' and convert to numeric
+         wkhct = zap_labels(wkhct),  # Remove labels from 'wkhct' and convert to numeric
+         grwage = case_when(  # Calculate 'grwage' based on different conditions
+           infqbst == 1 ~ 4 * grspnum,  # If 'infqbst' is 1, multiply 'grspnum' by 4
+           infqbst == 3 ~ grspnum / 12,  # If 'infqbst' is 3, divide 'grspnum' by 12
+           TRUE ~ grspnum),  # Otherwise, keep 'grspnum' as it is
+         pspwght = zap_labels(pspwght),  # Remove labels from 'pspwght' and convert to numeric
+         eduyrs = case_when(  # Censor 'eduyrs' to be between 9 and 21
+           eduyrs > 21 ~ 21,  # If 'eduyrs' is greater than 21, set it to 21
+           eduyrs < 9 ~ 9,  # If 'eduyrs' is less than 9, set it to 9
+           TRUE ~ as.numeric(eduyrs)),  # Otherwise, keep 'eduyrs' as it is
+         gndr = as_factor(gndr)) %>%  # Convert 'gndr' to a factor
+  filter(wkhct > 0) %>%  # Filter out cases where 'wkhct' is not greater than 0
+  drop_na()  # Remove rows with missing values
+```
+]]
+.panel[.panel-name[OLS]
+.push-left[
+```{r OLSgender, echo = FALSE}
+# Run robust regressions of 'grwage' on 'gndr' with weights
+mod1 <- lm_robust(grwage ~ gndr, data = ESS, weights = pspwght) 
+mod2 <- lm_robust(grwage ~ gndr + wkhct, data = ESS, weights = pspwght)
+
+modelsummary(list("Wage before tax" = mod1, "Wage before tax" = mod2),  # Regression table with both models
+             gof_map = c("nobs", "r.squared"),  # Include nr obs and R-squared
+             stars = TRUE,  # Add stars for significance levels
+             output = "kableExtra")  # Use kableExtra for output formatting
+```
+]
+.push-right[.font80[
+```{r ref.label = "OLSgender", include = FALSE}
+```
+]
+
+```{tikz, DAG_gender, echo = FALSE, out.width='100%'}
+\usetikzlibrary{shapes,decorations,arrows,calc,arrows.meta,fit,positioning,quotes}
+\tikzset{
+  -Latex,auto,node distance =1 cm and 1 cm,semithick,
+  state/.style ={ellipse, draw, minimum width = 0.7 cm},
+  point/.style = {circle, draw, inner sep=0.04cm,fill,node contents={}},
+  bidirected/.style={Latex-Latex,dashed},
+  el/.style = {inner sep=2pt, align=left, sloped}
+}
+
+\begin{tikzpicture}
+\sffamily
+\node[state] (1) at (0,0) {Gender};
+\node[state] (2) [double, gray] at (3,-2) {Work hours};
+\node[state] (3) at (6,0) {Gross wage};
+
+\path (1) edge [red] (3);
+\path (1) edge [gray] (2);
+\path (2) edge [gray] (3);
+\end{tikzpicture}
+```
+]]]
+
+---
+# An unclear case
 
 .left-column[
 .content-box-green[
@@ -154,7 +229,7 @@ Are citizenship rights a confounder or mediator if we are interested in the effe
 ]]
 
 .right-column[
-```{tikz, DAG_ConfMed2, echo = FALSE, out.width='80%'}
+```{tikz, DAG_ConfMed2, echo = FALSE, out.width='90%'}
 \usetikzlibrary{shapes,decorations,arrows,calc,arrows.meta,fit,positioning,quotes}
 \tikzset{
   -Latex,auto,node distance =1 cm and 1 cm,semithick,
@@ -167,13 +242,13 @@ Are citizenship rights a confounder or mediator if we are interested in the effe
 \begin{tikzpicture}
 \sffamily
 \node[state, align = center] (1) at (0,0) {Socialism};
-\node[state] (2) at (1, 2) {Citizenship rights};
-\node[state, align = center] (3) [right = of 1] {Poverty};
+\node[state] (2) [gray] at (3, 2.5) {Citizenship rights};
+\node[state, align = center] (3) at (6,0) {Poverty};
 
-\path (1) edge (3);
+\path (1) [red] edge (3);
 \path (1) [gray, dashed] edge (2);
 \path (2) [gray, dashed] edge (1);
-\path (2) edge (3);
+\path (2) [gray, dashed] edge (3);
 \end{tikzpicture}
 ```
 ]
@@ -249,7 +324,7 @@ Dat <- Dat %>% mutate(socialist = case_when( # Years socialist minus years since
 ```
 
 .center[.font140[
-Would socialist countries be better at reducing poverty<br><br> **if they offered at least average citizenship rights to their citizens?**
+Would socialist countries be better at reducing poverty<br><br> **if they didn't offer fewer citizenship rights to their citizens?**
 ]]
 
 <br>
@@ -273,11 +348,9 @@ ggplot(data = Dat, aes(y = citizen_rights, x = socialist, label = country)) +
 
 .push-right[
 ```{r, echo = FALSE, out.width='96%'}
-knitr::include_graphics('https://almayasabdam.com/wp-content/uploads/2020/09/1496441134_communists.png')
+knitr::include_graphics('https://paradoxoftheday.com/wp-content/uploads/2016/05/marx.engels.lenin_.stalin.mao_.webp')
 ```
 ]
-
-
 
 ---
 # Multiple OLS
@@ -289,16 +362,16 @@ ols <- lm_robust(poverty ~ socialist, data = Dat)
 # Multiple OLS
 ols_mult <- lm_robust(poverty ~ socialist + citizen_rights, data = Dat)
 # Regression table
-modelsummary(list("Poverty (OLS)" = ols, "Poverty (OLS mult.)" = ols_mult),
-             gof_map = c("nobs", "r.squared"), stars = TRUE)
+modelsummary(list("Poverty (Biv. OLS)" = ols, "Poverty (OLS mult.)" = ols_mult),
+             gof_map = c("nobs", "r.squared"), stars = TRUE, output = "kableExtra")
 ```
 ]]
 
 .left-column[
 .content-box-green[
-Multiple OLS cannot give a final answer!
+Multiple OLS cannot provide a definite answer! Only an experiment could.
 
-But how does it bring us a bit closer to answering the question that we just asked?
+But how does it get us closer to an answer to our research question?
 ]
 
 ```{tikz, DAG_ConfMed2b, echo = FALSE, out.width='90%'}
@@ -331,11 +404,11 @@ layout: true
 # Recap: Frisch-Waugh
 
 .left-column[
-It partials out/controlls for:
-  1. $\beta_{Y \leftarrow C}$
-  2. $\beta_{D \leftarrow C}$
+OLS controlls for:
+  1. $\beta_{C \leftarrow Y}$
+  2. $\beta_{C \leftarrow D}$
   
-`r Citet(myBib, "frisch_partial_1933")` proved that the way multiple OLS achieves this is mathematically equivalent to the following three steps:
+`r Citet(myBib, "frisch_partial_1933")` demonstrated that "controlling" for a confounder is mathematically equivalent to a three-step procedure.
 
 ```{tikz, DAG_FrischWaugh, echo = FALSE, out.width='70%'}
 \usetikzlibrary{shapes,decorations,arrows,calc,arrows.meta,fit,positioning,quotes}
@@ -370,7 +443,7 @@ It partials out/controlls for:
 .push-left[
 .font80[
 ```{r}
-# Regress xeno on age,
+# Regress poverty on citizen rights,
 (Dat <- lm_robust(poverty ~ citizen_rights, 
                   data = Dat) %>%
    # Get residuals,
@@ -411,7 +484,7 @@ ggplot(data = Dat_plot, mapping = aes(y = poverty, x = citizen_rights, label = c
 .push-left[
 .font80[
 ```{r}
-# Regress xeno on age,
+# Regress socialism on citizen rights,
 (Dat <- lm_robust(socialist ~ citizen_rights, 
                   data = Dat) %>%
    # Get residuals,
@@ -452,18 +525,18 @@ layout: false
 **Step 3: Regress $Y_{e}$ on $D_{e}$.**
 ]
 .font80[
-```{r}
+```{r FW3, echo = FALSE}
 # Regress residuals of poverty on res. of socialism,
 ols_e <- lm_robust(e_poverty ~ e_socialist, data = Dat)
 # Regression table
-modelsummary(list("OLS (mult.)" = ols_mult,
-                  "OLS (Res.)" = ols_e), gof_map = c("nobs", "r.squared"), stars = TRUE)
+modelsummary(list("OLS (mult.)" = ols_mult, "OLS (Res.)" = ols_e), 
+             gof_map = c("nobs", "r.squared"), stars = TRUE, output = "kableExtra")
 ```
 ]]
 
 .right-column[
-
-<br>
+```{r ref.label = "FW3", results = FALSE}
+```
 
 .push-right[
 ```{r out.width='100%', fig.height = 4, fig.width = 5, results = FALSE, echo = FALSE}
@@ -501,87 +574,6 @@ ggplot(data = Dat_plot, mapping = aes(y = e_poverty, x = e_socialist, label = co
 ```
 ]]
 
-
----
-# Visualize model predictions
-
-.panelset[
-.panel[.panel-name[The model]
-.push-left[.font90[
-```{r Coefplot2, fig.show = 'hide'}
-plotdata <- ols_mult %>%
-  tidy() %>% # Turn results into a tibble,
-  mutate( # Rename variables for the plot.
-    term = case_when(
-      term == "socialist" ~ "Socialism index",
-      term == "citizen_rights" ~ "Citizenship rights",
-      term == "(Intercept)" ~ "Intercept")) %>%
-  filter(term != "Intercept") # Drop the intercept
-
-ggplot(data = plotdata, 
-       aes(y = estimate, x = reorder(term, estimate))) +
-  geom_hline(yintercept = 0, color = "red", lty = "dashed") +
-  # Point with error-bars,
-  geom_pointrange(aes(min = conf.low, max = conf.high)) +
-  coord_flip() + # Flip Y- & X-Axis,
-  labs(
-    title = "Multiple OLS of extreme poverty",
-    x = "",
-    # Write Greek beta into axis title.
-    y = expression("Estimate of"~beta)) +
-  theme_minimal()
-```
-]]
-.push-right[
-```{r ref.label = "Coefplot2", out.width='100%', fig.height = 4, fig.width = 6, echo = FALSE}
-
-```
-]]
-.panel[.panel-name[Predictions]
-.push-left[
-**Step 1**: Generate fictional data of $x1$ with informative values. .alert[Set controls to informative constant value (e.g. average citizen rights)!]
-.font90[
-```{r}
-(fict_dat <- tibble(
-  socialist = 0:100,
-  citizen_rights = mean(Dat$citizen_rights)))
-```
-]]
-.push-right[
-**Step 2**: Apply estimated model to fictional data. Given fictional data, what $\hat{y}$ does our model predict?
-.font90[
-```{r}
-(fict_dat <- predict( #<<
-  ols_mult, newdata = fict_dat, #<<
-  interval = "confidence", level = 0.95)$fit %>% #<<
-   as_tibble() %>% # Turn into a tibble, then
-   bind_cols(fict_dat, .)) # Add to the synthetic data.
-```
-]]]
-.panel[.panel-name[Visualization]
-.push-left[.font90[
-```{r Predplot, fig.show = 'hide'}
-ggplot(data = fict_dat, aes(y = fit, x = socialist)) +
-  geom_vline(xintercept = c(73), 
-             color = "red", lty = "dashed") +
-  geom_hline(yintercept = 0, 
-             color = "orange", lty = "dashed") +
-  geom_ribbon(aes(ymin = lwr, ymax = upr), alpha = 0.5) +
-  geom_line() +
-  labs(
-    title = "Predictions based on multiple OLS of extreme poverty",
-    x = "By years of socialist history
-    (At average citizenship rights)",
-    y = "Predicted population in extreme poverty",
-    caption = "") +
-  theme_minimal()
-```
-]]
-.push-right[
-```{r ref.label = "Predplot", out.width='100%', fig.height = 4, fig.width = 6, echo = FALSE}
-```
-]]]
-
 ---
 class: inverse middle center
 # Break
@@ -611,315 +603,102 @@ class: inverse middle center
 <iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'></iframe>
 
 ---
-layout: false
-class: inverse middle center
-
-# 2. Fix broken Interventions
-
----
-# My friend Joscha had an idea
-
-.left-column[
-<br>
-
-```{r, echo = FALSE, out.width='60%'}
-knitr::include_graphics('https://www.wzb.eu/files/styles/4_column_content_lg/public/image/dsi/aam/wzbjahresbericht3836-smaller.jpg?itok=_G0nt5M9')
-```
-
-]
-
-
-.right-column[
-```{r, echo = FALSE, out.width='100%'}
-knitr::include_graphics('./img/Joscha2.png')
-```
-.center[.backgrnote[*Source:* `r Citet(myBib, "legewie_terrorist_2013")`]]
-
-.alert[Assumption 1]: The European Social Survey is based on random sampling. .alert[The day of] $i$.alert['s interview is also random!]
-
-- *Reachability bias*: Respondents who are easier to contact tend to be interviewed earlier during the survey period.
-
-.alert[Assumption 2]: No other event had a causal effect on $Y_{i}$.
-]
-
----
-class: clear
-# Age as confounder? .font70[(i.e., Age-based selection into treatment?)]
-
-.left-column[
-On average, xenophobia increases with age.
-
-The older a respondent, the more likely they are part of the control group (i.e., not exposed to Bali attack).
-
-$\rightarrow E[Y_{0i}|D=0] \color{red}{>} E[Y_{0i}|D=1]$ 
-
-.backgrnote[
-Note that in Portugal, older respondents were more likely to be in the treatment group.
-$\rightarrow E[Y_{0i}|D=0] \color{red}{<} E[Y_{0i}|D=1]$ 
-]]
-
-.right-column[
-```{tikz, DAG_Age, echo = FALSE, out.width='80%'}
-\usetikzlibrary{shapes,decorations,arrows,calc,arrows.meta,fit,positioning,quotes}
-\tikzset{
-  -Latex,auto,node distance =1 cm and 1 cm,semithick,
-  state/.style ={ellipse, draw, minimum width = 0.7 cm},
-  point/.style = {circle, draw, inner sep=0.04cm,fill,node contents={}},
-  bidirected/.style={Latex-Latex,dashed},
-  el/.style = {inner sep=2pt, align=left, sloped}
-}
-
-\begin{tikzpicture}
-\sffamily
-\node[state, align = center] (1) [red] at (0,0) {Day of \\ interview};
-\node[state, align = center] (2) [right = of 1] {Exp. to \\ Bali};
-\node[state] (3) [red, dashed, above = of 2] {Age};
-\node[state] (4) [right = of 2] {Xeno};
-
-\path (1) edge [red] (2);
-\path (3) edge [red, dashed] (1);
-\path (2) edge (4);
-\path (3) edge [red, dashed] (4);
-\end{tikzpicture}
-```
-]
-
----
-# Omitted variable bias
-
-.content-box-red[
-```{tikz, DAG_OMV, echo = FALSE, out.width='25%'}
-\usetikzlibrary{shapes,decorations,arrows,calc,arrows.meta,fit,positioning,quotes}
-\tikzset{
-  -Latex,auto,node distance =1 cm and 1 cm,semithick,
-  state/.style ={ellipse, draw, minimum width = 0.7 cm},
-  point/.style = {circle, draw, inner sep=0.04cm,fill,node contents={}},
-  bidirected/.style={Latex-Latex,dashed},
-  el/.style = {inner sep=2pt, align=left, sloped}
-}
-
-\begin{tikzpicture}
-\sffamily
-\node[state, align = center] (1) at (0,0) {$D$};
-\node[state] (2) [red, dashed, above = of 1] {$C$};
-\node[state] (3) [right = of 1] {$Y$};
-
-\path (1) edge (3);
-\path (2) edge [red, dashed] (1);
-\path (2) edge [red, dashed] (3);
-\end{tikzpicture}
-```
-
-$$\tilde{\beta}_{Y \leftarrow D} = \beta_{Y \leftarrow D} + \underbrace{(\beta_{Y \leftarrow C} \times \beta_{C \leftarrow D})}_{\text{Omitted Variable Bias}}$$
-]
-
----
-# Back to Bali .font70[The Portuguese subsample]
-
-```{r include = FALSE}
-pacman::p_load(
-  tidyverse, # Data manipulation,
-  haven, # Read Stata data,
-  furniture, # For row-means,
-  ggplot2, # beautiful figures,
-  estimatr, # Regression for weighted data,
-  modelr, # Turn results of lm() into a tibble,
-  modelsummary, # for balance tables,
-  texreg) # regression tables with nice layout.
-
-# Bali terror attack
-event_date_begin <- as.Date("2002-09-14")
-event_date       <- as.Date("2002-10-13")
-event_date_end   <- as.Date("2002-10-20")
-
-# Read the ESS 2002 data and prepare for analysis
-ESS <- read_dta("../../../assets/Legewie_ESS_02.dta") %>%
-  mutate(
-    # Day and time of the survey interview,
-    int_year = inwyr,
-    int_mon  = inwmm,
-    int_day  = inwdd,
-    int_date = sprintf("%s-%s-%s", int_year, int_mon, int_day) %>% as.Date(),
-    # Treatment indicator,
-    treat = case_when(
-      int_date > event_date & int_date <= event_date_end ~ "After Bali",
-      int_date < event_date & int_date > event_date_begin ~ "Before Bali",
-      TRUE ~ as.character(NA)) %>% fct_relevel("Before Bali", "After Bali"),
-    # Attitudes towards immigrants
-    anti_immi = rowmeans(
-      imtcjob, imbleco, imbgeco, imueclt,
-      imwbcnt, imwbcrm, imbghct, na.rm = TRUE) %>% scale() %>% as.numeric(),
-    # Subtract from max to make larger values more xenophobic.
-    anti_immi = max(anti_immi, na.rm = TRUE) - anti_immi,
-    # Immigrant origin
-    brncntr = as_factor(brncntr),
-    mocntr = as_factor(mocntr),
-    facntr = as_factor(facntr),
-    # Age
-    age = int_year - yrbrn,
-    # Weights
-    pspwght = pweight * dweight) %>%
-  # Sample restriction        
-  filter(# Mainstream members (i.e. immigrant origin)
-    brncntr == "yes" & mocntr == "yes" &  facntr == "yes") %>%
-  # Keep only a minimum set of variables we need today,
-  select(treat, age, anti_immi, cntry, int_date, pspwght) %>%
-  drop_na() # Delete cases with missing values.
-```
+# Visualize model predictions
 
 .panelset[
-.panel[.panel-name[Balance table]
-.left-column[
-.content-box-green[
-- What do we learn from this balance table?
+.panel[.panel-name[The model]
+.push-left[.font80[
+```{r Coefplot2, fig.show = 'hide'}
+plotdata <- ols_mult %>% 
+  tidy() %>%  # Turn results into a tibble 
+  mutate(  # Rename variables for the plot
+    term = case_when(
+      term == "socialist" ~ "Socialism index",
+      term == "citizen_rights" ~ "Citizenship rights",
+      term == "(Intercept)" ~ "Intercept")) %>% 
+  filter(term != "Intercept")  # Drop the intercept
 
-- What does it suggest about the direction of the omitted age bias among Portuguese? (Assuming that xenophobia also increases with age in Portugal?)
-]]
-.right-panel[
-```{r balance1, echo = FALSE, results = 'asis'}
-ESS %>%
-  # Focus on Portuguese respondents
-  filter(cntry == "PT") %>%
-  # Select variables for which I want my balance test,
-  select(age, anti_immi, treat, pspwght) %>%
-  rename(weights = pspwght) %>% # Rename the weights variable! #<<
-  datasummary_balance( # Make a balance table, #<<
-    formula = ~ treat, # by exposure to Bali #<< 
-    data = . , #<<
-    title = "Xeno and age by those who were (not) exposed to Bali") #<<
-```
-]]
-
-.panel[.panel-name[R code]
-```{r balance1, eval = FALSE}
-```
-]]
-
----
-class: clear
-# Controlling for *observed* confounders
-
-.left-column[
-- Alternative names for "controlling for $X$": 
-  + Partialling out $X$,
-  + Adjusted for $X$,
-  + Conditional on $X$.
-]
-
-.right-column[
-```{r, echo = FALSE, out.width='100%'}
-knitr::include_graphics('./img/Joscha5.png')
-```
-.center[.backgrnote[*Source:* `r Citet(myBib, "legewie_terrorist_2013", after = ", page 1210")`.]]
-]
-
----
-class: clear
-# Adjusting for age-based selection into treatment
-
-.push-left[
-.font80[
-```{r olsPT}
-# Estimate the treatment effect with OLS
-ols_pt_bi <- lm_robust(anti_immi ~ treat, weights = pspwght,
-                       data = ESS %>% filter(cntry == "PT"))
-ols_pt_mult <- lm_robust(anti_immi ~ treat + age, weights = pspwght,
-                         data = ESS %>% filter(cntry == "PT"))
-# Report results in a nicely-formatted table
-modelsummary(list("Biv. OLS" = ols_pt_bi, "Mult. OLS" = ols_pt_mult), stars = TRUE,
-             gof_map = c("nobs", "r.squared"))
-```
-]]
-
-.push-right[
-.panelset[
-.panel[.panel-name[Coefficient plot]
-```{r coefplotPT,  out.width='90%', fig.height = 4, fig.width = 6.5, results = FALSE, echo = FALSE}
-bind_rows(ols_pt_bi %>% tidy(),
-          ols_pt_mult %>% tidy(),
-          .id = "model") %>%
-  filter(term == "treatAfter Bali") %>%
-  mutate(model = case_when(
-    model == 1 ~ "Bivariate",
-    model == 2 ~ "Adjusted for age")) %>%
-  ggplot(aes(y = estimate, x = model, 
-             ymin = conf.low, ymax = conf.high)) +
-  geom_hline(yintercept = 0, 
-             color = "orange", lty = "dashed") +
-  geom_pointrange() +
-  coord_flip() +
+ggplot(data = plotdata, 
+       # Create the plot, reordering x-axis by estimate
+       aes(y = estimate, x = reorder(term, estimate))) + 
+  # Add a horizontal line at y=0
+  geom_hline(yintercept = 0, color = "red", lty = "dashed") + 
+  # Add points with error bars
+  geom_pointrange(aes(min = conf.low, max = conf.high)) +  
+  coord_flip() +  # Flip the x and y axes
   labs(
-    title = "Causal effect of Bali 2002 terror attack among the Portugese",
-    y = "Standardized difference in xenophobia
-    compared to respondents interviewed before the attack",
-    x = "") +
-  theme_minimal()
+    title = "Multiple OLS of extreme poverty",  # Set the plot title
+    x = "",  # Remove x-axis label
+    # Set y-axis label with Greek beta
+    y = expression("Estimate of"~beta)) +  
+  theme_minimal()  # Use a minimal theme
 ```
+]]
+.push-right[
+```{r ref.label = "Coefplot2", out.width='100%', fig.height = 4, fig.width = 6, echo = FALSE}
 
-```{r include = FALSE}
-ols_bias <- lm_robust(age ~ treat, data = ESS %>% filter(cntry == "PT"), weights = pspwght)
 ```
-
-$$\tilde{\beta}_{y \leftarrow D} = \underbrace{`r coef(ols_pt_mult)["treatAfter Bali"]`}_{\beta_{y \leftarrow D}} + \underbrace{(`r round(coef(ols_bias)["treatAfter Bali"], digits = 1)` \times `r coef(ols_pt_mult)["age"]`)}_{\text{OVB}} = `r coef(ols_pt_mult)["treatAfter Bali"] + ( coef(ols_bias)["treatAfter Bali"] * coef(ols_pt_mult)["age"] )`$$
-]
-.panel[.panel-name[R code]
-```{r ref.label = "coefplotPT", eval = FALSE}
+]]
+.panel[.panel-name[Predictions]
+.push-left[
+**Step 1**: Generate fictional data of $x1$ with informative values. .alert[Set controls to informative constant value (e.g. average citizen rights)!]
+.font80[
+```{r}
+(fict_dat <- tibble(
+  # Sequence from 0 to 100 for 'socialist' variable
+  socialist = 0:100,  
+  # Set 'citizen_rights' to the mean value from 'Dat' #<<
+  citizen_rights = mean(Dat$citizen_rights))) #<<
+```
+]]
+.push-right[
+**Step 2**: Apply estimated model to fictional data. Given fictional data, what $\hat{y}$ does our model predict?
+.font80[
+```{r}
+(fict_dat <- predict( 
+  ols_mult, # Predict using the 'ols_mult'
+  newdata = fict_dat, # Use 'fict_dat' for prediction
+  # Calculate 95% confidence intervals
+  interval = "confidence", level = 0.95)$fit %>%  
+  as_tibble() %>%  # Convert output to a tibble
+  # Combine predictions with original 'fict_dat' 
+  bind_cols(fict_dat, .))  
+```
+]]]
+.panel[.panel-name[Visualization]
+.push-left[.font80[
+```{r Predplot, fig.show = 'hide'}
+ggplot(data = fict_dat, aes(y = fit, x = socialist)) +
+  geom_vline(xintercept = c(73),  # Add a vertical line at x=73
+             color = "red", lty = "dashed") + 
+  geom_hline(yintercept = 0,  # Add a horizontal line at y=0
+             color = "orange", lty = "dashed") +
+  # Add a ribbon for the confidence interval
+  geom_ribbon(aes(ymin = lwr, ymax = upr), alpha = 0.5) + 
+  geom_line() +  # Add a line for the predicted values
+  labs( # Set the plot title, x- & y-axis labels
+    title = "Predictions based on multiple OLS of extreme poverty",  
+    x = "By years of socialist history\n(At average citizenship rights)", 
+    y = "Predicted population in extreme poverty") +
+  theme_minimal()  # Use a minimal theme
+```
+]]
+.push-right[
+```{r ref.label = "Predplot", out.width='100%', fig.height = 4, fig.width = 6, echo = FALSE}
 ```
 ]]]
 
 ---
-class: clear
-# Can multiple OLS fix broken interventions?
-
-.push-left[.content-box-green[
-
-```{tikz, ref.label = "DAG_FrischWaugh", echo = FALSE, out.width = '40%'}
-
-```
-
-OLS can statistically balance **_observed_** confounders, even after data collection.
-]]
-
-.push-right[.content-box-red[
-
-```{tikz, DAG_FrischWaugh2, echo = FALSE, out.width = '40%'}
-\usetikzlibrary{shapes,decorations,arrows,calc,arrows.meta,fit,positioning,quotes}
-\tikzset{
-  -Latex,auto,node distance =1 cm and 1 cm,semithick,
-  state/.style ={ellipse, draw, minimum width = 0.7 cm},
-  point/.style = {circle, draw, inner sep=0.04cm,fill,node contents={}},
-  bidirected/.style={Latex-Latex,dashed},
-  el/.style = {inner sep=2pt, align=left, sloped}
-}
-
-\begin{tikzpicture}
-\sffamily
-\node[state, align = center] (1) at (0,0) {$D$};
-\node[state] (2) [gray, double, above = of 1] {$C_{1}$};
-\node[state] (3) [right = of 1] {$Y$};
-\node[state] (4) [red, dashed, above = of 3] {$C_{2}$};
-
-\path (1) edge (3);
-\path (2) edge [gray, dashed] (1);
-\path (2) edge [gray, dashed] (3);
-\path (4) edge [red, dashed] (1);
-\path (4) edge [red, dashed] (3);
-\end{tikzpicture}
-```
-
-If **_observed_** confounders are imbalanced, *maybe even more is broken?*
-]]
-
----
 class: inverse middle center
 
-# 3. Smart summary controls
+# 2. Smart summary controls
 
-> Control for [such] a wide range of factors seems daunting: the possibilities are virtually infinite, and many characterisitcs are hard to quantify.
+> Control for a wide range of factors seems daunting: the possibilities are virtually infinite, and many characterisitcs are hard to quantify.
 
 > -- `r Citet(myBib, "angrist_mastering_2014", after  = ", page 51")`
 
 ---
+layout: true
 # Football and domestic violence
 
 .left-column[
@@ -955,6 +734,16 @@ class: inverse middle center
 knitr::include_graphics('https://wpr-public.s3.amazonaws.com/wprorg/styles/facebook/s3/field/image/ap20296067506098.jpg?itok=hZu82HBq')
 ```
 ]
+
+---
+
+.right-column[.content-box-green[
+1. What counfounders could bias the effect of a lost football game on domestic violence?
+
+2. Does controlling for Sports Bet block the backdoor path through those confounders?
+]]
+
+---
 
 .right-column[
 ```{r, echo = FALSE, out.width='100%', fig.align='center'}

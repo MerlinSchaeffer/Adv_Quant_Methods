@@ -7,11 +7,11 @@ library(estimatr)
 # Read the CSV files
 Q1 <- read_csv("assets/Quizz-participation/2024/Quiz_Week1.csv") %>% mutate(correct = (`n correct` / (`n correct` + `n incorrect`)) * 100) %>% select(name, correct, score)
 Q2 <- read_csv("assets/Quizz-participation/2024/Quiz_Week2.csv") %>% mutate(correct = (`n correct` / (`n correct` + `n incorrect`)) * 100) %>% select(name, correct, score)
-# Q3 <- read_csv("assets/Quizz-participation/Quiz_Week3.csv") %>% mutate(correct = (`n correct` / (`n correct` + `n incorrect`)) * 100) %>% select(name, correct)
-# Q4 <- read_csv("assets/Quizz-participation/Quiz_Week4.csv") %>% mutate(correct = (`n correct` / (`n correct` + `n incorrect`)) * 100) %>% select(name, correct)
-# Q5 <- read_csv("assets/Quizz-participation/Quiz_Week5.csv") %>% mutate(correct = (`n correct` / (`n correct` + `n incorrect`)) * 100) %>% select(name, correct)
-# Q6 <- read_csv("assets/Quizz-participation/Quiz_Week6.csv") %>% mutate(correct = (`n correct` / (`n correct` + `n incorrect`)) * 100) %>% select(name, correct)
-# Q7 <- read_csv("assets/Quizz-participation/Quiz_Week7.csv") %>% mutate(correct = (`n correct` / (`n correct` + `n incorrect`)) * 100) %>% select(name, correct)
+Q3 <- read_csv("assets/Quizz-participation/2024/Quiz_Week3.csv") %>% mutate(correct = (`n correct` / (`n correct` + `n incorrect`)) * 100) %>% select(name, correct, score)
+Q4 <- read_csv("assets/Quizz-participation/2024/Quiz_Week4.csv") %>% mutate(correct = (`n correct` / (`n correct` + `n incorrect`)) * 100) %>% select(name, correct, score)
+Q5 <- read_csv("assets/Quizz-participation/2024/Quiz_Week5.csv") %>% mutate(correct = (`n correct` / (`n correct` + `n incorrect`)) * 100) %>% select(name, correct, score)
+Q6 <- read_csv("assets/Quizz-participation/2024/Quiz_Week6.csv") %>% mutate(correct = (`n correct` / (`n correct` + `n incorrect`)) * 100) %>% select(name, correct, score)
+Q7 <- read_csv("assets/Quizz-participation/2024/Quiz_Week7.csv") %>% mutate(correct = (`n correct` / (`n correct` + `n incorrect`)) * 100) %>% select(name, correct, score)
 # Q8 <- read_csv("assets/Quizz-participation/Quiz_Week8.csv") %>% mutate(correct = (`n correct` / (`n correct` + `n incorrect`)) * 100) %>% select(name, correct)
 # Q9 <- read_csv("assets/Quizz-participation/Quiz_Week9.csv") %>% mutate(correct = (`n correct` / (`n correct` + `n incorrect`)) * 100) %>% select(name, correct)
 # Q10 <- read_csv("assets/Quizz-participation/Quiz_Week10.csv") %>% mutate(correct = (`n correct` / (`n correct` + `n incorrect`)) * 100) %>% select(name, correct)
@@ -20,7 +20,7 @@ Q2 <- read_csv("assets/Quizz-participation/2024/Quiz_Week2.csv") %>% mutate(corr
 # Q13 <- read_csv("assets/Quizz-participation/Quiz_Week13.csv") %>% mutate(correct = (`n correct` / (`n correct` + `n incorrect`)) * 100) %>% select(name, correct)
 
 # Combine the dataframes into a single dataframe
-dataframes <- list(Q1, Q2) #, Q3, Q4, Q5, Q6, Q7, Q8, Q9, Q10, Q11, Q12, Q13)
+dataframes <- list(Q1, Q2, Q3, Q4, Q5, Q6, Q7) #, Q8, Q9, Q10, Q11, Q12, Q13)
 Q <- bind_rows(dataframes, .id = "source_df") # %>% filter(name != "Charlotte Baarts")
 
 # Reshape to wide
@@ -101,7 +101,7 @@ result %>% print(n = 102)
 
 # Who is not qualified?
 result %>%
-  filter(appearances < 10) %>%
+  filter(appearances < 5) %>%
   print(.)
 
 save(result, file = "/Users/fsm788/Documents/Teaching/My classes/Multiple Regression and Causal Inference/static/Lectures/14-Conclusion/Result.RData")

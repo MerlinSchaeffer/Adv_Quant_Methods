@@ -1,0 +1,657 @@
+name,id,sis_id,section,section_id,section_sis_id,submitted,attempt,"865818: If a 95% confidence interval for a population mean is reported as (45, 55), what does this interval mean?",5.0,865819: In what scenario are post-stratification weights particularly useful?,5.0,"865820: We can examplify the idea of a random sample by sampling random sub-samples of our total sample. The tidyverse function slice_sample() makes this super easy! Just pipe a data frame and select the number of rows you want to sample.
+Draw two different subsamples at random from elecCampaign.
+Then, for each subsample, calculate a separate OLS model that investigates how age affects the degree to which citizens perceive immigration as a threat.
+Finish the two sentences:
+It is [coef] that the unrounded coefficient is identical across the two different models.
+It is most likely that we draw two samples where the two coefficients for two identically specified models are [reg]
+",9.0,"865821: For the rest of the quiz, we will only look at data from the first day of the data collection. Filter the data so that you only include data from the first day of the election campaign, the 5th of October 2022. This will give you 1,173 observations.",0.0,865830: What is the correct interpretation of the p-value for the beta coefficient in our model?,9.0,"865835: We now investigate another variable.
+We'll test whether someone's educational level is associated with their perceived economic safety. Let’s find out!
+Recode education to a numeric variable reflecting qualification degree using the code in the quiz script (based on https://ufm.dk/uddannelse/anerkendelse-og-dokumentation/dokumentation/kvalifikationsrammer/typer/samlet-oversigt).
+Formulate a short hypothesis for the relationship between educational level and perceived economic safety.",20.0,"865838: On a scale from 0 (the worst possible quiz for this course) to 10 (the best possible quiz for this course), how would you rate the quiz, that you have just completed?",0.0,"865839: If you have any suggestions as to how we can improve these quizzes, feel free to let us know here.
+If you don't have any suggestions, just type a blank space",0.0,"865816: Before we dive into today’s examples, let's review some key concepts from today's lecture.
+
+Which of the following best defines random sampling?",5.0,"865823: Estimate a linear regression model with economic security (economicSecurity) as dependent variable and age (age) as the independent variable. The estimated beta coefficient for age is 
+  
+    [ Select ]
+  
+  [""0.005"", ""0.006"", ""0.007"", ""0.008""]
+
+.
+
+Perform a t-test to determine if the relation between the regressor and perceived economic safety is statistically significant. This is done automatically when estimating a regression model in R.
+Use tidy() to see the results.
+The null hypothesis for this test can be formally written down as: H0: 
+  
+    [ Select ]
+  
+  [""alfa = 0"", ""beta = 0"", ""alfa ≠ 0"", ""beta ≠ 0""]
+
+.
+The t-value for the estimated beta-coefficient is: 
+  
+    [ Select ]
+  
+  [""1.128"", ""1.428"", ""2.128"", ""2.428""]
+
+.
+What are the critical value(s) of the double-sided t-test if we choose a significance level of 0.01?: ± 
+  
+    [ Select ]
+  
+  [""1.64"", ""1.96"", ""2.58""]
+
+ (two digits). Is the t-value more extreme than the critical value(s)? 
+  
+    [ Select ]
+  
+  [""Yes"", ""No""]
+
+.
+
+What is the conclusion of the t-test? Is the beta coefficient significantly different from 0 at the 0.01-level?: 
+  
+    [ Select ]
+  
+  [""Yes"", ""No""]
+
+.",9.0,"865827: We can draw the same conclusions by looking directly at the p-value for the beta coefficient.
+Which of the following statements about the model in the picture is correct for the regressor, if we set a significance level of 0.05?
+",9.0,"865832: Another method of using our knowledge of randomness to communicate the statistical uncertainty of our results is by using confidence intervals.
+Estimate a linear regression model with perceived economic security (economicSecurity) as dependent variable and the number of adults in one's household(AdultsInHousehold) as the independent variable.
+
+The lower limit of the 95%-confidence interval for the beta coefficient is: 
+  
+    [ Select ]
+  
+  [""-0.017"", ""0.017"", ""-2.810"", ""2.810""]
+
+.
+The beta coefficient is: 
+  
+    [ Select ]
+  
+  [""0.065"", ""0.070"", ""0.075"", ""0.080""]
+
+
+The upper limit of the 95%-confidence interval for the beta coefficient is: 
+  
+    [ Select ]
+  
+  [""0.168"", ""3.180"", ""-0.168"", ""-3.180""]
+
+.
+
+Finish the sentence: The fact that the 95-pct. confidence interval 
+  
+    [ Select ]
+  
+  [""does"", ""doesn't""]
+
+ cover 0 reflects that the p-value is 
+  
+    [ Select ]
+  
+  [""significant"", ""insignificant""]
+
+ on the 0.95-level.
+Make a scatterplot (using ggplot) with the independent variable on the x-axis and the dependent variable on the y-axis and visualize the linear regression line with a 95%-confidence interval.
+The upper limit of this interval for a person in a household with 4 adults is approximately 
+  
+    [ Select ]
+  
+  [""3.0"", ""3.5"", ""4.0""]
+
+. The lower limit of this interval person in a household with 1 adults is approximately 
+  
+    [ Select ]
+  
+  [""2.0"", ""2.5"", ""3.0""]
+
+.",9.0,"865836: Estimate a linear regression model with perceived economic security (economicSecurity) as dependent variable and education level (education.Lvl) as the independent variable.
+please report (3 digits)
+the beta coefficient: 
+  
+    [ Select ]
+  
+  [""0.09"", ""0.091"", ""0.092""]
+
+the p.value: 
+  
+    [ Select ]
+  
+  [""0.000"", ""0.001"", ""0.002""]
+
+
+Which of the following interpretations is correct? People with higher educational levels are in their own eyes on average 
+  
+    [ Select ]
+  
+  [""more"", ""less""]
+
+ economically safe
+",20.0,"865817: Before we dive into today’s examples, let's review some key concepts from today's lecture.
+
+Which statement correctly describes random sampling?",5.0,"865824: Estimate a linear regression model with economic security (economicSecurity) as dependent variable and the number of adults in one's household (AdultsInHousehold) as the independent variable. The estimated beta coefficient for household size is 
+  
+    [ Select ]
+  
+  [""0.065"", ""0.070"", ""0.075"", ""0.080""]
+
+.
+
+Perform a t-test to determine if the relation between the regressor and perceived economic safety is statistically significant. This is done automatically when estimating a regression model in R.
+Use tidy() to see the results.
+The null hypothesis for this test can be formally written down as: H0: 
+  
+    [ Select ]
+  
+  [""b = 0"", ""b  0"", ""b  0"", ""b ~ 0""]
+
+.
+The t-value for the estimated beta-coefficient is: 
+  
+    [ Select ]
+  
+  [""1.594"", ""1.864"", ""2.154"", ""2.334""]
+
+. What are the critical value(s) of the double-sided t-test if we choose a significance level of 0.05?: ± 
+  
+    [ Select ]
+  
+  [""1.64"", ""1.96"", ""2.58""]
+
+ (two digits). Is the t-value more extreme than the critical value(s)? 
+  
+    [ Select ]
+  
+  [""Yes"", ""No""]
+
+.
+
+What is the conclusion of the t-test? Is the beta coefficient significantly different from 0 at the 0.05-level?: 
+  
+    [ Select ]
+  
+  [""Yes"", ""No""]
+
+.",9.0,"865826: We can draw the same conclusions by looking directly at the p-value for the beta coefficient.
+Which of the following statements about the model in the picture is correct for the regressor, if we set a significance level of 0.05?
+",9.0,"865834: Another method of using our knowledge of randomness to communicate the statistical uncertainty of our results is by using confidence intervals.
+Estimate a linear regression model with perceived economic security (economicSecurity) as dependent variable andage(age) as the independent variable.
+
+The lower limit of the95%-confidence interval for the beta coefficient is: 
+  
+    [ Select ]
+  
+  [""-0.002"", ""-0.001"", ""0.001"", ""0.002""]
+
+.
+The beta coefficient is: 
+  
+    [ Select ]
+  
+  [""0.005"", ""0.006"", ""0.007"", ""0.008""]
+
+
+The upper limit of the95%-confidence interval for the beta coefficient is: 
+  
+    [ Select ]
+  
+  [""0.002"", ""0.004"", ""0.006"", ""0.008""]
+
+.
+
+Finish the sentence: The fact that the 95-pct. confidence interval 
+  
+    [ Select ]
+  
+  [""does"", ""doesn't""]
+
+ cover 0 reflects that the p-value is 
+  
+    [ Select ]
+  
+  [""significant"", ""insignificant""]
+
+ on the 0.90-level.
+Make a scatterplot (using ggplot) withthe independent variableon the x-axis andthe dependent variableon the y-axis and visualize the linear regression line with a95%-confidence interval.
+The upper limit of this interval for a person of 30 years is approximately 
+  
+    [ Select ]
+  
+  [""3.15"", ""3.25"", ""3.35""]
+
+. The lower limit of this interval for a person of 80 yearsis approximately 
+  
+    [ Select ]
+  
+  [""3.0"", ""3.2"", ""3.4""]
+
+.",9.0,"865831: Another method of using our knowledge of randomness to communicate the statistical uncertainty of our results is by using confidence intervals.
+Estimate a linear regression model with perceived economic security (economicSecurity) as dependent variable andthe number of adults in one's household(AdultsInHousehold) as the independent variable.
+
+The lower limit of the90%-confidence interval for the beta coefficient is: 
+  
+    [ Select ]
+  
+  [""-0.002"", ""0.002"", ""-2.840"", ""2.840""]
+
+.
+The beta coefficient is: 
+  
+    [ Select ]
+  
+  [""0.065"", ""0.070"", ""0.075"", ""0.080""]
+
+
+The upper limit of the90%-confidence interval for the beta coefficient is: 
+  
+    [ Select ]
+  
+  [""-0.153"", ""0.153"", ""-3.150"", ""3.150""]
+
+.
+
+Finish the sentence: The fact that the 90-pct. confidence interval 
+  
+    [ Select ]
+  
+  [""does"", ""doesn't""]
+
+ cover 0 reflects that the p-value is 
+  
+    [ Select ]
+  
+  [""significant"", ""insignificant""]
+
+ on the 0.90-level.
+Make a scatterplot (using ggplot) withthe independent variableon the x-axis andthe dependent variableon the y-axis and visualize the linear regression line with a90%-confidence interval.
+The upper limit of this interval for a person in a household with 3 adults is approximately 
+  
+    [ Select ]
+  
+  [""2.7"", ""3.0"", ""3.3""]
+
+. The lower limit of this interval person in a household with 6adults is approximately 
+  
+    [ Select ]
+  
+  [""2.1"", ""3.1"", ""4.1""]
+
+.",9.0,"865837: Estimate a linear regression model with perceived economic security (economicSecurity) as dependent variable and education level (education.Lvl) as the independent variable.
+please report (4 digits)
+the beta coefficient: 
+  
+    [ Select ]
+  
+  [""0.0914"", ""0.0915"", ""0.0916"", ""0.0917""]
+
+the p.value: 
+  
+    [ Select ]
+  
+  [""0.0000"", ""0.0002"", ""0.0004"", ""0.0006""]
+
+
+Which of the following interpretations is correct? People with higher educational levels are in their own eyes on average 
+  
+    [ Select ]
+  
+  [""more"", ""less""]
+
+ economically safe",20.0,"865822: Estimate a linear regression model with economic security (economicSecurity) as dependent variable and age (age) as the independent variable. The estimated beta coefficient for age is 
+  
+    [ Select ]
+  
+  [""0.003"", ""0.004"", ""0.005"", ""0.006""]
+
+.
+
+Perform a t-test to determine if the relation between the regressor and perceived economic safety is statistically significant. This is done automatically when estimating a regression model in R.
+Use tidy() to see the results.
+The null hypothesis for this test can be formally written down as: H0: 
+  
+    [ Select ]
+  
+  [""b = 0"", ""b  0"", ""b  0"", ""b ~ 0""]
+
+.
+The t-value for the estimated beta-coefficient is: 
+  
+    [ Select ]
+  
+  [""1.128"", ""1.428"", ""2.128"", ""2.428""]
+
+. What are the critical value(s) of the double-sided t-test if we choose a significance level of 0.05?: ± 
+  
+    [ Select ]
+  
+  [""1.64"", ""1.96"", ""2.58""]
+
+ (two digits). Is the t-value more extreme than the critical value(s)? 
+  
+    [ Select ]
+  
+  [""Yes"", ""No""]
+
+.
+
+What is the conclusion of the t-test? Is the beta coefficient significantly different from 0 at the 0.05-level?: 
+  
+    [ Select ]
+  
+  [""Yes"", ""No""]
+
+.",9.0,"865829: We can draw the same conclusions by looking directly at the p-value for the beta coefficient.
+Which of the following statements about the model in the picture is correct for the regressor, if we set a significance level of 0.10?
+",9.0,"865825: Estimate a linear regression model with economic security (economicSecurity) as dependent variable and the number of adults in one's household (AdultsInHousehold) as the independent variable. The estimated beta coefficient for household size is 
+  
+    [ Select ]
+  
+  [""0.065"", ""0.070"", ""0.075"", ""0.080""]
+
+.
+
+Perform a t-test to determine if the relation between the regressor and perceived economic safety is statistically significant. This is done automatically when estimating a regression model in R.
+Use tidy() to see the results.
+The null hypothesis for this test can be formally written down as: H0: 
+  
+    [ Select ]
+  
+  [""b = 0"", ""b  0"", ""b  0"", ""b ~ 0""]
+
+.
+The t-value for the estimated beta-coefficient is: 
+  
+    [ Select ]
+  
+  [""1.594"", ""1.864"", ""2.154"", ""2.334""]
+
+. What are the critical value(s) of the double-sided t-test if we choose a significance level of 0.10?: ± 
+  
+    [ Select ]
+  
+  [""1.64"", ""1.96"", ""2.58""]
+
+ (two digits). Is the t-value more extreme than the critical value(s)? 
+  
+    [ Select ]
+  
+  [""Yes"", ""No""]
+
+.
+
+What is the conclusion of the t-test? Is the beta coefficient significantly different from 0 at the 0.10-level?: 
+  
+    [ Select ]
+  
+  [""Yes"", ""No""]
+
+.",9.0,"865833: Another method of using our knowledge of randomness to communicate the statistical uncertainty of our results is by using confidence intervals.
+Estimate a linear regression model with perceived economic security (economicSecurity) as dependent variable and age (age) as the independent variable.
+
+The lower limit of the90%-confidence interval for the beta coefficient is: 
+  
+    [ Select ]
+  
+  [""-0.002"", ""-0.001"", ""0.001"", ""0.002""]
+
+.
+The beta coefficient is: 
+  
+    [ Select ]
+  
+  [""0.005"", ""0.006"", ""0.007"", ""0.008""]
+
+
+The upper limit of the90%-confidence interval for the beta coefficient is: 
+  
+    [ Select ]
+  
+  [""0.002"", ""0.004"", ""0.006"", ""0.008""]
+
+.
+
+Finish the sentence: The fact that the 90-pct. confidence interval 
+  
+    [ Select ]
+  
+  [""does"", ""doesn't""]
+
+ cover 0 reflects that the p-value is 
+  
+    [ Select ]
+  
+  [""significant"", ""insignificant""]
+
+ on the 0.90-level.
+Make a scatterplot (using ggplot) withthe independent variableon the x-axis andthe dependent variableon the y-axis and visualize the linear regression line with a90%-confidence interval.
+The upper limit of this interval for a person of 20 years is approximately 
+  
+    [ Select ]
+  
+  [""2.7"", ""2.9"", ""3.1""]
+
+. The lower limit of this interval for a person of 70 yearsis approximately 
+  
+    [ Select ]
+  
+  [""3.15"", ""3.25"", ""3.35""]
+
+.",9.0,"865815: Before we dive into today’s examples, let's review some key concepts from today's lecture.
+
+Which of the following is a characteristic of random sampling?",5.0,"865814: Before we dive into today’s example, let's review some key concepts from today's lecture.
+
+Which of the following statements about random sampling is true?",5.0,"865828: We can draw the same conclusions by looking directly at the p-value for the beta coefficient.
+Which of the following statements about the model in the picture is correct for the regressor, if we set a significance level of 0.01?
+",9.0,n correct,n incorrect,score
+Isabella Sø Rocha,411725,781117,Hold3;,173224,Hsyl210695,2024-10-02 21:59:00 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The probability that the null hypothesis is true.,0.0,"",0.0,"",0.0,"",0.0,Ensuring every individual in the population has an equal likelihood of selection.,5.0,"0.005,beta ≠ 0,2.428,2.58,No,No",7.5,"The p-value is below our significance level of 0.05, and we therefore reject the null hypothesis.",0.0,"-0.017,0.065,3.180,3.5,2.0,insignificant,doesn't",5.142857142857142,"",0.0,"","","","","","","","","","","","","","","","","","","","","","","","","","",9,4,36.64285714285714
+Paula Mille Møller Hougaard,409573,786690,Hold1;,173222,Hsyl210693,2024-10-02 06:32:17 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The probability that the independent variable has a causal effect on perceived economic safety.,0.0,"",0.0,8,0.0,"",0.0,"","","","","","","","","",0.0,It completely removes all bias from the sampling process.,0.0,"0.075,b = 0,1.594,1.96,No,No",9.0,"The p-value is below our significance level of 0.05, and we therefore don't reject the null hypothesis.",0.0,"-0.002,0.004,0.005,3.25,3.0,significant,doesn't",5.142857142857142,"","","","","","","","","","","","","","","","","","",9,4,33.14285714285714
+Weixi Xie,426231,818063,Hold3;,173224,Hsyl210695,2024-10-01 22:45:17 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The probability of drawing a random sample with this (or a more extreme) beta coefficient given that it is in reality 0.,9.0,"",0.0,8,0.0,    ,0.0,"","","","","","","","","","",It requires predetermined criteria for subject selection.,0.0,"0.075,b = 0,1.594,1.96,No,No",9.0,"The p-value is below our significance level of 0.05, and we therefore reject the null hypothesis.",9.0,"","","-0.002,0.075,0.153,2.7,4.1,does,insignificant",6.428571428571429,"0.0916,0.0002,more",6.666666666666666,"","","","","","","","","","","","","","",12,1,59.095238095238095
+Evanthy Wang,427003,817725,Hold3;,173224,Hsyl210695,2024-10-01 22:11:33 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The probability of drawing a random sample with this (or a more extreme) beta coefficient given that it is in reality 0.,9.0,"",0.0,"",0.0,"",0.0,"","","","","","","2.810,0.075,3.180,3.5,3.0,significant,doesn't",2.571428571428571,"","",It provides each member of the population an equal opportunity to be included.,5.0,"","","The p-value is above our significance level of 0.05, and we therefore don't reject the null hypothesis.",0.0,"","","","","",0.0,"0.004,b = 0,2.428,1.96,Yes,Yes",7.5,"","","","","","","","","","","","",10,3,43.07142857142857
+Patrick Elkjær Trads Olesen,407484,796814,Hold3;,173224,Hsyl210695,2024-10-01 20:10:04 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The probability of drawing a random sample with this (or a more extreme) beta coefficient given that it is in reality 0.,9.0,"H0: Educational level has no effect on perceived economic safety (the beta coefficient for education is equal to 0)
+
+H1: Higher educational levels are positively associated with perceived economic safety (the beta coefficient for education is greater than 0).",0.0,7,0.0,I do not have any suggestions. Have a nice day :'),0.0,"","","","","","","-0.017,0.075,0.168,3.5,3.0,insignificant,does",7.7142857142857135,"","",It provides each member of the population an equal opportunity to be included.,5.0,"","","","","","","","","0.0915,0.0000,more",13.333333333333332,"0.005,b = 0,2.428,1.96,Yes,Yes",7.5,"The p-value is above our significance level of 0.10, and we therefore don't reject the null hypothesis.",9.0,"","","","","","","","","","",13,0,70.54761904761904
+Josefine Ulvbjerg Jørgensen,411308,751438,Hold4;,173225,Hsyl210696,2024-10-01 17:22:41 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,"",0.0,"",0.0,8,0.0,"",0.0,Ensuring every individual in the population has an equal likelihood of selection.,5.0,"","","","","",0.0,"",0.0,"","","","","","","","","","","","","","","The p-value is above our significance level of 0.10, and we therefore reject the null hypothesis.",0.0,0.075,1.5,"","","","","","","","",9,4,25.5
+Anna Schepelern Pedersen,408524,780214,Hold3;,173224,Hsyl210695,2024-10-01 17:04:08 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The probability that the null hypothesis is true.,0.0,There is no relationsship between a persons educational level and their perceived economical safty,0.0,6,0.0,"        
+
+ ",0.0,"","","0.005,beta ≠ 0,2.428,2.58,No,No",7.5,"The p-value is above our significance level of 0.05, and we therefore reject the null hypothesis.",0.0,"","","","",It provides each member of the population an equal opportunity to be included.,5.0,"","","","","","","","","0.0915,0.0000,more",13.333333333333332,"","","","","","","0.002,0.007,0.002,2.9,3.15,doesn't,insignificant",2.571428571428571,"","","","","","",11,2,47.4047619047619
+Arthur Barrier,427050,817672,Hold4;,173225,Hsyl210696,2024-10-01 16:31:09 UTC,1,There is a 95% chance that any randomly selected value from the population will be between 45 and 55.,0.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The probability of drawing a random sample with this (or a more extreme) beta coefficient given that it is in reality 0.,9.0,"From the data collected during the election campaign, electors with a higher level of education seem to feel safer about their economic situation looking one year ahead. This is visible with smaller proportion of respondents with bachelor and master degrees feeding for their economic security, while respondents that only completed elementary school or the gymnasium are much less likely to feel entirely safe about the economic situation than respondents from other education levels.
+
+ 
+
+ ",0.0,3,0.0,p,0.0,Ensuring every individual in the population has an equal likelihood of selection.,5.0,"","","The p-value is below our significance level of 0.05, and we therefore reject the null hypothesis.",0.0,"","","","","","","","","","","","","","","0.0917,0.0004,more",13.333333333333332,"","","","","0.065,b ~ 0,1.594,1.64,No,No",6.0,"0.002,0.005,0.004,3.1,3.15,does,insignificant",3.8571428571428568,"","","","","","",11,2,51.19047619047618
+Leïa Grac,427116,818207,Hold4;,173225,Hsyl210696,2024-10-01 12:08:12 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"TRUE,exactly identical.",0.0,"",0,The probability that the independent variable has a causal effect on perceived economic safety.,0.0,"",0.0,"",0.0,"",0.0,"","","","","The p-value is below our significance level of 0.05, and we therefore don't reject the null hypothesis.",0.0,"0.017,0.070,0.168,3.5,2.0,significant,does",3.8571428571428568,"0.091,0.001,more",13.333333333333332,"","","","","","","","","","","","","","","","","0.070,b < 0,1.864,1.96,Yes,No",1.5,"","",It ensures that every member of the population has an equal chance of being selected.,5.0,"","","","",9,4,33.69047619047618
+Johan Rafael Barnholdt Nielsen,385993,767847,Hold4;,173225,Hsyl210696,2024-10-01 09:34:42 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The probability of drawing a random sample with this (or a more extreme) beta coefficient given that it is in reality 0.,9.0,My hypothesis is that the people with a higher level of education have a greater sense of economic safety! ,0.0,6,0.0,Some of the coding got confusing. Especially around question 6 and 9 i had to recode a bunch. And there was still mistakes. Maybe make some clearer guidelines for trouble- shooting in the script. ,0.0,"","","","","","","","","","","","","","","","","","","-0.002,0.080,0.153,2.7,3.1,does,significant",5.142857142857142,"0.0915,0.0004,more",20.0,"","","The p-value is above our significance level of 0.10, and we therefore don't reject the null hypothesis.",9.0,"0.070,b = 0,1.864,1.64,Yes,Yes",3.0,"","","","",Random sampling ensures that every subset of the population has an equal chance of being selected.,5.0,"","",13,0,70.14285714285714
+Frederikke Kisbye Jakobsen,409596,758753,Hold1;,173222,Hsyl210693,2024-10-01 09:06:09 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The probability of drawing a random sample with this (or a more extreme) beta coefficient given that it is in reality 0.,9.0,A hypothesis could be that the higher educational level you have the higher economic safety you perceive.,0.0,4,0.0,no,0.0,"","","","","","","","","","",It provides each member of the population an equal opportunity to be included.,5.0,"","","","","","","0.002,0.075,0.153,3.3,3.1,doesn't,insignificant",6.428571428571429,"0.0915,0.0002,more",13.333333333333332,"","","","","0.075,b = 0,1.594,1.64,No,No",9.0,"","","","","","","The p-value is above our significance level of 0.01, and we therefore don't reject the null hypothesis.",9.0,13,0,70.76190476190476
+Valentina Novelli,426240,819103,Hold3;,173224,Hsyl210695,2024-09-30 14:17:48 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The probability of drawing a random sample with this (or a more extreme) beta coefficient given that it is in reality 0.,9.0,"I hypothesize that an individual's level of education is positively associated with their perceived economic security. Specifically, individuals with higher educational qualifications will have a stronger sense of economic stability. The reasoning behind this is that higher education tends to increase access to better job opportunities, higher income and more job security, which can contribute to an individual’s overall perception of economic well-being. ",0.0,9,0.0,                                      ,0.0,"","","","","","","","","0.091,0.000,more",20.0,It provides each member of the population an equal opportunity to be included.,5.0,"0.075,b = 0,1.594,1.96,No,No",9.0,"","","","","","","","","","","The p-value is above our significance level of 0.10, and we therefore reject the null hypothesis.",0.0,"","","0.001,0.005,0.008,3.1,3.15,doesn't,significant",9.0,"","","","","","",12,1,71.0
+Clara Bruun Ryttov,410642,789099,Hold2;,173223,Hsyl210694,2024-09-27 17:48:18 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"TRUE,exactly identical.",0.0,"",0,The probability of drawing a random sample with this (or a more extreme) beta coefficient given that it is in reality 0.,9.0,There is a significant positive relationship between educational level and perceived economic safety. Higher educational levels are associated with higher perceived economic safety scores.,0.0,7,0.0,"",0.0,"","","","","The p-value is above our significance level of 0.05, and we therefore reject the null hypothesis.",0.0,"","","0.092,0.000,more",13.333333333333332,"","","","","","","","","-0.002,0.075,0.153,2.7,2.1,does,significant",5.142857142857142,"","","","","","","0.075,b = 0,1.594,1.64,No,No",9.0,"","",It ensures that every member of the population has an equal chance of being selected.,5.0,"","","","",11,2,51.476190476190474
+Christian Fischer Krarup,391108,767325,Hold4;,173225,Hsyl210696,2024-09-27 09:16:55 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The probability of drawing a random sample with this (or a more extreme) beta coefficient given that it is in reality 0.,9.0,"h0: There is no correlation between educational level and perceived economic safety.
+
+h1: There is a correlation between educational level and perceived economic safety.",0.0,5,0.0,"",0.0,"","","","","","","","","0.092,0.000,more",13.333333333333332,"","","","","The p-value is above our significance level of 0.05, and we therefore don't reject the null hypothesis.",0.0,"","","-0.002,0.075,0.153,3.3,3.1,does,insignificant",9.0,"","","","","","","0.075,b > 0,1.594,1.64,No,No",7.5,"","",It ensures that every member of the population has an equal chance of being selected.,5.0,"","","","",12,1,62.83333333333333
+Ida Korsgaard Andreasen,412913,795058,Hold4;,173225,Hsyl210696,2024-09-27 09:08:09 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The probability of drawing a random sample with this (or a more extreme) beta coefficient given that it is in reality 0.,9.0,"Jo højere uddannelse, jo mere perceived economic safety",0.0,8,0.0,fine,0.0,Ensuring every individual in the population has an equal likelihood of selection.,5.0,"","","","","-0.017,0.075,0.168,3.5,3.0,insignificant,does",7.7142857142857135,"0.091,0.000,more",20.0,"","","0.075,b = 0,1.594,1.96,No,No",9.0,"The p-value is below our significance level of 0.05, and we therefore reject the null hypothesis.",9.0,"","","","","","","","","","","","","","","","","","","","",13,0,78.71428571428571
+Boline Stadel Clausen,412738,793604,Hold4;,173225,Hsyl210696,2024-09-27 09:03:59 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The probability of drawing a random sample with this (or a more extreme) beta coefficient given that it is in reality 0.,9.0,I think that there is a significally significant relationship between educational level and perceived economic safety. With people of higher education having a higher perceived economic safety.,0.0,8,0.0,It is difficult to figure out when you have to get the answer from R and when you just have to known/think/look at slides,0.0,"","","","","","","-0.017,0.075,0.168,3.5,3.0,insignificant,does",7.7142857142857135,"0.091,0.000,more",20.0,"","","","","","","","","","","","","","","","","0.075,b = 0,1.594,1.64,No,No",9.0,"","","","",Random sampling ensures that every subset of the population has an equal chance of being selected.,5.0,"The p-value is above our significance level of 0.01, and we therefore don't reject the null hypothesis.",9.0,13,0,78.71428571428571
+Julius Anders Buhl,411841,781844,Hold2;,173223,Hsyl210694,2024-09-27 08:04:39 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The probability of drawing a random sample with this (or a more extreme) beta coefficient given that it is in reality 0.,9.0,"",0.0,"",0.0,"",0.0,"","","0.005,beta = 0,2.428,2.58,No,No",9.0,"The p-value is above our significance level of 0.05, and we therefore don't reject the null hypothesis.",9.0,"-0.017,0.075,0.168,3.0,2.5,insignificant,does",5.142857142857142,"0.092,0.002,less",0.0,"","","","","","","","","","","","","","","","","","","","",It ensures that every member of the population has an equal chance of being selected.,5.0,"","","","",11,2,56.14285714285714
+Sarah Jean Boye,408377,784425,Hold4;,173225,Hsyl210696,2024-09-26 19:46:19 UTC,1,There is a 95% chance that any randomly selected value from the population will be between 45 and 55.,0.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The probability of drawing a random sample with this (or a more extreme) beta coefficient given that it is in reality 0.,9.0,"The higher educational the level the better perception of economic safety, as highly educated people are more likely to land stable-income jobs with reliable wages.",0.0,7,0.0,the tidy thing is a bit hard to understand and some of the code feels hard to properly understand what is really going on like the sub-samples and the final task,0.0,Ensuring every individual in the population has an equal likelihood of selection.,5.0,"","","The p-value is above our significance level of 0.05, and we therefore don't reject the null hypothesis.",9.0,"","","","","","","","","","","0.001,0.008,0.005,3.15,3.2,significant,doesn't",6.428571428571429,"","","0.0915,0.0000,more",13.333333333333332,"","","","","0.075,b = 0,1.594,2.58,Yes,No",6.0,"","","","","","","","",12,1,62.76190476190476
+Mathilde Dorf Nimb,413081,795569,Hold2;,173223,Hsyl210694,2024-09-26 18:22:57 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The strength of the correlation between the independent variable and perceived economic safety.,0.0,---,0.0,7,0.0,---,0.0,"","","","","","","","","0.092,0.000,more",13.333333333333332,"","","0.075,b = 0,1.594,1.96,No,No",9.0,"The p-value is below our significance level of 0.05, and we therefore don't reject the null hypothesis.",0.0,"","","-0.002,0.075,0.153,3.3,3.1,does,insignificant",9.0,"","","","","","","","","","",It ensures that every member of the population has an equal chance of being selected.,5.0,"","","","",11,2,55.33333333333333
+Olivia Nzong Yde-Andersen,412351,777689,Hold3;,173224,Hsyl210695,2024-09-26 13:05:36 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The probability of drawing a random sample with this (or a more extreme) beta coefficient given that it is in reality 0.,9.0,"H0: there is no relationship between someone's educational level and their perceived economic safety.
+
+ 
+
+Ha: There is a relationship between someone's educational level and their perceived economic safety.",0.0,9,0.0, .,0.0,"","","0.005,beta = 0,2.428,2.58,No,No",9.0,"","","","","","","","","","","The p-value is below our significance level of 0.05, and we therefore don't reject the null hypothesis.",0.0,"","","-0.002,0.075,0.153,3.3,3.1,does,insignificant",9.0,"0.0915,0.0004,more",6.666666666666666,"","","","","","","","","","",Random sampling ensures that every subset of the population has an equal chance of being selected.,5.0,"","",12,1,57.666666666666664
+Frida Kjøller Jensen,412923,781426,Hold3;,173224,Hsyl210695,2024-09-25 18:30:10 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The strength of the correlation between the independent variable and perceived economic safety.,0.0,"Null Hypothesis: There is no association between economic safety and educational level.
+
+ 
+
+Alternative Hypohesis: There is a positive association between economic safety and educational level.",0.0,9,0.0,.,0.0,Ensuring every individual in the population has an equal likelihood of selection.,5.0,"","","","","","","0.091,0.000,more",20.0,"","","0.075,b = 0,1.594,1.96,No,No",9.0,"The p-value is below our significance level of 0.05, and we therefore reject the null hypothesis.",9.0,"","","-0.002,0.075,0.153,3.3,3.1,does,insignificant",9.0,"","","","","","","","","","","","","","","","",12,1,71.0
+Alicia Paul,424259,818126,Hold2;,173223,Hsyl210694,2024-09-25 17:34:15 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The probability of drawing a random sample with this (or a more extreme) beta coefficient given that it is in reality 0.,9.0,"My hypothesis is that higher educational levels are positively associated with perceived economic safety, because higher education may lead to better job opportunities, higher income and increased financial stability.",0.0,7,0.0,blank space,0.0,Ensuring every individual in the population has an equal likelihood of selection.,5.0,"","","The p-value is above our significance level of 0.05, and we therefore don't reject the null hypothesis.",9.0,"-0.017,0.075,0.168,3.5,3.0,significant,does",6.428571428571429,"0.091,0.000,more",20.0,"","","0.075,b = 0,1.594,1.96,No,No",9.0,"","","","","","","","","","","","","","","","","","","","","","",13,0,77.42857142857143
+Theo Møller Meilstrup,412225,784244,Hold4;,173225,Hsyl210696,2024-09-25 12:59:30 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The probability of drawing a random sample with this (or a more extreme) beta coefficient given that it is in reality 0.,9.0,I would guess that ,0.0,5,0.0,"",0.0,"","","","","","","","","0.091,0.001,more",13.333333333333332,"","","0.075,b = 0,1.594,1.96,No,No",9.0,"","","","","-0.002,0.075,0.153,3.3,3.1,does,insignificant",9.0,"","","","","","","","","","","","",Random sampling ensures that every subset of the population has an equal chance of being selected.,5.0,"The p-value is above our significance level of 0.01, and we therefore don't reject the null hypothesis.",9.0,13,0,73.33333333333333
+Rosa Amalie Mørch Jørgensen,408087,792628,Hold2;,173223,Hsyl210694,2024-09-25 12:57:31 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The probability of drawing a random sample with this (or a more extreme) beta coefficient given that it is in reality 0.,9.0,"H0 = Your educational level does not play a role in your perceived economic safety.
+
+H1 = Your educational level does play a role",0.0,2.5,0.0,It was a little too difficult this time,0.0,Ensuring every individual in the population has an equal likelihood of selection.,5.0,"","","","","","","0.091,0.000,more",20.0,"","","","","","","","","","","","","","","","","0.075,b = 0,1.594,1.64,No,No",9.0,"0.002,0.005,0.006,3.1,3.35,does,significant",3.8571428571428568,"","","","","The p-value is above our significance level of 0.01, and we therefore don't reject the null hypothesis.",9.0,13,0,74.85714285714286
+Rosa Muncan Laursen,410308,778192,Hold1;,173222,Hsyl210693,2024-09-24 20:28:20 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The probability that the null hypothesis is true.,0.0,.,0.0,5,0.0,"",0.0,Ensuring every individual in the population has an equal likelihood of selection.,5.0,"","","The p-value is above our significance level of 0.05, and we therefore don't reject the null hypothesis.",9.0,"","","","","","","0.075,b = 0,1.594,1.96,No,No",9.0,"","","0.001,0.008,0.005,3.15,3.2,significant,doesn't",6.428571428571429,"","","0.0915,0.0004,more",20.0,"","","","","","","","","","","","","","",12,1,68.42857142857143
+Anna Fage Bonderup,408625,756055,Hold1;,173222,Hsyl210693,2024-09-24 20:24:37 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The probability of drawing a random sample with this (or a more extreme) beta coefficient given that it is in reality 0.,9.0,xxx,0.0,2,0.0,"I have to be honest and say this quiz is far more difficult than any of the others we have done.
+I know from talking to other of my fellow students that I am not alone in this thought, and it feels almost too difficult compared to what we have learned.",0.0,"","","","","","","","","","",It provides each member of the population an equal opportunity to be included.,5.0,"","","","","","","","","0.0915,0.0004,more",20.0,"","","","","0.075,b = 0,1.594,1.64,No,No",9.0,"-0.001,0.005,0.008,3.1,3.15,doesn't,significant",7.7142857142857135,"","","","","The p-value is above our significance level of 0.01, and we therefore don't reject the null hypothesis.",9.0,13,0,78.71428571428571
+Astrid Boesgaard Nielsen,388767,748150,Hold4;,173225,Hsyl210696,2024-09-24 16:19:33 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The probability that the null hypothesis is true.,0.0,"",0.0,5,0.0,"",0.0,"","","0.007,beta ≠ 0,1.428,1.96,Yes,Yes",0.0,"The p-value is above our significance level of 0.05, and we therefore don't reject the null hypothesis.",9.0,"","","0.091,0.001,less",6.666666666666666,"","","","","","","","","","","","","","","","","","","0.001,0.006,0.006,2.7,3.25,does,insignificant",1.2857142857142856,It ensures that every member of the population has an equal chance of being selected.,5.0,"","","","",11,2,40.95238095238095
+Oskar Emil Andersson,410738,748604,Hold3;,173224,Hsyl210695,2024-09-24 13:09:06 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The probability that the independent variable has a causal effect on perceived economic safety.,0.0,"Higher educational levels are positively associated with increased perceptions of economic safety, so that individuals with more education tend to feel more economically secure.",0.0,8,0.0,"",0.0,"","","0.005,beta ≠ 0,2.428,2.58,No,Yes",6.0,"","","2.810,0.075,3.180,3.5,3.0,significant,doesn't",2.571428571428571,"","","","","","","","","","","","","0.0915,0.0004,more",20.0,"","","The p-value is below our significance level of 0.10, and we therefore reject the null hypothesis.",0.0,"","","","",It ensures that every member of the population has an equal chance of being selected.,5.0,"","","","",11,2,52.57142857142857
+Mette-Marie Michaelsen,412879,783597,Hold2;,173223,Hsyl210694,2024-09-24 12:51:23 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The probability of drawing a random sample with this (or a more extreme) beta coefficient given that it is in reality 0.,9.0,"H0: no significant relationsship between edducational level and perceived economic safety
+
+H1: educational levels are positivily associated with perceived economic safety.
+
+ 
+
+ 
+
+ ",0.0,6,0.0,"",0.0,Ensuring every individual in the population has an equal likelihood of selection.,5.0,"","","The p-value is above our significance level of 0.05, and we therefore don't reject the null hypothesis.",9.0,"-0.017,0.075,0.168,3.5,3.0,insignificant,does",7.7142857142857135,"0.092,0.001,more",6.666666666666666,"","","","","","","","","","","","","","","","","0.075,b = 0,1.594,1.96,No,No",7.5,"","","","","","","","",13,0,63.88095238095238
+Asger Skriver Gelbek,409470,792421,Hold3;,173224,Hsyl210695,2024-09-24 09:56:00 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The probability that the null hypothesis is true.,0.0,"The longer the education, the stronger percieved economic safety",0.0,10,0.0,"",0.0,"","","","","","","","","","",It provides each member of the population an equal opportunity to be included.,5.0,"","","","","","","-0.002,0.075,0.153,3.3,3.1,does,insignificant",9.0,"0.0915,0.0004,more",20.0,"","","","","0.075,b = 0,1.594,1.64,No,No",9.0,"","","","","","","The p-value is above our significance level of 0.01, and we therefore don't reject the null hypothesis.",9.0,12,1,71.0
+Emmeline Søltoft Søndergaard,411690,792757,Hold4;,173225,Hsyl210696,2024-09-24 06:43:08 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The probability of drawing a random sample with this (or a more extreme) beta coefficient given that it is in reality 0.,9.0,"The longer education one have, the more economic safety is perceived.",0.0,9,0.0,"",0.0,"","","0.005,beta = 0,2.428,2.58,No,No",9.0,"","","","","0.091,0.000,more",20.0,"","","","","","","","","","","","","","","","","","","0.001,0.005,0.008,2.9,3.15,doesn't,significant",7.7142857142857135,"","",Random sampling ensures that every subset of the population has an equal chance of being selected.,5.0,"The p-value is above our significance level of 0.01, and we therefore don't reject the null hypothesis.",9.0,13,0,78.71428571428571
+Marie Oline Mejlvang Johannesen,387034,760955,Hold1;,173222,Hsyl210693,2024-09-23 17:03:16 UTC,1,There is a 95% chance that any randomly selected value from the population will be between 45 and 55.,0.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The probability of drawing a random sample with this (or a more extreme) beta coefficient given that it is in reality 0.,9.0,"Hypothesis: Higher education level are associated with greater economic safety, so individuals with more education are feeling more economically secure.
+
+ ",0.0,4,0.0,f,0.0,Ensuring every individual in the population has an equal likelihood of selection.,5.0,"","","The p-value is above our significance level of 0.05, and we therefore don't reject the null hypothesis.",9.0,"","","","","","","0.075,b = 0,1.594,1.96,No,No",9.0,"","","0.001,0.008,0.005,3.15,3.2,significant,doesn't",6.428571428571429,"","","0.0915,0.0000,more",13.333333333333332,"","","","","","","","","","","","","","",12,1,65.76190476190476
+Ignacio Yum Herrera,427026,819501,Hold3;,173224,Hsyl210695,2024-09-23 16:12:14 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The probability of drawing a random sample with this (or a more extreme) beta coefficient given that it is in reality 0.,9.0,"Individuals with higher educational levels are likely to experience greater perceived economic safety. Specifically, those holding advanced qualifications, such as master's or doctoral degrees, tend to report feeling more economically secure than those with lower educational attainment, like high school diplomas or vocational training.",0.0,5,0.0,"",0.0,Ensuring every individual in the population has an equal likelihood of selection.,5.0,"","","","","","","0.091,0.000,more",20.0,"","","0.075,b = 0,1.594,1.96,No,No",9.0,"The p-value is below our significance level of 0.05, and we therefore don't reject the null hypothesis.",0.0,"","","","","","","","","","","","","-0.001,0.007,0.002,3.1,3.15,does,insignificant",2.571428571428571,"","","","","","",12,1,64.57142857142857
+Riccardo Vassalli,426257,818182,Hold1;,173222,Hsyl210693,2024-09-23 15:56:22 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The strength of the correlation between the independent variable and perceived economic safety.,0.0,Individuals with higher levels of education perceive greater economic safety compared to those with lower educational levels.,0.0,8,0.0,.,0.0,Ensuring every individual in the population has an equal likelihood of selection.,5.0,"0.005,beta = 0,2.428,2.58,No,No",9.0,"","","","","0.092,0.002,more",6.666666666666666,"","","","","","","","","-0.002,0.075,0.153,3.3,3.1,does,insignificant",9.0,"","","","","The p-value is above our significance level of 0.10, and we therefore don't reject the null hypothesis.",9.0,"","","","","","","","","","",12,1,57.666666666666664
+Mathilde Menck Nielsen,407461,764470,Hold1;,173222,Hsyl210693,2024-09-22 17:24:11 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The strength of the correlation between the independent variable and perceived economic safety.,0.0,"",0.0,2,0.0,"",0.0,"","","","","","","","","","",It provides each member of the population an equal opportunity to be included.,5.0,"0.075,b = 0,1.594,1.96,No,Yes",7.5,"","","","","-0.002,0.075,-3.150,3.0,3.1,does,significant",5.142857142857142,"0.0914,0.0004,more",13.333333333333332,"","","The p-value is above our significance level of 0.10, and we therefore reject the null hypothesis.",0.0,"","","","","","","","","","",11,2,49.976190476190474
+Barbry Mathilde,427303,818145,Hold4;,173225,Hsyl210696,2024-09-22 16:04:31 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The strength of the correlation between the independent variable and perceived economic safety.,0.0,"The educational level and the perceived economic safety have a positive relationship  :
+
+First, the t-value is 3.561, and the p-value is well below 0,05 (0.0003836), it means that there's a relationship between education level and economic security, and that the link is therefore statistically significant at a high level of confidence.
+
+Also, the coefficient of the educational level is 0.09150, it means that each increase of one unit in the level of education, the perceived economic security increases on average by 0.0915 units. The effect is small, but not non-existent.
+
+In summary, although education is statistically significant for predicting economic security, its impact is moderate and other factors are likely to play a more important role.
+
+ ",0.0,6,0.0,"",0.0,"","","","","","","","","0.091,0.000,more",20.0,"","","0.075,b = 0,1.594,1.96,No,Yes",7.5,"","","","","","","","","","","The p-value is above our significance level of 0.10, and we therefore reject the null hypothesis.",0.0,"","","-0.002,0.005,0.004,2.7,3.25,does,significant",2.571428571428571,It ensures that every member of the population has an equal chance of being selected.,5.0,"","","","",11,2,54.07142857142857
+Emilie Esther Rohrberg,407852,795013,Hold3;,173224,Hsyl210695,2024-09-22 14:22:08 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The probability of drawing a random sample with this (or a more extreme) beta coefficient given that it is in reality 0.,9.0,"(H0): There is no significant relationship between educational level and perceived economic safety.
+
+(H1): There is a significant relationship between educational level and perceived economic safety.",0.0,6,0.0,"It was a little hard, with many new codes we have never used before ",0.0,"","","","","","","-0.017,0.075,0.168,3.5,3.0,insignificant,does",7.7142857142857135,"","","","","","","","","","","","","0.0915,0.0004,more",20.0,"0.005,b = 0,2.428,1.96,Yes,Yes",7.5,"The p-value is above our significance level of 0.10, and we therefore don't reject the null hypothesis.",9.0,"","","","","","",Random sampling ensures that every subset of the population has an equal chance of being selected.,5.0,"","",13,0,77.21428571428571
+Sidsel Ortved Rastad,403231,787771,Hold4;,173225,Hsyl210696,2024-09-22 12:44:12 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The probability of drawing a random sample with this (or a more extreme) beta coefficient given that it is in reality 0.,9.0,"The higher level of education, the higher perceived economic safety. ",0.0,5,0.0,The code in 2.2 question 6 did not create the t-values,0.0,"","","0.005,beta = 0,2.428,1.96,Yes,Yes",4.5,"The p-value is above our significance level of 0.05, and we therefore don't reject the null hypothesis.",9.0,"","","0.091,0.000,more",20.0,It provides each member of the population an equal opportunity to be included.,5.0,"","","","","","","0.002,0.075,0.153,3.3,2.1,doesn't,significant",3.8571428571428568,"","","","","","","","","","","","","","","","",13,0,70.35714285714286
+David Dauda Kølby Ceesay,408991,793318,Hold2;,173223,Hsyl210694,2024-09-21 15:39:17 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The probability of drawing a random sample with this (or a more extreme) beta coefficient given that it is in reality 0.,9.0,There is a positive association between Economic Security and Educational Level,0.0,5,0.0,"There has been some mismatches between the question numbers in the quiz and r script, making in a bit confusing. ",0.0,"","","","","The p-value is above our significance level of 0.05, and we therefore don't reject the null hypothesis.",9.0,"","","0.091,0.000,more",20.0,"","","0.075,b = 0,1.594,1.96,No,No",9.0,"","","","","","","","","","","","","","","0.001,0.005,0.008,2.9,3.25,doesn't,significant",6.428571428571429,"","",Random sampling ensures that every subset of the population has an equal chance of being selected.,5.0,"","",13,0,77.42857142857143
+Simon Løffler Puggaard,324650,665741,Hold3;,173224,Hsyl210695,2024-09-21 14:00:16 UTC,1,There is a 95% chance that any randomly selected value from the population will be between 45 and 55.,0.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The probability of drawing a random sample with this (or a more extreme) beta coefficient given that it is in reality 0.,9.0,The H1 hypothesis could be there is a positive relationship between educational level and perceived economic safety,0.0,8,0.0,"",0.0,Ensuring every individual in the population has an equal likelihood of selection.,5.0,"","","","","-0.017,0.070,0.168,3.5,3.0,insignificant,does",7.7142857142857135,"0.091,0.000,more",20.0,"","","","","The p-value is below our significance level of 0.05, and we therefore reject the null hypothesis.",9.0,"","","","","","","","","","","0.070,b = 0,1.594,1.64,No,No",7.5,"","","","","","","","",12,1,72.21428571428571
+Helena Bundsgaard Matz,407489,788488,Hold3;,173224,Hsyl210695,2024-09-21 06:44:50 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The probability that the null hypothesis is true.,0.0,"h0: there is no relationship between educational level and perceived economic safety 
+
+h1: there is a relationship between educational level and perceived economic safety ",0.0,8,0.0,the last part is way to difficult to figure out on my own,0.0,"","","","","","","","","","","","","","","","","","","-0.002,0.075,0.153,3.3,3.1,does,insignificant",9.0,"0.0915,0.0004,more",20.0,"","","","","0.075,b = 0,1.594,1.96,No,No",7.5,"","",It ensures that every member of the population has an equal chance of being selected.,5.0,"","","The p-value is below our significance level of 0.01, and we therefore reject the null hypothesis.",0.0,11,2,60.5
+Molly-Marie Gjerskov Hylby,409000,779668,Hold4;,173225,Hsyl210696,2024-09-20 17:57:43 UTC,1,There is a 95% chance that any randomly selected value from the population will be between 45 and 55.,0.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The probability of drawing a random sample with this (or a more extreme) beta coefficient given that it is in reality 0.,9.0,"H1: There is a relationship between educational level and perceived economic safety.
+
+H0: There is no relationship between educational level and perceived economic safety.",0.0,1,0.0,There were too many times the script was wrong or just didn't work. ,0.0,"","","","","","","2.810,0.075,3.180,3.5,2.5,significant,doesn't",1.2857142857142856,"0.091,0.000,more",20.0,"","","","","The p-value is below our significance level of 0.05, and we therefore reject the null hypothesis.",9.0,"","","","","","","","","","","0.075,b = 0,1.594,2.58,No,No",7.5,"","","","",Random sampling ensures that every subset of the population has an equal chance of being selected.,5.0,"","",12,1,65.78571428571429
+Signe Siff Elkjær Trudslev,412857,788473,Hold2;,173223,Hsyl210694,2024-09-20 15:37:40 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The probability of drawing a random sample with this (or a more extreme) beta coefficient given that it is in reality 0.,9.0,"H0 = There is no relationship between someone's educational level and their perceived economic safety.
+
+ 
+
+H1 = There is a relationship between someone's educational level and their perceived economic safety.",0.0,5,0.0,"",0.0,"","","0.005,beta = 0,2.428,2.58,No,No",9.0,"The p-value is below our significance level of 0.05, and we therefore don't reject the null hypothesis.",0.0,"","","","","","","","","","","0.001,0.008,0.008,3.15,3.4,significant,doesn't",3.8571428571428568,"","","0.0915,0.0004,more",6.666666666666666,"","","","","","","","","","",Random sampling guarantees that the sample will be representative of the population.,0.0,"","",11,2,47.523809523809526
+Kamma Holtse Stengård Johansen,412365,758720,Hold1;,173222,Hsyl210693,2024-09-20 14:27:06 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The probability of drawing a random sample with this (or a more extreme) beta coefficient given that it is in reality 0.,9.0,"H0: There is no relationship between educational level and perceived economic safety. 
+H1: There is a relationship between educational level and perceived economic safety.",0.0,4,0.0,"",0.0,"","","","","","","","","","","","","0.075,b = 0,1.594,1.96,No,No",9.0,"The p-value is below our significance level of 0.05, and we therefore reject the null hypothesis.",9.0,"","","","","0.0915,0.0004,more",20.0,"","","","","","","0.001,0.005,0.008,2.7,3.25,doesn't,significant",6.428571428571429,"","",Random sampling ensures that every subset of the population has an equal chance of being selected.,5.0,"","",13,0,77.42857142857143
+Lin Søndergård Mortensen,410278,779858,Hold1;,173222,Hsyl210693,2024-09-20 13:27:00 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The probability of drawing a random sample with this (or a more extreme) beta coefficient given that it is in reality 0.,9.0,"My hypothesis is that the a higher level of education gives more percieved economic safety. 
+
+H0 = there is no relationship between education and percieved economic safety. 
+
+ 
+
+ ",0.0,6,0.0,:),0.0,"","","","","The p-value is above our significance level of 0.05, and we therefore reject the null hypothesis.",0.0,"","","","","","","","","","","","","-0.002,0.075,0.153,3.3,3.1,does,insignificant",9.0,"0.0915,0.0004,more",20.0,"","","","","0.075,b = 0,1.594,1.64,No,Yes",7.5,"","","","",Random sampling ensures that every subset of the population has an equal chance of being selected.,5.0,"","",12,1,69.5
+Naja Arentoft Nielsen,343183,691991,Hold2;,173223,Hsyl210694,2024-09-20 13:00:41 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The probability of drawing a random sample with this (or a more extreme) beta coefficient given that it is in reality 0.,9.0,There is a correlation between educational level and perceived economic safety,0.0,3,0.0,"",0.0,"","","","","The p-value is below our significance level of 0.05, and we therefore reject the null hypothesis.",0.0,"0.017,0.075,0.168,3.5,3.0,significant,doesn't",3.8571428571428568,"","",It provides each member of the population an equal opportunity to be included.,5.0,"0.075,b = 0,1.864,1.96,Yes,No",6.0,"","","","","","","0.0916,0.0004,more",13.333333333333332,"","","","","","","","","","","","","","",12,1,56.19047619047618
+Ida Røssell-Widding,369257,715070,Hold3;,173224,Hsyl210695,2024-09-20 12:42:39 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The probability of drawing a random sample with this (or a more extreme) beta coefficient given that it is in reality 0.,9.0,"Jeg ville tænke, at jo højere educational level man har, jo større perceived economic safety vil man også have. ",0.0,5,0.0,       ,0.0,"","","","","","","-0.017,0.075,0.168,3.5,3.0,insignificant,does",7.7142857142857135,"","",It provides each member of the population an equal opportunity to be included.,5.0,"","","","","","","","","0.0916,0.0004,more",13.333333333333332,"","","The p-value is above our significance level of 0.10, and we therefore reject the null hypothesis.",0.0,"0.075,b < 0,1.594,1.96,No,No",6.0,"","","","","","","","",12,1,60.047619047619044
+Freja Lee Andersen,411236,793588,Hold1;,173222,Hsyl210693,2024-09-20 11:52:10 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The probability of drawing a random sample with this (or a more extreme) beta coefficient given that it is in reality 0.,9.0,"H0: there is no relationship between someone's educational level and their perceived economic safety.
+
+ 
+
+HA: there is a relationship between someone's educational level and their perceived economic safety.
+
+ ",0.0,2,0.0,"The instructions could definitely be better. It was not always clear what to do, and commands were used that we hadn't been introduced to. ",0.0,"","","","","","","","","0.091,0.000,more",20.0,It provides each member of the population an equal opportunity to be included.,5.0,"","","","","0.001,0.008,0.005,3.15,3.2,insignificant,does",3.8571428571428568,"","","","","","","","","0.075,b = 0,1.594,1.64,No,No",9.0,"","","","","","","The p-value is above our significance level of 0.01, and we therefore reject the null hypothesis.",0.0,12,1,65.85714285714286
+Rosa Pauline Faller Warnke,411966,769607,Hold1;,173222,Hsyl210693,2024-09-20 11:46:12 UTC,1,95% of the data points are between 45 and 55.,0.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The probability that the independent variable has a causal effect on perceived economic safety.,0.0,"H0: there is no relationship between education level and perceived economic safety
+
+H1: there is a relationship between education level and perceived economic safety 
+
+ 
+
+The higher the education the more safe about economic situation. ",0.0,7,0.0, - ,0.0,"","","","","","","","","","","","","0.075,b = 0,1.594,1.96,No,Yes",7.5,"","","","","-0.002,0.075,0.153,3.0,2.1,does,significant",5.142857142857142,"0.0915,0.0004,more",20.0,"","","","","","","","",It ensures that every member of the population has an equal chance of being selected.,5.0,"","","The p-value is above our significance level of 0.01, and we therefore reject the null hypothesis.",0.0,10,3,51.64285714285714
+Ida Juel-Kristensen,408123,787241,Hold1;,173222,Hsyl210693,2024-09-20 11:24:05 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The probability that the null hypothesis is true.,0.0,"H0= there is no relationship between educational level and perceived economic safety
+
+H1= here is a relationship between educational level and perceived economic safety",0.0,7,0.0,  ,0.0,Ensuring every individual in the population has an equal likelihood of selection.,5.0,"0.005,beta = 0,2.428,2.58,No,No",9.0,"The p-value is above our significance level of 0.05, and we therefore don't reject the null hypothesis.",9.0,"","","0.092,0.000,more",13.333333333333332,"","","","","","","0.001,0.008,0.005,3.15,3.2,significant,doesn't",6.428571428571429,"","","","","","","","","","","","","","","","","","",12,1,61.76190476190476
+Matilde Nordal Thomsen,407358,793569,Hold4;,173225,Hsyl210696,2024-09-20 11:21:17 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The probability of drawing a random sample with this (or a more extreme) beta coefficient given that it is in reality 0.,9.0,"I suggest that there is a positive correlation between education level and PES. 
+
+H0: There is no relation between the variables.
+
+H1: There is a relationship between the variables. ",0.0,6,0.0,"",0.0,"","","","","","","","","","",It provides each member of the population an equal opportunity to be included.,5.0,"0.075,b = 0,1.594,1.96,No,No",9.0,"The p-value is above our significance level of 0.05, and we therefore don't reject the null hypothesis.",0.0,"","","-0.002,0.075,0.153,3.3,3.1,does,insignificant",9.0,"0.0915,0.0004,more",20.0,"","","","","","","","","","","","","","",12,1,71.0
+Agnes Isabella Grundahl,410100,791957,Hold3;,173224,Hsyl210695,2024-09-20 11:03:13 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The probability of drawing a random sample with this (or a more extreme) beta coefficient given that it is in reality 0.,9.0,The higher level of education the higher level of percieved economic safety ,0.0,5,0.0,there's a lot of flaws in this quiz script. ,0.0,"","","0.005,beta = 0,2.428,1.96,Yes,Yes",4.5,"","","-0.017,0.075,0.168,4.0,2.0,insignificant,does",5.142857142857142,"0.091,0.000,more",20.0,"","","","","The p-value is below our significance level of 0.05, and we therefore reject the null hypothesis.",9.0,"","","","","","","","","","","","","","",It guarantees a sample that is representative of the population.,0.0,"","","","",12,1,66.64285714285714
+Anna Maluwa Brix Pilegaard,386246,746786,Hold3;,173224,Hsyl210695,2024-09-20 11:01:23 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The probability of drawing a random sample with this (or a more extreme) beta coefficient given that it is in reality 0.,9.0,"With an increase in educational level, we see a increase in a persons feeling of economic safety",0.0,8,0.0,:),0.0,Ensuring every individual in the population has an equal likelihood of selection.,5.0,"0.005,beta = 0,2.428,2.58,No,No",9.0,"","","","","0.092,0.002,more",6.666666666666666,"","","","","","","","","-0.002,0.075,0.153,3.3,4.1,does,insignificant",7.7142857142857135,"","","","","The p-value is above our significance level of 0.10, and we therefore don't reject the null hypothesis.",9.0,"","","","","","","","","","",13,0,65.38095238095238
+Signe Krogsgaard Gudnason,387908,768469,Hold3;,173224,Hsyl210695,2024-09-20 10:30:18 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The probability of drawing a random sample with this (or a more extreme) beta coefficient given that it is in reality 0.,9.0,I would suspect a positive association between someone's educational level and their perceived economic safety,0.0,9,0.0," 
+
+ ",0.0,Ensuring every individual in the population has an equal likelihood of selection.,5.0,"","","","","","","0.091,0.000,more",20.0,"","","","","","","0.001,0.008,0.005,3.15,3.2,significant,doesn't",6.428571428571429,"","","","","","","","","0.075,b = 0,1.594,1.64,No,No",9.0,"","","","","","","The p-value is above our significance level of 0.01, and we therefore reject the null hypothesis.",0.0,12,1,68.42857142857143
+Jonatan Fog Cordsen,410938,778997,Hold4;,173225,Hsyl210696,2024-09-20 10:25:17 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The strength of the correlation between the independent variable and perceived economic safety.,0.0,I think that the higher the education the more financial security,0.0,1,0.0,"It was hard and confusing. Some of the answers I guessed, because I could not find the coding for the answers, and I got confused by all the different questions with in the question. ",0.0,"","","","","The p-value is below our significance level of 0.05, and we therefore don't reject the null hypothesis.",0.0,"","","0.09,0.002,more",6.666666666666666,"","","","","","","-0.002,0.006,0.007,3.15,3.2,insignificant,does",5.142857142857142,"","","","","","","","","0.070,b < 0,2.154,1.96,Yes,Yes",0.0,"","",It ensures that every member of the population has an equal chance of being selected.,5.0,"","","","",10,3,35.80952380952381
+Hannah Kleinbeck,409014,780878,Hold4;,173225,Hsyl210696,2024-09-20 10:21:05 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The strength of the correlation between the independent variable and perceived economic safety.,0.0,the higher education the higher economic  safety,0.0,2,0.0,forvirrende tidy :(,0.0,"","","","","","","","","","","","","0.075,b = 0,1.594,1.96,No,No",9.0,"","","","","","","0.0915,0.0004,more",20.0,"","","","","","","0.002,0.005,0.008,2.7,3.25,doesn't,significant",5.142857142857142,It guarantees a sample that is representative of the population.,0.0,"","","The p-value is above our significance level of 0.01, and we therefore don't reject the null hypothesis.",9.0,11,2,62.14285714285714
+Ines McNair,407659,778419,Hold4;,173225,Hsyl210696,2024-09-20 10:17:51 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The strength of the correlation between the independent variable and perceived economic safety.,0.0,the higher education the higher economic safety ,0.0,3,0.0,Make the tasks and descriptions match the questions. ,0.0,"","","","","","","","","0.091,0.001,more",13.333333333333332,"","","","","","","0.001,0.008,0.005,3.15,3.2,significant,doesn't",6.428571428571429,"","","","","0.005,b = 0,2.428,1.96,Yes,Yes",7.5,"","","","","","","","",Random sampling ensures that every subset of the population has an equal chance of being selected.,5.0,"The p-value is above our significance level of 0.01, and we therefore don't reject the null hypothesis.",9.0,12,1,60.26190476190476
+Silas Agger Pape,410667,765206,Hold4;,173225,Hsyl210696,2024-09-20 10:04:50 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The probability of drawing a random sample with this (or a more extreme) beta coefficient given that it is in reality 0.,9.0,"Education level aren't associated with the perceived economic safety. So the association would be 0 - h0
+
+ 
+
+Education level are associated with the perceived economic safety. So the association is different from 0 - h1",0.0,8,0.0,minor things. when you drop the na's you get 10539 instead of the 1037,0.0,"","","","","","","","","","","","","0.075,b = 0,1.594,1.96,No,Yes",7.5,"The p-value is below our significance level of 0.05, and we therefore reject the null hypothesis.",9.0,"0.001,0.008,0.005,3.15,3.2,significant,doesn't",6.428571428571429,"","","0.0915,0.0004,more",20.0,"","","","","","","","",It ensures that every member of the population has an equal chance of being selected.,5.0,"","","","",13,0,75.92857142857143
+Hugo Emil Arnoldus-Henningsen,386331,754034,Hold2;,173223,Hsyl210694,2024-09-20 09:44:53 UTC,1,There is a 95% chance that any randomly selected value from the population will be between 45 and 55.,0.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The probability of drawing a random sample with this (or a more extreme) beta coefficient given that it is in reality 0.,9.0,I assume that higher education implies higher perceived economic safety because wages typically get higher the longer a persons education is. ,0.0,9,0.0,"",0.0,Ensuring every individual in the population has an equal likelihood of selection.,5.0,"","","The p-value is above our significance level of 0.05, and we therefore don't reject the null hypothesis.",9.0,"","","0.091,0.000,more",20.0,"","","","","","","","","","","","","","","","","0.075,b = 0,1.594,1.64,No,No",9.0,"0.001,0.005,0.008,3.1,3.25,does,significant",6.428571428571429,"","","","","","",12,1,72.42857142857143
+Astrid Enggaard Nielsen,409532,780420,Hold3;,173224,Hsyl210695,2024-09-20 09:43:57 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The probability of drawing a random sample with this (or a more extreme) beta coefficient given that it is in reality 0.,9.0,"Jo højere uddannelsesniveau, jo højere økonomisk sikkerhed",0.0,7,0.0,-,0.0,Ensuring every individual in the population has an equal likelihood of selection.,5.0,"","","","","","","0.091,0.000,more",20.0,"","","","","","","","","-0.002,0.075,0.153,3.0,3.1,does,insignificant",7.7142857142857135,"","","","","The p-value is above our significance level of 0.10, and we therefore don't reject the null hypothesis.",9.0,"0.075,b = 0,1.594,1.64,No,No",9.0,"","","","","","","","",13,0,78.71428571428571
+Eik Sørensen Nygaard,403439,785026,Hold3;,173224,Hsyl210695,2024-09-20 09:41:51 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The probability of drawing a random sample with this (or a more extreme) beta coefficient given that it is in reality 0.,9.0,"h_0
+beta_educationlvl=0
+
+h_1 
+beta_educationlvl /=0 
+
+min hupothesis er at der en sammenhæng mellem hvor lang en uddannelse man har og hvor meget økonomisk sikkerhed man har",0.0,5,0.0,"the where som erros in the quiz, notably the number of respondents in the data at the start, and then it seemed that the code marked for q9 was for q8 and that code for q10 was for 8",0.0,"","","","","","","","","0.092,0.000,more",13.333333333333332,"","","","","","","","","-0.002,0.075,0.153,3.3,3.1,does,insignificant",9.0,"","","","","","","0.075,b = 0,1.594,1.64,No,No",9.0,"","","","",Random sampling ensures that every subset of the population has an equal chance of being selected.,5.0,"The p-value is above our significance level of 0.01, and we therefore don't reject the null hypothesis.",9.0,13,0,73.33333333333333
+Kathrine Sofie Münter,408838,758686,Hold1;,173222,Hsyl210693,2024-09-20 09:40:43 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The probability that the independent variable has a causal effect on perceived economic safety.,0.0,"Jo længere ens uddanelse er, jo mere økonomisk sikker føler man sig",0.0,4,0.0,"en smule mere glidende overgang ift hvornår man ikke får hjælp mere, gerne give hints",0.0,Ensuring every individual in the population has an equal likelihood of selection.,5.0,"","","The p-value is below our significance level of 0.05, and we therefore don't reject the null hypothesis.",0.0,"","","0.091,0.000,more",20.0,"","","","","","","0.001,0.008,0.005,3.15,3.4,significant,doesn't",5.142857142857142,"","","","","","","","","0.075,b = 0,1.594,1.96,No,No",7.5,"","","","","","","","",11,2,56.64285714285714
+Rebecca Runge Ribergaard,407702,791112,Hold1;,173222,Hsyl210693,2024-09-20 08:32:00 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The probability of drawing a random sample with this (or a more extreme) beta coefficient given that it is in reality 0.,9.0,Jeg tror at mere uddannelse giver mere økonomisk sikkerhed,0.0,2,0.0,Hjælp os lidt mere til sidst i quizzen. Mange fejl i quiz,0.0,"","","","","","","","","0.092,0.002,more",6.666666666666666,"","","0.075,b = 0,1.594,1.96,No,No",9.0,"","","","","-0.002,0.075,0.153,3.3,2.1,does,insignificant",7.7142857142857135,"","","","","The p-value is above our significance level of 0.10, and we therefore don't reject the null hypothesis.",9.0,"","","","",It ensures that every member of the population has an equal chance of being selected.,5.0,"","","","",13,0,65.38095238095238
+Camilla Hansen Bager,408393,769673,Hold2;,173223,Hsyl210694,2024-09-20 08:07:17 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The probability of drawing a random sample with this (or a more extreme) beta coefficient given that it is in reality 0.,9.0,"H1= There is an association between educational level and perceived economic safety.
+
+ 
+
+H0= There is not an association between educational level and perceived economic safety.",0.0,5,0.0,The script did not really work nice with the quiz. It has been better. Please make better !,0.0,"","","","","The p-value is above our significance level of 0.05, and we therefore don't reject the null hypothesis.",9.0,"-0.017,0.075,0.168,3.5,3.0,significant,doesn't",5.142857142857142,"0.091,0.000,more",20.0,It provides each member of the population an equal opportunity to be included.,5.0,"","","","","","","","","","","0.005,b = 0,2.428,1.96,Yes,Yes",7.5,"","","","","","","","","","","","",13,0,74.64285714285714
+Rebecca Aagaard Larsen,408218,784188,Hold2;,173223,Hsyl210694,2024-09-20 08:07:01 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The probability of drawing a random sample with this (or a more extreme) beta coefficient given that it is in reality 0.,9.0,"H0= There is not an assosation between education level and perceived economic safety
+
+H1= There is an assosation between education level and perceived economic safety
+
+ ",0.0,7,0.0,"",0.0,"","","","","","","","","","",It provides each member of the population an equal opportunity to be included.,5.0,"0.075,b = 0,1.594,1.96,No,No",9.0,"","","0.001,0.008,0.005,3.35,3.0,significant,doesn't",3.8571428571428568,"","","0.0915,0.0004,more",6.666666666666666,"","","The p-value is above our significance level of 0.10, and we therefore don't reject the null hypothesis.",9.0,"","","","","","","","","","",13,0,61.523809523809526
+Caroline Delfort Lorentzen,410092,788184,Hold2;,173223,Hsyl210694,2024-09-20 08:06:14 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"TRUE,are fairly close but not identical.",4.5,"",0,The probability of drawing a random sample with this (or a more extreme) beta coefficient given that it is in reality 0.,9.0,højere uddannelsesniveu er positivt forbundet med opfattelsen af økonomisk sikkerhed,0.0,7,0.0,"",0.0,Ensuring every individual in the population has an equal likelihood of selection.,5.0,"0.005,beta = 0,2.428,1.96,Yes,No",6.0,"","","","","","","","","","","The p-value is below our significance level of 0.05, and we therefore reject the null hypothesis.",9.0,"0.001,0.008,0.005,3.15,3.2,significant,doesn't",6.428571428571429,"","","0.0915,0.0000,more",13.333333333333332,"","","","","","","","","","","","","","",13,0,63.26190476190476
+Siebe Pieter Emil Hoekstra,410979,766936,Hold1;,173222,Hsyl210693,2024-09-20 08:05:57 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The probability of drawing a random sample with this (or a more extreme) beta coefficient given that it is in reality 0.,9.0,"H1 = there is a positive relationship between educational level and perceived economic safety
+
+H0 = There is no relationship between the variables",0.0,9,0.0,"The number of respondents after first variable selection didnt match mine was 10,539 but later it was.
+
+ 
+
+Question numbers didnt match in  here and r script 5~6",0.0,"","","","","","","","","0.091,0.000,more",20.0,"","","","","","","0.001,0.008,0.005,3.25,3.2,significant,doesn't",5.142857142857142,"","","","","0.005,b = 0,2.428,1.96,Yes,Yes",7.5,"","","","","","",It ensures that every member of the population has an equal chance of being selected.,5.0,"","","The p-value is above our significance level of 0.01, and we therefore don't reject the null hypothesis.",9.0,13,0,74.64285714285714
+Alberte Bøgelund Hansen,408783,755086,Hold2;,173223,Hsyl210694,2024-09-20 08:05:21 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The probability of drawing a random sample with this (or a more extreme) beta coefficient given that it is in reality 0.,9.0,My hypothesis: there is an association between one's educational level and percieved economic safety,0.0,0,0.0,"",0.0,Ensuring every individual in the population has an equal likelihood of selection.,5.0,"","","The p-value is above our significance level of 0.05, and we therefore reject the null hypothesis.",0.0,"-0.017,0.075,0.168,3.5,3.0,significant,doesn't",5.142857142857142,"0.092,0.000,more",13.333333333333332,"","","","","","","","","","","","","","","","","0.075,b = 0,1.594,1.64,No,No",9.0,"","","","","","","","",12,1,60.476190476190474
+Celina Dalvang,412638,794895,Hold2;,173223,Hsyl210694,2024-09-20 08:05:18 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The strength of the correlation between the independent variable and perceived economic safety.,0.0,My hypothesis is that there is an association between educational level and perceived economic safety. People with higher education will perceive themselves as more economic safe.,0.0,8,0.0,"",0.0,Ensuring every individual in the population has an equal likelihood of selection.,5.0,"","","","","","","0.092,0.000,more",13.333333333333332,"","","","","","","0.001,0.008,0.005,3.15,3.2,significant,doesn't",6.428571428571429,"","","","","0.004,b = 0,2.428,1.96,Yes,Yes",7.5,"","","","","","","","","","","The p-value is above our significance level of 0.01, and we therefore don't reject the null hypothesis.",9.0,12,1,60.26190476190476
+Alma Frimodt-Møller,411433,793335,Hold1;,173222,Hsyl210693,2024-09-20 08:04:41 UTC,1,There is a 95% chance that any randomly selected value from the population will be between 45 and 55.,0.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The probability of drawing a random sample with this (or a more extreme) beta coefficient given that it is in reality 0.,9.0,"the higher educational level a person has, the more perceived economic safety they have",0.0,5,0.0,"",0.0,"","","","","","","","","","","","","","","","","0.001,0.008,0.005,3.15,3.2,significant,doesn't",6.428571428571429,"","","0.0915,0.0000,more",13.333333333333332,"0.005,b = 0,2.428,1.96,Yes,Yes",7.5,"The p-value is above our significance level of 0.10, and we therefore don't reject the null hypothesis.",9.0,"","","","","","",Random sampling guarantees that the sample will be representative of the population.,0.0,"","",11,2,59.26190476190476
+Line Kruse,407846,746625,Hold1;,173222,Hsyl210693,2024-09-20 08:03:09 UTC,1,There is a 95% chance that any randomly selected value from the population will be between 45 and 55.,0.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The probability of drawing a random sample with this (or a more extreme) beta coefficient given that it is in reality 0.,9.0,The higher level of education. the higher perceived economic safety,0.0,10,0.0, .,0.0,"","","0.005,beta = 0,2.428,1.64,Yes,Yes",4.5,"","","-0.017,0.075,0.168,3.5,3.0,insignificant,does",7.7142857142857135,"0.091,0.000,more",20.0,"","","","","","","","","","","","","","","The p-value is above our significance level of 0.10, and we therefore don't reject the null hypothesis.",9.0,"","","","",It guarantees a sample that is representative of the population.,0.0,"","","","",11,2,64.21428571428571
+Anouscha Linde Jørgensen,407336,768248,Hold1;,173222,Hsyl210693,2024-09-20 08:02:43 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The probability of drawing a random sample with this (or a more extreme) beta coefficient given that it is in reality 0.,9.0,jo højere uddannelsesniveau jo højere forventet økonomisk sikkerhed,0.0,9,0.0,.,0.0,"","","","","","","-0.017,0.075,0.168,3.5,3.0,insignificant,does",7.7142857142857135,"0.091,0.000,more",20.0,"","","","","","","","","","","","","0.005,b = 0,2.428,1.96,Yes,Yes",7.5,"The p-value is above our significance level of 0.10, and we therefore don't reject the null hypothesis.",9.0,"","","","",It ensures that every member of the population has an equal chance of being selected.,5.0,"","","","",13,0,77.21428571428571
+Sol Grum-Schwensen,412859,785758,Hold2;,173223,Hsyl210694,2024-09-20 07:54:45 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The probability of drawing a random sample with this (or a more extreme) beta coefficient given that it is in reality 0.,9.0,higher education level makes one have higher perceived economic safety,0.0,3,0.0,Question 8 didnt match the script and there was no help with making the confidence intervals.,0.0,"","","0.005,beta = 0,2.428,2.58,No,No",9.0,"","","-0.017,0.075,3.180,3.5,3.0,insignificant,doesn't",5.142857142857142,"0.091,0.000,more",20.0,"","","","","","","","","","","","","","","","","","","","","","",Random sampling ensures that every subset of the population has an equal chance of being selected.,5.0,"The p-value is above our significance level of 0.01, and we therefore don't reject the null hypothesis.",9.0,13,0,76.14285714285714
+Thomas Peter Smart,410416,782211,Hold2;,173223,Hsyl210694,2024-09-20 07:27:55 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The probability of drawing a random sample with this (or a more extreme) beta coefficient given that it is in reality 0.,9.0,I think there could possible be a relationship since higher educational level is also associated with higher income. Thereby income might be a confounder for economic safety.,0.0,8,0.0,"# Af denne grund var deres dataset 10537 og ikke 10539:
+elecCampaign <- elecCampaign %>%
+  filter(age < 100)
+
+ 
+
+Very nice that you began writing which question in the quiz the r script corresponds to - but some of them were wrong in the script for today.
+
+ 
+
+ ",0.0,"","","","","","","","","0.091,0.000,more",20.0,"","","","","","","","","","","","","0.005,b = 0,2.428,1.96,Yes,Yes",7.5,"The p-value is above our significance level of 0.10, and we therefore don't reject the null hypothesis.",9.0,"","","0.001,0.005,0.008,3.1,3.15,doesn't,significant",9.0,It ensures that every member of the population has an equal chance of being selected.,5.0,"","","","",13,0,78.5
+Ulrikke Bertram Rasmussen,409943,783169,Hold1;,173222,Hsyl210693,2024-09-20 07:17:44 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The probability of drawing a random sample with this (or a more extreme) beta coefficient given that it is in reality 0.,9.0,"The hypothesis is, that higher educational level is associated with higher economic safety ",0.0,6,0.0,A bit more help in the script would be nice ,0.0,Ensuring every individual in the population has an equal likelihood of selection.,5.0,"","","","","","","","","","","","","","","","","-0.002,0.075,0.153,2.7,3.1,does,insignificant",7.7142857142857135,"0.0915,0.0004,more",20.0,"","","The p-value is above our significance level of 0.10, and we therefore don't reject the null hypothesis.",9.0,"0.075,b = 0,1.594,1.64,No,No",9.0,"","","","","","","","",13,0,78.71428571428571
+Halfdan Temple,410396,779591,Hold2;,173223,Hsyl210694,2024-09-20 06:49:41 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The probability of drawing a random sample with this (or a more extreme) beta coefficient given that it is in reality 0.,9.0,"A longer education gives access to higher paying jobs. Therefore, i hypothesize, that education is positively associated with economic safety:
+
+ 
+
+H0: There is no association or a negative association between educational level and perceived economic safety.
+
+H1: There is a positive relationship between educational level and perceived economic safety.",0.0,9,0.0,"Good one this week. Happy to see questions that dig a little deeper than a simple multiple choice. The longer questions are very good. Nice to see some variation in critical values instead of the constant 0.05 p-value etc., so that we get to think about what different critical values actually mean :).",0.0,"","","0.005,beta = 0,2.428,2.58,No,No",9.0,"","","","","","","","","","","","","","","","","0.0915,0.0002,more",13.333333333333332,"","","The p-value is above our significance level of 0.10, and we therefore don't reject the null hypothesis.",9.0,"","","0.001,0.005,0.008,3.1,3.15,doesn't,significant",9.0,It ensures that every member of the population has an equal chance of being selected.,5.0,"","","","",13,0,73.33333333333333
+Rebekka Eltang Lynbech,411116,793471,Hold2;,173223,Hsyl210694,2024-09-19 19:11:42 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"TRUE,are fairly close but not identical.",4.5,"",0,The probability of drawing a random sample with this (or a more extreme) beta coefficient given that it is in reality 0.,9.0,People who have higher education will feel more economically safe,0.0,7,0.0,-,0.0,"","","","","","","","","","","","","","","","","0.001,0.008,0.005,3.15,3.4,significant,doesn't",5.142857142857142,"","","0.0915,0.0004,more",6.666666666666666,"","","","","0.075,b = 0,1.594,1.64,No,No",9.0,"","","","",Random sampling ensures that every subset of the population has an equal chance of being selected.,5.0,"The p-value is above our significance level of 0.01, and we therefore don't reject the null hypothesis.",9.0,13,0,58.30952380952381
+Adam Mathias Kelstrup Turner,409093,795195,Hold4;,173225,Hsyl210696,2024-09-19 17:02:54 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The probability of drawing a random sample with this (or a more extreme) beta coefficient given that it is in reality 0.,9.0,Educational level has a significant impact on perceived economic safety. ,0.0,6,0.0,"Hey, I had to get a lot of help from chatGBT, to fill in some blanc, that weren't clear what to do",0.0,Ensuring every individual in the population has an equal likelihood of selection.,5.0,"","","","","","","0.091,0.000,more",20.0,"","","","","The p-value is below our significance level of 0.05, and we therefore reject the null hypothesis.",9.0,"0.001,0.008,0.005,3.15,3.2,significant,doesn't",6.428571428571429,"","","","","","","","","0.075,b = 0,1.594,1.64,No,No",9.0,"","","","","","","","",13,0,77.42857142857143
+Kamma Gro Bang Simonÿ,407998,795764,Hold4;,173225,Hsyl210696,2024-09-19 17:02:27 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The probability of drawing a random sample with this (or a more extreme) beta coefficient given that it is in reality 0.,9.0,There is a positive relationship between educational level and their perceived economic safety ,0.0,8,0.0,   ,0.0,Ensuring every individual in the population has an equal likelihood of selection.,5.0,"0.005,beta = 0,2.428,2.58,No,No",9.0,"The p-value is above our significance level of 0.05, and we therefore don't reject the null hypothesis.",9.0,"","","0.091,0.000,more",20.0,"","","","","","","0.001,0.008,0.005,3.15,3.2,significant,doesn't",6.428571428571429,"","","","","","","","","","","","","","","","","","",13,0,77.42857142857143
+Malou Sander Dyreborg,411926,766800,Hold3;,173224,Hsyl210695,2024-09-19 16:44:18 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"TRUE,are fairly close but not identical.",4.5,"",0,The probability of drawing a random sample with this (or a more extreme) beta coefficient given that it is in reality 0.,9.0,Individuals with higher educational levels will perceive greater economic safety compared to those with lower educational levels,0.0,5,0.0,"The quizzes are often too long to complete during the lecture time allotted. As a result, many of us rush through them and don't fully grasp the concepts or the R techniques being taught. It's unfortunate, as it impacts our learning and understanding.",0.0,Ensuring every individual in the population has an equal likelihood of selection.,5.0,"","","","","","","","","","","","","The p-value is below our significance level of 0.05, and we therefore reject the null hypothesis.",9.0,"","","","","0.0915,0.0002,more",6.666666666666666,"0.005,b = 0,2.428,1.96,Yes,Yes",7.5,"","","","","0.002,0.006,0.008,2.9,3.25,doesn't,significant",3.8571428571428568,"","","","","","",13,0,55.523809523809526
+Sally Viktoria Fogh Hansen,412928,783381,Hold4;,173225,Hsyl210696,2024-09-19 14:47:48 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The probability that the null hypothesis is true.,0.0,Higher education is associated with a higher perceived economic safety,0.0,3,0.0,"the code in q10 did not work for me
+
+ ",0.0,Ensuring every individual in the population has an equal likelihood of selection.,5.0,"","","The p-value is above our significance level of 0.05, and we therefore don't reject the null hypothesis.",9.0,"-0.017,0.075,0.168,3.5,3.0,insignificant,does",7.7142857142857135,"",0.0,"","","0.075,b < 0,1.594,1.96,No,No",7.5,"","","","","","","","","","","","","","","","","","","","","","",11,2,48.214285714285715
+Ditte Thorsen Dieu,410941,777296,Hold1;,173222,Hsyl210693,2024-09-19 12:34:35 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,are fairly close but not identical.",9.0,"",0,The probability that the null hypothesis is true.,0.0,"Higher education gives higher perceived notion of economic safety. 
+
+Lower education gives lower perceived notion of economic safety.",0.0,6,0.0,"",0.0,"","","","","The p-value is below our significance level of 0.05, and we therefore don't reject the null hypothesis.",0.0,"","","","","","","","","","","0.001,0.008,0.005,3.15,3.2,significant,doesn't",6.428571428571429,"","","0.0915,0.0004,more",6.666666666666666,"","","","","0.075,b = 0,1.594,1.64,No,No",9.0,"","","","",Random sampling ensures that every subset of the population has an equal chance of being selected.,5.0,"","",11,2,46.095238095238095
+Mathilde Hellmann-Petersen,412935,793957,Hold1;,173222,Hsyl210693,2024-09-18 18:45:03 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"TRUE,are fairly close but not identical.",4.5,"",0,The probability of drawing a random sample with this (or a more extreme) beta coefficient given that it is in reality 0.,9.0,"H0 = No relationship between educational level and economic safety
+
+H1 = Relationship between educational level and economic safety",0.0,2,0.0,"",0.0,"","","0.005,beta = 0,2.428,2.58,No,Yes",7.5,"The p-value is above our significance level of 0.05, and we therefore don't reject the null hypothesis.",9.0,"","","0.09,0.002,more",6.666666666666666,"","","","","","","","","-0.002,0.075,0.153,3.0,2.1,does,significant",5.142857142857142,"","","","","","","","","","",It ensures that every member of the population has an equal chance of being selected.,5.0,"","","","",13,0,56.80952380952381
+Jakob Øeby Lambourne,410073,779366,Hold2;,173223,Hsyl210694,2024-09-18 17:21:25 UTC,1,We are 95% confident that the true population mean lies between 45 and 55.,5.0,When certain subgroups are overrepresented or underrepresented in the sample,5.0,"FALSE,completely unrelated.",4.5,"",0,The probability of drawing a random sample with this (or a more extreme) beta coefficient given that it is in reality 0.,9.0,"h0 = not correlation between education and safety
+
+ 
+
+h1 = evidence to suggest a relashinship ",0.0,8,0.0,"",0.0,"","","0.005,beta = 0,2.428,2.58,No,No",9.0,"","","","","0.091,0.000,more",20.0,It provides each member of the population an equal opportunity to be included.,5.0,"","","The p-value is below our significance level of 0.05, and we therefore reject the null hypothesis.",9.0,"0.001,0.008,0.005,3.15,3.4,significant,doesn't",5.142857142857142,"","","","","","","","","","","","","","","","","","",13,0,71.64285714285714

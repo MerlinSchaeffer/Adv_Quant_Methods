@@ -19,49 +19,50 @@ library(essentials)
 
 ```{r}
 pacman::p_load(
-  tidyverse, # Data manipulation,
-  ggplot2, # beautiful figures,
-  wbstats, # download data from Worldbank. Tremendous source of global socio-economic data.
-  estimatr, # OLS with robust SE,
-  modelsummary) # for balance and regression tables.
+  tidyverse,  # Load the tidyverse package for data manipulation and visualization
+  ggplot2,  # Load the ggplot2 package for creating plots
+  wbstats,  # Load the wbstats package to download data from the World Bank
+  estimatr,  # Load the estimatr package for running regressions with robust standard errors
+  modelsummary)  # Load the modelsummary package for creating nice-looking regression tables
 
 # 1. The worldbank data
-Dat <- wb_data("SI.POV.DDAY", # Download poverty data: <1.90$ per day,
-               start_date = 2002, end_date = 2022) %>%
-  rename(poverty = SI.POV.DDAY) %>% # rename poverty variable,
-  select(country, date, poverty) %>% # Keep only 3 variables
-  drop_na(poverty) %>% # Drop cases with missing data,
-  group_by(country) %>% # Group by country,
-  filter(date == max(date)) %>% # Keep the most recent data per country.
-  mutate(date = as.numeric(date)) %>% ungroup()
+Dat <- wb_data("SI.POV.DDAY",  # Download data on poverty headcount ratio at $1.90 a day from the World Bank
+              start_date = 2002, end_date = 2022) %>%  # Specify the time range for the data
+  rename(poverty = SI.POV.DDAY) %>%  # Rename the 'SI.POV.DDAY' variable to 'poverty'
+  select(country, date, poverty) %>%  # Keep only the 'country', 'date', and 'poverty' variables
+  drop_na(poverty) %>%  # Remove rows with missing 'poverty' values
+  group_by(country) %>%  # Group the data by country
+  filter(date == max(date)) %>%  # Keep only the most recent observation for each country
+  mutate(date = as.numeric(date)) %>%  # Convert the 'date' variable to numeric
+  ungroup()  # Ungroup the data
 
 # 2. Colonizer data
 Dat <- Dat %>% 
   mutate(
-    colonizer = case_when(
-      str_detect(country, "Algeria|Benin|Burkina Faso|Cambodia|Central African Republic|Chad") |
+    colonizer = case_when(  # Create a new variable 'colonizer' based on the country name
+      str_detect(country, "Algeria|Benin|Burkina Faso|Cambodia|Central African Republic|Chad") |  # If the country name contains any of these strings...
         str_detect(country, "Djibouti|Gabon|Guinea|Haiti|Laos|Lebanon|Madagascar|Mali|Congo, Rep.|Cote D'Ivoire") | 
-        str_detect(country, "Mauritania|Niger|Senegal|Syria|Togo|Tunisia|Vietnam") ~ "France", # France
-      str_detect(country, "Angola|Brazil|Mozambique|Guinea-Bissau") ~ "Portugal", # Portugal
+        str_detect(country, "Mauritania|Niger|Senegal|Syria|Togo|Tunisia|Vietnam") ~ "France",  # ...then assign "France" as the colonizer
+      str_detect(country, "Angola|Brazil|Mozambique|Guinea-Bissau") ~ "Portugal",  # Similarly, assign "Portugal" for these countries
       str_detect(country, "Argentina|Bolivia|Chile|Colombia|Costa Rica|Cuba|Dominican Republic|Ecuador") |
         str_detect(country, "El Salvador|Guatemala|Honduras|Mexico|Nicaragua|Panama|Paraguay|Peru") |
-        str_detect(country, "Uruguay|Venezuela") ~ "Spain", # Spain
+        str_detect(country, "Uruguay|Venezuela") ~ "Spain",  # Assign "Spain" for these countries
       str_detect(country, "Australia|Bahrain|Bangladesh|Botswana|Canada|Cyprus|Egypt|Fiji") |
         str_detect(country, "Gambia|Ghana|Guyana|India|Iraq|Israel|Jamaica|Jordan|Kenya|Kuwait") |
-        str_detect(country, "Lesotho|Malawi|Malaysia|Mauritius|Myanmar|New Zealand|Nigeria|Oman") | 
-        str_detect(country, "Pakistan|Qatar|Sierra Leone|Singapore|South Africa") | 
-        str_detect(country, "Sri Lanka|Sudan|Swaziland|Tanzania|Trinidad/Tobago|Uganda") | 
-        str_detect(country, "United Arab Emirates|United States|Yemen|Zambia|Zimbabwe") ~ "Britain", # Britain
-      str_detect(country, "Burundi|Congo, Dem. Rep.|Rwanda") ~ "Belgium",
-    str_detect(country, "Iceland|Estonia") ~ "Denmark")) # Denmark
+        str_detect(country, "Lesotho|Malawi|Malaysia|Mauritius|Myanmar|New Zealand|Nigeria|Oman") |
+        str_detect(country, "Pakistan|Qatar|Sierra Leone|Singapore|South Africa") |
+        str_detect(country, "Sri Lanka|Sudan|Swaziland|Tanzania|Trinidad/Tobago|Uganda") |
+        str_detect(country, "United Arab Emirates|United States|Yemen|Zambia|Zimbabwe") ~ "Britain",  # Assign "Britain" for these countries
+      str_detect(country, "Burundi|Congo, Dem. Rep.|Rwanda") ~ "Belgium",  # Assign "Belgium" for these countries
+      str_detect(country, "Iceland|Estonia") ~ "Denmark"))  # Assign "Denmark" for these countries
 
 # 3. Independence from colonialism data
 Dat <- Dat %>% 
   mutate(
-    years_indep = case_when(
-      is.na(colonizer) ~ as.numeric(NA),
-      country == "Estonia" ~ date - 1645,
-      country == "United States" ~ date - 1783, country == "Haiti" ~ date - 1804, 
+    years_indep = case_when(  # Create a new variable 'years_indep' (years of independence) based on the country and colonization history
+      is.na(colonizer) ~ as.numeric(NA),  # If the 'colonizer' is NA, then 'years_indep' is also NA
+      country == "Estonia" ~ date - 1645,  # For Estonia, calculate years of independence since 1645
+      country == "United States" ~ date - 1783, country == "Haiti" ~ date - 1804,  # Similar calculations for other countries based on their independence years
       country == "Paraguay" ~ date - 1811, country == "Chile" ~ date - 1818,
       str_detect(country, "Argentina|Bolivia|Colombia") ~ date - 1819,
       str_detect(country, "Costa Rica|Dominican Republic|Mexico|Nicaragua|Panama|El Salvador|Guatemala|Honduras|Venezuela") ~ date - 1821,
@@ -97,28 +98,33 @@ Dat <- Dat %>%
       country == "Namibia" ~ date - 1990))
 ```
 
-2. Make Denmark the reference category. 
+2. Make Denmark the reference category. Ask an AI how you can use `fct_relevel("Denmark")` to achieve this.
 `r hide("R solution -> dont' peak to early ;) !")`
 ```{r}
 Dat <- Dat %>%
-  mutate( # Make Denmark the reference
-    colonizer = colonizer %>% fct_relevel("Denmark"))
+  mutate(  # Modify the 'colonizer' variable
+    # Relevel the 'colonizer' factor so that "Denmark" is the reference category
+    colonizer = colonizer %>% fct_relevel("Denmark"))  
 ```
 `r unhide()`
 
-3. Answer the following question: To which degree do differences in the number of years since independence from colonialism explain why we saw significant differences between countries colonized by different colonial powers? `r mcq(c("It does not explain much", "Many of the stars are gone.", answer = "The years since indepence explain a large share of the different poverty legacies of the various colonializers"))`. 
+3. Answer the following question: To which degree do differences in the number of years since independence from colonialism explain why we saw significant differences in poverty rates between countries colonized by different colonial powers? `r mcq(c("It does not explain much", "Many of the stars are gone.", answer = "The years since indepence explain a large share of the different poverty legacies of the various colonializers"))`. 
 
 `r hide("R solution -> dont' peak to early ;) !")`
 ```{r}
-# Bivariate model
-ols_bi <- lm_robust(poverty ~  colonizer, data = Dat)
-# Controlling for years since independence
-ols_mult <- lm_robust(poverty ~  colonizer + years_indep, data = Dat)
+# Run a robust bivariate linear regression of 'poverty' on 'colonizer' using the 'Dat' dataset. 
+# This model examines the relationship between the colonizing country and poverty levels.
+ols_bi <- lm_robust(poverty ~ colonizer, data = Dat)  
 
-# Regression table
-modelsummary(list("Biv. OLS" = ols_bi, "Mult. OLS" = ols_mult), 
-             gof_map = c("nobs", "r.squared"), stars = TRUE)
+# Run a robust multiple linear regression of 'poverty' on 'colonizer' and 'years_indep' (years of independence). 
+# This model adds years of independence as a control variable to assess the impact of the colonizer while accounting for the time since independence.
+ols_mult <- lm_robust(poverty ~ colonizer + years_indep, data = Dat)  
+
+# Create a summary table for both regression models ('ols_bi' and 'ols_mult'), labeling them "Biv. OLS" and "Mult. OLS" respectively.
+modelsummary(list("Biv. OLS" = ols_bi, "Mult. OLS" = ols_mult),   
+             gof_map = c("nobs", "r.squared"),  # Include the number of observations ('nobs') and R-squared ('r.squared').
+             stars = TRUE)  # Add stars to indicate the statistical significance.
 ```
 `r unhide()`
 
-4. What does this say about a causal colonializer effect? `r mcq(c("It's much smaller than the bivariate result suggests.", "Correlation isn't causation", answer = "It's unclear whether the years since independence are not themselves an outcome of the colonializer (i.e. a mediator). Thus, it might be bad control if we are interested in a causal effect of the colonializer", "It's larger than the bivariate result suggests."))`
+4. What does this say about a causal colonizer effect? `r mcq(c("It's much smaller than the bivariate result suggests.", "Correlation isn't causation", answer = "It's unclear whether the years since independence are not themselves an outcome of the colonializer (i.e. a mediator).", "It's larger than the bivariate result suggests."))`
