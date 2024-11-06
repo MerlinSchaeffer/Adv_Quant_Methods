@@ -218,6 +218,9 @@ modelsummary(list("Wage before tax" = mod1, "Wage before tax" = mod2),  # Regres
 \path (2) edge [gray] (3);
 \end{tikzpicture}
 ```
+
+$$(1 - \frac{`r coef(mod2)["gndrFemale"]`}{`r coef(mod1)["gndrFemale"]`}) \times 100 = `r round((1 - coef(mod2)["gndrFemale"] / coef(mod1)["gndrFemale"]) * 100, 2)`\%$$
+
 ]]]
 
 ---
@@ -802,7 +805,6 @@ knitr::include_graphics('./img/DaleKrueger0.png')
 ---
 
 .push-left[
-
 ```{tikz, DaleKrueger2, echo = FALSE, out.width = '100%'}
 \usetikzlibrary{shapes,decorations,arrows,calc,arrows.meta,fit,positioning,quotes}
 \tikzset{
@@ -853,13 +855,13 @@ knitr::include_graphics('./img/DaleKrueger0.png')
 
 ---
 
-.push-left[
+.left-column[
 ```{tikz, ref.label = "DaleKrueger2", echo = FALSE, out.width = '100%'}
 
 ```
 ]
 
-.push-right[
+.right-column[
 ```{r, echo = FALSE, out.width='100%'}
 knitr::include_graphics('./img/DaleKrueger2.png')
 ```
