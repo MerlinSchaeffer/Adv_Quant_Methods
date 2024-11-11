@@ -1,5 +1,5 @@
 ---
-title: "Exercise 1 (20 minutes)"
+title: "Exercise 1 (30) minutes)"
 subtitle: "When you're done, assist some of the others ..."
 output: webexercises::webexercises_default
 ---
@@ -108,7 +108,7 @@ modelsummary(list("Reduced Stage" = rdcd_stage), stars = TRUE,
 ```{r include = FALSE}
 coef_rdcd <- coef(rdcd_stage)["chld_lb_lw"] %>% round(., 3) %>% as.scalar()
 ```
-3. `lnwkwage` contains the logged wages. Estimate the reduced form using the same control variables. A year of compulsory education increases logged wages by: `r fitb(coef_rdcd, width = "5")`. According to Acemoglu and Angrist, this is `r mcq(c("Not a causal effect!", answer = "the causal effect of child labor law, if their assumption is true that differences bewteen states and years are random", "The causal effect of education"))`.
+3. `lnwkwage` contains the logged wages. Estimate the reduced form using the same control variables. A year of compulsory education increases logged wages by: `r fitb(coef_rdcd, width = "5")`. According to Acemoglu and Angrist, this is `r mcq(c("Not a causal effect!", answer = "the causal effect of child labor law, if their assumption is true that differences between states and years are random", "The causal effect of education"))`.
 
 `r hide("R solution -> dont' peak to early ;) !")`
 ```{r ref.label = "reduced"}

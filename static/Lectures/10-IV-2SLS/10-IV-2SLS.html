@@ -4,7 +4,7 @@
     <title>Multiple Regression &amp;    Fundamentals of Causal Inference</title>
     <meta charset="utf-8" />
     <meta name="author" content="Merlin Schaeffer  Department of Sociology" />
-    <meta name="date" content="2023-11-22" />
+    <meta name="date" content="2024-11-11" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
     <script src="libs/tile-view/tile-view.js"></script>
@@ -29,7 +29,7 @@ class: center, middle, inverse, title-slide
 ### Merlin Schaeffer<br> Department of Sociology
 ]
 .date[
-### 2023-11-22
+### 2024-11-11
 ]
 
 ---
@@ -83,24 +83,11 @@ class: inverse
 .left-column[
 &lt;img src="10-IV-2SLS_files/figure-html/DAG_2-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 
-&lt;img src="https://www.learnliberty.org/wp-content/uploads/2017/09/Sni%CC%81mek-obrazovky-2021-11-09-v-21.24.45.png" width="100%" style="display: block; margin: auto;" /&gt;
+
 ]
 
 .right-column[
-&lt;img src="./img/Karlson_2.png" width="100%" style="display: block; margin: auto;" /&gt;
-.backgrnote[.center[*Source:* Karlson and Landersø (2021)]]
-]
-
----
-# No, there are confounders!
-
-.left-column[
-&lt;img src="10-IV-2SLS_files/figure-html/DAG_3-1.png" width="100%" style="display: block; margin: auto;" /&gt;
-]
-
-.right-column[
-&lt;img src="./img/Karlson_3.png" width="100%" style="display: block; margin: auto;" /&gt;
-.backgrnote[.center[*Source:* Karlson and Landersø (2021)]]
+&lt;img src="https://www.learnliberty.org/wp-content/uploads/2017/09/Sni%CC%81mek-obrazovky-2021-11-09-v-21.24.45.png" width="80%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -120,10 +107,6 @@ If we *randomly* divide subjects into treatment and control groups, .alert[they 
 
 ---
 # Angrist and Krueger (1991) had an idea
-
-.left-column[
-&lt;img src="10-IV-2SLS_files/figure-html/DAG_4-1.png" width="100%" style="display: block; margin: auto;" /&gt;
-]
 
 .right-column[
 - In the US, the school year starts 1 June.
@@ -147,14 +130,26 @@ If we *randomly* divide subjects into treatment and control groups, .alert[they 
 Under which assumptions is the quarter of birth a valid instrument for years of schooling?
 ]]
 
----
-# Replication
+--
 
+.left-column[.font90[
+&lt;img src="10-IV-2SLS_files/figure-html/DAGIV-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+
+**First Stage:** `\(E[D_{i}|Z_{i}=1]-E[D_{i}|Z_{i}=0]; \text{call this }\phi.\)`
+
+**Reduced Form:** `\(E[Y_{i}|Z_{i}=1]-E[Y_{i}|Z_{i}=0]; \text{call this }\rho.\)`
+
+**IV Estimator:** `\(\lambda = \frac{\rho}{\phi} = \frac{E[Y_{i}|Z_{i}=1]-E[Y_{i}|Z_{i}=0]}{E[D_{i}|Z_{i}=1]-E[D_{i}|Z_{i}=0]}.\)`
+]]
+
+---
+  # Replication
+  
 .panelset[
 .panel[.panel-name[The data]
 .font80[
 
-```r
+``` r
 pacman::p_load(
   tidyverse, # Data manipulation,
   ggplot2, # beautiful figures,
@@ -166,7 +161,7 @@ pacman::p_load(
 
 # Load the data from the Quarter of Birth IV study
 data("ak91", package = "masteringmetrics")
-ak91
+ak91 # Print forst 10 rows of the data
 # # A tibble: 329,509 × 6
 #      lnw     s   yob   qob   sob   age
 #    &lt;dbl&gt; &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;int&gt; &lt;dbl&gt;
@@ -186,15 +181,15 @@ ak91
 .panel[.panel-name[Naïv comparison]
 .push-left[.font80[
 
-```r
-# Multiple OLS
+``` r
+# Regress wage on years of schooling (S) and age
 mult_OLS = lm_robust(lnw ~ s + age, data = ak91)
-# Regression table
+# Make a regression table
 modelsummary(list("log Wage" = mult_OLS), stars = TRUE,
-             gof_map = c("nobs", "r.squared"))
+             gof_map = c("nobs", "r.squared"), output = "kableExtra")
 ```
 
-&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+&lt;table style="NAborder-bottom: 0; color: black; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
  &lt;thead&gt;
   &lt;tr&gt;
    &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
@@ -247,15 +242,15 @@ modelsummary(list("log Wage" = mult_OLS), stars = TRUE,
 .panel[.panel-name[The reduced form/ITT]
 .push-left[.font80[
 
-```r
-# Bivariate OLS
+``` r
+# Reduced form
 reduced_frm &lt;- lm_robust(lnw ~ qob, data = ak91)
 # Regression table
 modelsummary(list("log Wage" = reduced_frm), stars = TRUE,
-             gof_map = c("nobs", "r.squared"))
+             gof_map = c("nobs", "r.squared"), output = "kableExtra")
 ```
 
-&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+&lt;table style="NAborder-bottom: 0; color: black; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
  &lt;thead&gt;
   &lt;tr&gt;
    &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
@@ -295,26 +290,24 @@ modelsummary(list("log Wage" = reduced_frm), stars = TRUE,
 
 ]]
 .push-right[
-
 .push-left[
 &lt;img src="10-IV-2SLS_files/figure-html/reduced1-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]
 .push-right[
 &lt;img src="10-IV-2SLS_files/figure-html/reduced2-1.png" width="100%" style="display: block; margin: auto;" /&gt;
-]]
-]
+]]]
 .panel[.panel-name[The first stage]
 .push-left[.font80[
 
-```r
-# Bivariate OLS
+``` r
+# First stage
 frst_stage &lt;- lm_robust(s ~ qob, data = ak91)
 # Regression table
 modelsummary(list("Schooling" = frst_stage), stars = TRUE,
-             gof_map = c("nobs", "r.squared"))
+             gof_map = c("nobs", "r.squared"), output = "kableExtra")
 ```
 
-&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+&lt;table style="NAborder-bottom: 0; color: black; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
  &lt;thead&gt;
   &lt;tr&gt;
    &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
@@ -354,7 +347,6 @@ modelsummary(list("Schooling" = frst_stage), stars = TRUE,
 
 ]]
 .push-right[
-
 .push-left[
 &lt;img src="10-IV-2SLS_files/figure-html/first1-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]
@@ -364,43 +356,45 @@ modelsummary(list("Schooling" = frst_stage), stars = TRUE,
 .panel[.panel-name[IV]
 .left-column[.font80[
 
-```r
+``` r
 *iv &lt;- ivreg( # IV (2SLS)
 * lnw ~ s | qob,
 * data = ak91)
 
-modelsummary(list("OLS" = mult_OLS, 
-                  "1st Stage" = frst_stage, 
-                  "Reduced Form" = reduced_frm, 
-                  "IV" = iv), stars = TRUE, 
-             gof_map = c("nobs", "r.squared"))
+modelsummary(
+  list("OLS" = mult_OLS, 
+       "Reduced Form" = reduced_frm, 
+       "1st Stage" = frst_stage, 
+       "IV" = iv), stars = TRUE, 
+  gof_map = c("nobs", "r.squared"),
+  output = "kableExtra")
 ```
 `$$\text{IV} = \frac{\rho}{\phi} = \frac{0.005}{0.052} = 0.099$$`
 ]]
 .right-column[.font90[
-&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+&lt;table style="NAborder-bottom: 0; color: black; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
  &lt;thead&gt;
   &lt;tr&gt;
    &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
    &lt;th style="text-align:center;"&gt; OLS &lt;/th&gt;
-   &lt;th style="text-align:center;"&gt; 1st Stage &lt;/th&gt;
    &lt;th style="text-align:center;"&gt; Reduced Form &lt;/th&gt;
-   &lt;th style="text-align:center;"&gt;  IV &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; 1st Stage &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; &amp;amp;nbsp;IV &lt;/th&gt;
   &lt;/tr&gt;
  &lt;/thead&gt;
 &lt;tbody&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
    &lt;td style="text-align:center;"&gt; 4.776*** &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 12.641*** &lt;/td&gt;
    &lt;td style="text-align:center;"&gt; 5.887*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 12.641*** &lt;/td&gt;
    &lt;td style="text-align:center;"&gt; 4.633*** &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
    &lt;td style="text-align:center;"&gt; (0.018) &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (0.014) &lt;/td&gt;
    &lt;td style="text-align:center;"&gt; (0.003) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.014) &lt;/td&gt;
    &lt;td style="text-align:center;"&gt; (0.250) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
@@ -434,15 +428,15 @@ modelsummary(list("OLS" = mult_OLS,
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; qob &lt;/td&gt;
    &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.052*** &lt;/td&gt;
    &lt;td style="text-align:center;"&gt; 0.005*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.052*** &lt;/td&gt;
    &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
    &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.005) &lt;/td&gt;
    &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.001) &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.005) &lt;/td&gt;
    &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
@@ -470,28 +464,28 @@ modelsummary(list("OLS" = mult_OLS,
 ---
 class: inverse middle center
 
-# Two-stage Least Squares (2SLS)
+# Two-Stage Least Squares (2SLS)
 
 The Frisch-Waugh perspective on IV
 
 ---
 # The *first* stage
-
-.left-column[
-&lt;img src="10-IV-2SLS_files/figure-html/unnamed-chunk-13-1.png" width="100%" style="display: block; margin: auto;" /&gt;
-
-&lt;img src="10-IV-2SLS_files/figure-html/unnamed-chunk-14-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+  
+  .left-column[
+&lt;img src="10-IV-2SLS_files/figure-html/unnamed-chunk-11-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+    
+&lt;img src="10-IV-2SLS_files/figure-html/unnamed-chunk-12-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]
 
 .right-column[
 
-```r
-frst_stage &lt;- lm_robust(s ~ qob, data = ak91) # Bivariate OLS
-
+``` r
+frst_stage &lt;- lm_robust(s ~ qob, data = ak91) # The first stage
+  
 (ak91 &lt;- ak91 %&gt;% # Add predictions and residuals
-  add_predictions(frst_stage, data = .) %&gt;%
-  add_residuals(frst_stage, data = .) %&gt;%
-  rename(pred_s = pred, e_s = resid))
+      add_predictions(frst_stage, data = .) %&gt;%
+      add_residuals(frst_stage, data = .) %&gt;%
+      rename(pred_s = pred, e_s = resid))
 # # A tibble: 329,509 × 8
 #      lnw     s   yob   qob   sob   age pred_s    e_s
 #    &lt;dbl&gt; &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;int&gt; &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;
@@ -507,40 +501,42 @@ frst_stage &lt;- lm_robust(s ~ qob, data = ak91) # Bivariate OLS
 # 10  5.26     7  1930     1    45    50   12.7 -5.69 
 # # ℹ 329,499 more rows
 ```
-
+  
 .content-box-green[.font80[
 Which is unconfounded, the predicted education `pred_s` or the residuals `e_s`?
 ]]]
 
 ---
 # The *second* stage
-
+  
 .push-left[
-&lt;img src="10-IV-2SLS_files/figure-html/unnamed-chunk-16-1.png" width="50%" style="display: block; margin: auto;" /&gt;
-
-- An instrument `\(Z_{i}\)` induces random variation into the treatment `\(D\)`. 
-- We can measure that random variation, by taking the predictions `\(\hat{D}_{i}\)` from the first stage:
-  `$$D_{i} = \alpha_1 + \phi Z_{i} + e_{i}.$$`
+&lt;img src="10-IV-2SLS_files/figure-html/unnamed-chunk-14-1.png" width="50%" style="display: block; margin: auto;" /&gt;
+    
+- An instrument `\(Z_{i}\)` induces random variation into the treatment `\(D_{i}\)`. 
+- We can isolate that random variation, by taking the predictions `\(\hat{D}_{i}\)` from the first stage:
+      `$$D_{i} = \alpha_1 + \phi Z_{i} + e_{i}.$$`
 - We then use `\(\hat{D}_{i}\)` as predictor in the second stage:
-`$$Y_{i} = \alpha_2 + \lambda_{\text{2SLS}}\hat{D}_{i} + e_{i}.$$`
+      `$$Y_{i} = \alpha_2 + \lambda_{\text{2SLS}}\hat{D}_{i} + e_{i}.$$`
 ]
 
 .push-right[.font80[
 
-```r
-scnd_stage &lt;- lm_robust(lnw ~ pred_s, data = ak91) 
+``` r
+scnd_stage &lt;- lm_robust(lnw ~ pred_s, data = ak91) # Second stage
 *iv &lt;- ivreg(lnw ~ s | qob, data = ak91) # IV (2SLS)
+
 modelsummary(list("2n Stage" = scnd_stage, 
-                  "IV" = iv), stars = TRUE, 
-             gof_map = c("nobs", "r.squared"))
+                    "IV" = iv), stars = TRUE, 
+               gof_map = c("nobs", "r.squared"),
+               output = "kableExtra")
 ```
 
-&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+&lt;table style="NAborder-bottom: 0; color: black; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
  &lt;thead&gt;
   &lt;tr&gt;
    &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
-   &lt;th style="text-align:center;"&gt;  2n Stage &lt;/th&gt;
-   &lt;th style="text-align:center;"&gt;  IV &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; &amp;amp;nbsp;2n Stage &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; &amp;amp;nbsp;IV &lt;/th&gt;
   &lt;/tr&gt;
  &lt;/thead&gt;
 &lt;tbody&gt;
@@ -594,49 +590,49 @@ modelsummary(list("2n Stage" = scnd_stage,
 
 ---
 # Two perspectives on IV
-
+  
 &lt;img src="10-IV-2SLS_files/figure-html/DAG_IV-1.png" width="25%" style="display: block; margin: auto;" /&gt;
 
 .push-left[
 .content-box-blue[
 .center[**Wald IV estimator**]
-
+    
 `$$\lambda_{\text{Wald}} = \frac{\rho}{\phi}$$`
-*Conceptually*: Weigh up the ITT (or `\(\rho\)` ) on `\(Y\)` to get the causal effect of `\(D\)` among those who actually received `\(D\)`.
+      *Conceptually*: Weigh up the ITT (or `\(\rho\)` ) on `\(Y\)` to get the causal effect of `\(D\)` among complyers.
 ]]
 
 .push-right[
 .content-box-green[
 .center[**2SLS IV estimator**]
-
+    
 `$$Y_{i} = \alpha + \lambda_{\text{2SLS}}\hat{D}_{i} + e_{i}$$`
-*Conceptually*: Use (first stage) OLS to identify random variation in `\(D\)`. Use that random variation in a second (stage) OLS to estimate the causal effect of `\(D\)` on `\(Y\)`.
-
+      *Conceptually*: Use (first stage) OLS to isolate random variation in `\(D\)`. Use that random variation in a second (stage) OLS to estimate the causal effect of `\(D\)` on `\(Y\)` among complyers.
+    
 *Advantage*: We can use several instruments to identify as much random variation in `\(D\)` as possible!
 ]]
 
 ---
 # Control vs. instrument variables
-
+  
 .push-right[.content-box-blue[
-&lt;img src="10-IV-2SLS_files/figure-html/unnamed-chunk-18-1.png" width="50%" style="display: block; margin: auto;" /&gt;
-
-An instrument variable `\(Z\)` induces unconfounded random variation into `\(D\)`. 
-
+&lt;img src="10-IV-2SLS_files/figure-html/unnamed-chunk-16-1.png" width="50%" style="display: block; margin: auto;" /&gt;
+    
+An instrument variable `\(Z\)` induces random variation into `\(D\)`. 
+    
 By using IV, we only keep the predicted values (not the resuduals) of `\(D\)`, the part of `\(D\)` that **_correlates_** with `\(Z\)`.
 ]]
 
 .push-left[.content-box-red[
-&lt;img src="10-IV-2SLS_files/figure-html/DAG_FrischWaugh-1.png" width="29%" style="display: block; margin: auto;" /&gt;
-
-A confounder `\(C\)` induces omitted variable/selection bias into `\(D\)`. 
-
+  &lt;img src="10-IV-2SLS_files/figure-html/DAG_FrischWaugh-1.png" width="29%" style="display: block; margin: auto;" /&gt;
+  
+A confounder `\(C\)` induces bias into `\(D\)`. 
+  
 By controlling for `\(C\)`, we only keep the residuals (not the predicted values) of `\(D\)`, the part of `\(D\)` that **_does not correlate_** with `\(C\)`.
 ]]
 
 ---
 # Remember the exclusion restriction!
-
+  
 .left-column[
 &lt;img src="10-IV-2SLS_files/figure-html/DAG_5-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]
@@ -648,9 +644,9 @@ By controlling for `\(C\)`, we only keep the residuals (not the predicted values
 
 ---
 # Remember the exclusion restriction!
-
+  
 .left-column[
-&lt;img src="10-IV-2SLS_files/figure-html/unnamed-chunk-20-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="10-IV-2SLS_files/figure-html/unnamed-chunk-18-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]
 
 .right-column[
@@ -660,17 +656,15 @@ By controlling for `\(C\)`, we only keep the residuals (not the predicted values
 
 ---
 # Remember the exclusion restriction!
-
 .content-box-blue[
 &lt;img src="10-IV-2SLS_files/figure-html/DAG_IV2-1.png" width="25%" style="display: block; margin: auto;" /&gt;
-
+    
 If the exclusion restriction does not hold, an instrument basically turns into a confounder. This has two implications:
-
-1. The instrument does not induce random variation but omitted variable bias (OVB) into `\(D\)`. Remember, a backdoor path is any path from `\(D\)` to `\(Y\)` that starts with an arrow into `\(D\)`.
-
-2. By using IV, we weigh up it's OVB by `\(\frac{1}{\phi}\)`!
+      
+1. The instrument does not induce random variation but bias into `\(D\)`. Remember, a backdoor path is any path from `\(D\)` to `\(Y\)` that starts with an arrow into `\(D\)`.
+    
+2. We learned from the Wald-IV perspective: By using IV, we weigh up it's bias by `\(\frac{1}{\phi}\)`!
 ]
-
 
 ---
 class: inverse middle center
@@ -712,7 +706,7 @@ layout: true
 ---
 
 .left-column[
-&lt;img src="https://wandanowicka.pl/wp-content/uploads/2020/08/upadek-solidarnosci.jpg" width="85%" style="display: block; margin: auto;" /&gt;&lt;img src="https://dzieje.pl/sites/default/files/styles/open_article_750x0_/public/201204/solidarnosc_tkk2.jpg?itok=YpPQeO8f" width="85%" style="display: block; margin: auto;" /&gt;&lt;img src="https://edupolis.pl/wp-content/uploads/2021/05/Solidarnosc.jpg" width="85%" style="display: block; margin: auto;" /&gt;
+&lt;img src="https://dzieje.pl/sites/default/files/styles/open_article_750x0_/public/201204/solidarnosc_tkk2.jpg?itok=YpPQeO8f" width="85%" style="display: block; margin: auto;" /&gt;&lt;img src="https://edupolis.pl/wp-content/uploads/2021/05/Solidarnosc.jpg" width="85%" style="display: block; margin: auto;" /&gt;
 
 
 ]
@@ -730,7 +724,7 @@ layout: true
 .left-column[
 &lt;img src="10-IV-2SLS_files/figure-html/DAG_Hager-1.png" width="80%" style="display: block; margin: auto;" /&gt;
 
-&lt;img src="https://wandanowicka.pl/wp-content/uploads/2020/08/upadek-solidarnosci.jpg" width="85%" style="display: block; margin: auto;" /&gt;&lt;img src="https://edupolis.pl/wp-content/uploads/2021/05/Solidarnosc.jpg" width="85%" style="display: block; margin: auto;" /&gt;
+&lt;img src="https://dzieje.pl/sites/default/files/styles/open_article_750x0_/public/201204/solidarnosc_tkk2.jpg?itok=YpPQeO8f" width="85%" style="display: block; margin: auto;" /&gt;&lt;img src="https://edupolis.pl/wp-content/uploads/2021/05/Solidarnosc.jpg" width="85%" style="display: block; margin: auto;" /&gt;
 ]
 
 .right-column[
@@ -745,9 +739,9 @@ layout: true
 ---
 
 .left-column[
-&lt;img src="10-IV-2SLS_files/figure-html/unnamed-chunk-26-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+&lt;img src="10-IV-2SLS_files/figure-html/unnamed-chunk-24-1.png" width="80%" style="display: block; margin: auto;" /&gt;
 
-&lt;img src="https://wandanowicka.pl/wp-content/uploads/2020/08/upadek-solidarnosci.jpg" width="85%" style="display: block; margin: auto;" /&gt;&lt;img src="https://edupolis.pl/wp-content/uploads/2021/05/Solidarnosc.jpg" width="85%" style="display: block; margin: auto;" /&gt;
+&lt;img src="https://dzieje.pl/sites/default/files/styles/open_article_750x0_/public/201204/solidarnosc_tkk2.jpg?itok=YpPQeO8f" width="85%" style="display: block; margin: auto;" /&gt;&lt;img src="https://edupolis.pl/wp-content/uploads/2021/05/Solidarnosc.jpg" width="85%" style="display: block; margin: auto;" /&gt;
 ]
 
 .right-column[
@@ -763,9 +757,9 @@ layout: true
 ---
 
 .left-column[
-&lt;img src="10-IV-2SLS_files/figure-html/unnamed-chunk-29-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+&lt;img src="10-IV-2SLS_files/figure-html/unnamed-chunk-27-1.png" width="80%" style="display: block; margin: auto;" /&gt;
 
-&lt;img src="https://wandanowicka.pl/wp-content/uploads/2020/08/upadek-solidarnosci.jpg" width="85%" style="display: block; margin: auto;" /&gt;&lt;img src="https://edupolis.pl/wp-content/uploads/2021/05/Solidarnosc.jpg" width="85%" style="display: block; margin: auto;" /&gt;
+&lt;img src="https://dzieje.pl/sites/default/files/styles/open_article_750x0_/public/201204/solidarnosc_tkk2.jpg?itok=YpPQeO8f" width="85%" style="display: block; margin: auto;" /&gt;&lt;img src="https://edupolis.pl/wp-content/uploads/2021/05/Solidarnosc.jpg" width="85%" style="display: block; margin: auto;" /&gt;
 ]
 
 .right-column[
@@ -778,7 +772,7 @@ layout: true
 .left-column[
 &lt;img src="10-IV-2SLS_files/figure-html/DAG_Hager2-1.png" width="80%" style="display: block; margin: auto;" /&gt;
 
-&lt;img src="https://wandanowicka.pl/wp-content/uploads/2020/08/upadek-solidarnosci.jpg" width="70%" style="display: block; margin: auto;" /&gt;&lt;img src="https://edupolis.pl/wp-content/uploads/2021/05/Solidarnosc.jpg" width="70%" style="display: block; margin: auto;" /&gt;
+&lt;img src="https://dzieje.pl/sites/default/files/styles/open_article_750x0_/public/201204/solidarnosc_tkk2.jpg?itok=YpPQeO8f" width="70%" style="display: block; margin: auto;" /&gt;&lt;img src="https://edupolis.pl/wp-content/uploads/2021/05/Solidarnosc.jpg" width="70%" style="display: block; margin: auto;" /&gt;
 
 .content-box-green[
 Why might these results not be causal?
@@ -793,9 +787,9 @@ Why might these results not be causal?
 ---
 
 .left-column[
-&lt;img src="10-IV-2SLS_files/figure-html/unnamed-chunk-34-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+&lt;img src="10-IV-2SLS_files/figure-html/unnamed-chunk-32-1.png" width="80%" style="display: block; margin: auto;" /&gt;
 
-&lt;img src="https://wandanowicka.pl/wp-content/uploads/2020/08/upadek-solidarnosci.jpg" width="70%" style="display: block; margin: auto;" /&gt;&lt;img src="https://edupolis.pl/wp-content/uploads/2021/05/Solidarnosc.jpg" width="70%" style="display: block; margin: auto;" /&gt;
+&lt;img src="https://dzieje.pl/sites/default/files/styles/open_article_750x0_/public/201204/solidarnosc_tkk2.jpg?itok=YpPQeO8f" width="70%" style="display: block; margin: auto;" /&gt;&lt;img src="https://edupolis.pl/wp-content/uploads/2021/05/Solidarnosc.jpg" width="70%" style="display: block; margin: auto;" /&gt;
 
 .content-box-green[
 Why might these results not be causal?
@@ -900,7 +894,7 @@ Two-stage least squares (2SLS)
 
 ---
 # Today's general lessons 2
-
+  
 Instrument variables vs. control variables: are both used to reduce bias in statistical models. However, they work in different ways.
 
 1. An *instrument variable* is used to identify and control for unconfounded random variation in the treatment variable. 
@@ -912,7 +906,7 @@ Instrument variables vs. control variables: are both used to reduce bias in stat
 | Purpose | To identify unconfounded random variation in the treatment variable. | To control for systematically confounded variation in the treatment variable. |
 | Correlation with treatment variable | Causes treatment variable. | Causes treatment variable. |
 | Correlation with outcome variable | Must be uncorrelated with outcome variable, except through the treatment variable. | Causes outcome variable. |
-
+  
 ---
 class: inverse
 # Today's general lessons 3
@@ -931,7 +925,7 @@ class: inverse
 
 ---
 # References
-
+  
 .font80[
 Angrist, J. D. and A. B. Krueger (1991). "Does Compulsory School Attendance Affect Schooling and
 Earnings?*". In: _The Quarterly Journal of Economics_, pp. 979-1014.
@@ -945,7 +939,6 @@ Surveillance in Communist Poland". In: _American Political Science Review_, pp. 
 Karlson, K. and R. Landersø (2021). "The Making and Unmaking of Opportunity: Educational Mobility in
 20th Century-Denmark". In: _SSRN Electronic Journal_.
 ]
-
 
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>

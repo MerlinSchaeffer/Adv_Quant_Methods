@@ -127,44 +127,6 @@ knitr::include_graphics('./img/Karlson_1.png')
 \node[state, align = center] (1) at (0,0) {Education};
 \node[state, align = center] (2) [right = of 1] {\$};
 \node[state, align = center] (3) [dashed, red, above = of 1] {Parental \\ education};
-
-\path (1) edge (2);
-\path (3) edge [dashed, red] (2);
-\path (3) edge [dashed, red] (1);
-\end{tikzpicture}
-```
-
-```{r, echo = FALSE, out.width='100%', fig.align='center'}
-knitr::include_graphics('https://www.learnliberty.org/wp-content/uploads/2017/09/Sni%CC%81mek-obrazovky-2021-11-09-v-21.24.45.png')
-```
-]
-
-.right-column[
-```{r, echo = FALSE, out.width='100%', fig.align='center'}
-knitr::include_graphics('./img/Karlson_2.png')
-```
-.backgrnote[.center[*Source:* `r Citet(myBib, "karlson_making_2021")`]]
-]
-
----
-# No, there are confounders!
-
-.left-column[
-```{tikz, DAG_3, echo = FALSE, out.width='100%'}
-\usetikzlibrary{shapes,decorations,arrows,calc,arrows.meta,fit,positioning,quotes}
-\tikzset{
-  -Latex,auto,node distance =1 cm and 1 cm,semithick,
-  state/.style ={ellipse, draw, minimum width = 0.7 cm},
-  point/.style = {circle, draw, inner sep=0.04cm,fill,node contents={}},
-  bidirected/.style={Latex-Latex,dashed},
-  el/.style = {inner sep=2pt, align=left, sloped}
-}
-
-\begin{tikzpicture}
-\sffamily
-\node[state, align = center] (1) at (0,0) {Education};
-\node[state, align = center] (2) [right = of 1] {\$};
-\node[state, align = center] (3) [dashed, red, above = of 1] {Parental \\ education};
 \node[state, align = center] (4) [dashed, red, below = of 1] {Cognitive \\ ability};
 
 \path (1) edge (2);
@@ -174,13 +136,14 @@ knitr::include_graphics('./img/Karlson_2.png')
 \path (4) edge [dashed, red] (1);
 \end{tikzpicture}
 ```
+
+
 ]
 
 .right-column[
-```{r, echo = FALSE, out.width='100%', fig.align='center'}
-knitr::include_graphics('./img/Karlson_3.png')
+```{r, echo = FALSE, out.width='80%', fig.align='center'}
+knitr::include_graphics('https://www.learnliberty.org/wp-content/uploads/2017/09/Sni%CC%81mek-obrazovky-2021-11-09-v-21.24.45.png')
 ```
-.backgrnote[.center[*Source:* `r Citet(myBib, "karlson_making_2021")`]]
 ]
 
 ---
@@ -225,35 +188,6 @@ If we *randomly* divide subjects into treatment and control groups, .alert[they 
 ---
 # `r Citet(myBib, "angrist_does_1991")` had an idea
 
-.left-column[
-```{tikz, DAG_4, echo = FALSE, out.width='100%'}
-\usetikzlibrary{shapes,decorations,arrows,calc,arrows.meta,fit,positioning,quotes}
-\tikzset{
-  -Latex,auto,node distance =1 cm and 1 cm,semithick,
-  state/.style ={ellipse, draw, minimum width = 0.7 cm},
-  point/.style = {circle, draw, inner sep=0.04cm,fill,node contents={}},
-  bidirected/.style={Latex-Latex,dashed},
-  el/.style = {inner sep=2pt, align=left, sloped}
-}
-
-\begin{tikzpicture}
-\sffamily
-\node[state, align = center] (1) at (0,0) {Education};
-\node[state, align = center] (2) [right = of 1] {\$};
-\node[state, align = center] (3) [dashed, gray, above = of 1] {Parental \\ education};
-\node[state, align = center] (4) [dashed, gray, below = of 1] {Cognitive \\ ability};
-\node[state, align = center] (5) [red, left = of 1] {Quarter of \\ birth};
-
-\path (1) edge (2);
-\path (3) edge [dashed, gray] (2);
-\path (4) edge [dashed, gray] (2);
-\path (3) edge [dashed, gray] (1);
-\path (4) edge [dashed, gray] (1);
-\path (5) edge [red] (1);
-\end{tikzpicture}
-```
-]
-
 .right-column[
 - In the US, the school year starts 1 June.
 - Kids enter school in the year in which they turn 6.
@@ -276,9 +210,43 @@ $\rightarrow$ Dropouts born in the 4th quarter of a year, will have one more yea
 Under which assumptions is the quarter of birth a valid instrument for years of schooling?
 ]]
 
----
-# Replication
+--
 
+.left-column[.font90[
+```{tikz, DAGIV, echo = FALSE, out.width='70%'}
+\usetikzlibrary{shapes,decorations,arrows,calc,arrows.meta,fit,positioning,quotes}
+\tikzset{
+  -Latex,auto,node distance =1 cm and 1 cm,semithick,
+  state/.style ={ellipse, draw, minimum width = 0.7 cm},
+  point/.style = {circle, draw, inner sep=0.04cm,fill,node contents={}},
+  bidirected/.style={Latex-Latex, dashed},
+  el/.style = {inner sep=2pt, align=left, sloped}
+}
+
+\begin{tikzpicture}
+\sffamily
+\node[state] (1) [red] at (0,0) {$Z$};
+\node[state] (2) [right = of 1] {$D$};
+\node[state] (3) [above = of 2] {$C$};
+\node[state] (4) [right = of 2] {$Y$};
+
+\path (1) [red] edge ["$\phi$"] (2);
+\path (2) edge ["$\lambda$"](4);
+\path (3) edge [dashed] (4);
+\path (3) edge [dashed] (2);
+\end{tikzpicture}
+```
+
+**First Stage:** $E[D_{i}|Z_{i}=1]-E[D_{i}|Z_{i}=0]; \text{call this }\phi.$
+
+**Reduced Form:** $E[Y_{i}|Z_{i}=1]-E[Y_{i}|Z_{i}=0]; \text{call this }\rho.$
+
+**IV Estimator:** $\lambda = \frac{\rho}{\phi} = \frac{E[Y_{i}|Z_{i}=1]-E[Y_{i}|Z_{i}=0]}{E[D_{i}|Z_{i}=1]-E[D_{i}|Z_{i}=0]}.$
+]]
+
+---
+  # Replication
+  
 .panelset[
 .panel[.panel-name[The data]
 .font80[
@@ -294,17 +262,17 @@ pacman::p_load(
 
 # Load the data from the Quarter of Birth IV study
 data("ak91", package = "masteringmetrics")
-ak91
+ak91 # Print forst 10 rows of the data
 ```
 ]]
 .panel[.panel-name[Naïv comparison]
 .push-left[.font80[
 ```{r}
-# Multiple OLS
+# Regress wage on years of schooling (S) and age
 mult_OLS = lm_robust(lnw ~ s + age, data = ak91)
-# Regression table
+# Make a regression table
 modelsummary(list("log Wage" = mult_OLS), stars = TRUE,
-             gof_map = c("nobs", "r.squared"))
+             gof_map = c("nobs", "r.squared"), output = "kableExtra")
 ```
 ]]
 .push-right[
@@ -312,26 +280,27 @@ modelsummary(list("log Wage" = mult_OLS), stars = TRUE,
 ggplot(data = ak91, aes(y = lnw, x = s)) +
   geom_jitter(alpha = 1/10, width = 0.1, height = 0) +
   geom_smooth(method = "lm", SE = FALSE) +
+  labs(y = "lnw \n (log of wage)", x = "s \n (years of schooling)") + 
   theme_minimal()
 ```
 ]]
 .panel[.panel-name[The reduced form/ITT]
 .push-left[.font80[
 ```{r}
-# Bivariate OLS
+# Reduced form
 reduced_frm <- lm_robust(lnw ~ qob, data = ak91)
 # Regression table
 modelsummary(list("log Wage" = reduced_frm), stars = TRUE,
-             gof_map = c("nobs", "r.squared"))
+             gof_map = c("nobs", "r.squared"), output = "kableExtra")
 ```
 ]]
 .push-right[
-
 .push-left[
 ```{r reduced1, out.width='100%', fig.height = 4, fig.width = 5, results = FALSE, echo = FALSE}
 ggplot(data = ak91, aes(y = lnw, x = qob)) +
   geom_jitter(alpha = 1/10, width = 0.1, height = 0.2) +
   geom_smooth(method = "lm", SE = FALSE) +
+  labs(y = "lnw \n (log of wage)", x = "qob \n (quarter of birth)") + 
   theme_minimal()
 ```
 ]
@@ -339,27 +308,27 @@ ggplot(data = ak91, aes(y = lnw, x = qob)) +
 ```{r reduced2, out.width='100%', fig.height = 4, fig.width = 5, results = FALSE, echo = FALSE}
 ggplot(data = ak91, aes(y = lnw, x = qob)) +
   geom_smooth(method = "lm") +
+  labs(y = "lnw \n (log of wage)", x = "qob \n (quarter of birth)") + 
   theme_minimal()
 ```
-]]
-]
+]]]
 .panel[.panel-name[The first stage]
 .push-left[.font80[
 ```{r}
-# Bivariate OLS
+# First stage
 frst_stage <- lm_robust(s ~ qob, data = ak91)
 # Regression table
 modelsummary(list("Schooling" = frst_stage), stars = TRUE,
-             gof_map = c("nobs", "r.squared"))
+             gof_map = c("nobs", "r.squared"), output = "kableExtra")
 ```
 ]]
 .push-right[
-
 .push-left[
 ```{r first1, out.width='100%', fig.height = 4, fig.width = 5, results = FALSE, echo = FALSE}
 ggplot(data = ak91, aes(y = s, x = qob)) +
   geom_jitter(alpha = 1/10, width = 0.1, height = 0.2) +
   geom_smooth(method = "lm", SE = FALSE) +
+  labs(y = "s \n (years of schooling)", x = "qob \n (quarter of birth)") + 
   theme_minimal()
 ```
 ]
@@ -367,6 +336,7 @@ ggplot(data = ak91, aes(y = s, x = qob)) +
 ```{r first2, out.width='100%', fig.height = 4, fig.width = 5, results = FALSE, echo = FALSE}
 ggplot(data = ak91, aes(y = s, x = qob)) +
   geom_smooth(method = "lm", SE = FALSE) +
+  labs(y = "s \n (years of schooling)", x = "qob \n (quarter of birth)") + 
   theme_minimal()
 ```
 ]]]
@@ -377,11 +347,13 @@ iv <- ivreg( # IV (2SLS) #<<
   lnw ~ s | qob, #<<
   data = ak91) #<<
 
-modelsummary(list("OLS" = mult_OLS, 
-                  "1st Stage" = frst_stage, 
-                  "Reduced Form" = reduced_frm, 
-                  "IV" = iv), stars = TRUE, 
-             gof_map = c("nobs", "r.squared"))
+modelsummary(
+  list("OLS" = mult_OLS, 
+       "Reduced Form" = reduced_frm, 
+       "1st Stage" = frst_stage, 
+       "IV" = iv), stars = TRUE, 
+  gof_map = c("nobs", "r.squared"),
+  output = "kableExtra")
 ```
 $$\text{IV} = \frac{\rho}{\phi} = \frac{`r coef(reduced_frm)["qob"]`}{`r coef(frst_stage)["qob"]`} = `r coef(reduced_frm)["qob"] / coef(frst_stage)["qob"]`$$
 ]]
@@ -394,63 +366,64 @@ $$\text{IV} = \frac{\rho}{\phi} = \frac{`r coef(reduced_frm)["qob"]`}{`r coef(fr
 ---
 class: inverse middle center
 
-# Two-stage Least Squares (2SLS)
+# Two-Stage Least Squares (2SLS)
 
 The Frisch-Waugh perspective on IV
 
 ---
 # The *first* stage
-
-.left-column[
-```{tikz, ref.label = "DAG_4", echo = FALSE, out.width='100%'}
+  
+  .left-column[
+```{tikz, ref.label = "DAGIV", echo = FALSE, out.width='100%'}
 ```
-
+    
 ```{r ref.label = "first1", out.width='100%', fig.height = 4, fig.width = 5, results = FALSE, echo = FALSE}
-
 ```
 ]
 
 .right-column[
 ```{r}
-frst_stage <- lm_robust(s ~ qob, data = ak91) # Bivariate OLS
-
+frst_stage <- lm_robust(s ~ qob, data = ak91) # The first stage
+  
 (ak91 <- ak91 %>% # Add predictions and residuals
-  add_predictions(frst_stage, data = .) %>%
-  add_residuals(frst_stage, data = .) %>%
-  rename(pred_s = pred, e_s = resid))
+      add_predictions(frst_stage, data = .) %>%
+      add_residuals(frst_stage, data = .) %>%
+      rename(pred_s = pred, e_s = resid))
 ```
-
+  
 .content-box-green[.font80[
 Which is unconfounded, the predicted education `pred_s` or the residuals `e_s`?
 ]]]
 
 ---
 # The *second* stage
-
+  
 .push-left[
-```{tikz, ref.label = "DAG_4", echo = FALSE, out.width='50%'}
+```{tikz, ref.label = "DAGIV", echo = FALSE, out.width='50%'}
 ```
-
-- An instrument $Z_{i}$ induces random variation into the treatment $D$. 
-- We can measure that random variation, by taking the predictions $\hat{D}_{i}$ from the first stage:
-  $$D_{i} = \alpha_1 + \phi Z_{i} + e_{i}.$$
+    
+- An instrument $Z_{i}$ induces random variation into the treatment $D_{i}$. 
+- We can isolate that random variation, by taking the predictions $\hat{D}_{i}$ from the first stage:
+      $$D_{i} = \alpha_1 + \phi Z_{i} + e_{i}.$$
 - We then use $\hat{D}_{i}$ as predictor in the second stage:
-$$Y_{i} = \alpha_2 + \lambda_{\text{2SLS}}\hat{D}_{i} + e_{i}.$$
+      $$Y_{i} = \alpha_2 + \lambda_{\text{2SLS}}\hat{D}_{i} + e_{i}.$$
 ]
 
 .push-right[.font80[
 ```{r}
-scnd_stage <- lm_robust(lnw ~ pred_s, data = ak91) 
+scnd_stage <- lm_robust(lnw ~ pred_s, data = ak91) # Second stage
 iv <- ivreg(lnw ~ s | qob, data = ak91) # IV (2SLS) #<< 
+
 modelsummary(list("2n Stage" = scnd_stage, 
-                  "IV" = iv), stars = TRUE, 
-             gof_map = c("nobs", "r.squared"))
+                    "IV" = iv), stars = TRUE, 
+               gof_map = c("nobs", "r.squared"),
+               output = "kableExtra")
 ```
 ]]
 
 ---
 # Two perspectives on IV
-
+  
 ```{tikz, DAG_IV, echo = FALSE, out.width='25%'}
 \usetikzlibrary{shapes,decorations,arrows,calc,arrows.meta,fit,positioning,quotes}
 \tikzset{
@@ -478,65 +451,64 @@ modelsummary(list("2n Stage" = scnd_stage,
 .push-left[
 .content-box-blue[
 .center[**Wald IV estimator**]
-
+    
 $$\lambda_{\text{Wald}} = \frac{\rho}{\phi}$$
-*Conceptually*: Weigh up the ITT (or $\rho$ ) on $Y$ to get the causal effect of $D$ among those who actually received $D$.
+      *Conceptually*: Weigh up the ITT (or $\rho$ ) on $Y$ to get the causal effect of $D$ among complyers.
 ]]
 
 .push-right[
 .content-box-green[
 .center[**2SLS IV estimator**]
-
+    
 $$Y_{i} = \alpha + \lambda_{\text{2SLS}}\hat{D}_{i} + e_{i}$$
-*Conceptually*: Use (first stage) OLS to identify random variation in $D$. Use that random variation in a second (stage) OLS to estimate the causal effect of $D$ on $Y$.
-
+      *Conceptually*: Use (first stage) OLS to isolate random variation in $D$. Use that random variation in a second (stage) OLS to estimate the causal effect of $D$ on $Y$ among complyers.
+    
 *Advantage*: We can use several instruments to identify as much random variation in $D$ as possible!
 ]]
 
 ---
 # Control vs. instrument variables
-
+  
 .push-right[.content-box-blue[
 ```{tikz, ref.label = "DAG_IV", echo = FALSE, out.width='50%'}
-
 ```
-
-An instrument variable $Z$ induces unconfounded random variation into $D$. 
-
+    
+An instrument variable $Z$ induces random variation into $D$. 
+    
 By using IV, we only keep the predicted values (not the resuduals) of $D$, the part of $D$ that **_correlates_** with $Z$.
 ]]
 
 .push-left[.content-box-red[
-```{tikz, DAG_FrischWaugh, echo = FALSE, out.width='29%'}
-\usetikzlibrary{shapes,decorations,arrows,calc,arrows.meta,fit,positioning,quotes}
-\tikzset{
-  -Latex,auto,node distance =1 cm and 1 cm,semithick,
-  state/.style ={ellipse, draw, minimum width = 0.7 cm},
-  point/.style = {circle, draw, inner sep=0.04cm,fill,node contents={}},
-  bidirected/.style={Latex-Latex,dashed},
-  el/.style = {inner sep=2pt, align=left, sloped}
-}
-
-\begin{tikzpicture}
-\sffamily
-\node[state, align = center] (1) at (0,0) {$D$};
-\node[state] (2) [gray, double, above = of 1] {$C$};
-\node[state] (3) [right = of 1] {$Y$};
-
-\path (1) edge (3);
-\path (2) edge [gray, dashed] (1);
-\path (2) edge [gray, dashed] (3);
-\end{tikzpicture}
-```
-
-A confounder $C$ induces omitted variable/selection bias into $D$. 
-
+  ```{tikz, DAG_FrischWaugh, echo = FALSE, out.width='29%'}
+  \usetikzlibrary{shapes,decorations,arrows,calc,arrows.meta,fit,positioning,quotes}
+  \tikzset{
+    -Latex,auto,node distance =1 cm and 1 cm,semithick,
+    state/.style ={ellipse, draw, minimum width = 0.7 cm},
+    point/.style = {circle, draw, inner sep=0.04cm,fill,node contents={}},
+    bidirected/.style={Latex-Latex,dashed},
+    el/.style = {inner sep=2pt, align=left, sloped}
+  }
+  
+  \begin{tikzpicture}
+  \sffamily
+  \node[state, align = center] (1) at (0,0) {$D$};
+  \node[state] (2) [gray, double, above = of 1] {$C$};
+  \node[state] (3) [right = of 1] {$Y$};
+  
+  \path (1) edge (3);
+  \path (2) edge [gray, dashed] (1);
+  \path (2) edge [gray, dashed] (3);
+  \end{tikzpicture}
+  ```
+  
+A confounder $C$ induces bias into $D$. 
+  
 By controlling for $C$, we only keep the residuals (not the predicted values) of $D$, the part of $D$ that **_does not correlate_** with $C$.
 ]]
 
 ---
 # Remember the exclusion restriction!
-
+  
 .left-column[
 ```{tikz, DAG_5, echo = FALSE, out.width='100%'}
 \usetikzlibrary{shapes,decorations,arrows,calc,arrows.meta,fit,positioning,quotes}
@@ -547,7 +519,7 @@ By controlling for $C$, we only keep the residuals (not the predicted values) of
   bidirected/.style={Latex-Latex,dashed},
   el/.style = {inner sep=2pt, align=left, sloped}
 }
-
+    
 \begin{tikzpicture}
 \sffamily
 \node[state, align = center] (1) at (0,0) {Education};
@@ -576,10 +548,9 @@ knitr::include_graphics('./img/Buckles1.png')
 
 ---
 # Remember the exclusion restriction!
-
+  
 .left-column[
 ```{tikz, ref.label = "DAG_5", echo = FALSE, out.width='100%'}
-
 ```
 ]
 
@@ -592,7 +563,6 @@ knitr::include_graphics('./img/Buckles2.png')
 
 ---
 # Remember the exclusion restriction!
-
 .content-box-blue[
 ```{tikz, DAG_IV2, echo = FALSE, out.width='25%'}
 \usetikzlibrary{shapes,decorations,arrows,calc,arrows.meta,fit,positioning,quotes}
@@ -614,19 +584,17 @@ knitr::include_graphics('./img/Buckles2.png')
 \path (1) [red] edge ["$\phi$"] (2);
 \path (2) edge ["$\lambda$"](4);
 \path (3) edge [dashed, red] (4);
-\path (3) edge [dashed, red] (2);
 \path (1) edge [dashed, red] (3);
 \path (3) edge [dashed, red] (1);
 \end{tikzpicture}
 ```
-
+    
 If the exclusion restriction does not hold, an instrument basically turns into a confounder. This has two implications:
-
-1. The instrument does not induce random variation but omitted variable bias (OVB) into $D$. Remember, a backdoor path is any path from $D$ to $Y$ that starts with an arrow into $D$.
-
-2. By using IV, we weigh up it's OVB by $\frac{1}{\phi}$!
+      
+1. The instrument does not induce random variation but bias into $D$. Remember, a backdoor path is any path from $D$ to $Y$ that starts with an arrow into $D$.
+    
+2. We learned from the Wald-IV perspective: By using IV, we weigh up it's bias by $\frac{1}{\phi}$!
 ]
-
 
 ---
 class: inverse middle center
@@ -671,7 +639,6 @@ layout: true
 
 .left-column[
 ```{r, echo = FALSE, out.width='85%'}
-knitr::include_graphics('https://wandanowicka.pl/wp-content/uploads/2020/08/upadek-solidarnosci.jpg')
 knitr::include_graphics('https://dzieje.pl/sites/default/files/styles/open_article_750x0_/public/201204/solidarnosc_tkk2.jpg?itok=YpPQeO8f')
 knitr::include_graphics('https://edupolis.pl/wp-content/uploads/2021/05/Solidarnosc.jpg')
 ```
@@ -710,7 +677,7 @@ knitr::include_graphics('https://edupolis.pl/wp-content/uploads/2021/05/Solidarn
 ```
 
 ```{r, echo = FALSE, out.width='85%'}
-knitr::include_graphics('https://wandanowicka.pl/wp-content/uploads/2020/08/upadek-solidarnosci.jpg')
+knitr::include_graphics('https://dzieje.pl/sites/default/files/styles/open_article_750x0_/public/201204/solidarnosc_tkk2.jpg?itok=YpPQeO8f')
 knitr::include_graphics('https://edupolis.pl/wp-content/uploads/2021/05/Solidarnosc.jpg')
 ```
 ]
@@ -734,7 +701,7 @@ knitr::include_graphics('https://static.cambridge.org/binary/version/id/urn:camb
 ```
 
 ```{r, echo = FALSE, out.width='85%'}
-knitr::include_graphics('https://wandanowicka.pl/wp-content/uploads/2020/08/upadek-solidarnosci.jpg')
+knitr::include_graphics('https://dzieje.pl/sites/default/files/styles/open_article_750x0_/public/201204/solidarnosc_tkk2.jpg?itok=YpPQeO8f')
 knitr::include_graphics('https://edupolis.pl/wp-content/uploads/2021/05/Solidarnosc.jpg')
 ```
 ]
@@ -759,7 +726,7 @@ knitr::include_graphics('https://static.cambridge.org/binary/version/id/urn:camb
 ```
 
 ```{r, echo = FALSE, out.width='85%'}
-knitr::include_graphics('https://wandanowicka.pl/wp-content/uploads/2020/08/upadek-solidarnosci.jpg')
+knitr::include_graphics('https://dzieje.pl/sites/default/files/styles/open_article_750x0_/public/201204/solidarnosc_tkk2.jpg?itok=YpPQeO8f')
 knitr::include_graphics('https://edupolis.pl/wp-content/uploads/2021/05/Solidarnosc.jpg')
 ```
 ]
@@ -797,7 +764,7 @@ knitr::include_graphics('./img/Hager1.png')
 ```
 
 ```{r, echo = FALSE, out.width='70%'}
-knitr::include_graphics('https://wandanowicka.pl/wp-content/uploads/2020/08/upadek-solidarnosci.jpg')
+knitr::include_graphics('https://dzieje.pl/sites/default/files/styles/open_article_750x0_/public/201204/solidarnosc_tkk2.jpg?itok=YpPQeO8f')
 knitr::include_graphics('https://edupolis.pl/wp-content/uploads/2021/05/Solidarnosc.jpg')
 ```
 
@@ -821,7 +788,7 @@ knitr::include_graphics('./img/Hager1.png')
 ```
 
 ```{r, echo = FALSE, out.width='70%'}
-knitr::include_graphics('https://wandanowicka.pl/wp-content/uploads/2020/08/upadek-solidarnosci.jpg')
+knitr::include_graphics('https://dzieje.pl/sites/default/files/styles/open_article_750x0_/public/201204/solidarnosc_tkk2.jpg?itok=YpPQeO8f')
 knitr::include_graphics('https://edupolis.pl/wp-content/uploads/2021/05/Solidarnosc.jpg')
 ```
 
@@ -948,7 +915,7 @@ Two-stage least squares (2SLS)
 
 ---
 # Today's general lessons 2
-
+  
 Instrument variables vs. control variables: are both used to reduce bias in statistical models. However, they work in different ways.
 
 1. An *instrument variable* is used to identify and control for unconfounded random variation in the treatment variable. 
@@ -960,7 +927,7 @@ Instrument variables vs. control variables: are both used to reduce bias in stat
 | Purpose | To identify unconfounded random variation in the treatment variable. | To control for systematically confounded variation in the treatment variable. |
 | Correlation with treatment variable | Causes treatment variable. | Causes treatment variable. |
 | Correlation with outcome variable | Must be uncorrelated with outcome variable, except through the treatment variable. | Causes outcome variable. |
-
+  
 ---
 class: inverse
 # Today's general lessons 3
@@ -979,11 +946,10 @@ class: inverse
 
 ---
 # References
-
+  
 .font80[
 ```{r ref1, results = 'asis', echo = FALSE}
 PrintBibliography(myBib)
 ```
 ]
-
 
