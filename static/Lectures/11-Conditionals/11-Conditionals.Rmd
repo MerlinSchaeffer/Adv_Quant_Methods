@@ -137,7 +137,8 @@ ols_mult_2 <- lm_robust(imwbcnt ~ cntry + eduyrs + agea,
                         data = ESS, weights = pspwght)
 
 modelsummary(list("Xeno" = ols_bi, "Xeno" = ols_mult_1, "Xeno" = ols_mult_2),
-             gof_map = c("nobs", "r.squared"), stars = TRUE)
+             gof_map = c("nobs", "r.squared"), 
+             stars = TRUE, output = "kableExtra")
 ```
 ]]
 
@@ -289,7 +290,8 @@ ols_inter <- lm_robust(imwbcnt ~ cntry*eduyrs, #<<
 
 # Report results in a regression table
 modelsummary(list("Xeno" = ols_mult_1, "Xeno" = ols_inter),
-             gof_map = c("nobs", "r.squared"), stars = TRUE)
+             gof_map = c("nobs", "r.squared"), 
+             stars = TRUE, output = "kableExtra")
 ```
 ]]
 
@@ -341,7 +343,8 @@ ols_inter2 <- lm_robust(imwbcnt ~ cntry + eduyrs + intr_trm,
                        data = ESS, weights = pspwght)
 # Report results in a regression table
 modelsummary(list("Xeno" = ols_inter, "Xeno" = ols_inter2),
-             gof_map = c("nobs", "r.squared"), stars = TRUE)
+             gof_map = c("nobs", "r.squared"), 
+             stars = TRUE, output = "kableExtra")
 ```
 ]]
 
@@ -472,7 +475,8 @@ ols_inter3 <- lm_robust(imwbcnt ~ cntry*mc_eduyrs,
                        data = ESS, weights = pspwght)
 # Report results in a regression table
 modelsummary(list("Xeno" = ols_inter, "Xeno" = ols_inter3),
-             gof_map = c("nobs", "r.squared"), stars = TRUE)
+             gof_map = c("nobs", "r.squared"), 
+             stars = TRUE, output = "kableExtra")
 ```
 ]
 
@@ -520,7 +524,8 @@ The interaction term, $\beta_3(X_{1i}\times X_{2i})$, can be interpreted in two 
 ```{r inter3, echo = FALSE}
 # Report results in a regression table
 modelsummary(list("Xeno" = ols_inter3),
-             gof_map = c("nobs", "r.squared"), stars = TRUE)
+             gof_map = c("nobs", "r.squared"), 
+             stars = TRUE, output = "kableExtra")
 ```
 ]
 
@@ -563,7 +568,8 @@ ols_inter <- lm_robust(imwbcnt ~ mc_eduyrs*gndr,
                        data = ESS, weights = pspwght)
 # Report results in a regression table
 modelsummary(list("Xeno" = ols_inter),
-             gof_map = c("nobs", "r.squared"), stars = TRUE)
+             gof_map = c("nobs", "r.squared"), 
+             stars = TRUE, output = "kableExtra")
 ```
 ]]
 .right-column[
@@ -635,7 +641,8 @@ ols_inter4 <- lm_robust(imwbcnt ~ cntry*mc_eduyrs + gndr + agea,
                        data = ESS, weights = pspwght)
 # Report results in a regression table
 modelsummary(list("Xeno" = ols_inter3, "Xeno" = ols_inter4),
-             gof_map = c("nobs", "r.squared"), stars = TRUE)
+             gof_map = c("nobs", "r.squared"), 
+             stars = TRUE, output = "kableExtra")
 ```
 ]
 
@@ -738,7 +745,7 @@ knitr::include_graphics('https://miro.medium.com/max/1280/1*8Y_EPw2a67TRRos3b24Y
 
 .push-right[
 ```{r, echo = FALSE, out.width='96%'}
-knitr::include_graphics('https://almayasabdam.com/wp-content/uploads/2020/09/1496441134_communists.png')
+knitr::include_graphics('https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/Marx_-_Engels_-_Lenin_-_Stalin.svg/984px-Marx_-_Engels_-_Lenin_-_Stalin.svg.png')
 ```
 ]
 
@@ -763,14 +770,17 @@ pacman::p_load(
 
 # 1. Download Freedom House data for all countries since 1972,
 Dat_citi_rights <- download_fh(verbose = FALSE) %>% 
-   rename(country = fh_country, # rename country ID,
-          citizen_rights = fh_total_reversed, # rename Citizenship rights indicator,
-          date = year) %>% # rename year,
-   select(country, date, citizen_rights) # Keep only these 3 variables.
+  rename(country = fh_country, # rename country ID,
+         citizen_rights = fh_total_reversed, # rename Citizenship rights indicator,
+         date = year) %>% # rename year,
+  mutate(country = case_when( 
+    country == "Vietnam" ~ "Viet Nam", # Rename Vietnam
+    TRUE ~ country)) %>% # Leave all others as they are
+  select(country, date, citizen_rights) # Keep only these 3 variables.
 
 # 2. Download poverty data: <US$2.15 per day
 Dat_poverty <- wb_data("SI.POV.DDAY", 
-                        start_date = 2002, end_date = 2022) %>% #<<
+                        start_date = 1972, end_date = 2024) %>% #<<
    rename(poverty = SI.POV.DDAY) %>% # rename poverty variable,
    select(country, date, poverty) %>% # Keep only 3 variables
    drop_na(poverty) %>% # Drop cases with missing data,
@@ -782,37 +792,34 @@ Dat_poverty <- wb_data("SI.POV.DDAY",
 Dat <- inner_join(Dat_poverty, Dat_citi_rights, by = c("country", "date"))
 
 # 4. Code socialism index
-Dat <- Dat %>% mutate(socialist = case_when( # Years socialist minus years since,
-  country == "China" ~ date - 1949,
-  country == "Vietnam" ~ date - 1945,
-  country == "Algeria" ~ date - 1962,
-  str_detect(country,"Portugal|Bangladesh") ~ date - 1972,
-  country == "Guinea-Bissau" ~ date - 1973,
-  country == "India" ~ date - 1976,
-  country == "Nicaragua" ~ date - 1979,
-  country == "Sri Lanka" ~ date - 1978,
-  country == "Tanzania" ~ date - 1964,
-  country == "Albania" ~ (1992 - 1944) - (date - 1992),
-  str_detect(country, "Angola|Cabo Verde|Madagascar") ~ (1992 - 1975) - (date - 1992),
-  str_detect(country,"Belarus|Bulgaria") ~ (1990 - 1946) - (date - 1990),
-  str_detect(country, "Benin|Mozambique") ~ (1990 - 1975) - (date - 1990),
-  country == "Chad" ~ (1975 - 1962) - (date - 1975), country == "Congo, Rep." ~ (1992 - 1970) - (date - 1992),
-  country == "Czech Republic" ~ (1990 - 1948) - (date - 1990), country == "Djibouti" ~ (1992 - 1981) - (date - 1992),
-  country == "Ethiopia" ~ (1991 - 1974) - (date - 1991), country == "Ghana" ~ (1966 - 1960) - (date - 1966),
-  country == "Guinea" ~ (1984 - 1958) - (date - 1984), country == "Hungary" ~ (1989 - 1949) - (date - 1989),
-  country == "Iraq" ~ (2005 - 1958) - (date - 2005), country == "Mali" ~ (1991 - 1960) - (date - 1991),
-  country == "Mauritania" ~ (1978 - 1961) - (date - 1978), country == "Mongolia" ~ (1992 - 1924) - (date - 1992),
-  country == "Myanmar" ~ (1988 - 1962) - (date - 1988), country == "Poland" ~ (1989 - 1945) - (date - 1989),
-  country == "Romania" ~ (1989 - 1947) - (date - 1989), country == "Russian Federation" ~ (1991 - 1922) - (date - 1991),
-  country == "Seychelles" ~ (1991 - 1977) - (date - 1991), country == "Senegal" ~ (1981 - 1960) - (date - 1981),
-  country == "Sierra Leone" ~ (1991 - 1978) - (date - 1991), country == "Somalia" ~ (1991 - 1969) - (date - 1991),
-  country == "Sudan" ~ (1985 - 1969) - (date - 1985), country == "Syria" ~ (2012 - 1963) - (date - 2012),
-  country == "Tunisia" ~ (1988 - 1964) - (date - 1988), country == "Ukraine" ~ (1991 - 1919) - (date - 1991),
-  country == "Yemen, Rep." ~ (1991 - 1967) - (date - 1991), country == "Zambia" ~ (1991 - 1973) - (date - 1991),
-  str_detect(country,"Slovenia|Croatia|Serbia|Montenegro|Bosnia and Herzegovina|North Macedonia|Kosovo") ~ (1992 - 1943) - (date - 1992),
-  TRUE ~ 0),
-  socialist = case_when( # Min. 5 years given socialist history,
-    (socialist < 5 & socialist > 0) | socialist < 0 ~ 5,
+Dat <- Dat %>% mutate(socialist = case_when( # Years socialist minus years since not socialist anymore,
+    country == "China" ~ date - 1949,
+    country == "Viet Nam" ~ date - 1945,
+    country == "Algeria" ~ date - 1962,
+    str_detect(country,"Portugal|Bangladesh") ~ date - 1972,
+    country == "Guinea-Bissau" ~ date - 1973, country == "India" ~ date - 1976, 
+    country == "Nicaragua" ~ date - 1979, country == "Sri Lanka" ~ date - 1978,
+    country == "Tanzania" ~ date - 1964, country == "Albania" ~ (1992 - 1944) - (date - 1992),
+    str_detect(country, "Angola|Cabo Verde|Madagascar") ~ (1992 - 1975) - (date - 1992),
+    str_detect(country,"Belarus|Bulgaria") ~ (1990 - 1946) - (date - 1990),
+    str_detect(country, "Benin|Mozambique") ~ (1990 - 1975) - (date - 1990),
+    country == "Chad" ~ (1975 - 1962) - (date - 1975), country == "Congo, Rep." ~ (1992 - 1970) - (date - 1992),
+    country == "Czech Republic" ~ (1990 - 1948) - (date - 1990), country == "Djibouti" ~ (1992 - 1981) - (date - 1992),
+    country == "Ethiopia" ~ (1991 - 1974) - (date - 1991), country == "Ghana" ~ (1966 - 1960) - (date - 1966),
+    country == "Guinea" ~ (1984 - 1958) - (date - 1984), country == "Hungary" ~ (1989 - 1949) - (date - 1989),
+    country == "Iraq" ~ (2005 - 1958) - (date - 2005), country == "Mali" ~ (1991 - 1960) - (date - 1991),
+    country == "Mauritania" ~ (1978 - 1961) - (date - 1978), country == "Mongolia" ~ (1992 - 1924) - (date - 1992),
+    country == "Myanmar" ~ (1988 - 1962) - (date - 1988), country == "Poland" ~ (1989 - 1945) - (date - 1989),
+    country == "Romania" ~ (1989 - 1947) - (date - 1989), country == "Russian Federation" ~ (1991 - 1922) - (date - 1991),
+    country == "Seychelles" ~ (1991 - 1977) - (date - 1991), country == "Senegal" ~ (1981 - 1960) - (date - 1981),
+    country == "Sierra Leone" ~ (1991 - 1978) - (date - 1991), country == "Somalia" ~ (1991 - 1969) - (date - 1991),
+    country == "Sudan" ~ (1985 - 1969) - (date - 1985), country == "Syria" ~ (2012 - 1963) - (date - 2012),
+    country == "Tunisia" ~ (1988 - 1964) - (date - 1988), country == "Ukraine" ~ (1991 - 1919) - (date - 1991),
+    country == "Yemen, Rep." ~ (1991 - 1967) - (date - 1991), country == "Zambia" ~ (1991 - 1973) - (date - 1991),
+    str_detect(country,"Slovenia|Croatia|Serbia|Montenegro|Bosnia and Herzegovina|North Macedonia|Kosovo") ~ (1992 - 1943) - (date - 1992),
+    TRUE ~ 0),
+  socialist = case_when( # Min. 5 years given any socialist history,
+    socialist != 0 & socialist < 5 ~ 5,
     TRUE ~ socialist)) %>% drop_na() # Drop countries with missing values.
 ```
 
@@ -873,7 +880,8 @@ ols_add <- lm_robust(poverty ~ mc_socialist + mc_citizen_rights, data = Dat)
 
 # Report results in a regression table
 modelsummary(list("Poverty" = ols_add),
-             gof_map = c("nobs", "r.squared"), stars = TRUE)
+             gof_map = c("nobs", "r.squared"), 
+             stars = TRUE, output = "kableExtra")
 ```
 ]
 .push-right[
@@ -895,7 +903,8 @@ ols_inter <- lm_robust(poverty ~ mc_socialist*mc_citizen_rights, data = Dat)
 
 # Report results in a regression table
 modelsummary(list("Poverty" = ols_add, "Poverty" = ols_inter),
-             gof_map = c("nobs", "r.squared"), stars = TRUE)
+             gof_map = c("nobs", "r.squared"), 
+             stars = TRUE, output = "kableExtra")
 
 # The 3-D plot
 library(rockchalk)
