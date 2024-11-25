@@ -52,7 +52,7 @@ ESS contains rich background information about the respondents, which you can us
 
 **2.4 Weights**
 
-Remember to use the post-stratification weights in all your analyses.
+Remember to use the post-stratification weights in all your analyses. The post-stratification weights are called "pspwght".
 
 **2.5 Requirements for the empirical analysis:**
 
