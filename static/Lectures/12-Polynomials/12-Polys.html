@@ -4,7 +4,7 @@
     <title>Polynomials and transformations</title>
     <meta charset="utf-8" />
     <meta name="author" content="Merlin Schaeffer  Department of Sociology" />
-    <meta name="date" content="2023-12-06" />
+    <meta name="date" content="2024-11-25" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
     <script src="libs/tile-view/tile-view.js"></script>
@@ -29,7 +29,7 @@ class: center, middle, inverse, title-slide
 ### Merlin Schaeffer<br> Department of Sociology
 ]
 .date[
-### 2023-12-06
+### 2024-11-25
 ]
 
 ---
@@ -55,6 +55,7 @@ Application of the day: Life expectancy at birth!
   + `\(\log_2\)`
 
 ---
+layout: true
 class: inverse 
 # Life expectancy at birth
 
@@ -62,10 +63,19 @@ class: inverse
 &lt;img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/The_newborn_baby_in_men.jpg/1920px-The_newborn_baby_in_men.jpg" width="65%" style="display: block; margin: auto;" /&gt;&lt;img src="https://ychef.files.bbci.co.uk/976x549/p086k2k4.jpg" width="65%" style="display: block; margin: auto;" /&gt;
 ]
 
+---
+
 .push-right[
 &lt;iframe src="https://ourworldindata.org/grapher/life-expectancy?tab=chart&amp;time=1770..2019&amp;country=Africa~Asia~Europe~OWID_WRL~Americas~Oceania" loading="lazy" style="width: 100%; height: 500px; border: 0px none;"&gt;&lt;/iframe&gt;
 ]
+
 ---
+
+.push-right[
+&lt;iframe src="https://ourworldindata.org/grapher/life-expectancy-unwpp?tab=chart&amp;country=Europe+%28UN%29~Africa+%28UN%29~Asia+%28UN%29~Oceania+%28UN%29~Northern+America+%28UN%29~Latin+America+and+the+Caribbean+%28UN%29" loading="lazy" style="width: 100%; height: 500px; border: 0px none;" allow="web-share; clipboard-write"&gt;&lt;/iframe&gt;
+]
+---
+layout: false
 class: inverse 
 # Is life expectacy simply a (linear) function of&lt;br&gt; how much money we spend on health?
 
@@ -77,7 +87,7 @@ class: inverse
 .panelset[
 .panel[.panel-name[Woldbank health data]
 
-```r
+``` r
 pacman::p_load(
   tidyverse, # Data manipulation,
   ggplot2, # beautiful figures,
@@ -91,7 +101,7 @@ pacman::p_load(
 Dat_life &lt;- wb_data(
   # Download Life expectancy and healthcare expenditures data.
 * c("SP.DYN.LE00.IN", "SH.XPD.CHEX.PP.CD"),
-  start_date = 2002, end_date = 2023) %&gt;%
+  start_date = 2000, end_date = 2024) %&gt;%
 * rename(LifeExpect = SP.DYN.LE00.IN, # rename health variables,
 *        HealthExp = SH.XPD.CHEX.PP.CD) %&gt;%
   select(country, date, LifeExpect, HealthExp) %&gt;% # Keep only 4 variables
@@ -100,11 +110,14 @@ Dat_life &lt;- wb_data(
 ]
 .panel[.panel-name[Join citizenship rights]
 
-```r
+``` r
 Dat_citi_rights &lt;- download_fh(verbose = FALSE) %&gt;% # Download Freedom House data for all countries since 1972,
   rename(country = fh_country, # rename variables,
          citizen_rights = fh_total_reversed,
          date = year) %&gt;%
+  mutate(country = case_when( 
+    country == "Vietnam" ~ "Viet Nam", # Rename Vietnam
+    TRUE ~ country)) %&gt;% # Leave all others as they are
   # Keep only 3 variables.
   select(country, date, citizen_rights)
 
@@ -115,10 +128,10 @@ Dat &lt;- inner_join(Dat_life, Dat_citi_rights, by = c("country", "date"))
 .panel[.panel-name[Add socialism]
 .font60[
 
-```r
+``` r
 Dat &lt;- Dat %&gt;% mutate(socialist = case_when( # Years socialist minus years since,
   country == "China" ~ date - 1949,
-  country == "Vietnam" ~ date - 1945,
+  country == "Viet Nam" ~ date - 1945,
   country == "Algeria" ~ date - 1962,
   str_detect(country,"Portugal|Bangladesh") ~ date - 1972,
   country == "Guinea-Bissau" ~ date - 1973,
@@ -152,14 +165,14 @@ Dat &lt;- Dat %&gt;% mutate(socialist = case_when( # Years socialist minus years
 ]]
 .panel[.panel-name[The resulting data]
 
-```r
+``` r
 Dat
-# # A tibble: 3,142 × 6
+# # A tibble: 3,654 × 6
 #    country      date LifeExpect HealthExp citizen_rights socialist
 #    &lt;chr&gt;       &lt;dbl&gt;      &lt;dbl&gt;     &lt;dbl&gt;          &lt;dbl&gt;     &lt;dbl&gt;
-#  1 Afghanistan  2002       56.5      87.5              2         0
-#  2 Afghanistan  2003       57.3      86.2              2         0
-#  3 Afghanistan  2004       57.9      93.9              3         0
+#  1 Afghanistan  2002       56.5      87.4              2         0
+#  2 Afghanistan  2003       57.3      86.3              2         0
+#  3 Afghanistan  2004       57.9      94.0              3         0
 #  4 Afghanistan  2005       58.4     106.               4         0
 #  5 Afghanistan  2006       58.7     118.               4         0
 #  6 Afghanistan  2007       59.1     112.               4         0
@@ -167,7 +180,7 @@ Dat
 #  8 Afghanistan  2009       60.4     154.               2         0
 #  9 Afghanistan  2010       60.9     149.               2         0
 # 10 Afghanistan  2011       61.4     147.               2         0
-# # ℹ 3,132 more rows
+# # ℹ 3,644 more rows
 ```
 ]]
 
@@ -181,18 +194,22 @@ class: clear
 ]
 .panel[.panel-name[Code]
 
-```r
-ggplot(data = Dat %&gt;% 
-         filter(country == "Denmark" | country == "Switzerland" | country == "Germany" | country == "Sweden"), 
-       aes(y = LifeExpect, x = HealthExp, color = country)) +
-  geom_line(alpha = 0.5) +
-  geom_text(aes(label = date), size = 2.3) +
-  guides(color = FALSE) +
-  scale_x_continuous(expand=c(0, 1300)) +
-  geom_dl(aes(label = country), method = list(dl.combine("last.points"))) +
-  labs(y = "Life expectacy at birth",
-       x = "Health expenditure per capita in $") +
-  theme_minimal()
+``` r
+ggplot(data = Dat %&gt;%  # Start of the ggplot function, specifying the data to be used
+         # Filter the data to include only these four countries
+         filter(country == "Denmark" | country == "Switzerland" | country == "Germany" | country == "Sweden"),  
+       # Define the aesthetics: LifeExpect on y-axis, HealthExp on x-axis, color by country
+       aes(y = LifeExpect, x = HealthExp, color = country)) +  
+  geom_line(alpha = 0.5) +  # Add lines to the plot with a transparency of 0.5
+  # Add text labels to the plot, using the 'date' column for labels, with a size of 2.3
+  geom_text(aes(label = date), size = 2.3) +  
+  guides(color = FALSE) +  # Remove the legend for color
+  scale_x_continuous(expand=c(0, 1300)) +  # Adjust the x-axis scale, adding 1300 units of space to the right 
+  # Add direct labels to the lines, placing them at the last points of each line
+  geom_dl(aes(label = country), method = list(dl.combine("last.points"))) + 
+  labs(y = "Life expectacy at birth",  # Set the y-axis label
+       x = "Health expenditure per capita in $") +  # Set the x-axis label
+  theme_minimal()  # Use a minimal theme for the plot
 ```
 ]]
 
@@ -207,7 +224,7 @@ class: inverse center middle
 .push-left[
 .font80[
 
-```r
+``` r
 ols_1 &lt;- lm_robust(
   LifeExpect ~ date + socialist*citizen_rights, data = Dat,
 * clusters = country) # Note that we need to specify this argument,
@@ -215,22 +232,21 @@ ols_1 &lt;- lm_robust(
 *# They are repeated observations of the same countries.
 
 # 3D plot of interaction. Controls set to their mean.
-plotPlane(ols_1, "citizen_rights", "socialist", 
-          theta = 35, phi = 20)
+plotPlane(ols_1, "citizen_rights", "socialist", theta = 35, phi = 20)
 ```
 
-&lt;img src="12-Polys_files/figure-html/unnamed-chunk-5-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+&lt;img src="12-Polys_files/figure-html/unnamed-chunk-5-1.png" width="50%" style="display: block; margin: auto;" /&gt;
+
+``` r
+modelsummary(list("Life Exp." = ols_1),
+             gof_map = c("nobs", "r.squared"), 
+             stars = TRUE, output = "kableExtra")
+```
 ]]
 
 .push-right[
 .font80[
-
-```r
-modelsummary(list("Life Exp." = ols_1),
-             gof_map = c("nobs", "r.squared"), stars = TRUE)
-```
-
-&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+&lt;table style="NAborder-bottom: 0; color: black; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
  &lt;thead&gt;
   &lt;tr&gt;
    &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
@@ -240,51 +256,51 @@ modelsummary(list("Life Exp." = ols_1),
 &lt;tbody&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; −552.190*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −498.204*** &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (44.498) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (40.195) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; date &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.305*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.278*** &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (0.022) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.020) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; socialist &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.145+ &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.161** &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (0.082) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.057) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; citizen_rights &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 1.127*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 1.138*** &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (0.169) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.168) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; socialist × citizen_rights &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; −0.015 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −0.017* &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.010) &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.008) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 3142 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 3654 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.248 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.252 &lt;/td&gt;
   &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
@@ -305,12 +321,7 @@ class: inverse center middle
 .push-left[
 .font80[
 
-```r
-*ols_2 &lt;- lm_robust(LifeExpect ~ I(HealthExp / 1000) + # I() allows to transform x
-*                  # within model. 1 unit increase = $1000
-                   date + socialist*citizen_rights, data = Dat, clusters = country)
-```
-&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+&lt;table style="NAborder-bottom: 0; color: black; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
  &lt;thead&gt;
   &lt;tr&gt;
    &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
@@ -320,39 +331,39 @@ class: inverse center middle
 &lt;tbody&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; −195.702** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −152.792** &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (61.099) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (57.881) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; I(HealthExp/1000) &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 3.177*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 3.097*** &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (0.468) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.494) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; date &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.128*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.107*** &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (0.030) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.029) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; socialist &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.128* &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.145*** &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (0.064) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.043) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; citizen_rights &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.497** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.538*** &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
@@ -360,19 +371,19 @@ class: inverse center middle
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; socialist × citizen_rights &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; −0.007 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −0.009+ &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.007) &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.005) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 3142 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 3654 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.481 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.471 &lt;/td&gt;
   &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
@@ -386,7 +397,15 @@ class: inverse center middle
 
 .push-right[
 .font90[
-&lt;img src="12-Polys_files/figure-html/LifeExp3-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+
+``` r
+ols_2 &lt;- lm_robust(
+* # I() transforms x
+* LifeExpect ~ I(HealthExp / 1000) + # 1 unit increase = $1000
+    date + socialist*citizen_rights, 
+  data = Dat, clusters = country)
+```
+&lt;img src="12-Polys_files/figure-html/LifeExp3-1.png" width="90%" style="display: block; margin: auto;" /&gt;
 
 .center[.alert[This clearly violates OLS' linearity assumption!]]
 ]]
@@ -395,7 +414,7 @@ class: inverse center middle
 # Health expenditures .font70[The goal]
 
 .left-column[
-- We need a non-linear model:
+We need a non-linear model:
   + Here: An initial steep increase, which progressively flattens out.]
 .right-column[
 &lt;img src="12-Polys_files/figure-html/LifeExp4-1.png" width="90%" style="display: block; margin: auto;" /&gt;
@@ -404,11 +423,11 @@ class: inverse center middle
 ---
 class: inverse center middle
 
-# Step 1 &lt;br&gt; &lt;br&gt; .font80[Get a first impression using LOESS (locally estimated scatterplot smoothing)]
+# Step 1 &lt;br&gt; &lt;br&gt; .font80[Get a first impression using LOESS &lt;br&gt; (locally estimated scatterplot smoothing)]
 
 ---
 class: clear
-# LOESS (locally estimated scatterplot smoothing)
+# LOESS .font60[(locally estimated scatterplot smoothing)]
 
 .left-column[
 - LOESS is basically a "local" regression for every observation plus the (e.g. 6) nearest observations to the left and right.
@@ -419,29 +438,34 @@ class: clear
 .right-column[
 .panelset[
 .panel[.panel-name[LOESS fit]
-&lt;img src="12-Polys_files/figure-html/LifeExp4a-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+&lt;img src="12-Polys_files/figure-html/LifeExp4a-1.png" width="80%" style="display: block; margin: auto;" /&gt;
 ]
 .panel[.panel-name[Code]
 
-```r
-ggplot(data = Dat, aes(y = LifeExpect, x = HealthExp)) +
-  geom_point(aes(color = country), alpha = 0.5) +
-  geom_line(aes(color = country), alpha = 0.3) +
-  geom_dl(data = Dat %&gt;% filter(country == "Switzerland" | country == "Denmark"), 
-          aes(label = country, color = country), method = list(dl.combine("last.points"))) +
-* # By default geom_smooth() estimates LOESS!
-* geom_smooth(color = "black") +
-  labs(y = "Life expectacy at birth",
-       x = "Health expenditure per capita in $") +
-  theme_minimal() +
-  guides(color = FALSE)
+``` r
+# Start of the ggplot function, setting LifeExpect on the y-axis and HealthExp on the x-axis
+ggplot(data = Dat, aes(y = LifeExpect, x = HealthExp)) +  
+  # Add points to the plot, colored by country
+  geom_point(aes(color = country), alpha = 0.5) +  
+  # Add lines to the plot, colored by country
+  geom_line(aes(color = country), alpha = 0.3) +  
+  # Add direct labels, but only for Switzerland and Denmark after filtering the data
+  geom_dl(data = Dat %&gt;% filter(country == "Switzerland" | country == "Denmark"),  
+          # Label by country and place labels at the last points of the lines
+          aes(label = country, color = country), method = list(dl.combine("last.points"))) +  
+  # Add a LOESS to the plot to show the overall trend, colored black.
+  geom_smooth(color = "black") + 
+  labs(y = "Life expectacy at birth",  # Set the y-axis label
+       x = "Health expenditure per capita in $") +  # Set the x-axis label
+  theme_minimal() +  # Use a minimal theme for the plot
+  guides(color = FALSE)  # Remove the legend for color
 ```
 ]]]
 
 ---
 class: inverse center middle
 
-# Modeling non-linear relations &lt;br&gt;&lt;br&gt; Possibility 1:&lt;br&gt; *Polynomials*
+# Step 2: Modeling non-linear relations &lt;br&gt;&lt;br&gt; Possibility 1:&lt;br&gt; *Polynomials*
 
 ---
 layout: true
@@ -450,13 +474,7 @@ layout: true
 .push-left[
 .font80[
 
-```r
-ols_3 &lt;- lm_robust(
-  LifeExpect ~ I(HealthExp/1000) + 
-*   I((HealthExp/1000)^2) +
-    date + socialist*citizen_rights, data = Dat, clusters = country)
-```
-&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+&lt;table style="NAborder-bottom: 0; color: black; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
  &lt;thead&gt;
   &lt;tr&gt;
    &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
@@ -466,67 +484,67 @@ ols_3 &lt;- lm_robust(
 &lt;tbody&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; −194.254*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −136.291** &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (49.957) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (47.578) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; I(HealthExp/1000) &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 8.167*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 7.753*** &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (1.006) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (1.076) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; I((HealthExp/1000)^2) &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; −0.835** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −0.748*** &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (0.197) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.206) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; date &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.127*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.098*** &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (0.025) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.023) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; socialist &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.148* &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.160*** &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (0.046) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.033) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; citizen_rights &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.333** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.363** &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (0.125) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.122) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; socialist × citizen_rights &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; −0.010+ &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −0.012** &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.005) &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.004) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 3142 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 3654 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.610 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.595 &lt;/td&gt;
   &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
@@ -539,8 +557,15 @@ ols_3 &lt;- lm_robust(
 ---
 
 .push-right[
-- We need a non-linear model:
-  
+
+``` r
+ols_3 &lt;- lm_robust(
+  LifeExpect ~ I(HealthExp/1000) + 
+*   I((HealthExp/1000)^2) +
+    date + socialist*citizen_rights, 
+  data = Dat, clusters = country)
+```
+
 `$$Y_{i} = \alpha + \beta_{1}X_{1} + \beta_{2}X_{1}^2 + \ldots + e_{i}$$`
 .content-box-green[.center[
 Do you see any similarity to the logic of an interaction term?
@@ -554,10 +579,10 @@ Do you see any similarity to the logic of an interaction term?
 
 .center[Interpretation:]
 
-`\(\beta_{\text{HealthExp}}\)`: At $0, a $1000 increase in `HealthExp` is associated with an increase in life expectancy at birth of 8.167 years.
+`\(\beta_{\text{HealthExp}}\)`: At $0, a $1000 increase in `HealthExp` is associated with an increase in life expectancy at birth of 7.753 years.
 
-`\(\beta_{\text{HealthExp}^2}\)`: With every $1000 increase in `HealthExp`, this association declines by -0.835 years.
- - For example, the increase from $1000 to $2000 is associated with an increase in life expectancy at birth of `\(8.167 + ( 2 \times -0.835 ) = 6.497\)` years.
+`\(\beta_{\text{HealthExp}^2}\)`: With every $1000 increase in `HealthExp`, this association declines by -0.748 years.
+ - For example, the increase from $1000 to $2000 is associated with an increase in life expectancy at birth of `\(7.753 + ( 2 \times -0.748 ) = 6.258\)` years.
 ]
 
 ---
@@ -567,12 +592,12 @@ layout: true
 .push-left[
 .font80[
 
-```r
-*ols_4 &lt;- lm_robust( # Use poly() is better to specify polynomials
-* LifeExpect ~ poly(I(HealthExp/1000), degree = 2, raw = TRUE) +
+``` r
+ols_4 &lt;- lm_robust( LifeExpect ~ 
+* poly(I(HealthExp/1000), degree = 2, raw = TRUE) + # Better use poly()
     date + socialist*citizen_rights, data = Dat, clusters = country)
 ```
-&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+&lt;table style="NAborder-bottom: 0; color: black; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
  &lt;thead&gt;
   &lt;tr&gt;
    &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
@@ -582,67 +607,67 @@ layout: true
 &lt;tbody&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; −194.254*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −136.291** &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (49.957) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (47.578) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; poly(I(HealthExp/1000), degree = 2, raw = TRUE)1 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 8.167*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 7.753*** &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (1.006) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (1.076) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; poly(I(HealthExp/1000), degree = 2, raw = TRUE)2 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; −0.835*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −0.748*** &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (0.197) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.206) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; date &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.127*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.098*** &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (0.025) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.023) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; socialist &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.148** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.160*** &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (0.046) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.033) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; citizen_rights &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.333** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.363** &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (0.125) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.122) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; socialist × citizen_rights &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; −0.010* &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −0.012** &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.005) &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.004) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 3142 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 3654 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.610 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.595 &lt;/td&gt;
   &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
@@ -660,10 +685,10 @@ layout: true
 
 .center[Interpretation:]
 
-`\(\beta_{\text{HealthExp}}\)`: At $0, a $1000 increase in `HealthExp` is associated with an increase in life expectancy at birth of 8.167 years.
+`\(\beta_{\text{HealthExp}}\)`: At $0, a $1000 increase in `HealthExp` is associated with an increase in life expectancy at birth of 7.753 years.
 
-`\(\beta_{\text{HealthExp}^2}\)`: With every $1000 increase in `HealthExp`, this association declines by -0.835 years.
- - For example, the increase from $1000 to $2000 is associated with an increase in life expectancy at birth of `\(8.167 + ( 2 \times -0.835 ) = 6.497\)` years.
+`\(\beta_{\text{HealthExp}^2}\)`: With every $1000 increase in `HealthExp`, this association declines by -0.748 years.
+ - For example, the increase from $1000 to $2000 is associated with an increase in life expectancy at birth of `\(7.753 + ( 2 \times -0.748 ) = 6.258\)` years.
 
 .center[.alert[This is complex; so plot it!]]
 ]
@@ -675,79 +700,82 @@ layout: true
 .panel[.panel-name[Fictional data]
 .font90[
 
-```r
+``` r
 (fict_dat &lt;- tibble( # 1. Make fictional data
   # Realistic variation in x: Min to max
   HealthExp = min(Dat$HealthExp):max(Dat$HealthExp), 
   # Hold other variables constant.
   socialist = 0, # Non-socialist
   citizen_rights = 12, # Max democracy
-  date = 2019)) # most recent date
-# # A tibble: 11,684 × 4
+  date = 2020)) # most recent date
+# # A tibble: 12,464 × 4
 #    HealthExp socialist citizen_rights  date
 #        &lt;dbl&gt;     &lt;dbl&gt;          &lt;dbl&gt; &lt;dbl&gt;
-#  1      19.1         0             12  2019
-#  2      20.1         0             12  2019
-#  3      21.1         0             12  2019
-#  4      22.1         0             12  2019
-#  5      23.1         0             12  2019
-#  6      24.1         0             12  2019
-#  7      25.1         0             12  2019
-#  8      26.1         0             12  2019
-#  9      27.1         0             12  2019
-# 10      28.1         0             12  2019
-# # ℹ 11,674 more rows
+#  1      10.4         0             12  2020
+#  2      11.4         0             12  2020
+#  3      12.4         0             12  2020
+#  4      13.4         0             12  2020
+#  5      14.4         0             12  2020
+#  6      15.4         0             12  2020
+#  7      16.4         0             12  2020
+#  8      17.4         0             12  2020
+#  9      18.4         0             12  2020
+# 10      19.4         0             12  2020
+# # ℹ 12,454 more rows
 ```
 ]]
 .panel[.panel-name[Predict]
 .font90[
 
-```r
+``` r
 (fict_dat &lt;- predict( # 2. Add predctions based on the model
   ols_4, newdata = fict_dat,
   interval = "confidence", level = 0.95)$fit %&gt;%
    as_tibble() %&gt;% # Turn into a tibble, then
    bind_cols(fict_dat, .)) # Add to the synthetic data.
-# # A tibble: 11,684 × 7
+# # A tibble: 12,464 × 7
 #    HealthExp socialist citizen_rights  date   fit   lwr   upr
 #        &lt;dbl&gt;     &lt;dbl&gt;          &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
-#  1      19.1         0             12  2019  65.8  63.7  67.9
-#  2      20.1         0             12  2019  65.8  63.7  67.9
-#  3      21.1         0             12  2019  65.8  63.7  67.9
-#  4      22.1         0             12  2019  65.8  63.7  67.9
-#  5      23.1         0             12  2019  65.8  63.7  67.9
-#  6      24.1         0             12  2019  65.8  63.7  67.9
-#  7      25.1         0             12  2019  65.8  63.7  67.9
-#  8      26.1         0             12  2019  65.8  63.7  67.9
-#  9      27.1         0             12  2019  65.8  63.7  67.9
-# 10      28.1         0             12  2019  65.8  63.7  67.9
-# # ℹ 11,674 more rows
+#  1      10.4         0             12  2020  65.8  63.6  67.9
+#  2      11.4         0             12  2020  65.8  63.6  67.9
+#  3      12.4         0             12  2020  65.8  63.6  67.9
+#  4      13.4         0             12  2020  65.8  63.6  67.9
+#  5      14.4         0             12  2020  65.8  63.6  67.9
+#  6      15.4         0             12  2020  65.8  63.6  67.9
+#  7      16.4         0             12  2020  65.8  63.7  68.0
+#  8      17.4         0             12  2020  65.8  63.7  68.0
+#  9      18.4         0             12  2020  65.8  63.7  68.0
+# 10      19.4         0             12  2020  65.8  63.7  68.0
+# # ℹ 12,454 more rows
 ```
 ]]
 .panel[.panel-name[Plot]
+.font70[
 &lt;img src="12-Polys_files/figure-html/predictions2-1.png" width="100%" style="display: block; margin: auto;" /&gt;
-]
+]]
 .panel[.panel-name[Plot code]
 .font90[
 
-```r
+``` r
 # 3. plot the predictions
 ggplot(data = fict_dat, aes(y = fit, x = HealthExp)) +
-  geom_ribbon(aes(ymin = lwr, ymax = upr), alpha = 0.5) +
-  geom_line() +
-  geom_text(data = Dat %&gt;% # Add some exemplary countries
-              filter(date == 2019 &amp; 
-                       (country == "Mali" | country == "Nepal" |
-                          country == "Morocco" | country == "Mexico" | 
-                          country == "Poland" | country == "Japan" |
-                          country == "Denmark" | country == "Switzerland" |
-                          country == "United States")), 
-            aes(y = LifeExpect, HealthExp, label = country)) +
-  labs(title = "Predictions based on multiple OLS",
-       x = "By Healthcare Expenditures in $
-    (Socialism, Citizenship rights, and time held constant)",
-    y = "Predicted Life expectancy at birth") +
-  theme_minimal()
+  # Add a ribbon for uncertainty (likely confidence intervals)
+  geom_ribbon(aes(ymin = lwr, ymax = upr), alpha = 0.5) +  
+  geom_line() +  # Add a line for the fitted values
+  geom_text(
+    data = Dat %&gt;%  # Use original 'Dat' data for labeling
+      filter(date == 2020 &amp;  # Filter for the year 2022 and specific countries
+               (country == "Mali" | country == "Nepal" | 
+                  country == "Morocco" | country == "Mexico" | 
+                  country == "Poland" | country == "Japan" | 
+                  country == "Denmark" | country == "Switzerland" |
+                  country == "United States")), 
+    # Position labels using actual life expectancy and health expenditure
+    aes(y = LifeExpect, HealthExp, label = country)) + 
+  labs(title = "Predictions based on multiple OLS",  # Set the plot title
+       x = "By Healthcare Expenditures in $ \n(Socialism, Citizenship rights, and time held constant)",
+       y = "Predicted Life expectancy at birth") +  # Set y-axis label
+  theme_minimal()  # Use a minimal theme
 ```
 ]]]]
 
@@ -760,12 +788,12 @@ class: clear
 .push-left[
 .font80[
 
-```r
-ols_5 &lt;- lm_robust(
-* LifeExpect ~ poly(I(HealthExp/1000), degree = 4, raw = TRUE) +
-    date + socialist*citizen_rights, data = Dat, clusters = country)
+``` r
+ols_5 &lt;- lm_robust(LifeExpect ~ 
+*       poly(I(HealthExp/1000), degree = 4, raw = TRUE) +
+        date + socialist*citizen_rights, data = Dat, clusters = country)
 ```
-&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+&lt;table style="NAborder-bottom: 0; color: black; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
  &lt;thead&gt;
   &lt;tr&gt;
    &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
@@ -775,83 +803,83 @@ ols_5 &lt;- lm_robust(
 &lt;tbody&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; −136.416* &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −81.520 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (54.366) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (51.201) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; poly(I(HealthExp/1000), degree = 4, raw = TRUE)1 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 17.442*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 17.051*** &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (1.799) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (1.706) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; poly(I(HealthExp/1000), degree = 4, raw = TRUE)2 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; −5.452*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −5.185*** &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (1.016) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.938) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; poly(I(HealthExp/1000), degree = 4, raw = TRUE)3 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.691*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.631*** &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (0.196) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.175) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; poly(I(HealthExp/1000), degree = 4, raw = TRUE)4 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; −0.030* &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −0.026** &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (0.012) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.010) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; date &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.097*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.069** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.025) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; socialist &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.164*** &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
    &lt;td style="text-align:center;"&gt; (0.027) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; socialist &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.148*** &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (0.037) &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; citizen_rights &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.278* &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.302** &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (0.119) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.113) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; socialist × citizen_rights &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; −0.012** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −0.014*** &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.004) &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.003) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 3142 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 3654 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.670 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.660 &lt;/td&gt;
   &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
@@ -868,7 +896,7 @@ ols_5 &lt;- lm_robust(
 .panel[.panel-name[Fictional data]
 .font90[
 
-```r
+``` r
 (fict_dat &lt;- tibble( # 1. Make fictional data
   # Realistic variation in x: Min to max
   HealthExp = min(Dat$HealthExp):max(Dat$HealthExp), 
@@ -876,45 +904,45 @@ ols_5 &lt;- lm_robust(
   socialist = 0, # Non-socialist
   citizen_rights = 12, # Max democracy
   date = 2019)) # most recent date
-# # A tibble: 11,684 × 4
+# # A tibble: 12,464 × 4
 #    HealthExp socialist citizen_rights  date
 #        &lt;dbl&gt;     &lt;dbl&gt;          &lt;dbl&gt; &lt;dbl&gt;
-#  1      19.1         0             12  2019
-#  2      20.1         0             12  2019
-#  3      21.1         0             12  2019
-#  4      22.1         0             12  2019
-#  5      23.1         0             12  2019
-#  6      24.1         0             12  2019
-#  7      25.1         0             12  2019
-#  8      26.1         0             12  2019
-#  9      27.1         0             12  2019
-# 10      28.1         0             12  2019
-# # ℹ 11,674 more rows
+#  1      10.4         0             12  2019
+#  2      11.4         0             12  2019
+#  3      12.4         0             12  2019
+#  4      13.4         0             12  2019
+#  5      14.4         0             12  2019
+#  6      15.4         0             12  2019
+#  7      16.4         0             12  2019
+#  8      17.4         0             12  2019
+#  9      18.4         0             12  2019
+# 10      19.4         0             12  2019
+# # ℹ 12,454 more rows
 ```
 ]]
 .panel[.panel-name[Predict]
 .font90[
 
-```r
+``` r
 (fict_dat &lt;- predict( # 2. Get predictions
   ols_5, newdata = fict_dat,
   interval = "confidence", level = 0.95)$fit %&gt;%
    as_tibble() %&gt;% # Turn into a tibble, then
    bind_cols(fict_dat, .)) # Add to the synthetic data.
-# # A tibble: 11,684 × 7
+# # A tibble: 12,464 × 7
 #    HealthExp socialist citizen_rights  date   fit   lwr   upr
 #        &lt;dbl&gt;     &lt;dbl&gt;          &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
-#  1      19.1         0             12  2019  62.7  60.5  64.9
-#  2      20.1         0             12  2019  62.8  60.6  64.9
-#  3      21.1         0             12  2019  62.8  60.6  65.0
-#  4      22.1         0             12  2019  62.8  60.6  65.0
-#  5      23.1         0             12  2019  62.8  60.6  65.0
-#  6      24.1         0             12  2019  62.8  60.6  65.0
-#  7      25.1         0             12  2019  62.8  60.7  65.0
-#  8      26.1         0             12  2019  62.9  60.7  65.0
-#  9      27.1         0             12  2019  62.9  60.7  65.0
-# 10      28.1         0             12  2019  62.9  60.7  65.1
-# # ℹ 11,674 more rows
+#  1      10.4         0             12  2019  62.5  60.3  64.6
+#  2      11.4         0             12  2019  62.5  60.3  64.6
+#  3      12.4         0             12  2019  62.5  60.4  64.6
+#  4      13.4         0             12  2019  62.5  60.4  64.7
+#  5      14.4         0             12  2019  62.5  60.4  64.7
+#  6      15.4         0             12  2019  62.5  60.4  64.7
+#  7      16.4         0             12  2019  62.6  60.4  64.7
+#  8      17.4         0             12  2019  62.6  60.4  64.7
+#  9      18.4         0             12  2019  62.6  60.5  64.7
+# 10      19.4         0             12  2019  62.6  60.5  64.7
+# # ℹ 12,454 more rows
 ```
 ]]
 .panel[.panel-name[Plot]
@@ -923,24 +951,26 @@ ols_5 &lt;- lm_robust(
 .panel[.panel-name[Plot code]
 .font90[
 
-```r
+``` r
 # 3. Plot the predictions
 ggplot(data = fict_dat, aes(y = fit, x = HealthExp)) +
-  geom_ribbon(aes(ymin = lwr, ymax = upr), alpha = 0.5) +
-  geom_line() +
-  geom_text(data = Dat %&gt;% # Add some exemplary countries
-              filter(date == 2019 &amp; 
-                       (country == "Mali" | country == "Nepal" |
-                          country == "Morocco" | country == "Mexico" | 
-                          country == "Poland" | country == "Japan" |
-                          country == "Denmark" | country == "Switzerland" |
-                          country == "United States")), 
-            aes(y = LifeExpect, HealthExp, label = country)) +
-  labs(title = "Predictions based on multiple OLS",
-       x = "By Healthcare Expenditures in $
-        (Socialism, Citizenship rights, and time held constant)",
-       y = "Predicted Life expectancy at birth") +
-  theme_minimal()
+  # Add a ribbon for uncertainty (likely confidence intervals)
+  geom_ribbon(aes(ymin = lwr, ymax = upr), alpha = 0.5) +  
+  geom_line() +  # Add a line for the fitted values
+  geom_text(
+    data = Dat %&gt;%  # Use original 'Dat' data for labeling
+      filter(date == 2020 &amp;  # Filter for the year 2022 and specific countries
+               (country == "Mali" | country == "Nepal" | 
+                  country == "Morocco" | country == "Mexico" | 
+                  country == "Poland" | country == "Japan" | 
+                  country == "Denmark" | country == "Switzerland" |
+                  country == "United States")), 
+    # Position labels using actual life expectancy and health expenditure
+    aes(y = LifeExpect, HealthExp, label = country)) + 
+  labs(title = "Predictions based on multiple OLS",  # Set the plot title
+       x = "By Healthcare Expenditures in $ \n(Socialism, Citizenship rights, and time held constant)",
+       y = "Predicted Life expectancy at birth") +  # Set y-axis label
+  theme_minimal()  # Use a minimal theme
 ```
 ]]]]
 
@@ -949,13 +979,13 @@ ggplot(data = fict_dat, aes(y = fit, x = HealthExp)) +
 .push-right[
 With a unit increase in `\(X\)`, each polynomial always alters the one before it:
 
-`\(\beta_{\text{HealthExp}}\)`: At $0, a $1000 increase in `HealthExp` is associated with an increase in life expectancy at birth of 17.442 years.
+`\(\beta_{\text{HealthExp}}\)`: At $0, a $1000 increase in `HealthExp` is associated with an increase in life expectancy at birth of 17.051 years.
 
-`\(\beta_{\text{HealthExp}^2}\)`: With every $1000 increase in `HealthExp`, `\(\beta_{\text{HealthExp}}\)` changes by -5.452.
+`\(\beta_{\text{HealthExp}^2}\)`: With every $1000 increase in `HealthExp`, `\(\beta_{\text{HealthExp}}\)` changes by -5.185.
 
-`\(\beta_{\text{HealthExp}^3}\)`: With every $1000 increase in `HealthExp`, `\(\beta_{\text{HealthExp}^2}\)` changes by `\(0.691\)`.
+`\(\beta_{\text{HealthExp}^3}\)`: With every $1000 increase in `HealthExp`, `\(\beta_{\text{HealthExp}^2}\)` changes by `\(0.631\)`.
 
-`\(\beta_{\text{HealthExp}^4}\)`: With every $1000 increase in `HealthExp`, `\(\beta_{\text{HealthExp}^3}\)` changes by `\(-0.03\)`.
+`\(\beta_{\text{HealthExp}^4}\)`: With every $1000 increase in `HealthExp`, `\(\beta_{\text{HealthExp}^3}\)` changes by `\(-0.026\)`.
 
 .center[.alert[It gets super abstract; so always plot the implied association!]]
 ]
@@ -1013,7 +1043,7 @@ layout: true
 # Transform `\(Y\)` or `\(X\)` .font70[Our favorite: The logarithm]
 
 .push-left[
-- Sometimes it helps to transform `\(Y\)` and/or `\(X\)`. Textbooks discuss many transformations. .alert[The most common and useful is log/ln.]
+- Sometimes it helps to transform `\(Y\)` and/or `\(X\)`. Textbooks discuss several transformations. .alert[The most common and useful is log()/ln().]
 
 &lt;img src="https://helpingwithmath.com/wp-content/uploads/2021/10/Logarithms-1.png" width="60%" style="display: block; margin: auto;" /&gt;
 
@@ -1049,11 +1079,7 @@ layout: true
 .push-left[
 .font80[
 
-```r
-*ols_6 &lt;- lm_robust(LifeExpect ~ I(log2(HealthExp)) +
-                     date + socialist*citizen_rights, data = Dat, clusters = country)
-```
-&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+&lt;table style="NAborder-bottom: 0; color: black; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
  &lt;thead&gt;
   &lt;tr&gt;
    &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
@@ -1063,59 +1089,59 @@ layout: true
 &lt;tbody&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; −73.836 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 1.576 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (47.253) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (43.501) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; I(log2(HealthExp)) &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 3.590*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 3.589*** &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (0.193) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.188) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; date &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.055* &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.017 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (0.024) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.022) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; socialist &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.110** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.127*** &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (0.040) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.028) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; citizen_rights &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.175 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.184 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (0.125) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (0.118) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; socialist × citizen_rights &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; −0.007 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −0.009** &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.004) &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.003) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 3142 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 3654 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.700 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.699 &lt;/td&gt;
   &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
@@ -1127,9 +1153,16 @@ layout: true
 
 ---
 
-.push-right[
+.push-right[.font80[
+
+``` r
+*ols_6 &lt;- lm_robust(LifeExpect ~ I(log2(HealthExp)) +
+                     date + socialist*citizen_rights, 
+                   data = Dat, clusters = country)
+```
+]
 .content-box-green[
-How can we interpret the coefficient of 3.59?
+How can we interpret the coefficient of 3.589?
 ]]
 
 ---
@@ -1139,7 +1172,7 @@ How can we interpret the coefficient of 3.59?
 .panel[.panel-name[Fictional data]
 .font90[
 
-```r
+``` r
 (fict_dat &lt;- tibble( # 1. Make fictional data
   # Realistic variation in x: Min to max
   HealthExp = min(Dat$HealthExp):max(Dat$HealthExp), 
@@ -1147,45 +1180,45 @@ How can we interpret the coefficient of 3.59?
   socialist = 0, # Non-socialist
   citizen_rights = 12, # Max democracy
   date = 2019)) # most recent date
-# # A tibble: 11,684 × 4
+# # A tibble: 12,464 × 4
 #    HealthExp socialist citizen_rights  date
 #        &lt;dbl&gt;     &lt;dbl&gt;          &lt;dbl&gt; &lt;dbl&gt;
-#  1      19.1         0             12  2019
-#  2      20.1         0             12  2019
-#  3      21.1         0             12  2019
-#  4      22.1         0             12  2019
-#  5      23.1         0             12  2019
-#  6      24.1         0             12  2019
-#  7      25.1         0             12  2019
-#  8      26.1         0             12  2019
-#  9      27.1         0             12  2019
-# 10      28.1         0             12  2019
-# # ℹ 11,674 more rows
+#  1      10.4         0             12  2019
+#  2      11.4         0             12  2019
+#  3      12.4         0             12  2019
+#  4      13.4         0             12  2019
+#  5      14.4         0             12  2019
+#  6      15.4         0             12  2019
+#  7      16.4         0             12  2019
+#  8      17.4         0             12  2019
+#  9      18.4         0             12  2019
+# 10      19.4         0             12  2019
+# # ℹ 12,454 more rows
 ```
 ]]
 .panel[.panel-name[Predict]
 .font90[
 
-```r
+``` r
 (fict_dat &lt;- predict( # 2. Get predictions
   ols_6, newdata = fict_dat,
   interval = "confidence", level = 0.95)$fit %&gt;%
    as_tibble() %&gt;% # Turn into a tibble, then
    bind_cols(fict_dat, .)) # Add to the synthetic data.
-# # A tibble: 11,684 × 7
+# # A tibble: 12,464 × 7
 #    HealthExp socialist citizen_rights  date   fit   lwr   upr
 #        &lt;dbl&gt;     &lt;dbl&gt;          &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
-#  1      19.1         0             12  2019  53.7  50.7  56.7
-#  2      20.1         0             12  2019  54.0  51.0  57.0
-#  3      21.1         0             12  2019  54.3  51.3  57.2
-#  4      22.1         0             12  2019  54.5  51.6  57.4
-#  5      23.1         0             12  2019  54.7  51.8  57.6
-#  6      24.1         0             12  2019  54.9  52.1  57.8
-#  7      25.1         0             12  2019  55.2  52.3  58.0
-#  8      26.1         0             12  2019  55.4  52.5  58.2
-#  9      27.1         0             12  2019  55.5  52.7  58.4
-# 10      28.1         0             12  2019  55.7  52.9  58.5
-# # ℹ 11,674 more rows
+#  1      10.4         0             12  2019  50.3  47.1  53.5
+#  2      11.4         0             12  2019  50.7  47.6  53.9
+#  3      12.4         0             12  2019  51.2  48.1  54.3
+#  4      13.4         0             12  2019  51.6  48.5  54.6
+#  5      14.4         0             12  2019  52.0  48.9  55.0
+#  6      15.4         0             12  2019  52.3  49.3  55.3
+#  7      16.4         0             12  2019  52.6  49.7  55.6
+#  8      17.4         0             12  2019  52.9  50.0  55.9
+#  9      18.4         0             12  2019  53.2  50.3  56.1
+# 10      19.4         0             12  2019  53.5  50.6  56.4
+# # ℹ 12,454 more rows
 ```
 ]]
 .panel[.panel-name[Plot]
@@ -1194,24 +1227,26 @@ How can we interpret the coefficient of 3.59?
 .panel[.panel-name[Plot code]
 .font90[
 
-```r
+``` r
 # 3. Plot the predictions
 ggplot(data = fict_dat, aes(y = fit, x = HealthExp)) +
-  geom_ribbon(aes(ymin = lwr, ymax = upr), alpha = 0.5) +
-  geom_line() +
-  geom_text(data = Dat %&gt;% # Add some exemplary countries
-              filter(date == 2019 &amp; 
-                       (country == "Mali" | country == "Nepal" |
-                          country == "Morocco" | country == "Mexico" | 
-                          country == "Poland" | country == "Japan" |
-                          country == "Denmark" | country == "Switzerland" |
-                          country == "United States")), 
-            aes(y = LifeExpect, HealthExp, label = country)) +
-  labs(title = "Predictions based on multiple OLS",
-       x = "By Healthcare Expenditures in $100
-        (Socialism, Citizenship rights, and time held constant)",
-       y = "Predicted Life expectancy at birth") +
-  theme_minimal()
+  # Add a ribbon for uncertainty (likely confidence intervals)
+  geom_ribbon(aes(ymin = lwr, ymax = upr), alpha = 0.5) +  
+  geom_line() +  # Add a line for the fitted values
+  geom_text(
+    data = Dat %&gt;%  # Use original 'Dat' data for labeling
+      filter(date == 2020 &amp;  # Filter for the year 2022 and specific countries
+               (country == "Mali" | country == "Nepal" | 
+                  country == "Morocco" | country == "Mexico" | 
+                  country == "Poland" | country == "Japan" | 
+                  country == "Denmark" | country == "Switzerland" |
+                  country == "United States")), 
+    # Position labels using actual life expectancy and health expenditure
+    aes(y = LifeExpect, HealthExp, label = country)) + 
+  labs(title = "Predictions based on multiple OLS",  # Set the plot title
+       x = "By Healthcare Expenditures in $ \n(Socialism, Citizenship rights, and time held constant)",
+       y = "Predicted Life expectancy at birth") +  # Set y-axis label
+  theme_minimal()  # Use a minimal theme
 ```
 ]]]]
 
@@ -1228,32 +1263,32 @@ class: clear
 # =========================================================================
 #                                                Model 1       Model 2     
 # -------------------------------------------------------------------------
-# (Intercept)                                    -136.416 *     -73.836    
-#                                                 (54.366)      (47.253)   
-# poly(HealthExp/1000), degree = 4, raw = TRUE1    17.442 ***              
-#                                                  (1.799)                 
-# poly(HealthExp/1000), degree = 4, raw = TRUE2    -5.452 ***              
-#                                                  (1.016)                 
-# poly(HealthExp/1000), degree = 4, raw = TRUE3     0.691 **               
-#                                                  (0.196)                 
-# poly(HealthExp/1000), degree = 4, raw = TRUE4    -0.030 *                
-#                                                  (0.012)                 
-# date                                              0.097 ***     0.055 *  
-#                                                  (0.027)       (0.024)   
-# socialist                                         0.148 *       0.110 *  
-#                                                  (0.037)       (0.040)   
-# citizen_rights                                    0.278 *       0.175    
-#                                                  (0.119)       (0.125)   
-# socialist:citizen_rights                         -0.012 *      -0.007    
-#                                                  (0.004)       (0.004)   
-# log2(HealthExp)                                                 3.590 ***
-#                                                                (0.193)   
+# (Intercept)                                     -81.520         1.576    
+#                                                 (51.201)      (43.501)   
+# poly(HealthExp/1000), degree = 4, raw = TRUE1    17.051 ***              
+#                                                  (1.706)                 
+# poly(HealthExp/1000), degree = 4, raw = TRUE2    -5.185 ***              
+#                                                  (0.938)                 
+# poly(HealthExp/1000), degree = 4, raw = TRUE3     0.631 **               
+#                                                  (0.175)                 
+# poly(HealthExp/1000), degree = 4, raw = TRUE4    -0.026 *                
+#                                                  (0.010)                 
+# date                                              0.069 **      0.017    
+#                                                  (0.025)       (0.022)   
+# socialist                                         0.164 **      0.127 ** 
+#                                                  (0.027)       (0.028)   
+# citizen_rights                                    0.302 **      0.184    
+#                                                  (0.113)       (0.118)   
+# socialist:citizen_rights                         -0.014 **     -0.009 *  
+#                                                  (0.003)       (0.003)   
+# log2(HealthExp)                                                 3.589 ***
+#                                                                (0.188)   
 # -------------------------------------------------------------------------
-# R^2                                               0.670         0.700    
-# Adj. R^2                                          0.670         0.699    
-# Num. obs.                                      3142          3142        
-# RMSE                                              5.071         4.839    
-# N Clusters                                      168           168        
+# R^2                                               0.660         0.699    
+# Adj. R^2                                          0.660         0.699    
+# Num. obs.                                      3654          3654        
+# RMSE                                              5.191         4.882    
+# N Clusters                                      169           169        
 # =========================================================================
 # *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
 ```
@@ -1262,8 +1297,9 @@ class: clear
 --
 
 .left-column[
-- In this case, the `\(R^{2}\)` and the Adjusted `\(R^{2}\)` (which penalizes additional predictors, that is, overtly complex models) both suggest: `\(\log_2(X)\)` describes the relationship better.
-- It also better fits our theoretical intuition of the process.
+In this case, the `\(R^{2}\)` and the Adjusted `\(R^{2}\)` (which penalizes additional predictors, that is, overtly complex models) both suggest: `\(\log_2(X)\)` describes the relationship better.
+
+It also better fits our theoretical intuition of the process.
 ]
 
 ---
@@ -1273,7 +1309,7 @@ class: inverse center middle
 # Modeling non-linear relations &lt;br&gt;&lt;br&gt; Possibility 3:&lt;br&gt; *Generalized Linear Models with link functions*
 
 `$$Y_{i} = g^{-1}(\alpha + \beta_{1}X_{i1} + \ldots)$$`
-## Later in your studies
+## Later in your studies ...
 
 ---
 class: inverse middle center

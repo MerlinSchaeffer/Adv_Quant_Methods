@@ -64,6 +64,7 @@ Application of the day: Life expectancy at birth!
   + $\log_2$
 
 ---
+layout: true
 class: inverse 
 # Life expectancy at birth
 
@@ -74,10 +75,19 @@ knitr::include_graphics('https://ychef.files.bbci.co.uk/976x549/p086k2k4.jpg')
 ```
 ]
 
+---
+
 .push-right[
 <iframe src="https://ourworldindata.org/grapher/life-expectancy?tab=chart&time=1770..2019&country=Africa~Asia~Europe~OWID_WRL~Americas~Oceania" loading="lazy" style="width: 100%; height: 500px; border: 0px none;"></iframe>
 ]
+
 ---
+
+.push-right[
+<iframe src="https://ourworldindata.org/grapher/life-expectancy-unwpp?tab=chart&country=Europe+%28UN%29~Africa+%28UN%29~Asia+%28UN%29~Oceania+%28UN%29~Northern+America+%28UN%29~Latin+America+and+the+Caribbean+%28UN%29" loading="lazy" style="width: 100%; height: 500px; border: 0px none;" allow="web-share; clipboard-write"></iframe>
+]
+---
+layout: false
 class: inverse 
 # Is life expectacy simply a (linear) function of<br> how much money we spend on health?
 
@@ -102,7 +112,7 @@ pacman::p_load(
 Dat_life <- wb_data(
   # Download Life expectancy and healthcare expenditures data.
   c("SP.DYN.LE00.IN", "SH.XPD.CHEX.PP.CD"), #<<
-  start_date = 2002, end_date = 2023) %>%
+  start_date = 2000, end_date = 2024) %>%
   rename(LifeExpect = SP.DYN.LE00.IN, # rename health variables, #<<
          HealthExp = SH.XPD.CHEX.PP.CD) %>% #<<
   select(country, date, LifeExpect, HealthExp) %>% # Keep only 4 variables
@@ -115,6 +125,9 @@ Dat_citi_rights <- download_fh(verbose = FALSE) %>% # Download Freedom House dat
   rename(country = fh_country, # rename variables,
          citizen_rights = fh_total_reversed,
          date = year) %>%
+  mutate(country = case_when( 
+    country == "Vietnam" ~ "Viet Nam", # Rename Vietnam
+    TRUE ~ country)) %>% # Leave all others as they are
   # Keep only 3 variables.
   select(country, date, citizen_rights)
 
@@ -127,7 +140,7 @@ Dat <- inner_join(Dat_life, Dat_citi_rights, by = c("country", "date"))
 ```{r join}
 Dat <- Dat %>% mutate(socialist = case_when( # Years socialist minus years since,
   country == "China" ~ date - 1949,
-  country == "Vietnam" ~ date - 1945,
+  country == "Viet Nam" ~ date - 1945,
   country == "Algeria" ~ date - 1962,
   str_detect(country,"Portugal|Bangladesh") ~ date - 1972,
   country == "Guinea-Bissau" ~ date - 1973,
@@ -172,17 +185,21 @@ class: clear
 .panelset[
 .panel[.panel-name[Some country trends]
 ```{r LifeExp1, out.width='55%', fig.height = 5, fig.width = 7, echo = FALSE}
-ggplot(data = Dat %>% 
-         filter(country == "Denmark" | country == "Switzerland" | country == "Germany" | country == "Sweden"), 
-       aes(y = LifeExpect, x = HealthExp, color = country)) +
-  geom_line(alpha = 0.5) +
-  geom_text(aes(label = date), size = 2.3) +
-  guides(color = FALSE) +
-  scale_x_continuous(expand=c(0, 1300)) +
-  geom_dl(aes(label = country), method = list(dl.combine("last.points"))) +
-  labs(y = "Life expectacy at birth",
-       x = "Health expenditure per capita in $") +
-  theme_minimal()
+ggplot(data = Dat %>%  # Start of the ggplot function, specifying the data to be used
+         # Filter the data to include only these four countries
+         filter(country == "Denmark" | country == "Switzerland" | country == "Germany" | country == "Sweden"),  
+       # Define the aesthetics: LifeExpect on y-axis, HealthExp on x-axis, color by country
+       aes(y = LifeExpect, x = HealthExp, color = country)) +  
+  geom_line(alpha = 0.5) +  # Add lines to the plot with a transparency of 0.5
+  # Add text labels to the plot, using the 'date' column for labels, with a size of 2.3
+  geom_text(aes(label = date), size = 2.3) +  
+  guides(color = FALSE) +  # Remove the legend for color
+  scale_x_continuous(expand=c(0, 1300)) +  # Adjust the x-axis scale, adding 1300 units of space to the right 
+  # Add direct labels to the lines, placing them at the last points of each line
+  geom_dl(aes(label = country), method = list(dl.combine("last.points"))) + 
+  labs(y = "Life expectacy at birth",  # Set the y-axis label
+       x = "Health expenditure per capita in $") +  # Set the x-axis label
+  theme_minimal()  # Use a minimal theme for the plot
 ```
 ]
 .panel[.panel-name[Code]
@@ -200,7 +217,7 @@ class: inverse center middle
 
 .push-left[
 .font80[
-```{r out.width='60%', fig.height = 5, fig.width = 5}
+```{r out.width='50%', fig.height = 5, fig.width = 5}
 ols_1 <- lm_robust(
   LifeExpect ~ date + socialist*citizen_rights, data = Dat,
   clusters = country) # Note that we need to specify this argument, #<<
@@ -208,16 +225,18 @@ ols_1 <- lm_robust(
 # They are repeated observations of the same countries. #<<
 
 # 3D plot of interaction. Controls set to their mean.
-plotPlane(ols_1, "citizen_rights", "socialist", 
-          theta = 35, phi = 20)
+plotPlane(ols_1, "citizen_rights", "socialist", theta = 35, phi = 20)
+```
+```{r LifeExp2, results = 'hide'}
+modelsummary(list("Life Exp." = ols_1),
+             gof_map = c("nobs", "r.squared"), 
+             stars = TRUE, output = "kableExtra")
 ```
 ]]
 
 .push-right[
 .font80[
-```{r LifeExp2}
-modelsummary(list("Life Exp." = ols_1),
-             gof_map = c("nobs", "r.squared"), stars = TRUE)
+```{r ref.label = "LifeExp2", echo = FALSE}
 ```
 ]]
 
@@ -231,14 +250,17 @@ class: inverse center middle
 
 .push-left[
 .font80[
-```{r}
-ols_2 <- lm_robust(LifeExpect ~ I(HealthExp / 1000) + # I() allows to transform x #<<
-                   # within model. 1 unit increase = $1000 #<<
-                   date + socialist*citizen_rights, data = Dat, clusters = country)
+```{r I-ols, echo = FALSE}
+ols_2 <- lm_robust(
+  # I() transforms x #<<
+  LifeExpect ~ I(HealthExp / 1000) + # 1 unit increase = $1000 #<<
+    date + socialist*citizen_rights, 
+  data = Dat, clusters = country)
 ```
 ```{r, echo = FALSE}
 modelsummary(list("Life Exp." = ols_2),
-             gof_map = c("nobs", "r.squared"), stars = TRUE)
+             gof_map = c("nobs", "r.squared"), 
+             stars = TRUE, output = "kableExtra")
 ```
 ]]
 
@@ -246,7 +268,9 @@ modelsummary(list("Life Exp." = ols_2),
 
 .push-right[
 .font90[
-```{r LifeExp3, out.width='100%', fig.height = 5, fig.width = 7, echo = FALSE}
+```{r I-ols, results = 'hide'}
+```
+```{r LifeExp3, out.width='90%', fig.height = 5, fig.width = 7, echo = FALSE}
 ggplot(data = Dat, aes(y = LifeExpect, x = HealthExp)) +
   geom_point(aes(color = country), alpha = 0.5) +
   geom_line(aes(color = country), alpha = 0.3) +
@@ -265,7 +289,7 @@ ggplot(data = Dat, aes(y = LifeExpect, x = HealthExp)) +
 # Health expenditures .font70[The goal]
 
 .left-column[
-- We need a non-linear model:
+We need a non-linear model:
   + Here: An initial steep increase, which progressively flattens out.]
 .right-column[
 ```{r LifeExp4, out.width='90%', fig.height = 5, fig.width = 7, echo = FALSE}
@@ -285,11 +309,11 @@ ggplot(data = Dat, aes(y = LifeExpect, x = HealthExp)) +
 ---
 class: inverse center middle
 
-# Step 1 <br> <br> .font80[Get a first impression using LOESS (locally estimated scatterplot smoothing)]
+# Step 1 <br> <br> .font80[Get a first impression using LOESS <br> (locally estimated scatterplot smoothing)]
 
 ---
 class: clear
-# LOESS (locally estimated scatterplot smoothing)
+# LOESS .font60[(locally estimated scatterplot smoothing)]
 
 .left-column[
 - LOESS is basically a "local" regression for every observation plus the (e.g. 6) nearest observations to the left and right.
@@ -300,18 +324,23 @@ class: clear
 .right-column[
 .panelset[
 .panel[.panel-name[LOESS fit]
-```{r LifeExp4a, out.width='90%', fig.height = 5, fig.width = 7, echo = FALSE}
-ggplot(data = Dat, aes(y = LifeExpect, x = HealthExp)) +
-  geom_point(aes(color = country), alpha = 0.5) +
-  geom_line(aes(color = country), alpha = 0.3) +
-  geom_dl(data = Dat %>% filter(country == "Switzerland" | country == "Denmark"), 
-          aes(label = country, color = country), method = list(dl.combine("last.points"))) +
-  # By default geom_smooth() estimates LOESS! #<<
-  geom_smooth(color = "black") + #<<
-  labs(y = "Life expectacy at birth",
-       x = "Health expenditure per capita in $") +
-  theme_minimal() +
-  guides(color = FALSE)
+```{r LifeExp4a, out.width='80%', fig.height = 5, fig.width = 7, echo = FALSE}
+# Start of the ggplot function, setting LifeExpect on the y-axis and HealthExp on the x-axis
+ggplot(data = Dat, aes(y = LifeExpect, x = HealthExp)) +  
+  # Add points to the plot, colored by country
+  geom_point(aes(color = country), alpha = 0.5) +  
+  # Add lines to the plot, colored by country
+  geom_line(aes(color = country), alpha = 0.3) +  
+  # Add direct labels, but only for Switzerland and Denmark after filtering the data
+  geom_dl(data = Dat %>% filter(country == "Switzerland" | country == "Denmark"),  
+          # Label by country and place labels at the last points of the lines
+          aes(label = country, color = country), method = list(dl.combine("last.points"))) +  
+  # Add a LOESS to the plot to show the overall trend, colored black.
+  geom_smooth(color = "black") + 
+  labs(y = "Life expectacy at birth",  # Set the y-axis label
+       x = "Health expenditure per capita in $") +  # Set the x-axis label
+  theme_minimal() +  # Use a minimal theme for the plot
+  guides(color = FALSE)  # Remove the legend for color
 ```
 ]
 .panel[.panel-name[Code]
@@ -323,7 +352,7 @@ ggplot(data = Dat, aes(y = LifeExpect, x = HealthExp)) +
 ---
 class: inverse center middle
 
-# Modeling non-linear relations <br><br> Possibility 1:<br> *Polynomials*
+# Step 2: Modeling non-linear relations <br><br> Possibility 1:<br> *Polynomials*
 
 ---
 layout: true
@@ -331,23 +360,26 @@ layout: true
 
 .push-left[
 .font80[
-```{r}
+```{r poly, echo = FALSE}
 ols_3 <- lm_robust(
   LifeExpect ~ I(HealthExp/1000) + 
     I((HealthExp/1000)^2) + #<<
-    date + socialist*citizen_rights, data = Dat, clusters = country)
+    date + socialist*citizen_rights, 
+  data = Dat, clusters = country)
 ```
 ```{r, echo = FALSE}
 modelsummary(list("Life Exp." = ols_3),
-             gof_map = c("nobs", "r.squared"), stars = TRUE)
+             gof_map = c("nobs", "r.squared"), 
+             stars = TRUE, output = "kableExtra")
 ```
 ]]
 
 ---
 
 .push-right[
-- We need a non-linear model:
-  
+```{r ref.label = "poly", results = 'hide'}
+```
+
 $$Y_{i} = \alpha + \beta_{1}X_{1} + \beta_{2}X_{1}^2 + \ldots + e_{i}$$
 .content-box-green[.center[
 Do you see any similarity to the logic of an interaction term?
@@ -374,13 +406,14 @@ layout: true
 .push-left[
 .font80[
 ```{r}
-ols_4 <- lm_robust( # Use poly() is better to specify polynomials #<<
-  LifeExpect ~ poly(I(HealthExp/1000), degree = 2, raw = TRUE) + #<< 
+ols_4 <- lm_robust( LifeExpect ~ 
+  poly(I(HealthExp/1000), degree = 2, raw = TRUE) + # Better use poly() #<<
     date + socialist*citizen_rights, data = Dat, clusters = country)
 ```
 ```{r, echo = FALSE}
 modelsummary(list("Life Exp." = ols_4),
-             gof_map = c("nobs", "r.squared"), stars = TRUE)
+             gof_map = c("nobs", "r.squared"), 
+             stars = TRUE, output = "kableExtra")
 ```
 ]]
 
@@ -413,7 +446,7 @@ $\beta_{\text{HealthExp}^2}$: With every $1000 increase in `HealthExp`, this ass
   # Hold other variables constant.
   socialist = 0, # Non-socialist
   citizen_rights = 12, # Max democracy
-  date = 2019)) # most recent date
+  date = 2020)) # most recent date
 ```
 ]]
 .panel[.panel-name[Predict]
@@ -427,26 +460,29 @@ $\beta_{\text{HealthExp}^2}$: With every $1000 increase in `HealthExp`, this ass
 ```
 ]]
 .panel[.panel-name[Plot]
+.font70[
 ```{r predictions2, fig.height = 4, fig.width = 5, echo = FALSE, out.width='100%'}
 # 3. plot the predictions
 ggplot(data = fict_dat, aes(y = fit, x = HealthExp)) +
-  geom_ribbon(aes(ymin = lwr, ymax = upr), alpha = 0.5) +
-  geom_line() +
-  geom_text(data = Dat %>% # Add some exemplary countries
-              filter(date == 2019 & 
-                       (country == "Mali" | country == "Nepal" |
-                          country == "Morocco" | country == "Mexico" | 
-                          country == "Poland" | country == "Japan" |
-                          country == "Denmark" | country == "Switzerland" |
-                          country == "United States")), 
-            aes(y = LifeExpect, HealthExp, label = country)) +
-  labs(title = "Predictions based on multiple OLS",
-       x = "By Healthcare Expenditures in $
-    (Socialism, Citizenship rights, and time held constant)",
-    y = "Predicted Life expectancy at birth") +
-  theme_minimal()
+  # Add a ribbon for uncertainty (likely confidence intervals)
+  geom_ribbon(aes(ymin = lwr, ymax = upr), alpha = 0.5) +  
+  geom_line() +  # Add a line for the fitted values
+  geom_text(
+    data = Dat %>%  # Use original 'Dat' data for labeling
+      filter(date == 2020 &  # Filter for the year 2022 and specific countries
+               (country == "Mali" | country == "Nepal" | 
+                  country == "Morocco" | country == "Mexico" | 
+                  country == "Poland" | country == "Japan" | 
+                  country == "Denmark" | country == "Switzerland" |
+                  country == "United States")), 
+    # Position labels using actual life expectancy and health expenditure
+    aes(y = LifeExpect, HealthExp, label = country)) + 
+  labs(title = "Predictions based on multiple OLS",  # Set the plot title
+       x = "By Healthcare Expenditures in $ \n(Socialism, Citizenship rights, and time held constant)",
+       y = "Predicted Life expectancy at birth") +  # Set y-axis label
+  theme_minimal()  # Use a minimal theme
 ```
-]
+]]
 .panel[.panel-name[Plot code]
 .font90[
 ```{r ref.label = "predictions2", fig.height = 4, fig.width = 5, fig.show = 'hide', out.width='100%'}
@@ -463,13 +499,14 @@ class: clear
 .push-left[
 .font80[
 ```{r}
-ols_5 <- lm_robust(
-  LifeExpect ~ poly(I(HealthExp/1000), degree = 4, raw = TRUE) + #<<
-    date + socialist*citizen_rights, data = Dat, clusters = country)
+ols_5 <- lm_robust(LifeExpect ~ 
+        poly(I(HealthExp/1000), degree = 4, raw = TRUE) + #<<
+        date + socialist*citizen_rights, data = Dat, clusters = country)
 ```
 ```{r, echo = FALSE}
 modelsummary(list("Life Exp." = ols_5),
-             gof_map = c("nobs", "r.squared"), stars = TRUE)
+             gof_map = c("nobs", "r.squared"), 
+             stars = TRUE, output = "kableExtra")
 ```
 ]]
 
@@ -503,21 +540,23 @@ modelsummary(list("Life Exp." = ols_5),
 ```{r predictions3, fig.height = 4, fig.width = 5, echo = FALSE, out.width='100%'}
 # 3. Plot the predictions
 ggplot(data = fict_dat, aes(y = fit, x = HealthExp)) +
-  geom_ribbon(aes(ymin = lwr, ymax = upr), alpha = 0.5) +
-  geom_line() +
-  geom_text(data = Dat %>% # Add some exemplary countries
-              filter(date == 2019 & 
-                       (country == "Mali" | country == "Nepal" |
-                          country == "Morocco" | country == "Mexico" | 
-                          country == "Poland" | country == "Japan" |
-                          country == "Denmark" | country == "Switzerland" |
-                          country == "United States")), 
-            aes(y = LifeExpect, HealthExp, label = country)) +
-  labs(title = "Predictions based on multiple OLS",
-       x = "By Healthcare Expenditures in $
-        (Socialism, Citizenship rights, and time held constant)",
-       y = "Predicted Life expectancy at birth") +
-  theme_minimal()
+  # Add a ribbon for uncertainty (likely confidence intervals)
+  geom_ribbon(aes(ymin = lwr, ymax = upr), alpha = 0.5) +  
+  geom_line() +  # Add a line for the fitted values
+  geom_text(
+    data = Dat %>%  # Use original 'Dat' data for labeling
+      filter(date == 2020 &  # Filter for the year 2022 and specific countries
+               (country == "Mali" | country == "Nepal" | 
+                  country == "Morocco" | country == "Mexico" | 
+                  country == "Poland" | country == "Japan" | 
+                  country == "Denmark" | country == "Switzerland" |
+                  country == "United States")), 
+    # Position labels using actual life expectancy and health expenditure
+    aes(y = LifeExpect, HealthExp, label = country)) + 
+  labs(title = "Predictions based on multiple OLS",  # Set the plot title
+       x = "By Healthcare Expenditures in $ \n(Socialism, Citizenship rights, and time held constant)",
+       y = "Predicted Life expectancy at birth") +  # Set y-axis label
+  theme_minimal()  # Use a minimal theme
 ```
 ]
 .panel[.panel-name[Plot code]
@@ -600,7 +639,7 @@ layout: true
 # Transform $Y$ or $X$ .font70[Our favorite: The logarithm]
 
 .push-left[
-- Sometimes it helps to transform $Y$ and/or $X$. Textbooks discuss many transformations. .alert[The most common and useful is log/ln.]
+- Sometimes it helps to transform $Y$ and/or $X$. Textbooks discuss several transformations. .alert[The most common and useful is log()/ln().]
 
 ```{r, echo = FALSE, out.width='60%', fig.align='center'}
 knitr::include_graphics('https://helpingwithmath.com/wp-content/uploads/2021/10/Logarithms-1.png')
@@ -675,19 +714,24 @@ layout: true
 
 .push-left[
 .font80[
-```{r}
+```{r loggie, echo = FALSE}
 ols_6 <- lm_robust(LifeExpect ~ I(log2(HealthExp)) + #<<
-                     date + socialist*citizen_rights, data = Dat, clusters = country)
+                     date + socialist*citizen_rights, 
+                   data = Dat, clusters = country)
 ```
 ```{r, echo = FALSE}
 modelsummary(list("Life Exp." = ols_6),
-             gof_map = c("nobs", "r.squared"), stars = TRUE)
+             gof_map = c("nobs", "r.squared"), 
+             stars = TRUE, output = "kableExtra")
 ```
 ]]
 
 ---
 
-.push-right[
+.push-right[.font80[
+```{r ref.label = "loggie", results = 'hide'}
+```
+]
 .content-box-green[
 How can we interpret the coefficient of `r coef(ols_6)["I(log2(HealthExp))"]`?
 ]]
@@ -722,21 +766,23 @@ How can we interpret the coefficient of `r coef(ols_6)["I(log2(HealthExp))"]`?
 ```{r predictions4, fig.height = 4, fig.width = 5, echo = FALSE, out.width='100%'}
 # 3. Plot the predictions
 ggplot(data = fict_dat, aes(y = fit, x = HealthExp)) +
-  geom_ribbon(aes(ymin = lwr, ymax = upr), alpha = 0.5) +
-  geom_line() +
-  geom_text(data = Dat %>% # Add some exemplary countries
-              filter(date == 2019 & 
-                       (country == "Mali" | country == "Nepal" |
-                          country == "Morocco" | country == "Mexico" | 
-                          country == "Poland" | country == "Japan" |
-                          country == "Denmark" | country == "Switzerland" |
-                          country == "United States")), 
-            aes(y = LifeExpect, HealthExp, label = country)) +
-  labs(title = "Predictions based on multiple OLS",
-       x = "By Healthcare Expenditures in $100
-        (Socialism, Citizenship rights, and time held constant)",
-       y = "Predicted Life expectancy at birth") +
-  theme_minimal()
+  # Add a ribbon for uncertainty (likely confidence intervals)
+  geom_ribbon(aes(ymin = lwr, ymax = upr), alpha = 0.5) +  
+  geom_line() +  # Add a line for the fitted values
+  geom_text(
+    data = Dat %>%  # Use original 'Dat' data for labeling
+      filter(date == 2020 &  # Filter for the year 2022 and specific countries
+               (country == "Mali" | country == "Nepal" | 
+                  country == "Morocco" | country == "Mexico" | 
+                  country == "Poland" | country == "Japan" | 
+                  country == "Denmark" | country == "Switzerland" |
+                  country == "United States")), 
+    # Position labels using actual life expectancy and health expenditure
+    aes(y = LifeExpect, HealthExp, label = country)) + 
+  labs(title = "Predictions based on multiple OLS",  # Set the plot title
+       x = "By Healthcare Expenditures in $ \n(Socialism, Citizenship rights, and time held constant)",
+       y = "Predicted Life expectancy at birth") +  # Set y-axis label
+  theme_minimal()  # Use a minimal theme
 ```
 ]
 .panel[.panel-name[Plot code]
@@ -762,8 +808,9 @@ screenreg(list(ols_5, ols_6), include.ci = FALSE, digits = 3)
 --
 
 .left-column[
-- In this case, the $R^{2}$ and the Adjusted $R^{2}$ (which penalizes additional predictors, that is, overtly complex models) both suggest: $\log_2(X)$ describes the relationship better.
-- It also better fits our theoretical intuition of the process.
+In this case, the $R^{2}$ and the Adjusted $R^{2}$ (which penalizes additional predictors, that is, overtly complex models) both suggest: $\log_2(X)$ describes the relationship better.
+
+It also better fits our theoretical intuition of the process.
 ]
 
 ---
@@ -773,7 +820,7 @@ class: inverse center middle
 # Modeling non-linear relations <br><br> Possibility 3:<br> *Generalized Linear Models with link functions*
 
 $$Y_{i} = g^{-1}(\alpha + \beta_{1}X_{i1} + \ldots)$$
-## Later in your studies
+## Later in your studies ...
 
 ---
 class: inverse middle center
