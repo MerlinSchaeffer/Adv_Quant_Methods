@@ -47,7 +47,7 @@ xaringanExtra::use_panelset()
 .font130[.center[Use data to .alert[discover patterns], <br> and the social mechanisms that bring them about.]]
 
 ```{r, echo = FALSE, out.width='70%', fig.align='center'}
-knitr::include_graphics('https://liu.se/-/media/istock-501261958.jpg?mw=1120&mh=1120&hash=DA8977CCE6A6E600AE80A40CFEE771C9')
+knitr::include_graphics('https://researchleap.com/wp-content/uploads/2021/12/Population-data.jpeg')
 ```
 
 ---
@@ -309,11 +309,11 @@ ggplot(data = Dat, aes(y = LifeExpect, x = HealthExp)) +
 ---
 class: inverse center middle
 
-# Step 1 <br> <br> .font80[Get a first impression using LOESS <br> (locally estimated scatterplot smoothing)]
+# .font80[Step 1: Get a first impression using LOWESS <br> (locally weighted scatterplot smoothing)]
 
 ---
 class: clear
-# LOESS .font60[(locally estimated scatterplot smoothing)]
+# LOWESS
 
 .left-column[
 - LOESS is basically a "local" regression for every observation plus the (e.g. 6) nearest observations to the left and right.
@@ -323,6 +323,11 @@ class: clear
 
 .right-column[
 .panelset[
+.panel[.panel-name[LOESS idea]
+```{r, echo = FALSE, out.width='70%', fig.align='center'}
+knitr::include_graphics('./media/LOWESS.png')
+```
+]
 .panel[.panel-name[LOESS fit]
 ```{r LifeExp4a, out.width='80%', fig.height = 5, fig.width = 7, echo = FALSE}
 # Start of the ggplot function, setting LifeExpect on the y-axis and HealthExp on the x-axis
