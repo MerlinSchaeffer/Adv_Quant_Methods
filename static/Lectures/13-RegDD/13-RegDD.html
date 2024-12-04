@@ -217,6 +217,24 @@ So now let's zoom in on the data right around the threshold
 &lt;img src="13-RegDD_files/figure-html/RDD4-1.png" width="90%" style="display: block; margin: auto;" /&gt;
 ]
 .panel[.panel-name[Zoom out...]
+
+``` r
+mlda &lt;- mlda %&gt;% mutate(
+  # Define those who are allowed to drink
+  close = case_when( 
+    agecell &gt;= 20.7 &amp; agecell &lt; 21 ~ "low",
+    agecell &gt;= 21 &amp; agecell &lt; 21.3 ~ "high",
+    TRUE ~ "No"))
+
+ggplot(data = mlda, aes(y = all, x = agecell, color = close)) +
+  geom_point() +
+  theme_minimal() + 
+    scale_color_manual(values = c("blue", "red", "black")) +
+  labs(y = "Nr of deaths among US Americans \n aged 20-22 (1997-2003)",
+       x = "Age in months") +
+  guides(color = "none")
+```
+
 &lt;img src="13-RegDD_files/figure-html/RDD5-1.png" width="90%" style="display: block; margin: auto;" /&gt;
 ]]]
 
@@ -500,7 +518,7 @@ Thankfully, finding the right bandwidth is automated with a function in RDDtools
 
 .right-column[
 .panelset[
-.panel[.panel-name[Convert data]
+.panel[.panel-name[Run estimates]
 
 ``` r
 # Weird-looking function name, but it figures out the optimal bandwidth given your data
@@ -510,7 +528,7 @@ coef_nonparam &lt;- summary(reg_nonparam)$coefMat[1]
 se_nonparam &lt;- summary(reg_nonparam)$coefMat[2]
 ```
 ]
-.panel[.panel-name[Plot the estimate]
+.panel[.panel-name[Show model summary]
 
 ``` r
 summary(reg_nonparam)

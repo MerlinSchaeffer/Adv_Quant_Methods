@@ -25,6 +25,7 @@ library(modelr)
 library(webexercises) # Small web-based answer scales.
 library(equatiomatic) # Regression equations from model objects.
 library(essentials)
+library(RDDtools)
 
 options(htmltools.preserve.raw = FALSE, tikzDefaultEngine = "xetex",
         htmltools.dir.version = FALSE, servr.interval = 0.5, width = 115, digits = 3)
@@ -238,7 +239,7 @@ ggplot(data = mlda, aes(y = all, x = agecell, color = close)) +
 ```
 ]
 .panel[.panel-name[Zoom out...]
-```{r RDD5, out.width='90%', fig.height = 5, fig.width = 8, echo = FALSE}
+```{r RDD5, out.width='90%', fig.height = 5, fig.width = 8}
 mlda <- mlda %>% mutate(
   # Define those who are allowed to drink
   close = case_when( 
@@ -362,7 +363,7 @@ summary(rdd_linear)
 ```
 ]
 .panel[.panel-name[Plot the estimate]
-```{r RDDtools4, out.width='90%', fig.height = 5, fig.width = 8, echo = FALSE}
+```{r RDDtools4, out.width='90%', fig.height = 5, fig.width = 8, echo=FALSE}
 # It's helpful to change the axis labels since it changes the variable names
 # and 'x' and 'y' aren't very informative
 plot(
@@ -505,7 +506,7 @@ Thankfully, finding the right bandwidth is automated with a function in RDDtools
 
 .right-column[
 .panelset[
-.panel[.panel-name[Convert data]
+.panel[.panel-name[Run estimates]
 ```{r RDDtools7, out.width='90%', fig.height = 5, fig.width = 8}
 # Weird-looking function name, but it figures out the optimal bandwidth given your data
 bandwidth <- RDDbw_IK(drinking_rdd_data)
@@ -514,7 +515,7 @@ coef_nonparam <- summary(reg_nonparam)$coefMat[1]
 se_nonparam <- summary(reg_nonparam)$coefMat[2]
 ```
 ]
-.panel[.panel-name[Plot the estimate]
+.panel[.panel-name[Show model summary]
 ```{r RDDtools8, out.width='90%', fig.height = 5, fig.width = 8}
 summary(reg_nonparam)
 ```
