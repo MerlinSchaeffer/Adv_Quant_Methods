@@ -4,7 +4,7 @@
     <title>Regression Discontinuity Designs</title>
     <meta charset="utf-8" />
     <meta name="author" content="Merlin Schaeffer  Department of Sociology" />
-    <meta name="date" content="2022-11-30" />
+    <meta name="date" content="2024-12-04" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
     <script src="libs/tile-view/tile-view.js"></script>
@@ -27,7 +27,7 @@ class: center, middle, inverse, title-slide
 ### Merlin Schaeffer<br> Department of Sociology
 ]
 .date[
-### 2022-11-30
+### 2024-12-04
 ]
 
 ---
@@ -37,11 +37,13 @@ class: center, middle, inverse, title-slide
 
 .font140[.center[.alert[Use data to discover patterns ("social facts" in Durkheim's terms), &lt;br&gt; and the &lt;ins&gt;social mechanisms that bring them about&lt;/ins&gt;.]]]
 
-&lt;img src="https://liu.se/-/media/istock-501261958.jpg?mw=1120&amp;mh=1120&amp;hash=DA8977CCE6A6E600AE80A40CFEE771C9" width="70%" style="display: block; margin: auto;" /&gt;
+&lt;img src="img/emile-durkheim.jpg" width="50%" style="display: block; margin: auto;" /&gt;
 
 ---
 class: inverse middle
 # Today's schedule
+
+Intuition
 
 Application 1: Drinking + Driving = Death
 1. Simple RDD.
@@ -54,20 +56,7 @@ Application 2: Does Electing Women Reduce Corruption?
 Application 3: Ethnic discrimination in Access to healthcare and far-right mayors.
 
 ---
-class: inverse center middle
-
-.push-right[
-&lt;img src="https://dam-p-dfi.pqcloud.eu/preview/6XAlSpTzaLfBqzdLvpQ4nU/previews/cropOffsetX_0_cropOffsetY_0_maxWidth_1280_cropWidth_7212_cropHeight_4056.jpg/*/landscape169L.jpg?authcred=R3Vlc3Q6R3Vlc3Q=" width="100%" style="display: block; margin: auto;" /&gt;
-]
-
---
-
-.push-left[
-.font120[**What is the causal effect of &lt;br&gt;&lt;br&gt; making alcohol consumption legal &lt;br&gt;&lt;br&gt; on mortality?**]
-]
-
----
-# We need an RCT!
+# Remember RCTs!
 
 .push-left[
 &lt;img src="./img/randomization2.png" width="60%" style="display: block; margin: auto;" /&gt;
@@ -83,11 +72,70 @@ class: inverse center middle
 ]
 
 ---
-# had an idea!
+# The intuition for RDD is different
+
+## With regression discontinuity designs (RDDs) we try leverage artificial thresholds to imitate experimental group assignment
+
+Society has all kinds of thresholds where people get different treatment above and below that cut point:
+
+1. Elections
+  - The person with the most votes in an election gets to be the Mayor
+  - Every other candidate else does not
+2. Pension age
+  - People above a certain age are allowed to withdraw their pension
+  - Everyone else has to pay a penalty to do the same thing
+3. Borders
+  - People on one side of Øresundsbroen pay one tax rate
+  - People on the other side pay another tax rate
+
+---
+# RDD Intuitions
+
+## What if we compared people who fall right on either side of the threshold?
+
+- Assignment isn't random
+- But right at the threshold, maybe it's close to random?
+
+&lt;img src="img/RDD_intuition.png" width="100%" style="display: block; margin: auto;" /&gt;
+
+---
+# RDD Intuitions
+
+## But which group you fall into becomes less random the further you get from the threshold
+
+- Someone who loses an election *badly* is probably very different from a person who loses an election by a few votes
+- Someone who is 23 is probably very different from a person who is 64
+
+&lt;img src="img/RDD_intuition2.png" width="100%" style="display: block; margin: auto;" /&gt;
+
+---
+# RDD Intuitions
+
+## So we would really like to compare people just barely on either side of the threshold
+
+&lt;img src="img/RDD_intuition3.png" width="100%" style="display: block; margin: auto;" /&gt;
+
+
+---
+class: inverse center middle
+# How can we make this work? An Example
+
+.push-right[
+&lt;img src="https://dam-p-dfi.pqcloud.eu/preview/6XAlSpTzaLfBqzdLvpQ4nU/previews/cropOffsetX_0_cropOffsetY_0_maxWidth_1280_cropWidth_7212_cropHeight_4056.jpg/*/landscape169L.jpg?authcred=R3Vlc3Q6R3Vlc3Q=" width="100%" style="display: block; margin: auto;" /&gt;
+]
+
+--
+
+.push-left[
+.font120[&lt;br&gt;&lt;br&gt;What is the causal effect of &lt;br&gt;&lt;br&gt; making alcohol consumption legal &lt;br&gt;&lt;br&gt; on mortality?]
+]
+
+---
+# Let's try our idea
 
 .left-column[
 .content-box-green[
-Can't we compare those who are legally too youn to drink (&gt;21) to those who may?
+Let's compare those who are legally too young to drink (&gt;21) to those who are old enough to drink?
 ]]
 
 .right-column[
@@ -95,46 +143,55 @@ Can't we compare those who are legally too youn to drink (&gt;21) to those who m
 .panel[.panel-name[MLDA data]
 .font80[
 
-```r
+``` r
 pacman::p_load(
   tidyverse, # Data manipulation,
   ggplot2, # beautiful figures,
   estimatr, # OLS with robust SE
   texreg, # regression tables with nice layout,
-  rdrobust) # Non-parametric regression.
+  rdrobust, # Non-parametric regression,
+  RDDtools # easy RDD fitting
+)
 
 # Get the Minimum legal drinking age data!
 data("mlda", package = "masteringmetrics")
+mlda &lt;- mlda %&gt;% drop_na()
 mlda # print the tibble.
-# # A tibble: 50 × 19
-#    agecell   all allfitted internal interna…¹ exter…² exter…³ alcohol alcoh…⁴ homic…⁵ homic…⁶ suicide suici…⁷   mva
-#      &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt;
-#  1    19.1  92.8      91.7     16.6      16.7    76.2    75.0   0.639   0.794    16.3    16.3    11.2    11.6  35.8
-#  2    19.2  95.1      91.9     18.3      16.9    76.8    75.0   0.677   0.838    16.9    16.3    12.2    11.6  35.6
-#  3    19.2  92.1      92.0     18.9      17.1    73.2    75.0   0.866   0.878    15.2    16.3    11.7    11.6  34.2
-#  4    19.3  88.4      92.2     16.1      17.3    72.3    74.9   0.867   0.915    16.7    16.3    11.3    11.6  32.3
-#  5    19.4  88.7      92.3     17.4      17.4    71.3    74.9   1.02    0.949    14.9    16.3    11.0    11.6  32.7
-#  6    19.5  90.2      92.5     17.9      17.6    72.3    74.9   1.17    0.981    15.6    16.3    12.2    11.6  32.7
-#  7    19.6  96.2      92.6     16.4      17.8    79.8    74.8   0.870   1.01     16.3    16.3    12.4    11.6  36.4
-#  8    19.6  89.6      92.7     16.0      17.9    73.6    74.8   1.10    1.03     15.8    16.3    11.0    11.6  34.2
-#  9    19.7  93.4      92.8     17.4      18.1    75.9    74.7   1.17    1.06     16.8    16.3    11.9    11.6  31.9
-# 10    19.8  90.9      92.9     18.3      18.2    72.6    74.6   0.948   1.08     16.6    16.4    11.6    11.6  30.6
-# # … with 40 more rows, 5 more variables: mvafitted &lt;dbl&gt;, drugs &lt;dbl&gt;, drugsfitted &lt;dbl&gt;, externalother &lt;dbl&gt;,
-# #   externalotherfitted &lt;dbl&gt;, and abbreviated variable names ¹​internalfitted, ²​external, ³​externalfitted,
-# #   ⁴​alcoholfitted, ⁵​homicide, ⁶​homicidefitted, ⁷​suicidefitted
+# # A tibble: 48 × 19
+#    agecell   all allfitted internal internalfitted external externalfitted alcohol alcoholfitted homicide
+#      &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;          &lt;dbl&gt;    &lt;dbl&gt;          &lt;dbl&gt;   &lt;dbl&gt;         &lt;dbl&gt;    &lt;dbl&gt;
+#  1    19.1  92.8      91.7     16.6           16.7     76.2           75.0   0.639         0.794     16.3
+#  2    19.2  95.1      91.9     18.3           16.9     76.8           75.0   0.677         0.838     16.9
+#  3    19.2  92.1      92.0     18.9           17.1     73.2           75.0   0.866         0.878     15.2
+#  4    19.3  88.4      92.2     16.1           17.3     72.3           74.9   0.867         0.915     16.7
+#  5    19.4  88.7      92.3     17.4           17.4     71.3           74.9   1.02          0.949     14.9
+#  6    19.5  90.2      92.5     17.9           17.6     72.3           74.9   1.17          0.981     15.6
+#  7    19.6  96.2      92.6     16.4           17.8     79.8           74.8   0.870         1.01      16.3
+#  8    19.6  89.6      92.7     16.0           17.9     73.6           74.8   1.10          1.03      15.8
+#  9    19.7  93.4      92.8     17.4           18.1     75.9           74.7   1.17          1.06      16.8
+# 10    19.8  90.9      92.9     18.3           18.2     72.6           74.6   0.948         1.08      16.6
+# # ℹ 38 more rows
+# # ℹ 9 more variables: homicidefitted &lt;dbl&gt;, suicide &lt;dbl&gt;, suicidefitted &lt;dbl&gt;, mva &lt;dbl&gt;, mvafitted &lt;dbl&gt;,
+# #   drugs &lt;dbl&gt;, drugsfitted &lt;dbl&gt;, externalother &lt;dbl&gt;, externalotherfitted &lt;dbl&gt;
 ```
 ]]
+.panel[.panel-name[Note]
+- Everything on this slide and the next is done with tidyverse and ggplot2
+- Later we will use the RDDtools package to do the more complex tasks
+- When we do that, it will be much easier to use the plot() command instead of ggplot2
+]
 .panel[.panel-name[Plot]
 &lt;img src="13-RegDD_files/figure-html/RDD1-1.png" width="90%" style="display: block; margin: auto;" /&gt;
 ]
 .panel[.panel-name[Code]
 
-```r
+``` r
 mlda &lt;- mlda %&gt;% mutate(
   # Define those who are allowed to drink
   over21 = case_when( 
     agecell &gt;= 21 ~ "Yes",
-    TRUE ~ "No"))
+    TRUE ~ "No")
+  )
 
 ggplot(data = mlda, aes(y = all, x = agecell, color = over21)) +
   geom_point() +
@@ -144,36 +201,485 @@ ggplot(data = mlda, aes(y = all, x = agecell, color = over21)) +
        x = "Age in months") +
   guides(color = "none")
 ```
-]
-.panel[.panel-name[Plot 2]
-&lt;img src="13-RegDD_files/figure-html/RDD2-1.png" width="90%" style="display: block; margin: auto;" /&gt;
-]
-.panel[.panel-name[Plot 3]
-&lt;img src="13-RegDD_files/figure-html/RDD3-1.png" width="90%" style="display: block; margin: auto;" /&gt;
 ]]]
 
 ---
-# had an idea!
+# Let's try our idea
 
 .left-column[
-1. We need to get as close to the threshold as possible.
-2. We need to use as much as the data to gain statistical power as possible.
+.content-box-green[
+So now let's zoom in on the data right around the threshold
+]]
+
+.right-column[
+.panelset[
+.panel[.panel-name[Start at the threshold...]
+&lt;img src="13-RegDD_files/figure-html/RDD4-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+]
+.panel[.panel-name[Zoom out...]
+&lt;img src="13-RegDD_files/figure-html/RDD5-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+]]]
+
+---
+# But we need a model
+
+.push-left[
+The simplest approach is to use linear regression, and add a binary variable (0/1) *D* to indicate whether an observation *i* is above or below the threshold on the running variable of interest, *a*. Note that in the equations on the right, *y* is our dependent variable (e.g. death rate), and `\(\alpha\)` is the intercept.
+]
+
+.push-right[
+
+A simple regression model:
+
+`$$\begin{equation}
+y_{i} = \alpha + \rho D_{i} + \gamma a_{i} + e_{i}
+\end{equation}$$`
+
+We might also consider adding polynomial terms to help the model if we are not convinced that the relationship is linear. For instance, we could add a squared term (a "second order" polynomial):
+
+`$$\begin{equation}
+y_{i} = \alpha + \rho D_{i} + \gamma_{1} a_{i} + \gamma_{2} a_{i}^{2} + e_{i}
+\end{equation}$$`
+
+We can even add a polynomial with a power of three, or more! For instance, a "third order" polynomial:
+
+`$$\begin{equation}
+y_{i} = \alpha + \rho D_{i} + \gamma_{1} a_{i} + \gamma_{2} a_{i}^{2} + \gamma_{3} a_{i}^{3} + e_{i}
+\end{equation}$$`
+]
+
+## The modeling strategy on this page is referred to as *parametric* regression discontinuity
+
+---
+# Implementation
+## Parametric RDD with RDDtools
+
+.left-column[
+.content-box-green[
+Using the R package RDDtools, we can implement all of these models rather easily. The main challenge is just to install it. See Exercise 1 on that point.
+
+**First, creating a plot of the discontinuity with RDDtools**
+]]
+
+.right-column[
+.panelset[
+.panel[.panel-name[Convert data]
+
+``` r
+# Tell the package that it is an RDD dataset
+# y = the Y variable of interest, in this case mlda$all
+# x = the X variable of interest, in this case mlda$agecell
+# cutpoint = the point of discontinuity in the data, in this case 21
+drinking_rdd_data &lt;- RDDdata(
+  y=mlda$all,
+  x=mlda$agecell,
+  cutpoint=21
+  )
+
+# Note that this renames the variables to y and x. Do not be alarmed.
+# And do not change the variable names back, or you will get error messages
+```
+]
+.panel[.panel-name[Plot discontinuity]
+&lt;img src="13-RegDD_files/figure-html/RDDtools2-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+]
+.panel[.panel-name[Code]
+
+``` r
+# It's helpful to change the axis labels since it changes the variable names
+# and 'x' and 'y' aren't very informative
+plot(
+  drinking_rdd_data,
+  xlab='Age in months\n', # A little extra white space
+  ylab="Nr of deaths among US Americans aged 20-22 (1997-2003)"
+  )
+```
+]]]
+
+
+---
+# Implementation
+## Parametric RDD with RDDtools
+
+.left-column[
+.content-box-green[
+Using the R package RDDtools, we can implement all of these models rather easily. The main challenge is just to install it. See Exercise 1 on that point.
+
+**Next, creating a simple linear model without any polynomial terms**
+]]
+
+.right-column[
+.panelset[
+.panel[.panel-name[Convert data]
+
+``` r
+# Order refers to the polynomial. Polynomials of order 1 are just normal variables
+# without any exponents.
+# Slope can be set to "same" if we want both sides of the threshold to have the same
+# slope. It can also be set to "separate" if we want to add an interaction term so as
+# to allow the slopes on each side to differ from one another, as described in the textbook.
+rdd_linear &lt;- RDDreg_lm(
+  RDDobject = drinking_rdd_data,
+  order = 1,
+  slope='same'
+  )
+summary(rdd_linear)
+# 
+# Call:
+# lm(formula = y ~ ., data = dat_step1, weights = weights)
+# 
+# Residuals:
+#    Min     1Q Median     3Q    Max 
+# -5.056 -1.848  0.115  1.491  5.804 
+# 
+# Coefficients:
+#             Estimate Std. Error t value Pr(&gt;|t|)    
+# (Intercept)   91.841      0.805  114.08  &lt; 2e-16 ***
+# D              7.663      1.440    5.32  3.1e-06 ***
+# x             -0.975      0.632   -1.54     0.13    
+# ---
+# Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+# 
+# Residual standard error: 2.49 on 45 degrees of freedom
+# Multiple R-squared:  0.595,	Adjusted R-squared:  0.577 
+# F-statistic:   33 on 2 and 45 DF,  p-value: 1.51e-09
+```
+]
+.panel[.panel-name[Plot the estimate]
+&lt;img src="13-RegDD_files/figure-html/RDDtools4-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+]
+.panel[.panel-name[Code]
+
+``` r
+# It's helpful to change the axis labels since it changes the variable names
+# and 'x' and 'y' aren't very informative
+plot(
+  rdd_linear,
+  xlab='Age in months\n', # A little extra white space
+  ylab="Nr of deaths among US Americans aged 20-22 (1997-2003)"
+  )
+```
+]]]
+
+
+---
+# Implementation
+## Parametric RDD with RDDtools
+
+.left-column[
+.content-box-green[
+Using the R package RDDtools, we can implement all of these models rather easily. The main challenge is just to install it. See Exercise 1 on that point.
+
+**Finally, adding in some polynomial terms (power of 2)**
+]]
+
+.right-column[
+.panelset[
+.panel[.panel-name[Convert data]
+
+``` r
+# Order refers to the polynomial. Polynomials of order 1 are just normal variables
+# without any exponents.
+# Slope can be set to "same" if we want both sides of the threshold to have the same
+# slope. It can also be set to "separate" if we want to add an interaction term so as
+# to allow the slopes on each side to differ from one another, as described in the textbook.
+rdd_quadratic &lt;- RDDreg_lm(
+  RDDobject = drinking_rdd_data,
+  order = 2,
+  slope='same'
+  )
+summary(rdd_quadratic)
+# 
+# Call:
+# lm(formula = y ~ ., data = dat_step1, weights = weights)
+# 
+# Residuals:
+#    Min     1Q Median     3Q    Max 
+#  -4.45  -1.75   0.19   1.16   5.11 
+# 
+# Coefficients:
+#             Estimate Std. Error t value Pr(&gt;|t|)    
+# (Intercept)   92.903      0.837  110.99  &lt; 2e-16 ***
+# D              7.663      1.339    5.72  8.7e-07 ***
+# x             -0.975      0.588   -1.66   0.1046    
+# `x^2`         -0.819      0.289   -2.84   0.0069 ** 
+# ---
+# Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+# 
+# Residual standard error: 2.32 on 44 degrees of freedom
+# Multiple R-squared:  0.657,	Adjusted R-squared:  0.634 
+# F-statistic: 28.1 on 3 and 44 DF,  p-value: 2.61e-10
+```
+]
+.panel[.panel-name[Plot the estimate]
+&lt;img src="13-RegDD_files/figure-html/RDDtools6-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+]
+.panel[.panel-name[Code]
+
+``` r
+# It's helpful to change the axis labels since it changes the variable names
+# and 'x' and 'y' aren't very informative
+plot(
+  rdd_quadratic,
+  xlab='Age in months\n', # A little extra white space
+  ylab="Nr of deaths among US Americans aged 20-22 (1997-2003)"
+  )
+```
+]]]
+
+---
+class: inverse middle center
+# Break
+
+&lt;iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+
+---
+class: middle clear
+# Time to try Exercise #1
+
+.left-column[
+&lt;img src="https://www.laserfiche.com/wp-content/uploads/2014/10/femalecoder.jpg" width="80%" style="display: block; margin: auto;" /&gt;
+
+&lt;iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
 ]
 
 .right-column[
-&lt;img src="13-RegDD_files/figure-html/RDD4-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+&lt;br&gt;
+&lt;iframe src='exercise1.html' width='1000' height='600' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
 ]
+
 ---
-layout: false
-class: inverse
-# Today's general lessons
+# Reminder!
 
-1. Although OLS estimates linear models, we can "linearize" non-linear relationships. We can do so in two ways: by using polynomials, or by transforming `\(Y\)` or `\(X\)`.
-2. Polynomials are basically interaction terms of a variable with itself. By introducing `\(X^2\)`, or even higher order polynomials to our model, we let `\(\beta_{x}\)` change with a change in `\(X\)`. Importantly, every polynomial moderates/alerts the one before it with a unit increase in `\(X\)`. 
-3. Polynomials allow us to model very complex relationships. But we should be careful to not overfit the model to our particular data. Usually, a simple polynomial (i.e. `\(x\)` and `\(X^2\)` are enough).
-4. An alternative to polynomials is to transform `\(Y\)` and/or `\(X\)`. Many algebraic transformations are possible. But one of the most useful is the logarithm, which allows us to express `\(Y\)` or `\(X\)` in terms of rates of change instead of absolute unit increases.
+## We would really like to compare people just barely on either side of the threshold
+
+But so far we are using all the data points, and using polynomials to home in on real effect with our estimates. This lets us keep all the data, which gives us more statistical power. But there is an alternative.
+
+&lt;img src="img/RDD_intuition3.png" width="100%" style="display: block; margin: auto;" /&gt;
 
 
+---
+# Options
+# For balancing quality with statistical power
+
+1. Parametric Regression Discontinuity: Model the entire dataset, taking into account potential non-linearities in the data
+
+2. Nonparametric Regression Discontinuity: *Only* use data that is within a certain distance of the threshold
+
+---
+# Nonparametric RDD
+
+## How do we balance the "bandwidth"
+
+If we draw the green box too small (too close to the threshold), we will lose statistical power and won't be able to draw meaningful conclusions. If we draw the green box too big, we get more observations, but we lose the strength of the comparison. We call the width of the box the "bandwidth"
+
+&lt;img src="img/RDD_intuition3.png" width="100%" style="display: block; margin: auto;" /&gt;
+---
+# Nonparametric RDD
+
+That is, we want to estimate this:
+`$$\begin{equation}
+y_{i} = \alpha + \rho D_{i} + \gamma a_{i} + e_{i}
+\end{equation}$$`
+
+But we only want to estimate it in a sample where:
+`$$\begin{equation}
+threshold - bandwidth \ge a_{i} \le threshold + bandwidth
+\end{equation}$$`
+
+
+&lt;img src="img/RDD_intuition3.png" width="100%" style="display: block; margin: auto;" /&gt;
+---
+# Implementation
+## Nonparametric RDD with RDDtools
+
+.left-column[
+.content-box-green[
+Thankfully, finding the right bandwidth is automated with a function in RDDtools. So the process is relatively simple for us here.
+]]
+
+.right-column[
+.panelset[
+.panel[.panel-name[Convert data]
+
+``` r
+# Weird-looking function name, but it figures out the optimal bandwidth given your data
+bandwidth &lt;- RDDbw_IK(drinking_rdd_data)
+reg_nonparam &lt;- RDDreg_np(RDDobject = drinking_rdd_data, bw = bandwidth, slope='same')
+coef_nonparam &lt;- summary(reg_nonparam)$coefMat[1]
+se_nonparam &lt;- summary(reg_nonparam)$coefMat[2]
+```
+]
+.panel[.panel-name[Plot the estimate]
+
+``` r
+summary(reg_nonparam)
+# ### RDD regression: nonparametric local linear###
+# 	Bandwidth:  1.56 
+# 	Number of obs: 38 (left: 19, right: 19)
+# 
+# 	Weighted Residuals:
+#    Min     1Q Median     3Q    Max 
+# -7.633 -2.290 -0.309  0.784  4.221 
+# 
+# 	Coefficient:
+#   Estimate Std. Error z value Pr(&gt;|z|)    
+# D     9.19       1.74    5.29  1.2e-07 ***
+# ---
+# Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+# 
+# 	Local R squared: 0.709
+```
+]]]
+
+---
+# Empirical example #1
+## Women and corruption
+
+From Pereira &amp; Fernandez-Vazquez. (2022). Does electing women reduce corruption? *Legislative Studies Quarterly*
+
+---
+# Empirical example #1
+## Women and corruption
+
+.push-left[
+In 2007 Spain made a new rule saying that for towns with a population larger than 5000 people, parties had to provide at least 40% of their seats to women. They use this as an RDD to look into the well-known correlation between women in government and corruption.
+]
+
+.push-right[
+&lt;img src="./img/women_elected_threshold.png" width="70%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+# Empirical example #1
+## Women and corruption
+
+.push-left[
+There's an effect! But why?
+]
+
+.push-right[
+&lt;img src="./img/women_elected_effects.png" width="80%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+# Empirical example #1
+## Women and corruption
+
+.push-left[
+There's an effect! But why?
+
+- Women are socialized differently
+- Women are more risk averse
+- Women are under more scrutiny when elected
+- Women tend to work on policies in low-corruption areas
+]
+
+.push-right[
+&lt;img src="./img/women_elected_effects.png" width="80%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+# Empirical example #2
+## Cumulative advantage in basketball
+
+.push-left[
+From Biegert, Kühhirt, &amp; Van Lancker. (2022). They Can’t All Be Stars: The Matthew Effect, Cumulative Status Bias, and Status Persistence in NBA All-Star Elections *American Sociological Review*
+]
+
+.push-right[
+.content-box-green[
+Sociologists have argued for 80 years that small early advantages between equals can create large inequalities. Here they study this using unique data from professional basketball.
+]
+]
+
+---
+# Empirical example #2
+## Cumulative advantage in basketball
+
+.push-left[
+- Fans vote to decide who plays in the NBA "All-Star Game"
+- People in the Top X players at each position get to play
+- People with just a few votes less do not get to play
+
+.content-box-green[
+Does winning the fan vote in time *t* increase a person's chances of winning the fan vote again in time *t+1* and beyond? 
+]
+
+]
+
+.push-right[
+&lt;img src="./img/lebron.png" width="60%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+# Empirical example #2
+## Cumulative advantage in basketball
+
+.push-left[
+There's an effect! But why?
+
+Sociologist Robert Merton argued that this happens because we don't have enough available space to reward *every* deserving person (in his case, it was scientists...think the Nobel prize). We have to make decisions between people who are more or less equal, and rewarding one person at the threshold but not the other creates an actual inequality where there didn't use to be any.
+]
+
+]
+
+.push-right[
+&lt;img src="./img/nba_rdd_effects.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+# Empirical example #2
+## Cumulative advantage in basketball
+
+.push-left[
+Maybe the players who won the first time are just better? Nope. Every measure of performance is insignificant, while the RDD estimate remains significant.
+]
+
+.push-right[
+&lt;img src="./img/nba_covariates.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+# Empirical example #2
+## Far-right elections and welfare chauvisnism
+
+.push-left[
+I can't show you the evidence, because it isn't published yet! But I saw your professor present this work in Leipzig.
+
+.content-box-green[
+Newly arrived residents of Italian regions that just barely elect far-right governments are more likely to experience delays and difficulties getting their healthcare access set up, compared to those who live in regions that just barely *did not* elect far-right governments.
+]
+
+]
+
+.push-right[
+&lt;img src="./img/merlin.png" width="80%" style="display: block; margin: auto;" /&gt;
+]
+
+
+---
+class: inverse middle center
+# Break
+
+&lt;iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+
+---
+class: middle clear
+# Time to try Exercise #2
+
+.left-column[
+&lt;img src="https://www.laserfiche.com/wp-content/uploads/2014/10/femalecoder.jpg" width="80%" style="display: block; margin: auto;" /&gt;
+
+&lt;iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+]
+
+.right-column[
+&lt;br&gt;
+&lt;iframe src='exercise2.html' width='1000' height='600' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+]
+
+---
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="../template/remark-latest.min.js"></script>

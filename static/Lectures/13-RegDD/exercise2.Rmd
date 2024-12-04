@@ -46,24 +46,24 @@ Lee2008_rdd <- RDDdata(
   cutpoint = 0
   )
 
-reg_para1 <- RDDreg_lm(RDDobject = Lee2008_rdd, order = 1)
+reg_para1 <- RDDreg_lm(RDDobject = Lee2008_rdd, order = 1, slope='same')
 coef1 <- round(summary(reg_para1)$coefficients[2, 1], 3)
 se1 <- round(summary(reg_para1)$coefficients[2, 2], 3)
 
-reg_para2 <- RDDreg_lm(RDDobject = Lee2008_rdd, order = 2)
+reg_para2 <- RDDreg_lm(RDDobject = Lee2008_rdd, order = 2, slope='same')
 coef2 <- round(summary(reg_para2)$coefficients[2, 1], 3)
 se2 <- round(summary(reg_para2)$coefficients[2, 2], 3)
 
-reg_para3 <- RDDreg_lm(RDDobject = Lee2008_rdd, order = 3)
+reg_para3 <- RDDreg_lm(RDDobject = Lee2008_rdd, order = 3, slope='same')
 coef3 <- round(summary(reg_para3)$coefficients[2, 1], 3)
 se3 <- round(summary(reg_para3)$coefficients[2, 2], 3)
 
-reg_para4 <- RDDreg_lm(RDDobject = Lee2008_rdd, order = 4)
+reg_para4 <- RDDreg_lm(RDDobject = Lee2008_rdd, order = 4, slope='same')
 coef4 <- round(summary(reg_para4)$coefficients[2, 1], 3)
 se4 <- round(summary(reg_para4)$coefficients[2, 2], 3)
 ```
 
-1A. Fit separate models to the Lee2008 data where (a) you assume the relationship is linear, as in Exercise 1; (b) you assume the relationship is a second order polynomial, i.e. a power of two; and (c) you assume the relationship is a third order polynomial, i.e. a power of three, and (d) you assume the relationship is a fourth order polynomial, i.e. a power of four. Create a plot for each model, showing the line of best fit.
+1A. Fit separate models to the Lee2008 data where (a) you assume the relationship is linear, as in Exercise 1; (b) you assume the relationship is a second order polynomial, i.e. a power of two; and (c) you assume the relationship is a third order polynomial, i.e. a power of three, and (d) you assume the relationship is a fourth order polynomial, i.e. a power of four. The slope should be the same on both sides of the threshold, for every model. Create a plot for each model, showing the line of best fit.
 
 `r hide("R solution -> dont' peak to early ;) !")`
 ```{r ref.label="nonlinear_rdds"}
@@ -111,7 +111,7 @@ plot(
 ```
 `r unhide()`
 
-1B. Inspect each plot visually. Every time you increase the order of the polynomial the line appears to provide `r mcq(c("a worse", "the same", answer = "a better"))` fit for the data. Every model provides a different estimate for the effect of being the winner of the previous election. Among the models that assume a non-linear relationship, the largest estimate is (3 decimal places) `r fitb(coef3, width = "5")` and the smallest is (3 decimal places) `r fitb(coef2, width = "5")`.
+1B. Every model provides a different estimate for the effect of being the winner of the previous election. Among the models that assume a non-linear relationship, the largest estimate is (3 decimal places) `r fitb(coef2, width = "5")` and the smallest is (3 decimal places) `r fitb(coef4, width = "5")`.
 
 `r hide("R solution Part 1 -> dont' peak to early ;) !")`
 ```{r}
@@ -133,14 +133,14 @@ summary(reg_para4)
 
 ```{r nonparam_rdd, include=FALSE}
 bandwidth <- RDDbw_IK(Lee2008_rdd)
-reg_nonparam <- RDDreg_np(RDDobject = Lee2008_rdd, bw = bandwidth)
+reg_nonparam <- RDDreg_np(RDDobject = Lee2008_rdd, bw = bandwidth, slope='same')
 coef_nonparam <- summary(reg_nonparam)$coefMat[1]
 se_nonparam <- summary(reg_nonparam)$coefMat[2]
 
 summary(reg_nonparam)
 ```
 
-2. Now let's hone in on the comparison at the threshold. Fit a nonparametric model on the Lee2008 data. The estimated effect in the nonparametric model is (3 decimal places) `r fitb(coef_nonparam, width = "5")` and its standard error is (3 decimal places) `r fitb(se_nonparam, width = "5")`. This means that the effect is `r mcq(c("Not significant", answer = "Statistically significant", "worrysome"))`.
+2. Now let's hone in on the comparison at the threshold. Fit a nonparametric model on the Lee2008 data, again assuming that both sides of the threshold have the same slope. The estimated effect in the nonparametric model is (3 decimal places) `r fitb(coef_nonparam, width = "5")` and its standard error is (3 decimal places) `r fitb(se_nonparam, width = "5")`. This means that the effect is `r mcq(c("Not significant", answer = "Statistically significant", "worrysome"))`.
 
 `r hide("R solution -> dont' peak to early ;) !")`
 ```{r ref.label="nonparam_rdd"}
@@ -148,14 +148,3 @@ summary(reg_nonparam)
 ```
 `r unhide()`
 
-3. Create a plot showing the results of your nonparametric RDD in Q2.
-
-`r hide("R solution -> dont' peak to early ;) !")`
-```{r}
-plot(
-  reg_nonparam,
-  xlab='Democratic Win Margin in time t\n',
-  ylab='Democratic Vote Share in time t+1'
-  )
-```
-`r unhide()`
