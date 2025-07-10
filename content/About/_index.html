@@ -17,15 +17,18 @@ view: 2
 <h1>Before the first session!</h1>
 <p>Before the first session, I would like you to please follow these steps in exactly this order, regardless of whether you have worked with R and RStudio before.</p>
 <ol style="list-style-type: decimal">
-<li><p><a href="https://mirrors.dotsrc.org/cran/">Get a recent version of R (&gt;= 4.4.0)</a>.</p></li>
-<li><p><a href="https://rstudio.com/products/rstudio/download/#download">Install RStudio (&gt;= 2024.04)</a>, or update to the most recent version. Also check <a href="https://psyteachr.github.io/msc-data-skills/installingr.html#installing-base-r">this homepage</a>.</p></li>
+<li><p><a href="https://mirrors.dotsrc.org/cran/">Get a recent version of R (&gt;= 4.5.0)</a>.</p></li>
+<li><p><a href="https://rstudio.com/products/rstudio/download/#download">Install RStudio (&gt;= 2025.05)</a>, or update to the most recent version. Also check <a href="https://psyteachr.github.io/msc-data-skills/installingr.html#installing-base-r">this homepage</a>.</p></li>
 <li><p>Open RStudio and follow these <a href="/Lectures/0-Prep/0-Prep.html">instructions to setup a Project</a> for this class.</p></li>
-<li><p>As a final step, run the lines of code below in the Console of your RStudio. Note that this can take a while. If you are asked whether you want to “Do you want to install from sources the package which needs compilation?” answer: “no”. Make sure to wait until the courser blinks behind a <code>&gt;</code> again. Press enter again two times to produce two more <code>&gt;</code>.</p></li>
+<li><p>As a final step, run the lines of code below, step by step (!), in the Console of your RStudio. Note that this can take a while. If you are asked whether you want to “Do you want to install from sources the package which needs compilation?” answer: “No”. Make sure to wait until the courser blinks behind a <code>&gt;</code> again. Press enter again two times to produce two more <code>&gt;</code>.</p></li>
 </ol>
-<pre class="r"><code>update.packages(ask = FALSE)
+<pre class="r"><code># Step 1, wait until done (indicated by blinking courser behind `&gt;`)
+update.packages(ask = FALSE)
 
+# Step 2, wait until done (indicated by blinking courser behind `&gt;`)
 install.packages(&quot;pacman&quot;)
 
+# Step 3, wait until done (indicated by blinking courser behind `&gt;`)
 pacman::p_load(
   tidyverse, # Data manipulation,
   ggplot2, # beautiful figures,
@@ -38,12 +41,19 @@ pacman::p_load(
   countrycode, # Easy recodings of country names,
   remotes) # Install beta version packages from GitHub.
 
+# Step 4, wait until done (indicated by blinking courser behind `&gt;`)
 remotes::install_github(&quot;jrnold/masteringmetrics&quot;, subdir = &quot;masteringmetrics&quot;)
+
+# Step 5, wait until done (indicated by blinking courser behind `&gt;`)
 remotes::install_github(&quot;xmarquez/democracyData&quot;)
+
+# Step 6, wait until done (indicated by blinking courser behind `&gt;`)
 remotes::install_github(&quot;avehtari/ROS-Examples&quot;, subdir = &quot;rpackage&quot;)
-# P.S.: If you cannot install one or several of these remotes::install_github(...) packages
+
+# Important: If you cannot install one or several of these remotes::install_github(...) packages
 # Please try from home, or an internet connection that is not associated with KU.
 
+# Step 7, wait until done (indicated by blinking courser behind `&gt;`)
 pacman::p_load(
   rosdata, # Data from Gelman &amp; Hill&#39;s &quot;Regression and other Stories&quot;
   masteringmetrics, # Data and examples from Mastering Metrics
@@ -61,8 +71,8 @@ pacman::p_load(
 <ol style="list-style-type: decimal">
 <li>Thoroughly prepare for each class by completing the assigned readings.</li>
 <li>Actively engage in lectures by asking relevant questions, participating in discussions, and completing assigned tasks during exercise classes.</li>
-<li>Solve the weekly Online Quizzes on Absalon (at least 10 to qualify for the exam!).</li>
-<li>Complete and submit the integrated exam shared with Mads’ Jæger’s course “Velfærd, ulighed og mobilitet”.</li>
+<li><strong>10 Online Quizzes:</strong> Solve the weekly Online Quizzes on Absalon (at least 10 to qualify for the exam!).</li>
+<li><strong>Home assignment (final exam):</strong> Complete and submit the home assignment (final exam) by <strong>noon 12 January 2026</strong>.</li>
 </ol>
 </div>
 <div id="course-structure" class="section level1">
@@ -73,10 +83,10 @@ pacman::p_load(
 <div id="course-schedule-and-team" class="section level1">
 <h1>Course Schedule and Team</h1>
 <p>Wednesdays, kl. 10-13: Lecture @ CSS 1-1-18 (Merlin)</p>
-<p>Fridays, kl. 8-10, Exercise group 1 @ CSS 2-1-02 (Jonas)</p>
-<p>Fridays, kl. 8-10, Exercise group 1 @ CSS 4-1-30 (Josefine)</p>
-<p>Fridays, kl. 8-10, Exercise group 1 @ CSS 2-2-55 (Elias)</p>
-<p>Fridays, kl. 8-10, Exercise group 1 @ CSS 2-1-55 (Adna)</p>
+<p>Fridays, kl. 8-10, Exercise group 1 @ CSS 4-0-02 (Halfdan)</p>
+<p>Fridays, kl. 8-10, Exercise group 1 @ CSS 2-2-55 (Sofie)</p>
+<p>Fridays, kl. 10-12, Exercise group 1 @ CSS 1-0-10 (Halfdan)</p>
+<p>Fridays, kl. 10-12, Exercise group 1 @ CSS 2-2-55 (Sofie)</p>
 </div>
 <div id="course-literature" class="section level1">
 <h1>Course Literature</h1>

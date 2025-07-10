@@ -20,19 +20,22 @@ Ultimately, this course aims to establish a strong foundation in statistical ana
 
 Before the first session, I would like you to please follow these steps in exactly this order, regardless of whether you have worked with R and RStudio before.
 
-1. [Get a recent version of R (>= 4.4.0)](https://mirrors.dotsrc.org/cran/).
+1. [Get a recent version of R (>= 4.5.0)](https://mirrors.dotsrc.org/cran/).
 
-2. [Install RStudio (>= 2024.04)](https://rstudio.com/products/rstudio/download/#download), or update to the most recent version. Also check [this homepage](https://psyteachr.github.io/msc-data-skills/installingr.html#installing-base-r). 
+2. [Install RStudio (>= 2025.05)](https://rstudio.com/products/rstudio/download/#download), or update to the most recent version. Also check [this homepage](https://psyteachr.github.io/msc-data-skills/installingr.html#installing-base-r). 
 
 3. Open RStudio and follow these [instructions to setup a Project](/Lectures/0-Prep/0-Prep.html) for this class.
 
-4. As a final step, run the lines of code below in the Console of your RStudio. Note that this can take a while. If you are asked whether you want to "Do you want to install from sources the package which needs compilation?" answer: "no". Make sure to wait until the courser blinks behind a `>` again. Press enter again two times to produce two more `>`.
+4. As a final step, run the lines of code below, step by step (!), in the Console of your RStudio. Note that this can take a while. If you are asked whether you want to "Do you want to install from sources the package which needs compilation?" answer: "No". Make sure to wait until the courser blinks behind a `>` again. Press enter again two times to produce two more `>`.
 
 ```{r eval = FALSE}
+# Step 1, wait until done (indicated by blinking courser behind `>`)
 update.packages(ask = FALSE)
 
+# Step 2, wait until done (indicated by blinking courser behind `>`)
 install.packages("pacman")
 
+# Step 3, wait until done (indicated by blinking courser behind `>`)
 pacman::p_load(
   tidyverse, # Data manipulation,
   ggplot2, # beautiful figures,
@@ -45,12 +48,19 @@ pacman::p_load(
   countrycode, # Easy recodings of country names,
   remotes) # Install beta version packages from GitHub.
 
+# Step 4, wait until done (indicated by blinking courser behind `>`)
 remotes::install_github("jrnold/masteringmetrics", subdir = "masteringmetrics")
+
+# Step 5, wait until done (indicated by blinking courser behind `>`)
 remotes::install_github("xmarquez/democracyData")
+
+# Step 6, wait until done (indicated by blinking courser behind `>`)
 remotes::install_github("avehtari/ROS-Examples", subdir = "rpackage")
-# P.S.: If you cannot install one or several of these remotes::install_github(...) packages
+
+# Important: If you cannot install one or several of these remotes::install_github(...) packages
 # Please try from home, or an internet connection that is not associated with KU.
 
+# Step 7, wait until done (indicated by blinking courser behind `>`)
 pacman::p_load(
   rosdata, # Data from Gelman & Hill's "Regression and other Stories"
   masteringmetrics, # Data and examples from Mastering Metrics
@@ -58,7 +68,7 @@ pacman::p_load(
 ```
 
 5. Now type `sessionInfo()` into your console and check whether all of the following are mentioned under "other attached packages": tidyverse, ggplot2, wbstats, estimatr, modelr, furniture,  modelsummary, ivreg, countrycode, remotes, rosdata, masteringmetrics, and finally democracyData. **If any package is missing. Contact a tutor to help you set everything up properly.**
-  
+
 - Please always make sure to bring your laptop to class.
 
 # Course Components and Expectations 
@@ -67,8 +77,8 @@ This course consists of a combination of methodological and substantive lectures
 
 1. Thoroughly prepare for each class by completing the assigned readings.
 2. Actively engage in lectures by asking relevant questions, participating in discussions, and completing assigned tasks during exercise classes.
-3. Solve the weekly Online Quizzes on Absalon (at least 10 to qualify for the exam!).
-4. Complete and submit the integrated exam shared with Mads' Jæger's course "Velfærd, ulighed og mobilitet".
+3. **10 Online Quizzes:** Solve the weekly Online Quizzes on Absalon (at least 10 to qualify for the exam!).
+4. **Home assignment (final exam):** Complete and submit the home assignment (final exam) by **noon 12 January 2026**.
 
 # Course structure
 
@@ -81,13 +91,13 @@ The course schedule includes weekly lecture every Wednesday at 10am. Each sessio
 
 Wednesdays, kl. 10-13: Lecture @ CSS 1-1-18 (Merlin) 
 
-Fridays, kl. 8-10, Exercise group 1 @ CSS 2-1-02 (Jonas)
+Fridays, kl. 8-10, Exercise group 1 @ CSS 4-0-02	 (Halfdan)
 
-Fridays, kl. 8-10, Exercise group 1 @ CSS 4-1-30 (Josefine)
+Fridays, kl. 8-10, Exercise group 1 @ CSS 2-2-55 (Sofie)
 
-Fridays, kl. 8-10, Exercise group 1 @ CSS 2-2-55 (Elias)
+Fridays, kl. 10-12, Exercise group 1 @ CSS 1-0-10 (Halfdan)
 
-Fridays, kl. 8-10, Exercise group 1 @ CSS 2-1-55 (Adna)
+Fridays, kl. 10-12, Exercise group 1 @ CSS 2-2-55 (Sofie)
 
 
 # Course Literature 
