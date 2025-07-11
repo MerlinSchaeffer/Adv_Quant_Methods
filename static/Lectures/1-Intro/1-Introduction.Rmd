@@ -23,6 +23,7 @@ library(ggrepel) # Nicely placed labels in figures.
 library(modelr)
 library(webexercises) # Small web-based answer scales.
 library(equatiomatic) # Regression equations from model objects.
+library(pdftools)
 
 options(htmltools.preserve.raw = FALSE,
         htmltools.dir.version = FALSE, servr.interval = 0.5, width = 115, digits = 3)
@@ -48,10 +49,10 @@ xaringanExtra::use_panelset()
 
 | TA       | Fridays  | Room       |
 |:---------|:---------|:-----------|
-| Adna     | 8  am    | CSS 2-1-02 |
-| Josefine | 8  am    | CSS 4-1-30 |
-| Elias    | 10 am    | CSS 2-2-55 |
-| Jonas    | 10 am    | CSS 2-1-55 |
+| Sofie     | 8  am    | CSS 2-2-55 |
+| Halfdan | 8  am    | CSS 4-0-02 |
+| Sofie    | 10 am    | CSS 2-2-55 |
+| Halfdan    | 10 am    | CSS 1-0-10 |
 ]
 
 .right-column[
@@ -86,7 +87,6 @@ knitr::include_graphics('https://www.templehealth.org/sites/default/files/styles
 ```
 ]
 
-
 .right-column[
 ```{r, echo = FALSE, out.width='100%'}
 knitr::include_graphics('./img/Paired_Vignette.png')
@@ -95,7 +95,6 @@ knitr::include_graphics('./img/Paired_Vignette.png')
 ]
 
 ---
-
 
 ```{r, echo = FALSE, out.width='80%'}
 knitr::include_graphics('./img/jcac025f1.jpeg')
@@ -107,14 +106,14 @@ knitr::include_graphics('./img/jcac025f1.jpeg')
 ```{r, echo = FALSE, out.width='42%'}
 knitr::include_graphics('./img/Krzysz.png')
 ```
-.center[.backgrnote[*Source*: `r Citet(myBib, "krakowski_populist_2022")`]]
+.center[.backgrnote[*Source*: `r Citet(myBib, "schaeffer_when_2025")`]]
 
 ---
 
 ```{r, echo = FALSE, out.width='95%'}
 knitr::include_graphics('./img/IT-Healthcare.png')
 ```
-.center[.backgrnote[*Source*: `r Citet(myBib, "krakowski_populist_2022")`]]
+.center[.backgrnote[*Source*: `r Citet(myBib, "schaeffer_when_2025")`]]
 
 ---
 
@@ -122,7 +121,7 @@ knitr::include_graphics('./img/IT-Healthcare.png')
 ```{r, echo = FALSE, out.width='45%'}
 knitr::include_graphics('./img/Wiedner.png')
 ```
-.center[.backgrnote[*Source*: `r Citet(myBib, "wiedner_ethno-religious_2023")`]]
+.center[.backgrnote[*Source*: `r Citet(myBib, "wiedner_local_2025")`]]
   
 ---
 layout: false
@@ -212,7 +211,7 @@ Think of the last exam you wrote. What type of research question did it enage wi
 .font130[.center[Use data to discover patterns, <br> and the .alert[social mechanisms that bring them about.]]]
 
 ```{r, echo = FALSE, out.width='70%', fig.align='center'}
-knitr::include_graphics('https://liu.se/-/media/istock-501261958.jpg?mw=1120&mh=1120&hash=DA8977CCE6A6E600AE80A40CFEE771C9')
+knitr::include_graphics('https://researchleap.com/wp-content/uploads/2021/12/Population-data.jpeg')
 ```
 
 ---
@@ -336,7 +335,7 @@ knitr::include_graphics('./img/Krzysz.png')
 ```{r, echo = FALSE, out.width='100%', fig.align='center'}
 knitr::include_graphics('./img/Figure2a-1.png')
 ```
-.backgrnote[.center[*Source:* `r Citet(myBib, "krakowski_populist_2022")`]]
+.backgrnote[.center[*Source:* `r Citet(myBib, "schaeffer_when_2025")`]]
 ]
 
 ---
@@ -444,7 +443,7 @@ knitr::include_graphics('https://www.mountpolley.com/wp-content/uploads/2020/08/
 ---
 # Task 1
 
-1. Get a [recent version of R (>= 4.3.0)](https://mirrors.dotsrc.org/cran/).
+1. Get a [recent version of R (>= 4.5.0)](https://mirrors.dotsrc.org/cran/).
 
 2. [Install RStudio](https://posit.co/download/rstudio-desktop/), or update to the most recent version.
 

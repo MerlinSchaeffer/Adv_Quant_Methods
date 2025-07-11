@@ -16,7 +16,7 @@ library(webexercises)
 
 1. Do the [Setup](https://merlin-ols.netlify.app/about/), if you have not yet done so. 
 
-2. Start a new R-script and copy the lines of R code from my slides that generate 'Dat'. That is, get Freedom House and WB data via the APIs, join them, and construct our socialism index.
+2. Start a new R-script and copy the lines of R code from my slides that generate 'Dat'. That is, get V-dem and WB data via the APIs, join them, and construct our socialism index.
   
 `r hide("R solution -> dont' peak too early ;) !")`
 ```{r}
@@ -25,62 +25,61 @@ pacman::p_load(
   ggplot2, # beautiful figures,
   wbstats, # download data from Worldbank. Tremendous source of global socio-economic data.
   estimatr, # OLS with robust SE,
-  democracyData, # download democracy data used in the scholarly literature.
+  vdemdata, # Use varieties of democracy data, #<<
   countrycode, # Easy recodings of country names,
+  modelsummary, # regression tables with nice layout,
   remotes) # Install beta version packages from GitHub.
 
-# 1. Download Freedom House data for all countries since 1972,
-Dat_citi_rights <- download_fh(verbose = FALSE) %>% 
-  rename(country = fh_country, # rename country ID,
-         citizen_rights = fh_total_reversed, # rename Citizenship rights indicator,
-         date = year) %>% # rename year,
-  mutate(country = case_when( 
-    country == "Vietnam" ~ "Viet Nam", # Rename Vietnam
-    TRUE ~ country)) %>% # Leave all others as they are
-  select(country, date, citizen_rights) # Keep only these 3 variables.
+# 1. V-Dem data
+(Dat_vdem <- vdem %>% # The data are part of the package we loaded earlier
+    as_tibble() %>% # turn into a tiblle
+    select(country_name, country_text_id, year, v2xcl_rol) %>%
+    rename(equal_liberty = v2xcl_rol, # rename liberty variable
+           country = country_name) %>% #rename country variable
+    select(-country)) # Drop the country variable !!
 
 # 2. Download poverty data: <US$2.15 per day
-Dat_poverty <- wb_data("SI.POV.DDAY", 
-                        start_date = 1972, end_date = 2022) %>% #<<
-   rename(poverty = SI.POV.DDAY) %>% # rename poverty variable,
-   select(country, date, poverty) %>% # Keep only 3 variables
+(Dat_poverty <- wb_data("SI.POV.DDAY", # Download poverty data: <$2.15 per day, #<<
+                        start_date = 1972, end_date = 2025) %>% #<<
+   rename(poverty = SI.POV.DDAY, # rename poverty variable,
+          year = date, # rename year variable,
+          country_text_id = iso3c) %>% # rename country abbreviation,
+   select(country_text_id, year, country, poverty) %>% # Keep only 3 variables
    drop_na(poverty) %>% # Drop cases with missing data,
-   group_by(country) %>% # Group by country,
-   filter(date == max(date)) %>% # Keep the most recent data per country.
-   ungroup()
+   group_by(country) %>% filter(year == max(year)) %>% ungroup()) # Keep the most recent poverty statistic per country.
 
-# 3. Join Freedom House and Worldbank data
-Dat <- inner_join(Dat_poverty, Dat_citi_rights, by = c("country", "date"))
+# 3. Join V-dem and Worldbank data
+Dat <- inner_join(Dat_poverty, Dat_vdem, by = c("country_text_id", "year"))
 
 # 4. Code socialism index
 Dat <- Dat %>% mutate(socialist = case_when( # Years socialist minus years since,
-  country == "China" ~ date - 1949,
-  country == "Viet Nam" ~ date - 1945,
-  country == "Algeria" ~ date - 1962,
-  str_detect(country,"Portugal|Bangladesh") ~ date - 1972,
-  country == "Guinea-Bissau" ~ date - 1973,
-  country == "India" ~ date - 1976,
-  country == "Nicaragua" ~ date - 1979,
-  country == "Sri Lanka" ~ date - 1978,
-  country == "Tanzania" ~ date - 1964,
-  country == "Albania" ~ (1992 - 1944) - (date - 1992),
-  str_detect(country, "Angola|Cabo Verde|Madagascar") ~ (1992 - 1975) - (date - 1992),
-  str_detect(country,"Belarus|Bulgaria") ~ (1990 - 1946) - (date - 1990),
-  str_detect(country, "Benin|Mozambique") ~ (1990 - 1975) - (date - 1990),
-  country == "Chad" ~ (1975 - 1962) - (date - 1975), country == "Congo, Rep." ~ (1992 - 1970) - (date - 1992),
-  country == "Czech Republic" ~ (1990 - 1948) - (date - 1990), country == "Djibouti" ~ (1992 - 1981) - (date - 1992),
-  country == "Ethiopia" ~ (1991 - 1974) - (date - 1991), country == "Ghana" ~ (1966 - 1960) - (date - 1966),
-  country == "Guinea" ~ (1984 - 1958) - (date - 1984), country == "Hungary" ~ (1989 - 1949) - (date - 1989),
-  country == "Iraq" ~ (2005 - 1958) - (date - 2005), country == "Mali" ~ (1991 - 1960) - (date - 1991),
-  country == "Mauritania" ~ (1978 - 1961) - (date - 1978), country == "Mongolia" ~ (1992 - 1924) - (date - 1992),
-  country == "Myanmar" ~ (1988 - 1962) - (date - 1988), country == "Poland" ~ (1989 - 1945) - (date - 1989),
-  country == "Romania" ~ (1989 - 1947) - (date - 1989), country == "Russian Federation" ~ (1991 - 1922) - (date - 1991),
-  country == "Seychelles" ~ (1991 - 1977) - (date - 1991), country == "Senegal" ~ (1981 - 1960) - (date - 1981),
-  country == "Sierra Leone" ~ (1991 - 1978) - (date - 1991), country == "Somalia" ~ (1991 - 1969) - (date - 1991),
-  country == "Sudan" ~ (1985 - 1969) - (date - 1985), country == "Syria" ~ (2012 - 1963) - (date - 2012),
-  country == "Tunisia" ~ (1988 - 1964) - (date - 1988), country == "Ukraine" ~ (1991 - 1919) - (date - 1991),
-  country == "Yemen, Rep." ~ (1991 - 1967) - (date - 1991), country == "Zambia" ~ (1991 - 1973) - (date - 1991),
-  str_detect(country,"Slovenia|Croatia|Serbia|Montenegro|Bosnia and Herzegovina|North Macedonia|Kosovo") ~ (1992 - 1943) - (date - 1992),
+  country == "China" ~ year - 1949,
+  country == "Viet Nam" ~ year - 1945,
+  country == "Algeria" ~ year - 1962,
+  str_detect(country,"Portugal|Bangladesh") ~ year - 1972,
+  country == "Guinea-Bissau" ~ year - 1973,
+  country == "India" ~ year - 1976,
+  country == "Nicaragua" ~ year - 1979,
+  country == "Sri Lanka" ~ year - 1978,
+  country == "Tanzania" ~ year - 1964,
+  country == "Albania" ~ (1992 - 1944) - (year - 1992),
+  str_detect(country, "Angola|Cabo Verde|Madagascar") ~ (1992 - 1975) - (year - 1992),
+  str_detect(country,"Belarus|Bulgaria") ~ (1990 - 1946) - (year - 1990),
+  str_detect(country, "Benin|Mozambique") ~ (1990 - 1975) - (year - 1990),
+  country == "Chad" ~ (1975 - 1962) - (year - 1975), country == "Congo, Rep." ~ (1992 - 1970) - (year - 1992),
+  country == "Czech Republic" ~ (1990 - 1948) - (year - 1990), country == "Djibouti" ~ (1992 - 1981) - (year - 1992),
+  country == "Ethiopia" ~ (1991 - 1974) - (year - 1991), country == "Ghana" ~ (1966 - 1960) - (year - 1966),
+  country == "Guinea" ~ (1984 - 1958) - (year - 1984), country == "Hungary" ~ (1989 - 1949) - (year - 1989),
+  country == "Iraq" ~ (2005 - 1958) - (year - 2005), country == "Mali" ~ (1991 - 1960) - (year - 1991),
+  country == "Mauritania" ~ (1978 - 1961) - (year - 1978), country == "Mongolia" ~ (1992 - 1924) - (year - 1992),
+  country == "Myanmar" ~ (1988 - 1962) - (year - 1988), country == "Poland" ~ (1989 - 1945) - (year - 1989),
+  country == "Romania" ~ (1989 - 1947) - (year - 1989), country == "Russian Federation" ~ (1991 - 1922) - (year - 1991),
+  country == "Seychelles" ~ (1991 - 1977) - (year - 1991), country == "Senegal" ~ (1981 - 1960) - (year - 1981),
+  country == "Sierra Leone" ~ (1991 - 1978) - (year - 1991), country == "Somalia" ~ (1991 - 1969) - (year - 1991),
+  country == "Sudan" ~ (1985 - 1969) - (year - 1985), country == "Syria" ~ (2012 - 1963) - (year - 2012),
+  country == "Tunisia" ~ (1988 - 1964) - (year - 1988), country == "Ukraine" ~ (1991 - 1919) - (year - 1991),
+  country == "Yemen, Rep." ~ (1991 - 1967) - (year - 1991), country == "Zambia" ~ (1991 - 1973) - (year - 1991),
+  str_detect(country,"Slovenia|Croatia|Serbia|Montenegro|Bosnia and Herzegovina|North Macedonia|Kosovo") ~ (1992 - 1943) - (year - 1992),
   TRUE ~ 0),
   socialist = case_when( # Min. 5 years given socialist history,
     (socialist < 5 & socialist > 0) | socialist < 0 ~ 5,
@@ -88,13 +87,13 @@ Dat <- Dat %>% mutate(socialist = case_when( # Years socialist minus years since
 ```
 `r unhide()`
 
-3. Make a scatterplot with poverty as outcome on the Y-axis and civic and political citizenship rights as predictor on the X-axis.
+3. Make a scatterplot with poverty as outcome on the Y-axis and the index of equality and liberty as predictor on the X-axis.
 `r hide("R solution -> dont' peak too early ;) !")`
 ```{r out.width='100%', fig.height = 4, fig.width = 7.5, results = FALSE, echo = TRUE}
-ggplot(data = Dat, aes(y = poverty, x = citizen_rights)) +
+ggplot(data = Dat, aes(y = poverty, x = equal_liberty)) +
   geom_text(aes(label = country)) +
   labs(y = "% population with less than US$2.15 a day\n (less than DKK420 per month)", 
-       x = "Freedom House index of citizenship rights") +
+       x = "Index of equality before the law and individual liberty") +
   theme_minimal() +
   guides(color = "none")
 ```
@@ -102,21 +101,21 @@ ggplot(data = Dat, aes(y = poverty, x = citizen_rights)) +
 
 ```{r results = FALSE, echo = FALSE}
 cor_povcitiz <- cor_povcitiz <- Dat %>% 
-  select(poverty, citizen_rights) %>% 
+  select(poverty, equal_liberty) %>% 
   cor() %>% 
   round(., 2)
 cor_povcitiz <- cor_povcitiz[1, 2]
 ```
 
-4. Estimate the correlation between poverty and civic and political citizenship rights (rounded to two digits): `r fitb(cor_povcitiz, width = "5")`
+4. Estimate the correlation between poverty and the index of equality and liberty (rounded to two digits): `r fitb(cor_povcitiz, width = "5")`
 `r hide("R solution -> dont' peak too early ;) !")`
 ```{r}
 Dat %>% 
-  select(poverty, citizen_rights) %>% 
+  select(poverty, equal_liberty) %>% 
   cor() %>% 
   round(., 2)
 ```
 `r unhide()`
 
 4. What does the correlation suggest about whether there is a freedom-equality trade off?
-`r mcq(c(answer = "No, where people have civic and political rights, there is also less poverty", "Yes, limited freedom is the price to pay for equality", "The result is inconclusive"))`
+`r mcq(c(answer = "No, where people have equality and freedom rights, there is also less poverty", "Yes, limited freedom is the price to pay for equality", "The result is inconclusive"))`

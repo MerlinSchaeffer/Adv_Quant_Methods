@@ -4,7 +4,7 @@
     <title>Multiple Regression &amp;    Fundamentals of Causal Inference</title>
     <meta charset="utf-8" />
     <meta name="author" content="Merlin Schaeffer  Department of Sociology" />
-    <meta name="date" content="2024-09-11" />
+    <meta name="date" content="2025-07-11" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
     <script src="libs/tile-view/tile-view.js"></script>
@@ -29,7 +29,7 @@ class: center, middle, inverse, title-slide
 ### Merlin Schaeffer<br> Department of Sociology
 ]
 .date[
-### 2024-09-11
+### 2025-07-11
 ]
 
 ---
@@ -40,7 +40,7 @@ class: center, middle, inverse, title-slide
 
 .font130[.center[Use data to .alert[discover patterns], &lt;br&gt; and the social mechanisms that bring them about.]]
 
-&lt;img src="https://liu.se/-/media/istock-501261958.jpg?mw=1120&amp;mh=1120&amp;hash=DA8977CCE6A6E600AE80A40CFEE771C9" width="70%" style="display: block; margin: auto;" /&gt;
+&lt;img src="https://researchleap.com/wp-content/uploads/2021/12/Population-data.jpeg" width="70%" style="display: block; margin: auto;" /&gt;
 
 
 ---
@@ -113,7 +113,7 @@ pacman::p_load(
   tidyverse, # Data manipulation,
   ggplot2, # beautiful figures,
 * wbstats, # download data from Worldbank. Tremendous source of global socio-economic data.
-* democracyData, # Use democracy data APIs,
+* vdemdata, # Use varieties of democracy data,
   estimatr, # OLS with robust SE,
   modelsummary, # regression tables with nice layout,
   countrycode) # Easy recodings of country names.
@@ -128,62 +128,75 @@ class:c clear
 
 ---
 class: clear
-# (1) Freedom House Data .font70[Civic and political citizenship rights]
-
-.panelset[
-.panel[.panel-name[The data]
+# (1) Varieties of Democracy Data
 
 .left-column[
-Since 1972, Freedom House codes civil and political citizenship rights around the world on a scale from 12 (strong citizenship rights) to 0 (no citizenship rights).
+We focus on: **Equality before the law &amp; individual freedom:** impartial public administration, transparent laws with predictable enforcement, access to justice for men/women, property rights for men/women, freedom from torture, freedom from political killings, from forced labor for
+men/women, freedom of religion, freedom of foreign movement, and freedom of domestic movement for men/women.
 ]
-
 .right-column[
-&lt;iframe src='https://en.wikipedia.org/wiki/Freedom_House' width='1200' height='480' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
-]]
-.panel[.panel-name[Use API to get the data]
+.panelset[
+.panel[.panel-name[The data]
+&lt;iframe src='https://en.wikipedia.org/wiki/V-Dem_Institute' width='1200' height='480' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+]
+.panel[.panel-name[Get the data]
 
 ``` r
-*(Dat_citi_rights &lt;- download_fh(verbose = FALSE) %&gt;% # Use API to download FH data for all countries since 1972,
-   rename(country = fh_country, # rename country ID,
-          citizen_rights = fh_total_reversed, # rename Citizenship rights indicator,
-          date = year) %&gt;% # rename year variable,
-   mutate(country = case_when( 
-     country == "Vietnam" ~ "Viet Nam", # Rename Vietnam
-     TRUE ~ country)) %&gt;% # Leave all others as they are
-   select(country, date, citizen_rights)) # Keep only these 3 variables.
-# # A tibble: 9,045 × 3
-#    country      date citizen_rights
-#    &lt;chr&gt;       &lt;dbl&gt;          &lt;dbl&gt;
-#  1 Afghanistan  1972              5
-#  2 Afghanistan  1973              1
-#  3 Afghanistan  1974              1
-#  4 Afghanistan  1975              1
-#  5 Afghanistan  1976              1
-#  6 Afghanistan  1977              2
-#  7 Afghanistan  1978              0
-#  8 Afghanistan  1979              0
-#  9 Afghanistan  1980              0
-# 10 Afghanistan  1982              0
-# # ℹ 9,035 more rows
+(Dat_vdem &lt;- vdem %&gt;% # The data are part of the package we loaded earlier
+   as_tibble() %&gt;% # turn into a tiblle
+   select(country_name, country_text_id, year, v2xcl_rol) %&gt;%
+   rename(equal_liberty = v2xcl_rol, # rename liberty variable
+          country = country_name)) #rename country variable
+# # A tibble: 27,913 × 4
+#    country country_text_id  year equal_liberty
+#    &lt;chr&gt;   &lt;chr&gt;           &lt;dbl&gt;         &lt;dbl&gt;
+#  1 Mexico  MEX              1789         0.204
+#  2 Mexico  MEX              1790         0.204
+#  3 Mexico  MEX              1791         0.204
+#  4 Mexico  MEX              1792         0.204
+#  5 Mexico  MEX              1793         0.204
+#  6 Mexico  MEX              1794         0.204
+#  7 Mexico  MEX              1795         0.204
+#  8 Mexico  MEX              1796         0.204
+#  9 Mexico  MEX              1797         0.204
+# 10 Mexico  MEX              1798         0.204
+# # ℹ 27,903 more rows
 ```
 ]
 
-.panel[.panel-name[Citizenship rights across the world '22]
+.panel[.panel-name[Denmark &amp; Germany since 1789]
 &lt;img src="2-Corr-n-Reg_files/figure-html/unnamed-chunk-8-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]
 
-.panel[.panel-name[Plot code] 
+.panel[.panel-name[Code] 
 
 ``` r
-ggplot(data = Dat_citi_rights %&gt;% filter(date == 2022), # Make coordinate system for data from 2022,
-       aes(y = citizen_rights, # Y- and X-axis of plot,
-           x = reorder(country, citizen_rights))) +
+ggplot(data = Dat_vdem %&gt;% filter(country == "Denmark" | country == "Germany"), # Make coordinate system for data from Denmark,
+       aes(y = equal_liberty, x = year, # Y- and X-axis of plot,
+           color = country)) +
+  geom_line() + # plot data as is in a bar chart,
+  labs(y = "Index of equality before the law \n and individual liberty", x = "", cap = "Source: V-Dem", color = "") + # Axis labels,
+  theme_minimal() + # Simple background layout,
+  theme(axis.text.x = element_text(angle = 60, hjust = 1), legend.position="bottom") # Write country names in a 60 degree angle.
+```
+]
+
+.panel[.panel-name[Across the world '24]
+&lt;img src="2-Corr-n-Reg_files/figure-html/unnamed-chunk-9-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
+
+.panel[.panel-name[Code] 
+
+``` r
+ggplot(data = Dat_vdem %&gt;% filter(year == 2024), # Make coordinate system for data from 2022,
+       aes(y = equal_liberty, # Y- and X-axis of plot,
+           x = reorder(country, equal_liberty))) +
   geom_bar(stat = "identity") + # plot data as is in a bar chart,
-  labs(y = "Citizenship rights", x = "", cap = "Source: Freedom House data for 2022") + # Axis labels,
+  labs(y = "Index of equality before the law \n and individual liberty in 2024", x = "", cap = "Source: V-Dem") + # Axis labels,
   theme_minimal() + # Simple background layout,
   theme(axis.text.x = element_text(angle = 60, hjust = 1)) # Write country names in a 60 degree angle.
 ```
-]]
+]]]
 
 ---
 class: clear
@@ -215,26 +228,27 @@ class: clear
 
 ``` r
 *(Dat_poverty &lt;- wb_data("SI.POV.DDAY", # Download poverty data: &lt;$2.15 per day,
-*                       start_date = 1972, end_date = 2024) %&gt;%
-   rename(poverty = SI.POV.DDAY) %&gt;% # rename poverty variable,
-   select(country, date, poverty) %&gt;% # Keep only 3 variables
+*                       start_date = 1972, end_date = 2025) %&gt;%
+   rename(poverty = SI.POV.DDAY, # rename poverty variable,
+          year = date, # rename year variable,
+          country_text_id = iso3c) %&gt;% # rename country abbreviation,
+   select(country_text_id, year, country, poverty) %&gt;% # Keep only 3 variables
    drop_na(poverty) %&gt;% # Drop cases with missing data,
-   group_by(country) %&gt;% # Group by country,
-   filter(date == max(date)) %&gt;% ungroup()) # Keep the most recent poverty statistic per country.
-# # A tibble: 168 × 3
-#    country     date poverty
-#    &lt;chr&gt;      &lt;dbl&gt;   &lt;dbl&gt;
-#  1 Albania     2020     0  
-#  2 Algeria     2011     0.5
-#  3 Angola      2018    31.1
-#  4 Argentina   2022     0.6
-#  5 Armenia     2022     0.8
-#  6 Australia   2018     0.5
-#  7 Austria     2021     0.5
-#  8 Azerbaijan  2005     0  
-#  9 Bangladesh  2022     5  
-# 10 Belarus     2020     0  
-# # ℹ 158 more rows
+   group_by(country) %&gt;% filter(year == max(year)) %&gt;% ungroup()) # Keep the most recent poverty statistic per country.
+# # A tibble: 171 × 4
+#    country_text_id  year country    poverty
+#    &lt;chr&gt;           &lt;dbl&gt; &lt;chr&gt;        &lt;dbl&gt;
+#  1 ALB              2020 Albania        0.3
+#  2 DZA              2011 Algeria        0  
+#  3 AGO              2018 Angola        39.3
+#  4 ARG              2023 Argentina      1.2
+#  5 ARM              2023 Armenia        1.9
+#  6 AUS              2018 Australia      0.5
+#  7 AUT              2022 Austria        0.6
+#  8 AZE              2005 Azerbaijan     0  
+#  9 BGD              2022 Bangladesh     8  
+# 10 BRB              2016 Barbados       1.7
+# # ℹ 161 more rows
 ```
 ]
 .panel[.panel-name[Purchasing power parity (PPP)]
@@ -284,21 +298,21 @@ Our tibbles are related, because both contain *countries* at various *dates*. &l
 .push-left[
 
 ``` r
-Dat_citi_rights
-# # A tibble: 9,045 × 3
-#    country      date citizen_rights
-#    &lt;chr&gt;       &lt;dbl&gt;          &lt;dbl&gt;
-#  1 Afghanistan  1972              5
-#  2 Afghanistan  1973              1
-#  3 Afghanistan  1974              1
-#  4 Afghanistan  1975              1
-#  5 Afghanistan  1976              1
-#  6 Afghanistan  1977              2
-#  7 Afghanistan  1978              0
-#  8 Afghanistan  1979              0
-#  9 Afghanistan  1980              0
-# 10 Afghanistan  1982              0
-# # ℹ 9,035 more rows
+(Dat_vdem &lt;- Dat_vdem %&gt;% select(-country)) # Drop the country variable
+# # A tibble: 27,913 × 3
+#    country_text_id  year equal_liberty
+#    &lt;chr&gt;           &lt;dbl&gt;         &lt;dbl&gt;
+#  1 MEX              1789         0.204
+#  2 MEX              1790         0.204
+#  3 MEX              1791         0.204
+#  4 MEX              1792         0.204
+#  5 MEX              1793         0.204
+#  6 MEX              1794         0.204
+#  7 MEX              1795         0.204
+#  8 MEX              1796         0.204
+#  9 MEX              1797         0.204
+# 10 MEX              1798         0.204
+# # ℹ 27,903 more rows
 ```
 ]
 
@@ -306,20 +320,20 @@ Dat_citi_rights
 
 ``` r
 Dat_poverty
-# # A tibble: 168 × 3
-#    country     date poverty
-#    &lt;chr&gt;      &lt;dbl&gt;   &lt;dbl&gt;
-#  1 Albania     2020     0  
-#  2 Algeria     2011     0.5
-#  3 Angola      2018    31.1
-#  4 Argentina   2022     0.6
-#  5 Armenia     2022     0.8
-#  6 Australia   2018     0.5
-#  7 Austria     2021     0.5
-#  8 Azerbaijan  2005     0  
-#  9 Bangladesh  2022     5  
-# 10 Belarus     2020     0  
-# # ℹ 158 more rows
+# # A tibble: 171 × 4
+#    country_text_id  year country    poverty
+#    &lt;chr&gt;           &lt;dbl&gt; &lt;chr&gt;        &lt;dbl&gt;
+#  1 ALB              2020 Albania        0.3
+#  2 DZA              2011 Algeria        0  
+#  3 AGO              2018 Angola        39.3
+#  4 ARG              2023 Argentina      1.2
+#  5 ARM              2023 Armenia        1.9
+#  6 AUS              2018 Australia      0.5
+#  7 AUT              2022 Austria        0.6
+#  8 AZE              2005 Azerbaijan     0  
+#  9 BGD              2022 Bangladesh     8  
+# 10 BRB              2016 Barbados       1.7
+# # ℹ 161 more rows
 ```
 ]
 
@@ -358,21 +372,21 @@ Dat_poverty
 
 
 ``` r
-*(Dat &lt;- inner_join(Dat_poverty, Dat_citi_rights, by = c("country", "date")))
-# # A tibble: 149 × 4
-#    country     date poverty citizen_rights
-#    &lt;chr&gt;      &lt;dbl&gt;   &lt;dbl&gt;          &lt;dbl&gt;
-#  1 Albania     2020     0                8
-#  2 Algeria     2011     0.5              3
-#  3 Angola      2018    31.1              3
-#  4 Argentina   2022     0.6             10
-#  5 Armenia     2022     0.8              6
-#  6 Australia   2018     0.5             12
-#  7 Austria     2021     0.5             12
-#  8 Azerbaijan  2005     0                3
-#  9 Bangladesh  2022     5                4
-# 10 Belarus     2020     0                1
-# # ℹ 139 more rows
+*(Dat &lt;- inner_join(Dat_poverty, Dat_vdem, by = c("country_text_id", "year")))
+# # A tibble: 161 × 5
+#    country_text_id  year country    poverty equal_liberty
+#    &lt;chr&gt;           &lt;dbl&gt; &lt;chr&gt;        &lt;dbl&gt;         &lt;dbl&gt;
+#  1 ALB              2020 Albania        0.3         0.912
+#  2 DZA              2011 Algeria        0           0.564
+#  3 AGO              2018 Angola        39.3         0.564
+#  4 ARG              2023 Argentina      1.2         0.869
+#  5 ARM              2023 Armenia        1.9         0.845
+#  6 AUS              2018 Australia      0.5         0.967
+#  7 AUT              2022 Austria        0.6         0.934
+#  8 AZE              2005 Azerbaijan     0           0.381
+#  9 BGD              2022 Bangladesh     8           0.353
+# 10 BRB              2016 Barbados       1.7         0.925
+# # ℹ 151 more rows
 ```
 
 ---
@@ -398,30 +412,30 @@ Dat_poverty
 ``` r
 Dat &lt;- Dat %&gt;% mutate(
   socialist = case_when( # Years socialist minus years since not socialist anymore,
-    country == "China" ~ date - 1949,
-    country == "Viet Nam" ~ date - 1945,
-    country == "Algeria" ~ date - 1962,
-    str_detect(country,"Portugal|Bangladesh") ~ date - 1972,
-    country == "Guinea-Bissau" ~ date - 1973, country == "India" ~ date - 1976, 
-    country == "Nicaragua" ~ date - 1979, country == "Sri Lanka" ~ date - 1978,
-    country == "Tanzania" ~ date - 1964, country == "Albania" ~ (1992 - 1944) - (date - 1992),
-    str_detect(country, "Angola|Cabo Verde|Madagascar") ~ (1992 - 1975) - (date - 1992),
-    str_detect(country,"Belarus|Bulgaria") ~ (1990 - 1946) - (date - 1990),
-    str_detect(country, "Benin|Mozambique") ~ (1990 - 1975) - (date - 1990),
-    country == "Chad" ~ (1975 - 1962) - (date - 1975), country == "Congo, Rep." ~ (1992 - 1970) - (date - 1992),
-    country == "Czech Republic" ~ (1990 - 1948) - (date - 1990), country == "Djibouti" ~ (1992 - 1981) - (date - 1992),
-    country == "Ethiopia" ~ (1991 - 1974) - (date - 1991), country == "Ghana" ~ (1966 - 1960) - (date - 1966),
-    country == "Guinea" ~ (1984 - 1958) - (date - 1984), country == "Hungary" ~ (1989 - 1949) - (date - 1989),
-    country == "Iraq" ~ (2005 - 1958) - (date - 2005), country == "Mali" ~ (1991 - 1960) - (date - 1991),
-    country == "Mauritania" ~ (1978 - 1961) - (date - 1978), country == "Mongolia" ~ (1992 - 1924) - (date - 1992),
-    country == "Myanmar" ~ (1988 - 1962) - (date - 1988), country == "Poland" ~ (1989 - 1945) - (date - 1989),
-    country == "Romania" ~ (1989 - 1947) - (date - 1989), country == "Russian Federation" ~ (1991 - 1922) - (date - 1991),
-    country == "Seychelles" ~ (1991 - 1977) - (date - 1991), country == "Senegal" ~ (1981 - 1960) - (date - 1981),
-    country == "Sierra Leone" ~ (1991 - 1978) - (date - 1991), country == "Somalia" ~ (1991 - 1969) - (date - 1991),
-    country == "Sudan" ~ (1985 - 1969) - (date - 1985), country == "Syria" ~ (2012 - 1963) - (date - 2012),
-    country == "Tunisia" ~ (1988 - 1964) - (date - 1988), country == "Ukraine" ~ (1991 - 1919) - (date - 1991),
-    country == "Yemen, Rep." ~ (1991 - 1967) - (date - 1991), country == "Zambia" ~ (1991 - 1973) - (date - 1991),
-    str_detect(country,"Slovenia|Croatia|Serbia|Montenegro|Bosnia and Herzegovina|North Macedonia|Kosovo") ~ (1992 - 1943) - (date - 1992),
+    country == "China" ~ year - 1949,
+    country == "Viet Nam" ~ year - 1945,
+    country == "Algeria" ~ year - 1962,
+    str_detect(country,"Portugal|Bangladesh") ~ year - 1972,
+    country == "Guinea-Bissau" ~ year - 1973, country == "India" ~ year - 1976, 
+    country == "Nicaragua" ~ year - 1979, country == "Sri Lanka" ~ year - 1978,
+    country == "Tanzania" ~ year - 1964, country == "Albania" ~ (1992 - 1944) - (year - 1992),
+    str_detect(country, "Angola|Cabo Verde|Madagascar") ~ (1992 - 1975) - (year - 1992),
+    str_detect(country,"Belarus|Bulgaria") ~ (1990 - 1946) - (year - 1990),
+    str_detect(country, "Benin|Mozambique") ~ (1990 - 1975) - (year - 1990),
+    country == "Chad" ~ (1975 - 1962) - (year - 1975), country == "Congo, Rep." ~ (1992 - 1970) - (year - 1992),
+    country == "Czech Republic" ~ (1990 - 1948) - (year - 1990), country == "Djibouti" ~ (1992 - 1981) - (year - 1992),
+    country == "Ethiopia" ~ (1991 - 1974) - (year - 1991), country == "Ghana" ~ (1966 - 1960) - (year - 1966),
+    country == "Guinea" ~ (1984 - 1958) - (year - 1984), country == "Hungary" ~ (1989 - 1949) - (year - 1989),
+    country == "Iraq" ~ (2005 - 1958) - (year - 2005), country == "Mali" ~ (1991 - 1960) - (year - 1991),
+    country == "Mauritania" ~ (1978 - 1961) - (year - 1978), country == "Mongolia" ~ (1992 - 1924) - (year - 1992),
+    country == "Myanmar" ~ (1988 - 1962) - (year - 1988), country == "Poland" ~ (1989 - 1945) - (year - 1989),
+    country == "Romania" ~ (1989 - 1947) - (year - 1989), country == "Russian Federation" ~ (1991 - 1922) - (year - 1991),
+    country == "Seychelles" ~ (1991 - 1977) - (year - 1991), country == "Senegal" ~ (1981 - 1960) - (year - 1981),
+    country == "Sierra Leone" ~ (1991 - 1978) - (year - 1991), country == "Somalia" ~ (1991 - 1969) - (year - 1991),
+    country == "Sudan" ~ (1985 - 1969) - (year - 1985), country == "Syria" ~ (2012 - 1963) - (year - 2012),
+    country == "Tunisia" ~ (1988 - 1964) - (year - 1988), country == "Ukraine" ~ (1991 - 1919) - (year - 1991),
+    country == "Yemen, Rep." ~ (1991 - 1967) - (year - 1991), country == "Zambia" ~ (1991 - 1973) - (year - 1991),
+    str_detect(country,"Slovenia|Croatia|Serbia|Montenegro|Bosnia and Herzegovina|North Macedonia|Kosovo") ~ (1992 - 1943) - (year - 1992),
     TRUE ~ 0),
   socialist = case_when( # Min. 5 years given any socialist history,
     socialist != 0 &amp; socialist &lt; 5 ~ 5,
@@ -432,20 +446,20 @@ Dat &lt;- Dat %&gt;% mutate(
 
 ``` r
 Dat
-# # A tibble: 149 × 5
-#    country     date poverty citizen_rights socialist
-#    &lt;chr&gt;      &lt;dbl&gt;   &lt;dbl&gt;          &lt;dbl&gt;     &lt;dbl&gt;
-#  1 Albania     2020     0                8        20
-#  2 Algeria     2011     0.5              3        49
-#  3 Angola      2018    31.1              3         5
-#  4 Argentina   2022     0.6             10         0
-#  5 Armenia     2022     0.8              6         0
-#  6 Australia   2018     0.5             12         0
-#  7 Austria     2021     0.5             12         0
-#  8 Azerbaijan  2005     0                3         0
-#  9 Bangladesh  2022     5                4        50
-# 10 Belarus     2020     0                1        14
-# # ℹ 139 more rows
+# # A tibble: 161 × 6
+#    country_text_id  year country    poverty equal_liberty socialist
+#    &lt;chr&gt;           &lt;dbl&gt; &lt;chr&gt;        &lt;dbl&gt;         &lt;dbl&gt;     &lt;dbl&gt;
+#  1 ALB              2020 Albania        0.3         0.912        20
+#  2 DZA              2011 Algeria        0           0.564        49
+#  3 AGO              2018 Angola        39.3         0.564         5
+#  4 ARG              2023 Argentina      1.2         0.869         0
+#  5 ARM              2023 Armenia        1.9         0.845         0
+#  6 AUS              2018 Australia      0.5         0.967         0
+#  7 AUT              2022 Austria        0.6         0.934         0
+#  8 AZE              2005 Azerbaijan     0           0.381         0
+#  9 BGD              2022 Bangladesh     8           0.353        50
+# 10 BRB              2016 Barbados       1.7         0.925         0
+# # ℹ 151 more rows
 ```
 ]
 .panel[.panel-name[Socialist history across the world]
@@ -513,20 +527,20 @@ class: clear
    mutate( # Z-Standardize variables.
 *    z_socialist = scale(socialist) %&gt;% as.numeric(),
 *    z_poverty = scale(poverty) %&gt;% as.numeric()))
-# # A tibble: 149 × 7
-#    country     date poverty citizen_rights socialist z_socialist z_poverty
-#    &lt;chr&gt;      &lt;dbl&gt;   &lt;dbl&gt;          &lt;dbl&gt;     &lt;dbl&gt;       &lt;dbl&gt;     &lt;dbl&gt;
-#  1 Albania     2020     0                8        20       0.916    -0.620
-#  2 Algeria     2011     0.5              3        49       2.88     -0.592
-#  3 Angola      2018    31.1              3         5      -0.102     1.11 
-#  4 Argentina   2022     0.6             10         0      -0.441    -0.587
-#  5 Armenia     2022     0.8              6         0      -0.441    -0.575
-#  6 Australia   2018     0.5             12         0      -0.441    -0.592
-#  7 Austria     2021     0.5             12         0      -0.441    -0.592
-#  8 Azerbaijan  2005     0                3         0      -0.441    -0.620
-#  9 Bangladesh  2022     5                4        50       2.95     -0.342
-# 10 Belarus     2020     0                1        14       0.509    -0.620
-# # ℹ 139 more rows
+# # A tibble: 161 × 8
+#    country_text_id  year country    poverty equal_liberty socialist z_socialist z_poverty
+#    &lt;chr&gt;           &lt;dbl&gt; &lt;chr&gt;        &lt;dbl&gt;         &lt;dbl&gt;     &lt;dbl&gt;       &lt;dbl&gt;     &lt;dbl&gt;
+#  1 ALB              2020 Albania        0.3         0.912        20      0.961     -0.672
+#  2 DZA              2011 Algeria        0           0.564        49      2.98      -0.686
+#  3 AGO              2018 Angola        39.3         0.564         5     -0.0835     1.14 
+#  4 ARG              2023 Argentina      1.2         0.869         0     -0.432     -0.630
+#  5 ARM              2023 Armenia        1.9         0.845         0     -0.432     -0.598
+#  6 AUS              2018 Australia      0.5         0.967         0     -0.432     -0.663
+#  7 AUT              2022 Austria        0.6         0.934         0     -0.432     -0.658
+#  8 AZE              2005 Azerbaijan     0           0.381         0     -0.432     -0.686
+#  9 BGD              2022 Bangladesh     8           0.353        50      3.05      -0.315
+# 10 BRB              2016 Barbados       1.7         0.925         0     -0.432     -0.607
+# # ℹ 151 more rows
 ```
 ]
 .panel[.panel-name[Illustration]
@@ -589,8 +603,8 @@ Dat %&gt;% # Use our data,
   select(poverty, socialist) %&gt;% # Select vars for analysis,
 * cor() # Estimate correlation.
 #           poverty socialist
-# poverty     1.000    -0.089
-# socialist  -0.089     1.000
+# poverty    1.0000   -0.0968
+# socialist -0.0968    1.0000
 ```
 ]]]
 
@@ -639,7 +653,7 @@ Models should not be driven by few singular cases, like in this example.]
 ]
 
 .right-column[
-&lt;img src="2-Corr-n-Reg_files/figure-html/unnamed-chunk-30-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="2-Corr-n-Reg_files/figure-html/unnamed-chunk-31-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -669,7 +683,7 @@ Models should not be driven by few singular cases, like in this example.]
 **Residuals**: `\(e_{i} =y_{i} - \hat{y}\)`&lt;br&gt;
 differences between what model predicts and actual data.
 
-`\(e_{\text{Denmark}} = 0.2\% - 11.9\%=-11.7\%\)`
+`\(e_{\text{Denmark}} = 0.2\% - 15.7\%=-15.5\%\)`
 ]
 .right-column[
 &lt;img src="2-Corr-n-Reg_files/figure-html/residuals-1.png" width="100%" style="display: block; margin: auto;" /&gt;
@@ -729,7 +743,7 @@ modelsummary(list("OLS" = ols, "Std. OLS" = zols), # Nicely-formatted table,
              gof_map = c("nobs", "r.squared")) # Only 2 model-fit stats.
 ```
 
-&lt;img src="2-Corr-n-Reg_files/figure-html/unnamed-chunk-34-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+&lt;img src="2-Corr-n-Reg_files/figure-html/unnamed-chunk-35-1.png" width="70%" style="display: block; margin: auto;" /&gt;
 ]
 
 .left-column[
@@ -745,28 +759,28 @@ modelsummary(list("OLS" = ols, "Std. OLS" = zols), # Nicely-formatted table,
 &lt;tbody&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 11.860 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 15.682 &lt;/td&gt;
    &lt;td style="text-align:center;"&gt; 0.000 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; socialist &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; −0.109 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −0.145 &lt;/td&gt;
    &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt; z_socialist &lt;/td&gt;
    &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; −0.089 &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; −0.097 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 149 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 149 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 161 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 161 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.008 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.008 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.009 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.009 &lt;/td&gt;
   &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
@@ -776,22 +790,22 @@ modelsummary(list("OLS" = ols, "Std. OLS" = zols), # Nicely-formatted table,
 
 .panel[.panel-name[Interpretation]
 .push-left[
-&lt;img src="2-Corr-n-Reg_files/figure-html/unnamed-chunk-35-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="2-Corr-n-Reg_files/figure-html/unnamed-chunk-36-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]
 
 .push-right[
 
 $$
-\operatorname{\widehat{poverty}} = 11.86 - 0.11(\operatorname{socialist})
+\operatorname{\widehat{poverty}} = 15.68 - 0.15(\operatorname{socialist})
 $$
  `\(\rightarrow\)` the best-fitting line that `\(\min \sum_{i=1}^{n} e_{i}^{2}\)`.
 
-Among countries without a socialist past, poverty is on average 11.86%.
-  + `\((\hat{y}|\text{Socialism = 0}) = 11.86\%\)`.
+Among countries without a socialist past, poverty is on average 15.68%.
+  + `\((\hat{y}|\text{Socialism = 0}) = 15.68\%\)`.
   
-With every year of socialism, the average level of poverty is -0.11 percentage points lower.
+With every year of socialism, the average level of poverty is -0.15 percentage points lower.
 
-This model accounts for 0.008*100% = 0.8% more of the variance of poverty across the world, than the average `\(\bar{y} = 11.15\%\)`.
+This model accounts for 0.009*100% = 0.9% more of the variance of poverty across the world, than the average `\(\bar{y} = 14.78\%\)`.
 ]]]
 
 ---
@@ -800,7 +814,7 @@ This model accounts for 0.008*100% = 0.8% more of the variance of poverty across
 .left-column[
 .center[**1. Causal**]
 
-With every additional year of socialism, poverty is expected to decline by -0.11 percentage points. Thus, if China and Vietnam stay socialist, poverty will further decline.
+With every additional year of socialism, poverty is expected to decline by -0.15 percentage points. Thus, if China and Vietnam stay socialist, poverty will further decline.
 
 .alert[Beware, this interpretation only holds under some conditions.] 
 
@@ -814,7 +828,7 @@ I will teach you how to estimate regressions that have a causal interpretation l
 **2. Descriptive: conditional means `\(\bar{y}|x\)`**
 ]
 
-With every year of socialism, the average level of poverty -0.11 percentage points lower.
+With every year of socialism, the average level of poverty -0.15 percentage points lower.
 
 Here regression is a (linear) model that describes the average of the outcome for different values of the predictor.
 
@@ -884,11 +898,11 @@ Veaux, D., Velleman, and Bock (2021). _Stats: Data and Models, Global Edition_. 
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="../template/remark-latest.min.js"></script>
 <script>var slideshow = remark.create({
-"highlightLanguage": "r",
-"highlightStyle": "zenburn",
-"highlightLines": true,
-"countIncrementalSlides": false,
-"ratio": "16:9"
+  "highlightLanguage": "r",
+  "highlightStyle": "zenburn",
+  "highlightLines": true,
+  "countIncrementalSlides": false,
+  "ratio": "16:9"
 });
 if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
   window.dispatchEvent(new Event('resize'));
