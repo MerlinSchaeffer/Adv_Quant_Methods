@@ -39,7 +39,8 @@ pacman::p_load(
   modelsummary, # for regression and balance tables,
   ivreg, # IV 2SLS,
   countrycode, # Easy recodings of country names,
-  remotes) # Install beta version packages from GitHub.
+  remotes, # Install beta version packages from GitHub.
+  devtools) # Install beta version packages from GitHub.
 
 # Step 4, wait until done (indicated by blinking courser behind `&gt;`)
 remotes::install_github(&quot;jrnold/masteringmetrics&quot;, subdir = &quot;masteringmetrics&quot;)
@@ -51,7 +52,7 @@ remotes::install_github(&quot;xmarquez/democracyData&quot;)
 remotes::install_github(&quot;avehtari/ROS-Examples&quot;, subdir = &quot;rpackage&quot;)
 
 # Step 7, wait until done (indicated by blinking courser behind `&gt;`)
-remotes::install_github(&quot;vdeminstitute/vdemdata&quot;, subdir = &quot;rpackage&quot;)
+devtools::install_github(&quot;vdeminstitute/vdemdata&quot;, subdir = &quot;rpackage&quot;)
 
 # Important: If you cannot install one or several of these remotes::install_github(...) packages
 # Please try from home, or an internet connection that is not associated with KU.
