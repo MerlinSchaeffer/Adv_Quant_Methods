@@ -49,10 +49,10 @@ xaringanExtra::use_panelset()
 
 | TA       | Fridays  | Room       |
 |:---------|:---------|:-----------|
-| Sofie     | 8  am    | CSS 2-2-55 |
-| Halfdan | 8  am    | CSS 4-0-02 |
-| Sofie    | 10 am    | CSS 2-2-55 |
-| Halfdan    | 10 am    | CSS 1-0-10 |
+| Sofie     | 8  am    | CSS 4-0-02 |
+| Halfdan | 8  am    |  CSS 2-2-55 |
+| Sofie    | 10 am    |  CSS 1-0-10 |
+| Halfdan    | 10 am    | CSS 2-2-55 |
 ]
 
 .right-column[
@@ -71,35 +71,13 @@ background-size: cover
 **My research agenda**
 ]
 .font200[
-**How Does International Immigration<br><br>Transform our Societies?**
+**How Does International Immigration<br><br>Transform Societies?**
 ]
 
 
 ---
 layout: true
 # Some of my current work
-
----
-
-.left-column[
-```{r, echo = FALSE, out.width='100%'}
-knitr::include_graphics('https://www.templehealth.org/sites/default/files/styles/without_crop/public/2021-01/man-wearing-mask-coughing-into-shoulder.jpg?itok=Z6mUgWPd')
-```
-]
-
-.right-column[
-```{r, echo = FALSE, out.width='100%'}
-knitr::include_graphics('./img/Paired_Vignette.png')
-```
-.center[.backgrnote[*Source*: `r Citet(myBib, "schaeffer_who_2023")`]]
-]
-
----
-
-```{r, echo = FALSE, out.width='80%'}
-knitr::include_graphics('./img/jcac025f1.jpeg')
-```
-.center[.backgrnote[*Source*: `r Citet(myBib, "schaeffer_who_2023")`]]
 
 ---
 
@@ -118,11 +96,31 @@ knitr::include_graphics('./img/IT-Healthcare.png')
 ---
 
 
-```{r, echo = FALSE, out.width='45%'}
-knitr::include_graphics('./img/Wiedner.png')
+```{r, echo = FALSE, out.width='67%'}
+knitr::include_graphics('./img/Fig4.png')
 ```
 .center[.backgrnote[*Source*: `r Citet(myBib, "wiedner_local_2025")`]]
-  
+
+---
+
+```{r, echo = FALSE, out.width='45%'}
+knitr::include_graphics('img/survey3.png')
+```
+.center[.backgrnote[*Source*: `r Citet(myBib, "Schaeffer_unveiling_2025")`]]
+---
+
+```{r, echo = FALSE, out.width='80%'}
+knitr::include_graphics('img/survey4.png')
+```
+.center[.backgrnote[*Source*: `r Citet(myBib, "Schaeffer_unveiling_2025")`]]
+
+---
+
+```{r, echo = FALSE, out.width='55%'}
+knitr::include_graphics('img/Missperception_4.png')
+```
+.center[.backgrnote[*Source*: `r Citet(myBib, "Schaeffer_unveiling_2025")`]]
+
 ---
 layout: false
 class: inverse middle center
@@ -134,7 +132,7 @@ class: inverse middle center
 .push-left[
 **(1) Ontological**: What is the nature of .alert[X]?
   + What is power?
-  + What is gender; how is it different from race?
+  + What is gender; how is it different from sex?
   + What is a state? .backgrnote[
 > A human community that (successfully) claims the monopoly of the legitimate use of physical force within a given territory
 
@@ -143,8 +141,7 @@ class: inverse middle center
 
 
 **(2) Critical**: Is .alert[X] (un-)just?
-  + Is home office exploitation?
-  + Is the color-blind ideology a new form of racism?
+  + Is the colorblind ideology a new form of racism?
 ]
 
 --
@@ -152,7 +149,7 @@ class: inverse middle center
 .push-right[
 **(3) Descriptive**: What types of .alert[X] exist<br> and how frequent are they?
   + What are the survival strategies of the poor?
-  + How did Danes structure their days during the COVID-19 lockdowns?
+  + How did people in Denmark structure their days during the COVID-19 lockdowns?
 
 
 
@@ -216,14 +213,14 @@ knitr::include_graphics('https://researchleap.com/wp-content/uploads/2021/12/Pop
 
 ---
 class: inverse middle center
-# Three learning goals
+# The three learning goals <br> of this course
 
 ---
 # Three learning goals
 
 .push-left[
 **(1) Multiple OLS regression**
-  + Multiple predictors & confounder adjustment,
+  + Multiple predictors & confounder adjustment (Frisch-Waugh),
   + Interaction effects,
   + Polynomials.
 
@@ -244,12 +241,12 @@ knitr::include_graphics('https://www.journals.uchicago.edu/cms/10.1086/686942/as
 
 .push-right[
 **(3) Fundamentals of causal inference**
-  + Potential outcomes and directed acyclical graphs,
-  + Randomized Controlled Trials,
-  + Intention to treat & instrument variable regression,
+  + Potential outcomes & directed acyclical graphs (DAG),
+  + Randomized Controlled Trials (RCT),
+  + Intention to treat (ITT) & instrument variable (IV) regression,
   + Multiple regression,
   + 2-SLS instrument variable regression,
-  + Regression discontinuity designs.
+  + Regression discontinuity designs (RDD).
 
 ```{tikz, DAG1,  echo = FALSE, out.width='45%'}
 \usetikzlibrary{shapes,decorations,arrows,calc,arrows.meta,fit,positioning}
@@ -365,22 +362,14 @@ knitr::include_graphics('./img/Structure.png')
 ]
 
 ---
-class: clear
-
-```{r, echo = FALSE, out.width='60%', fig.align='center'}
-knitr::include_graphics('./img/Quizz1.png')
-knitr::include_graphics('./img/Quizz2.png')
-knitr::include_graphics('./img/Quizz3.png')
-```  
----
 # Weekly Absalon Online Quizzes
 
 .left-column[
-- 13 Online Quizzes on Absalon designed by [Epinion](https://epinionglobal.com/) & Adna.
+- 13 Online Quizzes on Absalon designed by [Epinion](https://epinionglobal.com/) & us.
 
 - Based on data Epinion collects for municipality of Copenhagen, DR, Skat, etc.
 
-- .alert[Submit at least 10 completed quizzes] to qualify for the integrated exam with "Velfærd, ulighed og mobilitet"!
+- .alert[Submit at least 10 completed quizzes] to qualify for the exam!
 
 - .alert[Submit individually and within two weeks] after they are made available online (i.e., Wednesdays after the lecture).
 ]
@@ -412,10 +401,10 @@ class: inverse
 layout: false
 # Two textbooks
 
-$\rightarrow$ Both textbooks are accessible at Academic Books and are available at the university library.
+$\rightarrow$ Accessible at Academic Books and are available at the university library.
 
 .push-left[
-.center[The first textbook, carried over from last semester, serves as a reference for regression and statistical inference.]
+.center[Carried over from last semester, serves as a reference for regression and statistical inference.]
 
 ```{r, echo = FALSE, out.width='40%', fig.align='center'}
 knitr::include_graphics('https://imgcdn.saxo.com/_9781292362328')
@@ -424,7 +413,7 @@ knitr::include_graphics('https://imgcdn.saxo.com/_9781292362328')
 ]
 
 .push-right[
-.center[To deepen our understanding of how regression analysis can be applied to identify causal effects, we will heavily rely on Angrist and Pischke's textbook]
+.center[To learn how to identify causal effects, we will use Angrist and Pischke's textbook]
 
 ```{r, echo = FALSE, out.width='35%', fig.align='center'}
 knitr::include_graphics('https://imgcdn.saxo.com/_9780691152844')
@@ -598,13 +587,17 @@ knitr::include_graphics('./img/Rscript4.png')
 ---
 layout: false
 class: clear
-# AI & Large Language Models like ChatGPT
+# AI (like ChatGPT)
 
 .push-left[
 1. **Privacy**: .alert[Don't use AI/LLMs to process sensitive information!]
-2. **Learning**: Use AI/LLMs to *explain, comment, debug, and improve* R code that you drafted. Also use AI/LLMs to get *summaries* of text passages and concepts that you do not understand. This will help you to read complex texts and better understand difficult topics. You can also use use AI/LLMs to *discuss* your understanding of the course materials and ask things that confuse you.
 
-3. **Generation**: Don't use AI/LLMs to *generate, draft, and write* your R code. .alert[You need to learn how to code to assess whether ChatGPT coded what you asked for.]
+2. **Learning**: 
+  + Use AI to *explain, comment, debug, and improve* R code while you draft it. 
+  + Use AI to get *summaries* of text passages and concepts that you do not understand. This will help you to read complex texts and better understand difficult topics. 
+  + Use AI to *discuss* your understanding of the course materials and ask things that confuse you.
+
+3. **Generation**: Don't use AI to *generate, draft, and write* your R code. .alert[You need to learn how to code to assess whether ChatGPT coded what you asked for.]
 ]
 
 .push-right[
