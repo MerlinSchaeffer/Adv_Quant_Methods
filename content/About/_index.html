@@ -46,7 +46,7 @@ pacman::p_load(
 remotes::install_github(&quot;jrnold/masteringmetrics&quot;, subdir = &quot;masteringmetrics&quot;)
 
 # Step 5, wait until done (indicated by blinking courser behind `&gt;`)
-remotes::install_github(&quot;xmarquez/democracyData&quot;)
+remotes::install_github(&quot;nset-ornl/wbstats&quot;)
 
 # Step 6, wait until done (indicated by blinking courser behind `&gt;`)
 remotes::install_github(&quot;avehtari/ROS-Examples&quot;, subdir = &quot;rpackage&quot;)
@@ -57,11 +57,11 @@ devtools::install_github(&quot;vdeminstitute/vdemdata&quot;, subdir = &quot;rpac
 # Important: If you cannot install one or several of these remotes::install_github(...) packages
 # Please try from home, or an internet connection that is not associated with KU.
 
-# Step 7, wait until done (indicated by blinking courser behind `&gt;`)
+# Step 8, wait until done (indicated by blinking courser behind `&gt;`)
 pacman::p_load(
+  wbstats, # Data from the world bank
   rosdata, # Data from Gelman &amp; Hill&#39;s &quot;Regression and other Stories&quot;
-  masteringmetrics, # Data and examples from Mastering Metrics
-  democracyData) # download democracy data used in the scholarly literature.</code></pre>
+  masteringmetrics) # Data and examples from Mastering Metrics</code></pre>
 <ol start="5" style="list-style-type: decimal">
 <li>Now type <code>sessionInfo()</code> into your console and check whether all of the following are mentioned under “other attached packages”: tidyverse, ggplot2, wbstats, estimatr, modelr, furniture, modelsummary, ivreg, countrycode, remotes, rosdata, masteringmetrics, and finally democracyData. <strong>If any package is missing. Contact a tutor to help you set everything up properly.</strong></li>
 </ol>
