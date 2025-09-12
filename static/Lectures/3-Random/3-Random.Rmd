@@ -44,7 +44,7 @@ xaringanExtra::use_panelset()
 .font130[.center[Use data to .alert[discover patterns], <br> and the social mechanisms that bring them about.]]
 
 ```{r, echo = FALSE, out.width='70%', fig.align='center'}
-knitr::include_graphics('https://liu.se/-/media/istock-501261958.jpg?mw=1120&mh=1120&hash=DA8977CCE6A6E600AE80A40CFEE771C9')
+knitr::include_graphics('https://researchleap.com/wp-content/uploads/2021/12/Population-data.jpeg')
 ```
 ---
 class: inverse
@@ -453,7 +453,7 @@ If randomization has partly failed, we use post-stratification weights to counte
 class: inverse middle center
 # Break
 
-<iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'></iframe>
+<iframe src='https://panel.letstimeit.com/instant-timer/15-minute' width='600' height='400' frameborder='0' scrolling='yes'></iframe>
 
 ---
 class: middle clear
@@ -476,7 +476,8 @@ knitr::include_graphics('https://cdn.dribbble.com/users/10549/screenshots/991614
 class: inverse middle center
 # Break
 
-<iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'></iframe>
+<iframe src='https://panel.letstimeit.com/instant-timer/10-minute' width='600' height='400' frameborder='0' scrolling='yes'></iframe>
+
 
 ---
 class: inverse middle center
@@ -641,7 +642,7 @@ for (draw in 3:1000) {
 ```{r sample1000_ols3, out.width='60%', fig.height = 4, fig.width = 6, echo = FALSE}
 library(gganimate)
 
-ggplot(data = Samples, aes(y = psppsgva, x = eduyrs)) +
+my_animation <- ggplot(data = Samples, aes(y = psppsgva, x = eduyrs)) +
   geom_jitter(color = "#901A1E", alpha = 1/3, width = 0.1, height = 0.1) +
   geom_smooth(method = "lm", se = FALSE, color = "#901A1E", size = 0.7) +
   geom_smooth(data = ESS, method = "lm", se = FALSE) +
@@ -652,6 +653,8 @@ ggplot(data = Samples, aes(y = psppsgva, x = eduyrs)) +
                     transition_length = 10,
                     state_length = 1000) +
   shadow_mark(alpha = 0.15, size = 0.1)
+
+animate(my_animation, nframes = 400, fps = 20)
 ```
 ]
 
@@ -1112,7 +1115,8 @@ ggplot(data = ESS, aes(y = psppsgva, x = eduyrs)) +
 class: inverse middle center
 # Break
 
-<iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'></iframe>
+<iframe src='https://panel.letstimeit.com/instant-timer/15-minute' width='600' height='400' frameborder='0' scrolling='yes'></iframe>
+
 
 ---
 class: middle clear
