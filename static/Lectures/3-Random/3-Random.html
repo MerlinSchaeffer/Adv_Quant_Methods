@@ -4,7 +4,7 @@
     <title>Multiple Regression &amp;    Fundamentals of Causal Inference</title>
     <meta charset="utf-8" />
     <meta name="author" content="Merlin Schaeffer  Department of Sociology" />
-    <meta name="date" content="2025-09-12" />
+    <meta name="date" content="2025-09-17" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
     <script src="libs/tile-view/tile-view.js"></script>
@@ -29,7 +29,7 @@ class: center, middle, inverse, title-slide
 ### Merlin Schaeffer<br> Department of Sociology
 ]
 .date[
-### 2025-09-12
+### 2025-09-17
 ]
 
 ---
@@ -99,9 +99,11 @@ Download the "ESS9e03_1.sav" data from Absalon. Place them into the folder for t
 ]
 .push-right[
 
+
+
 ``` r
 # Read the ESS round 9 data
-ESS &lt;- read_spss("../../../assets/ESS9e03_1.sav") %&gt;%
+ESS &lt;- read_spss("ESS9e03_1.sav") %&gt;%
   filter(cntry == "DK") %&gt;% # Keep only the Danish data,
   # Keep only a minimum set of variables we need today,
   select(idno, pspwght, gndr, eduyrs, agea, 
@@ -1110,7 +1112,8 @@ summary(ols_goal, include.ci = FALSE, digits = 3)
 class: inverse middle center
 # Break
 
-&lt;iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+&lt;iframe src='https://panel.letstimeit.com/instant-timer/15-minute' width='600' height='400' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+
 
 ---
 class: middle clear

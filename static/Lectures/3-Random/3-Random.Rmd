@@ -105,9 +105,19 @@ pacman::p_load(
 Download the "ESS9e03_1.sav" data from Absalon. Place them into the folder for this course (where your R-project is located).
 ]
 .push-right[
-```{r ESS}
+```{r ESS, echo = FALSE}
 # Read the ESS round 9 data
 ESS <- read_spss("../../../assets/ESS9e03_1.sav") %>%
+  filter(cntry == "DK") %>% # Keep only the Danish data,
+  # Keep only a minimum set of variables we need today,
+  select(idno, pspwght, gndr, eduyrs, agea, 
+         psppsgva, trstlgl, trstplc) %>%
+  drop_na() # Delete cases with missing values.
+```
+
+```{r ESS-1, eval = FALSE}
+# Read the ESS round 9 data
+ESS <- read_spss("ESS9e03_1.sav") %>%
   filter(cntry == "DK") %>% # Keep only the Danish data,
   # Keep only a minimum set of variables we need today,
   select(idno, pspwght, gndr, eduyrs, agea, 
