@@ -4,7 +4,7 @@
     <title>Multiple Regression &amp;    Fundamentals of Causal Inference</title>
     <meta charset="utf-8" />
     <meta name="author" content="Merlin Schaeffer  Department of Sociology" />
-    <meta name="date" content="2024-09-25" />
+    <meta name="date" content="2025-09-22" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
     <script src="libs/tile-view/tile-view.js"></script>
@@ -29,7 +29,7 @@ class: center, middle, inverse, title-slide
 ### Merlin Schaeffer<br> Department of Sociology
 ]
 .date[
-### 2024-09-25
+### 2025-09-22
 ]
 
 ---
@@ -40,7 +40,7 @@ class: center, middle, inverse, title-slide
 
 .font130[.center[Use data to .alert[discover patterns], &lt;br&gt; and the social mechanisms that bring them about.]]
 
-&lt;img src="https://liu.se/-/media/istock-501261958.jpg?mw=1120&amp;mh=1120&amp;hash=DA8977CCE6A6E600AE80A40CFEE771C9" width="70%" style="display: block; margin: auto;" /&gt;
+&lt;img src="https://researchleap.com/wp-content/uploads/2021/12/Population-data.jpeg" width="70%" style="display: block; margin: auto;" /&gt;
 ---
 class: inverse
 # Today's schedule
@@ -103,7 +103,7 @@ pacman::p_load(
   tidyverse, # Data manipulation,
   ggplot2, # beautiful figures,
   kableExtra, # for table formatting,
-  democracyData, # download democracy datasets used in the scholarly literature.
+  vdemdata, # download democracy datasets used in the scholarly literature.
   wbstats, # download data from Worldbank. Tremendous source of global socio-economic data.
   estimatr, # OLS with robust SE,
   modelsummary) # regression tables with nice layout,
@@ -113,26 +113,26 @@ pacman::p_load(
 
 ``` r
 (Dat &lt;- wb_data("SI.POV.DDAY", # Download poverty data: &lt;$2.15 per day,
-                start_date = 2000, end_date = 2024) %&gt;%
+                start_date = 2000, end_date = 2025) %&gt;%
    rename(poverty = SI.POV.DDAY) %&gt;% # rename poverty variable,
    select(country, date, poverty) %&gt;% # Keep only 3 variables
    drop_na(poverty) %&gt;% group_by(country) %&gt;% # Group by country,
    filter(date == max(date)) %&gt;% # Keep the most recent data per country.
    mutate(date = as.numeric(date)) %&gt;% ungroup())
-# # A tibble: 165 × 3
+# # A tibble: 168 × 3
 #    country     date poverty
 #    &lt;chr&gt;      &lt;dbl&gt;   &lt;dbl&gt;
-#  1 Albania     2020     0  
+#  1 Albania     2020     0.3
 #  2 Algeria     2011     0  
-#  3 Angola      2018    31.1
-#  4 Argentina   2022     0.6
-#  5 Armenia     2022     0.8
+#  3 Angola      2018    39.3
+#  4 Argentina   2023     1.2
+#  5 Armenia     2023     1.9
 #  6 Australia   2018     0.5
-#  7 Austria     2021     0.5
+#  7 Austria     2022     0.6
 #  8 Azerbaijan  2005     0  
-#  9 Bangladesh  2022     5  
-# 10 Belarus     2020     0  
-# # ℹ 155 more rows
+#  9 Bangladesh  2022     8  
+# 10 Barbados    2016     1.7
+# # ℹ 158 more rows
 ```
 ]]
 
@@ -171,25 +171,25 @@ Dat &lt;- Dat %&gt;%
   mutate(
     colonizer = case_when(
       str_detect(country, "Algeria|Benin|Burkina Faso|Cambodia|Central African Republic|Chad") |
-        str_detect(country, "Djibouti|Gabon|Guinea|Haiti|Laos|Lebanon|Madagascar|Mali|Congo, Rep.|Cote D'Ivoire") | 
+        str_detect(country, "Djibouti|Gabon|Guinea|Laos|Haiti|Lebanon|Madagascar|Mali|Congo, Rep.|Cote D'Ivoire") | 
         str_detect(country, "Mauritania|Niger|Senegal|Syria|Togo|Tunisia|Viet Nam") ~ "France", # France
-      str_detect(country, "Angola|Brazil|Mozambique|Guinea-Bissau") ~ "Portugal", # Portugal
-      str_detect(country, "Argentina|Bolivia|Chile|Colombia|Costa Rica|Cuba|Dominican Republic|Ecuador") |
-        str_detect(country, "El Salvador|Guatemala|Honduras|Mexico|Nicaragua|Panama|Paraguay|Peru") |
-        str_detect(country, "Uruguay|Venezuela, RB") ~ "Spain", # Spain
       str_detect(country, "Bahrain|Bangladesh|Botswana|Cyprus|Egypt|Fiji") |
         str_detect(country, "Gambia|Ghana|Guyana|India|Iraq|Jamaica|Jordan|Kenya|Kuwait") |
         str_detect(country, "Lesotho|Malawi|Malaysia|Mauritius|Myanmar|Nigeria|Oman") | 
-        str_detect(country, "Pakistan|Qatar|Sierra Leone|Singapore|South Africa") | 
+        str_detect(country, "Pakistan|Qatar|Sierra Leone|Singapore") | 
         str_detect(country, "Sri Lanka|Sudan|Swaziland|Tanzania|Trinidad/Tobago|Uganda") | 
         str_detect(country, "United Arab Emirates|Yemen|Zambia|Zimbabwe") ~ "Britain", # Britain
-      # Australia, Canada, Israel, New Zealand, United States; left out as settler societies
       str_detect(country, "Burundi|Congo, Dem. Rep.|Rwanda") ~ "Belgium")) # Belgium
-      # str_detect(country, "Liberia|Philippines") ~ "USA", # USA
-      # str_detect(country, "Libya|Somalia") ~ "Italy", # Italy
-      # str_detect(country, "Indonesia") ~ "Holland", # Holland
-      # str_detect(country, "Namibia") ~ "South Africa", # Holland
-      # str_detect(country, "Korea|Taiwan") ~ "Japan")) # Japan
+# Australia, South Africa, Canada, Israel, New Zealand, United States; left out as settler societies
+# str_detect(country, "Angola|Brazil|Mozambique|Guinea-Bissau") ~ "Portugal", # Portugal
+# str_detect(country, "Argentina|Bolivia|Chile|Colombia|Costa Rica|Cuba|Dominican Republic|Ecuador") |
+# str_detect(country, "El Salvador|Guatemala|Honduras|Mexico|Nicaragua|Panama|Paraguay|Peru") |
+# str_detect(country, "Uruguay|Venezuela, RB") ~ "Spain", # Spain
+# str_detect(country, "Liberia|Philippines") ~ "USA", # USA
+# str_detect(country, "Libya|Somalia") ~ "Italy", # Italy
+# str_detect(country, "Indonesia") ~ "Holland", # Holland
+# str_detect(country, "Namibia") ~ "South Africa", # South Africa
+# str_detect(country, "Korea|Taiwan") ~ "Japan")) # Japan
 ```
 ]]
 
@@ -262,7 +262,7 @@ modelsummary(
   output = "kableExtra")
 ```
 
-&lt;table style="NAborder-bottom: 0; color: black; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
  &lt;thead&gt;
   &lt;tr&gt;
    &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
@@ -272,27 +272,27 @@ modelsummary(
 &lt;tbody&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 31.766*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 32.136* &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (4.332) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (14.035) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; years_indep &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; −0.136*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −0.039 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.024) &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.229) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 71 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 51 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.174 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.001 &lt;/td&gt;
   &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
@@ -335,121 +335,23 @@ class: clear
 - **Gray dotted line:** OLS regression.
 
 - **Leverage:** High influence on regression; `\(x_i\)` far from `\(\bar{x}\)`.
-  
-
-- **Z-standardized residuals:** Z-standardized residuals: Distance from regression line.
-  + Example: Haiti (poverty rate 29.2%).
-
-
-``` r
-# Re-estimate model using lm(),
-lm(poverty ~ years_indep, 
-   data = Dat) %&gt;%
-  # The best outlier plot.
-* plot(., which = 5)
-```
-]
-
-.right-column[
-&lt;img src="4-OLS-Wisdoms_files/figure-html/unnamed-chunk-15-1.png" width="80%" style="display: block; margin: auto;" /&gt;
-]
-
----
-# An artificial outlier
-.panelset[
-.panel[.panel-name[Let's create an outlier]
-
-``` r
-Dat_outl &lt;- Dat %&gt;%
-  mutate( # Let's create an outlier:
-    years_indep = case_when(
-      country == "Sweden" ~ 500, # years of independence
-      TRUE ~ years_indep),
-    poverty = case_when(
-      country == "Sweden" ~ 99, # 99% poverty
-      TRUE ~ poverty))
-```
-]
-
-.panel[.panel-name[OLS]
-.left-column[.font90[
-
-``` r
-ols_outl &lt;- lm_robust( # Estimation
-  poverty ~ years_indep, 
-  data = Dat_outl)
-
-modelsummary( # Regression table
-  list("Poverty" = ols_outl), stars = TRUE,
-  gof_map = c("nobs", "r.squared"), 
-  output = "kableExtra")
-```
-
-&lt;table style="NAborder-bottom: 0; color: black; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
- &lt;thead&gt;
-  &lt;tr&gt;
-   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
-   &lt;th style="text-align:center;"&gt; Poverty &lt;/th&gt;
-  &lt;/tr&gt;
- &lt;/thead&gt;
-&lt;tbody&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 21.255* &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (9.207) &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; years_indep &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; −0.015 &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.099) &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 72 &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.003 &lt;/td&gt;
-  &lt;/tr&gt;
-&lt;/tbody&gt;
-&lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
-&lt;sup&gt;&lt;/sup&gt; + p &amp;lt; 0.1, * p &amp;lt; 0.05, ** p &amp;lt; 0.01, *** p &amp;lt; 0.001&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;
-&lt;/table&gt;
-
-
-]]
-
-.right-column[
-&lt;img src="4-OLS-Wisdoms_files/figure-html/Sweden-1.png" width="100%" style="display: block; margin: auto;" /&gt;
-]]
-.panel[.panel-name[Outlier analysis]
-.left-column[
-- **Gray dotted line:** OLS regression.
-
-- **Leverage:** High influence on regression; `\(x_i\)` far from `\(\bar{x}\)`.
 
 - **Cook's D**: Change in `\(\sum{\hat{y}}\)` (in std. residuals) if case `\(i\)` removed
 
-
-``` r
-# Re-estimate model using lm(),
-lm(poverty ~ years_indep, 
-   data = Dat_outl) %&gt;%
-  # The best outlier plot.
-* plot(., which = 5)
-```
+- **Z-standardized residuals:** Z-standardized residuals: Distance from regression line.
+  + Example: Haiti (poverty rate 40.4%).
 ]
 
 .right-column[
-&lt;img src="4-OLS-Wisdoms_files/figure-html/unnamed-chunk-18-1.png" width="75%" style="display: block; margin: auto;" /&gt;
+
+``` r
+# Re-estimate model using lm(),
+lm(poverty ~ years_indep, data = Dat) %&gt;%
+* plot(., which = 5) # The best outlier plot.
+```
+
+&lt;img src="4-OLS-Wisdoms_files/figure-html/unnamed-chunk-15-1.png" width="75%" style="display: block; margin: auto;" /&gt;
 ]
-]]
 
 ---
 # Linearity
@@ -461,44 +363,118 @@ lm(poverty ~ years_indep,
 
 - **Ideal:** Red line matches gray dotted line
 
-- **Our case:** Linearity assumption slightly violated, but generally acceptable
-
-
-``` r
-# Re-estimate model using lm(),
-lm(poverty ~ years_indep, 
-   data = Dat) %&gt;%
-  # The best linearity plot.
-* plot(., which = 1)
-```
+- **Our case:** Linearity assumption clearly violated
 ]
 
 .right-column[
-&lt;img src="4-OLS-Wisdoms_files/figure-html/unnamed-chunk-19-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+``` r
+# Re-estimate model using lm(),
+lm(poverty ~ years_indep, data = Dat) %&gt;%
+* plot(., which = 1) # The best linearity plot.
+```
+
+&lt;img src="4-OLS-Wisdoms_files/figure-html/unnamed-chunk-16-1.png" width="75%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
-# Linearity .font70[And our outlier ...]
+layout: true
+# Removing the outlier
 
 .left-column[
-- **Gray dotted line:** OLS regression
-
-- **Red line:** Smoothed relationship between residuals and fitted values
-
-- **Ideal:** Red line matches gray dotted line
-
 
 ``` r
-# Re-estimate model using lm(),
-lm(poverty ~ years_indep, 
-   data = Dat_outl) %&gt;%
-  # The best linearity plot.
-  plot(., which = 1)
+Dat &lt;- Dat %&gt;%
+* filter(country != "Haiti")
 ```
 ]
 
+---
+
 .right-column[
-&lt;img src="4-OLS-Wisdoms_files/figure-html/unnamed-chunk-20-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+``` r
+# Re-estimate model using lm(),
+lm(poverty ~ years_indep, data = Dat) %&gt;%
+* plot(., which = 5) # The best outlier plot.
+```
+
+&lt;img src="4-OLS-Wisdoms_files/figure-html/unnamed-chunk-18-1.png" width="75%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
+.right-column[
+
+``` r
+# Re-estimate model using lm(),
+lm(poverty ~ years_indep, data = Dat) %&gt;%
+* plot(., which = 1) # The best linearity plot.
+```
+
+&lt;img src="4-OLS-Wisdoms_files/figure-html/unnamed-chunk-19-1.png" width="75%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+layout: false
+# Poverty and years of independence
+
+.left-column[.font90[
+
+``` r
+# Estimate OLS regression
+ols &lt;- lm_robust(
+  poverty ~ years_indep, 
+  data = Dat)
+# Regression table
+modelsummary(
+  list("Poverty" = ols), stars = TRUE,
+  gof_map = c("nobs", "r.squared"), 
+  output = "kableExtra")
+```
+
+&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; Poverty &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 63.190*** &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (16.305) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; years_indep &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −0.575* &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.260) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 50 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.047 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
+&lt;sup&gt;&lt;/sup&gt; + p &amp;lt; 0.1, * p &amp;lt; 0.05, ** p &amp;lt; 0.01, *** p &amp;lt; 0.001&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;
+&lt;/table&gt;
+
+
+]]
+
+.right-column[
+&lt;img src="4-OLS-Wisdoms_files/figure-html/indep-world2-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -569,7 +545,7 @@ modelsummary(
 &lt;img src="4-OLS-Wisdoms_files/figure-html/unnamed-chunk-21-1.png" width="75%" style="display: block; margin: auto;" /&gt;
 ]
 .push-right[
-&lt;table style="NAborder-bottom: 0; color: black; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
  &lt;thead&gt;
   &lt;tr&gt;
    &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
@@ -579,51 +555,35 @@ modelsummary(
 &lt;tbody&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 18.853*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 23.824*** &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (3.977) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (4.793) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; France &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 5.112 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 4.941 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (5.913) &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; Spain &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; −15.453*** &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (4.069) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (6.923) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Belgium &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 45.480*** &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (8.796) &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; Portugal &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 17.513 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 50.609*** &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (21.044) &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (7.843) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 76 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 55 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.307 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.181 &lt;/td&gt;
   &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
@@ -635,7 +595,7 @@ modelsummary(
 
 .panel[.panel-name[Interpretation]
 .push-left[.font90[
-&lt;table style="NAborder-bottom: 0; color: black; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
  &lt;thead&gt;
   &lt;tr&gt;
    &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
@@ -645,51 +605,35 @@ modelsummary(
 &lt;tbody&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 18.853*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 23.824*** &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (3.977) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (4.793) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; France &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 5.112 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 4.941 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (5.913) &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; Spain &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; −15.453*** &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (4.069) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (6.923) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Belgium &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 45.480*** &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (8.796) &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; Portugal &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 17.513 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 50.609*** &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (21.044) &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (7.843) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 76 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 55 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.307 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.181 &lt;/td&gt;
   &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
@@ -703,26 +647,25 @@ modelsummary(
 
 $$
 `\begin{aligned}
-\operatorname{\widehat{poverty}} &amp;= 18.85 + 5.11(\operatorname{colonizer}_{\operatorname{France}})\ - \\
-&amp;\quad 15.45(\operatorname{colonizer}_{\operatorname{Spain}}) + 45.48(\operatorname{colonizer}_{\operatorname{Belgium}})\ + \\
-&amp;\quad 17.51(\operatorname{colonizer}_{\operatorname{Portugal}})
+\operatorname{\widehat{poverty}} &amp;= 23.82 + 4.94(\operatorname{colonizer}_{\operatorname{France}})\ + \\
+&amp;\quad 50.61(\operatorname{colonizer}_{\operatorname{Belgium}})
 \end{aligned}`
 $$
 
 
-- Average poverty in British-colonized countries: 18.85% 
+- Average poverty in British-colonized countries: 23.82% 
   + (When France = Belgium = Spain = Portugal = 0)
 
-- French-colonized countries compared to British: 5.11 percentage points higher poverty on average
+- French-colonized countries compared to British: 4.94 percentage points higher poverty on average
   + Difference not statistically significant&lt;br&gt; (may be due to chance)
-  + Average poverty in French-colonized countries: 18.85% + 5.11% = 23.96%
+  + Average poverty in French-colonized countries: 23.82% + 4.94% = 28.76%
 ]]]]
 
 ---
 class: inverse middle center
 # Break
 
-&lt;iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+&lt;iframe src='https://panel.letstimeit.com/instant-timer/15-minute' width='600' height='400' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
 
 ---
 class: middle clear
@@ -730,7 +673,7 @@ class: middle clear
 .left-column[
 &lt;img src="https://cdn.dribbble.com/users/10549/screenshots/9890798/media/f38f0e4d71d9763c7533641d2418b35b.png?compress=1&amp;resize=1200x900&amp;vertical=top" width="100%" style="display: block; margin: auto;" /&gt;
 
-&lt;iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+&lt;iframe src='https://panel.letstimeit.com/instant-timer/20-minute' width='600' height='400' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
 ]
 
 .right-column[
@@ -743,7 +686,7 @@ class: middle clear
 class: inverse middle center
 # Break
 
-&lt;iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+&lt;iframe src='https://panel.letstimeit.com/instant-timer/10-minute' width='600' height='400' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
 
 ---
 class: inverse middle center
@@ -799,6 +742,7 @@ y_{i} &amp;= \text{logit}^{-1}(\alpha + \beta x) \\
 We need a 'link function' `\(g^{-1}\)` that maps the linear model results to the [0, 1] range. The sigmoid-shaped logistic function serves this purpose, with its inverse being the logit (log odds).
 
 &lt;img src="4-OLS-Wisdoms_files/figure-html/Logit-fun-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+]
 
 ---
 class: middle center
@@ -826,16 +770,12 @@ class: clear
    mutate( # Rename variables for the plot.
      term = case_when(
        term == "colonizerFrance" ~ "France",
-       term == "colonizerSpain" ~ "Spain",
        term == "colonizerBelgium" ~ "Belgium",
-       term == "colonizerPortugal" ~ "Portugal",
        term == "(Intercept)" ~ "Intercept \n (Britain)")) %&gt;%
    filter(term != "Intercept \n (Britain)"))
-#       term estimate std.error statistic  p.value conf.low conf.high df outcome
-# 1   France     5.11      5.91     0.865 3.90e-01    -6.68     16.90 71 poverty
-# 2    Spain   -15.45      4.07    -3.798 3.05e-04   -23.57     -7.34 71 poverty
-# 3  Belgium    45.48      8.80     5.171 2.06e-06    27.94     63.02 71 poverty
-# 4 Portugal    17.51     21.04     0.832 4.08e-01   -24.45     59.47 71 poverty
+#      term estimate std.error statistic  p.value conf.low conf.high df outcome
+# 1  France     4.94      6.92     0.714 4.79e-01    -8.95      18.8 52 poverty
+# 2 Belgium    50.61      7.84     6.453 3.68e-08    34.87      66.3 52 poverty
 ```
 ]
 
@@ -862,7 +802,7 @@ ggplot(data = plotdata,
 &lt;img src="4-OLS-Wisdoms_files/figure-html/unnamed-chunk-29-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]
 .push-right[
-&lt;table style="NAborder-bottom: 0; color: black; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
  &lt;thead&gt;
   &lt;tr&gt;
    &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
@@ -872,51 +812,35 @@ ggplot(data = plotdata,
 &lt;tbody&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 18.853*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 23.824*** &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (3.977) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (4.793) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; France &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 5.112 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 4.941 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (5.913) &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; Spain &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; −15.453*** &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (4.069) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (6.923) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Belgium &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 45.480*** &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (8.796) &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; Portugal &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 17.513 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 50.609*** &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (21.044) &lt;/td&gt;
+   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (7.843) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 76 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 55 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.307 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.181 &lt;/td&gt;
   &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
@@ -936,8 +860,8 @@ ggplot(data = plotdata,
 ``` r
 (ols &lt;- lm_robust(poverty ~ years_indep, data = Dat))
 #             Estimate Std. Error t value Pr(&gt;|t|) CI Lower CI Upper DF
-# (Intercept)   31.766     4.3318    7.33 3.30e-10   23.124  40.4072 69
-# years_indep   -0.136     0.0244   -5.59 4.18e-07   -0.185  -0.0878 69
+# (Intercept)   63.190      16.30    3.88 0.000322     30.4  95.9732 48
+# years_indep   -0.575       0.26   -2.21 0.031745     -1.1  -0.0524 48
 ```
 ]
 .push-right[
@@ -987,16 +911,16 @@ ggplot(data = plotdata,
 # # A tibble: 500 × 4
 #    years_indep   fit   lwr   upr
 #          &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
-#  1           1  31.6  23.0  40.2
-#  2           2  31.5  22.9  40.0
-#  3           3  31.4  22.9  39.9
-#  4           4  31.2  22.8  39.7
-#  5           5  31.1  22.7  39.5
-#  6           6  30.9  22.6  39.3
-#  7           7  30.8  22.5  39.1
-#  8           8  30.7  22.4  38.9
-#  9           9  30.5  22.3  38.8
-# 10          10  30.4  22.2  38.6
+#  1           1  62.6  30.3  94.9
+#  2           2  62.0  30.3  93.8
+#  3           3  61.5  30.2  92.7
+#  4           4  60.9  30.1  91.6
+#  5           5  60.3  30.1  90.5
+#  6           6  59.7  30.0  89.5
+#  7           7  59.2  29.9  88.4
+#  8           8  58.6  29.9  87.3
+#  9           9  58.0  29.8  86.2
+# 10          10  57.4  29.7  85.1
 # # ℹ 490 more rows
 ```
 ]]]
@@ -1046,7 +970,7 @@ ggplot(data = fict_dat, aes(y = fit, x = years_indep)) +
 class: inverse middle center
 # Break
 
-&lt;iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+&lt;iframe src='https://panel.letstimeit.com/instant-timer/15-minute' width='600' height='400' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
 
 ---
 class: middle clear
@@ -1054,7 +978,7 @@ class: middle clear
 .left-column[
 &lt;img src="https://cdn.dribbble.com/users/10549/screenshots/9890798/media/f38f0e4d71d9763c7533641d2418b35b.png?compress=1&amp;resize=1200x900&amp;vertical=top" width="100%" style="display: block; margin: auto;" /&gt;
 
-&lt;iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+&lt;iframe src='https://panel.letstimeit.com/instant-timer/20-minute' width='600' height='400' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
 ]
 
 .right-column[
@@ -1104,11 +1028,11 @@ Colonialism on Postcolonial Civil Violence". In: _Social Forces_, pp. 785-817.
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="../template/remark-latest.min.js"></script>
 <script>var slideshow = remark.create({
-"highlightLanguage": "r",
-"highlightStyle": "zenburn",
-"highlightLines": true,
-"countIncrementalSlides": false,
-"ratio": "16:9"
+  "highlightLanguage": "r",
+  "highlightStyle": "zenburn",
+  "highlightLines": true,
+  "countIncrementalSlides": false,
+  "ratio": "16:9"
 });
 if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
   window.dispatchEvent(new Event('resize'));
