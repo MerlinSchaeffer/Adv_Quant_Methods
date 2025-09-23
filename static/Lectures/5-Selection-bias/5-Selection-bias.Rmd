@@ -47,8 +47,14 @@ xaringanExtra::use_panelset()
 .font130[.center[Use data to discover patterns, <br> and the .alert[social mechanisms that bring them about.]]]
 
 ```{r, echo = FALSE, out.width='70%', fig.align='center'}
-knitr::include_graphics('https://liu.se/-/media/istock-501261958.jpg?mw=1120&mh=1120&hash=DA8977CCE6A6E600AE80A40CFEE771C9')
+knitr::include_graphics('https://researchleap.com/wp-content/uploads/2021/12/Population-data.jpeg')
 ```
+
+???
+
+- Our goal: not just describing patterns, but explaining them.
+
+- Today is about avoiding false explanations.
 
 ---
 class: inverse middle
@@ -69,6 +75,16 @@ class: inverse middle
   + Backdoor paths
   + Confounder bias (= selection bias)
 
+???
+
+1. Start with a real-world puzzle.
+
+2. Show a simple but flawed analysis.
+
+3. Introduce the theory to fix it (Potential Outcomes).
+
+4. Introduce the tool to visualize it (DAGs).
+
 ---
 # Race relations in the US
 
@@ -77,6 +93,12 @@ knitr::include_graphics('img/Gallup.png')
 ```
 .font70[ .center[ *Source:* [Gallup](https://news.gallup.com/poll/1687/race-relations.aspx)]]
 
+???
+
+- Why do subjective evaluations of the situation deteriorate?
+
+- Objective context may not have improve much, but did it really become worse?
+
 ---
 class: inverse
 .push-left[
@@ -84,7 +106,7 @@ class: inverse
 <br>
 .font200[**The Integration Paradox**]
 
-immigrants and their descendants with seemingly better access to mainstream middle-class society <br> — as evidenced by their education, labor market success, length of residence, or generational status — <br> often report more discrimination than those on the societal margins.
+Immigrants and their descendants with seemingly better access to mainstream middle-class society <br> — as evidenced by their education, labor market success, length of residence, or generational status — <br> often report more discrimination than those on the societal margins.
 ]
 
 .push-right[
@@ -93,6 +115,13 @@ knitr::include_graphics('img/Meta.png')
 ```
 .font70[.center[*Source:* `r Citet(myBib, "schaeffer_integration_2024")`]]]
 
+???
+
+- The central puzzle: The Integration Paradox.
+  + It's counterintuitive: more integration -> more reported discrimination. 
+
+- Meta-analysis on right confirms this pattern: Indicator of integration -> more reported discrimination
+  + Estimates + 95Ci from +40 studies
 ---
 class: inverse
 # The Integration Paradox .font60[Research question of the day]
@@ -113,11 +142,21 @@ knitr::include_graphics('img/Steinmann3.png')
 .font70[.center[*Source:* `r Citet(myBib, "steinmann_paradox_2019")`]]
 ]
 
+???
+
+- Ask them to interpret the regression result.
+
+- Narrow the focus: Awareness. 
+  + More integrated people consume more news, making them more aware of discrimination. 
+
+- Frame this as the hypothesis we will test today.
+
 --
 
 .left-column[.center[.font110[
 **Does news media consumption** <br><br> _**increase**_ <br><br> **how often immigrant minorities' report discrimination?**
 ]]]
+
 
 ---
 # The direct-question fallacy!
@@ -133,6 +172,16 @@ knitr::include_graphics('http://www.news.uzh.ch/dam/jcr:00000000-09c6-5ee1-ffff-
 Why might this be problematic?
 ]]
 ]
+
+???
+
+- Ask class: "Why is just asking people a bad way to test this?"
+  + Give. them 2 minutes to discuss
+  + (Social desirability, poor memory, lack of self-awareness).
+
+Click 2: Main point: self-reports are not credible causal evidence.
+  + People tell interesting stories about their life, they do not record causal facts.
+  + Need better, more objective methods.
 
 --
 
@@ -160,6 +209,8 @@ knitr::include_graphics('./img/ESR.png')
 class: inverse middle center
 # Hypothesis $\rightarrow$ Comparison
 
+???
+- Key idea: Testing hypotheses always implies a comparison.
 ---
 class: clear
 # Hypothesis $\rightarrow$ Comparison
@@ -170,6 +221,9 @@ $H_{1}:$ Media consumption *increases* how often immigrant minorities report dis
 
 .backgrnote[
 $H_{0}:$ Media consumption *does not change* how often immigrant minorities report discrimination.]
+
+???
+Causality = counterfactual ("what if").
 
 --
 
@@ -184,11 +238,14 @@ $H_{1}: 0 < Avg_{n}[\text{Discrimination}|\text{Read news} = 1] - Avg_{n}[\text{
  
 .backgrnote[ 
 $H_{0}: 0 \geq Avg_{n}[\text{Discrimination}|\text{Read news} = 1] - Avg_{n}[\text{Discrimination}|\text{Read news} = 0]$
-
 - This formula states that the average reported discrimination for those who read news is less than or equal to those who don't.
 - The difference between these two averages is zero or negative $(\geq 0).$
  ]
- 
+
+???
+Translate H_1 into a mathematical comparison:
+- We compare the average outcome of news-readers vs. non-readers.
+
 --
 
 .content-box-green[.font80[
@@ -199,6 +256,11 @@ $H_{0}: 0 \geq Avg_{n}[\text{Discrimination}|\text{Read news} = 1] - Avg_{n}[\te
 - **Simmel**: Urbanization increases impersonal relations nervous stimulation; residents of cities are therefore rational and distant.
 ]]
 
+???
+Ask Students to reinforce counterfactuals with classic examples:
+- Marx: capitalism vs. non-capitalism.
+- Simmel: urban vs. rural life.
+- Give them two inutes to discuss.
 ---
 # Preparation
 
@@ -281,9 +343,20 @@ APAD
 
 ]]
 
+???
+Go through setup. Briefly explain:
+- Content of survey data and its questions.
+- Data preparation and coding of variables:
+  + `discrimination` is the outcome: Average across dimensions
+  + `news consumption` is the cause: binary and total minutes
+
 ---
 class: inverse middle center
 # Fruitless naïv comparison
+
+???
+
+Let's do the simplest possible comparison.
 
 ---
 # Fruitless\naïv comparison
@@ -302,6 +375,11 @@ ggplot(data = APAD, aes(y = dis_index, x = news)) +
 How does this scatter plot test $H_{1}$?
 ]]
 
+???
+Ask class to interpret scatter plot (2 minutes with neighbor)
+- Regression line is flat / slightly negative.
+- Visually, does not support our hypothesis.
+
 --
 
 .push-right[.font80[
@@ -318,6 +396,14 @@ modelsummary( # Create summary table of OLS results
 ```
 ]]
 
+???
+Ask class to interpret OLS table
+- Focus on categorical news_yn: -0.093.
+- News-readers report slightly *less* discrimination.
+- Not statistically significant ($\beta < 1.96 \times \text{SE}$).
+- Conclusion: Hypothesis seems wrong. 
+
+But is this analysis valid?
 ---
 # Small recap .font60[Hypotheses tests, *t*- and, *p*-values]
 
@@ -372,11 +458,19 @@ ggplot(data= data, aes(x = betas, y = density)) +
 ```
 ]]
 
+???
+Quick recap of Stats I.
+
+- Graph shows sampling distribution under the null (H_0: effect is 0).
+- Our estimate (-0.093) is the dotted line.
+- Not outside the red $H_0$-"rejection" region $(H_0 \pm 1.96 \times \text{SE})$
+- Outside orange region $\rightarrow$ p-value > 0.05, so we fail to reject the null.
+
 ---
 class: inverse middle center
 # Break
 
-<iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'></iframe>
+<iframe src='https://panel.letstimeit.com/instant-timer/15-minute' width='600' height='400' frameborder='0' scrolling='yes'></iframe>
 
 ---
 class: middle clear
@@ -386,7 +480,7 @@ class: middle clear
 knitr::include_graphics('https://www.laserfiche.com/wp-content/uploads/2014/10/femalecoder.jpg')
 ```
 
-<iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'></iframe>
+<iframe src='https://panel.letstimeit.com/instant-timer/20-minute' width='600' height='400' frameborder='0' scrolling='yes'></iframe>
 ]
 
 .right-column[
@@ -398,7 +492,7 @@ knitr::include_graphics('https://www.laserfiche.com/wp-content/uploads/2014/10/f
 class: inverse middle center
 # Break
 
-<iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'></iframe>
+<iframe src='https://panel.letstimeit.com/instant-timer/10-minute' width='600' height='400' frameborder='0' scrolling='yes'></iframe>
 
 ---
 class: inverse middle center
@@ -408,6 +502,13 @@ class: inverse middle center
 > The Neyman–Rubin causal model is based on the idea of potential outcomes. For example, a person would have a particular income at age 40 if they had attended college, whereas they would have a different income at age 40 if they had not attended college. To measure the causal effect of going to college for this person, we need to compare the outcome for the same individual in both alternative futures. Since it is impossible to see both potential outcomes at once, one of the potential outcomes is always missing. This dilemma is the "fundamental problem of causal inference"
 
 > -- *Source*: [.white[Wikipedia]](https://en.wikipedia.org/wiki/Rubin_causal_model)
+
+???
+The key statistical theory: Potential Outcomes Framework
+- Key idea: For anyone, there are two potential states (e.g., news reader vs. no news reader).
+- The causal effect is the difference between these two states.
+- Fundamental problem of causal inference: We only ever see one state.
+
 ---
 # Potential outcomes .font60[Ferda's *personal causl effect*]
 
@@ -428,6 +529,17 @@ knitr::include_graphics('https://miro.medium.com/max/1400/0*M_2Lt3gq2wUHeTrI')
 ```
 ]
 
+???
+
+Concrete with a hypothetical person: Ferda.
+
+- $Y_1$: Outcome if she gets treatment (reads news).
+
+- $Y_0$: Outcome if she doesn't.
+
+- Personal causal effect: $Y_1−Y_0=+2$.
+
+Punchline: In reality, we only observe $Y_1$ or $Y_0$ for Ferda.
 ---
 class: center inverse
 # The average causal effect
@@ -443,6 +555,13 @@ The average causal effect is <br> *the average of all personal causal effects* <
 For example, the average causal effect of reading the news compares discrimination for everyone in the sample in the hypothetical scenario that they all read the news, to the discrimination for everyone in the sample in the hypothetical scenario that they did not read the news.
 ]]
 
+???
+
+Goal: the Average Causal Effect (ACE) of all individual effects.
+
+Conceptually: compare a world where everyone gets treatment to a world where no one does.
+
+Estimable under certain conditions!
 ---
 layout: false
 class: inverse center
@@ -465,6 +584,10 @@ knitr::include_graphics('./img/fork.png')
 ```
 ]
 
+???
+We only observe one path per observation. The other is forever unknown.
+
+**This is why we need methods that don't rely on asking people to _imagine_ the other path!**
 ---
 layout: true
 # Apples and oranges .font60[Ferda compared to Tuki?]
@@ -483,6 +606,15 @@ $Y_{1}$: Outcome with news    | 4 (Often)   | .gray[5<br>(V.often)]
 True news effect          | .gray[+2] | .gray[0]
 ]]
 
+???
+
+Can we just compare two different people?
+
+Introduce Ferda (reads news, we see $Y_1=4$) and Tuki (no news, we see $Y_0=5$).
+
+Grey numbers are unobserved counterfactuals.
+
+The "true" effects are +2 for Ferda, 0 for Tuki.
 ---
 
 ---
@@ -495,6 +627,14 @@ $$\begin{equation} \begin{split}
 Why is it misleading to compare Ferda to Tuki?
 ]]]
 
+???
+Do the naïve comparison: Ferda's outcome - Tuki's outcome = -1.
+
+Terrible estimate of either person's true effect!
+
+"Why is this comparison so wrong?" (give 2 minutes to discuss)
+
+"They are different people *to begin* with."
 ---
 
 .right-column[.font90[
@@ -505,6 +645,12 @@ $$\begin{equation} \begin{split}
 \end{split} \end{equation}$$
 ]]
 
+???
+Looks complex, but we just add something that is overall 0
+
+Allows us to see: True Causal Effect (+2)
+
+...plus something else, called Selection Bias (-3)
 ---
 
 .right-column[.font90[
@@ -522,6 +668,12 @@ $\Downarrow$
 Tuki's *baseline* (i.e., no news) to report discrimination <br> is higher than Ferda's!
 ]]]
 
+???
+Define Selection Bias: The groups were different *to begin* with.
+
+$Y_0,Ferda \neq Y_0,Tuki$
+
+Tuki's baseline discrimination is higher than Ferda's. This pre-existing difference contaminates our comparison.
 ---
 layout: false
 # Observed vs Potential Outcomes
@@ -550,6 +702,14 @@ $$\begin{equation} D_{i}=\begin{cases} 1, & \text{if}\ i = \text{Reads news} \\ 
   + .font70[Potential discrimination among those who don't read news,<br> *if they had read it news*.]
 ]]
 
+???
+Introduce formal notation.
+
+Blue box: What we can see in the data. The average of each group.
+
+Red box: The unobserved counterfactuals. The missing pieces of the puzzle.
+
+Our naïve comparison only uses the blue box info!
 ---
 # Observed differences between groups
 
@@ -565,6 +725,13 @@ knitr::include_graphics('https://www.rbgcal.com/wp-content/uploads/2018/01/Netwo
 .push-right[
 Usually, observed differences between groups do not tell us the average causal effect: $Avg_{n}[Y_{1i}-Y_{0i}]$!
 ]
+
+???
+Now we generalize from Ferda and Tuki to populations; logic remains the same!
+
+Left side: The Average Causal Effect (what we want).
+
+Right side: The naïve difference in means (what we calculate).
 ---
 # Why? Selection bias!
 
@@ -579,6 +746,14 @@ $\text{Selection bias} = \underbrace{Avg_{n}[Y_{0i} | D_{i} = 1]}_{\text{Unobser
 $\rightarrow$ The difference in $Avg_{n}(Y_{0i})$, the baseline of the outcome, between the groups we compare.
 ]]
 
+???
+Same mathematical addiotion of term that equals 0!
+
+Observed Difference = Causal Effect + *Selection Bias*
+
+Highlight the formula for selection bias. 
+
+Emphasize that one term is **unobserved**.
 --
 
 .content-box-green[.center[
@@ -586,6 +761,12 @@ $\rightarrow$ The difference in $Avg_{n}(Y_{0i})$, the baseline of the outcome, 
 
 That is, if immigrant minorities who read the news had not read them, would they report discrimination as often as those who do not read the news?
 ]]
+
+???
+Let them brainstorm reasons why news-readers might be different.
+
+(Education, age, language, citizenship ...)
+
 
 ---
 # (Im-)balance .font70[.alert[of oberserved variables!]]
@@ -615,10 +796,23 @@ APAD %>% # Start with the APAD dataset, then pipe
 ```{r ref.label = "balance1", echo = FALSE}
 ```
 ]]
+???
+How to check for *observed* bias? A balance test.
 
+We can't compare unobserved things, but we can compare observed characteristics.
+
+Explain logic of R code
+
+Balance table:
+- They differ on age, citizenship, immigrant generation!
+- Conclusion: The groups are imbalanced. Our naïve comparison is definitely biased
 ---
 class: inverse middle center
 # Directed Acyclical Graphs (DAGs)
+
+???
+We know bias exists. Now, a visual tool to think about it.
+
 
 ---
 layout: true
@@ -638,6 +832,16 @@ layout: true
 .alert[Confounder \ Backdoor path bias \ Selection bias]: A confounder is a variable that is on a backdoor path between $D$ and $Y$. It biases our estimate of the causal effect of $D$ on $Y$.
 ]
 
+???
+DAG: a visual map of our causal assumptions.
+
+Backdoor Path: a non-causal path connecting Treatment (D) and Outcome (Y).
+
+A Confounder is a variable on a backdoor path. It's the source of the bias.
+
+Think of DAG as a puppet that you shake at a variable. 
+
+Shaking transfrs along the edges
 ---
 
 .push-right[
@@ -666,6 +870,16 @@ layout: true
 The red bi-directed arrow is officially not part of the DAG. But helps it helps us to understand that the correlation between $Y$ and $D$ is not causal in nature. The reason for this non-causal relationship is the existence of a backdoor path. The backdoor path is opened by variable C, which influences both D and Y.
 ]]
 
+???
+The classic confounding diagram.
+
+Backdoor path: D <- C -> Y.
+
+If you shake C, D and Y covary.
+
+If you shake D, Y does not move!
+
+non-causal (spurious) correlation between D and Y!
 ---
 
 .push-right[
@@ -695,6 +909,16 @@ The red bi-directed arrow is officially not part of the DAG. But helps it helps 
 The red bi-directed arrow is officially not part of the DAG. But helps it helps us to understand that the correlation between Discrimination and Reading the news is not causal in nature. The reason for this non-causal relationship is the existence of a backdoor path. The backdoor path is opened by German citizenship, which influences whether people read the news but also how much discrimination they experience.
 ]]
 
+???
+Confounder (C): German Citizenship
+
+Citizenship -> affects news reading (D)
+
+Citizenship -> affects discrimination experiences (Y)
+
+Backdoor path: Read news <- German citizen -> Discrimination.
+
+This path could explain our negative correlation.
 ---
 layout: false
 # Learning goal achieved!
@@ -714,6 +938,11 @@ The baseline of the outcome, $Y_{0i}$, may differ between the groups we compare.
 
 ]]]
 
+???
+Now we know WHY we can't interpret this as causal.
+
+Selection Bias: The groups differ on confounders.
+
 ---
 layout: false
 class: middle clear
@@ -723,7 +952,7 @@ class: middle clear
 knitr::include_graphics('https://www.laserfiche.com/wp-content/uploads/2014/10/femalecoder.jpg')
 ```
 
-<iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'></iframe>
+<iframe src='https://panel.letstimeit.com/instant-timer/20-minute' width='600' height='400' frameborder='0' scrolling='yes'></iframe>
 ]
 
 .right-column[
