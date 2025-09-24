@@ -4,7 +4,7 @@
     <title>Multiple Regression &amp;    Fundamentals of Causal Inference</title>
     <meta charset="utf-8" />
     <meta name="author" content="Merlin Schaeffer  Department of Sociology" />
-    <meta name="date" content="2025-09-22" />
+    <meta name="date" content="2025-09-24" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
     <script src="libs/tile-view/tile-view.js"></script>
@@ -29,7 +29,7 @@ class: center, middle, inverse, title-slide
 ### Merlin Schaeffer<br> Department of Sociology
 ]
 .date[
-### 2025-09-22
+### 2025-09-24
 ]
 
 ---
@@ -163,7 +163,7 @@ pacman::p_load(
 .center[.backgrnote[*Source*: Lange and Dawson (2009)]]
 ]]
 
-.panel[.panel-name[Coding colonial powers]
+.panel[.panel-name[Coding of colonizer]
 .font90[
 
 ``` r
@@ -197,7 +197,7 @@ Dat &lt;- Dat %&gt;%
 &lt;img src="4-OLS-Wisdoms_files/figure-html/col-powers-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]
 
-.panel[.panel-name[Coding independence]
+.panel[.panel-name[Coding of independence]
 .font60[
 
 ``` r
@@ -332,14 +332,20 @@ class: clear
 # Outlier 
 
 .left-column[
-- **Gray dotted line:** OLS regression.
+- **Gray dotted line:** OLS fit
 
+
+- **Z-standardized residuals:** Distance from regression line; Examples: 
+  + Nr. 62 Haiti (poverty rate 40.4%).
+  + Nr. 32 Congo, Dem. Rep. (poverty rate 85.3%).
+  + Nr. 69 Ireland (poverty rate 0.2%).
+
+ 
 - **Leverage:** High influence on regression; `\(x_i\)` far from `\(\bar{x}\)`.
 
-- **Cook's D**: Change in `\(\sum{\hat{y}}\)` (in std. residuals) if case `\(i\)` removed
 
-- **Z-standardized residuals:** Z-standardized residuals: Distance from regression line.
-  + Example: Haiti (poverty rate 40.4%).
+- **Cook's D**: Change in `\(\sum{\hat{y}}\)` (in std. residuals) if case `\(i\)` was removed
+  + Thresholds: gray dashed lines!
 ]
 
 .right-column[
@@ -357,7 +363,9 @@ lm(poverty ~ years_indep, data = Dat) %&gt;%
 # Linearity
 
 .left-column[
-- **Gray dotted line:** OLS regression
+- **Gray dotted line:** OLS fit
+
+- **Fitted values:** `\(\hat{Y}\)` 
 
 - **Red line:** Smoothed relationship between residuals and fitted values
 
@@ -508,15 +516,15 @@ class: inverse middle center
     0 &amp; \text{otherwise}
   \end{cases}$$`
 
-Contintent                       | Belgium | France | ...
+Contintent                       | Britain | France | ...
 ---------------------------------|----|----|----
-Burundi                 | 1  | 0  | 0 
-Rwanda                 | 1  | 0  | 0
+Kenya                 | 1  | 0  | 0 
+India                 | 1  | 0  | 0
 ...                 | 1  | 0  | 0
 Cambodia                          | 0  | 1  | 0  
 Algeria                          | 0  | 1  | 0
 ...                          | 0  | 1  | 0
-Reference &lt;br&gt; .backgrnote[(Britain)] | 0  | 0  | 0
+Reference &lt;br&gt; .backgrnote[(Belgium)] | 0  | 0  | 0
 ]
 
 .push-right[
@@ -526,23 +534,21 @@ Reference &lt;br&gt; .backgrnote[(Britain)] | 0  | 0  | 0
 .panel[.panel-name[How it's done in R]
 .push-left[.font70[
 
+
 ``` r
 # R recognizes categorical variables automatically,
 # if they are factor or character vectors.
 ols_2 &lt;- lm_robust(poverty ~ colonizer, data = Dat)
 # Regression table
-modelsummary(
-  list("Poverty" = ols_2), stars = TRUE,
+modelsummary(list("Poverty" = ols_2), stars = TRUE,
   # Rename for a better-looking table
   coef_rename = c("colonizerFrance" = "France", 
-                  "colonizerBelgium" = "Belgium",
-                  "colonizerPortugal" = "Portugal", 
-                  "colonizerSpain" = "Spain"),
+                  "colonizerBritain" = "Britain"),
   gof_map = c("nobs", "r.squared"), output = "kableExtra")
 ```
 ]
 
-&lt;img src="4-OLS-Wisdoms_files/figure-html/unnamed-chunk-21-1.png" width="75%" style="display: block; margin: auto;" /&gt;
+&lt;img src="4-OLS-Wisdoms_files/figure-html/unnamed-chunk-22-1.png" width="75%" style="display: block; margin: auto;" /&gt;
 ]
 .push-right[
 &lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
@@ -555,23 +561,23 @@ modelsummary(
 &lt;tbody&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 23.824*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 74.433*** &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (4.793) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (6.208) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; France &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 4.941 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −45.668*** &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (6.923) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (7.968) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; Belgium &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 50.609*** &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Britain &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −50.609*** &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
@@ -605,23 +611,23 @@ modelsummary(
 &lt;tbody&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 23.824*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 74.433*** &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (4.793) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (6.208) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; France &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 4.941 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −45.668*** &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (6.923) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (7.968) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; Belgium &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 50.609*** &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Britain &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −50.609*** &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
@@ -647,18 +653,20 @@ modelsummary(
 
 $$
 `\begin{aligned}
-\operatorname{\widehat{poverty}} &amp;= 23.82 + 4.94(\operatorname{colonizer}_{\operatorname{France}})\ + \\
-&amp;\quad 50.61(\operatorname{colonizer}_{\operatorname{Belgium}})
+\operatorname{\widehat{poverty}} &amp;= 74.43 - 45.67(\operatorname{colonizer}_{\operatorname{France}})\ - \\
+&amp;\quad 50.61(\operatorname{colonizer}_{\operatorname{Britain}})
 \end{aligned}`
 $$
 
 
-- Average poverty in British-colonized countries: 23.82% 
-  + (When France = Belgium = Spain = Portugal = 0)
+- Average poverty in Belgian-colonized countries: 74.43% 
+  + (When France = Britiain = 0)
 
-- French-colonized countries compared to British: 4.94 percentage points higher poverty on average
-  + Difference not statistically significant&lt;br&gt; (may be due to chance)
-  + Average poverty in French-colonized countries: 23.82% + 4.94% = 28.76%
+- French-colonized countries compared to Belgian: -45.67 percentage points lower poverty on average
+  + Average poverty in French-colonized countries: 74.43% + -45.67% = 28.76%
+  
+- British-colonized countries compared to Belgian: -50.61 percentage points lower poverty on average
+  + Average poverty in British-colonized countries: 74.43% + -50.61% = 23.82%
 ]]]]
 
 ---
@@ -690,71 +698,6 @@ class: inverse middle center
 
 ---
 class: inverse middle center
-# Binary outcomes
-
----
-class: clear
-# LPM versus Generalized Linear Models (GLM)
-
-.left-column[
-**Linear Probability Model (LPM)**:
-
-- Uses OLS to predict binary outcomes &lt;br&gt; (0 = "No" / 1 = "Yes")
-
-- Predicts `\(\hat{\text{P}(y_i = 1|x_{i})}\)`
-
-- Controversial issues:
- + Violates linearity assumption
- + Can predict probabilities &lt; 0 or &gt; 1
-]
-
-
-.right-column[
-&lt;img src="http://res.cloudinary.com/dyd911kmh/image/upload/f_auto,q_auto:best/v1523361626/linear_vs_logistic_regression_h8voek.jpg" width="100%" style="display: block; margin: auto;" /&gt;
-.center[.backgrnote[*Source*: [datacamp: Logistic Regression in R Tutorial](https://www.datacamp.com/community/tutorials/logistic-regression-R)]]
-]
-
----
-# Logistic regression .font70[GLM for binary outcomes]
-
-.push-left[
-`$$\begin{align*}
-\text{logit}(y_{i}) &amp;= \alpha + \beta x, \\
-y_{i} &amp;= \text{logit}^{-1}(\alpha + \beta x) \\
-&amp; = \text{logistic}(\alpha + \beta x) \\
-&amp;= \frac{1}{1+e^{-(\alpha + \beta x)}}.
-\end{align*}$$`
-
-
-
-.font90[
-| `\(\alpha + \beta x\)`  | `\(e^{(\alpha + \beta x)}\)` | `\(\frac{1}{e^{(\alpha + \beta x)}} \color{gray}{= e^{-(\alpha + \beta x)}}\)` | `\(\frac{1}{1 + e^{(\alpha + \beta x)}}\)` | `\(\frac{1}{1 +e^{-(\alpha + \beta x)}}\)` | 
-|--------------------:|-------------------------:|-------------------------------------------------------------:|---------------------------------------:|---------------------------------------:|
-|        -2           | 0.135                    | 7.389                                                        | 0.881                                  | 0.119                                  | 
-|        -1           | 0.368                    | 2.718                                                        | 0.731                                  | 0.269                                  | 
-|         0           | 1                        | 1                                                            | 0.5                                    | 0.5                                    | 
-|         1           | 2.718                    | 0.368                                                        | 0.269                                  | 0.731                                  | 
-|         2           | 7.389                    | 0.135                                                        | 0.119                                  | 0.881                                  |
-
-]]
-
-.push-right[
-We need a 'link function' `\(g^{-1}\)` that maps the linear model results to the [0, 1] range. The sigmoid-shaped logistic function serves this purpose, with its inverse being the logit (log odds).
-
-&lt;img src="4-OLS-Wisdoms_files/figure-html/Logit-fun-1.png" width="80%" style="display: block; margin: auto;" /&gt;
-]
-
----
-class: middle center
-
-GLMs (e.g., logistic regression) have their own issues (Breen, Karlson, and Holm, 2018).
-
-.alert[We use Linear Probability Models for binary outcomes.]
-
-For categorical outcomes, use 0/1 coding.
-
----
-class: inverse middle center
 # Visualizing regression models
 
 ---
@@ -770,12 +713,12 @@ class: clear
    mutate( # Rename variables for the plot.
      term = case_when(
        term == "colonizerFrance" ~ "France",
-       term == "colonizerBelgium" ~ "Belgium",
-       term == "(Intercept)" ~ "Intercept \n (Britain)")) %&gt;%
-   filter(term != "Intercept \n (Britain)"))
-#      term estimate std.error statistic  p.value conf.low conf.high df outcome
-# 1  France     4.94      6.92     0.714 4.79e-01    -8.95      18.8 52 poverty
-# 2 Belgium    50.61      7.84     6.453 3.68e-08    34.87      66.3 52 poverty
+       term == "colonizerBritain" ~ "Britiain",
+       term == "(Intercept)" ~ "Intercept \n (Belgium)")) %&gt;%
+   filter(term != "Intercept \n (Belgium)"))
+#       term estimate std.error statistic  p.value conf.low conf.high df outcome
+# 1   France    -45.7      7.97     -5.73 5.09e-07    -61.7     -29.7 52 poverty
+# 2 Britiain    -50.6      7.84     -6.45 3.68e-08    -66.3     -34.9 52 poverty
 ```
 ]
 
@@ -793,15 +736,17 @@ ggplot(data = plotdata,
 * coord_flip() + # Flip Y- &amp; X-Axis,
   labs(title = "OLS regression results",
        x = "Countries colonized by:",
-       y = "Difference in poverty rate compared to countries colonized by Britain") +
+       y = "Average Difference in poverty rate compared to countries colonized by Belgium") +
   theme_minimal()
 ```
 ]
 .panel[.panel-name[Plot]
 .push-left[
-&lt;img src="4-OLS-Wisdoms_files/figure-html/unnamed-chunk-29-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+
+&lt;img src="4-OLS-Wisdoms_files/figure-html/unnamed-chunk-28-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]
 .push-right[
+
 &lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
  &lt;thead&gt;
   &lt;tr&gt;
@@ -812,23 +757,23 @@ ggplot(data = plotdata,
 &lt;tbody&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 23.824*** &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 74.433*** &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (4.793) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (6.208) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; France &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 4.941 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −45.668*** &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (6.923) &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; (7.968) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; Belgium &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 50.609*** &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Britain &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; −50.609*** &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
@@ -948,7 +893,7 @@ ggplot(data = fict_dat, aes(y = fit, x = years_indep)) +
 ```
 ]]
 .push-right[
-&lt;img src="4-OLS-Wisdoms_files/figure-html/unnamed-chunk-34-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="4-OLS-Wisdoms_files/figure-html/unnamed-chunk-33-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]]]
 
 ---
@@ -961,9 +906,9 @@ ggplot(data = fict_dat, aes(y = fit, x = years_indep)) +
 ]
 
 .right-column[
-&lt;img src="4-OLS-Wisdoms_files/figure-html/unnamed-chunk-35-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+&lt;img src="4-OLS-Wisdoms_files/figure-html/unnamed-chunk-34-1.png" width="60%" style="display: block; margin: auto;" /&gt;
 
-&lt;img src="4-OLS-Wisdoms_files/figure-html/unnamed-chunk-36-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+&lt;img src="4-OLS-Wisdoms_files/figure-html/unnamed-chunk-35-1.png" width="60%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -1018,12 +963,74 @@ class: inverse
 # References
 
 .font80[
-Breen, R., K. B. Karlson, and A. Holm (2018). "Interpreting and Understanding Logits, Probits, and
-Other NonLinear Probability Models". In: _Annual Review of Sociology_, pp. 39-54.
-
 Lange, M. and A. Dawson (2009). "Dividing and Ruling the World? A Statistical Test of the Effects of
 Colonialism on Postcolonial Civil Violence". In: _Social Forces_, pp. 785-817.
 ]
+
+---
+class: inverse middle center
+# Binary outcomes
+
+---
+class: clear
+# LPM versus Generalized Linear Models (GLM)
+
+.left-column[
+**Linear Probability Model (LPM)**:
+
+- Uses OLS to predict binary outcomes &lt;br&gt; (0 = "No" / 1 = "Yes")
+
+- Predicts `\(\hat{\text{P}(y_i = 1|x_{i})}\)`
+
+- Controversial issues:
+ + Violates linearity assumption
+ + Can predict probabilities &lt; 0 or &gt; 1
+]
+
+
+.right-column[
+&lt;img src="http://res.cloudinary.com/dyd911kmh/image/upload/f_auto,q_auto:best/v1523361626/linear_vs_logistic_regression_h8voek.jpg" width="100%" style="display: block; margin: auto;" /&gt;
+.center[.backgrnote[*Source*: [datacamp: Logistic Regression in R Tutorial](https://www.datacamp.com/community/tutorials/logistic-regression-R)]]
+]
+
+---
+# Logistic regression .font70[GLM for binary outcomes]
+
+.push-left[
+`$$\begin{align*}
+\text{logit}(y_{i}) &amp;= \alpha + \beta x, \\
+y_{i} &amp;= \text{logit}^{-1}(\alpha + \beta x) \\
+&amp; = \text{logistic}(\alpha + \beta x) \\
+&amp;= \frac{1}{1+e^{-(\alpha + \beta x)}}.
+\end{align*}$$`
+
+
+
+.font90[
+| `\(\alpha + \beta x\)`  | `\(e^{(\alpha + \beta x)}\)` | `\(\frac{1}{e^{(\alpha + \beta x)}} \color{gray}{= e^{-(\alpha + \beta x)}}\)` | `\(\frac{1}{1 + e^{(\alpha + \beta x)}}\)` | `\(\frac{1}{1 +e^{-(\alpha + \beta x)}}\)` | 
+|--------------------:|-------------------------:|-------------------------------------------------------------:|---------------------------------------:|---------------------------------------:|
+|        -2           | 0.135                    | 7.389                                                        | 0.881                                  | 0.119                                  | 
+|        -1           | 0.368                    | 2.718                                                        | 0.731                                  | 0.269                                  | 
+|         0           | 1                        | 1                                                            | 0.5                                    | 0.5                                    | 
+|         1           | 2.718                    | 0.368                                                        | 0.269                                  | 0.731                                  | 
+|         2           | 7.389                    | 0.135                                                        | 0.119                                  | 0.881                                  |
+
+]]
+
+.push-right[
+We need a 'link function' `\(g^{-1}\)` that maps the linear model results to the [0, 1] range. The sigmoid-shaped logistic function serves this purpose, with its inverse being the logit (log odds).
+
+&lt;img src="4-OLS-Wisdoms_files/figure-html/Logit-fun-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+class: middle center
+
+GLMs (e.g., logistic regression) have their own issues (Breen, Karlson, and Holm, 2018).
+
+.alert[We use Linear Probability Models for binary outcomes.]
+
+For categorical outcomes, use 0/1 coding.
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="../template/remark-latest.min.js"></script>

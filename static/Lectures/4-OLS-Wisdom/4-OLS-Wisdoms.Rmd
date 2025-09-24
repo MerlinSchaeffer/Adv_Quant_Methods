@@ -171,7 +171,7 @@ knitr::include_graphics('./img/Colonial3.png')
 .center[.backgrnote[*Source*: `r Citet(myBib, "lange_dividing_2009")`]]
 ]]
 
-.panel[.panel-name[Coding colonial powers]
+.panel[.panel-name[Coding of colonizer]
 .font90[
 ```{r}
 Dat <- Dat %>% 
@@ -209,12 +209,12 @@ Dat <- Dat %>%
 ggplot(data = Dat %>% filter(!is.na(colonizer)), # Make coord system for data,
        aes(x = colonizer)) + # Y- and X-axis of plot,
   geom_bar() + # plot data as is in a bar chart,
-  labs(y = "Nr of (former) colonies", x = "") + # Axis labels,
+  labs(y = "Nr of countries colonized", x = "") + # Axis labels,
   theme_minimal()
 ```
 ]
 
-.panel[.panel-name[Coding independence]
+.panel[.panel-name[Coding of independence]
 .font60[
 ```{r}
 Dat <- Dat %>% 
@@ -324,14 +324,20 @@ $\rightarrow$ Scatter plots!
 # Outlier 
 
 .left-column[
-- **Gray dotted line:** OLS regression.
+- **Gray dotted line:** OLS fit
 
+
+- **Z-standardized residuals:** Distance from regression line; Examples: 
+  + Nr. 62 Haiti (poverty rate `r Dat$poverty[Dat$country == "Haiti"]`%).
+  + Nr. 32 Congo, Dem. Rep. (poverty rate `r Dat$poverty[Dat$country == "Congo, Dem. Rep."]`%).
+  + Nr. 69 Ireland (poverty rate `r Dat$poverty[Dat$country == "Ireland"]`%).
+
+ 
 - **Leverage:** High influence on regression; $x_i$ far from $\bar{x}$.
 
-- **Cook's D**: Change in $\sum{\hat{y}}$ (in std. residuals) if case $i$ removed
 
-- **Z-standardized residuals:** Z-standardized residuals: Distance from regression line.
-  + Example: Haiti (poverty rate `r Dat$poverty[Dat$country == "Haiti"]`%).
+- **Cook's D**: Change in $\sum{\hat{y}}$ (in std. residuals) if case $i$ was removed
+  + Thresholds: gray dashed lines!
 ]
 
 .right-column[
@@ -349,7 +355,9 @@ lm(poverty ~ years_indep, data = Dat) %>%
 # Linearity
 
 .left-column[
-- **Gray dotted line:** OLS regression
+- **Gray dotted line:** OLS fit
+
+- **Fitted values:** $\hat{Y}$ 
 
 - **Red line:** Smoothed relationship between residuals and fitted values
 
@@ -459,14 +467,14 @@ class: inverse middle center
 Dat_bi <- Dat %>%
    mutate(
      colonizer_bi = case_when(
-       colonizer == "Belgium" ~ 1,
-       colonizer == "Britain" ~ 0,
+       colonizer == "Belgium" ~ 0,
+       colonizer == "Britain" ~ 1,
        TRUE ~ as.numeric(NA)))
 
 ggplot(data = Dat_bi, aes(y = poverty, x = colonizer_bi)) +
   geom_text(aes(label = country), size = 3) +
   geom_smooth(method = "lm") +
-  scale_x_continuous(breaks = c(0, 1), labels = c("Britain", "Belgium")) +
+  scale_x_continuous(breaks = c(0, 1), labels = c("Belgium", "Britain")) +
   labs(y = "% population with less \n than $2.15 a day", 
        x = "Colonializer") +
   theme_minimal() +
@@ -483,15 +491,15 @@ $$x=
     0 & \text{otherwise}
   \end{cases}$$
 
-Contintent                       | Belgium | France | ...
+Contintent                       | Britain | France | ...
 ---------------------------------|----|----|----
-Burundi                 | 1  | 0  | 0 
-Rwanda                 | 1  | 0  | 0
+Kenya                 | 1  | 0  | 0 
+India                 | 1  | 0  | 0
 ...                 | 1  | 0  | 0
 Cambodia                          | 0  | 1  | 0  
 Algeria                          | 0  | 1  | 0
 ...                          | 0  | 1  | 0
-Reference <br> .backgrnote[(Britain)] | 0  | 0  | 0
+Reference <br> .backgrnote[(Belgium)] | 0  | 0  | 0
 ]
 
 .push-right[
@@ -499,15 +507,16 @@ Reference <br> .backgrnote[(Britain)] | 0  | 0  | 0
 Dat_bi <- Dat %>%
    mutate(
      colonizer_bi = case_when(
-       colonizer == "Belgium" ~ 1,
-       TRUE ~ 0))
+       colonizer == "Britain" ~ 1,
+       colonizer == "Belgium" ~ 0,
+       TRUE ~ as.numeric(NA)))
 
 ggplot(data = Dat_bi, aes(y = poverty, x = colonizer_bi)) +
   geom_text(aes(label = country)) +
   geom_smooth(method = "lm") +
   scale_x_continuous(breaks = c(0, 1)) +
   labs(y = "% population with less \n than $2.15 a day", 
-       x = "Belgium") +
+       x = "Britain") +
   theme_minimal() +
   guides(color = "none")
 ```
@@ -515,23 +524,25 @@ ggplot(data = Dat_bi, aes(y = poverty, x = colonizer_bi)) +
 
 .panel[.panel-name[How it's done in R]
 .push-left[.font70[
+```{r include = FALSE}
+Dat <- Dat %>%
+  mutate(
+    colonizer = colonizer %>% fct_relevel("Belgium", "France", "Britain"))
+```
 ```{r ols_2, eval = FALSE}
 # R recognizes categorical variables automatically,
 # if they are factor or character vectors.
 ols_2 <- lm_robust(poverty ~ colonizer, data = Dat)
 # Regression table
-modelsummary(
-  list("Poverty" = ols_2), stars = TRUE,
+modelsummary(list("Poverty" = ols_2), stars = TRUE,
   # Rename for a better-looking table
   coef_rename = c("colonizerFrance" = "France", 
-                  "colonizerBelgium" = "Belgium",
-                  "colonizerPortugal" = "Portugal", 
-                  "colonizerSpain" = "Spain"),
+                  "colonizerBritain" = "Britain"),
   gof_map = c("nobs", "r.squared"), output = "kableExtra")
 ```
 ]
 
-```{r ref.label = "categorical", out.width='75%', fig.height = 4, fig.width = 6.5, results = FALSE, echo = FALSE}
+```{r ref.label = "categorical", out.width='75%', fig.height = 4.5, fig.width = 6.5, results = FALSE, echo = FALSE}
 ```
 ]
 .push-right[
@@ -552,12 +563,14 @@ ols_2 <- lm(poverty ~ colonizer, data = Dat)
 
 `r extract_eq(ols_2, wrap = TRUE, terms_per_line = 2, use_coefs = TRUE)`
 
-- Average poverty in British-colonized countries: `r round(coef(ols_2)[1], 2)`% 
-  + (When France = Belgium = Spain = Portugal = 0)
+- Average poverty in Belgian-colonized countries: `r round(coef(ols_2)[1], 2)`% 
+  + (When France = Britiain = 0)
 
-- French-colonized countries compared to British: `r round(coef(ols_2)[2], 2)` percentage points higher poverty on average
-  + Difference not statistically significant<br> (may be due to chance)
+- French-colonized countries compared to Belgian: `r round(coef(ols_2)[2], 2)` percentage points lower poverty on average
   + Average poverty in French-colonized countries: `r round(coef(ols_2)[1], 2)`% + `r round(coef(ols_2)[2], 2)`% = `r round(coef(ols_2)[1], 2) + round(coef(ols_2)[2], 2)`%
+  
+- British-colonized countries compared to Belgian: `r round(coef(ols_2)[3], 2)` percentage points lower poverty on average
+  + Average poverty in British-colonized countries: `r round(coef(ols_2)[1], 2)`% + `r round(coef(ols_2)[3], 2)`% = `r round(coef(ols_2)[1], 2) + round(coef(ols_2)[3], 2)`%
 ]]]]
 
 ---
@@ -591,88 +604,6 @@ class: inverse middle center
 
 ---
 class: inverse middle center
-# Binary outcomes
-
----
-class: clear
-# LPM versus Generalized Linear Models (GLM)
-
-.left-column[
-**Linear Probability Model (LPM)**:
-
-- Uses OLS to predict binary outcomes <br> (0 = "No" / 1 = "Yes")
-
-- Predicts $\hat{\text{P}(y_i = 1|x_{i})}$
-
-- Controversial issues:
- + Violates linearity assumption
- + Can predict probabilities < 0 or > 1
-]
-
-
-.right-column[
-```{r, echo = FALSE, out.width='100%'}
-knitr::include_graphics('http://res.cloudinary.com/dyd911kmh/image/upload/f_auto,q_auto:best/v1523361626/linear_vs_logistic_regression_h8voek.jpg')
-```
-.center[.backgrnote[*Source*: [datacamp: Logistic Regression in R Tutorial](https://www.datacamp.com/community/tutorials/logistic-regression-R)]]
-]
-
----
-# Logistic regression .font70[GLM for binary outcomes]
-
-.push-left[
-$$\begin{align*}
-\text{logit}(y_{i}) &= \alpha + \beta x, \\
-y_{i} &= \text{logit}^{-1}(\alpha + \beta x) \\
-& = \text{logistic}(\alpha + \beta x) \\
-&= \frac{1}{1+e^{-(\alpha + \beta x)}}.
-\end{align*}$$
-
-```{r include = FALSE}
-library(knitr)
-logistic <- function(x) {1 / (1 + exp(-x))}
-df <- data.frame(x <- -2:2)
-df$exp <- exp(-x)
-df$logistic <- logistic(x)
-kable(df)
-```
-
-.font90[
-| $\alpha + \beta x$  | $e^{(\alpha + \beta x)}$ | $\frac{1}{e^{(\alpha + \beta x)}} \color{gray}{= e^{-(\alpha + \beta x)}}$ | $\frac{1}{1 + e^{(\alpha + \beta x)}}$ | $\frac{1}{1 +e^{-(\alpha + \beta x)}}$ | 
-|--------------------:|-------------------------:|-------------------------------------------------------------:|---------------------------------------:|---------------------------------------:|
-|        -2           | 0.135                    | 7.389                                                        | 0.881                                  | 0.119                                  | 
-|        -1           | 0.368                    | 2.718                                                        | 0.731                                  | 0.269                                  | 
-|         0           | 1                        | 1                                                            | 0.5                                    | 0.5                                    | 
-|         1           | 2.718                    | 0.368                                                        | 0.269                                  | 0.731                                  | 
-|         2           | 7.389                    | 0.135                                                        | 0.119                                  | 0.881                                  |
-
-]]
-
-.push-right[
-We need a 'link function' $g^{-1}$ that maps the linear model results to the [0, 1] range. The sigmoid-shaped logistic function serves this purpose, with its inverse being the logit (log odds).
-
-```{r Logit-fun, out.width='80%', fig.height = 3, fig.width = 4, echo = FALSE}
-df <- data.frame(x = rnorm(mean = 0, sd = 1, n = 1000))
-x <- df$x
-ggplot(data = df, mapping = aes(x = x)) +
-  stat_function(fun = logistic, geom = "line") +
-  labs(x = expression(alpha + beta * x)) +
-  scale_y_continuous(name = expression(over(1, 1+e^-(alpha + beta * x) ))) +
-  theme_minimal() + xlim(-6, 6)
-```
-]
-
----
-class: middle center
-
-GLMs (e.g., logistic regression) have their own issues `r Citep(myBib, "breen_interpreting_2018")`.
-
-.alert[We use Linear Probability Models for binary outcomes.]
-
-For categorical outcomes, use 0/1 coding.
-
----
-class: inverse middle center
 # Visualizing regression models
 
 ---
@@ -687,9 +618,9 @@ class: clear
    mutate( # Rename variables for the plot.
      term = case_when(
        term == "colonizerFrance" ~ "France",
-       term == "colonizerBelgium" ~ "Belgium",
-       term == "(Intercept)" ~ "Intercept \n (Britain)")) %>%
-   filter(term != "Intercept \n (Britain)"))
+       term == "colonizerBritain" ~ "Britiain",
+       term == "(Intercept)" ~ "Intercept \n (Belgium)")) %>%
+   filter(term != "Intercept \n (Belgium)"))
 ```
 ]
 
@@ -706,16 +637,18 @@ ggplot(data = plotdata,
   coord_flip() + # Flip Y- & X-Axis, #<<
   labs(title = "OLS regression results",
        x = "Countries colonized by:",
-       y = "Difference in poverty rate compared to countries colonized by Britain") +
+       y = "Average Difference in poverty rate compared to countries colonized by Belgium") +
   theme_minimal()
 ```
 ]
 .panel[.panel-name[Plot]
 .push-left[
+
 ```{r ref.label = "Coefplotter", out.width='100%', fig.height = 4, fig.width = 6, echo = FALSE}
 ```
 ]
 .push-right[
+
 ```{r ref.label = "ols_2", results = 'asis', echo = FALSE}
 ```
 ]]]
@@ -884,3 +817,85 @@ class: inverse
 PrintBibliography(myBib)
 ```
 ]
+
+---
+class: inverse middle center
+# Binary outcomes
+
+---
+class: clear
+# LPM versus Generalized Linear Models (GLM)
+
+.left-column[
+**Linear Probability Model (LPM)**:
+
+- Uses OLS to predict binary outcomes <br> (0 = "No" / 1 = "Yes")
+
+- Predicts $\hat{\text{P}(y_i = 1|x_{i})}$
+
+- Controversial issues:
+ + Violates linearity assumption
+ + Can predict probabilities < 0 or > 1
+]
+
+
+.right-column[
+```{r, echo = FALSE, out.width='100%'}
+knitr::include_graphics('http://res.cloudinary.com/dyd911kmh/image/upload/f_auto,q_auto:best/v1523361626/linear_vs_logistic_regression_h8voek.jpg')
+```
+.center[.backgrnote[*Source*: [datacamp: Logistic Regression in R Tutorial](https://www.datacamp.com/community/tutorials/logistic-regression-R)]]
+]
+
+---
+# Logistic regression .font70[GLM for binary outcomes]
+
+.push-left[
+$$\begin{align*}
+\text{logit}(y_{i}) &= \alpha + \beta x, \\
+y_{i} &= \text{logit}^{-1}(\alpha + \beta x) \\
+& = \text{logistic}(\alpha + \beta x) \\
+&= \frac{1}{1+e^{-(\alpha + \beta x)}}.
+\end{align*}$$
+
+```{r include = FALSE}
+library(knitr)
+logistic <- function(x) {1 / (1 + exp(-x))}
+df <- data.frame(x <- -2:2)
+df$exp <- exp(-x)
+df$logistic <- logistic(x)
+kable(df)
+```
+
+.font90[
+| $\alpha + \beta x$  | $e^{(\alpha + \beta x)}$ | $\frac{1}{e^{(\alpha + \beta x)}} \color{gray}{= e^{-(\alpha + \beta x)}}$ | $\frac{1}{1 + e^{(\alpha + \beta x)}}$ | $\frac{1}{1 +e^{-(\alpha + \beta x)}}$ | 
+|--------------------:|-------------------------:|-------------------------------------------------------------:|---------------------------------------:|---------------------------------------:|
+|        -2           | 0.135                    | 7.389                                                        | 0.881                                  | 0.119                                  | 
+|        -1           | 0.368                    | 2.718                                                        | 0.731                                  | 0.269                                  | 
+|         0           | 1                        | 1                                                            | 0.5                                    | 0.5                                    | 
+|         1           | 2.718                    | 0.368                                                        | 0.269                                  | 0.731                                  | 
+|         2           | 7.389                    | 0.135                                                        | 0.119                                  | 0.881                                  |
+
+]]
+
+.push-right[
+We need a 'link function' $g^{-1}$ that maps the linear model results to the [0, 1] range. The sigmoid-shaped logistic function serves this purpose, with its inverse being the logit (log odds).
+
+```{r Logit-fun, out.width='80%', fig.height = 3, fig.width = 4, echo = FALSE}
+df <- data.frame(x = rnorm(mean = 0, sd = 1, n = 1000))
+x <- df$x
+ggplot(data = df, mapping = aes(x = x)) +
+  stat_function(fun = logistic, geom = "line") +
+  labs(x = expression(alpha + beta * x)) +
+  scale_y_continuous(name = expression(over(1, 1+e^-(alpha + beta * x) ))) +
+  theme_minimal() + xlim(-6, 6)
+```
+]
+
+---
+class: middle center
+
+GLMs (e.g., logistic regression) have their own issues `r Citep(myBib, "breen_interpreting_2018")`.
+
+.alert[We use Linear Probability Models for binary outcomes.]
+
+For categorical outcomes, use 0/1 coding.
