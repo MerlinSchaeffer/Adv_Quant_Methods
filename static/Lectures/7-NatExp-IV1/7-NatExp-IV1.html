@@ -4,7 +4,7 @@
     <title>Multiple Regression &amp;    Fundamentals of Causal Inference</title>
     <meta charset="utf-8" />
     <meta name="author" content="Andrew Herman &amp; Merlin Schaeffer  Department of Sociology" />
-    <meta name="date" content="2025-09-23" />
+    <meta name="date" content="2025-09-30" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
     <script src="libs/tile-view/tile-view.js"></script>
@@ -27,7 +27,7 @@ class: center, middle, inverse, title-slide
 ### Andrew Herman &amp; Merlin Schaeffer<br> Department of Sociology
 ]
 .date[
-### 2025-09-23
+### 2025-09-30
 ]
 
 ---
@@ -37,8 +37,15 @@ class: center, middle, inverse, title-slide
 
 .font130[.center[Use data to discover patterns, &lt;br&gt; and the .alert[social mechanisms that bring them about.]]]
 
-&lt;img src="https://researchleap.com/wp-content/uploads/2021/12/Population-data.jpeg" width="70%" style="display: block; margin: auto;" /&gt;
+&lt;img src="https://researchleap.com/wp-content/uploads/2021/12/Population-data.jpeg" width="65%" style="display: block; margin: auto;" /&gt;
 
+???
+
+Our goal is to move beyond simply describing correlations.
+
+We want to understand the causal processes that create the social world we observe.
+
+Today is about methods that help us get closer to that causal understanding.
 ---
 class: inverse middle
 # Today's schedule
@@ -58,6 +65,13 @@ class: inverse middle
   - First stage, reduced form, &amp; Wald IV estimator
   - Why IV is LATE (local average treatment effect)
 
+???
+We'll start with a real-world question to introduce the idea of a Natural Experiment.
+
+Then we'll look at a study to understand the problem of non-compliance in experiments.
+
+This will lead us to the solution: Instrumental Variables, or IV.
+
 ---
 # Terrorism and xenophobia
 
@@ -70,6 +84,14 @@ class: inverse middle
 .push-right[
 &lt;img src="https://cdn.britannica.com/33/129733-050-AF95D301/Smoke-flames-twin-towers-attacks-World-Trade-September-11-2001.jpg" width="77.5%" style="display: block; margin: auto;" /&gt;
 ]
+
+???
+
+Let's begin with a difficult topic.
+
+It's often claimed that major terrorist attacks like 9/11 change public opinion and social attitudes.
+
+We want to investigate this claim empirically.
 
 ---
 class: inverse middle center
@@ -90,6 +112,10 @@ class: inverse middle center
 **of terrorist attacks on xenophobia?**
 ]]
 
+???
+
+Notice the wording: "average causal effect." We want to know if the attacks cause a change in xenophobia.
+
 ---
 # We need an RCT!
 
@@ -97,7 +123,7 @@ class: inverse middle center
 &lt;img src="./img/randomization2.png" width="60%" style="display: block; margin: auto;" /&gt;
 
 If we *randomly* divide subjects into treatment and control groups, .alert[they come from the same underlying population]. 
-    &lt;br&gt; &lt;br&gt; `\(\rightarrow\)` They will be similar, on average, *in every way*;&lt;br&gt; **including their `\(Y_{0}\)` **!
+    &lt;br&gt; &lt;br&gt; `\(\rightarrow\)` They will be similar, on average, *in every way*;&lt;br&gt; **including their `\(Y_{0}\)` ** (their potential outcome if not treated)!
     &lt;br&gt; &lt;br&gt; `\(\rightarrow E[Y_{0i}|D=1] = E[Y_{0i}|D=0]\)`!
     
 **Beware**, in practice randomization can fail, especially if your sample is small.
@@ -108,6 +134,15 @@ If we *randomly* divide subjects into treatment and control groups, .alert[they 
 `$$\begin{equation}\begin{split} &amp;  \underbrace{E[Y_{1i}|D=1] - E[Y_{0i}|D=0]}_{\text{Comparison between treatment and control group}} \\  \\ &amp; = E[Y_{0i} + \color{red}{\kappa} |D=1] - E[Y_{0i}|D=0], \\ \\ &amp;= \color{red}{\kappa} + \underbrace{E[Y_{0i} |D=1] - E[Y_{0i}|D=0]}_{\underbrace{0}_{\text{Selection bias (if randomization has worked)}}}, \\ \\ &amp; = \underbrace{\color{red}{\kappa}.}_{\text{The average causal effect}} \end{split}\end{equation}$$`
 ]
 
+???
+
+The ideal way: Randomized Controlled Trial (RCT).
+
+Makes treatment and control groups comparable, on average, before treatment is applied.
+
+This means their potential outcome without treatment `\((Y_0)\)` is the same.
+
+This makes selection bias term go to zero, so the simple difference in outcomes between the groups is average causal effect, `\(\kappa\)`.
 
 ---
 # But that is impossible and un-ethical!
@@ -122,10 +157,20 @@ treat people with terrorism!]
 &lt;img src="7-NatExp-IV1_files/figure-html/DAG1-1.png" width="70%" style="display: block; margin: auto;" /&gt;
 ]
 
+???
+
+RCT is not an option here. We simply cannot randomly assign terrorism.
+
+This is a common and fundamental challenge in sociology. Many of the "treatments" we care about are things we can't, or shouldn't, manipulate.
+
+We need a different strategy.
+
 ---
 class: inverse middle center
 # Natural Experiments
 
+???
+It's a way of finding an RCT-like situation that has occurred naturally in the world.
 
 ---
 class: clear
@@ -134,7 +179,7 @@ class: clear
 
 &lt;img src="https://news.harvard.edu/gazette/wp-content/uploads/2019/04/031319_Lewegie_103_2500.jpg" width="100%" style="display: block; margin: auto;" /&gt;
 
-### My friend Joscha 
+### Merlin's friend Joscha 
 
 ### had an idea
 
@@ -143,6 +188,14 @@ class: clear
 .right-column[
 &lt;img src="./img/Joscha1.png" width="60%" style="display: block; margin: auto;" /&gt;
 ]
+
+???
+
+Joscha found a very clever way to study our research question. 
+
+While he was a PhD student, he noticed something interesting about the timing of a major survey and a terrorist attack. 
+
+This observation became the basis for a paper in one of the top sociology journals. 
 
 ---
 # Natural experiments
@@ -169,6 +222,17 @@ The cause of Cholera]
 &lt;img src="https://i.guim.co.uk/img/static/sys-images/Guardian/Pix/pictures/2013/3/14/1363276040034/John-Snows-cholera-map-of-008.jpg?width=620&amp;dpr=1&amp;s=none&amp;crop=none" width="90%" style="display: block; margin: auto;" /&gt;
 .center[.backgrnote[*Source:* Snow (1856)]]
 ]
+
+???
+
+Exposure to the treatment is "as-if" random.
+
+The classic example is John Snow's work on cholera in London. 
+
+Because of how the water companies laid their pipes, the assignment was haphazard and not related to the residents' wealth or health.
+
+This allowed him to compare death by water provider rates and identify the contaminated water pump as the source of the outbreak. 
+
 ---
 # The 2002 Bali bombings
 
@@ -180,12 +244,24 @@ The cause of Cholera]
 &lt;iframe src='https://en.wikipedia.org/wiki/2002_Bali_bombings' width='1000' height='600' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
 ]
 
+???
+
+The event Legewie studied was the 2002 Bali bombings. 
+
+It was a major terrorist attack that killed 202 people, many of whom were European tourists. 
+
+This made the event highly salient across Europe, appearing on the front pages of newspapers everywhere.
 ---
 # The natural experiment
 
 &lt;img src="./img/Joscha2.png" width="60%" style="display: block; margin: auto;" /&gt;
 .center[.backgrnote[*Source:* Legewie (2013)]]
 
+???
+
+Legewie uses the fact that the Bali attack occurred during the fieldwork period of the European Social Survey. 
+
+The treatment and control groups are defined by the timing of their interview relative to the attack. 
 --
 
 .push-left[
@@ -194,11 +270,18 @@ The cause of Cholera]
 *Reachability bias*: Respondents who are easier to contact tend to be interviewed earlier during the survey period.
 ]
 
+???
+Assumption 1 is that the interview date is "as-if" random. Someone interviewed on Oct 11th is likely very similar to someone interviewed on Oct 13th. A potential threat to this is "reachability bias"
+
 --
 
 .push-right[
 .alert[Assumption 2]: No other event at the time had a causal effect on `\(Y_{i}\)`.
 ]
+
+???
+
+Assumption 2 is that no other major, confounding event happened at the exact same time.
 
 ---
 # Balance?
@@ -214,6 +297,16 @@ The cause of Cholera]
 .center[.backgrnote[*Source:* Legewie (2013)]]
 ]
 
+???
+
+How do we know if our "as-if" randomization worked? We can't be 100% sure, but we can check if the treatment and control groups are balanced on observable characteristics.
+
+The plots show these balance checks for the data from Portugal. 
+
+Plot 'a' shows the raw data. There's some minor imbalance; for example, the treatment group is slightly less likely to be retired. 
+
+Ignore Plot 'b'
+
 ---
 # RCTs vs Natural experiments
 
@@ -225,6 +318,9 @@ With an RCT, we control treatment assignment and thus know that the intervention
 &lt;img src="7-NatExp-IV1_files/figure-html/unnamed-chunk-15-1.png" width="70%" style="display: block; margin: auto;" /&gt;
 ]]
 
+???
+RCTs have high internal validity. We know the treatment was randomized, so we are very confident in our causal estimate for the specific sample and setting.
+
 --
 
 .push-left[.content-box-blue[
@@ -235,6 +331,12 @@ With a natural experiment, we can study a real event `\(E\)` and not some artifi
 
 &lt;img src="7-NatExp-IV1_files/figure-html/DAG2-1.png" width="70%" style="display: block; margin: auto;" /&gt;
 ]]
+
+???
+
+Natural experiments often have higher external validity. We are studying a real-world event, not an artificial one, so the findings are more likely to be generalizable.
+
+The cost is slightly lower internal validity. We have to assume the randomization (the event E is not caused by confounders C) rather than knowing it for sure.
 
 ---
 # Natural experiments .font70[How to?!]
@@ -250,6 +352,12 @@ Analyzing a natural experiment does not necessarily involve much statistical sop
 .right-column[
 &lt;img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Cochon_truffier.JPG" width="80%" style="display: block; margin: auto;" /&gt;
 ]
+
+???
+
+The key skill in using natural experiments is not complex statistical modeling.
+
+The real challenge is having the creativity and deep knowledge of a subject to identify a situation in the world that provides "as-if" random assignment.
 
 ---
 class: clear
@@ -272,11 +380,20 @@ But why was there an effect in Portugal, but not in the UK?
 Read his article ;)
 ]]]
 
+???
+
+So, here's the payoff. This is our first learning goal.
+
+Legewie's natural experiment shows that the Bali attack did have a causal effect, increasing anti-immigrant sentiment in Portugal, Poland, and Finland. 
+
+But importantly, the effect was not universal. There was no significant effect in countries like Great Britain or the Netherlands. 
+
 ---
 class: inverse middle center
 # Break
 
-&lt;iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+&lt;iframe src='https://panel.letstimeit.com/instant-timer/15-minute' width='600' height='400' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+
 
 ---
 class: middle clear
@@ -284,7 +401,8 @@ class: middle clear
 .left-column[
 &lt;img src="https://www.latentview.com/wp-content/uploads/2016/04/LatentView-Turns-Ten-A-decade-of-data-science.jpg" width="100%" style="display: block; margin: auto;" /&gt;
 
-&lt;iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+&lt;iframe src='https://panel.letstimeit.com/instant-timer/20-minute' width='600' height='400' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+
 ]
 
 .right-column[
@@ -297,11 +415,18 @@ layout: false
 class: inverse middle center
 # Break
 
-&lt;iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+&lt;iframe src='https://panel.letstimeit.com/instant-timer/10-minute' width='600' height='400' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+
 
 ---
 class: inverse middle center
 # Intention to Treat (ITT) Designs
+
+???
+
+So far, the "treatment" was an event everyone was exposed to.
+
+But what about experiments where people are offered a treatment, but not everyone accepts it? This brings us to Intention-to-Treat designs.
 
 ---
 # .font80[One of the largest RCTs in the social sciences]
@@ -316,6 +441,18 @@ class: inverse middle center
 &lt;iframe src='https://en.wikipedia.org/wiki/Moving_to_Opportunity' width='1000' height='600' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
 ]
 
+???
+
+Our second example is the "Moving to Opportunity" or MTO experiment. 
+
+This was a massive, real RCT conducted by the US government. 
+
+4,600 low-income families in high-poverty public housing were randomly assigned to one of three groups. 
+
+The key group received a housing voucher that they could only use to move to a low-poverty neighborhood, plus counseling to help them. 
+
+This was designed to answer the fundamental question: Does your neighborhood determine your destiny?
+
 ---
 layout: true
 # Intention to treat (ITT) `\(\neq\)` treatment
@@ -326,12 +463,30 @@ layout: true
 &lt;img src="7-NatExp-IV1_files/figure-html/DAG3-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]
 
+???
+
+Here's the critical complication in the MTO study: The experimenters randomly assigned the offer of a voucher. That's the Intention to Treat.
+
+But they couldn't force people to move. The actual treatment is moving.
+
+This table from Chetty, Hendren, and Katz's 2016 re-analysis of the MTO data shows that only 47.66% of families with young children who were offered the experimental voucher actually took it up and moved. 
+
+This is called non-compliance. The randomly assigned variable, Z (the offer), is not the same as the treatment variable, D (moving).
+
 ---
 
 .right-column[
 &lt;img src="./img/Chetty_1.png" width="80%" style="display: block; margin: auto;" /&gt;
 .center[.backgrnote[*Source:* Chetty, Hendren, and Katz (2016)]]
 ]
+
+???
+
+Now let's look at the long-term results on children's adult earnings.
+
+Column 2 shows the "Intent-to-Treat" or ITT effect. For children under 13, being offered the voucher caused their adult earnings to be $1,624 higher. 
+
+This is an important finding. But is this the causal effect of moving?
 
 ---
 
@@ -340,7 +495,7 @@ layout: true
 .center[.backgrnote[*Source:* Chetty, Hendren, and Katz (2016)]]
 
 .content-box-green[.center[
-Is the ITT an average causal effects of moving out of poor neighborhoods during childhood?
+Is this \$1,624 increase the average causal effect of *moving*?
 ]]]
 
 ---
@@ -359,6 +514,14 @@ Is the ITT an average causal effects of moving out of poor neighborhoods during 
 
 ]]
 
+???
+
+No, it's not.
+
+Because the offer (Z) was randomized, the ITT of $1,624 is a valid causal effect. But it's the causal effect of being offered the program, not the effect of the treatment itself (moving).
+
+The ITT effect is diluted. It's the average of a large effect for the 48% who moved and a zero effect for the 52% who were offered the voucher but stayed.
+
 ---
 layout: false
 # RCTs vs ITTs
@@ -373,6 +536,10 @@ The correlation between intervention `\(I\)` and predictor of interest `\(D\)` i
 &lt;img src="7-NatExp-IV1_files/figure-html/DAG4-1.png" width="70%" style="display: block; margin: auto;" /&gt;
 ]]
 
+???
+
+In a perfect RCT with full compliance, the intervention is the treatment. I equals D.
+
 --
 
 .push-left[.content-box-blue[
@@ -386,28 +553,53 @@ The correlation between intervention `\(Z\)` and predictor of interest `\(D\)` i
 &lt;img src="7-NatExp-IV1_files/figure-html/DAG5-1.png" width="70%" style="display: block; margin: auto;" /&gt;
 ]]
 
+???
+
+In an ITT design with non-compliance, the randomly assigned variable Z (the "instrument" or "intention") is different from the treatment D. The correlation is less than one.
+
+How do we get from the causal effect of Z to the causal effect of D?
+
 ---
 layout: false
 class: inverse middle center
 # .font50[Fortunately, the Intervention (i.e. intention to treat) can be used as an:]&lt;br&gt; Instrument Variable (IV)
 
+???
+
+We can use the random assignment of the intention to treat as an "instrument" to isolate the causal effect of the treatment itself.
+
 ---
 layout: true
 # Instrument Variables (IV)
 
-.left-column[.content-box-red[
+.push-left[
+.content-box-blue[
+.center[**Goal**]
+
+Estimate causal effect `\(\lambda\)` of treatment `\(D_{i}\)` on outcome `\(Y_{i}\)`.
+]
+.content-box-red[
 .center[**3 Requirements**]
-1. *First stage*: Instrument `\(Z_{i}\)` has causal effect on `\(D_{i}\)`.
+1. *First stage*: Instrument `\(Z_{i}\)` has causal effect `\(\phi\)` on `\(D_{i}\)`.
 
-2. *Randomization*: Instrument `\(Z_{i}\)` is randomly assigned (RCT or natural experiment).
+2. *Randomization*: `\(Z_{i}\)` is randomly assigned (RCT or natural experiment).
 
-3. *Exclusion restriction*: Instrument `\(Z_{i}\)` affects outcome `\(Y_{i}\)` **_only_** through its effect on `\(D_{i}\)`.
+3. *Exclusion restriction*: `\(Z_{i}\)` affects `\(Y_{i}\)` **_only_** through its effect on `\(D_{i}\)`.
 ]]
 
 ---
-.right-column[
-&lt;img src="7-NatExp-IV1_files/figure-html/unnamed-chunk-25-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+.push-right[
+&lt;img src="7-NatExp-IV1_files/figure-html/DAG8-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+
 ]
+
+???
+
+First, it must have a causal effect on the treatment D we're interested in. We can test this. In MTO, we saw that the voucher offer did indeed cause people to move.
+
+Second, the instrument Z must be randomly assigned, or at least "as-if" random. This means it's uncorrelated with any confounders C. In MTO, this is true by design.
+
+Third, and most critically, is the Exclusion Restriction. The instrument Z can only affect the outcome Y by going through the treatment D. There can be no other causal pathway.
 
 ---
 
@@ -416,6 +608,15 @@ layout: true
 &lt;img src="7-NatExp-IV1_files/figure-html/DAG6-1.png" width="80%" style="display: block; margin: auto;" /&gt;
 ]
 
+???
+
+Let's think about how the Exclusion Restriction could be violated in the MTO study.
+
+What if winning the housing lottery not only made you more likely to move, but also gave you a sense of hope or optimism?
+
+And what if that optimism itself—a personality trait—helped your children succeed later in life, regardless of whether you moved or not?
+
+This assumption is not testable; we have to argue for its plausibility.
 
 ---
 
@@ -424,31 +625,53 @@ layout: true
 &lt;img src="7-NatExp-IV1_files/figure-html/DAG7-1.png" width="80%" style="display: block; margin: auto;" /&gt;
 ]
 
+???
+
+Assuming all requirements hold, let's build the intuition for how IV estimation works.
+
+We want to find the causal effect of "Moving" on "Income," but we can't estimate it directly because of confounding.
+
+---
+
+.right-column[
+.center[**"Instrumenting" the effect of interest**]
+&lt;img src="7-NatExp-IV1_files/figure-html/unnamed-chunk-25-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+`$$\underbrace{\kappa_{\text{Win lottery}\rightarrow\text{Moving}}}_{0.4766} \times \color{red}{\underbrace{\kappa_{\text{Moving}\rightarrow\text{Income}}}_{?}} = \underbrace{\kappa_{\text{Win lottery}\rightarrow\text{Income}}}_{1624\text{ Dollar}}$$`
+
+]
+
+???
+
+We can estimate two other effects cleanly.
+
+First, the causal effect of winning the lottery on moving. That's the first stage, which is 0.4766.
+
+Second, the causal effect of winning the lottery on income. That's the ITT or "reduced form" effect, which is $1624.
+
+If the exclusion restriction holds, the reduced form effect must be equal to the first stage effect multiplied by the causal effect of moving on income.
+
 ---
 
 .right-column[
 .center[**"Instrumenting" the effect of interest**]
 &lt;img src="7-NatExp-IV1_files/figure-html/unnamed-chunk-26-1.png" width="80%" style="display: block; margin: auto;" /&gt;
 
-`$$\underbrace{\kappa_{\text{Win lottery}\rightarrow\text{Moving}}}_{0.4766} \times \color{red}{\underbrace{\kappa_{\text{Moving}\rightarrow\text{Income}}}_{?}} = \underbrace{\kappa_{\text{Win lottery}\rightarrow\text{Income}}}_{1624\text{ Dollar}}$$`
-
-]
-
----
-
-.right-column[
-.center[**"Instrumenting" the effect of interest**]
-&lt;img src="7-NatExp-IV1_files/figure-html/unnamed-chunk-27-1.png" width="80%" style="display: block; margin: auto;" /&gt;
-
 
 `$$\begin{equation}\begin{split} \underbrace{\kappa_{\text{Win lottery}\rightarrow\text{Moving}}}_{0.4766} \times &amp; \color{red}{\underbrace{\kappa_{\text{Moving}\rightarrow\text{Income}}}_{?}} = \underbrace{\kappa_{\text{Win lottery}\rightarrow\text{Income}}}_{1624\text{ Dollar}} \\ \\ &amp; \color{red}{\underbrace{\kappa_{\text{Moving}\rightarrow\text{Income}}}_{?}} = \frac{\kappa_{\text{Win lottery}\rightarrow\text{Income}}}{\kappa_{\text{Win lottery}\rightarrow\text{Moving}}} \end{split}\end{equation}$$`
 ]
+
+???
+
+We can rearrange this equation: The causal effect we want (Moving -&gt; Income) is simply the reduced form effect (Lottery -&gt; Income) divided by the first stage effect (Lottery -&gt; Moving).
+
+This is the fundamental logic of the IV estimator.
 ---
 layout: false
-# IV .font60[in general]
+# IV .font60[in general (The Wald Estimator)]
 
 .push-left[
-&lt;img src="7-NatExp-IV1_files/figure-html/DAG8-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+&lt;img src="7-NatExp-IV1_files/figure-html/unnamed-chunk-27-1.png" width="70%" style="display: block; margin: auto;" /&gt;
 
 **First Stage:** `\(E[D_{i}|Z_{i}=1]-E[D_{i}|Z_{i}=0]; \text{call this }\phi.\)`
 
@@ -468,6 +691,12 @@ layout: false
 If the exclusion restriction does not hold, &lt;br&gt; we additionally weigh-up other effects by `\(\frac{1}{\phi}\)`
 ]]]]
 
+???
+
+Here is the general formula, known as the Wald Estimator: The causal effect of interest, `\(\lambda\)`, is the ratio of the reduced form effect `\(\rho\)` to the first-stage effect `\(\phi\)`.
+
+For MTO, this is $1624 divided by 0.4766, which gives us about $3407.
+
 ---
 layout: false
 # IV is LATE .font60[Local Average Treatment Effect]
@@ -485,6 +714,20 @@ layout: false
 .push-right[
 &lt;img src="7-NatExp-IV1_files/figure-html/Tree1-1.png" width="90%" style="display: block; margin: auto;" /&gt;
 ]
+
+???
+
+But IV gives us the Local Average Treatment Effect, or LATE.
+
+"Local" means it applies only to a specific subgroup:
+
+Compliers: These are the people who follow their assignment. They move if they win the lottery and stay if they lose.
+
+Never-takers: They will stay in their original neighborhood no matter what.
+
+Always-takers: They will find a way to move to a better neighborhood, whether they win the MTO lottery or not.
+
+Defiers: These are strange people who would move if they lose the lottery, but stay if they win.
 
 ---
 layout: false
@@ -508,6 +751,16 @@ layout: false
 **Monotonicity**: If there are defiers (&amp; compliers),&lt;br&gt; IV produces garbage.
 ]
 
+???
+
+The IV estimator isolates the causal effect only for compliers!
+
+Why? Because the behavior of never-takers and always-takers is the same regardless of whether they win the lottery. So their effects on the average outcome cancel out.
+
+The only group whose behavior is changed by the lottery is the compliers.
+
+This assumes no defiers! This is almost always a very reasonable assumption.
+
 ---
 class: clear
 # Learning goal 2 .font60[Moving kids out of poor nbhs improves their adult lifes!]
@@ -522,12 +775,21 @@ class: clear
 .center[.backgrnote[*Source:* Chetty, Hendren, and Katz (2016)]]
 ]
 
+???
+
+Using the housing voucher lottery as an instrumental variable, Chetty and colleagues estimated the LATE—the causal effect for complier families. 
+
+Their key finding, shown in the TOT (Treatment-on-the-Treated) column, is that moving to a low-poverty neighborhood as a young child causes a substantial increase of about $3,477 in annual adult earnings. 
+
+This provides powerful causal evidence that neighborhood environments during childhood have long-lasting effects.
+
 ---
 layout: false
 class: inverse middle center
 # Break
 
-&lt;iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+&lt;iframe src='https://panel.letstimeit.com/instant-timer/15-minute' width='600' height='400' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+
 
 
 ---
@@ -564,7 +826,8 @@ class: middle clear
 .left-column[
 &lt;img src="https://www.latentview.com/wp-content/uploads/2016/04/LatentView-Turns-Ten-A-decade-of-data-science.jpg" width="100%" style="display: block; margin: auto;" /&gt;
 
-&lt;iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+&lt;iframe src='https://panel.letstimeit.com/instant-timer/20-minute' width='600' height='400' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+
 ]
 
 .right-column[
@@ -582,7 +845,7 @@ class: inverse
 
 3. *Instrument Variables (IV) Estimation*: Instrument variable regression allows us to recover the causal effect of the treatment (not the intention) in an intention to treat design.
 
-4. *LATE (Local average treatment effect):* The LATE is the average treatment effect among people who would have complied with the treatment if they had been assigned to it. This is a narrower effect than the overall treatment effect, but it is often more precise. This means, we cannot know how people who did not comply to the intended treatment would have been affected by the treatment.
+4. *LATE (Local average treatment effect):* The LATE is the average treatment effect among people who would have complied with the treatment if they had been assigned to it. This is the Average Treatment Effect, but only for the "local" group of compliers. We learn the effect for those whose behavior was changed by the instrument, but we remain ignorant about the effect on never-takers and always-takers.
 
 ---
 # References
