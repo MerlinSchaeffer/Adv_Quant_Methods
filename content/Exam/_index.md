@@ -15,15 +15,12 @@ To successfully complete this course, you will need to fulfill two requirements:
 # Exam
 This examination consists of two primary components. The first component requires a statistical analysis of a provided dataset to test a set of pre-registered hypotheses. The second component requires you to propose an alternative research design to test the principal hypothesis.
 
-- Pre-registrations: [Link to Pre-registration 1] and [Link to Pre-registration 2]
+- Pre-registrations: [Link to Pre-registration 1] and [Link to Pre-registration 2](https://osf.io/g8n4v/overview?view_only=97f3c8ec393d470085283b57a272683a)
 
 - Data Availability: The dataset will be made available at the beginning of December.
 
 ## Component 1: Data Analysis and Interpretation** 
-You will be provided with a dataset from a survey experiment conducted by my colleagues and me in September. You will also receive the full questionnaire and two separate pre-registrations. A pre-registration is a document researchers file in a public registry before data collection, outlining their hypotheses and planned analysis strategies. Your task is to select one of the two pre-registrations and conduct the statistical analyses to test its hypotheses. You must adhere as closely as possible to the analytical strategy described in your chosen pre-registration. Your deliverable will be a written report of your methods and findings.
-
-## Deliverables for Component 1
-This component requires you to produce two core sections of a scientific paper:
+You will be provided with a dataset from a survey experiment conducted by my colleagues and me in September. You will also receive the full questionnaire and two separate pre-registrations. A pre-registration is a document researchers file in a public registry before data collection, outlining their hypotheses and planned analysis strategies. Your task is to select one of the two pre-registrations and conduct the statistical analyses to test its hypotheses. You must adhere as closely as possible to the analytical strategy described in your chosen pre-registration. Your deliverable will be a written report of your methods and findings. This component requires you to produce two core sections of a scientific paper:
 
 1. A "Data and Methods" Section:
 
