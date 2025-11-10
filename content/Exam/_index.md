@@ -17,6 +17,8 @@ This examination consists of two primary components. The first component require
 
 - Pre-registrations: [Link to Pre-registration 1] and [Link to Pre-registration 2](https://osf.io/g8n4v/overview?view_only=97f3c8ec393d470085283b57a272683a)
 
+- Questionnaire: You can find a link to the questionnaire in the pre-registration.
+
 - Data Availability: The dataset will be made available at the beginning of December.
 
 ## Component 1: Data Analysis and Interpretation** 
