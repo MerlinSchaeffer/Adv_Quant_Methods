@@ -21,7 +21,7 @@ This examination consists of two primary components. The first component require
 
 - Data Availability: The dataset will be made available at the beginning of December.
 
-## Component 1: Data Analysis and Interpretation** 
+## Component 1: Data Analysis and Interpretation
 You will be provided with a dataset from a survey experiment conducted by my colleagues and me in September. You will also receive the full questionnaire and two separate pre-registrations. A pre-registration is a document researchers file in a public registry before data collection, outlining their hypotheses and planned analysis strategies. Your task is to select one of the two pre-registrations and conduct the statistical analyses to test its hypotheses. You must adhere as closely as possible to the analytical strategy described in your chosen pre-registration. Your deliverable will be a written report of your methods and findings. This component requires you to produce two core sections of a scientific paper:
 
 1. A "Data and Methods" Section:
