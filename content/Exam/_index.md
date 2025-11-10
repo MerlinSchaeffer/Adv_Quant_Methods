@@ -15,7 +15,7 @@ To successfully complete this course, you will need to fulfill two requirements:
 # Exam
 This examination consists of two primary components. The first component requires a statistical analysis of a provided dataset to test a set of pre-registered hypotheses. The second component requires you to propose an alternative research design to test the principal hypothesis.
 
-- Pre-registrations: [Link to Pre-registration 1] and [Link to Pre-registration 2](https://osf.io/g8n4v/overview?view_only=97f3c8ec393d470085283b57a272683a)
+- Pre-registrations: [Link to Pre-registration 1](https://osf.io/76usw/overview?view_only=c7fdbbb8e2eb4e77b072544579fb2aa1) and [Link to Pre-registration 2](https://osf.io/g8n4v/overview?view_only=97f3c8ec393d470085283b57a272683a)
 
 - Questionnaire: You can find a link to the questionnaire in the pre-registration.
 
