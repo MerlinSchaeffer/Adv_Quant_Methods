@@ -46,28 +46,26 @@ xaringanExtra::use_panelset()
 
 .font130[.center[Use data to discover patterns, <br> and the .alert[social mechanisms that bring them about.]]]
 
-```{r, echo = FALSE, out.width='70%', fig.align='center'}
-knitr::include_graphics('https://liu.se/-/media/istock-501261958.jpg?mw=1120&mh=1120&hash=DA8977CCE6A6E600AE80A40CFEE771C9')
+```{r, echo = FALSE, out.width='50%', fig.align='center'}
+knitr::include_graphics('https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgykJbXZbwIX-nd1oVOyzmEfj09ho8aQ4HBhfMH27t6YeTYSBevfrD2DFTEQSe7e3UwaVnv-fAJAOVpjW2pSGfG2QNrgHfkTmFtRWK4VXl6KmWK6vVlLud0DRU6lFXAqBF7iij420oOTLFh/s1600/photo.JPG')
 ```
+
 
 ---
 class: inverse middle
 # Today's schedule
 
-1. Application of the day: Does education pay off?
+Application of the day: Does education pay off?
   + Recapitulation of IV.
   + Two-stage least Squares (2SLS).
   + Wald IV versus 2SLS IV Estimator.
-
-2. Another IV application:
-  2. Does state surveillance spark resistance?
 
 ---
 class: inverse
 # Application of the day
 
 .push-left[.center[.font130[
-**_Returns to education_:<br><br> Does education really pay off?**
+**_Returns to education_: <br><br>Does education really pay off?**
 ]]]
 
 .push-right[
@@ -199,18 +197,16 @@ $\rightarrow$ Dropouts born in the 4th quarter of a year, will have one more yea
 
 ]
 
-.push-right[
+.push-left[
 **Carl**: Born 1 January 1930, enters school aged 6.5 in June 1936. He drops out on the day of his 16th birthday with 9 years of schooling.
 ]
-.push-left[
+.push-right[
 **Luis**: Born 31 December 1930, enters school aged 5.5 in June 1936. He drops out on the day of his 16th birthday with 10 years of schooling.
 ]
 
 .content-box-green[
-Under which assumptions is the quarter of birth a valid instrument for years of schooling?
+Is the quarter of birth a valid instrument for years of schooling?
 ]]
-
---
 
 .left-column[.font90[
 ```{tikz, DAGIV, echo = FALSE, out.width='70%'}
@@ -235,6 +231,41 @@ Under which assumptions is the quarter of birth a valid instrument for years of 
 \path (3) edge [dashed] (4);
 \path (3) edge [dashed] (2);
 \end{tikzpicture}
+```
+
+.content-box-red[
+.center[**3 Requirements**]
+1. *First stage*: Instrument $Z_{i}$ has causal effect $\phi$ on $D_{i}$.
+
+2. *Randomization*: $Z_{i}$ is randomly assigned (RCT or natural experiment).
+
+3. *Exclusion restriction*: $Z_{i}$ affects $Y_{i}$ **_only_** through its effect on $D_{i}$.
+]]]
+
+---
+# `r Citet(myBib, "angrist_does_1991")` had an idea
+
+.right-column[
+- In the US, the school year starts 1 June.
+- Kids enter school in the year in which they turn 6.
+- Attending school is mandatory until one turns 16.
+
+.center[
+
+$\rightarrow$ Dropouts born in the 4th quarter of a year, will have one more year of education compared to those born in the first one!
+
+]
+
+.push-left[
+**Carl**: Born 1 January 1930, enters school aged 6.5 in June 1936. He drops out on the day of his 16th birthday with 9 years of schooling.
+]
+.push-right[
+**Luis**: Born 31 December 1930, enters school aged 5.5 in June 1936. He drops out on the day of his 16th birthday with 10 years of schooling.
+]]
+
+.left-column[.font90[
+```{tikz ref.label = "DAGIV", echo = FALSE}
+
 ```
 
 **First Stage:** $E[D_{i}|Z_{i}=1]-E[D_{i}|Z_{i}=0]; \text{call this }\phi.$
@@ -353,7 +384,7 @@ modelsummary(
        "1st Stage" = frst_stage, 
        "IV" = iv), stars = TRUE, 
   gof_map = c("nobs", "r.squared"),
-  output = "kableExtra")
+  output = "gt")
 ```
 $$\text{IV} = \frac{\rho}{\phi} = \frac{`r coef(reduced_frm)["qob"]`}{`r coef(frst_stage)["qob"]`} = `r coef(reduced_frm)["qob"] / coef(frst_stage)["qob"]`$$
 ]]
@@ -403,9 +434,9 @@ Which is unconfounded, the predicted education `pred_s` or the residuals `e_s`?
 ```
     
 - An instrument $Z_{i}$ induces random variation into the treatment $D_{i}$. 
-- We can isolate that random variation, by taking the predictions $\hat{D}_{i}$ from the first stage:
+- We can isolate that random variation, by taking the predictions $\hat{D}_{i}$ from the **first stage**:
       $$D_{i} = \alpha_1 + \phi Z_{i} + e_{i}.$$
-- We then use $\hat{D}_{i}$ as predictor in the second stage:
+- We then use $\hat{D}_{i}$ as predictor in the **second stage**:
       $$Y_{i} = \alpha_2 + \lambda_{\text{2SLS}}\hat{D}_{i} + e_{i}.$$
 ]
 
@@ -417,9 +448,39 @@ iv <- ivreg(lnw ~ s | qob, data = ak91) # IV (2SLS) #<<
 modelsummary(list("2n Stage" = scnd_stage, 
                     "IV" = iv), stars = TRUE, 
                gof_map = c("nobs", "r.squared"),
-               output = "kableExtra")
+               output = "gt")
 ```
 ]]
+
+---
+class: inverse middle center
+# Break
+
+<iframe src='https://panel.letstimeit.com/instant-timer/15-minute' width='600' height='400' frameborder='0' scrolling='yes'></iframe>
+
+---
+class: middle clear
+
+.left-column[
+```{r, echo = FALSE, out.width='100%'}
+knitr::include_graphics('https://cdn.dribbble.com/users/10549/screenshots/9916149/media/a9dbfea8e23e5b8e23db142528c3bc9f.png?compress=1&resize=1200x900&vertical=top')
+```
+
+<iframe src='https://panel.letstimeit.com/instant-timer/20-minute' width='600' height='400' frameborder='0' scrolling='yes'></iframe>
+
+]
+
+.right-column[
+<br>
+<iframe src='exercise1.html' width='1000' height='600' frameborder='0' scrolling='yes'></iframe>
+]
+
+---
+class: inverse middle center
+# Break
+
+<iframe src='https://panel.letstimeit.com/instant-timer/10-minute' width='600' height='400' frameborder='0' scrolling='yes'></iframe>
+
 
 ---
 # Two perspectives on IV
@@ -597,310 +658,284 @@ If the exclusion restriction does not hold, an instrument basically turns into a
 ]
 
 ---
-class: inverse middle center
-# Break
 
-<iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'></iframe>
+<!-- --- -->
+<!-- layout: false -->
+<!-- class: inverse middle center -->
+<!-- # Does state surveillance spark resistance? -->
 
----
-class: middle clear
+<!-- <iframe width="560" height="315" src="https://www.youtube.com/embed/YsShZNHmpGE" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe> -->
 
-.left-column[
-```{r, echo = FALSE, out.width='100%'}
-knitr::include_graphics('https://cdn.dribbble.com/users/10549/screenshots/9916149/media/a9dbfea8e23e5b8e23db142528c3bc9f.png?compress=1&resize=1200x900&vertical=top')
-```
+<!-- --- -->
+<!-- layout: true -->
+<!-- # The end of communism in Poland -->
 
-<iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'></iframe>
-]
+<!-- --- -->
 
-.right-column[
-<br>
-<iframe src='exercise1.html' width='1000' height='600' frameborder='0' scrolling='yes'></iframe>
-]
+<!-- .left-column[ -->
+<!-- ```{r, echo = FALSE, out.width='85%'} -->
+<!-- knitr::include_graphics('https://dzieje.pl/sites/default/files/styles/open_article_750x0_/public/201204/solidarnosc_tkk2.jpg?itok=YpPQeO8f') -->
+<!-- knitr::include_graphics('https://edupolis.pl/wp-content/uploads/2021/05/Solidarnosc.jpg') -->
+<!-- ``` -->
 
----
-class: inverse middle center
-# Break
 
-<iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'></iframe>
+<!-- ] -->
 
----
-layout: false
-class: inverse middle center
-# Does state surveillance spark resistance?
+<!-- .right-column[.font80[ -->
+<!-- > Following World War II, in 1947 the Soviet Union imposed a Marxist–Leninist government in Poland, called the Polish People’s Republic (henceforth, PPR). [...]  -->
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/YsShZNHmpGE" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
----
-layout: true
-# The end of communism in Poland
+<!-- > By the early 1980s, protests organized by workers of state firms led to the creation of the Independent and Self-Governing Trade Union Solidarity (henceforth, Solidarność), the first independent trade union in Communist Poland. Solidarność created a broad, nonviolent, anticommunist social movement. The following years saw bitter fights, and the PPR was ultimately forced to hold (semi-)free elections in 1989. -->
 
----
+<!-- > `r Citet(myBib, "hager_does_2022", after = ", page 567")` -->
+<!-- ]] -->
+<!-- --- -->
 
-.left-column[
-```{r, echo = FALSE, out.width='85%'}
-knitr::include_graphics('https://dzieje.pl/sites/default/files/styles/open_article_750x0_/public/201204/solidarnosc_tkk2.jpg?itok=YpPQeO8f')
-knitr::include_graphics('https://edupolis.pl/wp-content/uploads/2021/05/Solidarnosc.jpg')
-```
+<!-- .left-column[ -->
+<!-- ```{tikz, DAG_Hager, echo = FALSE, out.width='80%'} -->
+<!-- \usetikzlibrary{shapes,decorations,arrows,calc,arrows.meta,fit,positioning,quotes} -->
+<!-- \tikzset{ -->
+<!--   -Latex,auto,node distance =1 cm and 1 cm,semithick, -->
+<!--   state/.style ={ellipse, draw, minimum width = 0.7 cm}, -->
+<!--   point/.style = {circle, draw, inner sep=0.04cm,fill,node contents={}}, -->
+<!--   bidirected/.style={Latex-Latex,dashed}, -->
+<!--   el/.style = {inner sep=2pt, align=left, sloped} -->
+<!-- } -->
 
+<!-- \begin{tikzpicture} -->
+<!-- \sffamily -->
+<!-- \node[state, align = center] (1) at (0,0) {Surveillance}; -->
+<!-- \node[state, align = center] (2) [right = of 1] {Resistance}; -->
 
-]
+<!-- \path (1) edge (2); -->
+<!-- \end{tikzpicture} -->
+<!-- ``` -->
 
-.right-column[.font80[
-> Following World War II, in 1947 the Soviet Union imposed a Marxist–Leninist government in Poland, called the Polish People’s Republic (henceforth, PPR). [...] 
+<!-- ```{r, echo = FALSE, out.width='85%'} -->
+<!-- knitr::include_graphics('https://dzieje.pl/sites/default/files/styles/open_article_750x0_/public/201204/solidarnosc_tkk2.jpg?itok=YpPQeO8f') -->
+<!-- knitr::include_graphics('https://edupolis.pl/wp-content/uploads/2021/05/Solidarnosc.jpg') -->
+<!-- ``` -->
+<!-- ] -->
+
+<!-- .right-column[ -->
+<!-- ```{r, echo = FALSE, out.width='40%'} -->
+<!-- knitr::include_graphics('https://static.cambridge.org/binary/version/id/urn:cambridge.org:id:binary:20220425072255995-0362:S0003055421000770:S0003055421000770_fig1.png') -->
+<!-- ``` -->
 
+<!-- .font70[ -->
+<!-- > To obtain these data, we digitized archival sources from the Institute of National Remembrance (IPN, Polish acronym), which lists all secret police officers who operated in the region. [...] The resulting variable, *Surveillance*, indicates the number of officers per year and municipality from 1945 to 1989.  -->
 
-> By the early 1980s, protests organized by workers of state firms led to the creation of the Independent and Self-Governing Trade Union Solidarity (henceforth, Solidarność), the first independent trade union in Communist Poland. Solidarność created a broad, nonviolent, anticommunist social movement. The following years saw bitter fights, and the PPR was ultimately forced to hold (semi-)free elections in 1989.
+<!-- > `r Citet(myBib, "hager_does_2022", after = ", page 567")` -->
+<!-- ]] -->
 
-> `r Citet(myBib, "hager_does_2022", after = ", page 567")`
-]]
----
+<!-- --- -->
 
-.left-column[
-```{tikz, DAG_Hager, echo = FALSE, out.width='80%'}
-\usetikzlibrary{shapes,decorations,arrows,calc,arrows.meta,fit,positioning,quotes}
-\tikzset{
-  -Latex,auto,node distance =1 cm and 1 cm,semithick,
-  state/.style ={ellipse, draw, minimum width = 0.7 cm},
-  point/.style = {circle, draw, inner sep=0.04cm,fill,node contents={}},
-  bidirected/.style={Latex-Latex,dashed},
-  el/.style = {inner sep=2pt, align=left, sloped}
-}
+<!-- .left-column[ -->
+<!-- ```{tikz, ref.label = "DAG_Hager", echo = FALSE, out.width='80%'} -->
 
-\begin{tikzpicture}
-\sffamily
-\node[state, align = center] (1) at (0,0) {Surveillance};
-\node[state, align = center] (2) [right = of 1] {Resistance};
+<!-- ``` -->
 
-\path (1) edge (2);
-\end{tikzpicture}
-```
+<!-- ```{r, echo = FALSE, out.width='85%'} -->
+<!-- knitr::include_graphics('https://dzieje.pl/sites/default/files/styles/open_article_750x0_/public/201204/solidarnosc_tkk2.jpg?itok=YpPQeO8f') -->
+<!-- knitr::include_graphics('https://edupolis.pl/wp-content/uploads/2021/05/Solidarnosc.jpg') -->
+<!-- ``` -->
+<!-- ] -->
+
+<!-- .right-column[ -->
+<!-- ```{r, echo = FALSE, out.width='40%'} -->
+<!-- knitr::include_graphics('https://static.cambridge.org/binary/version/id/urn:cambridge.org:id:binary-alt:20220425072512-79013-optimisedImage-S0003055421000770_fig2.jpg') -->
+<!-- ``` -->
+
+<!-- .font70[ -->
+<!-- > We measure antiregime protests by geocoding all Solidarność strikes from 1980 to 1986 (Table A.1). Four reasons make the strikes a particularly relevant outcome. First and most important, Solidarność ultimately led to the toppling of the PPR. [...] To measure Solidarność strikes, we consulted archival sources by Niezależny Samorządny Zwiazek Zawodowy (NSZZ) Solidarność 1980–1989. -->
+
+<!-- > `r Citet(myBib, "hager_does_2022", after = ", page 568")` -->
+
+<!-- ]] -->
+
+<!-- --- -->
 
-```{r, echo = FALSE, out.width='85%'}
-knitr::include_graphics('https://dzieje.pl/sites/default/files/styles/open_article_750x0_/public/201204/solidarnosc_tkk2.jpg?itok=YpPQeO8f')
-knitr::include_graphics('https://edupolis.pl/wp-content/uploads/2021/05/Solidarnosc.jpg')
-```
-]
+<!-- .left-column[ -->
+<!-- ```{tikz, ref.label = "DAG_Hager", echo = FALSE, out.width='80%'} -->
 
-.right-column[
-```{r, echo = FALSE, out.width='40%'}
-knitr::include_graphics('https://static.cambridge.org/binary/version/id/urn:cambridge.org:id:binary:20220425072255995-0362:S0003055421000770:S0003055421000770_fig1.png')
-```
+<!-- ``` -->
+
+<!-- ```{r, echo = FALSE, out.width='85%'} -->
+<!-- knitr::include_graphics('https://dzieje.pl/sites/default/files/styles/open_article_750x0_/public/201204/solidarnosc_tkk2.jpg?itok=YpPQeO8f') -->
+<!-- knitr::include_graphics('https://edupolis.pl/wp-content/uploads/2021/05/Solidarnosc.jpg') -->
+<!-- ``` -->
+<!-- ] -->
+
+<!-- .right-column[ -->
+<!-- .center[Multiple OLS] -->
+<!-- ```{r, echo = FALSE, out.width='100%'} -->
+<!-- knitr::include_graphics('./img/Hager1.png') -->
+<!-- ``` -->
+<!-- ] -->
+
+<!-- --- -->
+
+<!-- .left-column[ -->
+<!-- ```{tikz, DAG_Hager2, echo = FALSE, out.width='80%'} -->
+<!-- \usetikzlibrary{shapes,decorations,arrows,calc,arrows.meta,fit,positioning,quotes} -->
+<!-- \tikzset{ -->
+<!--   -Latex,auto,node distance =1 cm and 1 cm,semithick, -->
+<!--   state/.style ={ellipse, draw, minimum width = 0.7 cm}, -->
+<!--   point/.style = {circle, draw, inner sep=0.04cm,fill,node contents={}}, -->
+<!--   bidirected/.style={Latex-Latex,dashed}, -->
+<!--   el/.style = {inner sep=2pt, align=left, sloped} -->
+<!-- } -->
+
+<!-- \begin{tikzpicture} -->
+<!-- \sffamily -->
+<!-- \node[state, align = center] (1) at (0,0) {Surveillance}; -->
+<!-- \node[state, align = center] (2) [right = of 1] {Resistance}; -->
+<!-- \node[state, align = center] (3) [red, dashed, above = of 1] {$C?$}; -->
+
+<!-- \path (1) edge (2); -->
+<!-- \path (3) edge [red, dashed] (1); -->
+<!-- \path (3) edge [red, dashed] (2); -->
+<!-- \end{tikzpicture} -->
+<!-- ``` -->
+
+<!-- ```{r, echo = FALSE, out.width='70%'} -->
+<!-- knitr::include_graphics('https://dzieje.pl/sites/default/files/styles/open_article_750x0_/public/201204/solidarnosc_tkk2.jpg?itok=YpPQeO8f') -->
+<!-- knitr::include_graphics('https://edupolis.pl/wp-content/uploads/2021/05/Solidarnosc.jpg') -->
+<!-- ``` -->
+
+<!-- .content-box-green[ -->
+<!-- Why might these results not be causal? -->
+<!-- ] -->
+<!-- ] -->
+
+<!-- .right-column[ -->
+<!-- .center[Multiple OLS] -->
+<!-- ```{r, echo = FALSE, out.width='100%'} -->
+<!-- knitr::include_graphics('./img/Hager1.png') -->
+<!-- ``` -->
+<!-- ] -->
+
+<!-- --- -->
+
+<!-- .left-column[ -->
+<!-- ```{tikz, ref.label = "DAG_Hager2", echo = FALSE, out.width='80%'} -->
+
+<!-- ``` -->
+
+<!-- ```{r, echo = FALSE, out.width='70%'} -->
+<!-- knitr::include_graphics('https://dzieje.pl/sites/default/files/styles/open_article_750x0_/public/201204/solidarnosc_tkk2.jpg?itok=YpPQeO8f') -->
+<!-- knitr::include_graphics('https://edupolis.pl/wp-content/uploads/2021/05/Solidarnosc.jpg') -->
+<!-- ``` -->
 
-.font70[
-> To obtain these data, we digitized archival sources from the Institute of National Remembrance (IPN, Polish acronym), which lists all secret police officers who operated in the region. [...] The resulting variable, *Surveillance*, indicates the number of officers per year and municipality from 1945 to 1989. 
-
-> `r Citet(myBib, "hager_does_2022", after = ", page 567")`
-]]
-
----
-
-.left-column[
-```{tikz, ref.label = "DAG_Hager", echo = FALSE, out.width='80%'}
-
-```
-
-```{r, echo = FALSE, out.width='85%'}
-knitr::include_graphics('https://dzieje.pl/sites/default/files/styles/open_article_750x0_/public/201204/solidarnosc_tkk2.jpg?itok=YpPQeO8f')
-knitr::include_graphics('https://edupolis.pl/wp-content/uploads/2021/05/Solidarnosc.jpg')
-```
-]
-
-.right-column[
-```{r, echo = FALSE, out.width='40%'}
-knitr::include_graphics('https://static.cambridge.org/binary/version/id/urn:cambridge.org:id:binary-alt:20220425072512-79013-optimisedImage-S0003055421000770_fig2.jpg')
-```
-
-.font70[
-> We measure antiregime protests by geocoding all Solidarność strikes from 1980 to 1986 (Table A.1). Four reasons make the strikes a particularly relevant outcome. First and most important, Solidarność ultimately led to the toppling of the PPR. [...] To measure Solidarność strikes, we consulted archival sources by Niezależny Samorządny Zwiazek Zawodowy (NSZZ) Solidarność 1980–1989.
-
-> `r Citet(myBib, "hager_does_2022", after = ", page 568")`
-
-]]
-
----
-
-.left-column[
-```{tikz, ref.label = "DAG_Hager", echo = FALSE, out.width='80%'}
-
-```
-
-```{r, echo = FALSE, out.width='85%'}
-knitr::include_graphics('https://dzieje.pl/sites/default/files/styles/open_article_750x0_/public/201204/solidarnosc_tkk2.jpg?itok=YpPQeO8f')
-knitr::include_graphics('https://edupolis.pl/wp-content/uploads/2021/05/Solidarnosc.jpg')
-```
-]
-
-.right-column[
-.center[Multiple OLS]
-```{r, echo = FALSE, out.width='100%'}
-knitr::include_graphics('./img/Hager1.png')
-```
-]
-
----
-
-.left-column[
-```{tikz, DAG_Hager2, echo = FALSE, out.width='80%'}
-\usetikzlibrary{shapes,decorations,arrows,calc,arrows.meta,fit,positioning,quotes}
-\tikzset{
-  -Latex,auto,node distance =1 cm and 1 cm,semithick,
-  state/.style ={ellipse, draw, minimum width = 0.7 cm},
-  point/.style = {circle, draw, inner sep=0.04cm,fill,node contents={}},
-  bidirected/.style={Latex-Latex,dashed},
-  el/.style = {inner sep=2pt, align=left, sloped}
-}
-
-\begin{tikzpicture}
-\sffamily
-\node[state, align = center] (1) at (0,0) {Surveillance};
-\node[state, align = center] (2) [right = of 1] {Resistance};
-\node[state, align = center] (3) [red, dashed, above = of 1] {$C?$};
-
-\path (1) edge (2);
-\path (3) edge [red, dashed] (1);
-\path (3) edge [red, dashed] (2);
-\end{tikzpicture}
-```
-
-```{r, echo = FALSE, out.width='70%'}
-knitr::include_graphics('https://dzieje.pl/sites/default/files/styles/open_article_750x0_/public/201204/solidarnosc_tkk2.jpg?itok=YpPQeO8f')
-knitr::include_graphics('https://edupolis.pl/wp-content/uploads/2021/05/Solidarnosc.jpg')
-```
-
-.content-box-green[
-Why might these results not be causal?
-]
-]
-
-.right-column[
-.center[Multiple OLS]
-```{r, echo = FALSE, out.width='100%'}
-knitr::include_graphics('./img/Hager1.png')
-```
-]
-
----
-
-.left-column[
-```{tikz, ref.label = "DAG_Hager2", echo = FALSE, out.width='80%'}
-
-```
-
-```{r, echo = FALSE, out.width='70%'}
-knitr::include_graphics('https://dzieje.pl/sites/default/files/styles/open_article_750x0_/public/201204/solidarnosc_tkk2.jpg?itok=YpPQeO8f')
-knitr::include_graphics('https://edupolis.pl/wp-content/uploads/2021/05/Solidarnosc.jpg')
-```
-
-.content-box-green[
-Why might these results not be causal?
-]
-]
-
-.right-column[
-.center[Multiple OLS]
-```{r, echo = FALSE, out.width='23%'}
-knitr::include_graphics('./img/Hager3.png')
-```
-]
-
----
-layout: true
-class: clear
-# `r Citet(myBib, "hager_does_2022")` had an idea
-
----
-
-.push-left[
-```{r, echo = FALSE, out.width='60%'}
-knitr::include_graphics('https://images.fineartamerica.com/images/artworkimages/mediumlarge/2/the-confession-1838-detail-giuseppe-molteni.jpg')
-```
-
-.font70[
-> Beginning in 1946, the Polish People’s Republic made a concerted effort to turn Catholic priests into agents of the secret police. [...] 
-
-> Important for our case, corrupted priests were crucial in the regime’s attempt to recruit additional spies and agents. The priests used confessions to collect compromising information on parishioners (Żurek Reference Żurek2009, 22, 66, 68).
-
-> `r Citet(myBib, "hager_does_2022", after = ", page 571")`
-
-]]
-
----
-
-.left-column[
-```{r, echo = FALSE, out.width='100%'}
-knitr::include_graphics('https://images.fineartamerica.com/images/artworkimages/mediumlarge/2/the-confession-1838-detail-giuseppe-molteni.jpg')
-```
-
-.font70[
-> Important for our case, corrupted priests were crucial in the regime’s attempt to recruit additional spies and agents.
-
-> `r Citet(myBib, "hager_does_2022", after = ", page 571")`
-
-]]
-
-.right-column[
-```{r, echo = FALSE, out.width='100%'}
-knitr::include_graphics('./img/Hager2.png')
-```
-
-.font70[
-> we exploit the fact that the placement of Catholic priests—who were then turned into spies—is arguably exogenous. To use corrupted priests as an instrumental variable for surveillance, we must invoke five assumptions. Below, we focus on two particularly important assumptions: exogeneity and excludability.
-
-> `r Citet(myBib, "hager_does_2022", after = ", page 571")`
-]]
-
----
-
-.right-column[
-```{r, echo = FALSE, out.width='100%'}
-knitr::include_graphics('./img/Hager2.png')
-```
-
-.font70[
-> we exploit the fact that the placement of Catholic priests—who were then turned into spies—is arguably exogenous. To use corrupted priests as an instrumental variable for surveillance, we must invoke five assumptions. Below, we focus on two particularly important assumptions: exogeneity and excludability.
-
-> `r Citet(myBib, "hager_does_2022", after = ", page 571")`
-]]
-
-.left-column[
-```{r, echo = FALSE, out.width='70%'}
-knitr::include_graphics('https://static.cambridge.org/binary/version/id/urn:cambridge.org:id:binary-alt:20220425072512-26492-optimisedImage-S0003055421000770_tab2.jpg')
-```
-]
-
----
-
-.push-right[
-```{r, echo = FALSE, out.width='100%'}
-knitr::include_graphics('./img/Hager2.png')
-```
-.font70[
-> Important for our case, corrupted priests were crucial in the regime’s attempt to recruit additional spies and agents.
-
-> `r Citet(myBib, "hager_does_2022", after = ", page 571")`
-]]
-
-.push-left[
-```{r, echo = FALSE, out.width='100%'}
-knitr::include_graphics('./img/Hager4.png')
-```
-
-]
-
----
-
-.push-right[
-```{r, echo = FALSE, out.width='100%'}
-knitr::include_graphics('./img/Hager2.png')
-```
-]
-
-.push-left[
-```{r, echo = FALSE, out.width='90%'}
-knitr::include_graphics('./img/Hager5.png')
-```
-]
+<!-- .content-box-green[ -->
+<!-- Why might these results not be causal? -->
+<!-- ] -->
+<!-- ] -->
+
+<!-- .right-column[ -->
+<!-- .center[Multiple OLS] -->
+<!-- ```{r, echo = FALSE, out.width='23%'} -->
+<!-- knitr::include_graphics('./img/Hager3.png') -->
+<!-- ``` -->
+<!-- ] -->
+
+<!-- --- -->
+<!-- layout: true -->
+<!-- class: clear -->
+<!-- # `r Citet(myBib, "hager_does_2022")` had an idea -->
+
+<!-- --- -->
+
+<!-- .push-left[ -->
+<!-- ```{r, echo = FALSE, out.width='60%'} -->
+<!-- knitr::include_graphics('https://images.fineartamerica.com/images/artworkimages/mediumlarge/2/the-confession-1838-detail-giuseppe-molteni.jpg') -->
+<!-- ``` -->
+
+<!-- .font70[ -->
+<!-- > Beginning in 1946, the Polish People’s Republic made a concerted effort to turn Catholic priests into agents of the secret police. [...]  -->
+
+<!-- > Important for our case, corrupted priests were crucial in the regime’s attempt to recruit additional spies and agents. The priests used confessions to collect compromising information on parishioners (Żurek Reference Żurek2009, 22, 66, 68). -->
+
+<!-- > `r Citet(myBib, "hager_does_2022", after = ", page 571")` -->
+
+<!-- ]] -->
+
+<!-- --- -->
+
+<!-- .left-column[ -->
+<!-- ```{r, echo = FALSE, out.width='100%'} -->
+<!-- knitr::include_graphics('https://images.fineartamerica.com/images/artworkimages/mediumlarge/2/the-confession-1838-detail-giuseppe-molteni.jpg') -->
+<!-- ``` -->
+
+<!-- .font70[ -->
+<!-- > Important for our case, corrupted priests were crucial in the regime’s attempt to recruit additional spies and agents. -->
+
+<!-- > `r Citet(myBib, "hager_does_2022", after = ", page 571")` -->
+
+<!-- ]] -->
+
+<!-- .right-column[ -->
+<!-- ```{r, echo = FALSE, out.width='100%'} -->
+<!-- knitr::include_graphics('./img/Hager2.png') -->
+<!-- ``` -->
+
+<!-- .font70[ -->
+<!-- > we exploit the fact that the placement of Catholic priests—who were then turned into spies—is arguably exogenous. To use corrupted priests as an instrumental variable for surveillance, we must invoke five assumptions. Below, we focus on two particularly important assumptions: exogeneity and excludability. -->
+
+<!-- > `r Citet(myBib, "hager_does_2022", after = ", page 571")` -->
+<!-- ]] -->
+
+<!-- --- -->
+
+<!-- .right-column[ -->
+<!-- ```{r, echo = FALSE, out.width='100%'} -->
+<!-- knitr::include_graphics('./img/Hager2.png') -->
+<!-- ``` -->
+
+<!-- .font70[ -->
+<!-- > we exploit the fact that the placement of Catholic priests—who were then turned into spies—is arguably exogenous. To use corrupted priests as an instrumental variable for surveillance, we must invoke five assumptions. Below, we focus on two particularly important assumptions: exogeneity and excludability. -->
+
+<!-- > `r Citet(myBib, "hager_does_2022", after = ", page 571")` -->
+<!-- ]] -->
+
+<!-- .left-column[ -->
+<!-- ```{r, echo = FALSE, out.width='70%'} -->
+<!-- knitr::include_graphics('https://static.cambridge.org/binary/version/id/urn:cambridge.org:id:binary-alt:20220425072512-26492-optimisedImage-S0003055421000770_tab2.jpg') -->
+<!-- ``` -->
+<!-- ] -->
+
+<!-- --- -->
+
+<!-- .push-right[ -->
+<!-- ```{r, echo = FALSE, out.width='100%'} -->
+<!-- knitr::include_graphics('./img/Hager2.png') -->
+<!-- ``` -->
+<!-- .font70[ -->
+<!-- > Important for our case, corrupted priests were crucial in the regime’s attempt to recruit additional spies and agents. -->
+
+<!-- > `r Citet(myBib, "hager_does_2022", after = ", page 571")` -->
+<!-- ]] -->
+
+<!-- .push-left[ -->
+<!-- ```{r, echo = FALSE, out.width='100%'} -->
+<!-- knitr::include_graphics('./img/Hager4.png') -->
+<!-- ``` -->
+
+<!-- ] -->
+
+<!-- --- -->
+
+<!-- .push-right[ -->
+<!-- ```{r, echo = FALSE, out.width='100%'} -->
+<!-- knitr::include_graphics('./img/Hager2.png') -->
+<!-- ``` -->
+<!-- ] -->
+
+<!-- .push-left[ -->
+<!-- ```{r, echo = FALSE, out.width='90%'} -->
+<!-- knitr::include_graphics('./img/Hager5.png') -->
+<!-- ``` -->
+<!-- ] -->
 
 ---
 layout: false

@@ -4,7 +4,7 @@
     <title>Multiple Regression &amp;    Fundamentals of Causal Inference</title>
     <meta charset="utf-8" />
     <meta name="author" content="Merlin Schaeffer  Department of Sociology" />
-    <meta name="date" content="2024-11-11" />
+    <meta name="date" content="2025-11-12" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
     <script src="libs/tile-view/tile-view.js"></script>
@@ -29,7 +29,7 @@ class: center, middle, inverse, title-slide
 ### Merlin Schaeffer<br> Department of Sociology
 ]
 .date[
-### 2024-11-11
+### 2025-11-12
 ]
 
 ---
@@ -39,26 +39,24 @@ class: center, middle, inverse, title-slide
 
 .font130[.center[Use data to discover patterns, &lt;br&gt; and the .alert[social mechanisms that bring them about.]]]
 
-&lt;img src="https://liu.se/-/media/istock-501261958.jpg?mw=1120&amp;mh=1120&amp;hash=DA8977CCE6A6E600AE80A40CFEE771C9" width="70%" style="display: block; margin: auto;" /&gt;
+&lt;img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgykJbXZbwIX-nd1oVOyzmEfj09ho8aQ4HBhfMH27t6YeTYSBevfrD2DFTEQSe7e3UwaVnv-fAJAOVpjW2pSGfG2QNrgHfkTmFtRWK4VXl6KmWK6vVlLud0DRU6lFXAqBF7iij420oOTLFh/s1600/photo.JPG" width="50%" style="display: block; margin: auto;" /&gt;
+
 
 ---
 class: inverse middle
 # Today's schedule
 
-1. Application of the day: Does education pay off?
+Application of the day: Does education pay off?
   + Recapitulation of IV.
   + Two-stage least Squares (2SLS).
   + Wald IV versus 2SLS IV Estimator.
-
-2. Another IV application:
-  2. Does state surveillance spark resistance?
 
 ---
 class: inverse
 # Application of the day
 
 .push-left[.center[.font130[
-**_Returns to education_:&lt;br&gt;&lt;br&gt; Does education really pay off?**
+**_Returns to education_: &lt;br&gt;&lt;br&gt;Does education really pay off?**
 ]]]
 
 .push-right[
@@ -119,21 +117,52 @@ If we *randomly* divide subjects into treatment and control groups, .alert[they 
 
 ]
 
-.push-right[
+.push-left[
 **Carl**: Born 1 January 1930, enters school aged 6.5 in June 1936. He drops out on the day of his 16th birthday with 9 years of schooling.
 ]
-.push-left[
+.push-right[
 **Luis**: Born 31 December 1930, enters school aged 5.5 in June 1936. He drops out on the day of his 16th birthday with 10 years of schooling.
 ]
 
 .content-box-green[
-Under which assumptions is the quarter of birth a valid instrument for years of schooling?
+Is the quarter of birth a valid instrument for years of schooling?
 ]]
-
---
 
 .left-column[.font90[
 &lt;img src="10-IV-2SLS_files/figure-html/DAGIV-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+
+.content-box-red[
+.center[**3 Requirements**]
+1. *First stage*: Instrument `\(Z_{i}\)` has causal effect `\(\phi\)` on `\(D_{i}\)`.
+
+2. *Randomization*: `\(Z_{i}\)` is randomly assigned (RCT or natural experiment).
+
+3. *Exclusion restriction*: `\(Z_{i}\)` affects `\(Y_{i}\)` **_only_** through its effect on `\(D_{i}\)`.
+]]]
+
+---
+# Angrist and Krueger (1991) had an idea
+
+.right-column[
+- In the US, the school year starts 1 June.
+- Kids enter school in the year in which they turn 6.
+- Attending school is mandatory until one turns 16.
+
+.center[
+
+`\(\rightarrow\)` Dropouts born in the 4th quarter of a year, will have one more year of education compared to those born in the first one!
+
+]
+
+.push-left[
+**Carl**: Born 1 January 1930, enters school aged 6.5 in June 1936. He drops out on the day of his 16th birthday with 9 years of schooling.
+]
+.push-right[
+**Luis**: Born 31 December 1930, enters school aged 5.5 in June 1936. He drops out on the day of his 16th birthday with 10 years of schooling.
+]]
+
+.left-column[.font90[
+&lt;img src="10-IV-2SLS_files/figure-html/unnamed-chunk-6-1.png" width="504" style="display: block; margin: auto;" /&gt;
 
 **First Stage:** `\(E[D_{i}|Z_{i}=1]-E[D_{i}|Z_{i}=0]; \text{call this }\phi.\)`
 
@@ -189,7 +218,7 @@ modelsummary(list("log Wage" = mult_OLS), stars = TRUE,
              gof_map = c("nobs", "r.squared"), output = "kableExtra")
 ```
 
-&lt;table style="NAborder-bottom: 0; color: black; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
  &lt;thead&gt;
   &lt;tr&gt;
    &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
@@ -250,7 +279,7 @@ modelsummary(list("log Wage" = reduced_frm), stars = TRUE,
              gof_map = c("nobs", "r.squared"), output = "kableExtra")
 ```
 
-&lt;table style="NAborder-bottom: 0; color: black; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
  &lt;thead&gt;
   &lt;tr&gt;
    &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
@@ -307,7 +336,7 @@ modelsummary(list("Schooling" = frst_stage), stars = TRUE,
              gof_map = c("nobs", "r.squared"), output = "kableExtra")
 ```
 
-&lt;table style="NAborder-bottom: 0; color: black; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
+&lt;table style="NAborder-bottom: 0; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
  &lt;thead&gt;
   &lt;tr&gt;
    &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
@@ -367,98 +396,529 @@ modelsummary(
        "1st Stage" = frst_stage, 
        "IV" = iv), stars = TRUE, 
   gof_map = c("nobs", "r.squared"),
-  output = "kableExtra")
+  output = "gt")
 ```
 `$$\text{IV} = \frac{\rho}{\phi} = \frac{0.005}{0.052} = 0.099$$`
 ]]
 .right-column[.font90[
-&lt;table style="NAborder-bottom: 0; color: black; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
- &lt;thead&gt;
-  &lt;tr&gt;
-   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
-   &lt;th style="text-align:center;"&gt; OLS &lt;/th&gt;
-   &lt;th style="text-align:center;"&gt; Reduced Form &lt;/th&gt;
-   &lt;th style="text-align:center;"&gt; 1st Stage &lt;/th&gt;
-   &lt;th style="text-align:center;"&gt; &amp;amp;nbsp;IV &lt;/th&gt;
-  &lt;/tr&gt;
- &lt;/thead&gt;
-&lt;tbody&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 4.776*** &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 5.887*** &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 12.641*** &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 4.633*** &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (0.018) &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (0.003) &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (0.014) &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (0.250) &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; s &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.071*** &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.099*** &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (0.000) &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (0.020) &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; age &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.005*** &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (0.000) &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; qob &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.005*** &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.052*** &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.001) &lt;/td&gt;
-   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.005) &lt;/td&gt;
-   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 329509 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 329509 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 329509 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 329509 &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.118 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.000 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.000 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.098 &lt;/td&gt;
-  &lt;/tr&gt;
-&lt;/tbody&gt;
-&lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
-&lt;sup&gt;&lt;/sup&gt; + p &amp;lt; 0.1, * p &amp;lt; 0.05, ** p &amp;lt; 0.01, *** p &amp;lt; 0.001&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;
-&lt;/table&gt;
+<div id="ttzkjmdxff" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#ttzkjmdxff table {
+  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
 
+#ttzkjmdxff thead, #ttzkjmdxff tbody, #ttzkjmdxff tfoot, #ttzkjmdxff tr, #ttzkjmdxff td, #ttzkjmdxff th {
+  border-style: none;
+}
 
+#ttzkjmdxff p {
+  margin: 0;
+  padding: 0;
+}
+
+#ttzkjmdxff .gt_table {
+  display: table;
+  border-collapse: collapse;
+  line-height: normal;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#ttzkjmdxff .gt_caption {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#ttzkjmdxff .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#ttzkjmdxff .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 3px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#ttzkjmdxff .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#ttzkjmdxff .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#ttzkjmdxff .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#ttzkjmdxff .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#ttzkjmdxff .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#ttzkjmdxff .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#ttzkjmdxff .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#ttzkjmdxff .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#ttzkjmdxff .gt_spanner_row {
+  border-bottom-style: hidden;
+}
+
+#ttzkjmdxff .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  text-align: left;
+}
+
+#ttzkjmdxff .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#ttzkjmdxff .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#ttzkjmdxff .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#ttzkjmdxff .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#ttzkjmdxff .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#ttzkjmdxff .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#ttzkjmdxff .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#ttzkjmdxff .gt_row_group_first th {
+  border-top-width: 2px;
+}
+
+#ttzkjmdxff .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#ttzkjmdxff .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#ttzkjmdxff .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#ttzkjmdxff .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#ttzkjmdxff .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#ttzkjmdxff .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#ttzkjmdxff .gt_last_grand_summary_row_top {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: double;
+  border-bottom-width: 6px;
+  border-bottom-color: #D3D3D3;
+}
+
+#ttzkjmdxff .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#ttzkjmdxff .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#ttzkjmdxff .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#ttzkjmdxff .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#ttzkjmdxff .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#ttzkjmdxff .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#ttzkjmdxff .gt_left {
+  text-align: left;
+}
+
+#ttzkjmdxff .gt_center {
+  text-align: center;
+}
+
+#ttzkjmdxff .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#ttzkjmdxff .gt_font_normal {
+  font-weight: normal;
+}
+
+#ttzkjmdxff .gt_font_bold {
+  font-weight: bold;
+}
+
+#ttzkjmdxff .gt_font_italic {
+  font-style: italic;
+}
+
+#ttzkjmdxff .gt_super {
+  font-size: 65%;
+}
+
+#ttzkjmdxff .gt_footnote_marks {
+  font-size: 75%;
+  vertical-align: 0.4em;
+  position: initial;
+}
+
+#ttzkjmdxff .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#ttzkjmdxff .gt_indent_1 {
+  text-indent: 5px;
+}
+
+#ttzkjmdxff .gt_indent_2 {
+  text-indent: 10px;
+}
+
+#ttzkjmdxff .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#ttzkjmdxff .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#ttzkjmdxff .gt_indent_5 {
+  text-indent: 25px;
+}
+
+#ttzkjmdxff .katex-display {
+  display: inline-flex !important;
+  margin-bottom: 0.75em !important;
+}
+
+#ttzkjmdxff div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+  height: 0px !important;
+}
+</style>
+<table class="gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
+  <thead>
+    <tr class="gt_col_headings">
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="a-"> </th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="OLS">OLS</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="Reduced-Form">Reduced Form</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="a1st-Stage">1st Stage</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="IV">IV</th>
+    </tr>
+  </thead>
+  <tbody class="gt_table_body">
+    <tr><td headers=" " class="gt_row gt_left">(Intercept)</td>
+<td headers="OLS" class="gt_row gt_center">4.776***</td>
+<td headers="Reduced Form" class="gt_row gt_center">5.887***</td>
+<td headers="1st Stage" class="gt_row gt_center">12.641***</td>
+<td headers="IV" class="gt_row gt_center">4.633***</td></tr>
+    <tr><td headers=" " class="gt_row gt_left"></td>
+<td headers="OLS" class="gt_row gt_center">(0.018)</td>
+<td headers="Reduced Form" class="gt_row gt_center">(0.003)</td>
+<td headers="1st Stage" class="gt_row gt_center">(0.014)</td>
+<td headers="IV" class="gt_row gt_center">(0.250)</td></tr>
+    <tr><td headers=" " class="gt_row gt_left">s</td>
+<td headers="OLS" class="gt_row gt_center">0.071***</td>
+<td headers="Reduced Form" class="gt_row gt_center"></td>
+<td headers="1st Stage" class="gt_row gt_center"></td>
+<td headers="IV" class="gt_row gt_center">0.099***</td></tr>
+    <tr><td headers=" " class="gt_row gt_left"></td>
+<td headers="OLS" class="gt_row gt_center">(0.000)</td>
+<td headers="Reduced Form" class="gt_row gt_center"></td>
+<td headers="1st Stage" class="gt_row gt_center"></td>
+<td headers="IV" class="gt_row gt_center">(0.020)</td></tr>
+    <tr><td headers=" " class="gt_row gt_left">age</td>
+<td headers="OLS" class="gt_row gt_center">0.005***</td>
+<td headers="Reduced Form" class="gt_row gt_center"></td>
+<td headers="1st Stage" class="gt_row gt_center"></td>
+<td headers="IV" class="gt_row gt_center"></td></tr>
+    <tr><td headers=" " class="gt_row gt_left"></td>
+<td headers="OLS" class="gt_row gt_center">(0.000)</td>
+<td headers="Reduced Form" class="gt_row gt_center"></td>
+<td headers="1st Stage" class="gt_row gt_center"></td>
+<td headers="IV" class="gt_row gt_center"></td></tr>
+    <tr><td headers=" " class="gt_row gt_left">qob</td>
+<td headers="OLS" class="gt_row gt_center"></td>
+<td headers="Reduced Form" class="gt_row gt_center">0.005***</td>
+<td headers="1st Stage" class="gt_row gt_center">0.052***</td>
+<td headers="IV" class="gt_row gt_center"></td></tr>
+    <tr><td headers=" " class="gt_row gt_left" style="border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #000000;"></td>
+<td headers="OLS" class="gt_row gt_center" style="border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #000000;"></td>
+<td headers="Reduced Form" class="gt_row gt_center" style="border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #000000;">(0.001)</td>
+<td headers="1st Stage" class="gt_row gt_center" style="border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #000000;">(0.005)</td>
+<td headers="IV" class="gt_row gt_center" style="border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #000000;"></td></tr>
+    <tr><td headers=" " class="gt_row gt_left">Num.Obs.</td>
+<td headers="OLS" class="gt_row gt_center">329509</td>
+<td headers="Reduced Form" class="gt_row gt_center">329509</td>
+<td headers="1st Stage" class="gt_row gt_center">329509</td>
+<td headers="IV" class="gt_row gt_center">329509</td></tr>
+    <tr><td headers=" " class="gt_row gt_left">R2</td>
+<td headers="OLS" class="gt_row gt_center">0.118</td>
+<td headers="Reduced Form" class="gt_row gt_center">0.000</td>
+<td headers="1st Stage" class="gt_row gt_center">0.000</td>
+<td headers="IV" class="gt_row gt_center">0.098</td></tr>
+  </tbody>
+  <tfoot>
+    <tr class="gt_sourcenotes">
+      <td class="gt_sourcenote" colspan="5">+ p &lt; 0.1, * p &lt; 0.05, ** p &lt; 0.01, *** p &lt; 0.001</td>
+    </tr>
+  </tfoot>
+</table>
+</div>
 ]]]]
 
 ---
@@ -472,9 +932,9 @@ The Frisch-Waugh perspective on IV
 # The *first* stage
   
   .left-column[
-&lt;img src="10-IV-2SLS_files/figure-html/unnamed-chunk-11-1.png" width="100%" style="display: block; margin: auto;" /&gt;
-    
 &lt;img src="10-IV-2SLS_files/figure-html/unnamed-chunk-12-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+    
+&lt;img src="10-IV-2SLS_files/figure-html/unnamed-chunk-13-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]
 
 .right-column[
@@ -510,12 +970,12 @@ Which is unconfounded, the predicted education `pred_s` or the residuals `e_s`?
 # The *second* stage
   
 .push-left[
-&lt;img src="10-IV-2SLS_files/figure-html/unnamed-chunk-14-1.png" width="50%" style="display: block; margin: auto;" /&gt;
+&lt;img src="10-IV-2SLS_files/figure-html/unnamed-chunk-15-1.png" width="50%" style="display: block; margin: auto;" /&gt;
     
 - An instrument `\(Z_{i}\)` induces random variation into the treatment `\(D_{i}\)`. 
-- We can isolate that random variation, by taking the predictions `\(\hat{D}_{i}\)` from the first stage:
+- We can isolate that random variation, by taking the predictions `\(\hat{D}_{i}\)` from the **first stage**:
       `$$D_{i} = \alpha_1 + \phi Z_{i} + e_{i}.$$`
-- We then use `\(\hat{D}_{i}\)` as predictor in the second stage:
+- We then use `\(\hat{D}_{i}\)` as predictor in the **second stage**:
       `$$Y_{i} = \alpha_2 + \lambda_{\text{2SLS}}\hat{D}_{i} + e_{i}.$$`
 ]
 
@@ -528,65 +988,528 @@ scnd_stage &lt;- lm_robust(lnw ~ pred_s, data = ak91) # Second stage
 modelsummary(list("2n Stage" = scnd_stage, 
                     "IV" = iv), stars = TRUE, 
                gof_map = c("nobs", "r.squared"),
-               output = "kableExtra")
+               output = "gt")
 ```
 
-&lt;table style="NAborder-bottom: 0; color: black; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
- &lt;thead&gt;
-  &lt;tr&gt;
-   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
-   &lt;th style="text-align:center;"&gt; &amp;amp;nbsp;2n Stage &lt;/th&gt;
-   &lt;th style="text-align:center;"&gt; &amp;amp;nbsp;IV &lt;/th&gt;
-  &lt;/tr&gt;
- &lt;/thead&gt;
-&lt;tbody&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 4.633*** &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 4.633*** &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (0.263) &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (0.250) &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; pred_s &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.099*** &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (0.021) &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; s &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.099*** &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.020) &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 329509 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 329509 &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.000 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.098 &lt;/td&gt;
-  &lt;/tr&gt;
-&lt;/tbody&gt;
-&lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
-&lt;sup&gt;&lt;/sup&gt; + p &amp;lt; 0.1, * p &amp;lt; 0.05, ** p &amp;lt; 0.01, *** p &amp;lt; 0.001&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;
-&lt;/table&gt;
+<div id="paehdxaixv" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#paehdxaixv table {
+  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
 
+#paehdxaixv thead, #paehdxaixv tbody, #paehdxaixv tfoot, #paehdxaixv tr, #paehdxaixv td, #paehdxaixv th {
+  border-style: none;
+}
 
+#paehdxaixv p {
+  margin: 0;
+  padding: 0;
+}
+
+#paehdxaixv .gt_table {
+  display: table;
+  border-collapse: collapse;
+  line-height: normal;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#paehdxaixv .gt_caption {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#paehdxaixv .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#paehdxaixv .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 3px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#paehdxaixv .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#paehdxaixv .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#paehdxaixv .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#paehdxaixv .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#paehdxaixv .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#paehdxaixv .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#paehdxaixv .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#paehdxaixv .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#paehdxaixv .gt_spanner_row {
+  border-bottom-style: hidden;
+}
+
+#paehdxaixv .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  text-align: left;
+}
+
+#paehdxaixv .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#paehdxaixv .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#paehdxaixv .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#paehdxaixv .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#paehdxaixv .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#paehdxaixv .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#paehdxaixv .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#paehdxaixv .gt_row_group_first th {
+  border-top-width: 2px;
+}
+
+#paehdxaixv .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#paehdxaixv .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#paehdxaixv .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#paehdxaixv .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#paehdxaixv .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#paehdxaixv .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#paehdxaixv .gt_last_grand_summary_row_top {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: double;
+  border-bottom-width: 6px;
+  border-bottom-color: #D3D3D3;
+}
+
+#paehdxaixv .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#paehdxaixv .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#paehdxaixv .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#paehdxaixv .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#paehdxaixv .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#paehdxaixv .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#paehdxaixv .gt_left {
+  text-align: left;
+}
+
+#paehdxaixv .gt_center {
+  text-align: center;
+}
+
+#paehdxaixv .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#paehdxaixv .gt_font_normal {
+  font-weight: normal;
+}
+
+#paehdxaixv .gt_font_bold {
+  font-weight: bold;
+}
+
+#paehdxaixv .gt_font_italic {
+  font-style: italic;
+}
+
+#paehdxaixv .gt_super {
+  font-size: 65%;
+}
+
+#paehdxaixv .gt_footnote_marks {
+  font-size: 75%;
+  vertical-align: 0.4em;
+  position: initial;
+}
+
+#paehdxaixv .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#paehdxaixv .gt_indent_1 {
+  text-indent: 5px;
+}
+
+#paehdxaixv .gt_indent_2 {
+  text-indent: 10px;
+}
+
+#paehdxaixv .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#paehdxaixv .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#paehdxaixv .gt_indent_5 {
+  text-indent: 25px;
+}
+
+#paehdxaixv .katex-display {
+  display: inline-flex !important;
+  margin-bottom: 0.75em !important;
+}
+
+#paehdxaixv div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+  height: 0px !important;
+}
+</style>
+<table class="gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
+  <thead>
+    <tr class="gt_col_headings">
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="a-"> </th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="a2n-Stage">2n Stage</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="IV">IV</th>
+    </tr>
+  </thead>
+  <tbody class="gt_table_body">
+    <tr><td headers=" " class="gt_row gt_left">(Intercept)</td>
+<td headers="2n Stage" class="gt_row gt_center">4.633***</td>
+<td headers="IV" class="gt_row gt_center">4.633***</td></tr>
+    <tr><td headers=" " class="gt_row gt_left"></td>
+<td headers="2n Stage" class="gt_row gt_center">(0.263)</td>
+<td headers="IV" class="gt_row gt_center">(0.250)</td></tr>
+    <tr><td headers=" " class="gt_row gt_left">pred_s</td>
+<td headers="2n Stage" class="gt_row gt_center">0.099***</td>
+<td headers="IV" class="gt_row gt_center"></td></tr>
+    <tr><td headers=" " class="gt_row gt_left"></td>
+<td headers="2n Stage" class="gt_row gt_center">(0.021)</td>
+<td headers="IV" class="gt_row gt_center"></td></tr>
+    <tr><td headers=" " class="gt_row gt_left">s</td>
+<td headers="2n Stage" class="gt_row gt_center"></td>
+<td headers="IV" class="gt_row gt_center">0.099***</td></tr>
+    <tr><td headers=" " class="gt_row gt_left" style="border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #000000;"></td>
+<td headers="2n Stage" class="gt_row gt_center" style="border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #000000;"></td>
+<td headers="IV" class="gt_row gt_center" style="border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #000000;">(0.020)</td></tr>
+    <tr><td headers=" " class="gt_row gt_left">Num.Obs.</td>
+<td headers="2n Stage" class="gt_row gt_center">329509</td>
+<td headers="IV" class="gt_row gt_center">329509</td></tr>
+    <tr><td headers=" " class="gt_row gt_left">R2</td>
+<td headers="2n Stage" class="gt_row gt_center">0.000</td>
+<td headers="IV" class="gt_row gt_center">0.098</td></tr>
+  </tbody>
+  <tfoot>
+    <tr class="gt_sourcenotes">
+      <td class="gt_sourcenote" colspan="3">+ p &lt; 0.1, * p &lt; 0.05, ** p &lt; 0.01, *** p &lt; 0.001</td>
+    </tr>
+  </tfoot>
+</table>
+</div>
 ]]
+
+---
+class: inverse middle center
+# Break
+
+&lt;iframe src='https://panel.letstimeit.com/instant-timer/15-minute' width='600' height='400' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+
+---
+class: middle clear
+
+.left-column[
+&lt;img src="https://cdn.dribbble.com/users/10549/screenshots/9916149/media/a9dbfea8e23e5b8e23db142528c3bc9f.png?compress=1&amp;resize=1200x900&amp;vertical=top" width="100%" style="display: block; margin: auto;" /&gt;
+
+&lt;iframe src='https://panel.letstimeit.com/instant-timer/20-minute' width='600' height='400' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+
+]
+
+.right-column[
+&lt;br&gt;
+&lt;iframe src='exercise1.html' width='1000' height='600' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+]
+
+---
+class: inverse middle center
+# Break
+
+&lt;iframe src='https://panel.letstimeit.com/instant-timer/10-minute' width='600' height='400' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+
 
 ---
 # Two perspectives on IV
@@ -615,7 +1538,7 @@ modelsummary(list("2n Stage" = scnd_stage,
 # Control vs. instrument variables
   
 .push-right[.content-box-blue[
-&lt;img src="10-IV-2SLS_files/figure-html/unnamed-chunk-16-1.png" width="50%" style="display: block; margin: auto;" /&gt;
+&lt;img src="10-IV-2SLS_files/figure-html/unnamed-chunk-18-1.png" width="50%" style="display: block; margin: auto;" /&gt;
     
 An instrument variable `\(Z\)` induces random variation into `\(D\)`. 
     
@@ -646,7 +1569,7 @@ By controlling for `\(C\)`, we only keep the residuals (not the predicted values
 # Remember the exclusion restriction!
   
 .left-column[
-&lt;img src="10-IV-2SLS_files/figure-html/unnamed-chunk-18-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="10-IV-2SLS_files/figure-html/unnamed-chunk-20-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]
 
 .right-column[
@@ -667,219 +1590,284 @@ If the exclusion restriction does not hold, an instrument basically turns into a
 ]
 
 ---
-class: inverse middle center
-# Break
 
-&lt;iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+&lt;!-- --- --&gt;
+&lt;!-- layout: false --&gt;
+&lt;!-- class: inverse middle center --&gt;
+&lt;!-- # Does state surveillance spark resistance? --&gt;
 
----
-class: middle clear
+&lt;!-- &lt;iframe width="560" height="315" src="https://www.youtube.com/embed/YsShZNHmpGE" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen&gt;&lt;/iframe&gt; --&gt;
 
-.left-column[
-&lt;img src="https://cdn.dribbble.com/users/10549/screenshots/9916149/media/a9dbfea8e23e5b8e23db142528c3bc9f.png?compress=1&amp;resize=1200x900&amp;vertical=top" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;!-- --- --&gt;
+&lt;!-- layout: true --&gt;
+&lt;!-- # The end of communism in Poland --&gt;
 
-&lt;iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
-]
+&lt;!-- --- --&gt;
 
-.right-column[
-&lt;br&gt;
-&lt;iframe src='exercise1.html' width='1000' height='600' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
-]
+&lt;!-- .left-column[ --&gt;
+&lt;!-- ```{r, echo = FALSE, out.width='85%'} --&gt;
+&lt;!-- knitr::include_graphics('https://dzieje.pl/sites/default/files/styles/open_article_750x0_/public/201204/solidarnosc_tkk2.jpg?itok=YpPQeO8f') --&gt;
+&lt;!-- knitr::include_graphics('https://edupolis.pl/wp-content/uploads/2021/05/Solidarnosc.jpg') --&gt;
+&lt;!-- ``` --&gt;
 
----
-class: inverse middle center
-# Break
 
-&lt;iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+&lt;!-- ] --&gt;
 
----
-layout: false
-class: inverse middle center
-# Does state surveillance spark resistance?
+&lt;!-- .right-column[.font80[ --&gt;
+&lt;!-- &gt; Following World War II, in 1947 the Soviet Union imposed a Marxist–Leninist government in Poland, called the Polish People’s Republic (henceforth, PPR). [...]  --&gt;
 
-&lt;iframe width="560" height="315" src="https://www.youtube.com/embed/YsShZNHmpGE" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen&gt;&lt;/iframe&gt;
 
----
-layout: true
-# The end of communism in Poland
+&lt;!-- &gt; By the early 1980s, protests organized by workers of state firms led to the creation of the Independent and Self-Governing Trade Union Solidarity (henceforth, Solidarność), the first independent trade union in Communist Poland. Solidarność created a broad, nonviolent, anticommunist social movement. The following years saw bitter fights, and the PPR was ultimately forced to hold (semi-)free elections in 1989. --&gt;
 
----
+&lt;!-- &gt; Hager and Krakowski (2022, page 567) --&gt;
+&lt;!-- ]] --&gt;
+&lt;!-- --- --&gt;
 
-.left-column[
-&lt;img src="https://dzieje.pl/sites/default/files/styles/open_article_750x0_/public/201204/solidarnosc_tkk2.jpg?itok=YpPQeO8f" width="85%" style="display: block; margin: auto;" /&gt;&lt;img src="https://edupolis.pl/wp-content/uploads/2021/05/Solidarnosc.jpg" width="85%" style="display: block; margin: auto;" /&gt;
+&lt;!-- .left-column[ --&gt;
+&lt;!-- ```{tikz, DAG_Hager, echo = FALSE, out.width='80%'} --&gt;
+&lt;!-- \usetikzlibrary{shapes,decorations,arrows,calc,arrows.meta,fit,positioning,quotes} --&gt;
+&lt;!-- \tikzset{ --&gt;
+&lt;!--   -Latex,auto,node distance =1 cm and 1 cm,semithick, --&gt;
+&lt;!--   state/.style ={ellipse, draw, minimum width = 0.7 cm}, --&gt;
+&lt;!--   point/.style = {circle, draw, inner sep=0.04cm,fill,node contents={}}, --&gt;
+&lt;!--   bidirected/.style={Latex-Latex,dashed}, --&gt;
+&lt;!--   el/.style = {inner sep=2pt, align=left, sloped} --&gt;
+&lt;!-- } --&gt;
 
+&lt;!-- \begin{tikzpicture} --&gt;
+&lt;!-- \sffamily --&gt;
+&lt;!-- \node[state, align = center] (1) at (0,0) {Surveillance}; --&gt;
+&lt;!-- \node[state, align = center] (2) [right = of 1] {Resistance}; --&gt;
 
-]
+&lt;!-- \path (1) edge (2); --&gt;
+&lt;!-- \end{tikzpicture} --&gt;
+&lt;!-- ``` --&gt;
 
-.right-column[.font80[
-&gt; Following World War II, in 1947 the Soviet Union imposed a Marxist–Leninist government in Poland, called the Polish People’s Republic (henceforth, PPR). [...] 
+&lt;!-- ```{r, echo = FALSE, out.width='85%'} --&gt;
+&lt;!-- knitr::include_graphics('https://dzieje.pl/sites/default/files/styles/open_article_750x0_/public/201204/solidarnosc_tkk2.jpg?itok=YpPQeO8f') --&gt;
+&lt;!-- knitr::include_graphics('https://edupolis.pl/wp-content/uploads/2021/05/Solidarnosc.jpg') --&gt;
+&lt;!-- ``` --&gt;
+&lt;!-- ] --&gt;
+
+&lt;!-- .right-column[ --&gt;
+&lt;!-- ```{r, echo = FALSE, out.width='40%'} --&gt;
+&lt;!-- knitr::include_graphics('https://static.cambridge.org/binary/version/id/urn:cambridge.org:id:binary:20220425072255995-0362:S0003055421000770:S0003055421000770_fig1.png') --&gt;
+&lt;!-- ``` --&gt;
 
+&lt;!-- .font70[ --&gt;
+&lt;!-- &gt; To obtain these data, we digitized archival sources from the Institute of National Remembrance (IPN, Polish acronym), which lists all secret police officers who operated in the region. [...] The resulting variable, *Surveillance*, indicates the number of officers per year and municipality from 1945 to 1989.  --&gt;
 
-&gt; By the early 1980s, protests organized by workers of state firms led to the creation of the Independent and Self-Governing Trade Union Solidarity (henceforth, Solidarność), the first independent trade union in Communist Poland. Solidarność created a broad, nonviolent, anticommunist social movement. The following years saw bitter fights, and the PPR was ultimately forced to hold (semi-)free elections in 1989.
+&lt;!-- &gt; Hager and Krakowski (2022, page 567) --&gt;
+&lt;!-- ]] --&gt;
 
-&gt; Hager and Krakowski (2022, page 567)
-]]
----
+&lt;!-- --- --&gt;
 
-.left-column[
-&lt;img src="10-IV-2SLS_files/figure-html/DAG_Hager-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+&lt;!-- .left-column[ --&gt;
+&lt;!-- ```{tikz, ref.label = "DAG_Hager", echo = FALSE, out.width='80%'} --&gt;
 
-&lt;img src="https://dzieje.pl/sites/default/files/styles/open_article_750x0_/public/201204/solidarnosc_tkk2.jpg?itok=YpPQeO8f" width="85%" style="display: block; margin: auto;" /&gt;&lt;img src="https://edupolis.pl/wp-content/uploads/2021/05/Solidarnosc.jpg" width="85%" style="display: block; margin: auto;" /&gt;
-]
+&lt;!-- ``` --&gt;
 
-.right-column[
-&lt;img src="https://static.cambridge.org/binary/version/id/urn:cambridge.org:id:binary:20220425072255995-0362:S0003055421000770:S0003055421000770_fig1.png" width="40%" style="display: block; margin: auto;" /&gt;
+&lt;!-- ```{r, echo = FALSE, out.width='85%'} --&gt;
+&lt;!-- knitr::include_graphics('https://dzieje.pl/sites/default/files/styles/open_article_750x0_/public/201204/solidarnosc_tkk2.jpg?itok=YpPQeO8f') --&gt;
+&lt;!-- knitr::include_graphics('https://edupolis.pl/wp-content/uploads/2021/05/Solidarnosc.jpg') --&gt;
+&lt;!-- ``` --&gt;
+&lt;!-- ] --&gt;
+
+&lt;!-- .right-column[ --&gt;
+&lt;!-- ```{r, echo = FALSE, out.width='40%'} --&gt;
+&lt;!-- knitr::include_graphics('https://static.cambridge.org/binary/version/id/urn:cambridge.org:id:binary-alt:20220425072512-79013-optimisedImage-S0003055421000770_fig2.jpg') --&gt;
+&lt;!-- ``` --&gt;
+
+&lt;!-- .font70[ --&gt;
+&lt;!-- &gt; We measure antiregime protests by geocoding all Solidarność strikes from 1980 to 1986 (Table A.1). Four reasons make the strikes a particularly relevant outcome. First and most important, Solidarność ultimately led to the toppling of the PPR. [...] To measure Solidarność strikes, we consulted archival sources by Niezależny Samorządny Zwiazek Zawodowy (NSZZ) Solidarność 1980–1989. --&gt;
+
+&lt;!-- &gt; Hager and Krakowski (2022, page 568) --&gt;
+
+&lt;!-- ]] --&gt;
+
+&lt;!-- --- --&gt;
 
-.font70[
-&gt; To obtain these data, we digitized archival sources from the Institute of National Remembrance (IPN, Polish acronym), which lists all secret police officers who operated in the region. [...] The resulting variable, *Surveillance*, indicates the number of officers per year and municipality from 1945 to 1989. 
+&lt;!-- .left-column[ --&gt;
+&lt;!-- ```{tikz, ref.label = "DAG_Hager", echo = FALSE, out.width='80%'} --&gt;
 
-&gt; Hager and Krakowski (2022, page 567)
-]]
+&lt;!-- ``` --&gt;
+
+&lt;!-- ```{r, echo = FALSE, out.width='85%'} --&gt;
+&lt;!-- knitr::include_graphics('https://dzieje.pl/sites/default/files/styles/open_article_750x0_/public/201204/solidarnosc_tkk2.jpg?itok=YpPQeO8f') --&gt;
+&lt;!-- knitr::include_graphics('https://edupolis.pl/wp-content/uploads/2021/05/Solidarnosc.jpg') --&gt;
+&lt;!-- ``` --&gt;
+&lt;!-- ] --&gt;
+
+&lt;!-- .right-column[ --&gt;
+&lt;!-- .center[Multiple OLS] --&gt;
+&lt;!-- ```{r, echo = FALSE, out.width='100%'} --&gt;
+&lt;!-- knitr::include_graphics('./img/Hager1.png') --&gt;
+&lt;!-- ``` --&gt;
+&lt;!-- ] --&gt;
+
+&lt;!-- --- --&gt;
+
+&lt;!-- .left-column[ --&gt;
+&lt;!-- ```{tikz, DAG_Hager2, echo = FALSE, out.width='80%'} --&gt;
+&lt;!-- \usetikzlibrary{shapes,decorations,arrows,calc,arrows.meta,fit,positioning,quotes} --&gt;
+&lt;!-- \tikzset{ --&gt;
+&lt;!--   -Latex,auto,node distance =1 cm and 1 cm,semithick, --&gt;
+&lt;!--   state/.style ={ellipse, draw, minimum width = 0.7 cm}, --&gt;
+&lt;!--   point/.style = {circle, draw, inner sep=0.04cm,fill,node contents={}}, --&gt;
+&lt;!--   bidirected/.style={Latex-Latex,dashed}, --&gt;
+&lt;!--   el/.style = {inner sep=2pt, align=left, sloped} --&gt;
+&lt;!-- } --&gt;
+
+&lt;!-- \begin{tikzpicture} --&gt;
+&lt;!-- \sffamily --&gt;
+&lt;!-- \node[state, align = center] (1) at (0,0) {Surveillance}; --&gt;
+&lt;!-- \node[state, align = center] (2) [right = of 1] {Resistance}; --&gt;
+&lt;!-- \node[state, align = center] (3) [red, dashed, above = of 1] {$C?$}; --&gt;
+
+&lt;!-- \path (1) edge (2); --&gt;
+&lt;!-- \path (3) edge [red, dashed] (1); --&gt;
+&lt;!-- \path (3) edge [red, dashed] (2); --&gt;
+&lt;!-- \end{tikzpicture} --&gt;
+&lt;!-- ``` --&gt;
+
+&lt;!-- ```{r, echo = FALSE, out.width='70%'} --&gt;
+&lt;!-- knitr::include_graphics('https://dzieje.pl/sites/default/files/styles/open_article_750x0_/public/201204/solidarnosc_tkk2.jpg?itok=YpPQeO8f') --&gt;
+&lt;!-- knitr::include_graphics('https://edupolis.pl/wp-content/uploads/2021/05/Solidarnosc.jpg') --&gt;
+&lt;!-- ``` --&gt;
+
+&lt;!-- .content-box-green[ --&gt;
+&lt;!-- Why might these results not be causal? --&gt;
+&lt;!-- ] --&gt;
+&lt;!-- ] --&gt;
+
+&lt;!-- .right-column[ --&gt;
+&lt;!-- .center[Multiple OLS] --&gt;
+&lt;!-- ```{r, echo = FALSE, out.width='100%'} --&gt;
+&lt;!-- knitr::include_graphics('./img/Hager1.png') --&gt;
+&lt;!-- ``` --&gt;
+&lt;!-- ] --&gt;
+
+&lt;!-- --- --&gt;
+
+&lt;!-- .left-column[ --&gt;
+&lt;!-- ```{tikz, ref.label = "DAG_Hager2", echo = FALSE, out.width='80%'} --&gt;
+
+&lt;!-- ``` --&gt;
+
+&lt;!-- ```{r, echo = FALSE, out.width='70%'} --&gt;
+&lt;!-- knitr::include_graphics('https://dzieje.pl/sites/default/files/styles/open_article_750x0_/public/201204/solidarnosc_tkk2.jpg?itok=YpPQeO8f') --&gt;
+&lt;!-- knitr::include_graphics('https://edupolis.pl/wp-content/uploads/2021/05/Solidarnosc.jpg') --&gt;
+&lt;!-- ``` --&gt;
 
----
-
-.left-column[
-&lt;img src="10-IV-2SLS_files/figure-html/unnamed-chunk-24-1.png" width="80%" style="display: block; margin: auto;" /&gt;
-
-&lt;img src="https://dzieje.pl/sites/default/files/styles/open_article_750x0_/public/201204/solidarnosc_tkk2.jpg?itok=YpPQeO8f" width="85%" style="display: block; margin: auto;" /&gt;&lt;img src="https://edupolis.pl/wp-content/uploads/2021/05/Solidarnosc.jpg" width="85%" style="display: block; margin: auto;" /&gt;
-]
-
-.right-column[
-&lt;img src="https://static.cambridge.org/binary/version/id/urn:cambridge.org:id:binary-alt:20220425072512-79013-optimisedImage-S0003055421000770_fig2.jpg" width="40%" style="display: block; margin: auto;" /&gt;
-
-.font70[
-&gt; We measure antiregime protests by geocoding all Solidarność strikes from 1980 to 1986 (Table A.1). Four reasons make the strikes a particularly relevant outcome. First and most important, Solidarność ultimately led to the toppling of the PPR. [...] To measure Solidarność strikes, we consulted archival sources by Niezależny Samorządny Zwiazek Zawodowy (NSZZ) Solidarność 1980–1989.
-
-&gt; Hager and Krakowski (2022, page 568)
-
-]]
-
----
-
-.left-column[
-&lt;img src="10-IV-2SLS_files/figure-html/unnamed-chunk-27-1.png" width="80%" style="display: block; margin: auto;" /&gt;
-
-&lt;img src="https://dzieje.pl/sites/default/files/styles/open_article_750x0_/public/201204/solidarnosc_tkk2.jpg?itok=YpPQeO8f" width="85%" style="display: block; margin: auto;" /&gt;&lt;img src="https://edupolis.pl/wp-content/uploads/2021/05/Solidarnosc.jpg" width="85%" style="display: block; margin: auto;" /&gt;
-]
-
-.right-column[
-.center[Multiple OLS]
-&lt;img src="./img/Hager1.png" width="100%" style="display: block; margin: auto;" /&gt;
-]
-
----
-
-.left-column[
-&lt;img src="10-IV-2SLS_files/figure-html/DAG_Hager2-1.png" width="80%" style="display: block; margin: auto;" /&gt;
-
-&lt;img src="https://dzieje.pl/sites/default/files/styles/open_article_750x0_/public/201204/solidarnosc_tkk2.jpg?itok=YpPQeO8f" width="70%" style="display: block; margin: auto;" /&gt;&lt;img src="https://edupolis.pl/wp-content/uploads/2021/05/Solidarnosc.jpg" width="70%" style="display: block; margin: auto;" /&gt;
-
-.content-box-green[
-Why might these results not be causal?
-]
-]
-
-.right-column[
-.center[Multiple OLS]
-&lt;img src="./img/Hager1.png" width="100%" style="display: block; margin: auto;" /&gt;
-]
-
----
-
-.left-column[
-&lt;img src="10-IV-2SLS_files/figure-html/unnamed-chunk-32-1.png" width="80%" style="display: block; margin: auto;" /&gt;
-
-&lt;img src="https://dzieje.pl/sites/default/files/styles/open_article_750x0_/public/201204/solidarnosc_tkk2.jpg?itok=YpPQeO8f" width="70%" style="display: block; margin: auto;" /&gt;&lt;img src="https://edupolis.pl/wp-content/uploads/2021/05/Solidarnosc.jpg" width="70%" style="display: block; margin: auto;" /&gt;
-
-.content-box-green[
-Why might these results not be causal?
-]
-]
-
-.right-column[
-.center[Multiple OLS]
-&lt;img src="./img/Hager3.png" width="23%" style="display: block; margin: auto;" /&gt;
-]
-
----
-layout: true
-class: clear
-# Hager and Krakowski (2022) had an idea
-
----
-
-.push-left[
-&lt;img src="https://images.fineartamerica.com/images/artworkimages/mediumlarge/2/the-confession-1838-detail-giuseppe-molteni.jpg" width="60%" style="display: block; margin: auto;" /&gt;
-
-.font70[
-&gt; Beginning in 1946, the Polish People’s Republic made a concerted effort to turn Catholic priests into agents of the secret police. [...] 
-
-&gt; Important for our case, corrupted priests were crucial in the regime’s attempt to recruit additional spies and agents. The priests used confessions to collect compromising information on parishioners (Żurek Reference Żurek2009, 22, 66, 68).
-
-&gt; Hager and Krakowski (2022, page 571)
-
-]]
-
----
-
-.left-column[
-&lt;img src="https://images.fineartamerica.com/images/artworkimages/mediumlarge/2/the-confession-1838-detail-giuseppe-molteni.jpg" width="100%" style="display: block; margin: auto;" /&gt;
-
-.font70[
-&gt; Important for our case, corrupted priests were crucial in the regime’s attempt to recruit additional spies and agents.
-
-&gt; Hager and Krakowski (2022, page 571)
-
-]]
-
-.right-column[
-&lt;img src="./img/Hager2.png" width="100%" style="display: block; margin: auto;" /&gt;
-
-.font70[
-&gt; we exploit the fact that the placement of Catholic priests—who were then turned into spies—is arguably exogenous. To use corrupted priests as an instrumental variable for surveillance, we must invoke five assumptions. Below, we focus on two particularly important assumptions: exogeneity and excludability.
-
-&gt; Hager and Krakowski (2022, page 571)
-]]
-
----
-
-.right-column[
-&lt;img src="./img/Hager2.png" width="100%" style="display: block; margin: auto;" /&gt;
-
-.font70[
-&gt; we exploit the fact that the placement of Catholic priests—who were then turned into spies—is arguably exogenous. To use corrupted priests as an instrumental variable for surveillance, we must invoke five assumptions. Below, we focus on two particularly important assumptions: exogeneity and excludability.
-
-&gt; Hager and Krakowski (2022, page 571)
-]]
-
-.left-column[
-&lt;img src="https://static.cambridge.org/binary/version/id/urn:cambridge.org:id:binary-alt:20220425072512-26492-optimisedImage-S0003055421000770_tab2.jpg" width="70%" style="display: block; margin: auto;" /&gt;
-]
-
----
-
-.push-right[
-&lt;img src="./img/Hager2.png" width="100%" style="display: block; margin: auto;" /&gt;
-.font70[
-&gt; Important for our case, corrupted priests were crucial in the regime’s attempt to recruit additional spies and agents.
-
-&gt; Hager and Krakowski (2022, page 571)
-]]
-
-.push-left[
-&lt;img src="./img/Hager4.png" width="100%" style="display: block; margin: auto;" /&gt;
-
-]
-
----
-
-.push-right[
-&lt;img src="./img/Hager2.png" width="100%" style="display: block; margin: auto;" /&gt;
-]
-
-.push-left[
-&lt;img src="./img/Hager5.png" width="90%" style="display: block; margin: auto;" /&gt;
-]
+&lt;!-- .content-box-green[ --&gt;
+&lt;!-- Why might these results not be causal? --&gt;
+&lt;!-- ] --&gt;
+&lt;!-- ] --&gt;
+
+&lt;!-- .right-column[ --&gt;
+&lt;!-- .center[Multiple OLS] --&gt;
+&lt;!-- ```{r, echo = FALSE, out.width='23%'} --&gt;
+&lt;!-- knitr::include_graphics('./img/Hager3.png') --&gt;
+&lt;!-- ``` --&gt;
+&lt;!-- ] --&gt;
+
+&lt;!-- --- --&gt;
+&lt;!-- layout: true --&gt;
+&lt;!-- class: clear --&gt;
+&lt;!-- # Hager and Krakowski (2022) had an idea --&gt;
+
+&lt;!-- --- --&gt;
+
+&lt;!-- .push-left[ --&gt;
+&lt;!-- ```{r, echo = FALSE, out.width='60%'} --&gt;
+&lt;!-- knitr::include_graphics('https://images.fineartamerica.com/images/artworkimages/mediumlarge/2/the-confession-1838-detail-giuseppe-molteni.jpg') --&gt;
+&lt;!-- ``` --&gt;
+
+&lt;!-- .font70[ --&gt;
+&lt;!-- &gt; Beginning in 1946, the Polish People’s Republic made a concerted effort to turn Catholic priests into agents of the secret police. [...]  --&gt;
+
+&lt;!-- &gt; Important for our case, corrupted priests were crucial in the regime’s attempt to recruit additional spies and agents. The priests used confessions to collect compromising information on parishioners (Żurek Reference Żurek2009, 22, 66, 68). --&gt;
+
+&lt;!-- &gt; Hager and Krakowski (2022, page 571) --&gt;
+
+&lt;!-- ]] --&gt;
+
+&lt;!-- --- --&gt;
+
+&lt;!-- .left-column[ --&gt;
+&lt;!-- ```{r, echo = FALSE, out.width='100%'} --&gt;
+&lt;!-- knitr::include_graphics('https://images.fineartamerica.com/images/artworkimages/mediumlarge/2/the-confession-1838-detail-giuseppe-molteni.jpg') --&gt;
+&lt;!-- ``` --&gt;
+
+&lt;!-- .font70[ --&gt;
+&lt;!-- &gt; Important for our case, corrupted priests were crucial in the regime’s attempt to recruit additional spies and agents. --&gt;
+
+&lt;!-- &gt; Hager and Krakowski (2022, page 571) --&gt;
+
+&lt;!-- ]] --&gt;
+
+&lt;!-- .right-column[ --&gt;
+&lt;!-- ```{r, echo = FALSE, out.width='100%'} --&gt;
+&lt;!-- knitr::include_graphics('./img/Hager2.png') --&gt;
+&lt;!-- ``` --&gt;
+
+&lt;!-- .font70[ --&gt;
+&lt;!-- &gt; we exploit the fact that the placement of Catholic priests—who were then turned into spies—is arguably exogenous. To use corrupted priests as an instrumental variable for surveillance, we must invoke five assumptions. Below, we focus on two particularly important assumptions: exogeneity and excludability. --&gt;
+
+&lt;!-- &gt; Hager and Krakowski (2022, page 571) --&gt;
+&lt;!-- ]] --&gt;
+
+&lt;!-- --- --&gt;
+
+&lt;!-- .right-column[ --&gt;
+&lt;!-- ```{r, echo = FALSE, out.width='100%'} --&gt;
+&lt;!-- knitr::include_graphics('./img/Hager2.png') --&gt;
+&lt;!-- ``` --&gt;
+
+&lt;!-- .font70[ --&gt;
+&lt;!-- &gt; we exploit the fact that the placement of Catholic priests—who were then turned into spies—is arguably exogenous. To use corrupted priests as an instrumental variable for surveillance, we must invoke five assumptions. Below, we focus on two particularly important assumptions: exogeneity and excludability. --&gt;
+
+&lt;!-- &gt; Hager and Krakowski (2022, page 571) --&gt;
+&lt;!-- ]] --&gt;
+
+&lt;!-- .left-column[ --&gt;
+&lt;!-- ```{r, echo = FALSE, out.width='70%'} --&gt;
+&lt;!-- knitr::include_graphics('https://static.cambridge.org/binary/version/id/urn:cambridge.org:id:binary-alt:20220425072512-26492-optimisedImage-S0003055421000770_tab2.jpg') --&gt;
+&lt;!-- ``` --&gt;
+&lt;!-- ] --&gt;
+
+&lt;!-- --- --&gt;
+
+&lt;!-- .push-right[ --&gt;
+&lt;!-- ```{r, echo = FALSE, out.width='100%'} --&gt;
+&lt;!-- knitr::include_graphics('./img/Hager2.png') --&gt;
+&lt;!-- ``` --&gt;
+&lt;!-- .font70[ --&gt;
+&lt;!-- &gt; Important for our case, corrupted priests were crucial in the regime’s attempt to recruit additional spies and agents. --&gt;
+
+&lt;!-- &gt; Hager and Krakowski (2022, page 571) --&gt;
+&lt;!-- ]] --&gt;
+
+&lt;!-- .push-left[ --&gt;
+&lt;!-- ```{r, echo = FALSE, out.width='100%'} --&gt;
+&lt;!-- knitr::include_graphics('./img/Hager4.png') --&gt;
+&lt;!-- ``` --&gt;
+
+&lt;!-- ] --&gt;
+
+&lt;!-- --- --&gt;
+
+&lt;!-- .push-right[ --&gt;
+&lt;!-- ```{r, echo = FALSE, out.width='100%'} --&gt;
+&lt;!-- knitr::include_graphics('./img/Hager2.png') --&gt;
+&lt;!-- ``` --&gt;
+&lt;!-- ] --&gt;
+
+&lt;!-- .push-left[ --&gt;
+&lt;!-- ```{r, echo = FALSE, out.width='90%'} --&gt;
+&lt;!-- knitr::include_graphics('./img/Hager5.png') --&gt;
+&lt;!-- ``` --&gt;
+&lt;!-- ] --&gt;
 
 ---
 layout: false
@@ -944,11 +1932,11 @@ Karlson, K. and R. Landersø (2021). "The Making and Unmaking of Opportunity: Ed
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="../template/remark-latest.min.js"></script>
 <script>var slideshow = remark.create({
-"highlightLanguage": "r",
-"highlightStyle": "zenburn",
-"highlightLines": true,
-"countIncrementalSlides": false,
-"ratio": "16:9"
+  "highlightLanguage": "r",
+  "highlightStyle": "zenburn",
+  "highlightLines": true,
+  "countIncrementalSlides": false,
+  "ratio": "16:9"
 });
 if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
   window.dispatchEvent(new Event('resize'));
