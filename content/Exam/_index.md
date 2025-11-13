@@ -15,6 +15,8 @@ To successfully complete this course, you will need to fulfill two requirements:
 # Exam
 This examination consists of two primary components. The first component requires a statistical analysis of a provided dataset to test a set of pre-registered hypotheses. The second component requires you to propose an alternative research design to test the principal hypothesis.
 
+![](/img/Pictures.png)
+
 - Pre-registrations: [Link to Pre-registration 1](https://osf.io/76usw/overview?view_only=c7fdbbb8e2eb4e77b072544579fb2aa1) and [Link to Pre-registration 2](https://osf.io/g8n4v/overview?view_only=97f3c8ec393d470085283b57a272683a)
 
 - Questionnaire: You can find a link to the questionnaire in the pre-registration.
@@ -53,10 +55,10 @@ First, briefly discuss the primary limitations of the original survey experiment
 
 ## Submission and Formatting Requirements
 - The deadline for submission is 12 January 2026 at 12 am (noon).
-- The scope of the assignment is max 10 pages of 2400 characters each, if it is done by one student. 5 pages are added per student if the assignment is done in groups. A reasonable (but in no way binding) allocation of a 15-page assignment could be the following: introduction (2 pages), analytical framework (4 pages), methodology/data/variables (4 pages), empirical analysis (4 pages) and conclusion (1 page).
+- The scope of the assignment is max 10 pages of 2400 characters each, if it is done by one student. 5 pages are added per student if the assignment is done in groups.
 - You must not write your name in the assignment – all exam papers are anonymous.
 - You must remember to enclose a declaration on the use of AI.
-- Familiarize yourself with the rules regarding the use of syllabus and petitum (external texts chosen by you). Note that (a) you must use and cite at least 25% of the syllabus in your assignment, (b) syllabus references may constitute a maximum of 2/3 of the total references and (c) petitum must constitute at least 1/3 of the total references.
+- Familiarize yourself with the rules regarding the use of syllabus and petitum (external texts chosen by you). Note that (a) you must use and cite at least 25% of the syllabus in your assignment, (b) syllabus references may constitute a maximum of 2/3 of the total references and (c) petitum must constitute at least 1/3 of the total references. Two books books count as the syllabus pensum, so citing one of of them fulfills the pensum requirement.
 
 ## Advisory Guide for Paper Organization
 This section provides general advice on structuring your exam paper. The main objective is to help you allocate your space effectively to the core tasks: (1) Introduction, (2) Analysis of the experiment, (3) Proposal of the alternative design, and (4) Conclusion. A reasonable (but non-binding) page allocation for a 10-page group assignment might be:
