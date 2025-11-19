@@ -46,8 +46,8 @@ xaringanExtra::use_panelset()
 
 .font130[.center[Use data to .alert[discover patterns], <br> and the social mechanisms that bring them about.]]
 
-```{r, echo = FALSE, out.width='70%', fig.align='center'}
-knitr::include_graphics('https://liu.se/-/media/istock-501261958.jpg?mw=1120&mh=1120&hash=DA8977CCE6A6E600AE80A40CFEE771C9')
+```{r, echo = FALSE, out.width='50%', fig.align='center'}
+knitr::include_graphics('https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgykJbXZbwIX-nd1oVOyzmEfj09ho8aQ4HBhfMH27t6YeTYSBevfrD2DFTEQSe7e3UwaVnv-fAJAOVpjW2pSGfG2QNrgHfkTmFtRWK4VXl6KmWK6vVlLud0DRU6lFXAqBF7iij420oOTLFh/s1600/photo.JPG')
 ```
 
 ---
@@ -138,7 +138,7 @@ ols_mult_2 <- lm_robust(imwbcnt ~ cntry + eduyrs + agea,
 
 modelsummary(list("Xeno" = ols_bi, "Xeno" = ols_mult_1, "Xeno" = ols_mult_2),
              gof_map = c("nobs", "r.squared"), 
-             stars = TRUE, output = "kableExtra")
+             stars = TRUE, output = "gt")
 ```
 ]]
 
@@ -147,8 +147,7 @@ modelsummary(list("Xeno" = ols_bi, "Xeno" = ols_mult_1, "Xeno" = ols_mult_2),
 bind_rows( # Combine estimate results into one tibble,
   ols_bi %>% tidy(),
   ols_mult_1 %>% tidy(),
-  ols_mult_2 %>% tidy(),
-  .id = "model") %>%
+  ols_mult_2 %>% tidy(), .id = "model") %>%
   filter(term == "cntryBulgaria") %>% # Keep country estimates,
   mutate( # Rename the model variable,
     term = case_when(
@@ -247,6 +246,7 @@ plot_ly(x=~x1.seq, y=~x2.seq, z=~z, type="surface") %>%
 .panel[.panel-name[Plot]
 .push-left[
 
+.font90[
 .content-box-blue[
 Two predictors $X_{1i}$ and $X_{2i}$ are **"conditional on each other"** or **"interact"**, when the association between the outcome $Y_{i}$ and one of the predictors depends on values of the other.
 ]
@@ -255,9 +255,10 @@ Two predictors $X_{1i}$ and $X_{2i}$ are **"conditional on each other"** or **"i
   + .backgrnote[That is, the association between education and xenophobia depends on the country people live in.]
 
 
-- The difference in average xenophobia between Danes and Bulgarians is larger among better educated people.
+- The difference in average xenophobia between people living in Denmark or Bulgarian is larger among better educated people.
   + .backgrnote[That is, the association between country and xenophobia depends on people's level of education.]
-]
+]]
+
 .push-right[
 ```{r conditional1, fig.height = 4, fig.width = 6, echo = FALSE, out.width='90%'}
 ggplot(data = ESS, aes(y = imwbcnt, x = eduyrs, color = cntry)) +
@@ -287,11 +288,9 @@ $$Y_{i} = \alpha + \beta_{1} X_{1} + \beta_{2}X_{2} + \color{red}{\beta_{3}(X_{1
 ```{r inter}
 ols_inter <- lm_robust(imwbcnt ~ cntry*eduyrs, #<<
                        data = ESS, weights = pspwght)
-
 # Report results in a regression table
 modelsummary(list("Xeno" = ols_mult_1, "Xeno" = ols_inter),
-             gof_map = c("nobs", "r.squared"), 
-             stars = TRUE, output = "kableExtra")
+             gof_map = c("nobs", "r.squared"), stars = TRUE, output = "gt")
 ```
 ]]
 
@@ -343,8 +342,7 @@ ols_inter2 <- lm_robust(imwbcnt ~ cntry + eduyrs + intr_trm,
                        data = ESS, weights = pspwght)
 # Report results in a regression table
 modelsummary(list("Xeno" = ols_inter, "Xeno" = ols_inter2),
-             gof_map = c("nobs", "r.squared"), 
-             stars = TRUE, output = "kableExtra")
+             gof_map = c("nobs", "r.squared"), stars = TRUE, output = "gt")
 ```
 ]]
 
@@ -476,7 +474,7 @@ ols_inter3 <- lm_robust(imwbcnt ~ cntry*mc_eduyrs,
 # Report results in a regression table
 modelsummary(list("Xeno" = ols_inter, "Xeno" = ols_inter3),
              gof_map = c("nobs", "r.squared"), 
-             stars = TRUE, output = "kableExtra")
+             stars = TRUE, output = "gt")
 ```
 ]
 
@@ -520,12 +518,12 @@ class: clear
 # Interpretation .font70[The "Interaction term" *alters* the main terms]
 
 .push-left[
-The interaction term, $\beta_3(X_{1i}\times X_{2i})$, can be interpreted in two ways
+Interaction terms, $\beta_3(X_{1i}\times X_{2i})$, have two interpretations!
 ```{r inter3, echo = FALSE}
 # Report results in a regression table
 modelsummary(list("Xeno" = ols_inter3),
              gof_map = c("nobs", "r.squared"), 
-             stars = TRUE, output = "kableExtra")
+             stars = TRUE, output = "gt")
 ```
 ]
 
@@ -569,7 +567,7 @@ ols_inter <- lm_robust(imwbcnt ~ mc_eduyrs*gndr,
 # Report results in a regression table
 modelsummary(list("Xeno" = ols_inter),
              gof_map = c("nobs", "r.squared"), 
-             stars = TRUE, output = "kableExtra")
+             stars = TRUE, output = "gt")
 ```
 ]]
 .right-column[
@@ -642,7 +640,7 @@ ols_inter4 <- lm_robust(imwbcnt ~ cntry*mc_eduyrs + gndr + agea,
 # Report results in a regression table
 modelsummary(list("Xeno" = ols_inter3, "Xeno" = ols_inter4),
              gof_map = c("nobs", "r.squared"), 
-             stars = TRUE, output = "kableExtra")
+             stars = TRUE, output = "gt")
 ```
 ]
 
@@ -704,7 +702,7 @@ ggplot(data = fict_dat, aes(y = fit, x = mc_eduyrs)) +
 class: inverse middle center
 # Break
 
-<iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'></iframe>
+<iframe src='https://panel.letstimeit.com/instant-timer/15-minute' width='600' height='400' frameborder='0' scrolling='yes'></iframe>
 
 ---
 class: middle clear
@@ -714,7 +712,8 @@ class: middle clear
 knitr::include_graphics('https://www.laserfiche.com/wp-content/uploads/2014/10/femalecoder.jpg')
 ```
 
-<iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'></iframe>
+<iframe src='https://panel.letstimeit.com/instant-timer/20-minute' width='600' height='400' frameborder='0' scrolling='yes'></iframe>
+
 ]
 
 .right-column[
@@ -726,7 +725,7 @@ knitr::include_graphics('https://www.laserfiche.com/wp-content/uploads/2014/10/f
 class: inverse middle center
 # Break
 
-<iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'></iframe>
+<iframe src='https://panel.letstimeit.com/instant-timer/10-minute' width='600' height='400' frameborder='0' scrolling='yes'></iframe>
 
 ---
 class: inverse
@@ -763,60 +762,57 @@ pacman::p_load(
   ggplot2, # beautiful figures,
   wbstats, # download data from Worldbank. Tremendous source of global socio-economic data.
   estimatr, # OLS with robust SE,
-  democracyData, # download democracy data used in the scholarly literature.
+  vdemdata, # Use varieties of democracy data,
   countrycode, # Easy recodings of country names,
   modelsummary, # regression tables with nice layout,
   remotes) # Install beta version packages from GitHub.
 
-# 1. Download Freedom House data for all countries since 1972,
-Dat_citi_rights <- download_fh(verbose = FALSE) %>% 
-  rename(country = fh_country, # rename country ID,
-         citizen_rights = fh_total_reversed, # rename Citizenship rights indicator,
-         date = year) %>% # rename year,
-  mutate(country = case_when( 
-    country == "Vietnam" ~ "Viet Nam", # Rename Vietnam
-    TRUE ~ country)) %>% # Leave all others as they are
-  select(country, date, citizen_rights) # Keep only these 3 variables.
+# 1. Download equality before the law & individual freedom data for all countries since 1972,
+(Dat_vdem <- vdem %>% # The data are part of the package we loaded earlier
+   as_tibble() %>% # turn into a tiblle
+   select(country_name, country_text_id, year, v2xcl_rol) %>%
+   rename(equal_liberty = v2xcl_rol)) # rename liberty variable
 
 # 2. Download poverty data: <US$2.15 per day
-Dat_poverty <- wb_data("SI.POV.DDAY", 
-                        start_date = 1972, end_date = 2024) %>% #<<
-   rename(poverty = SI.POV.DDAY) %>% # rename poverty variable,
-   select(country, date, poverty) %>% # Keep only 3 variables
+(Dat_poverty <- wb_data("SI.POV.DDAY", # Download poverty data: <$2.15 per day, #<<
+                        start_date = 1972, end_date = 2025) %>% #<<
+   rename(poverty = SI.POV.DDAY, # rename poverty variable,
+          year = date, # rename year variable,
+          country_text_id = iso3c) %>% # rename country abbreviation,
+   select(country_text_id, year, country, poverty) %>% # Keep only 3 variables
    drop_na(poverty) %>% # Drop cases with missing data,
-   group_by(country) %>% # Group by country,
-   filter(date == max(date)) %>% # Keep the most recent data per country.
-   ungroup()
+   group_by(country) %>% filter(year == max(year)) %>% ungroup()) # Keep the most recent poverty statistic per country.
 
 # 3. Join Freedom House and Worldbank data
-Dat <- inner_join(Dat_poverty, Dat_citi_rights, by = c("country", "date"))
+(Dat <- inner_join(Dat_poverty, Dat_vdem, by = c("country_text_id", "year")))
 
 # 4. Code socialism index
-Dat <- Dat %>% mutate(socialist = case_when( # Years socialist minus years since not socialist anymore,
-    country == "China" ~ date - 1949,
-    country == "Viet Nam" ~ date - 1945,
-    country == "Algeria" ~ date - 1962,
-    str_detect(country,"Portugal|Bangladesh") ~ date - 1972,
-    country == "Guinea-Bissau" ~ date - 1973, country == "India" ~ date - 1976, 
-    country == "Nicaragua" ~ date - 1979, country == "Sri Lanka" ~ date - 1978,
-    country == "Tanzania" ~ date - 1964, country == "Albania" ~ (1992 - 1944) - (date - 1992),
-    str_detect(country, "Angola|Cabo Verde|Madagascar") ~ (1992 - 1975) - (date - 1992),
-    str_detect(country,"Belarus|Bulgaria") ~ (1990 - 1946) - (date - 1990),
-    str_detect(country, "Benin|Mozambique") ~ (1990 - 1975) - (date - 1990),
-    country == "Chad" ~ (1975 - 1962) - (date - 1975), country == "Congo, Rep." ~ (1992 - 1970) - (date - 1992),
-    country == "Czech Republic" ~ (1990 - 1948) - (date - 1990), country == "Djibouti" ~ (1992 - 1981) - (date - 1992),
-    country == "Ethiopia" ~ (1991 - 1974) - (date - 1991), country == "Ghana" ~ (1966 - 1960) - (date - 1966),
-    country == "Guinea" ~ (1984 - 1958) - (date - 1984), country == "Hungary" ~ (1989 - 1949) - (date - 1989),
-    country == "Iraq" ~ (2005 - 1958) - (date - 2005), country == "Mali" ~ (1991 - 1960) - (date - 1991),
-    country == "Mauritania" ~ (1978 - 1961) - (date - 1978), country == "Mongolia" ~ (1992 - 1924) - (date - 1992),
-    country == "Myanmar" ~ (1988 - 1962) - (date - 1988), country == "Poland" ~ (1989 - 1945) - (date - 1989),
-    country == "Romania" ~ (1989 - 1947) - (date - 1989), country == "Russian Federation" ~ (1991 - 1922) - (date - 1991),
-    country == "Seychelles" ~ (1991 - 1977) - (date - 1991), country == "Senegal" ~ (1981 - 1960) - (date - 1981),
-    country == "Sierra Leone" ~ (1991 - 1978) - (date - 1991), country == "Somalia" ~ (1991 - 1969) - (date - 1991),
-    country == "Sudan" ~ (1985 - 1969) - (date - 1985), country == "Syria" ~ (2012 - 1963) - (date - 2012),
-    country == "Tunisia" ~ (1988 - 1964) - (date - 1988), country == "Ukraine" ~ (1991 - 1919) - (date - 1991),
-    country == "Yemen, Rep." ~ (1991 - 1967) - (date - 1991), country == "Zambia" ~ (1991 - 1973) - (date - 1991),
-    str_detect(country,"Slovenia|Croatia|Serbia|Montenegro|Bosnia and Herzegovina|North Macedonia|Kosovo") ~ (1992 - 1943) - (date - 1992),
+Dat <- Dat %>% mutate(
+  socialist = case_when( # Years socialist minus years since not socialist anymore,
+    country == "China" ~ year - 1949,
+    country == "Viet Nam" ~ year - 1945,
+    country == "Algeria" ~ year - 1962,
+    str_detect(country,"Portugal|Bangladesh") ~ year - 1972,
+    country == "Guinea-Bissau" ~ year - 1973, country == "India" ~ year - 1976, 
+    country == "Nicaragua" ~ year - 1979, country == "Sri Lanka" ~ year - 1978,
+    country == "Tanzania" ~ year - 1964, country == "Albania" ~ (1992 - 1944) - (year - 1992),
+    str_detect(country, "Angola|Cabo Verde|Madagascar") ~ (1992 - 1975) - (year - 1992),
+    str_detect(country,"Belarus|Bulgaria") ~ (1990 - 1946) - (year - 1990),
+    str_detect(country, "Benin|Mozambique") ~ (1990 - 1975) - (year - 1990),
+    country == "Chad" ~ (1975 - 1962) - (year - 1975), country == "Congo, Rep." ~ (1992 - 1970) - (year - 1992),
+    country == "Czech Republic" ~ (1990 - 1948) - (year - 1990), country == "Djibouti" ~ (1992 - 1981) - (year - 1992),
+    country == "Ethiopia" ~ (1991 - 1974) - (year - 1991), country == "Ghana" ~ (1966 - 1960) - (year - 1966),
+    country == "Guinea" ~ (1984 - 1958) - (year - 1984), country == "Hungary" ~ (1989 - 1949) - (year - 1989),
+    country == "Iraq" ~ (2005 - 1958) - (year - 2005), country == "Mali" ~ (1991 - 1960) - (year - 1991),
+    country == "Mauritania" ~ (1978 - 1961) - (year - 1978), country == "Mongolia" ~ (1992 - 1924) - (year - 1992),
+    country == "Myanmar" ~ (1988 - 1962) - (year - 1988), country == "Poland" ~ (1989 - 1945) - (year - 1989),
+    country == "Romania" ~ (1989 - 1947) - (year - 1989), country == "Russian Federation" ~ (1991 - 1922) - (year - 1991),
+    country == "Seychelles" ~ (1991 - 1977) - (year - 1991), country == "Senegal" ~ (1981 - 1960) - (year - 1981),
+    country == "Sierra Leone" ~ (1991 - 1978) - (year - 1991), country == "Somalia" ~ (1991 - 1969) - (year - 1991),
+    country == "Sudan" ~ (1985 - 1969) - (year - 1985), country == "Syria" ~ (2012 - 1963) - (year - 2012),
+    country == "Tunisia" ~ (1988 - 1964) - (year - 1988), country == "Ukraine" ~ (1991 - 1919) - (year - 1991),
+    country == "Yemen, Rep." ~ (1991 - 1967) - (year - 1991), country == "Zambia" ~ (1991 - 1973) - (year - 1991),
+    str_detect(country,"Slovenia|Croatia|Serbia|Montenegro|Bosnia and Herzegovina|North Macedonia|Kosovo") ~ (1992 - 1943) - (year - 1992),
     TRUE ~ 0),
   socialist = case_when( # Min. 5 years given any socialist history,
     socialist != 0 & socialist < 5 ~ 5,
@@ -846,7 +842,7 @@ ggplot(data = Dat,
 .push-right[
 ```{r citizen-corr1, out.width='90%', fig.height = 5, fig.width = 7, results = FALSE, echo = FALSE}
 ggplot(data = Dat, 
-       aes(y = poverty, x = citizen_rights, label = country)) +
+       aes(y = poverty, x = equal_liberty, label = country)) +
   geom_smooth(method = "lm") +
   geom_text() +
   geom_label_repel(data = Dat %>% filter(country == "Denmark"), 
@@ -873,21 +869,21 @@ class: clear
 # Same data as Lecture 2 
 Dat <- Dat %>% mutate( # Mean-center predictors
   mc_socialist = socialist - mean(socialist, na.rm = TRUE),
-  mc_citizen_rights = citizen_rights - mean(citizen_rights, na.rm = TRUE))
+  mc_equal_liberty = equal_liberty - mean(equal_liberty, na.rm = TRUE))
 
 # Multiple OLS
-ols_add <- lm_robust(poverty ~ mc_socialist + mc_citizen_rights, data = Dat)
+ols_add <- lm_robust(poverty ~ mc_socialist + mc_equal_liberty, data = Dat)
 
 # Report results in a regression table
 modelsummary(list("Poverty" = ols_add),
              gof_map = c("nobs", "r.squared"), 
-             stars = TRUE, output = "kableExtra")
+             stars = TRUE, output = "gt")
 ```
 ]
 .push-right[
 ```{r fig.height = 5, fig.width = 5, echo = FALSE, out.width='80%'}
 library(rockchalk)
-plotPlane(ols_add, "mc_citizen_rights", "mc_socialist", pch=16, alty=1,alwd=1, theta=50, phi=10)
+plotPlane(ols_add, "mc_equal_liberty", "mc_socialist", pch=16, alty=1,alwd=1, theta=50, phi=10)
 ```
 ]]
 .panel[.panel-name[Interactions imply non-linearity!]
@@ -896,25 +892,25 @@ plotPlane(ols_add, "mc_citizen_rights", "mc_socialist", pch=16, alty=1,alwd=1, t
 # Same data as Lecture 2 
 Dat <- Dat %>% mutate( # Mean-center predictors
   mc_socialist = socialist - mean(socialist, na.rm = TRUE),
-  mc_citizen_rights = citizen_rights - mean(citizen_rights, na.rm = TRUE))
+  mc_equal_liberty = equal_liberty - mean(equal_liberty, na.rm = TRUE))
 
 # Multiple OLS
-ols_inter <- lm_robust(poverty ~ mc_socialist*mc_citizen_rights, data = Dat)
+ols_inter <- lm_robust(poverty ~ mc_socialist*mc_equal_liberty, data = Dat)
 
 # Report results in a regression table
 modelsummary(list("Poverty" = ols_add, "Poverty" = ols_inter),
              gof_map = c("nobs", "r.squared"), 
-             stars = TRUE, output = "kableExtra")
+             stars = TRUE, output = "gt")
 
 # The 3-D plot
 library(rockchalk)
-plotPlane(ols_inter, "mc_citizen_rights", "mc_socialist", pch=16, alty=1,alwd=1, theta=50, phi=10)
+plotPlane(ols_inter, "mc_equal_liberty", "mc_socialist", pch=16, alty=1,alwd=1, theta=50, phi=10)
 ```
 ]
 
 .push-right[
 ```{r fig.height = 5, fig.width = 5, echo = FALSE, out.width='80%'}
-plotPlane(ols_inter, "mc_citizen_rights", "mc_socialist", pch=16, alty=1,alwd=1, theta=35, phi=20)
+plotPlane(ols_inter, "mc_equal_liberty", "mc_socialist", pch=16, alty=1,alwd=1, theta=35, phi=20)
 ```
 ]]
 .panel[.panel-name[Interpretation]
@@ -926,12 +922,12 @@ plotPlane(ols_inter, "mc_citizen_rights", "mc_socialist", pch=16, alty=1,alwd=1,
 .push-right[
 $\beta_{\text{Socialism}}|\text{Citizen Rights}=0$: At average levels of citizenship rights, socialism is significantly (but only marginally) related to declines in poverty.
 
-$\beta_{\text{Citizen Rights}}|\text{Socialism}=0$: At average levels of socialism, a unit increase in citizenship rights is significantly related to a `r coef(ols_inter)["mc_citizen_rights"]` percentage point decline in poverty.
+$\beta_{\text{Citizen Rights}}|\text{Socialism}=0$: At average levels of socialism, a unit increase in citizenship rights is significantly related to a `r coef(ols_inter)["mc_equal_liberty"]` percentage point decline in poverty.
 
 $$\beta_{\text{Socialism} \times \text{Citizen Rights}}$$
-1) With every unit more citizenship rights, socialism gets `r coef(ols_inter)["mc_socialist:mc_citizen_rights"]` percentage points worse at being related to declines in poverty.
+1) With every unit more citizenship rights, socialism gets `r coef(ols_inter)["mc_socialist:mc_equal_liberty"]` percentage points worse at being related to declines in poverty.
 
-2) With every additional year of socialism, citizenship rights are `r coef(ols_inter)["mc_socialist:mc_citizen_rights"]` percentage points less associated with declines in poverty.
+2) With every additional year of socialism, citizenship rights are `r coef(ols_inter)["mc_socialist:mc_equal_liberty"]` percentage points less associated with declines in poverty.
 
 ]]
 .panel[.panel-name[Code]
