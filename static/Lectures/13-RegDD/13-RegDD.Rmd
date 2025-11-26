@@ -1,5 +1,5 @@
 ---
-title: "Regression Discontinuity Designs"
+title: "Regression Discontinuity Designs (RDD)"
 subtitle: "The causal effect of rules"
 author: "Merlin Schaeffer<br> Department of Sociology"
 #last_edited_by: "Andrew Herman<br> Department of Sociology"
@@ -25,7 +25,8 @@ library(modelr)
 library(webexercises) # Small web-based answer scales.
 library(equatiomatic) # Regression equations from model objects.
 library(essentials)
-library(RDDtools)
+# library(RDDtools)
+library(rdrobust)
 
 options(htmltools.preserve.raw = FALSE, tikzDefaultEngine = "xetex",
         htmltools.dir.version = FALSE, servr.interval = 0.5, width = 115, digits = 3)
@@ -46,10 +47,10 @@ xaringanExtra::use_panelset()
 ```
 # The goal of social science research
 
-.font140[.center[.alert[Use data to discover patterns ("social facts" in Durkheim's terms), <br> and the <ins>social mechanisms that bring them about</ins>.]]]
+.font130[.center[Use data to discover patterns, <br> and the .alert[social mechanisms that bring them about.]]]
 
 ```{r, echo = FALSE, out.width='50%', fig.align='center'}
-knitr::include_graphics('img/emile-durkheim.jpg')
+knitr::include_graphics('https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgykJbXZbwIX-nd1oVOyzmEfj09ho8aQ4HBhfMH27t6YeTYSBevfrD2DFTEQSe7e3UwaVnv-fAJAOVpjW2pSGfG2QNrgHfkTmFtRWK4VXl6KmWK6vVlLud0DRU6lFXAqBF7iij420oOTLFh/s1600/photo.JPG')
 ```
 
 ---
@@ -76,8 +77,8 @@ Application 3: Ethnic discrimination in Access to healthcare and far-right mayor
 knitr::include_graphics('./img/randomization2.png')
 ```
 
-- If we *randomly* divide subjects into treatment and control groups: They come from the same underlying population. 
-  <br> <br> $\rightarrow$ Similar .alert[on average], *in every way*,<br> **including their $Y_{0}$ **!
+- If we .alert[randomly] divide subjects into treatment and control groups: They come from the same underlying population. 
+  <br> <br> $\rightarrow$ Similar on average, *in every way*,<br> **including their $Y_{0}$ **!
   <br> <br> $\rightarrow E[Y_{0i}|D=1] = E[Y_{0i}|D=0]$!
 ]
 
@@ -87,53 +88,50 @@ $$\begin{equation}\begin{split} E & [Y_{1i}|D=1] - E[Y_{0i}|D=0] \\  \\ & = E[\c
 ]
 
 ---
-# The intuition for RDD is different
+# RDD intuition
 
-## With regression discontinuity designs (RDDs) we try leverage artificial thresholds to imitate experimental group assignment
+.push-left[
+.content-box-blue[
+RDD uses .alert[rules] that create (sharp) thresholds on otherwise continuous variables.
+]
 
-Society has all kinds of thresholds where people get different treatment above and below that cut point:
+Societies have all kinds of thresholds that define what people get below and above the cut point.
 
-1. Elections
-  - The person with the most votes in an election gets to be the Mayor
-  - Every other candidate else does not
-2. Pension age
+- Pension age
   - People above a certain age are allowed to withdraw their pension
   - Everyone else has to pay a penalty to do the same thing
-3. Borders
+- Borders
   - People on one side of Øresundsbroen pay one tax rate
   - People on the other side pay another tax rate
+]
+
+.push-right[
+
+```{r, echo = FALSE, out.width='80%', fig.align='center'}
+knitr::include_graphics('https://i0.wp.com/epthinktank.eu/wp-content/uploads/2014/11/11-electoral-threshold.png?fit=300%2C266&ssl=1')
+```
+
+
+.content-box-green[
+Can you think of other examples?
+]]
 
 ---
-# RDD Intuitions
+# RDD intuition
 
-## What if we compared people who fall right on either side of the threshold?
-
-- Assignment isn't random
-- But right at the threshold, maybe it's close to random?
+What if we compared people who fall on either side of the threshold?
 
 ```{r, echo = FALSE, out.width='100%', fig.align='center'}
 knitr::include_graphics('img/RDD_intuition.png')
 ```
 
 ---
-# RDD Intuitions
+# RDD intuition
 
-## But which group you fall into becomes less random the further you get from the threshold
-
-- Someone who loses an election *badly* is probably very different from a person who loses an election by a few votes
-- Someone who is 23 is probably very different from a person who is 64
+But what if we compared people who fall just barely on either side of the threshold?
 
 ```{r, echo = FALSE, out.width='100%', fig.align='center'}
 knitr::include_graphics('img/RDD_intuition2.png')
-```
-
----
-# RDD Intuitions
-
-## So we would really like to compare people just barely on either side of the threshold
-
-```{r, echo = FALSE, out.width='100%', fig.align='center'}
-knitr::include_graphics('img/RDD_intuition3.png')
 ```
 
 
@@ -157,8 +155,10 @@ knitr::include_graphics('https://dam-p-dfi.pqcloud.eu/preview/6XAlSpTzaLfBqzdLvp
 # Let's try our idea
 
 .left-column[
-.content-box-green[
-Let's compare those who are legally too young to drink (>21) to those who are old enough to drink?
+  .content-box-green[
+  What are the advantages and disadvantages of:
+  1. Compare all those who are legally too young to drink (>21) to those who are old enough?
+  2. Compare only those who are legally just too young to drink (>21) to those who are bareley old enough?
 ]]
 
 .right-column[
@@ -170,10 +170,8 @@ pacman::p_load(
   tidyverse, # Data manipulation,
   ggplot2, # beautiful figures,
   estimatr, # OLS with robust SE
-  texreg, # regression tables with nice layout,
-  rdrobust, # Non-parametric regression,
-  RDDtools # easy RDD fitting
-)
+  modelsummary, # regression tables
+  rdrobust) # Non-parametric regression
 
 # Get the Minimum legal drinking age data!
 data("mlda", package = "masteringmetrics")
@@ -181,26 +179,21 @@ mlda <- mlda %>% drop_na()
 mlda # print the tibble.
 ```
 ]]
-.panel[.panel-name[Note]
-- Everything on this slide and the next is done with tidyverse and ggplot2
-- Later we will use the RDDtools package to do the more complex tasks
-- When we do that, it will be much easier to use the plot() command instead of ggplot2
-]
 .panel[.panel-name[Plot]
 ```{r RDD1, out.width='90%', fig.height = 5, fig.width = 8, echo = FALSE}
 mlda <- mlda %>% mutate(
   # Define those who are allowed to drink
   over21 = case_when( 
     agecell >= 21 ~ "Yes",
-    TRUE ~ "No")
-  )
+    TRUE ~ "No"))
 
 ggplot(data = mlda, aes(y = all, x = agecell, color = over21)) +
   geom_point() +
+  geom_vline(xintercept = 21, color = "#e41a1c") +
   theme_minimal() + 
-  scale_color_manual(values = c("red", "blue")) +
+  scale_color_manual(values = c("#984ea3", "#4daf4a")) +
   labs(y = "Nr of deaths among US Americans \n aged 20-22 (1997-2003)",
-       x = "Age in months") +
+       x = "Age in years + months") +
   guides(color = "none")
 ```
 ]
@@ -209,13 +202,12 @@ ggplot(data = mlda, aes(y = all, x = agecell, color = over21)) +
 
 ```
 ]]]
-
 ---
 # Let's try our idea
 
 .left-column[
-.content-box-green[
-So now let's zoom in on the data right around the threshold
+  .content-box-green[
+    So now let's zoom in on the data right around the threshold
 ]]
 
 .right-column[
@@ -324,136 +316,136 @@ plot(
   drinking_rdd_data,
   xlab='Age in months\n', # A little extra white space
   ylab="Nr of deaths among US Americans aged 20-22 (1997-2003)"
-  )
+)
 ```
-]
+  ]
 .panel[.panel-name[Code]
-```{r ref.label = "RDDtools2", out.width='90%', fig.height = 5, fig.width = 8, fig.show = "hide"}
-
-```
+       ```{r ref.label = "RDDtools2", out.width='90%', fig.height = 5, fig.width = 8, fig.show = "hide"}
+       
+       ```
 ]]]
 
 
 ---
-# Implementation
-## Parametric RDD with RDDtools
-
-.left-column[
-.content-box-green[
-Using the R package RDDtools, we can implement all of these models rather easily. The main challenge is just to install it. See Exercise 1 on that point.
-
-**Next, creating a simple linear model without any polynomial terms**
-]]
+  # Implementation
+  ## Parametric RDD with RDDtools
+  
+  .left-column[
+    .content-box-green[
+      Using the R package RDDtools, we can implement all of these models rather easily. The main challenge is just to install it. See Exercise 1 on that point.
+      
+      **Next, creating a simple linear model without any polynomial terms**
+    ]]
 
 .right-column[
-.panelset[
-.panel[.panel-name[Convert data]
-```{r RDDtools3, out.width='90%', fig.height = 5, fig.width = 8}
-# Order refers to the polynomial. Polynomials of order 1 are just normal variables
-# without any exponents.
-# Slope can be set to "same" if we want both sides of the threshold to have the same
-# slope. It can also be set to "separate" if we want to add an interaction term so as
-# to allow the slopes on each side to differ from one another, as described in the textbook.
-rdd_linear <- RDDreg_lm(
-  RDDobject = drinking_rdd_data,
-  order = 1,
-  slope='same'
-  )
-summary(rdd_linear)
-```
-]
-.panel[.panel-name[Plot the estimate]
-```{r RDDtools4, out.width='90%', fig.height = 5, fig.width = 8, echo=FALSE}
-# It's helpful to change the axis labels since it changes the variable names
-# and 'x' and 'y' aren't very informative
-plot(
-  rdd_linear,
-  xlab='Age in months\n', # A little extra white space
-  ylab="Nr of deaths among US Americans aged 20-22 (1997-2003)"
-  )
-```
-]
-.panel[.panel-name[Code]
-```{r ref.label = "RDDtools4", out.width='90%', fig.height = 5, fig.width = 8, fig.show = "hide"}
-
-```
-]]]
+  .panelset[
+    .panel[.panel-name[Convert data]
+           ```{r RDDtools3, out.width='90%', fig.height = 5, fig.width = 8}
+           # Order refers to the polynomial. Polynomials of order 1 are just normal variables
+           # without any exponents.
+           # Slope can be set to "same" if we want both sides of the threshold to have the same
+           # slope. It can also be set to "separate" if we want to add an interaction term so as
+           # to allow the slopes on each side to differ from one another, as described in the textbook.
+           rdd_linear <- RDDreg_lm(
+             RDDobject = drinking_rdd_data,
+             order = 1,
+             slope='same'
+           )
+           summary(rdd_linear)
+           ```
+    ]
+    .panel[.panel-name[Plot the estimate]
+           ```{r RDDtools4, out.width='90%', fig.height = 5, fig.width = 8, echo=FALSE}
+           # It's helpful to change the axis labels since it changes the variable names
+           # and 'x' and 'y' aren't very informative
+           plot(
+             rdd_linear,
+             xlab='Age in months\n', # A little extra white space
+             ylab="Nr of deaths among US Americans aged 20-22 (1997-2003)"
+           )
+           ```
+    ]
+    .panel[.panel-name[Code]
+           ```{r ref.label = "RDDtools4", out.width='90%', fig.height = 5, fig.width = 8, fig.show = "hide"}
+           
+           ```
+    ]]]
 
 
 ---
-# Implementation
-## Parametric RDD with RDDtools
-
-.left-column[
-.content-box-green[
-Using the R package RDDtools, we can implement all of these models rather easily. The main challenge is just to install it. See Exercise 1 on that point.
-
-**Finally, adding in some polynomial terms (power of 2)**
-]]
+  # Implementation
+  ## Parametric RDD with RDDtools
+  
+  .left-column[
+    .content-box-green[
+      Using the R package RDDtools, we can implement all of these models rather easily. The main challenge is just to install it. See Exercise 1 on that point.
+      
+      **Finally, adding in some polynomial terms (power of 2)**
+    ]]
 
 .right-column[
-.panelset[
-.panel[.panel-name[Convert data]
-```{r RDDtools5, out.width='90%', fig.height = 5, fig.width = 8}
-# Order refers to the polynomial. Polynomials of order 1 are just normal variables
-# without any exponents.
-# Slope can be set to "same" if we want both sides of the threshold to have the same
-# slope. It can also be set to "separate" if we want to add an interaction term so as
-# to allow the slopes on each side to differ from one another, as described in the textbook.
-rdd_quadratic <- RDDreg_lm(
-  RDDobject = drinking_rdd_data,
-  order = 2,
-  slope='same'
-  )
-summary(rdd_quadratic)
-```
-]
-.panel[.panel-name[Plot the estimate]
-```{r RDDtools6, out.width='90%', fig.height = 5, fig.width = 8, echo = FALSE}
-# It's helpful to change the axis labels since it changes the variable names
-# and 'x' and 'y' aren't very informative
-plot(
-  rdd_quadratic,
-  xlab='Age in months\n', # A little extra white space
-  ylab="Nr of deaths among US Americans aged 20-22 (1997-2003)"
-  )
-```
-]
-.panel[.panel-name[Code]
-```{r ref.label = "RDDtools6", out.width='90%', fig.height = 5, fig.width = 8, fig.show = "hide"}
-
-```
-]]]
+  .panelset[
+    .panel[.panel-name[Convert data]
+           ```{r RDDtools5, out.width='90%', fig.height = 5, fig.width = 8}
+           # Order refers to the polynomial. Polynomials of order 1 are just normal variables
+           # without any exponents.
+           # Slope can be set to "same" if we want both sides of the threshold to have the same
+           # slope. It can also be set to "separate" if we want to add an interaction term so as
+           # to allow the slopes on each side to differ from one another, as described in the textbook.
+           rdd_quadratic <- RDDreg_lm(
+             RDDobject = drinking_rdd_data,
+             order = 2,
+             slope='same'
+           )
+           summary(rdd_quadratic)
+           ```
+    ]
+    .panel[.panel-name[Plot the estimate]
+           ```{r RDDtools6, out.width='90%', fig.height = 5, fig.width = 8, echo = FALSE}
+           # It's helpful to change the axis labels since it changes the variable names
+           # and 'x' and 'y' aren't very informative
+           plot(
+             rdd_quadratic,
+             xlab='Age in months\n', # A little extra white space
+             ylab="Nr of deaths among US Americans aged 20-22 (1997-2003)"
+           )
+           ```
+    ]
+    .panel[.panel-name[Code]
+           ```{r ref.label = "RDDtools6", out.width='90%', fig.height = 5, fig.width = 8, fig.show = "hide"}
+           
+           ```
+    ]]]
 
 ---
-class: inverse middle center
+  class: inverse middle center
 # Break
 
 <iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'></iframe>
-
----
-class: middle clear
+  
+  ---
+  class: middle clear
 # Time to try Exercise #1
 
 .left-column[
-```{r, echo = FALSE, out.width='80%'}
-knitr::include_graphics('https://www.laserfiche.com/wp-content/uploads/2014/10/femalecoder.jpg')
-```
-
-<iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'></iframe>
+  ```{r, echo = FALSE, out.width='80%'}
+  knitr::include_graphics('https://www.laserfiche.com/wp-content/uploads/2014/10/femalecoder.jpg')
+  ```
+  
+  <iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'></iframe>
 ]
 
 .right-column[
-<br>
-<iframe src='exercise1.html' width='1000' height='600' frameborder='0' scrolling='yes'></iframe>
+  <br>
+    <iframe src='exercise1.html' width='1000' height='600' frameborder='0' scrolling='yes'></iframe>
 ]
 
 ---
-# Reminder!
-
-## We would really like to compare people just barely on either side of the threshold
-
-But so far we are using all the data points, and using polynomials to home in on real effect with our estimates. This lets us keep all the data, which gives us more statistical power. But there is an alternative.
+  # Reminder!
+  
+  ## We would really like to compare people just barely on either side of the threshold
+  
+  But so far we are using all the data points, and using polynomials to home in on real effect with our estimates. This lets us keep all the data, which gives us more statistical power. But there is an alternative.
 
 ```{r, echo = FALSE, out.width='100%', fig.align='center'}
 knitr::include_graphics('img/RDD_intuition3.png')
@@ -461,19 +453,19 @@ knitr::include_graphics('img/RDD_intuition3.png')
 
 
 ---
-# Options
-# For balancing quality with statistical power
-
-1. Parametric Regression Discontinuity: Model the entire dataset, taking into account potential non-linearities in the data
+  # Options
+  # For balancing quality with statistical power
+  
+  1. Parametric Regression Discontinuity: Model the entire dataset, taking into account potential non-linearities in the data
 
 2. Nonparametric Regression Discontinuity: *Only* use data that is within a certain distance of the threshold
 
 ---
-# Nonparametric RDD
-
-## How do we balance the "bandwidth"
-
-If we draw the green box too small (too close to the threshold), we will lose statistical power and won't be able to draw meaningful conclusions. If we draw the green box too big, we get more observations, but we lose the strength of the comparison. We call the width of the box the "bandwidth"
+  # Nonparametric RDD
+  
+  ## How do we balance the "bandwidth"
+  
+  If we draw the green box too small (too close to the threshold), we will lose statistical power and won't be able to draw meaningful conclusions. If we draw the green box too big, we get more observations, but we lose the strength of the comparison. We call the width of the box the "bandwidth"
 
 ```{r, echo = FALSE, out.width='100%', fig.align='center'}
 knitr::include_graphics('img/RDD_intuition3.png')
@@ -550,17 +542,17 @@ There's an effect! But why?
 ]
 
 .push-right[
-```{r, echo = FALSE, out.width='80%', fig.align='center'}
-knitr::include_graphics('./img/women_elected_effects.png')
-```
+  ```{r, echo = FALSE, out.width='80%', fig.align='center'}
+  knitr::include_graphics('./img/women_elected_effects.png')
+  ```
 ]
 
 ---
-# Empirical example #1
-## Women and corruption
-
-.push-left[
-There's an effect! But why?
+  # Empirical example #1
+  ## Women and corruption
+  
+  .push-left[
+    There's an effect! But why?
 
 - Women are socialized differently
 - Women are more risk averse
@@ -599,22 +591,22 @@ Sociologists have argued for 80 years that small early advantages between equals
 
 .content-box-green[
 Does winning the fan vote in time *t* increase a person's chances of winning the fan vote again in time *t+1* and beyond? 
-]
+  ]
 
 ]
 
 .push-right[
-```{r, echo = FALSE, out.width='60%', fig.align='center'}
-knitr::include_graphics('./img/lebron.png')
-```
+  ```{r, echo = FALSE, out.width='60%', fig.align='center'}
+  knitr::include_graphics('./img/lebron.png')
+  ```
 ]
 
 ---
-# Empirical example #2
-## Cumulative advantage in basketball
-
-.push-left[
-There's an effect! But why?
+  # Empirical example #2
+  ## Cumulative advantage in basketball
+  
+  .push-left[
+    There's an effect! But why?
 
 Sociologist Robert Merton argued that this happens because we don't have enough available space to reward *every* deserving person (in his case, it was scientists...think the Nobel prize). We have to make decisions between people who are more or less equal, and rewarding one person at the threshold but not the other creates an actual inequality where there didn't use to be any.
 ]

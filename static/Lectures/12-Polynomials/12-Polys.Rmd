@@ -107,68 +107,63 @@ pacman::p_load(
   modelsummary, # regression tables with nice layout,
   directlabels, # Labels addded to ggplot2 lines,
   rockchalk, # 3d plots of interaction effects,
-  democracyData) # download democracy data used in the scholarly literature.
+  vdemdata) # Use varieties of democracy data
 
 Dat_life <- wb_data(
   # Download Life expectancy and healthcare expenditures data.
   c("SP.DYN.LE00.IN", "SH.XPD.CHEX.PP.CD"), #<<
-  start_date = 2000, end_date = 2024) %>%
+  start_date = 2000, end_date = 2025) %>%
   rename(LifeExpect = SP.DYN.LE00.IN, # rename health variables, #<<
-         HealthExp = SH.XPD.CHEX.PP.CD) %>% #<<
-  select(country, date, LifeExpect, HealthExp) %>% # Keep only 4 variables
+         HealthExp = SH.XPD.CHEX.PP.CD, #<<
+         year = date, # rename year variable,
+         country_text_id = iso3c) %>%
+  select(country_text_id, country, year, LifeExpect, HealthExp) %>% # Keep only 4 variables
   drop_na(LifeExpect, HealthExp) # Drop cases with missing data
 ```
 ]
 .panel[.panel-name[Join citizenship rights]
 ```{r Citizen}
-Dat_citi_rights <- download_fh(verbose = FALSE) %>% # Download Freedom House data for all countries since 1972,
-  rename(country = fh_country, # rename variables,
-         citizen_rights = fh_total_reversed,
-         date = year) %>%
-  mutate(country = case_when( 
-    country == "Vietnam" ~ "Viet Nam", # Rename Vietnam
-    TRUE ~ country)) %>% # Leave all others as they are
-  # Keep only 3 variables.
-  select(country, date, citizen_rights)
+Dat_vdem <- vdem %>% # The data are part of the package we loaded earlier
+   as_tibble() %>% # turn into a tiblle
+   select(country_name, country_text_id, year, v2xcl_rol) %>%
+   rename(equal_liberty = v2xcl_rol) # rename liberty variable
 
 # Join Worldbank Health and Citizenship rights data
-Dat <- inner_join(Dat_life, Dat_citi_rights, by = c("country", "date"))
+Dat <- inner_join(Dat_life, Dat_vdem, by = c("country_text_id", "year"))
 ```
 ]
 .panel[.panel-name[Add socialism]
 .font60[
 ```{r join}
-Dat <- Dat %>% mutate(socialist = case_when( # Years socialist minus years since,
-  country == "China" ~ date - 1949,
-  country == "Viet Nam" ~ date - 1945,
-  country == "Algeria" ~ date - 1962,
-  str_detect(country,"Portugal|Bangladesh") ~ date - 1972,
-  country == "Guinea-Bissau" ~ date - 1973,
-  country == "India" ~ date - 1976,
-  country == "Nicaragua" ~ date - 1979,
-  country == "Sri Lanka" ~ date - 1978,
-  country == "Tanzania" ~ date - 1964,
-  country == "Albania" ~ (1992 - 1944) - (date - 1992),
-  str_detect(country, "Angola|Cabo Verde|Madagascar") ~ (1992 - 1975) - (date - 1992),
-  str_detect(country,"Belarus|Bulgaria") ~ (1990 - 1946) - (date - 1990),
-  str_detect(country, "Benin|Mozambique") ~ (1990 - 1975) - (date - 1990),
-  country == "Chad" ~ (1975 - 1962) - (date - 1975), country == "Congo, Rep." ~ (1992 - 1970) - (date - 1992),
-  country == "Czech Republic" ~ (1990 - 1948) - (date - 1990), country == "Djibouti" ~ (1992 - 1981) - (date - 1992),
-  country == "Ethiopia" ~ (1991 - 1974) - (date - 1991), country == "Ghana" ~ (1966 - 1960) - (date - 1966),
-  country == "Guinea" ~ (1984 - 1958) - (date - 1984), country == "Hungary" ~ (1989 - 1949) - (date - 1989),
-  country == "Iraq" ~ (2005 - 1958) - (date - 2005), country == "Mali" ~ (1991 - 1960) - (date - 1991),
-  country == "Mauritania" ~ (1978 - 1961) - (date - 1978), country == "Mongolia" ~ (1992 - 1924) - (date - 1992),
-  country == "Myanmar" ~ (1988 - 1962) - (date - 1988), country == "Poland" ~ (1989 - 1945) - (date - 1989),
-  country == "Romania" ~ (1989 - 1947) - (date - 1989), country == "Russian Federation" ~ (1991 - 1922) - (date - 1991),
-  country == "Seychelles" ~ (1991 - 1977) - (date - 1991), country == "Senegal" ~ (1981 - 1960) - (date - 1981),
-  country == "Sierra Leone" ~ (1991 - 1978) - (date - 1991), country == "Somalia" ~ (1991 - 1969) - (date - 1991),
-  country == "Sudan" ~ (1985 - 1969) - (date - 1985), country == "Syria" ~ (2012 - 1963) - (date - 2012),
-  country == "Tunisia" ~ (1988 - 1964) - (date - 1988), country == "Ukraine" ~ (1991 - 1919) - (date - 1991),
-  country == "Yemen, Rep." ~ (1991 - 1967) - (date - 1991), country == "Zambia" ~ (1991 - 1973) - (date - 1991),
-  str_detect(country,"Slovenia|Croatia|Serbia|Montenegro|Bosnia and Herzegovina|North Macedonia|Kosovo") ~ (1992 - 1943) - (date - 1992),
-  TRUE ~ 0),
-  socialist = case_when( # Min. 5 years given socialist history,
-    (socialist < 5 & socialist > 0) | socialist < 0 ~ 5,
+Dat <- Dat %>% mutate(
+  socialist = case_when( # Years socialist minus years since not socialist anymore,
+    country == "China" ~ year - 1949,
+    country == "Viet Nam" ~ year - 1945,
+    country == "Algeria" ~ year - 1962,
+    str_detect(country,"Portugal|Bangladesh") ~ year - 1972,
+    country == "Guinea-Bissau" ~ year - 1973, country == "India" ~ year - 1976, 
+    country == "Nicaragua" ~ year - 1979, country == "Sri Lanka" ~ year - 1978,
+    country == "Tanzania" ~ year - 1964, country == "Albania" ~ (1992 - 1944) - (year - 1992),
+    str_detect(country, "Angola|Cabo Verde|Madagascar") ~ (1992 - 1975) - (year - 1992),
+    str_detect(country,"Belarus|Bulgaria") ~ (1990 - 1946) - (year - 1990),
+    str_detect(country, "Benin|Mozambique") ~ (1990 - 1975) - (year - 1990),
+    country == "Chad" ~ (1975 - 1962) - (year - 1975), country == "Congo, Rep." ~ (1992 - 1970) - (year - 1992),
+    country == "Czech Republic" ~ (1990 - 1948) - (year - 1990), country == "Djibouti" ~ (1992 - 1981) - (year - 1992),
+    country == "Ethiopia" ~ (1991 - 1974) - (year - 1991), country == "Ghana" ~ (1966 - 1960) - (year - 1966),
+    country == "Guinea" ~ (1984 - 1958) - (year - 1984), country == "Hungary" ~ (1989 - 1949) - (year - 1989),
+    country == "Iraq" ~ (2005 - 1958) - (year - 2005), country == "Mali" ~ (1991 - 1960) - (year - 1991),
+    country == "Mauritania" ~ (1978 - 1961) - (year - 1978), country == "Mongolia" ~ (1992 - 1924) - (year - 1992),
+    country == "Myanmar" ~ (1988 - 1962) - (year - 1988), country == "Poland" ~ (1989 - 1945) - (year - 1989),
+    country == "Romania" ~ (1989 - 1947) - (year - 1989), country == "Russian Federation" ~ (1991 - 1922) - (year - 1991),
+    country == "Seychelles" ~ (1991 - 1977) - (year - 1991), country == "Senegal" ~ (1981 - 1960) - (year - 1981),
+    country == "Sierra Leone" ~ (1991 - 1978) - (year - 1991), country == "Somalia" ~ (1991 - 1969) - (year - 1991),
+    country == "Sudan" ~ (1985 - 1969) - (year - 1985), country == "Syria" ~ (2012 - 1963) - (year - 2012),
+    country == "Tunisia" ~ (1988 - 1964) - (year - 1988), country == "Ukraine" ~ (1991 - 1919) - (year - 1991),
+    country == "Yemen, Rep." ~ (1991 - 1967) - (year - 1991), country == "Zambia" ~ (1991 - 1973) - (year - 1991),
+    str_detect(country,"Slovenia|Croatia|Serbia|Montenegro|Bosnia and Herzegovina|North Macedonia|Kosovo") ~ (1992 - 1943) - (year - 1992),
+    TRUE ~ 0),
+  socialist = case_when( # Min. 5 years given any socialist history,
+    socialist != 0 & socialist < 5 ~ 5,
     TRUE ~ socialist)) %>% drop_na() # Drop countries with missing values.
 ```
 ]]
@@ -192,7 +187,7 @@ ggplot(data = Dat %>%  # Start of the ggplot function, specifying the data to be
        aes(y = LifeExpect, x = HealthExp, color = country)) +  
   geom_line(alpha = 0.5) +  # Add lines to the plot with a transparency of 0.5
   # Add text labels to the plot, using the 'date' column for labels, with a size of 2.3
-  geom_text(aes(label = date), size = 2.3) +  
+  geom_text(aes(label = year), size = 2.3) +  
   guides(color = FALSE) +  # Remove the legend for color
   scale_x_continuous(expand=c(0, 1300)) +  # Adjust the x-axis scale, adding 1300 units of space to the right 
   # Add direct labels to the lines, placing them at the last points of each line
@@ -219,18 +214,18 @@ class: inverse center middle
 .font80[
 ```{r out.width='50%', fig.height = 5, fig.width = 5}
 ols_1 <- lm_robust(
-  LifeExpect ~ date + socialist*citizen_rights, data = Dat,
+  LifeExpect ~ socialist*equal_liberty, data = Dat,
   clusters = country) # Note that we need to specify this argument, #<<
 # because the observations are not independent! #<<
 # They are repeated observations of the same countries. #<<
 
 # 3D plot of interaction. Controls set to their mean.
-plotPlane(ols_1, "citizen_rights", "socialist", theta = 35, phi = 20)
+plotPlane(ols_1, "equal_liberty", "socialist", theta = 35, phi = 20)
 ```
 ```{r LifeExp2, results = 'hide'}
 modelsummary(list("Life Exp." = ols_1),
              gof_map = c("nobs", "r.squared"), 
-             stars = TRUE, output = "kableExtra")
+             stars = TRUE, output = "gt")
 ```
 ]]
 
@@ -254,13 +249,13 @@ class: inverse center middle
 ols_2 <- lm_robust(
   # I() transforms x #<<
   LifeExpect ~ I(HealthExp / 1000) + # 1 unit increase = $1000 #<<
-    date + socialist*citizen_rights, 
+    year + socialist*equal_liberty, 
   data = Dat, clusters = country)
 ```
 ```{r, echo = FALSE}
 modelsummary(list("Life Exp." = ols_2),
              gof_map = c("nobs", "r.squared"), 
-             stars = TRUE, output = "kableExtra")
+             stars = TRUE, output = "gt")
 ```
 ]]
 
@@ -316,19 +311,19 @@ class: clear
 # LOWESS
 
 .left-column[
-- LOESS is basically a "local" regression for every observation plus the (e.g. 6) nearest observations to the left and right.
-- It then combines all those regression lines into a "smoothed" "non-parametric" line.
-- Beware, LOESS tends to overfit to the particular data.
+- LOWESS is a *local* regression for every observation plus the (approx. 6) nearest observations to the left and right.
+- It then combines all those regression lines into a *smoothed non-parametric* line.
+- Beware, LOWESS tends to overfit to the particular data.
 ]
 
 .right-column[
 .panelset[
-.panel[.panel-name[LOESS idea]
+.panel[.panel-name[LOWESS idea]
 ```{r, echo = FALSE, out.width='70%', fig.align='center'}
 knitr::include_graphics('./media/LOWESS.png')
 ```
 ]
-.panel[.panel-name[LOESS fit]
+.panel[.panel-name[LOWESS fit]
 ```{r LifeExp4a, out.width='80%', fig.height = 5, fig.width = 7, echo = FALSE}
 # Start of the ggplot function, setting LifeExpect on the y-axis and HealthExp on the x-axis
 ggplot(data = Dat, aes(y = LifeExpect, x = HealthExp)) +  
@@ -340,8 +335,8 @@ ggplot(data = Dat, aes(y = LifeExpect, x = HealthExp)) +
   geom_dl(data = Dat %>% filter(country == "Switzerland" | country == "Denmark"),  
           # Label by country and place labels at the last points of the lines
           aes(label = country, color = country), method = list(dl.combine("last.points"))) +  
-  # Add a LOESS to the plot to show the overall trend, colored black.
-  geom_smooth(color = "black") + 
+  # Add a LOWESS to the plot to show the overall trend, colored black. #<<
+  geom_smooth(color = "black") + #<<
   labs(y = "Life expectacy at birth",  # Set the y-axis label
        x = "Health expenditure per capita in $") +  # Set the x-axis label
   theme_minimal() +  # Use a minimal theme for the plot
@@ -364,18 +359,18 @@ layout: true
 # Polynomials
 
 .push-left[
-.font80[
+.font70[
 ```{r poly, echo = FALSE}
 ols_3 <- lm_robust(
   LifeExpect ~ I(HealthExp/1000) + 
     I((HealthExp/1000)^2) + #<<
-    date + socialist*citizen_rights, 
+    year + socialist*equal_liberty, 
   data = Dat, clusters = country)
 ```
 ```{r, echo = FALSE}
 modelsummary(list("Life Exp." = ols_3),
              gof_map = c("nobs", "r.squared"), 
-             stars = TRUE, output = "kableExtra")
+             stars = TRUE, output = "gt")
 ```
 ]]
 
@@ -398,7 +393,7 @@ $$Y_{i} = \alpha + \beta_{1}X_{1} + \beta_{2}X_{1}^2 + \ldots + e_{i}$$
 
 .center[Interpretation:]
 
-$\beta_{\text{HealthExp}}$: At $0, a $1000 increase in `HealthExp` is associated with an increase in life expectancy at birth of `r coef(ols_3)["I(HealthExp/1000)"]` years.
+$\beta_{\text{HealthExp}}$: At 0, a $1000 increase in `HealthExp` is associated with an increase in life expectancy at birth of `r coef(ols_3)["I(HealthExp/1000)"]` years.
 
 $\beta_{\text{HealthExp}^2}$: With every $1000 increase in `HealthExp`, this association declines by `r coef(ols_3)["I((HealthExp/1000)^2)"]` years.
  - For example, the increase from $1000 to $2000 is associated with an increase in life expectancy at birth of $`r coef(ols_3)["I(HealthExp/1000)"]` + ( 2 \times `r coef(ols_3)["I((HealthExp/1000)^2)"]` ) = `r coef(ols_3)["I(HealthExp/1000)"] + (2 * coef(ols_3)["I((HealthExp/1000)^2)"])`$ years.
@@ -409,16 +404,16 @@ layout: true
 # Polynomials
 
 .push-left[
-.font80[
+.font70[
 ```{r}
 ols_4 <- lm_robust( LifeExpect ~ 
   poly(I(HealthExp/1000), degree = 2, raw = TRUE) + # Better use poly() #<<
-    date + socialist*citizen_rights, data = Dat, clusters = country)
+    year + socialist*equal_liberty, data = Dat, clusters = country)
 ```
 ```{r, echo = FALSE}
 modelsummary(list("Life Exp." = ols_4),
              gof_map = c("nobs", "r.squared"), 
-             stars = TRUE, output = "kableExtra")
+             stars = TRUE, output = "gt")
 ```
 ]]
 
@@ -450,8 +445,8 @@ $\beta_{\text{HealthExp}^2}$: With every $1000 increase in `HealthExp`, this ass
   HealthExp = min(Dat$HealthExp):max(Dat$HealthExp), 
   # Hold other variables constant.
   socialist = 0, # Non-socialist
-  citizen_rights = 12, # Max democracy
-  date = 2020)) # most recent date
+  equal_liberty = 1, # Max democracy
+  year = 2022)) # most recent date
 ```
 ]]
 .panel[.panel-name[Predict]
@@ -474,7 +469,7 @@ ggplot(data = fict_dat, aes(y = fit, x = HealthExp)) +
   geom_line() +  # Add a line for the fitted values
   geom_text(
     data = Dat %>%  # Use original 'Dat' data for labeling
-      filter(date == 2020 &  # Filter for the year 2022 and specific countries
+      filter(year == 2022 &  # Filter for the year 2022 and specific countries
                (country == "Mali" | country == "Nepal" | 
                   country == "Morocco" | country == "Mexico" | 
                   country == "Poland" | country == "Japan" | 
@@ -506,17 +501,16 @@ class: clear
 ```{r}
 ols_5 <- lm_robust(LifeExpect ~ 
         poly(I(HealthExp/1000), degree = 4, raw = TRUE) + #<<
-        date + socialist*citizen_rights, data = Dat, clusters = country)
+        year + socialist*equal_liberty, data = Dat, clusters = country)
 ```
 ```{r, echo = FALSE}
 modelsummary(list("Life Exp." = ols_5),
              gof_map = c("nobs", "r.squared"), 
-             stars = TRUE, output = "kableExtra")
+             stars = TRUE, output = "gt")
 ```
 ]]
 
 ---
-
 .push-right[
 .panelset[
 .panel[.panel-name[Fictional data]
@@ -527,8 +521,8 @@ modelsummary(list("Life Exp." = ols_5),
   HealthExp = min(Dat$HealthExp):max(Dat$HealthExp), 
   # Hold other variables constant.
   socialist = 0, # Non-socialist
-  citizen_rights = 12, # Max democracy
-  date = 2019)) # most recent date
+  equal_liberty = 1, # Max democracy
+  year = 2022)) # most recent date
 ```
 ]]
 .panel[.panel-name[Predict]
@@ -550,7 +544,7 @@ ggplot(data = fict_dat, aes(y = fit, x = HealthExp)) +
   geom_line() +  # Add a line for the fitted values
   geom_text(
     data = Dat %>%  # Use original 'Dat' data for labeling
-      filter(date == 2020 &  # Filter for the year 2022 and specific countries
+      filter(year == 2022 &  # Filter for the year 2022 and specific countries
                (country == "Mali" | country == "Nepal" | 
                   country == "Morocco" | country == "Mexico" | 
                   country == "Poland" | country == "Japan" | 
@@ -594,11 +588,11 @@ $$Y_{i} = \alpha + \beta_{1}X_{1} + \beta_{2}X_{1}^2 + \ldots + e_{i}$$
 .push-left[
 .content-box-blue[
 - You can best think of a polynomial as an interaction of a variable with itself.
-  + Polynomials "linearize" non-linear relations.
+  + Polynomials *linearize* non-linear associations
 
 
 - The more polynomials, the more complex and "wobbly" the non-linear relation.
-  + Beware to not overfit the model to the particular data. .alert[In Sociology, it rarely makes sense to use higher order polynomials]
+  + Beware to not overfit the model to the particular data. .alert[In Sociology, it rarely makes sense to use polynomials beyond 2 or 3.]
 
 
 - In a multiple OLS framework, we can control for other variables.
@@ -614,7 +608,7 @@ $$Y_{i} = \alpha + \beta_{1}X_{1} + \beta_{2}X_{1}^2 + \ldots + e_{i}$$
 class: inverse middle center
 # Break
 
-<iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'></iframe>
+<iframe src='https://panel.letstimeit.com/instant-timer/15-minute' width='600' height='400' frameborder='0' scrolling='yes'></iframe>
 
 ---
 class: middle clear
@@ -624,7 +618,8 @@ class: middle clear
 knitr::include_graphics('https://www.laserfiche.com/wp-content/uploads/2014/10/femalecoder.jpg')
 ```
 
-<iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'></iframe>
+<iframe src='https://panel.letstimeit.com/instant-timer/20-minute' width='600' height='400' frameborder='0' scrolling='yes'></iframe>
+
 ]
 
 .right-column[
@@ -632,6 +627,11 @@ knitr::include_graphics('https://www.laserfiche.com/wp-content/uploads/2014/10/f
 <iframe src='exercise1.html' width='1000' height='600' frameborder='0' scrolling='yes'></iframe>
 ]
 
+---
+class: inverse middle center
+# Break
+
+<iframe src='https://panel.letstimeit.com/instant-timer/10-minute' width='600' height='400' frameborder='0' scrolling='yes'></iframe>
 
 
 ---
@@ -721,13 +721,13 @@ layout: true
 .font80[
 ```{r loggie, echo = FALSE}
 ols_6 <- lm_robust(LifeExpect ~ I(log2(HealthExp)) + #<<
-                     date + socialist*citizen_rights, 
+                     year + socialist*equal_liberty, 
                    data = Dat, clusters = country)
 ```
 ```{r, echo = FALSE}
 modelsummary(list("Life Exp." = ols_6),
              gof_map = c("nobs", "r.squared"), 
-             stars = TRUE, output = "kableExtra")
+             stars = TRUE, output = "gt")
 ```
 ]]
 
@@ -753,8 +753,8 @@ How can we interpret the coefficient of `r coef(ols_6)["I(log2(HealthExp))"]`?
   HealthExp = min(Dat$HealthExp):max(Dat$HealthExp), 
   # Hold other variables constant.
   socialist = 0, # Non-socialist
-  citizen_rights = 12, # Max democracy
-  date = 2019)) # most recent date
+  equal_liberty = 1, # Max democracy
+  year = 2022)) # most recent date
 ```
 ]]
 .panel[.panel-name[Predict]
@@ -776,7 +776,7 @@ ggplot(data = fict_dat, aes(y = fit, x = HealthExp)) +
   geom_line() +  # Add a line for the fitted values
   geom_text(
     data = Dat %>%  # Use original 'Dat' data for labeling
-      filter(date == 2020 &  # Filter for the year 2022 and specific countries
+      filter(year == 2022 &  # Filter for the year 2022 and specific countries
                (country == "Mali" | country == "Nepal" | 
                   country == "Morocco" | country == "Mexico" | 
                   country == "Poland" | country == "Japan" | 
@@ -831,7 +831,7 @@ $$Y_{i} = g^{-1}(\alpha + \beta_{1}X_{i1} + \ldots)$$
 class: inverse middle center
 # Break
 
-<iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'></iframe>
+<iframe src='https://panel.letstimeit.com/instant-timer/15-minute' width='600' height='400' frameborder='0' scrolling='yes'></iframe>
 
 ---
 class: middle clear
@@ -841,7 +841,8 @@ class: middle clear
 knitr::include_graphics('https://www.laserfiche.com/wp-content/uploads/2014/10/femalecoder.jpg')
 ```
 
-<iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'></iframe>
+<iframe src='https://panel.letstimeit.com/instant-timer/20-minute' width='600' height='400' frameborder='0' scrolling='yes'></iframe>
+
 ]
 
 .right-column[

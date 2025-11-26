@@ -4,15 +4,13 @@
     <title>Polynomials and transformations</title>
     <meta charset="utf-8" />
     <meta name="author" content="Merlin Schaeffer  Department of Sociology" />
-    <meta name="date" content="2024-11-27" />
+    <meta name="date" content="2025-11-26" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
     <script src="libs/tile-view/tile-view.js"></script>
     <link href="libs/tachyons/tachyons.min.css" rel="stylesheet" />
     <link href="libs/panelset/panelset.css" rel="stylesheet" />
     <script src="libs/panelset/panelset.js"></script>
-    <script src="libs/kePrint/kePrint.js"></script>
-    <link href="libs/lightable/lightable.css" rel="stylesheet" />
     <link rel="stylesheet" href="../template/Merlin169.css" type="text/css" />
   </head>
   <body>
@@ -29,7 +27,7 @@ class: center, middle, inverse, title-slide
 ### Merlin Schaeffer<br> Department of Sociology
 ]
 .date[
-### 2024-11-27
+### 2025-11-26
 ]
 
 ---
@@ -96,70 +94,65 @@ pacman::p_load(
   modelsummary, # regression tables with nice layout,
   directlabels, # Labels addded to ggplot2 lines,
   rockchalk, # 3d plots of interaction effects,
-  democracyData) # download democracy data used in the scholarly literature.
+  vdemdata) # Use varieties of democracy data
 
 Dat_life &lt;- wb_data(
   # Download Life expectancy and healthcare expenditures data.
 * c("SP.DYN.LE00.IN", "SH.XPD.CHEX.PP.CD"),
-  start_date = 2000, end_date = 2024) %&gt;%
+  start_date = 2000, end_date = 2025) %&gt;%
 * rename(LifeExpect = SP.DYN.LE00.IN, # rename health variables,
-*        HealthExp = SH.XPD.CHEX.PP.CD) %&gt;%
-  select(country, date, LifeExpect, HealthExp) %&gt;% # Keep only 4 variables
+*        HealthExp = SH.XPD.CHEX.PP.CD,
+         year = date, # rename year variable,
+         country_text_id = iso3c) %&gt;%
+  select(country_text_id, country, year, LifeExpect, HealthExp) %&gt;% # Keep only 4 variables
   drop_na(LifeExpect, HealthExp) # Drop cases with missing data
 ```
 ]
 .panel[.panel-name[Join citizenship rights]
 
 ``` r
-Dat_citi_rights &lt;- download_fh(verbose = FALSE) %&gt;% # Download Freedom House data for all countries since 1972,
-  rename(country = fh_country, # rename variables,
-         citizen_rights = fh_total_reversed,
-         date = year) %&gt;%
-  mutate(country = case_when( 
-    country == "Vietnam" ~ "Viet Nam", # Rename Vietnam
-    TRUE ~ country)) %&gt;% # Leave all others as they are
-  # Keep only 3 variables.
-  select(country, date, citizen_rights)
+Dat_vdem &lt;- vdem %&gt;% # The data are part of the package we loaded earlier
+   as_tibble() %&gt;% # turn into a tiblle
+   select(country_name, country_text_id, year, v2xcl_rol) %&gt;%
+   rename(equal_liberty = v2xcl_rol) # rename liberty variable
 
 # Join Worldbank Health and Citizenship rights data
-Dat &lt;- inner_join(Dat_life, Dat_citi_rights, by = c("country", "date"))
+Dat &lt;- inner_join(Dat_life, Dat_vdem, by = c("country_text_id", "year"))
 ```
 ]
 .panel[.panel-name[Add socialism]
 .font60[
 
 ``` r
-Dat &lt;- Dat %&gt;% mutate(socialist = case_when( # Years socialist minus years since,
-  country == "China" ~ date - 1949,
-  country == "Viet Nam" ~ date - 1945,
-  country == "Algeria" ~ date - 1962,
-  str_detect(country,"Portugal|Bangladesh") ~ date - 1972,
-  country == "Guinea-Bissau" ~ date - 1973,
-  country == "India" ~ date - 1976,
-  country == "Nicaragua" ~ date - 1979,
-  country == "Sri Lanka" ~ date - 1978,
-  country == "Tanzania" ~ date - 1964,
-  country == "Albania" ~ (1992 - 1944) - (date - 1992),
-  str_detect(country, "Angola|Cabo Verde|Madagascar") ~ (1992 - 1975) - (date - 1992),
-  str_detect(country,"Belarus|Bulgaria") ~ (1990 - 1946) - (date - 1990),
-  str_detect(country, "Benin|Mozambique") ~ (1990 - 1975) - (date - 1990),
-  country == "Chad" ~ (1975 - 1962) - (date - 1975), country == "Congo, Rep." ~ (1992 - 1970) - (date - 1992),
-  country == "Czech Republic" ~ (1990 - 1948) - (date - 1990), country == "Djibouti" ~ (1992 - 1981) - (date - 1992),
-  country == "Ethiopia" ~ (1991 - 1974) - (date - 1991), country == "Ghana" ~ (1966 - 1960) - (date - 1966),
-  country == "Guinea" ~ (1984 - 1958) - (date - 1984), country == "Hungary" ~ (1989 - 1949) - (date - 1989),
-  country == "Iraq" ~ (2005 - 1958) - (date - 2005), country == "Mali" ~ (1991 - 1960) - (date - 1991),
-  country == "Mauritania" ~ (1978 - 1961) - (date - 1978), country == "Mongolia" ~ (1992 - 1924) - (date - 1992),
-  country == "Myanmar" ~ (1988 - 1962) - (date - 1988), country == "Poland" ~ (1989 - 1945) - (date - 1989),
-  country == "Romania" ~ (1989 - 1947) - (date - 1989), country == "Russian Federation" ~ (1991 - 1922) - (date - 1991),
-  country == "Seychelles" ~ (1991 - 1977) - (date - 1991), country == "Senegal" ~ (1981 - 1960) - (date - 1981),
-  country == "Sierra Leone" ~ (1991 - 1978) - (date - 1991), country == "Somalia" ~ (1991 - 1969) - (date - 1991),
-  country == "Sudan" ~ (1985 - 1969) - (date - 1985), country == "Syria" ~ (2012 - 1963) - (date - 2012),
-  country == "Tunisia" ~ (1988 - 1964) - (date - 1988), country == "Ukraine" ~ (1991 - 1919) - (date - 1991),
-  country == "Yemen, Rep." ~ (1991 - 1967) - (date - 1991), country == "Zambia" ~ (1991 - 1973) - (date - 1991),
-  str_detect(country,"Slovenia|Croatia|Serbia|Montenegro|Bosnia and Herzegovina|North Macedonia|Kosovo") ~ (1992 - 1943) - (date - 1992),
-  TRUE ~ 0),
-  socialist = case_when( # Min. 5 years given socialist history,
-    (socialist &lt; 5 &amp; socialist &gt; 0) | socialist &lt; 0 ~ 5,
+Dat &lt;- Dat %&gt;% mutate(
+  socialist = case_when( # Years socialist minus years since not socialist anymore,
+    country == "China" ~ year - 1949,
+    country == "Viet Nam" ~ year - 1945,
+    country == "Algeria" ~ year - 1962,
+    str_detect(country,"Portugal|Bangladesh") ~ year - 1972,
+    country == "Guinea-Bissau" ~ year - 1973, country == "India" ~ year - 1976, 
+    country == "Nicaragua" ~ year - 1979, country == "Sri Lanka" ~ year - 1978,
+    country == "Tanzania" ~ year - 1964, country == "Albania" ~ (1992 - 1944) - (year - 1992),
+    str_detect(country, "Angola|Cabo Verde|Madagascar") ~ (1992 - 1975) - (year - 1992),
+    str_detect(country,"Belarus|Bulgaria") ~ (1990 - 1946) - (year - 1990),
+    str_detect(country, "Benin|Mozambique") ~ (1990 - 1975) - (year - 1990),
+    country == "Chad" ~ (1975 - 1962) - (year - 1975), country == "Congo, Rep." ~ (1992 - 1970) - (year - 1992),
+    country == "Czech Republic" ~ (1990 - 1948) - (year - 1990), country == "Djibouti" ~ (1992 - 1981) - (year - 1992),
+    country == "Ethiopia" ~ (1991 - 1974) - (year - 1991), country == "Ghana" ~ (1966 - 1960) - (year - 1966),
+    country == "Guinea" ~ (1984 - 1958) - (year - 1984), country == "Hungary" ~ (1989 - 1949) - (year - 1989),
+    country == "Iraq" ~ (2005 - 1958) - (year - 2005), country == "Mali" ~ (1991 - 1960) - (year - 1991),
+    country == "Mauritania" ~ (1978 - 1961) - (year - 1978), country == "Mongolia" ~ (1992 - 1924) - (year - 1992),
+    country == "Myanmar" ~ (1988 - 1962) - (year - 1988), country == "Poland" ~ (1989 - 1945) - (year - 1989),
+    country == "Romania" ~ (1989 - 1947) - (year - 1989), country == "Russian Federation" ~ (1991 - 1922) - (year - 1991),
+    country == "Seychelles" ~ (1991 - 1977) - (year - 1991), country == "Senegal" ~ (1981 - 1960) - (year - 1981),
+    country == "Sierra Leone" ~ (1991 - 1978) - (year - 1991), country == "Somalia" ~ (1991 - 1969) - (year - 1991),
+    country == "Sudan" ~ (1985 - 1969) - (year - 1985), country == "Syria" ~ (2012 - 1963) - (year - 2012),
+    country == "Tunisia" ~ (1988 - 1964) - (year - 1988), country == "Ukraine" ~ (1991 - 1919) - (year - 1991),
+    country == "Yemen, Rep." ~ (1991 - 1967) - (year - 1991), country == "Zambia" ~ (1991 - 1973) - (year - 1991),
+    str_detect(country,"Slovenia|Croatia|Serbia|Montenegro|Bosnia and Herzegovina|North Macedonia|Kosovo") ~ (1992 - 1943) - (year - 1992),
+    TRUE ~ 0),
+  socialist = case_when( # Min. 5 years given any socialist history,
+    socialist != 0 &amp; socialist &lt; 5 ~ 5,
     TRUE ~ socialist)) %&gt;% drop_na() # Drop countries with missing values.
 ```
 ]]
@@ -167,20 +160,20 @@ Dat &lt;- Dat %&gt;% mutate(socialist = case_when( # Years socialist minus years
 
 ``` r
 Dat
-# # A tibble: 3,654 × 6
-#    country      date LifeExpect HealthExp citizen_rights socialist
-#    &lt;chr&gt;       &lt;dbl&gt;      &lt;dbl&gt;     &lt;dbl&gt;          &lt;dbl&gt;     &lt;dbl&gt;
-#  1 Afghanistan  2002       56.5      87.4              2         0
-#  2 Afghanistan  2003       57.3      86.3              2         0
-#  3 Afghanistan  2004       57.9      94.0              3         0
-#  4 Afghanistan  2005       58.4     106.               4         0
-#  5 Afghanistan  2006       58.7     118.               4         0
-#  6 Afghanistan  2007       59.1     112.               4         0
-#  7 Afghanistan  2008       59.9     138.               3         0
-#  8 Afghanistan  2009       60.4     154.               2         0
-#  9 Afghanistan  2010       60.9     149.               2         0
-# 10 Afghanistan  2011       61.4     147.               2         0
-# # ℹ 3,644 more rows
+# # A tibble: 3,897 × 8
+#    country_text_id country      year LifeExpect HealthExp country_name equal_liberty socialist
+#    &lt;chr&gt;           &lt;chr&gt;       &lt;dbl&gt;      &lt;dbl&gt;     &lt;dbl&gt; &lt;chr&gt;                &lt;dbl&gt;     &lt;dbl&gt;
+#  1 AFG             Afghanistan  2002       56.2      85.9 Afghanistan          0.38          0
+#  2 AFG             Afghanistan  2003       57.2      85.9 Afghanistan          0.377         0
+#  3 AFG             Afghanistan  2004       57.8      93.9 Afghanistan          0.377         0
+#  4 AFG             Afghanistan  2005       58.2     106.  Afghanistan          0.379         0
+#  5 AFG             Afghanistan  2006       58.6     118.  Afghanistan          0.379         0
+#  6 AFG             Afghanistan  2007       59.0     112.  Afghanistan          0.379         0
+#  7 AFG             Afghanistan  2008       59.7     137.  Afghanistan          0.379         0
+#  8 AFG             Afghanistan  2009       60.2     153.  Afghanistan          0.381         0
+#  9 AFG             Afghanistan  2010       60.7     148.  Afghanistan          0.388         0
+# 10 AFG             Afghanistan  2011       61.2     147.  Afghanistan          0.394         0
+# # ℹ 3,887 more rows
 ```
 ]]
 
@@ -202,7 +195,7 @@ ggplot(data = Dat %&gt;%  # Start of the ggplot function, specifying the data to
        aes(y = LifeExpect, x = HealthExp, color = country)) +  
   geom_line(alpha = 0.5) +  # Add lines to the plot with a transparency of 0.5
   # Add text labels to the plot, using the 'date' column for labels, with a size of 2.3
-  geom_text(aes(label = date), size = 2.3) +  
+  geom_text(aes(label = year), size = 2.3) +  
   guides(color = FALSE) +  # Remove the legend for color
   scale_x_continuous(expand=c(0, 1300)) +  # Adjust the x-axis scale, adding 1300 units of space to the right 
   # Add direct labels to the lines, placing them at the last points of each line
@@ -226,13 +219,13 @@ class: inverse center middle
 
 ``` r
 ols_1 &lt;- lm_robust(
-  LifeExpect ~ date + socialist*citizen_rights, data = Dat,
+  LifeExpect ~ socialist*equal_liberty, data = Dat,
 * clusters = country) # Note that we need to specify this argument,
 *# because the observations are not independent!
 *# They are repeated observations of the same countries.
 
 # 3D plot of interaction. Controls set to their mean.
-plotPlane(ols_1, "citizen_rights", "socialist", theta = 35, phi = 20)
+plotPlane(ols_1, "equal_liberty", "socialist", theta = 35, phi = 20)
 ```
 
 &lt;img src="12-Polys_files/figure-html/unnamed-chunk-5-1.png" width="50%" style="display: block; margin: auto;" /&gt;
@@ -240,74 +233,497 @@ plotPlane(ols_1, "citizen_rights", "socialist", theta = 35, phi = 20)
 ``` r
 modelsummary(list("Life Exp." = ols_1),
              gof_map = c("nobs", "r.squared"), 
-             stars = TRUE, output = "kableExtra")
+             stars = TRUE, output = "gt")
 ```
 ]]
 
 .push-right[
 .font80[
-&lt;table style="NAborder-bottom: 0; color: black; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
- &lt;thead&gt;
-  &lt;tr&gt;
-   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
-   &lt;th style="text-align:center;"&gt; Life Exp. &lt;/th&gt;
-  &lt;/tr&gt;
- &lt;/thead&gt;
-&lt;tbody&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; −498.204*** &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (40.195) &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; date &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.278*** &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (0.020) &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; socialist &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.161** &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (0.057) &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; citizen_rights &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 1.138*** &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (0.168) &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; socialist × citizen_rights &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; −0.017* &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.008) &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 3654 &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.252 &lt;/td&gt;
-  &lt;/tr&gt;
-&lt;/tbody&gt;
-&lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
-&lt;sup&gt;&lt;/sup&gt; + p &amp;lt; 0.1, * p &amp;lt; 0.05, ** p &amp;lt; 0.01, *** p &amp;lt; 0.001&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;
-&lt;/table&gt;
+<div id="ncaouvoauw" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#ncaouvoauw table {
+  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
 
+#ncaouvoauw thead, #ncaouvoauw tbody, #ncaouvoauw tfoot, #ncaouvoauw tr, #ncaouvoauw td, #ncaouvoauw th {
+  border-style: none;
+}
 
+#ncaouvoauw p {
+  margin: 0;
+  padding: 0;
+}
+
+#ncaouvoauw .gt_table {
+  display: table;
+  border-collapse: collapse;
+  line-height: normal;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#ncaouvoauw .gt_caption {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#ncaouvoauw .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#ncaouvoauw .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 3px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#ncaouvoauw .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#ncaouvoauw .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#ncaouvoauw .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#ncaouvoauw .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#ncaouvoauw .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#ncaouvoauw .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#ncaouvoauw .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#ncaouvoauw .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#ncaouvoauw .gt_spanner_row {
+  border-bottom-style: hidden;
+}
+
+#ncaouvoauw .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  text-align: left;
+}
+
+#ncaouvoauw .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#ncaouvoauw .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#ncaouvoauw .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#ncaouvoauw .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#ncaouvoauw .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#ncaouvoauw .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#ncaouvoauw .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#ncaouvoauw .gt_row_group_first th {
+  border-top-width: 2px;
+}
+
+#ncaouvoauw .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#ncaouvoauw .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#ncaouvoauw .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#ncaouvoauw .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#ncaouvoauw .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#ncaouvoauw .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#ncaouvoauw .gt_last_grand_summary_row_top {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: double;
+  border-bottom-width: 6px;
+  border-bottom-color: #D3D3D3;
+}
+
+#ncaouvoauw .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#ncaouvoauw .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#ncaouvoauw .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#ncaouvoauw .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#ncaouvoauw .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#ncaouvoauw .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#ncaouvoauw .gt_left {
+  text-align: left;
+}
+
+#ncaouvoauw .gt_center {
+  text-align: center;
+}
+
+#ncaouvoauw .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#ncaouvoauw .gt_font_normal {
+  font-weight: normal;
+}
+
+#ncaouvoauw .gt_font_bold {
+  font-weight: bold;
+}
+
+#ncaouvoauw .gt_font_italic {
+  font-style: italic;
+}
+
+#ncaouvoauw .gt_super {
+  font-size: 65%;
+}
+
+#ncaouvoauw .gt_footnote_marks {
+  font-size: 75%;
+  vertical-align: 0.4em;
+  position: initial;
+}
+
+#ncaouvoauw .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#ncaouvoauw .gt_indent_1 {
+  text-indent: 5px;
+}
+
+#ncaouvoauw .gt_indent_2 {
+  text-indent: 10px;
+}
+
+#ncaouvoauw .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#ncaouvoauw .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#ncaouvoauw .gt_indent_5 {
+  text-indent: 25px;
+}
+
+#ncaouvoauw .katex-display {
+  display: inline-flex !important;
+  margin-bottom: 0.75em !important;
+}
+
+#ncaouvoauw div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+  height: 0px !important;
+}
+</style>
+<table class="gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
+  <thead>
+    <tr class="gt_col_headings">
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="a-"> </th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="Life-Exp.">Life Exp.</th>
+    </tr>
+  </thead>
+  <tbody class="gt_table_body">
+    <tr><td headers=" " class="gt_row gt_left">(Intercept)</td>
+<td headers="Life Exp." class="gt_row gt_center">58.592***</td></tr>
+    <tr><td headers=" " class="gt_row gt_left"></td>
+<td headers="Life Exp." class="gt_row gt_center">(1.892)</td></tr>
+    <tr><td headers=" " class="gt_row gt_left">socialist</td>
+<td headers="Life Exp." class="gt_row gt_center">0.181*</td></tr>
+    <tr><td headers=" " class="gt_row gt_left"></td>
+<td headers="Life Exp." class="gt_row gt_center">(0.091)</td></tr>
+    <tr><td headers=" " class="gt_row gt_left">equal_liberty</td>
+<td headers="Life Exp." class="gt_row gt_center">16.313***</td></tr>
+    <tr><td headers=" " class="gt_row gt_left"></td>
+<td headers="Life Exp." class="gt_row gt_center">(2.440)</td></tr>
+    <tr><td headers=" " class="gt_row gt_left">socialist × equal_liberty</td>
+<td headers="Life Exp." class="gt_row gt_center">-0.233+</td></tr>
+    <tr><td headers=" " class="gt_row gt_left" style="border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #000000;"></td>
+<td headers="Life Exp." class="gt_row gt_center" style="border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #000000;">(0.136)</td></tr>
+    <tr><td headers=" " class="gt_row gt_left">Num.Obs.</td>
+<td headers="Life Exp." class="gt_row gt_center">3897</td></tr>
+    <tr><td headers=" " class="gt_row gt_left">R2</td>
+<td headers="Life Exp." class="gt_row gt_center">0.205</td></tr>
+  </tbody>
+  <tfoot>
+    <tr class="gt_sourcenotes">
+      <td class="gt_sourcenote" colspan="2">+ p &lt; 0.1, * p &lt; 0.05, ** p &lt; 0.01, *** p &lt; 0.001</td>
+    </tr>
+  </tfoot>
+</table>
+</div>
 ]]
 
 ---
@@ -321,76 +737,499 @@ class: inverse center middle
 .push-left[
 .font80[
 
-&lt;table style="NAborder-bottom: 0; color: black; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
- &lt;thead&gt;
-  &lt;tr&gt;
-   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
-   &lt;th style="text-align:center;"&gt; Life Exp. &lt;/th&gt;
-  &lt;/tr&gt;
- &lt;/thead&gt;
-&lt;tbody&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; −152.792** &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (57.881) &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; I(HealthExp/1000) &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 3.097*** &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (0.494) &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; date &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.107*** &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (0.029) &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; socialist &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.145*** &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (0.043) &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; citizen_rights &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.538*** &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (0.155) &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; socialist × citizen_rights &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; −0.009+ &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.005) &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 3654 &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.471 &lt;/td&gt;
-  &lt;/tr&gt;
-&lt;/tbody&gt;
-&lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
-&lt;sup&gt;&lt;/sup&gt; + p &amp;lt; 0.1, * p &amp;lt; 0.05, ** p &amp;lt; 0.01, *** p &amp;lt; 0.001&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;
-&lt;/table&gt;
+<div id="bqqmzuerhd" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#bqqmzuerhd table {
+  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
 
+#bqqmzuerhd thead, #bqqmzuerhd tbody, #bqqmzuerhd tfoot, #bqqmzuerhd tr, #bqqmzuerhd td, #bqqmzuerhd th {
+  border-style: none;
+}
 
+#bqqmzuerhd p {
+  margin: 0;
+  padding: 0;
+}
+
+#bqqmzuerhd .gt_table {
+  display: table;
+  border-collapse: collapse;
+  line-height: normal;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#bqqmzuerhd .gt_caption {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#bqqmzuerhd .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#bqqmzuerhd .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 3px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#bqqmzuerhd .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#bqqmzuerhd .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#bqqmzuerhd .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#bqqmzuerhd .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#bqqmzuerhd .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#bqqmzuerhd .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#bqqmzuerhd .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#bqqmzuerhd .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#bqqmzuerhd .gt_spanner_row {
+  border-bottom-style: hidden;
+}
+
+#bqqmzuerhd .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  text-align: left;
+}
+
+#bqqmzuerhd .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#bqqmzuerhd .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#bqqmzuerhd .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#bqqmzuerhd .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#bqqmzuerhd .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#bqqmzuerhd .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#bqqmzuerhd .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#bqqmzuerhd .gt_row_group_first th {
+  border-top-width: 2px;
+}
+
+#bqqmzuerhd .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#bqqmzuerhd .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#bqqmzuerhd .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#bqqmzuerhd .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#bqqmzuerhd .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#bqqmzuerhd .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#bqqmzuerhd .gt_last_grand_summary_row_top {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: double;
+  border-bottom-width: 6px;
+  border-bottom-color: #D3D3D3;
+}
+
+#bqqmzuerhd .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#bqqmzuerhd .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#bqqmzuerhd .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#bqqmzuerhd .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#bqqmzuerhd .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#bqqmzuerhd .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#bqqmzuerhd .gt_left {
+  text-align: left;
+}
+
+#bqqmzuerhd .gt_center {
+  text-align: center;
+}
+
+#bqqmzuerhd .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#bqqmzuerhd .gt_font_normal {
+  font-weight: normal;
+}
+
+#bqqmzuerhd .gt_font_bold {
+  font-weight: bold;
+}
+
+#bqqmzuerhd .gt_font_italic {
+  font-style: italic;
+}
+
+#bqqmzuerhd .gt_super {
+  font-size: 65%;
+}
+
+#bqqmzuerhd .gt_footnote_marks {
+  font-size: 75%;
+  vertical-align: 0.4em;
+  position: initial;
+}
+
+#bqqmzuerhd .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#bqqmzuerhd .gt_indent_1 {
+  text-indent: 5px;
+}
+
+#bqqmzuerhd .gt_indent_2 {
+  text-indent: 10px;
+}
+
+#bqqmzuerhd .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#bqqmzuerhd .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#bqqmzuerhd .gt_indent_5 {
+  text-indent: 25px;
+}
+
+#bqqmzuerhd .katex-display {
+  display: inline-flex !important;
+  margin-bottom: 0.75em !important;
+}
+
+#bqqmzuerhd div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+  height: 0px !important;
+}
+</style>
+<table class="gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
+  <thead>
+    <tr class="gt_col_headings">
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="a-"> </th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="Life-Exp.">Life Exp.</th>
+    </tr>
+  </thead>
+  <tbody class="gt_table_body">
+    <tr><td headers=" " class="gt_row gt_left">(Intercept)</td>
+<td headers="Life Exp." class="gt_row gt_center">-124.471*</td></tr>
+    <tr><td headers=" " class="gt_row gt_left"></td>
+<td headers="Life Exp." class="gt_row gt_center">(55.845)</td></tr>
+    <tr><td headers=" " class="gt_row gt_left">I(HealthExp/1000)</td>
+<td headers="Life Exp." class="gt_row gt_center">3.110***</td></tr>
+    <tr><td headers=" " class="gt_row gt_left"></td>
+<td headers="Life Exp." class="gt_row gt_center">(0.445)</td></tr>
+    <tr><td headers=" " class="gt_row gt_left">year</td>
+<td headers="Life Exp." class="gt_row gt_center">0.092***</td></tr>
+    <tr><td headers=" " class="gt_row gt_left"></td>
+<td headers="Life Exp." class="gt_row gt_center">(0.028)</td></tr>
+    <tr><td headers=" " class="gt_row gt_left">socialist</td>
+<td headers="Life Exp." class="gt_row gt_center">0.118</td></tr>
+    <tr><td headers=" " class="gt_row gt_left"></td>
+<td headers="Life Exp." class="gt_row gt_center">(0.075)</td></tr>
+    <tr><td headers=" " class="gt_row gt_left">equal_liberty</td>
+<td headers="Life Exp." class="gt_row gt_center">6.584**</td></tr>
+    <tr><td headers=" " class="gt_row gt_left"></td>
+<td headers="Life Exp." class="gt_row gt_center">(2.302)</td></tr>
+    <tr><td headers=" " class="gt_row gt_left">socialist × equal_liberty</td>
+<td headers="Life Exp." class="gt_row gt_center">-0.062</td></tr>
+    <tr><td headers=" " class="gt_row gt_left" style="border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #000000;"></td>
+<td headers="Life Exp." class="gt_row gt_center" style="border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #000000;">(0.107)</td></tr>
+    <tr><td headers=" " class="gt_row gt_left">Num.Obs.</td>
+<td headers="Life Exp." class="gt_row gt_center">3897</td></tr>
+    <tr><td headers=" " class="gt_row gt_left">R2</td>
+<td headers="Life Exp." class="gt_row gt_center">0.472</td></tr>
+  </tbody>
+  <tfoot>
+    <tr class="gt_sourcenotes">
+      <td class="gt_sourcenote" colspan="2">+ p &lt; 0.1, * p &lt; 0.05, ** p &lt; 0.01, *** p &lt; 0.001</td>
+    </tr>
+  </tfoot>
+</table>
+</div>
 ]]
 
 --
@@ -402,7 +1241,7 @@ class: inverse center middle
 ols_2 &lt;- lm_robust(
 * # I() transforms x
 * LifeExpect ~ I(HealthExp / 1000) + # 1 unit increase = $1000
-    date + socialist*citizen_rights, 
+    year + socialist*equal_liberty, 
   data = Dat, clusters = country)
 ```
 &lt;img src="12-Polys_files/figure-html/LifeExp3-1.png" width="90%" style="display: block; margin: auto;" /&gt;
@@ -430,17 +1269,17 @@ class: clear
 # LOWESS
 
 .left-column[
-- LOESS is basically a "local" regression for every observation plus the (e.g. 6) nearest observations to the left and right.
-- It then combines all those regression lines into a "smoothed" "non-parametric" line.
-- Beware, LOESS tends to overfit to the particular data.
+- LOWESS is a *local* regression for every observation plus the (approx. 6) nearest observations to the left and right.
+- It then combines all those regression lines into a *smoothed non-parametric* line.
+- Beware, LOWESS tends to overfit to the particular data.
 ]
 
 .right-column[
 .panelset[
-.panel[.panel-name[LOESS idea]
+.panel[.panel-name[LOWESS idea]
 &lt;img src="./media/LOWESS.png" width="70%" style="display: block; margin: auto;" /&gt;
 ]
-.panel[.panel-name[LOESS fit]
+.panel[.panel-name[LOWESS fit]
 &lt;img src="12-Polys_files/figure-html/LifeExp4a-1.png" width="80%" style="display: block; margin: auto;" /&gt;
 ]
 .panel[.panel-name[Code]
@@ -456,8 +1295,8 @@ ggplot(data = Dat, aes(y = LifeExpect, x = HealthExp)) +
   geom_dl(data = Dat %&gt;% filter(country == "Switzerland" | country == "Denmark"),  
           # Label by country and place labels at the last points of the lines
           aes(label = country, color = country), method = list(dl.combine("last.points"))) +  
-  # Add a LOESS to the plot to show the overall trend, colored black.
-  geom_smooth(color = "black") + 
+* # Add a LOWESS to the plot to show the overall trend, colored black.
+* geom_smooth(color = "black") +
   labs(y = "Life expectacy at birth",  # Set the y-axis label
        x = "Health expenditure per capita in $") +  # Set the x-axis label
   theme_minimal() +  # Use a minimal theme for the plot
@@ -475,86 +1314,505 @@ layout: true
 # Polynomials
 
 .push-left[
-.font80[
+.font70[
 
-&lt;table style="NAborder-bottom: 0; color: black; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
- &lt;thead&gt;
-  &lt;tr&gt;
-   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
-   &lt;th style="text-align:center;"&gt; Life Exp. &lt;/th&gt;
-  &lt;/tr&gt;
- &lt;/thead&gt;
-&lt;tbody&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; −136.291** &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (47.578) &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; I(HealthExp/1000) &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 7.753*** &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (1.076) &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; I((HealthExp/1000)^2) &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; −0.748*** &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (0.206) &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; date &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.098*** &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (0.023) &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; socialist &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.160*** &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (0.033) &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; citizen_rights &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.363** &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (0.122) &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; socialist × citizen_rights &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; −0.012** &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.004) &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 3654 &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.595 &lt;/td&gt;
-  &lt;/tr&gt;
-&lt;/tbody&gt;
-&lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
-&lt;sup&gt;&lt;/sup&gt; + p &amp;lt; 0.1, * p &amp;lt; 0.05, ** p &amp;lt; 0.01, *** p &amp;lt; 0.001&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;
-&lt;/table&gt;
+<div id="fyydptdphl" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#fyydptdphl table {
+  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
 
+#fyydptdphl thead, #fyydptdphl tbody, #fyydptdphl tfoot, #fyydptdphl tr, #fyydptdphl td, #fyydptdphl th {
+  border-style: none;
+}
 
+#fyydptdphl p {
+  margin: 0;
+  padding: 0;
+}
+
+#fyydptdphl .gt_table {
+  display: table;
+  border-collapse: collapse;
+  line-height: normal;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#fyydptdphl .gt_caption {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#fyydptdphl .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#fyydptdphl .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 3px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#fyydptdphl .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#fyydptdphl .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#fyydptdphl .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#fyydptdphl .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#fyydptdphl .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#fyydptdphl .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#fyydptdphl .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#fyydptdphl .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#fyydptdphl .gt_spanner_row {
+  border-bottom-style: hidden;
+}
+
+#fyydptdphl .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  text-align: left;
+}
+
+#fyydptdphl .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#fyydptdphl .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#fyydptdphl .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#fyydptdphl .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#fyydptdphl .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#fyydptdphl .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#fyydptdphl .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#fyydptdphl .gt_row_group_first th {
+  border-top-width: 2px;
+}
+
+#fyydptdphl .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#fyydptdphl .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#fyydptdphl .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#fyydptdphl .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#fyydptdphl .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#fyydptdphl .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#fyydptdphl .gt_last_grand_summary_row_top {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: double;
+  border-bottom-width: 6px;
+  border-bottom-color: #D3D3D3;
+}
+
+#fyydptdphl .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#fyydptdphl .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#fyydptdphl .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#fyydptdphl .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#fyydptdphl .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#fyydptdphl .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#fyydptdphl .gt_left {
+  text-align: left;
+}
+
+#fyydptdphl .gt_center {
+  text-align: center;
+}
+
+#fyydptdphl .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#fyydptdphl .gt_font_normal {
+  font-weight: normal;
+}
+
+#fyydptdphl .gt_font_bold {
+  font-weight: bold;
+}
+
+#fyydptdphl .gt_font_italic {
+  font-style: italic;
+}
+
+#fyydptdphl .gt_super {
+  font-size: 65%;
+}
+
+#fyydptdphl .gt_footnote_marks {
+  font-size: 75%;
+  vertical-align: 0.4em;
+  position: initial;
+}
+
+#fyydptdphl .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#fyydptdphl .gt_indent_1 {
+  text-indent: 5px;
+}
+
+#fyydptdphl .gt_indent_2 {
+  text-indent: 10px;
+}
+
+#fyydptdphl .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#fyydptdphl .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#fyydptdphl .gt_indent_5 {
+  text-indent: 25px;
+}
+
+#fyydptdphl .katex-display {
+  display: inline-flex !important;
+  margin-bottom: 0.75em !important;
+}
+
+#fyydptdphl div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+  height: 0px !important;
+}
+</style>
+<table class="gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
+  <thead>
+    <tr class="gt_col_headings">
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="a-"> </th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="Life-Exp.">Life Exp.</th>
+    </tr>
+  </thead>
+  <tbody class="gt_table_body">
+    <tr><td headers=" " class="gt_row gt_left">(Intercept)</td>
+<td headers="Life Exp." class="gt_row gt_center">-102.907*</td></tr>
+    <tr><td headers=" " class="gt_row gt_left"></td>
+<td headers="Life Exp." class="gt_row gt_center">(46.761)</td></tr>
+    <tr><td headers=" " class="gt_row gt_left">I(HealthExp/1000)</td>
+<td headers="Life Exp." class="gt_row gt_center">7.953***</td></tr>
+    <tr><td headers=" " class="gt_row gt_left"></td>
+<td headers="Life Exp." class="gt_row gt_center">(0.805)</td></tr>
+    <tr><td headers=" " class="gt_row gt_left">I((HealthExp/1000)^2)</td>
+<td headers="Life Exp." class="gt_row gt_center">-0.748***</td></tr>
+    <tr><td headers=" " class="gt_row gt_left"></td>
+<td headers="Life Exp." class="gt_row gt_center">(0.137)</td></tr>
+    <tr><td headers=" " class="gt_row gt_left">year</td>
+<td headers="Life Exp." class="gt_row gt_center">0.081***</td></tr>
+    <tr><td headers=" " class="gt_row gt_left"></td>
+<td headers="Life Exp." class="gt_row gt_center">(0.023)</td></tr>
+    <tr><td headers=" " class="gt_row gt_left">socialist</td>
+<td headers="Life Exp." class="gt_row gt_center">0.136*</td></tr>
+    <tr><td headers=" " class="gt_row gt_left"></td>
+<td headers="Life Exp." class="gt_row gt_center">(0.061)</td></tr>
+    <tr><td headers=" " class="gt_row gt_left">equal_liberty</td>
+<td headers="Life Exp." class="gt_row gt_center">3.254+</td></tr>
+    <tr><td headers=" " class="gt_row gt_left"></td>
+<td headers="Life Exp." class="gt_row gt_center">(1.857)</td></tr>
+    <tr><td headers=" " class="gt_row gt_left">socialist × equal_liberty</td>
+<td headers="Life Exp." class="gt_row gt_center">-0.086</td></tr>
+    <tr><td headers=" " class="gt_row gt_left" style="border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #000000;"></td>
+<td headers="Life Exp." class="gt_row gt_center" style="border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #000000;">(0.085)</td></tr>
+    <tr><td headers=" " class="gt_row gt_left">Num.Obs.</td>
+<td headers="Life Exp." class="gt_row gt_center">3897</td></tr>
+    <tr><td headers=" " class="gt_row gt_left">R2</td>
+<td headers="Life Exp." class="gt_row gt_center">0.607</td></tr>
+  </tbody>
+  <tfoot>
+    <tr class="gt_sourcenotes">
+      <td class="gt_sourcenote" colspan="2">+ p &lt; 0.1, * p &lt; 0.05, ** p &lt; 0.01, *** p &lt; 0.001</td>
+    </tr>
+  </tfoot>
+</table>
+</div>
 ]]
 
 ---
@@ -565,7 +1823,7 @@ layout: true
 ols_3 &lt;- lm_robust(
   LifeExpect ~ I(HealthExp/1000) + 
 *   I((HealthExp/1000)^2) +
-    date + socialist*citizen_rights, 
+    year + socialist*equal_liberty, 
   data = Dat, clusters = country)
 ```
 
@@ -582,10 +1840,10 @@ Do you see any similarity to the logic of an interaction term?
 
 .center[Interpretation:]
 
-`\(\beta_{\text{HealthExp}}\)`: At $0, a $1000 increase in `HealthExp` is associated with an increase in life expectancy at birth of 7.753 years.
+`\(\beta_{\text{HealthExp}}\)`: At 0, a $1000 increase in `HealthExp` is associated with an increase in life expectancy at birth of 7.953 years.
 
 `\(\beta_{\text{HealthExp}^2}\)`: With every $1000 increase in `HealthExp`, this association declines by -0.748 years.
- - For example, the increase from $1000 to $2000 is associated with an increase in life expectancy at birth of `\(7.753 + ( 2 \times -0.748 ) = 6.258\)` years.
+ - For example, the increase from $1000 to $2000 is associated with an increase in life expectancy at birth of `\(7.953 + ( 2 \times -0.748 ) = 6.457\)` years.
 ]
 
 ---
@@ -593,91 +1851,510 @@ layout: true
 # Polynomials
 
 .push-left[
-.font80[
+.font70[
 
 ``` r
 ols_4 &lt;- lm_robust( LifeExpect ~ 
 * poly(I(HealthExp/1000), degree = 2, raw = TRUE) + # Better use poly()
-    date + socialist*citizen_rights, data = Dat, clusters = country)
+    year + socialist*equal_liberty, data = Dat, clusters = country)
 ```
-&lt;table style="NAborder-bottom: 0; color: black; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
- &lt;thead&gt;
-  &lt;tr&gt;
-   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
-   &lt;th style="text-align:center;"&gt; Life Exp. &lt;/th&gt;
-  &lt;/tr&gt;
- &lt;/thead&gt;
-&lt;tbody&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; −136.291** &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (47.578) &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; poly(I(HealthExp/1000), degree = 2, raw = TRUE)1 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 7.753*** &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (1.076) &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; poly(I(HealthExp/1000), degree = 2, raw = TRUE)2 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; −0.748*** &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (0.206) &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; date &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.098*** &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (0.023) &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; socialist &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.160*** &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (0.033) &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; citizen_rights &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.363** &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (0.122) &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; socialist × citizen_rights &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; −0.012** &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.004) &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 3654 &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.595 &lt;/td&gt;
-  &lt;/tr&gt;
-&lt;/tbody&gt;
-&lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
-&lt;sup&gt;&lt;/sup&gt; + p &amp;lt; 0.1, * p &amp;lt; 0.05, ** p &amp;lt; 0.01, *** p &amp;lt; 0.001&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;
-&lt;/table&gt;
+<div id="oodnybmyus" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#oodnybmyus table {
+  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
 
+#oodnybmyus thead, #oodnybmyus tbody, #oodnybmyus tfoot, #oodnybmyus tr, #oodnybmyus td, #oodnybmyus th {
+  border-style: none;
+}
 
+#oodnybmyus p {
+  margin: 0;
+  padding: 0;
+}
+
+#oodnybmyus .gt_table {
+  display: table;
+  border-collapse: collapse;
+  line-height: normal;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#oodnybmyus .gt_caption {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#oodnybmyus .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#oodnybmyus .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 3px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#oodnybmyus .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#oodnybmyus .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#oodnybmyus .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#oodnybmyus .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#oodnybmyus .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#oodnybmyus .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#oodnybmyus .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#oodnybmyus .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#oodnybmyus .gt_spanner_row {
+  border-bottom-style: hidden;
+}
+
+#oodnybmyus .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  text-align: left;
+}
+
+#oodnybmyus .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#oodnybmyus .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#oodnybmyus .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#oodnybmyus .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#oodnybmyus .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#oodnybmyus .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#oodnybmyus .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#oodnybmyus .gt_row_group_first th {
+  border-top-width: 2px;
+}
+
+#oodnybmyus .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#oodnybmyus .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#oodnybmyus .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#oodnybmyus .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#oodnybmyus .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#oodnybmyus .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#oodnybmyus .gt_last_grand_summary_row_top {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: double;
+  border-bottom-width: 6px;
+  border-bottom-color: #D3D3D3;
+}
+
+#oodnybmyus .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#oodnybmyus .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#oodnybmyus .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#oodnybmyus .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#oodnybmyus .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#oodnybmyus .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#oodnybmyus .gt_left {
+  text-align: left;
+}
+
+#oodnybmyus .gt_center {
+  text-align: center;
+}
+
+#oodnybmyus .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#oodnybmyus .gt_font_normal {
+  font-weight: normal;
+}
+
+#oodnybmyus .gt_font_bold {
+  font-weight: bold;
+}
+
+#oodnybmyus .gt_font_italic {
+  font-style: italic;
+}
+
+#oodnybmyus .gt_super {
+  font-size: 65%;
+}
+
+#oodnybmyus .gt_footnote_marks {
+  font-size: 75%;
+  vertical-align: 0.4em;
+  position: initial;
+}
+
+#oodnybmyus .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#oodnybmyus .gt_indent_1 {
+  text-indent: 5px;
+}
+
+#oodnybmyus .gt_indent_2 {
+  text-indent: 10px;
+}
+
+#oodnybmyus .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#oodnybmyus .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#oodnybmyus .gt_indent_5 {
+  text-indent: 25px;
+}
+
+#oodnybmyus .katex-display {
+  display: inline-flex !important;
+  margin-bottom: 0.75em !important;
+}
+
+#oodnybmyus div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+  height: 0px !important;
+}
+</style>
+<table class="gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
+  <thead>
+    <tr class="gt_col_headings">
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="a-"> </th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="Life-Exp.">Life Exp.</th>
+    </tr>
+  </thead>
+  <tbody class="gt_table_body">
+    <tr><td headers=" " class="gt_row gt_left">(Intercept)</td>
+<td headers="Life Exp." class="gt_row gt_center">-102.907*</td></tr>
+    <tr><td headers=" " class="gt_row gt_left"></td>
+<td headers="Life Exp." class="gt_row gt_center">(46.761)</td></tr>
+    <tr><td headers=" " class="gt_row gt_left">poly(I(HealthExp/1000), degree = 2, raw = TRUE)1</td>
+<td headers="Life Exp." class="gt_row gt_center">7.953***</td></tr>
+    <tr><td headers=" " class="gt_row gt_left"></td>
+<td headers="Life Exp." class="gt_row gt_center">(0.805)</td></tr>
+    <tr><td headers=" " class="gt_row gt_left">poly(I(HealthExp/1000), degree = 2, raw = TRUE)2</td>
+<td headers="Life Exp." class="gt_row gt_center">-0.748***</td></tr>
+    <tr><td headers=" " class="gt_row gt_left"></td>
+<td headers="Life Exp." class="gt_row gt_center">(0.137)</td></tr>
+    <tr><td headers=" " class="gt_row gt_left">year</td>
+<td headers="Life Exp." class="gt_row gt_center">0.081***</td></tr>
+    <tr><td headers=" " class="gt_row gt_left"></td>
+<td headers="Life Exp." class="gt_row gt_center">(0.023)</td></tr>
+    <tr><td headers=" " class="gt_row gt_left">socialist</td>
+<td headers="Life Exp." class="gt_row gt_center">0.136*</td></tr>
+    <tr><td headers=" " class="gt_row gt_left"></td>
+<td headers="Life Exp." class="gt_row gt_center">(0.061)</td></tr>
+    <tr><td headers=" " class="gt_row gt_left">equal_liberty</td>
+<td headers="Life Exp." class="gt_row gt_center">3.254+</td></tr>
+    <tr><td headers=" " class="gt_row gt_left"></td>
+<td headers="Life Exp." class="gt_row gt_center">(1.857)</td></tr>
+    <tr><td headers=" " class="gt_row gt_left">socialist × equal_liberty</td>
+<td headers="Life Exp." class="gt_row gt_center">-0.086</td></tr>
+    <tr><td headers=" " class="gt_row gt_left" style="border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #000000;"></td>
+<td headers="Life Exp." class="gt_row gt_center" style="border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #000000;">(0.085)</td></tr>
+    <tr><td headers=" " class="gt_row gt_left">Num.Obs.</td>
+<td headers="Life Exp." class="gt_row gt_center">3897</td></tr>
+    <tr><td headers=" " class="gt_row gt_left">R2</td>
+<td headers="Life Exp." class="gt_row gt_center">0.607</td></tr>
+  </tbody>
+  <tfoot>
+    <tr class="gt_sourcenotes">
+      <td class="gt_sourcenote" colspan="2">+ p &lt; 0.1, * p &lt; 0.05, ** p &lt; 0.01, *** p &lt; 0.001</td>
+    </tr>
+  </tfoot>
+</table>
+</div>
 ]]
 
 ---
@@ -688,10 +2365,10 @@ ols_4 &lt;- lm_robust( LifeExpect ~
 
 .center[Interpretation:]
 
-`\(\beta_{\text{HealthExp}}\)`: At $0, a $1000 increase in `HealthExp` is associated with an increase in life expectancy at birth of 7.753 years.
+`\(\beta_{\text{HealthExp}}\)`: At $0, a $1000 increase in `HealthExp` is associated with an increase in life expectancy at birth of 7.953 years.
 
 `\(\beta_{\text{HealthExp}^2}\)`: With every $1000 increase in `HealthExp`, this association declines by -0.748 years.
- - For example, the increase from $1000 to $2000 is associated with an increase in life expectancy at birth of `\(7.753 + ( 2 \times -0.748 ) = 6.258\)` years.
+ - For example, the increase from $1000 to $2000 is associated with an increase in life expectancy at birth of `\(7.953 + ( 2 \times -0.748 ) = 6.457\)` years.
 
 .center[.alert[This is complex; so plot it!]]
 ]
@@ -709,22 +2386,22 @@ ols_4 &lt;- lm_robust( LifeExpect ~
   HealthExp = min(Dat$HealthExp):max(Dat$HealthExp), 
   # Hold other variables constant.
   socialist = 0, # Non-socialist
-  citizen_rights = 12, # Max democracy
-  date = 2020)) # most recent date
-# # A tibble: 12,464 × 4
-#    HealthExp socialist citizen_rights  date
-#        &lt;dbl&gt;     &lt;dbl&gt;          &lt;dbl&gt; &lt;dbl&gt;
-#  1      10.4         0             12  2020
-#  2      11.4         0             12  2020
-#  3      12.4         0             12  2020
-#  4      13.4         0             12  2020
-#  5      14.4         0             12  2020
-#  6      15.4         0             12  2020
-#  7      16.4         0             12  2020
-#  8      17.4         0             12  2020
-#  9      18.4         0             12  2020
-# 10      19.4         0             12  2020
-# # ℹ 12,454 more rows
+  equal_liberty = 1, # Max democracy
+  year = 2022)) # most recent date
+# # A tibble: 12,429 × 4
+#    HealthExp socialist equal_liberty  year
+#        &lt;dbl&gt;     &lt;dbl&gt;         &lt;dbl&gt; &lt;dbl&gt;
+#  1      6.11         0             1  2022
+#  2      7.11         0             1  2022
+#  3      8.11         0             1  2022
+#  4      9.11         0             1  2022
+#  5     10.1          0             1  2022
+#  6     11.1          0             1  2022
+#  7     12.1          0             1  2022
+#  8     13.1          0             1  2022
+#  9     14.1          0             1  2022
+# 10     15.1          0             1  2022
+# # ℹ 12,419 more rows
 ```
 ]]
 .panel[.panel-name[Predict]
@@ -736,20 +2413,20 @@ ols_4 &lt;- lm_robust( LifeExpect ~
   interval = "confidence", level = 0.95)$fit %&gt;%
    as_tibble() %&gt;% # Turn into a tibble, then
    bind_cols(fict_dat, .)) # Add to the synthetic data.
-# # A tibble: 12,464 × 7
-#    HealthExp socialist citizen_rights  date   fit   lwr   upr
-#        &lt;dbl&gt;     &lt;dbl&gt;          &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
-#  1      10.4         0             12  2020  65.8  63.6  67.9
-#  2      11.4         0             12  2020  65.8  63.6  67.9
-#  3      12.4         0             12  2020  65.8  63.6  67.9
-#  4      13.4         0             12  2020  65.8  63.6  67.9
-#  5      14.4         0             12  2020  65.8  63.6  67.9
-#  6      15.4         0             12  2020  65.8  63.6  67.9
-#  7      16.4         0             12  2020  65.8  63.7  68.0
-#  8      17.4         0             12  2020  65.8  63.7  68.0
-#  9      18.4         0             12  2020  65.8  63.7  68.0
-# 10      19.4         0             12  2020  65.8  63.7  68.0
-# # ℹ 12,454 more rows
+# # A tibble: 12,429 × 7
+#    HealthExp socialist equal_liberty  year   fit   lwr   upr
+#        &lt;dbl&gt;     &lt;dbl&gt;         &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+#  1      6.11         0             1  2022  64.8  62.6  67.0
+#  2      7.11         0             1  2022  64.8  62.6  67.0
+#  3      8.11         0             1  2022  64.9  62.7  67.1
+#  4      9.11         0             1  2022  64.9  62.7  67.1
+#  5     10.1          0             1  2022  64.9  62.7  67.1
+#  6     11.1          0             1  2022  64.9  62.7  67.1
+#  7     12.1          0             1  2022  64.9  62.7  67.1
+#  8     13.1          0             1  2022  64.9  62.7  67.1
+#  9     14.1          0             1  2022  64.9  62.7  67.1
+# 10     15.1          0             1  2022  64.9  62.7  67.1
+# # ℹ 12,419 more rows
 ```
 ]]
 .panel[.panel-name[Plot]
@@ -767,7 +2444,7 @@ ggplot(data = fict_dat, aes(y = fit, x = HealthExp)) +
   geom_line() +  # Add a line for the fitted values
   geom_text(
     data = Dat %&gt;%  # Use original 'Dat' data for labeling
-      filter(date == 2020 &amp;  # Filter for the year 2022 and specific countries
+      filter(year == 2022 &amp;  # Filter for the year 2022 and specific countries
                (country == "Mali" | country == "Nepal" | 
                   country == "Morocco" | country == "Mexico" | 
                   country == "Poland" | country == "Japan" | 
@@ -794,106 +2471,516 @@ class: clear
 ``` r
 ols_5 &lt;- lm_robust(LifeExpect ~ 
 *       poly(I(HealthExp/1000), degree = 4, raw = TRUE) +
-        date + socialist*citizen_rights, data = Dat, clusters = country)
+        year + socialist*equal_liberty, data = Dat, clusters = country)
 ```
-&lt;table style="NAborder-bottom: 0; color: black; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
- &lt;thead&gt;
-  &lt;tr&gt;
-   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
-   &lt;th style="text-align:center;"&gt; Life Exp. &lt;/th&gt;
-  &lt;/tr&gt;
- &lt;/thead&gt;
-&lt;tbody&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; −81.520 &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (51.201) &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; poly(I(HealthExp/1000), degree = 4, raw = TRUE)1 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 17.051*** &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (1.706) &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; poly(I(HealthExp/1000), degree = 4, raw = TRUE)2 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; −5.185*** &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (0.938) &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; poly(I(HealthExp/1000), degree = 4, raw = TRUE)3 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.631*** &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (0.175) &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; poly(I(HealthExp/1000), degree = 4, raw = TRUE)4 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; −0.026** &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (0.010) &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; date &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.069** &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (0.025) &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; socialist &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.164*** &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (0.027) &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; citizen_rights &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.302** &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (0.113) &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; socialist × citizen_rights &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; −0.014*** &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.003) &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 3654 &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.660 &lt;/td&gt;
-  &lt;/tr&gt;
-&lt;/tbody&gt;
-&lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
-&lt;sup&gt;&lt;/sup&gt; + p &amp;lt; 0.1, * p &amp;lt; 0.05, ** p &amp;lt; 0.01, *** p &amp;lt; 0.001&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;
-&lt;/table&gt;
+<div id="oytvivobbx" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#oytvivobbx table {
+  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
 
+#oytvivobbx thead, #oytvivobbx tbody, #oytvivobbx tfoot, #oytvivobbx tr, #oytvivobbx td, #oytvivobbx th {
+  border-style: none;
+}
 
+#oytvivobbx p {
+  margin: 0;
+  padding: 0;
+}
+
+#oytvivobbx .gt_table {
+  display: table;
+  border-collapse: collapse;
+  line-height: normal;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#oytvivobbx .gt_caption {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#oytvivobbx .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#oytvivobbx .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 3px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#oytvivobbx .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#oytvivobbx .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#oytvivobbx .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#oytvivobbx .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#oytvivobbx .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#oytvivobbx .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#oytvivobbx .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#oytvivobbx .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#oytvivobbx .gt_spanner_row {
+  border-bottom-style: hidden;
+}
+
+#oytvivobbx .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  text-align: left;
+}
+
+#oytvivobbx .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#oytvivobbx .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#oytvivobbx .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#oytvivobbx .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#oytvivobbx .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#oytvivobbx .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#oytvivobbx .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#oytvivobbx .gt_row_group_first th {
+  border-top-width: 2px;
+}
+
+#oytvivobbx .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#oytvivobbx .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#oytvivobbx .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#oytvivobbx .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#oytvivobbx .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#oytvivobbx .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#oytvivobbx .gt_last_grand_summary_row_top {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: double;
+  border-bottom-width: 6px;
+  border-bottom-color: #D3D3D3;
+}
+
+#oytvivobbx .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#oytvivobbx .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#oytvivobbx .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#oytvivobbx .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#oytvivobbx .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#oytvivobbx .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#oytvivobbx .gt_left {
+  text-align: left;
+}
+
+#oytvivobbx .gt_center {
+  text-align: center;
+}
+
+#oytvivobbx .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#oytvivobbx .gt_font_normal {
+  font-weight: normal;
+}
+
+#oytvivobbx .gt_font_bold {
+  font-weight: bold;
+}
+
+#oytvivobbx .gt_font_italic {
+  font-style: italic;
+}
+
+#oytvivobbx .gt_super {
+  font-size: 65%;
+}
+
+#oytvivobbx .gt_footnote_marks {
+  font-size: 75%;
+  vertical-align: 0.4em;
+  position: initial;
+}
+
+#oytvivobbx .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#oytvivobbx .gt_indent_1 {
+  text-indent: 5px;
+}
+
+#oytvivobbx .gt_indent_2 {
+  text-indent: 10px;
+}
+
+#oytvivobbx .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#oytvivobbx .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#oytvivobbx .gt_indent_5 {
+  text-indent: 25px;
+}
+
+#oytvivobbx .katex-display {
+  display: inline-flex !important;
+  margin-bottom: 0.75em !important;
+}
+
+#oytvivobbx div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+  height: 0px !important;
+}
+</style>
+<table class="gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
+  <thead>
+    <tr class="gt_col_headings">
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="a-"> </th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="Life-Exp.">Life Exp.</th>
+    </tr>
+  </thead>
+  <tbody class="gt_table_body">
+    <tr><td headers=" " class="gt_row gt_left">(Intercept)</td>
+<td headers="Life Exp." class="gt_row gt_center">-55.525</td></tr>
+    <tr><td headers=" " class="gt_row gt_left"></td>
+<td headers="Life Exp." class="gt_row gt_center">(49.258)</td></tr>
+    <tr><td headers=" " class="gt_row gt_left">poly(I(HealthExp/1000), degree = 4, raw = TRUE)1</td>
+<td headers="Life Exp." class="gt_row gt_center">17.635***</td></tr>
+    <tr><td headers=" " class="gt_row gt_left"></td>
+<td headers="Life Exp." class="gt_row gt_center">(1.522)</td></tr>
+    <tr><td headers=" " class="gt_row gt_left">poly(I(HealthExp/1000), degree = 4, raw = TRUE)2</td>
+<td headers="Life Exp." class="gt_row gt_center">-5.379***</td></tr>
+    <tr><td headers=" " class="gt_row gt_left"></td>
+<td headers="Life Exp." class="gt_row gt_center">(0.799)</td></tr>
+    <tr><td headers=" " class="gt_row gt_left">poly(I(HealthExp/1000), degree = 4, raw = TRUE)3</td>
+<td headers="Life Exp." class="gt_row gt_center">0.659***</td></tr>
+    <tr><td headers=" " class="gt_row gt_left"></td>
+<td headers="Life Exp." class="gt_row gt_center">(0.144)</td></tr>
+    <tr><td headers=" " class="gt_row gt_left">poly(I(HealthExp/1000), degree = 4, raw = TRUE)4</td>
+<td headers="Life Exp." class="gt_row gt_center">-0.027***</td></tr>
+    <tr><td headers=" " class="gt_row gt_left"></td>
+<td headers="Life Exp." class="gt_row gt_center">(0.008)</td></tr>
+    <tr><td headers=" " class="gt_row gt_left">year</td>
+<td headers="Life Exp." class="gt_row gt_center">0.057*</td></tr>
+    <tr><td headers=" " class="gt_row gt_left"></td>
+<td headers="Life Exp." class="gt_row gt_center">(0.024)</td></tr>
+    <tr><td headers=" " class="gt_row gt_left">socialist</td>
+<td headers="Life Exp." class="gt_row gt_center">0.152**</td></tr>
+    <tr><td headers=" " class="gt_row gt_left"></td>
+<td headers="Life Exp." class="gt_row gt_center">(0.054)</td></tr>
+    <tr><td headers=" " class="gt_row gt_left">equal_liberty</td>
+<td headers="Life Exp." class="gt_row gt_center">2.163</td></tr>
+    <tr><td headers=" " class="gt_row gt_left"></td>
+<td headers="Life Exp." class="gt_row gt_center">(1.725)</td></tr>
+    <tr><td headers=" " class="gt_row gt_left">socialist × equal_liberty</td>
+<td headers="Life Exp." class="gt_row gt_center">-0.132+</td></tr>
+    <tr><td headers=" " class="gt_row gt_left" style="border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #000000;"></td>
+<td headers="Life Exp." class="gt_row gt_center" style="border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #000000;">(0.072)</td></tr>
+    <tr><td headers=" " class="gt_row gt_left">Num.Obs.</td>
+<td headers="Life Exp." class="gt_row gt_center">3897</td></tr>
+    <tr><td headers=" " class="gt_row gt_left">R2</td>
+<td headers="Life Exp." class="gt_row gt_center">0.677</td></tr>
+  </tbody>
+  <tfoot>
+    <tr class="gt_sourcenotes">
+      <td class="gt_sourcenote" colspan="2">+ p &lt; 0.1, * p &lt; 0.05, ** p &lt; 0.01, *** p &lt; 0.001</td>
+    </tr>
+  </tfoot>
+</table>
+</div>
 ]]
 
 ---
-
 .push-right[
 .panelset[
 .panel[.panel-name[Fictional data]
@@ -905,22 +2992,22 @@ ols_5 &lt;- lm_robust(LifeExpect ~
   HealthExp = min(Dat$HealthExp):max(Dat$HealthExp), 
   # Hold other variables constant.
   socialist = 0, # Non-socialist
-  citizen_rights = 12, # Max democracy
-  date = 2019)) # most recent date
-# # A tibble: 12,464 × 4
-#    HealthExp socialist citizen_rights  date
-#        &lt;dbl&gt;     &lt;dbl&gt;          &lt;dbl&gt; &lt;dbl&gt;
-#  1      10.4         0             12  2019
-#  2      11.4         0             12  2019
-#  3      12.4         0             12  2019
-#  4      13.4         0             12  2019
-#  5      14.4         0             12  2019
-#  6      15.4         0             12  2019
-#  7      16.4         0             12  2019
-#  8      17.4         0             12  2019
-#  9      18.4         0             12  2019
-# 10      19.4         0             12  2019
-# # ℹ 12,454 more rows
+  equal_liberty = 1, # Max democracy
+  year = 2022)) # most recent date
+# # A tibble: 12,429 × 4
+#    HealthExp socialist equal_liberty  year
+#        &lt;dbl&gt;     &lt;dbl&gt;         &lt;dbl&gt; &lt;dbl&gt;
+#  1      6.11         0             1  2022
+#  2      7.11         0             1  2022
+#  3      8.11         0             1  2022
+#  4      9.11         0             1  2022
+#  5     10.1          0             1  2022
+#  6     11.1          0             1  2022
+#  7     12.1          0             1  2022
+#  8     13.1          0             1  2022
+#  9     14.1          0             1  2022
+# 10     15.1          0             1  2022
+# # ℹ 12,419 more rows
 ```
 ]]
 .panel[.panel-name[Predict]
@@ -932,20 +3019,20 @@ ols_5 &lt;- lm_robust(LifeExpect ~
   interval = "confidence", level = 0.95)$fit %&gt;%
    as_tibble() %&gt;% # Turn into a tibble, then
    bind_cols(fict_dat, .)) # Add to the synthetic data.
-# # A tibble: 12,464 × 7
-#    HealthExp socialist citizen_rights  date   fit   lwr   upr
-#        &lt;dbl&gt;     &lt;dbl&gt;          &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
-#  1      10.4         0             12  2019  62.5  60.3  64.6
-#  2      11.4         0             12  2019  62.5  60.3  64.6
-#  3      12.4         0             12  2019  62.5  60.4  64.6
-#  4      13.4         0             12  2019  62.5  60.4  64.7
-#  5      14.4         0             12  2019  62.5  60.4  64.7
-#  6      15.4         0             12  2019  62.5  60.4  64.7
-#  7      16.4         0             12  2019  62.6  60.4  64.7
-#  8      17.4         0             12  2019  62.6  60.4  64.7
-#  9      18.4         0             12  2019  62.6  60.5  64.7
-# 10      19.4         0             12  2019  62.6  60.5  64.7
-# # ℹ 12,454 more rows
+# # A tibble: 12,429 × 7
+#    HealthExp socialist equal_liberty  year   fit   lwr   upr
+#        &lt;dbl&gt;     &lt;dbl&gt;         &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+#  1      6.11         0             1  2022  61.5  59.3  63.7
+#  2      7.11         0             1  2022  61.5  59.3  63.7
+#  3      8.11         0             1  2022  61.5  59.3  63.7
+#  4      9.11         0             1  2022  61.5  59.3  63.8
+#  5     10.1          0             1  2022  61.6  59.4  63.8
+#  6     11.1          0             1  2022  61.6  59.4  63.8
+#  7     12.1          0             1  2022  61.6  59.4  63.8
+#  8     13.1          0             1  2022  61.6  59.4  63.8
+#  9     14.1          0             1  2022  61.6  59.4  63.8
+# 10     15.1          0             1  2022  61.6  59.5  63.8
+# # ℹ 12,419 more rows
 ```
 ]]
 .panel[.panel-name[Plot]
@@ -962,7 +3049,7 @@ ggplot(data = fict_dat, aes(y = fit, x = HealthExp)) +
   geom_line() +  # Add a line for the fitted values
   geom_text(
     data = Dat %&gt;%  # Use original 'Dat' data for labeling
-      filter(date == 2020 &amp;  # Filter for the year 2022 and specific countries
+      filter(year == 2022 &amp;  # Filter for the year 2022 and specific countries
                (country == "Mali" | country == "Nepal" | 
                   country == "Morocco" | country == "Mexico" | 
                   country == "Poland" | country == "Japan" | 
@@ -982,13 +3069,13 @@ ggplot(data = fict_dat, aes(y = fit, x = HealthExp)) +
 .push-right[
 With a unit increase in `\(X\)`, each polynomial always alters the one before it:
 
-`\(\beta_{\text{HealthExp}}\)`: At $0, a $1000 increase in `HealthExp` is associated with an increase in life expectancy at birth of 17.051 years.
+`\(\beta_{\text{HealthExp}}\)`: At $0, a $1000 increase in `HealthExp` is associated with an increase in life expectancy at birth of 17.635 years.
 
-`\(\beta_{\text{HealthExp}^2}\)`: With every $1000 increase in `HealthExp`, `\(\beta_{\text{HealthExp}}\)` changes by -5.185.
+`\(\beta_{\text{HealthExp}^2}\)`: With every $1000 increase in `HealthExp`, `\(\beta_{\text{HealthExp}}\)` changes by -5.379.
 
-`\(\beta_{\text{HealthExp}^3}\)`: With every $1000 increase in `HealthExp`, `\(\beta_{\text{HealthExp}^2}\)` changes by `\(0.631\)`.
+`\(\beta_{\text{HealthExp}^3}\)`: With every $1000 increase in `HealthExp`, `\(\beta_{\text{HealthExp}^2}\)` changes by `\(0.659\)`.
 
-`\(\beta_{\text{HealthExp}^4}\)`: With every $1000 increase in `HealthExp`, `\(\beta_{\text{HealthExp}^3}\)` changes by `\(-0.026\)`.
+`\(\beta_{\text{HealthExp}^4}\)`: With every $1000 increase in `HealthExp`, `\(\beta_{\text{HealthExp}^3}\)` changes by `\(-0.027\)`.
 
 .center[.alert[It gets super abstract; so always plot the implied association!]]
 ]
@@ -1000,11 +3087,11 @@ layout: false
 .push-left[
 .content-box-blue[
 - You can best think of a polynomial as an interaction of a variable with itself.
-  + Polynomials "linearize" non-linear relations.
+  + Polynomials *linearize* non-linear associations
 
 
 - The more polynomials, the more complex and "wobbly" the non-linear relation.
-  + Beware to not overfit the model to the particular data. .alert[In Sociology, it rarely makes sense to use higher order polynomials]
+  + Beware to not overfit the model to the particular data. .alert[In Sociology, it rarely makes sense to use polynomials beyond 2 or 3.]
 
 
 - In a multiple OLS framework, we can control for other variables.
@@ -1018,7 +3105,7 @@ layout: false
 class: inverse middle center
 # Break
 
-&lt;iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+&lt;iframe src='https://panel.letstimeit.com/instant-timer/15-minute' width='600' height='400' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
 
 ---
 class: middle clear
@@ -1026,7 +3113,8 @@ class: middle clear
 .left-column[
 &lt;img src="https://www.laserfiche.com/wp-content/uploads/2014/10/femalecoder.jpg" width="80%" style="display: block; margin: auto;" /&gt;
 
-&lt;iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+&lt;iframe src='https://panel.letstimeit.com/instant-timer/20-minute' width='600' height='400' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+
 ]
 
 .right-column[
@@ -1034,6 +3122,11 @@ class: middle clear
 &lt;iframe src='exercise1.html' width='1000' height='600' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
 ]
 
+---
+class: inverse middle center
+# Break
+
+&lt;iframe src='https://panel.letstimeit.com/instant-timer/10-minute' width='600' height='400' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
 
 
 ---
@@ -1082,76 +3175,499 @@ layout: true
 .push-left[
 .font80[
 
-&lt;table style="NAborder-bottom: 0; color: black; width: auto !important; margin-left: auto; margin-right: auto;" class="table"&gt;
- &lt;thead&gt;
-  &lt;tr&gt;
-   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
-   &lt;th style="text-align:center;"&gt; Life Exp. &lt;/th&gt;
-  &lt;/tr&gt;
- &lt;/thead&gt;
-&lt;tbody&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 1.576 &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (43.501) &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; I(log2(HealthExp)) &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 3.589*** &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (0.188) &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; date &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.017 &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (0.022) &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; socialist &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.127*** &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (0.028) &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; citizen_rights &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.184 &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; (0.118) &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; socialist × citizen_rights &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; −0.009** &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;box-shadow: 0px 1.5px"&gt;  &lt;/td&gt;
-   &lt;td style="text-align:center;box-shadow: 0px 1.5px"&gt; (0.003) &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; Num.Obs. &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 3654 &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; R2 &lt;/td&gt;
-   &lt;td style="text-align:center;"&gt; 0.699 &lt;/td&gt;
-  &lt;/tr&gt;
-&lt;/tbody&gt;
-&lt;tfoot&gt;&lt;tr&gt;&lt;td style="padding: 0; " colspan="100%"&gt;
-&lt;sup&gt;&lt;/sup&gt; + p &amp;lt; 0.1, * p &amp;lt; 0.05, ** p &amp;lt; 0.01, *** p &amp;lt; 0.001&lt;/td&gt;&lt;/tr&gt;&lt;/tfoot&gt;
-&lt;/table&gt;
+<div id="rzqnxfszwc" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#rzqnxfszwc table {
+  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
 
+#rzqnxfszwc thead, #rzqnxfszwc tbody, #rzqnxfszwc tfoot, #rzqnxfszwc tr, #rzqnxfszwc td, #rzqnxfszwc th {
+  border-style: none;
+}
 
+#rzqnxfszwc p {
+  margin: 0;
+  padding: 0;
+}
+
+#rzqnxfszwc .gt_table {
+  display: table;
+  border-collapse: collapse;
+  line-height: normal;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#rzqnxfszwc .gt_caption {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#rzqnxfszwc .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#rzqnxfszwc .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 3px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#rzqnxfszwc .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#rzqnxfszwc .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#rzqnxfszwc .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#rzqnxfszwc .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#rzqnxfszwc .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#rzqnxfszwc .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#rzqnxfszwc .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#rzqnxfszwc .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#rzqnxfszwc .gt_spanner_row {
+  border-bottom-style: hidden;
+}
+
+#rzqnxfszwc .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  text-align: left;
+}
+
+#rzqnxfszwc .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#rzqnxfszwc .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#rzqnxfszwc .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#rzqnxfszwc .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#rzqnxfszwc .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#rzqnxfszwc .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#rzqnxfszwc .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#rzqnxfszwc .gt_row_group_first th {
+  border-top-width: 2px;
+}
+
+#rzqnxfszwc .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#rzqnxfszwc .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#rzqnxfszwc .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#rzqnxfszwc .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#rzqnxfszwc .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#rzqnxfszwc .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#rzqnxfszwc .gt_last_grand_summary_row_top {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: double;
+  border-bottom-width: 6px;
+  border-bottom-color: #D3D3D3;
+}
+
+#rzqnxfszwc .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#rzqnxfszwc .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#rzqnxfszwc .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#rzqnxfszwc .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#rzqnxfszwc .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#rzqnxfszwc .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#rzqnxfszwc .gt_left {
+  text-align: left;
+}
+
+#rzqnxfszwc .gt_center {
+  text-align: center;
+}
+
+#rzqnxfszwc .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#rzqnxfszwc .gt_font_normal {
+  font-weight: normal;
+}
+
+#rzqnxfszwc .gt_font_bold {
+  font-weight: bold;
+}
+
+#rzqnxfszwc .gt_font_italic {
+  font-style: italic;
+}
+
+#rzqnxfszwc .gt_super {
+  font-size: 65%;
+}
+
+#rzqnxfszwc .gt_footnote_marks {
+  font-size: 75%;
+  vertical-align: 0.4em;
+  position: initial;
+}
+
+#rzqnxfszwc .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#rzqnxfszwc .gt_indent_1 {
+  text-indent: 5px;
+}
+
+#rzqnxfszwc .gt_indent_2 {
+  text-indent: 10px;
+}
+
+#rzqnxfszwc .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#rzqnxfszwc .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#rzqnxfszwc .gt_indent_5 {
+  text-indent: 25px;
+}
+
+#rzqnxfszwc .katex-display {
+  display: inline-flex !important;
+  margin-bottom: 0.75em !important;
+}
+
+#rzqnxfszwc div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+  height: 0px !important;
+}
+</style>
+<table class="gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
+  <thead>
+    <tr class="gt_col_headings">
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="a-"> </th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="Life-Exp.">Life Exp.</th>
+    </tr>
+  </thead>
+  <tbody class="gt_table_body">
+    <tr><td headers=" " class="gt_row gt_left">(Intercept)</td>
+<td headers="Life Exp." class="gt_row gt_center">16.744</td></tr>
+    <tr><td headers=" " class="gt_row gt_left"></td>
+<td headers="Life Exp." class="gt_row gt_center">(45.180)</td></tr>
+    <tr><td headers=" " class="gt_row gt_left">I(log2(HealthExp))</td>
+<td headers="Life Exp." class="gt_row gt_center">3.646***</td></tr>
+    <tr><td headers=" " class="gt_row gt_left"></td>
+<td headers="Life Exp." class="gt_row gt_center">(0.179)</td></tr>
+    <tr><td headers=" " class="gt_row gt_left">year</td>
+<td headers="Life Exp." class="gt_row gt_center">0.010</td></tr>
+    <tr><td headers=" " class="gt_row gt_left"></td>
+<td headers="Life Exp." class="gt_row gt_center">(0.023)</td></tr>
+    <tr><td headers=" " class="gt_row gt_left">socialist</td>
+<td headers="Life Exp." class="gt_row gt_center">0.113*</td></tr>
+    <tr><td headers=" " class="gt_row gt_left"></td>
+<td headers="Life Exp." class="gt_row gt_center">(0.054)</td></tr>
+    <tr><td headers=" " class="gt_row gt_left">equal_liberty</td>
+<td headers="Life Exp." class="gt_row gt_center">0.918</td></tr>
+    <tr><td headers=" " class="gt_row gt_left"></td>
+<td headers="Life Exp." class="gt_row gt_center">(1.689)</td></tr>
+    <tr><td headers=" " class="gt_row gt_left">socialist × equal_liberty</td>
+<td headers="Life Exp." class="gt_row gt_center">-0.087</td></tr>
+    <tr><td headers=" " class="gt_row gt_left" style="border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #000000;"></td>
+<td headers="Life Exp." class="gt_row gt_center" style="border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #000000;">(0.070)</td></tr>
+    <tr><td headers=" " class="gt_row gt_left">Num.Obs.</td>
+<td headers="Life Exp." class="gt_row gt_center">3897</td></tr>
+    <tr><td headers=" " class="gt_row gt_left">R2</td>
+<td headers="Life Exp." class="gt_row gt_center">0.720</td></tr>
+  </tbody>
+  <tfoot>
+    <tr class="gt_sourcenotes">
+      <td class="gt_sourcenote" colspan="2">+ p &lt; 0.1, * p &lt; 0.05, ** p &lt; 0.01, *** p &lt; 0.001</td>
+    </tr>
+  </tfoot>
+</table>
+</div>
 ]]
 
 ---
@@ -1160,12 +3676,12 @@ layout: true
 
 ``` r
 *ols_6 &lt;- lm_robust(LifeExpect ~ I(log2(HealthExp)) +
-                     date + socialist*citizen_rights, 
+                     year + socialist*equal_liberty, 
                    data = Dat, clusters = country)
 ```
 ]
 .content-box-green[
-How can we interpret the coefficient of 3.589?
+How can we interpret the coefficient of 3.646?
 ]]
 
 ---
@@ -1181,22 +3697,22 @@ How can we interpret the coefficient of 3.589?
   HealthExp = min(Dat$HealthExp):max(Dat$HealthExp), 
   # Hold other variables constant.
   socialist = 0, # Non-socialist
-  citizen_rights = 12, # Max democracy
-  date = 2019)) # most recent date
-# # A tibble: 12,464 × 4
-#    HealthExp socialist citizen_rights  date
-#        &lt;dbl&gt;     &lt;dbl&gt;          &lt;dbl&gt; &lt;dbl&gt;
-#  1      10.4         0             12  2019
-#  2      11.4         0             12  2019
-#  3      12.4         0             12  2019
-#  4      13.4         0             12  2019
-#  5      14.4         0             12  2019
-#  6      15.4         0             12  2019
-#  7      16.4         0             12  2019
-#  8      17.4         0             12  2019
-#  9      18.4         0             12  2019
-# 10      19.4         0             12  2019
-# # ℹ 12,454 more rows
+  equal_liberty = 1, # Max democracy
+  year = 2022)) # most recent date
+# # A tibble: 12,429 × 4
+#    HealthExp socialist equal_liberty  year
+#        &lt;dbl&gt;     &lt;dbl&gt;         &lt;dbl&gt; &lt;dbl&gt;
+#  1      6.11         0             1  2022
+#  2      7.11         0             1  2022
+#  3      8.11         0             1  2022
+#  4      9.11         0             1  2022
+#  5     10.1          0             1  2022
+#  6     11.1          0             1  2022
+#  7     12.1          0             1  2022
+#  8     13.1          0             1  2022
+#  9     14.1          0             1  2022
+# 10     15.1          0             1  2022
+# # ℹ 12,419 more rows
 ```
 ]]
 .panel[.panel-name[Predict]
@@ -1208,20 +3724,20 @@ How can we interpret the coefficient of 3.589?
   interval = "confidence", level = 0.95)$fit %&gt;%
    as_tibble() %&gt;% # Turn into a tibble, then
    bind_cols(fict_dat, .)) # Add to the synthetic data.
-# # A tibble: 12,464 × 7
-#    HealthExp socialist citizen_rights  date   fit   lwr   upr
-#        &lt;dbl&gt;     &lt;dbl&gt;          &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
-#  1      10.4         0             12  2019  50.3  47.1  53.5
-#  2      11.4         0             12  2019  50.7  47.6  53.9
-#  3      12.4         0             12  2019  51.2  48.1  54.3
-#  4      13.4         0             12  2019  51.6  48.5  54.6
-#  5      14.4         0             12  2019  52.0  48.9  55.0
-#  6      15.4         0             12  2019  52.3  49.3  55.3
-#  7      16.4         0             12  2019  52.6  49.7  55.6
-#  8      17.4         0             12  2019  52.9  50.0  55.9
-#  9      18.4         0             12  2019  53.2  50.3  56.1
-# 10      19.4         0             12  2019  53.5  50.6  56.4
-# # ℹ 12,454 more rows
+# # A tibble: 12,429 × 7
+#    HealthExp socialist equal_liberty  year   fit   lwr   upr
+#        &lt;dbl&gt;     &lt;dbl&gt;         &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+#  1      6.11         0             1  2022  46.8  43.3  50.2
+#  2      7.11         0             1  2022  47.6  44.2  50.9
+#  3      8.11         0             1  2022  48.3  45.0  51.6
+#  4      9.11         0             1  2022  48.9  45.6  52.1
+#  5     10.1          0             1  2022  49.4  46.2  52.6
+#  6     11.1          0             1  2022  49.9  46.8  53.1
+#  7     12.1          0             1  2022  50.4  47.3  53.5
+#  8     13.1          0             1  2022  50.8  47.7  53.9
+#  9     14.1          0             1  2022  51.2  48.2  54.2
+# 10     15.1          0             1  2022  51.5  48.5  54.5
+# # ℹ 12,419 more rows
 ```
 ]]
 .panel[.panel-name[Plot]
@@ -1238,7 +3754,7 @@ ggplot(data = fict_dat, aes(y = fit, x = HealthExp)) +
   geom_line() +  # Add a line for the fitted values
   geom_text(
     data = Dat %&gt;%  # Use original 'Dat' data for labeling
-      filter(date == 2020 &amp;  # Filter for the year 2022 and specific countries
+      filter(year == 2022 &amp;  # Filter for the year 2022 and specific countries
                (country == "Mali" | country == "Nepal" | 
                   country == "Morocco" | country == "Mexico" | 
                   country == "Poland" | country == "Japan" | 
@@ -1266,32 +3782,32 @@ class: clear
 # =========================================================================
 #                                                Model 1       Model 2     
 # -------------------------------------------------------------------------
-# (Intercept)                                     -81.520         1.576    
-#                                                 (51.201)      (43.501)   
-# poly(HealthExp/1000), degree = 4, raw = TRUE1    17.051 ***              
-#                                                  (1.706)                 
-# poly(HealthExp/1000), degree = 4, raw = TRUE2    -5.185 ***              
-#                                                  (0.938)                 
-# poly(HealthExp/1000), degree = 4, raw = TRUE3     0.631 **               
-#                                                  (0.175)                 
-# poly(HealthExp/1000), degree = 4, raw = TRUE4    -0.026 *                
-#                                                  (0.010)                 
-# date                                              0.069 **      0.017    
-#                                                  (0.025)       (0.022)   
-# socialist                                         0.164 **      0.127 ** 
-#                                                  (0.027)       (0.028)   
-# citizen_rights                                    0.302 **      0.184    
-#                                                  (0.113)       (0.118)   
-# socialist:citizen_rights                         -0.014 **     -0.009 *  
-#                                                  (0.003)       (0.003)   
-# log2(HealthExp)                                                 3.589 ***
-#                                                                (0.188)   
+# (Intercept)                                     -55.525        16.744    
+#                                                 (49.258)      (45.180)   
+# poly(HealthExp/1000), degree = 4, raw = TRUE1    17.635 ***              
+#                                                  (1.522)                 
+# poly(HealthExp/1000), degree = 4, raw = TRUE2    -5.379 ***              
+#                                                  (0.799)                 
+# poly(HealthExp/1000), degree = 4, raw = TRUE3     0.659 ***              
+#                                                  (0.144)                 
+# poly(HealthExp/1000), degree = 4, raw = TRUE4    -0.027 **               
+#                                                  (0.008)                 
+# year                                              0.057 *       0.010    
+#                                                  (0.024)       (0.023)   
+# socialist                                         0.152 *       0.113    
+#                                                  (0.054)       (0.054)   
+# equal_liberty                                     2.163         0.918    
+#                                                  (1.725)       (1.689)   
+# socialist:equal_liberty                          -0.132        -0.087    
+#                                                  (0.072)       (0.070)   
+# log2(HealthExp)                                                 3.646 ***
+#                                                                (0.179)   
 # -------------------------------------------------------------------------
-# R^2                                               0.660         0.699    
-# Adj. R^2                                          0.660         0.699    
-# Num. obs.                                      3654          3654        
-# RMSE                                              5.191         4.882    
-# N Clusters                                      169           169        
+# R^2                                               0.677         0.720    
+# Adj. R^2                                          0.677         0.719    
+# Num. obs.                                      3897          3897        
+# RMSE                                              5.112         4.763    
+# N Clusters                                      172           172        
 # =========================================================================
 # *** p &lt; 0.001; ** p &lt; 0.01; * p &lt; 0.05
 ```
@@ -1318,7 +3834,7 @@ class: inverse center middle
 class: inverse middle center
 # Break
 
-&lt;iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+&lt;iframe src='https://panel.letstimeit.com/instant-timer/15-minute' width='600' height='400' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
 
 ---
 class: middle clear
@@ -1326,7 +3842,8 @@ class: middle clear
 .left-column[
 &lt;img src="https://www.laserfiche.com/wp-content/uploads/2014/10/femalecoder.jpg" width="80%" style="display: block; margin: auto;" /&gt;
 
-&lt;iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+&lt;iframe src='https://panel.letstimeit.com/instant-timer/20-minute' width='600' height='400' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+
 ]
 
 .right-column[
@@ -1350,11 +3867,11 @@ class: inverse
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="../template/remark-latest.min.js"></script>
 <script>var slideshow = remark.create({
-"highlightLanguage": "r",
-"highlightStyle": "zenburn",
-"highlightLines": true,
-"countIncrementalSlides": false,
-"ratio": "16:9"
+  "highlightLanguage": "r",
+  "highlightStyle": "zenburn",
+  "highlightLines": true,
+  "countIncrementalSlides": false,
+  "ratio": "16:9"
 });
 if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
   window.dispatchEvent(new Event('resize'));

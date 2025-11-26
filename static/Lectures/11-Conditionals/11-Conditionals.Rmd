@@ -783,7 +783,7 @@ pacman::p_load(
    drop_na(poverty) %>% # Drop cases with missing data,
    group_by(country) %>% filter(year == max(year)) %>% ungroup()) # Keep the most recent poverty statistic per country.
 
-# 3. Join Freedom House and Worldbank data
+# 3. Join VDem and Worldbank data
 (Dat <- inner_join(Dat_poverty, Dat_vdem, by = c("country_text_id", "year")))
 
 # 4. Code socialism index
