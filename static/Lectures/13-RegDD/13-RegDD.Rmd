@@ -144,13 +144,21 @@ Although the rule is strict and not random:<br>
 ]
 
 This holds under two assumptions:
-1. **Continuity of Expected Potential Outcomes**: If the rule did not exist, the relationship between the continuous variable and the outcome would be smooth (continuous) across the cutoff.
+1. **Continuity of Expected Potential Outcomes**: If the rule did not exist, the relationship between the continuous variable and the outcome would be smooth (continuous) across the cutoff. Without the rule, the world would be smoth.
 2. **No Sorting**: Cases must not be able to manipulate and place themselves on one side of the cutoff.
 ]
 
 ```{r, echo = FALSE, out.width='90%', fig.align='center'}
 knitr::include_graphics('img/RDD_intuition2.png')
 ```
+
+---
+# RDD intuition
+
+```{r, echo = FALSE, out.width='90%', fig.align='center'}
+knitr::include_graphics('https://theeffectbook.net/the-effect_files/figure-html/regressiondiscontinuity-fuzzydag-1.png')
+```
+.center[.backgrnote[*Source*: Huntington-Klein: ("The Effect")[https://theeffectbook.net/ch-RegressionDiscontinuity.html?panelset_003=r-code3]]]
 
 ---
 # The central RDD challenge
@@ -943,7 +951,9 @@ The bandwidth excludes cases that should not matter at all.
 
 But generally, cases closer to the threshold should matter more; they embody the core logic of an RDD.
 
-$\rightarrow$ *Triangual Kernel* weights are the default
+$\rightarrow$ *Triangular Kernel* weights are the default.
+
+The Triangular Kernel is default because it prioritizes the only thing we truly care about: the value at the cutoff.
 ]
 
 .right-column[
@@ -1133,7 +1143,7 @@ class: clear
 # More examples .font70[Far-right mayors and discrimination]
 
 ```{r, echo = FALSE, out.width='95%'}
-knitr::include_graphics('./img/IT-Healthcare.png')
+knitr::include_graphics('./img/Figure_1.png')
 ```
 .center[.backgrnote[*Source*: `r Citet(myBib, "schaeffer_when_2025")`]]
 
@@ -1195,10 +1205,19 @@ layout: false
 class: inverse
 # Today's general lessons
 
-1. Although OLS estimates linear models, we can "linearize" non-linear relationships. We can do so in two ways: by using polynomials, or by transforming $Y$ or $X$.
-2. Polynomials are basically interaction terms of a variable with itself. By introducing $X^2$, or even higher order polynomials to our model, we let $\beta_{x}$ change with a change in $X$. Importantly, every polynomial moderates/aletrs the one before it with a unit increase in $X$. 
-3. Polynomials allow us to model very complex relationships. But we should be careful to not overfit the model to our particular data. Usually, a simple polynomial (i.e. $x$ and $X^2$ are enough).
-4. An alternative to polynomials is to transform $Y$ and/or $X$. Many algebraic transformations are possible. But one of the most useful is the logarithm, which allows us to express $Y$ or $X$ in terms of rates of change instead of absolute unit increases.
+1. The RDD Logic: RDD works because strict rules create a "Natural Experiment". At the cutoff, the only difference between treated and untreated units is the rule itself, making assignment "as good as random".
+2. The Bandwidth-Bias Trade-off: We always face a dilemma:
+  + Wide Bandwidth: Uses more data $\rightarrow$ High Precision (Low Variance), but risks comparing dissimilar people $\rightarrow$ High Bias.
+  + Narrow Bandwidth: Compares identical people $\rightarrow$ Low Bias, but uses little data $\rightarrow$ Low Reliability\Precision (High Variance).
+3. Functional Form Matters: Real life is rarely a straight line. If the data is curved, a straight regression line will "miss" the cutoff (Bias). We solve this by allowing for curvature (polynomials) or sticking to local linear regression within a narrow window.
+4. Weighting (The Kernel): In RDD, not all data points are equal. Observations exactly at the cutoff are the most important for estimating the jump. We use Triangular Kernels to give maximum "volume" to the data at the border and turn down the volume for data further away.
+
+---
+layout: false
+class: inverse
+# Today's important functions
+
+- `rdrobust()`: Estimates Local linear RDD with optimized bandwidth and triangular Kernel weights.
 
 ---
 # References
