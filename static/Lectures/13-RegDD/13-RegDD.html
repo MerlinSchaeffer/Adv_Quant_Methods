@@ -4,7 +4,7 @@
     <title>Regression Discontinuity Designs (RDD)</title>
     <meta charset="utf-8" />
     <meta name="author" content="Merlin Schaeffer  Department of Sociology" />
-    <meta name="date" content="2025-11-24" />
+    <meta name="date" content="2025-12-01" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
     <script src="libs/tile-view/tile-view.js"></script>
@@ -27,7 +27,7 @@ class: center, middle, inverse, title-slide
 ### Merlin Schaeffer<br> Department of Sociology
 ]
 .date[
-### 2025-11-24
+### 2025-12-01
 ]
 
 ---
@@ -72,11 +72,11 @@ Application 3: Ethnic discrimination in Access to healthcare and far-right mayor
 ]
 
 ---
-# RDD intuition
+# RDD is different
 
 .push-left[
 .content-box-blue[
-RDD uses .alert[rules] that create (sharp) thresholds on otherwise continuous variables.
+We don't use randomness, but .alert[strict rules]. &lt;br&gt; Specifically, rules create (sharp) thresholds on otherwise continuous variables.
 ]
 
 Societies have all kinds of thresholds that define what people get below and above the cut point.
@@ -84,9 +84,9 @@ Societies have all kinds of thresholds that define what people get below and abo
 - Pension age
   - People above a certain age are allowed to withdraw their pension
   - Everyone else has to pay a penalty to do the same thing
-- Borders
-  - People on one side of Øresundsbroen pay one tax rate
-  - People on the other side pay another tax rate
+- GPA
+  - Applicants above the GPA threshold get to study sociology
+  - Those below it need to find another field of study
 ]
 
 .push-right[
@@ -94,47 +94,79 @@ Societies have all kinds of thresholds that define what people get below and abo
 &lt;img src="https://i0.wp.com/epthinktank.eu/wp-content/uploads/2014/11/11-electoral-threshold.png?fit=300%2C266&amp;ssl=1" width="80%" style="display: block; margin: auto;" /&gt;
 
 
-.content-box-green[
+.content-box-green[.center[
 Can you think of other examples?
-]]
+]]]
 
 ---
 # RDD intuition
 
-What if we compared people who fall on either side of the threshold?
+What if we compared *all* cases that fall on either side of a threshold?
 
 &lt;img src="img/RDD_intuition.png" width="100%" style="display: block; margin: auto;" /&gt;
 
 ---
 # RDD intuition
 
-But what if we compared people who fall just barely on either side of the threshold?
+What if we compared only cases that fall *just barely* on either side of the threshold?
 
 &lt;img src="img/RDD_intuition2.png" width="100%" style="display: block; margin: auto;" /&gt;
 
+---
+# RDD intuition
+
+.content-box-blue[
+.center[
+Although the rule is strict and not random:&lt;br&gt;
+**Falling just below or barely above the threshold is often _as good as random_!**
+]
+
+This holds under two assumptions:
+1. **Continuity of Expected Potential Outcomes**: If the rule did not exist, the relationship between the continuous variable and the outcome would be smooth (continuous) across the cutoff.
+2. **No Sorting**: Cases must not be able to manipulate and place themselves on one side of the cutoff.
+]
+
+&lt;img src="img/RDD_intuition2.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+# The central RDD challenge
+
+.push-left[
+If we compare **all cases** that fall on either side of the threshold:
+
+1. Maximum sample size `\(\rightarrow\)` **reliable** estimate.
+2. Comparison `\(\rightarrow\)` *invalidated by selection bias*.
+]
+
+.push-right[
+If we compare only **cases that fall just barely** on either side of the threshold:
+
+1. Tiny sample `\(\rightarrow\)` *unreliable* results.
+2. Comparison `\(\rightarrow\)` as good as random `\(\rightarrow\)` **unbiased** &lt;br&gt; `\(\rightarrow\)` local average treatment effect `\((\lambda, \text{ LATE})\)`.
+]
+
+&lt;img src="img/RDD_intuition2.png" width="100%" style="display: block; margin: auto;" /&gt;
 
 ---
 class: inverse center middle
-# How can we make this work? An Example
+# An Example
 
 .push-right[
 &lt;img src="https://dam-p-dfi.pqcloud.eu/preview/6XAlSpTzaLfBqzdLvpQ4nU/previews/cropOffsetX_0_cropOffsetY_0_maxWidth_1280_cropWidth_7212_cropHeight_4056.jpg/*/landscape169L.jpg?authcred=R3Vlc3Q6R3Vlc3Q=" width="100%" style="display: block; margin: auto;" /&gt;
 ]
-
---
 
 .push-left[
 .font120[&lt;br&gt;&lt;br&gt;What is the causal effect of &lt;br&gt;&lt;br&gt; making alcohol consumption legal &lt;br&gt;&lt;br&gt; on mortality?]
 ]
 
 ---
-# Let's try our idea
+# Alcohol and mortality
 
 .left-column[
   .content-box-green[
   What are the advantages and disadvantages of:
   1. Compare all those who are legally too young to drink (&gt;21) to those who are old enough?
-  2. Compare only those who are legally just too young to drink (&gt;21) to those who are bareley old enough?
+  2. Compare only those who are legally just too young to drink (pink) to those who are barely old enough (blue)?
 ]]
 
 .right-column[
@@ -148,12 +180,12 @@ pacman::p_load(
   ggplot2, # beautiful figures,
   estimatr, # OLS with robust SE
   modelsummary, # regression tables
+  masteringmetrics, # data for today
   rdrobust) # Non-parametric regression
 
 # Get the Minimum legal drinking age data!
 data("mlda", package = "masteringmetrics")
-mlda &lt;- mlda %&gt;% drop_na()
-mlda # print the tibble.
+(mlda &lt;- mlda %&gt;% drop_na()) # Drop missings and print forst 10 rows of the data
 # # A tibble: 48 × 19
 #    agecell   all allfitted internal internalfitted external externalfitted alcohol alcoholfitted homicide
 #      &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;          &lt;dbl&gt;    &lt;dbl&gt;          &lt;dbl&gt;   &lt;dbl&gt;         &lt;dbl&gt;    &lt;dbl&gt;
@@ -175,12 +207,17 @@ mlda # print the tibble.
 .panel[.panel-name[Plot]
 &lt;img src="13-RegDD_files/figure-html/RDD1-1.png" width="90%" style="display: block; margin: auto;" /&gt;
 ]
+.panel[.panel-name[Zoom out...]
+&lt;img src="13-RegDD_files/figure-html/RDD5-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+]
 .panel[.panel-name[Code]
 
 ``` r
 mlda &lt;- mlda %&gt;% mutate(
   # Define those who are allowed to drink
   over21 = case_when( 
+    agecell &gt;= 20.9 &amp; agecell &lt; 21 ~ "No-close",
+    agecell &gt;= 21.0 &amp; agecell &lt; 21.1 ~ "Yes-close",
     agecell &gt;= 21 ~ "Yes",
     TRUE ~ "No"))
 
@@ -188,245 +225,556 @@ ggplot(data = mlda, aes(y = all, x = agecell, color = over21)) +
   geom_point() +
   geom_vline(xintercept = 21, color = "#e41a1c") +
   theme_minimal() + 
-  scale_color_manual(values = c("#984ea3", "#4daf4a")) +
+  scale_color_manual(values = c("#9970ab", "#c51b7d", "#a6dba0", "#2166ac")) +
   labs(y = "Nr of deaths among US Americans \n aged 20-22 (1997-2003)",
        x = "Age in years + months") +
   guides(color = "none")
 ```
 ]]]
+
 ---
-# Let's try our idea
+class: inverse middle center
+
+.font120[
+How do we find the *best* trade-off between:
+
+a) an **unbiased estimate** `\(\lambda\)` (i.e. as few observations close to the threshold as possible) 
+
+versus 
+
+b) an **reliable estimate** (large sample size)
+]
+
+---
+# OLS Regression!
 
 .left-column[
-  .content-box-green[
-    So now let's zoom in on the data right around the threshold
-]]
+1. We use all data to estimate regression lines `\(\rightarrow\)` *reliable*!
 
-.right-column[
-.panelset[
-.panel[.panel-name[Start at the threshold...]
-&lt;img src="13-RegDD_files/figure-html/RDD4-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+2. We compare compare exactly at cutoff (21) `\(\rightarrow\)` *unbiased*!
+  - In fact, OLS allows us to compare treated &amp; control (those allowed to drink and those not allowed) **at exactly 21**.
+
+3. Though unbiased, the effect is "local" (may look different if threshold was 16).
+
 ]
-.panel[.panel-name[Zoom out...]
-
-``` r
-mlda &lt;- mlda %&gt;% mutate(
-  # Define those who are allowed to drink
-  close = case_when( 
-    agecell &gt;= 20.7 &amp; agecell &lt; 21 ~ "low",
-    agecell &gt;= 21 &amp; agecell &lt; 21.3 ~ "high",
-    TRUE ~ "No"))
-
-ggplot(data = mlda, aes(y = all, x = agecell, color = close)) +
-  geom_point() +
-  theme_minimal() + 
-    scale_color_manual(values = c("blue", "red", "black")) +
-  labs(y = "Nr of deaths among US Americans \n aged 20-22 (1997-2003)",
-       x = "Age in months") +
-  guides(color = "none")
-```
-
-&lt;img src="13-RegDD_files/figure-html/RDD5-1.png" width="90%" style="display: block; margin: auto;" /&gt;
-]]]
+.right-column[
+&lt;img src="13-RegDD_files/figure-html/RDD6-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
 
 ---
-# But we need a model
+# Linear parametric RDD
 
 .push-left[
-The simplest approach is to use linear regression, and add a binary variable (0/1) *D* to indicate whether an observation *i* is above or below the threshold on the running variable of interest, *a*. Note that in the equations on the right, *y* is our dependent variable (e.g. death rate), and `\(\alpha\)` is the intercept.
+`$$\begin{equation}
+Y_{i} = \alpha + \color{red}{\lambda} D_{i} + \beta_1 a_{i} + \beta_2(D_{i} \times a_{i}) + e_{i}
+\end{equation}$$`
+
+- `\(D\)` indicates whether an observation *i* is above (1) or below (0) the rule's threshold.
+- `\(a_{i}\)` (*"running variable"*), is the continuous variable on which the rule is based.
+  + .alert[Centered around the threshold!]
 ]
 
 .push-right[
+<div id="agmvheslly" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#agmvheslly table {
+  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
 
-A simple regression model:
+#agmvheslly thead, #agmvheslly tbody, #agmvheslly tfoot, #agmvheslly tr, #agmvheslly td, #agmvheslly th {
+  border-style: none;
+}
 
-`$$\begin{equation}
-y_{i} = \alpha + \rho D_{i} + \gamma a_{i} + e_{i}
-\end{equation}$$`
+#agmvheslly p {
+  margin: 0;
+  padding: 0;
+}
 
-We might also consider adding polynomial terms to help the model if we are not convinced that the relationship is linear. For instance, we could add a squared term (a "second order" polynomial):
+#agmvheslly .gt_table {
+  display: table;
+  border-collapse: collapse;
+  line-height: normal;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
 
-`$$\begin{equation}
-y_{i} = \alpha + \rho D_{i} + \gamma_{1} a_{i} + \gamma_{2} a_{i}^{2} + e_{i}
-\end{equation}$$`
+#agmvheslly .gt_caption {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
 
-We can even add a polynomial with a power of three, or more! For instance, a "third order" polynomial:
+#agmvheslly .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
 
-`$$\begin{equation}
-y_{i} = \alpha + \rho D_{i} + \gamma_{1} a_{i} + \gamma_{2} a_{i}^{2} + \gamma_{3} a_{i}^{3} + e_{i}
-\end{equation}$$`
+#agmvheslly .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 3px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#agmvheslly .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#agmvheslly .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#agmvheslly .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#agmvheslly .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#agmvheslly .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#agmvheslly .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#agmvheslly .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#agmvheslly .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#agmvheslly .gt_spanner_row {
+  border-bottom-style: hidden;
+}
+
+#agmvheslly .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  text-align: left;
+}
+
+#agmvheslly .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#agmvheslly .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#agmvheslly .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#agmvheslly .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#agmvheslly .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#agmvheslly .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#agmvheslly .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#agmvheslly .gt_row_group_first th {
+  border-top-width: 2px;
+}
+
+#agmvheslly .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#agmvheslly .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#agmvheslly .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#agmvheslly .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#agmvheslly .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#agmvheslly .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#agmvheslly .gt_last_grand_summary_row_top {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: double;
+  border-bottom-width: 6px;
+  border-bottom-color: #D3D3D3;
+}
+
+#agmvheslly .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#agmvheslly .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#agmvheslly .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#agmvheslly .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#agmvheslly .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#agmvheslly .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#agmvheslly .gt_left {
+  text-align: left;
+}
+
+#agmvheslly .gt_center {
+  text-align: center;
+}
+
+#agmvheslly .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#agmvheslly .gt_font_normal {
+  font-weight: normal;
+}
+
+#agmvheslly .gt_font_bold {
+  font-weight: bold;
+}
+
+#agmvheslly .gt_font_italic {
+  font-style: italic;
+}
+
+#agmvheslly .gt_super {
+  font-size: 65%;
+}
+
+#agmvheslly .gt_footnote_marks {
+  font-size: 75%;
+  vertical-align: 0.4em;
+  position: initial;
+}
+
+#agmvheslly .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#agmvheslly .gt_indent_1 {
+  text-indent: 5px;
+}
+
+#agmvheslly .gt_indent_2 {
+  text-indent: 10px;
+}
+
+#agmvheslly .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#agmvheslly .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#agmvheslly .gt_indent_5 {
+  text-indent: 25px;
+}
+
+#agmvheslly .katex-display {
+  display: inline-flex !important;
+  margin-bottom: 0.75em !important;
+}
+
+#agmvheslly div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+  height: 0px !important;
+}
+</style>
+<table class="gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
+  <thead>
+    <tr class="gt_col_headings">
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="a-"> </th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="Death-per-100,000-persons">Death per 100,000 persons</th>
+    </tr>
+  </thead>
+  <tbody class="gt_table_body">
+    <tr><td headers=" " class="gt_row gt_left">(Intercept)</td>
+<td headers="Death per 100,000 persons" class="gt_row gt_center">93.618***</td></tr>
+    <tr><td headers=" " class="gt_row gt_left"></td>
+<td headers="Death per 100,000 persons" class="gt_row gt_center">(0.627)</td></tr>
+    <tr><td headers=" " class="gt_row gt_left">D</td>
+<td headers="Death per 100,000 persons" class="gt_row gt_center">7.663***</td></tr>
+    <tr><td headers=" " class="gt_row gt_left"></td>
+<td headers="Death per 100,000 persons" class="gt_row gt_center">(1.294)</td></tr>
+    <tr><td headers=" " class="gt_row gt_left">age0</td>
+<td headers="Death per 100,000 persons" class="gt_row gt_center">0.827</td></tr>
+    <tr><td headers=" " class="gt_row gt_left"></td>
+<td headers="Death per 100,000 persons" class="gt_row gt_center">(0.728)</td></tr>
+    <tr><td headers=" " class="gt_row gt_left">D × age0</td>
+<td headers="Death per 100,000 persons" class="gt_row gt_center">-3.603**</td></tr>
+    <tr><td headers=" " class="gt_row gt_left" style="border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #000000;"></td>
+<td headers="Death per 100,000 persons" class="gt_row gt_center" style="border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #000000;">(1.146)</td></tr>
+    <tr><td headers=" " class="gt_row gt_left">Num.Obs.</td>
+<td headers="Death per 100,000 persons" class="gt_row gt_center">48</td></tr>
+    <tr><td headers=" " class="gt_row gt_left">R2</td>
+<td headers="Death per 100,000 persons" class="gt_row gt_center">0.668</td></tr>
+  </tbody>
+  <tfoot>
+    <tr class="gt_sourcenotes">
+      <td class="gt_sourcenote" colspan="2">+ p &lt; 0.1, * p &lt; 0.05, ** p &lt; 0.01, *** p &lt; 0.001</td>
+    </tr>
+  </tfoot>
+</table>
+</div>
 ]
 
-## The modeling strategy on this page is referred to as *parametric* regression discontinuity
-
 ---
-# Implementation
-## Parametric RDD with RDDtools
-
-.left-column[
-.content-box-green[
-Using the R package RDDtools, we can implement all of these models rather easily. The main challenge is just to install it. See Exercise 1 on that point.
-
-**First, creating a plot of the discontinuity with RDDtools**
-]]
-
-.right-column[
-.panelset[
-.panel[.panel-name[Convert data]
-
-``` r
-# Tell the package that it is an RDD dataset
-# y = the Y variable of interest, in this case mlda$all
-# x = the X variable of interest, in this case mlda$agecell
-# cutpoint = the point of discontinuity in the data, in this case 21
-drinking_rdd_data &lt;- RDDdata(
-  y=mlda$all,
-  x=mlda$agecell,
-  cutpoint=21
-  )
-# Error in RDDdata(y = mlda$all, x = mlda$agecell, cutpoint = 21): could not find function "RDDdata"
-# Note that this renames the variables to y and x. Do not be alarmed.
-# And do not change the variable names back, or you will get error messages
-```
-]
-.panel[.panel-name[Plot discontinuity]
-
-```
-# Error: object 'drinking_rdd_data' not found
-```
-  ]
-.panel[.panel-name[Code]
-       
-       ``` r
-       # It's helpful to change the axis labels since it changes the variable names
-       # and 'x' and 'y' aren't very informative
-       plot(
-         drinking_rdd_data,
-         xlab='Age in months\n', # A little extra white space
-         ylab="Nr of deaths among US Americans aged 20-22 (1997-2003)"
-       )
-       # Error: object 'drinking_rdd_data' not found
-       ```
-]]]
-
-
----
-  # Implementation
-  ## Parametric RDD with RDDtools
-  
-  .left-column[
-    .content-box-green[
-      Using the R package RDDtools, we can implement all of these models rather easily. The main challenge is just to install it. See Exercise 1 on that point.
-      
-      **Next, creating a simple linear model without any polynomial terms**
-    ]]
-
-.right-column[
-  .panelset[
-    .panel[.panel-name[Convert data]
-           
-           ``` r
-           # Order refers to the polynomial. Polynomials of order 1 are just normal variables
-           # without any exponents.
-           # Slope can be set to "same" if we want both sides of the threshold to have the same
-           # slope. It can also be set to "separate" if we want to add an interaction term so as
-           # to allow the slopes on each side to differ from one another, as described in the textbook.
-           rdd_linear &lt;- RDDreg_lm(
-             RDDobject = drinking_rdd_data,
-             order = 1,
-             slope='same'
-           )
-           # Error in RDDreg_lm(RDDobject = drinking_rdd_data, order = 1, slope = "same"): could not find function "RDDreg_lm"
-           summary(rdd_linear)
-           # Error: object 'rdd_linear' not found
-           ```
-    ]
-    .panel[.panel-name[Plot the estimate]
-           
-           ```
-           # Error: object 'rdd_linear' not found
-           ```
-    ]
-    .panel[.panel-name[Code]
-           
-           ``` r
-           # It's helpful to change the axis labels since it changes the variable names
-           # and 'x' and 'y' aren't very informative
-           plot(
-             rdd_linear,
-             xlab='Age in months\n', # A little extra white space
-             ylab="Nr of deaths among US Americans aged 20-22 (1997-2003)"
-           )
-           # Error: object 'rdd_linear' not found
-           ```
-    ]]]
-
-
----
-  # Implementation
-  ## Parametric RDD with RDDtools
-  
-  .left-column[
-    .content-box-green[
-      Using the R package RDDtools, we can implement all of these models rather easily. The main challenge is just to install it. See Exercise 1 on that point.
-      
-      **Finally, adding in some polynomial terms (power of 2)**
-    ]]
-
-.right-column[
-  .panelset[
-    .panel[.panel-name[Convert data]
-           
-           ``` r
-           # Order refers to the polynomial. Polynomials of order 1 are just normal variables
-           # without any exponents.
-           # Slope can be set to "same" if we want both sides of the threshold to have the same
-           # slope. It can also be set to "separate" if we want to add an interaction term so as
-           # to allow the slopes on each side to differ from one another, as described in the textbook.
-           rdd_quadratic &lt;- RDDreg_lm(
-             RDDobject = drinking_rdd_data,
-             order = 2,
-             slope='same'
-           )
-           # Error in RDDreg_lm(RDDobject = drinking_rdd_data, order = 2, slope = "same"): could not find function "RDDreg_lm"
-           summary(rdd_quadratic)
-           # Error: object 'rdd_quadratic' not found
-           ```
-    ]
-    .panel[.panel-name[Plot the estimate]
-           
-           ```
-           # Error: object 'rdd_quadratic' not found
-           ```
-    ]
-    .panel[.panel-name[Code]
-           
-           ``` r
-           # It's helpful to change the axis labels since it changes the variable names
-           # and 'x' and 'y' aren't very informative
-           plot(
-             rdd_quadratic,
-             xlab='Age in months\n', # A little extra white space
-             ylab="Nr of deaths among US Americans aged 20-22 (1997-2003)"
-           )
-           # Error: object 'rdd_quadratic' not found
-           ```
-    ]]]
-
----
-  class: inverse middle center
+class: inverse middle center
 # Break
 
-&lt;iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+&lt;iframe src='https://panel.letstimeit.com/instant-timer/15-minute' width='600' height='400' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
   
-  ---
-  class: middle clear
-# Time to try Exercise #1
+---
+class: middle clear
 
 .left-column[
   &lt;img src="https://www.laserfiche.com/wp-content/uploads/2014/10/femalecoder.jpg" width="80%" style="display: block; margin: auto;" /&gt;
   
-  &lt;iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+  &lt;iframe src='https://panel.letstimeit.com/instant-timer/20-minute' width='600' height='400' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
 ]
 
 .right-column[
@@ -434,216 +782,1427 @@ drinking_rdd_data &lt;- RDDdata(
     &lt;iframe src='exercise1.html' width='1000' height='600' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
 ]
 
----
-  # Reminder!
-  
-  ## We would really like to compare people just barely on either side of the threshold
-  
-  But so far we are using all the data points, and using polynomials to home in on real effect with our estimates. This lets us keep all the data, which gives us more statistical power. But there is an alternative.
-
-&lt;img src="img/RDD_intuition3.png" width="100%" style="display: block; margin: auto;" /&gt;
-
-
----
-  # Options
-  # For balancing quality with statistical power
-  
-  1. Parametric Regression Discontinuity: Model the entire dataset, taking into account potential non-linearities in the data
-
-2. Nonparametric Regression Discontinuity: *Only* use data that is within a certain distance of the threshold
-
----
-  # Nonparametric RDD
-  
-  ## How do we balance the "bandwidth"
-  
-  If we draw the green box too small (too close to the threshold), we will lose statistical power and won't be able to draw meaningful conclusions. If we draw the green box too big, we get more observations, but we lose the strength of the comparison. We call the width of the box the "bandwidth"
-
-&lt;img src="img/RDD_intuition3.png" width="100%" style="display: block; margin: auto;" /&gt;
----
-# Nonparametric RDD
-
-That is, we want to estimate this:
-`$$\begin{equation}
-y_{i} = \alpha + \rho D_{i} + \gamma a_{i} + e_{i}
-\end{equation}$$`
-
-But we only want to estimate it in a sample where:
-`$$\begin{equation}
-threshold - bandwidth \ge a_{i} \le threshold + bandwidth
-\end{equation}$$`
-
-
-&lt;img src="img/RDD_intuition3.png" width="100%" style="display: block; margin: auto;" /&gt;
----
-# Implementation
-## Nonparametric RDD with RDDtools
-
-.left-column[
-.content-box-green[
-Thankfully, finding the right bandwidth is automated with a function in RDDtools. So the process is relatively simple for us here.
-]]
-
-.right-column[
-.panelset[
-.panel[.panel-name[Run estimates]
-
-``` r
-# Weird-looking function name, but it figures out the optimal bandwidth given your data
-bandwidth &lt;- RDDbw_IK(drinking_rdd_data)
-# Error in RDDbw_IK(drinking_rdd_data): could not find function "RDDbw_IK"
-reg_nonparam &lt;- RDDreg_np(RDDobject = drinking_rdd_data, bw = bandwidth, slope='same')
-# Error in RDDreg_np(RDDobject = drinking_rdd_data, bw = bandwidth, slope = "same"): could not find function "RDDreg_np"
-coef_nonparam &lt;- summary(reg_nonparam)$coefMat[1]
-# Error: object 'reg_nonparam' not found
-se_nonparam &lt;- summary(reg_nonparam)$coefMat[2]
-# Error: object 'reg_nonparam' not found
-```
-]
-.panel[.panel-name[Show model summary]
-
-``` r
-summary(reg_nonparam)
-# Error: object 'reg_nonparam' not found
-```
-]]]
-
----
-# Empirical example #1
-## Women and corruption
-
-From Pereira &amp; Fernandez-Vazquez. (2022). Does electing women reduce corruption? *Legislative Studies Quarterly*
-
----
-# Empirical example #1
-## Women and corruption
-
-.push-left[
-In 2007 Spain made a new rule saying that for towns with a population larger than 5000 people, parties had to provide at least 40% of their seats to women. They use this as an RDD to look into the well-known correlation between women in government and corruption.
-]
-
-.push-right[
-&lt;img src="./img/women_elected_threshold.png" width="70%" style="display: block; margin: auto;" /&gt;
-]
-
----
-# Empirical example #1
-## Women and corruption
-
-.push-left[
-There's an effect! But why?
-]
-
-.push-right[
-  &lt;img src="./img/women_elected_effects.png" width="80%" style="display: block; margin: auto;" /&gt;
-]
-
----
-  # Empirical example #1
-  ## Women and corruption
-  
-  .push-left[
-    There's an effect! But why?
-
-- Women are socialized differently
-- Women are more risk averse
-- Women are under more scrutiny when elected
-- Women tend to work on policies in low-corruption areas
-]
-
-.push-right[
-&lt;img src="./img/women_elected_effects.png" width="80%" style="display: block; margin: auto;" /&gt;
-]
-
----
-# Empirical example #2
-## Cumulative advantage in basketball
-
-.push-left[
-From Biegert, Kühhirt, &amp; Van Lancker. (2022). They Can’t All Be Stars: The Matthew Effect, Cumulative Status Bias, and Status Persistence in NBA All-Star Elections *American Sociological Review*
-]
-
-.push-right[
-.content-box-green[
-Sociologists have argued for 80 years that small early advantages between equals can create large inequalities. Here they study this using unique data from professional basketball.
-]
-]
-
----
-# Empirical example #2
-## Cumulative advantage in basketball
-
-.push-left[
-- Fans vote to decide who plays in the NBA "All-Star Game"
-- People in the Top X players at each position get to play
-- People with just a few votes less do not get to play
-
-.content-box-green[
-Does winning the fan vote in time *t* increase a person's chances of winning the fan vote again in time *t+1* and beyond? 
-  ]
-
-]
-
-.push-right[
-  &lt;img src="./img/lebron.png" width="60%" style="display: block; margin: auto;" /&gt;
-]
-
----
-  # Empirical example #2
-  ## Cumulative advantage in basketball
-  
-  .push-left[
-    There's an effect! But why?
-
-Sociologist Robert Merton argued that this happens because we don't have enough available space to reward *every* deserving person (in his case, it was scientists...think the Nobel prize). We have to make decisions between people who are more or less equal, and rewarding one person at the threshold but not the other creates an actual inequality where there didn't use to be any.
-]
-
-]
-
-.push-right[
-&lt;img src="./img/nba_rdd_effects.png" width="100%" style="display: block; margin: auto;" /&gt;
-]
-
----
-# Empirical example #2
-## Cumulative advantage in basketball
-
-.push-left[
-Maybe the players who won the first time are just better? Nope. Every measure of performance is insignificant, while the RDD estimate remains significant.
-]
-
-.push-right[
-&lt;img src="./img/nba_covariates.png" width="100%" style="display: block; margin: auto;" /&gt;
-]
-
----
-# Empirical example #2
-## Far-right elections and welfare chauvisnism
-
-.push-left[
-I can't show you the evidence, because it isn't published yet! But I saw your professor present this work in Leipzig.
-
-.content-box-green[
-Newly arrived residents of Italian regions that just barely elect far-right governments are more likely to experience delays and difficulties getting their healthcare access set up, compared to those who live in regions that just barely *did not* elect far-right governments.
-]
-
-]
-
-.push-right[
-&lt;img src="./img/merlin.png" width="80%" style="display: block; margin: auto;" /&gt;
-]
-
 
 ---
 class: inverse middle center
 # Break
 
-&lt;iframe src='https://www.online-timer.net/' width='400' height='385' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
+&lt;iframe src='https://panel.letstimeit.com/instant-timer/10-minute' width='600' height='400' frameborder='0' scrolling='yes'&gt;&lt;/iframe&gt;
 
 ---
-class: middle clear
-# Time to try Exercise #2
+class: clear
+# Two problems of linear parametric RDD
 
+.left-column[
+1. Is linear **the correct functional form**, and if not what is? Adding polynomials to `\(\text{max}(R^2)\)` risks overfitting to single data points `\(\rightarrow\)` *bias*.
+]
+
+.right-column[
+&lt;img src="13-RegDD_files/figure-html/RDD7-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+class: clear
+# Two problems of linear parametric RDD
+
+.left-column[
+1. Is linear **the correct functional form**, and if not what is? Adding polynomials to `\(\text{max}(R^2)\)` risks overfitting to single data points `\(\rightarrow\)` *bias*.
+]
+
+.right-column[
+`$$Y_i = \alpha + \color{red}{\lambda} D_i + \beta_1 a_i + \beta_2 a_i^2 + \beta_1 (a_i \times D_i) + \beta_2 (a_i^2 \times D_i) + e_i$$`
+
+<div id="okpktbsrat" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#okpktbsrat table {
+  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#okpktbsrat thead, #okpktbsrat tbody, #okpktbsrat tfoot, #okpktbsrat tr, #okpktbsrat td, #okpktbsrat th {
+  border-style: none;
+}
+
+#okpktbsrat p {
+  margin: 0;
+  padding: 0;
+}
+
+#okpktbsrat .gt_table {
+  display: table;
+  border-collapse: collapse;
+  line-height: normal;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#okpktbsrat .gt_caption {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#okpktbsrat .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#okpktbsrat .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 3px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#okpktbsrat .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#okpktbsrat .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#okpktbsrat .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#okpktbsrat .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#okpktbsrat .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#okpktbsrat .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#okpktbsrat .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#okpktbsrat .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#okpktbsrat .gt_spanner_row {
+  border-bottom-style: hidden;
+}
+
+#okpktbsrat .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  text-align: left;
+}
+
+#okpktbsrat .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#okpktbsrat .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#okpktbsrat .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#okpktbsrat .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#okpktbsrat .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#okpktbsrat .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#okpktbsrat .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#okpktbsrat .gt_row_group_first th {
+  border-top-width: 2px;
+}
+
+#okpktbsrat .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#okpktbsrat .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#okpktbsrat .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#okpktbsrat .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#okpktbsrat .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#okpktbsrat .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#okpktbsrat .gt_last_grand_summary_row_top {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: double;
+  border-bottom-width: 6px;
+  border-bottom-color: #D3D3D3;
+}
+
+#okpktbsrat .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#okpktbsrat .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#okpktbsrat .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#okpktbsrat .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#okpktbsrat .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#okpktbsrat .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#okpktbsrat .gt_left {
+  text-align: left;
+}
+
+#okpktbsrat .gt_center {
+  text-align: center;
+}
+
+#okpktbsrat .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#okpktbsrat .gt_font_normal {
+  font-weight: normal;
+}
+
+#okpktbsrat .gt_font_bold {
+  font-weight: bold;
+}
+
+#okpktbsrat .gt_font_italic {
+  font-style: italic;
+}
+
+#okpktbsrat .gt_super {
+  font-size: 65%;
+}
+
+#okpktbsrat .gt_footnote_marks {
+  font-size: 75%;
+  vertical-align: 0.4em;
+  position: initial;
+}
+
+#okpktbsrat .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#okpktbsrat .gt_indent_1 {
+  text-indent: 5px;
+}
+
+#okpktbsrat .gt_indent_2 {
+  text-indent: 10px;
+}
+
+#okpktbsrat .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#okpktbsrat .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#okpktbsrat .gt_indent_5 {
+  text-indent: 25px;
+}
+
+#okpktbsrat .katex-display {
+  display: inline-flex !important;
+  margin-bottom: 0.75em !important;
+}
+
+#okpktbsrat div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+  height: 0px !important;
+}
+</style>
+<table class="gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
+  <thead>
+    <tr class="gt_col_headings">
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="a-"> </th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="Linear">Linear</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="Quadratic">Quadratic</th>
+    </tr>
+  </thead>
+  <tbody class="gt_table_body">
+    <tr><td headers=" " class="gt_row gt_left">(Intercept)</td>
+<td headers="Linear" class="gt_row gt_center">93.618***</td>
+<td headers="Quadratic" class="gt_row gt_center">93.073***</td></tr>
+    <tr><td headers=" " class="gt_row gt_left"></td>
+<td headers="Linear" class="gt_row gt_center">(0.627)</td>
+<td headers="Quadratic" class="gt_row gt_center">(0.815)</td></tr>
+    <tr><td headers=" " class="gt_row gt_left">D</td>
+<td headers="Linear" class="gt_row gt_center">7.663***</td>
+<td headers="Quadratic" class="gt_row gt_center">9.548***</td></tr>
+    <tr><td headers=" " class="gt_row gt_left"></td>
+<td headers="Linear" class="gt_row gt_center">(1.294)</td>
+<td headers="Quadratic" class="gt_row gt_center">(1.948)</td></tr>
+    <tr><td headers=" " class="gt_row gt_left">age0</td>
+<td headers="Linear" class="gt_row gt_center">0.827</td>
+<td headers="Quadratic" class="gt_row gt_center"></td></tr>
+    <tr><td headers=" " class="gt_row gt_left"></td>
+<td headers="Linear" class="gt_row gt_center">(0.728)</td>
+<td headers="Quadratic" class="gt_row gt_center"></td></tr>
+    <tr><td headers=" " class="gt_row gt_left">D × age0</td>
+<td headers="Linear" class="gt_row gt_center">-3.603**</td>
+<td headers="Quadratic" class="gt_row gt_center"></td></tr>
+    <tr><td headers=" " class="gt_row gt_left"></td>
+<td headers="Linear" class="gt_row gt_center">(1.146)</td>
+<td headers="Quadratic" class="gt_row gt_center"></td></tr>
+    <tr><td headers=" " class="gt_row gt_left">poly(age0, 2, raw = TRUE)1</td>
+<td headers="Linear" class="gt_row gt_center"></td>
+<td headers="Quadratic" class="gt_row gt_center">-0.831</td></tr>
+    <tr><td headers=" " class="gt_row gt_left"></td>
+<td headers="Linear" class="gt_row gt_center"></td>
+<td headers="Quadratic" class="gt_row gt_center">(2.891)</td></tr>
+    <tr><td headers=" " class="gt_row gt_left">poly(age0, 2, raw = TRUE)2</td>
+<td headers="Linear" class="gt_row gt_center"></td>
+<td headers="Quadratic" class="gt_row gt_center">-0.840</td></tr>
+    <tr><td headers=" " class="gt_row gt_left"></td>
+<td headers="Linear" class="gt_row gt_center"></td>
+<td headers="Quadratic" class="gt_row gt_center">(1.572)</td></tr>
+    <tr><td headers=" " class="gt_row gt_left">D × poly(age0, 2, raw = TRUE)1</td>
+<td headers="Linear" class="gt_row gt_center"></td>
+<td headers="Quadratic" class="gt_row gt_center">-6.017</td></tr>
+    <tr><td headers=" " class="gt_row gt_left"></td>
+<td headers="Linear" class="gt_row gt_center"></td>
+<td headers="Quadratic" class="gt_row gt_center">(4.710)</td></tr>
+    <tr><td headers=" " class="gt_row gt_left">D × poly(age0, 2, raw = TRUE)2</td>
+<td headers="Linear" class="gt_row gt_center"></td>
+<td headers="Quadratic" class="gt_row gt_center">2.904</td></tr>
+    <tr><td headers=" " class="gt_row gt_left" style="border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #000000;"></td>
+<td headers="Linear" class="gt_row gt_center" style="border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #000000;"></td>
+<td headers="Quadratic" class="gt_row gt_center" style="border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #000000;">(2.336)</td></tr>
+    <tr><td headers=" " class="gt_row gt_left">Num.Obs.</td>
+<td headers="Linear" class="gt_row gt_center">48</td>
+<td headers="Quadratic" class="gt_row gt_center">48</td></tr>
+    <tr><td headers=" " class="gt_row gt_left">R2</td>
+<td headers="Linear" class="gt_row gt_center">0.668</td>
+<td headers="Quadratic" class="gt_row gt_center">0.682</td></tr>
+  </tbody>
+  <tfoot>
+    <tr class="gt_sourcenotes">
+      <td class="gt_sourcenote" colspan="3">+ p &lt; 0.1, * p &lt; 0.05, ** p &lt; 0.01, *** p &lt; 0.001</td>
+    </tr>
+  </tfoot>
+</table>
+</div>
+]
+
+---
+class: clear
+# Two problems of linear parametric RDD
+
+.left-column[
+1. Is linear **the correct functional form**, and if not what is? Adding polynomials to `\(\text{max}(R^2)\)` risks overfitting to single data points `\(\rightarrow\)` *bias*.
+
+2. What should be **the importance of single observations** in estimating the regression? 
+  1. Should case far away from the threshold matter at all?
+  2. Should cases closer to the threshold matter more? 
+]
+
+.right-column[
+&lt;img src="13-RegDD_files/figure-html/RDD8-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+# 1. Bandwidth .font70[Cases outside of it do not count]
+
+.push-left[
+There are different algorithms that estimate the optimal bandwidth. They all weigh: `\(\frac{\text{Reliability}}{\text{Bias}}\)`. Within optimal bandwidth, RDD has `\(\text{min}(\text{Bias})\)` and `\(\text{max}(\text{Reliability})\)`. 
+
+.font80[
+
+
+``` r
+rdrobust::rdbwselect(mlda$all, mlda$agecell, c = 21) %&gt;% summary()
+# Call: rdbwselect
+# 
+# Number of Obs.                   48
+# BW type                       mserd
+# Kernel                   Triangular
+# VCE method                       NN
+# 
+# Number of Obs.                   24           24
+# Order est. (p)                    1            1
+# Order bias  (q)                   2            2
+# Unique Obs.                      24           24
+# 
+# =======================================================
+#                   BW est. (h)    BW bias (b)
+#             Left of c Right of c  Left of c Right of c
+# =======================================================
+#      mserd     0.493      0.493      0.780      0.780
+# =======================================================
+```
+
+]]
+
+.push-right[
+&lt;img src="13-RegDD_files/figure-html/RDD9-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+# 2. Better linear! 
+
+.push-left[
+OLS fits to entire data within bandwidth. To fit data points far away from the cutoff, polynomials might have to "swing" wildly.
+
+.center[
+`\(\downarrow\)`
+]
+
+Notoriously unstable at the boundaries of the data.
+
+.center[
+`\(\downarrow\)`
+]
+
+In RDD, we only care about the boundary/cutoff!
+
+.center[
+`\(\downarrow\)`
+
+Bias
+]]
+
+.push-right[
+&lt;img src="13-RegDD_files/figure-html/RDD10-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
+---
+# 2. Better linear! 
+
+.push-left[.font80[
+
+``` r
+RDD_linear &lt;- lm_robust(
+  all ~ D*age0, 
+* data = mlda %&gt;% filter(abs(age0) &lt; 0.493)) # Apply bandwidth
+RDD_poly &lt;- lm_robust(all ~ D*poly(age0, 2, raw = TRUE), data = mlda %&gt;% filter(abs(age0) &lt; 0.493))
+
+# Regression table
+modelsummary(list("Linear" = RDD_linear,
+                  "Quadratic" = RDD_poly), stars = TRUE,
+             gof_map = c("nobs", "r.squared"), output = "gt")
+```
+
+<div id="jkwcqkfang" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#jkwcqkfang table {
+  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#jkwcqkfang thead, #jkwcqkfang tbody, #jkwcqkfang tfoot, #jkwcqkfang tr, #jkwcqkfang td, #jkwcqkfang th {
+  border-style: none;
+}
+
+#jkwcqkfang p {
+  margin: 0;
+  padding: 0;
+}
+
+#jkwcqkfang .gt_table {
+  display: table;
+  border-collapse: collapse;
+  line-height: normal;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#jkwcqkfang .gt_caption {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#jkwcqkfang .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#jkwcqkfang .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 3px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#jkwcqkfang .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#jkwcqkfang .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#jkwcqkfang .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#jkwcqkfang .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#jkwcqkfang .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#jkwcqkfang .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#jkwcqkfang .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#jkwcqkfang .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#jkwcqkfang .gt_spanner_row {
+  border-bottom-style: hidden;
+}
+
+#jkwcqkfang .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  text-align: left;
+}
+
+#jkwcqkfang .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#jkwcqkfang .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#jkwcqkfang .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#jkwcqkfang .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#jkwcqkfang .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#jkwcqkfang .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#jkwcqkfang .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#jkwcqkfang .gt_row_group_first th {
+  border-top-width: 2px;
+}
+
+#jkwcqkfang .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#jkwcqkfang .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#jkwcqkfang .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#jkwcqkfang .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#jkwcqkfang .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#jkwcqkfang .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#jkwcqkfang .gt_last_grand_summary_row_top {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: double;
+  border-bottom-width: 6px;
+  border-bottom-color: #D3D3D3;
+}
+
+#jkwcqkfang .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#jkwcqkfang .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#jkwcqkfang .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#jkwcqkfang .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#jkwcqkfang .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#jkwcqkfang .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#jkwcqkfang .gt_left {
+  text-align: left;
+}
+
+#jkwcqkfang .gt_center {
+  text-align: center;
+}
+
+#jkwcqkfang .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#jkwcqkfang .gt_font_normal {
+  font-weight: normal;
+}
+
+#jkwcqkfang .gt_font_bold {
+  font-weight: bold;
+}
+
+#jkwcqkfang .gt_font_italic {
+  font-style: italic;
+}
+
+#jkwcqkfang .gt_super {
+  font-size: 65%;
+}
+
+#jkwcqkfang .gt_footnote_marks {
+  font-size: 75%;
+  vertical-align: 0.4em;
+  position: initial;
+}
+
+#jkwcqkfang .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#jkwcqkfang .gt_indent_1 {
+  text-indent: 5px;
+}
+
+#jkwcqkfang .gt_indent_2 {
+  text-indent: 10px;
+}
+
+#jkwcqkfang .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#jkwcqkfang .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#jkwcqkfang .gt_indent_5 {
+  text-indent: 25px;
+}
+
+#jkwcqkfang .katex-display {
+  display: inline-flex !important;
+  margin-bottom: 0.75em !important;
+}
+
+#jkwcqkfang div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+  height: 0px !important;
+}
+</style>
+<table class="gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
+  <thead>
+    <tr class="gt_col_headings">
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="a-"> </th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="Linear">Linear</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="Quadratic">Quadratic</th>
+    </tr>
+  </thead>
+  <tbody class="gt_table_body">
+    <tr><td headers=" " class="gt_row gt_left">(Intercept)</td>
+<td headers="Linear" class="gt_row gt_center">93.760***</td>
+<td headers="Quadratic" class="gt_row gt_center">95.119***</td></tr>
+    <tr><td headers=" " class="gt_row gt_left"></td>
+<td headers="Linear" class="gt_row gt_center">(0.663)</td>
+<td headers="Quadratic" class="gt_row gt_center">(0.342)</td></tr>
+    <tr><td headers=" " class="gt_row gt_left">D</td>
+<td headers="Linear" class="gt_row gt_center">8.878*</td>
+<td headers="Quadratic" class="gt_row gt_center">10.921*</td></tr>
+    <tr><td headers=" " class="gt_row gt_left"></td>
+<td headers="Linear" class="gt_row gt_center">(2.909)</td>
+<td headers="Quadratic" class="gt_row gt_center">(3.158)</td></tr>
+    <tr><td headers=" " class="gt_row gt_left">age0</td>
+<td headers="Linear" class="gt_row gt_center">2.919</td>
+<td headers="Quadratic" class="gt_row gt_center"></td></tr>
+    <tr><td headers=" " class="gt_row gt_left"></td>
+<td headers="Linear" class="gt_row gt_center">(2.866)</td>
+<td headers="Quadratic" class="gt_row gt_center"></td></tr>
+    <tr><td headers=" " class="gt_row gt_left">D × age0</td>
+<td headers="Linear" class="gt_row gt_center">-7.979</td>
+<td headers="Quadratic" class="gt_row gt_center"></td></tr>
+    <tr><td headers=" " class="gt_row gt_left"></td>
+<td headers="Linear" class="gt_row gt_center">(8.325)</td>
+<td headers="Quadratic" class="gt_row gt_center"></td></tr>
+    <tr><td headers=" " class="gt_row gt_left">poly(age0, 2, raw = TRUE)1</td>
+<td headers="Linear" class="gt_row gt_center"></td>
+<td headers="Quadratic" class="gt_row gt_center">19.219***</td></tr>
+    <tr><td headers=" " class="gt_row gt_left"></td>
+<td headers="Linear" class="gt_row gt_center"></td>
+<td headers="Quadratic" class="gt_row gt_center">(3.134)</td></tr>
+    <tr><td headers=" " class="gt_row gt_left">poly(age0, 2, raw = TRUE)2</td>
+<td headers="Linear" class="gt_row gt_center"></td>
+<td headers="Quadratic" class="gt_row gt_center">33.052**</td></tr>
+    <tr><td headers=" " class="gt_row gt_left"></td>
+<td headers="Linear" class="gt_row gt_center"></td>
+<td headers="Quadratic" class="gt_row gt_center">(6.629)</td></tr>
+    <tr><td headers=" " class="gt_row gt_left">D × poly(age0, 2, raw = TRUE)1</td>
+<td headers="Linear" class="gt_row gt_center"></td>
+<td headers="Quadratic" class="gt_row gt_center">-65.090</td></tr>
+    <tr><td headers=" " class="gt_row gt_left"></td>
+<td headers="Linear" class="gt_row gt_center"></td>
+<td headers="Quadratic" class="gt_row gt_center">(36.778)</td></tr>
+    <tr><td headers=" " class="gt_row gt_left">D × poly(age0, 2, raw = TRUE)2</td>
+<td headers="Linear" class="gt_row gt_center"></td>
+<td headers="Quadratic" class="gt_row gt_center">49.703</td></tr>
+    <tr><td headers=" " class="gt_row gt_left" style="border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #000000;"></td>
+<td headers="Linear" class="gt_row gt_center" style="border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #000000;"></td>
+<td headers="Quadratic" class="gt_row gt_center" style="border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #000000;">(73.600)</td></tr>
+    <tr><td headers=" " class="gt_row gt_left">Num.Obs.</td>
+<td headers="Linear" class="gt_row gt_center">12</td>
+<td headers="Quadratic" class="gt_row gt_center">12</td></tr>
+    <tr><td headers=" " class="gt_row gt_left">R2</td>
+<td headers="Linear" class="gt_row gt_center">0.856</td>
+<td headers="Quadratic" class="gt_row gt_center">0.910</td></tr>
+  </tbody>
+  <tfoot>
+    <tr class="gt_sourcenotes">
+      <td class="gt_sourcenote" colspan="3">+ p &lt; 0.1, * p &lt; 0.05, ** p &lt; 0.01, *** p &lt; 0.001</td>
+    </tr>
+  </tfoot>
+</table>
+</div>
+]]
+
+.push-right[
+&lt;img src="13-RegDD_files/figure-html/RDD11-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+class: clear
+# 3. Weigh .font70[Give more weight to points closer to the cutoff]
+
+.left-column[
+The bandwidth excludes cases that should not matter at all.
+
+But generally, cases closer to the threshold should matter more; they embody the core logic of an RDD.
+
+]
+
+.right-column[
+&lt;img src="13-RegDD_files/figure-html/RDD12-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
+---
+class: clear
+# 3. Weigh .font70[Give more weight to points closer to the cutoff]
+
+.left-column[
+The bandwidth excludes cases that should not matter at all.
+
+But generally, cases closer to the threshold should matter more; they embody the core logic of an RDD.
+
+`\(\rightarrow\)` *Triangual Kernel* weights are the default
+]
+
+.right-column[
+&lt;img src="13-RegDD_files/figure-html/Kernels-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+# All in one
+
+.left-column[
+`rdrobust()` imlements state-of the-art RDDs: Local linear regression within optimized bandwidth and triangular kernel weights.
+
+`mlda$all` is all deaths per 100,000 inhabitants of the US.
+]
+
+.right-column[
+
+``` r
+*RDD_all &lt;- rdrobust(y = mlda$all, x = mlda$agecell, # Outcome &amp; running variable
+* c = 21) # The threshold
+summary(RDD_all)
+# Sharp RD estimates using local polynomial regression.
+# 
+# Number of Obs.                   48
+# BW type                       mserd
+# Kernel                   Triangular
+# VCE method                       NN
+# 
+# Number of Obs.                   24           24
+# Eff. Number of Obs.               6            6
+# Order est. (p)                    1            1
+# Order bias  (q)                   2            2
+# BW est. (h)                   0.493        0.493
+# BW bias (b)                   0.780        0.780
+# rho (h/b)                     0.632        0.632
+# Unique Obs.                      24           24
+# 
+# =====================================================================
+#                    Point    Robust Inference
+#                 Estimate         z     P&gt;|z|      [ 95% C.I. ]       
+# ---------------------------------------------------------------------
+#      RD Effect     9.595     2.205     0.027     [1.077 , 18.300]    
+# =====================================================================
+```
+]
+
+---
+# All in one
+
+.left-column[
+`mlda$mva` are motor vehicle related deaths per 100,000 inhabitants of the US.
+]
+
+.right-column[
+
+``` r
+*RDD_drive &lt;- rdrobust(y = mlda$mva, x = mlda$agecell, # Outcome &amp; running variable
+* c = 21) # The threshold
+summary(RDD_drive)
+# Sharp RD estimates using local polynomial regression.
+# 
+# Number of Obs.                   48
+# BW type                       mserd
+# Kernel                   Triangular
+# VCE method                       NN
+# 
+# Number of Obs.                   24           24
+# Eff. Number of Obs.               6            6
+# Order est. (p)                    1            1
+# Order bias  (q)                   2            2
+# BW est. (h)                   0.485        0.485
+# BW bias (b)                   0.734        0.734
+# rho (h/b)                     0.660        0.660
+# Unique Obs.                      24           24
+# 
+# =====================================================================
+#                    Point    Robust Inference
+#                 Estimate         z     P&gt;|z|      [ 95% C.I. ]       
+# ---------------------------------------------------------------------
+#      RD Effect     4.903     1.879     0.060    [-0.203 , 9.698]     
+# =====================================================================
+```
+]
+
+---
+class: inverse middle center
+
+.font140[
+Research questions answered:
+
+9.5 more people die per 100,000 inhabitants when you make alcohol legal. 
+
+Approx. 50% of these deaths are increases in traffic related accidents.
+]
+
+---
+# More examples .font70[Women and corruption]
+
+.push-left[
+Pereira, Miguel &amp; Pablo Fernandez-Vazquez (2023): "Does Electing Women Reduce Corruption? *Legislative Studies Quarterly*, 48(4), 731-763.
+
+In 2007, Spain made a new rule saying that for municipalities with a population larger than 5.000 people, parties had to provide at least 40% of their seats to women. Pereira &amp; Fernandez-Vazquez use this as an RDD:
+- Outcome: (Revealed) Corruption
+- Running Variable: Municipality population
+- Cutoff: 5.000
+]
+
+.push-right[
+&lt;img src="./img/women_elected_threshold.png" width="80%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+# More examples .font70[Women and corruption]
+  
+.push-left[
+.content-box-green[
+There's an effect! But why?
+]]
+
+.push-right[
+&lt;img src="./img/women_elected_effects.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
+
+???
+- Women are socialized differently
+- Women are more risk averse
+- Women are under more scrutiny when elected
+- Women tend to work on policies in low-corruption areas
+
+&lt;!-- --- --&gt;
+&lt;!-- class: clear --&gt;
+&lt;!-- # More examples .font70[Cumulative advantage in basketball] --&gt;
+
+&lt;!-- .push-left[ --&gt;
+&lt;!-- Biegert, Thomas, Michael Kühhirt &amp; Van Lancker (2023): "They Can’t All Be Stars: The Matthew Effect, Cumulative Status Bias, and Status Persistence in NBA All-Star Elections" *American Sociological Review* 88(2): 189–219. --&gt;
+
+&lt;!-- **Matthew Effect**: Robert K. Merton argued that small early advantages between equals can create large downstream *"Cumulative"* inequalities. We cannot reward *every* deserving person. But rewarding one person at the threshold but not the other more or less equal ones creates an actual inequality where there didn't use to be any. --&gt;
+&lt;!-- ] --&gt;
+
+&lt;!-- .push-right[ --&gt;
+&lt;!-- ```{r, echo = FALSE, out.width='70%', fig.align='center'} --&gt;
+&lt;!-- knitr::include_graphics('./img/lebron.png') --&gt;
+&lt;!-- ``` --&gt;
+&lt;!-- ] --&gt;
+
+&lt;!-- --- --&gt;
+&lt;!-- class: clear --&gt;
+&lt;!-- # More examples .font70[Cumulative advantage in basketball] --&gt;
+
+&lt;!-- .push-left[ --&gt;
+&lt;!-- - Fans vote 5 players starting the NBA "All-Star Game". --&gt;
+&lt;!-- - Outcome: Play "All-Star Game" in the *following* years. --&gt;
+&lt;!-- - Running Variable: Rank of fan votes  --&gt;
+&lt;!-- - Cutoff: 5 --&gt;
+&lt;!-- ] --&gt;
+
+&lt;!-- .push-right[ --&gt;
+&lt;!-- ```{r, echo = FALSE, out.width='100%', fig.align='center'} --&gt;
+&lt;!-- knitr::include_graphics('./img/nba_rdd_effects.png') --&gt;
+&lt;!-- ``` --&gt;
+&lt;!-- ] --&gt;
+
+&lt;!-- --- --&gt;
+&lt;!-- # Empirical example #2 --&gt;
+&lt;!-- ## Cumulative advantage in basketball --&gt;
+
+&lt;!-- .push-left[ --&gt;
+&lt;!-- Maybe the players who won the first time are just better? Nope. Every measure of performance is insignificant, while the RDD estimate remains significant. --&gt;
+&lt;!-- ] --&gt;
+
+&lt;!-- .push-right[ --&gt;
+&lt;!-- ```{r, echo = FALSE, out.width='100%', fig.align='center'} --&gt;
+&lt;!-- knitr::include_graphics('./img/nba_covariates.png') --&gt;
+&lt;!-- ``` --&gt;
+&lt;!-- ] --&gt;
+
+---
+class: clear
+# More examples .font70[Far-right mayors and discrimination]
+
+&lt;img src="./img/Krzysz.png" width="42%" style="display: block; margin: auto;" /&gt;
+.center[.backgrnote[*Source*: Schaeffer, Romarri, Rosenberg et al. (2025)]]
+
+---
+class: clear
+# More examples .font70[Far-right mayors and discrimination]
+
+&lt;img src="./img/IT-Healthcare.png" width="95%" style="display: block; margin: auto;" /&gt;
+.center[.backgrnote[*Source*: Schaeffer, Romarri, Rosenberg et al. (2025)]]
+
+---
+class: clear
+# More examples .font70[Far-right mayors and discrimination]
+
+.push-left[
+&lt;img src="https://pbs.twimg.com/media/FOH1FlhWUAIqbN1.jpg:large" width="62%" style="display: block; margin: auto;" /&gt;
+]
+
+
+.push-right[
+.center[Municipalities where far-right candidates &lt;br&gt; *ran*
+versus where they *won*]
+&lt;img src="./img/Map_Italy.png" width="100%" style="display: block; margin: auto;" /&gt;
+.backgrnote[.center[*Source:* Romarri (2020)]]
+]
+
+---
+class: clear
+# More examples .font70[Far-right mayors and discrimination]
+
+.left-column[
+&lt;img src="./img/Krzysz.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
+
+.right-column[
+&lt;img src="./img/Figure2a-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+.backgrnote[.center[*Source:* Schaeffer, Romarri, Rosenberg et al. (2025)]]
+]
+
+
+---
+class: clear
 .left-column[
 &lt;img src="https://www.laserfiche.com/wp-content/uploads/2014/10/femalecoder.jpg" width="80%" style="display: block; margin: auto;" /&gt;
 
@@ -656,6 +2215,32 @@ class: middle clear
 ]
 
 ---
+layout: false
+class: inverse
+# Today's general lessons
+
+1. Although OLS estimates linear models, we can "linearize" non-linear relationships. We can do so in two ways: by using polynomials, or by transforming `\(Y\)` or `\(X\)`.
+2. Polynomials are basically interaction terms of a variable with itself. By introducing `\(X^2\)`, or even higher order polynomials to our model, we let `\(\beta_{x}\)` change with a change in `\(X\)`. Importantly, every polynomial moderates/aletrs the one before it with a unit increase in `\(X\)`. 
+3. Polynomials allow us to model very complex relationships. But we should be careful to not overfit the model to our particular data. Usually, a simple polynomial (i.e. `\(x\)` and `\(X^2\)` are enough).
+4. An alternative to polynomials is to transform `\(Y\)` and/or `\(X\)`. Many algebraic transformations are possible. But one of the most useful is the logarithm, which allows us to express `\(Y\)` or `\(X\)` in terms of rates of change instead of absolute unit increases.
+
+---
+# References
+
+.push-left[
+.font70[
+Romarri, A. (2020). _Do Far-Right Mayors Increase the Probability of Hate Crimes? Evidence From
+Italy_. SSRN Scholarly Paper ID 3506811. Rochester, NY: Social Science Research Network.
+
+Schaeffer, M., A. Romarri, D. Rosenberg, et al. (2025). "When Politics Enters the Waiting Room:
+Far-Right Electoral Victories Exacerbate Discrimination in Access to Healthcare". In: _Unpublished
+manuscript_.
+]]
+
+.push-right[
+.font70[
+
+]]
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="../template/remark-latest.min.js"></script>
