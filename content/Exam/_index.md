@@ -21,7 +21,8 @@ This examination consists of two primary components. The first component require
 
 - Questionnaire: You can find a link to the questionnaire in the pre-registration.
 
-- Data Availability: The dataset will be made available at the beginning of December.
+- Data: [Link to data for the exam](https://absalon.ku.dk/courses/84288/modules/items/2902800)
+  + Under no circumstances are you allowed to share these data with persons who are not enrolled in the course, or to upload them to any (AI or otherwise) platform. You are only allowed to rpcoess them using R on your personal computer.
 
 ## Component 1: Data Analysis and Interpretation
 You will be provided with a dataset from a survey experiment conducted by my colleagues and me in September. You will also receive the full questionnaire and two separate pre-registrations. A pre-registration is a document researchers file in a public registry before data collection, outlining their hypotheses and planned analysis strategies. Your task is to select one of the two pre-registrations and conduct the statistical analyses to test *all of its hypotheses*. You must adhere as closely as possible to the analytical strategy described in your chosen pre-registration. Note however, that you will not need to merge/join any data from Statistics Denmark. To test hypotheses about respondents' neighborhood characteristics, instead use the questions on the subjectively perceived shares of different social groups (e.g., share of immigrants, unemployed, etc) in their nieghborhood. Combine them into an additive scale, by first z-standardizing each of them and then taking the average value across all of them using the R function `rowMeans()` with the argument `na.rm = TRUE`. Your deliverable will be a written report of your methods and findings. This component requires you to produce two core sections of a scientific paper:
