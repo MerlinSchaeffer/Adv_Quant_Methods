@@ -1,0 +1,485 @@
+name,id,sis_id,section,section_id,section_sis_id,submitted,attempt,941506: Why is it important to check for outliers in OLS regression?,5.0,"941507: We need some data to explore urbanization across municipalities. A simple (and somewhat naive) measure of this could be the population size in a municipality: The larger the population, the more urbanized!
+We can use the dkstat-package to explore data from the Statistics Denmark api. 
+What does the function ""dst_search"" from the dkstat package do according to the package help-page? ""This function provides a search function for... [dst_search]
+Use the dst_search-function to search for statistics related to ""folketal"" and inspect the first 10 results. Which statistic shows both ""kommune"" and ""bystørrelse""? [stat]
+",5.0,"941508: Now, lets download the BY2 data from 2022 with the code snippet from the quiz-script.
+Create a tibble that summarizes the number of adults (in 10thousands) across all municipalities in the BY-data and name the tibble popCounts.
+How many rows are in the popCount-data? [popCount]",5.0,"941509: Now we have a data frame of municipalities and population sizes.
+Then, we need to prepare and summarize the survey data.
+Read theelection campaign data, select the variable for municipality of residence, the variable for perceiving immigration as a threat and the variable for thinking Inger Støjberg should be allowed to be minister. Remove all missing observations across the three variables. How many rows are in this data? [nrow_survey]
+Fill out the code in the quizzscript to summarize the survey data to municipality level data showing for each municipality the mean attitude towards immigration and the proportion who thinks Inger Støjberg should be allowed to be minister after the election. What proportion of citizens in Copenhagen thinks Inger Støjberg should be allowed to be minister after the election (3 digits)? [propCop]
+Now left_join the immigrationData on the popCounts by the variable ""municipality"". One municipality is missing data - which? [miss]
+Is it okay to remove this observation from data? (yes/no) [rm]",9.0,"941516: In both models the municipality of Copenhagen had by far the higher Cooks D.
+Is it a good idea to filter out Copenhagen from a model of Danish Municipalities? Write at leas one argument for, one against, and what you think is the better argument",9.0,"941517: Population size is a very noisy measure of urbanization. For instance, Frederiksberg has a lower population size than Vejle
+
+Luckily, the DST-api has other stats, namely a categorical kommune-grouping based on urbanisation. Use the quizscript to download these data and join them to the current data.
+Count the municipality-group variable. One group has much fewer observations than the other - which?",9.0,"941518: Use the script and the function fct_recode to recode ""Hovedstadskommuner"" together with ""Storbykommuner"" to make the latter have a higher number of observations.
+Then use the script to make a boxplot of the relationsship between the population count and the municipality urbanization groups.
+Based on the boxplot, think about which of the two is the better measure of urbanization and what potential effects that might be overlooked in the models we have calculated up until now
+",0.0,"941522: Let's make a coefficient plot of the regression of immigration attitude (perceiving immigration as a threat) on urbanization to easily visualize our findings.
+First, tidy the model output using tidy() with the conf.int -argument and filter as shown in the quiz script.
+Then, modify the coefficient-plot code to create a coefficient plot.
+How many of the 95% confidence intervals visualized include 0? [CI]
+Judging by the coefficient plot, does the model seem to predict that less urbanized municipalities have citizens who perceive immigration as a bigger threat? [neg]",20.0,"941523: On a scale from 0 (the worst possible quiz for this lecture) to 10 (the best possible quiz for this lecture), how would you rate the quiz, that you have just completed?",0.0,"941524: If you have any suggestions as to how we can improve these quizzes, feel free to let us know here.
+If you don't have any suggestions, just type a blank space",0.0,"941510: We want to find out how population size and citizens attitudes towards immigration (perceiving immigration as a threat) are related to one another.
+Run an OLS regression of immigration attitude on population size using lm().
+For each 10,000 more adults in a municipality, how many scale points does mean perception of immigration as a threat change 
+  
+    [ Select ]
+  
+  [""0.012"", ""0.011"", ""-0.011"", ""-0.012""]
+
+ (3 digits)?
+Is the correlation statistically significant at the 0.05-level? 
+  
+    [ Select ]
+  
+  [""Yes"", ""No""]
+
+
+Use the glance-function from the broom-package to inspect summary statistics for the model. What is the R2? 
+  
+    [ Select ]
+  
+  [""0.044"", ""0.054"", ""0.064"", ""0.074""]
+
+ (3 digits)
+",9.0,"941515: Make a scatterplot ofpopulation size and citizens attitudes towards immigration (proportion who thinks Inger Støjberg can be minister).
+The municipality that is furthest from the regression line in the scatterplot is probably the most likely to cause trouble for the regression model. Which municipality is that in this case? 
+  
+    [ Select ]
+  
+  [""Rebild"", ""Rødovre"", ""København"", ""Aarhus""]
+
+
+Run an OLS regression of immigration attitude (proportion who thinks Inger Støjberg can be minister) on population size using lm() and make a diagnostic outlier plot of the regression model.
+Add a variable for Cook's distance from the regression model to the data set.One municipality has a Cook's distance of  0.2. Which one is that? 
+  
+    [ Select ]
+  
+  [""Rebild"", ""Rødovre"", ""København"", ""Aarhus""]
+
+
+(Hint: The numbers by the dots in the diagnostic plot are the observation numbers. Use this number in square brackets to find the right country name from the country variable.)
+Filter out this municipality from the dataset and run the regression again. Is the coefficient still significant? 
+  
+    [ Select ]
+  
+  [""Yes"", ""No""]
+
+",9.0,"941519: Run an OLS regression of immigration attitude (perceiving immigration as a threat) on urbanization.
+How much higher is the mean level of perceiving immigration as a threat in an ""landkommune"" compared to a ""storbykommune""? 
+  
+    [ Select ]
+  
+  [""0.094"", ""0.114"", ""0.166"", ""0.125""]
+
+
+Is the difference statistically significant at the 0.05-level? 
+  
+    [ Select ]
+  
+  [""Yes"", ""No""]
+
+",20.0,"941513: We want to find out how population size and citizens attitudes towards immigration (proportion who thinks Inger Støjberg can be minister) are related to one another.
+Run an OLS regression of immigration attitude on population size using lm().
+For each 10,000 more adults in a municipality, how much does the proportion who thinks Inger Støjberg can be minister change 
+  
+    [ Select ]
+  
+  [""-0.005"", ""-0.006"", ""-0.007"", ""-0.008""]
+
+ (3 digits)?
+Is the correlation statistically significant at the 0.05-level? 
+  
+    [ Select ]
+  
+  [""Yes"", ""No""]
+
+
+Use the glance-function from the broom-package to inspect summary statistics for the model. What is the R2? 
+  
+    [ Select ]
+  
+  [""0.109"", ""0.119"", ""0.129"", ""0.139""]
+
+ (3 digits)",9.0,"941514: Make a scatterplot of population size and citizens attitudes towards immigration (perceiving immigration as a threat).
+The country that is furthest from the regression line in the scatterplot is probably the most likely to cause trouble for the regression model. Which country is that in this case? 
+  
+    [ Vælg ]
+  
+  [""Samsø"", ""Lemvig"", ""København"", ""Faxe""]
+
+
+Run an OLS regression of immigration attitude (perceiving immigration as a threat) on population size using lm() and make a diagnostic outlier plot of the regression model.
+Add a variable for Cook's distance from the regression model to the data set.One municipality has a Cook's distance of  0.2. Which one is that? 
+  
+    [ Vælg ]
+  
+  [""Samsø"", ""Lemvig"", ""København"", ""Faxe""]
+
+
+(Hint: The numbers by the dots in the diagnostic plot are the observation numbers. Use this number in square brackets to find the right country name from the country variable.)
+Filter out this municipality from the dataset and run the regression again. Is the coefficient still significant? 
+  
+    [ Vælg ]
+  
+  [""Yes"", ""No""]
+
+",9.0,"941521: Run an OLS regression of immigration attitude (perceiving immigration as a threat) on urbanization.
+How much higher is the mean level of perceiving immigration as a threat in an ""oplandskommune"" compared to a ""Storbykommune""? 
+  
+    [ Vælg ]
+  
+  [""0.009"", ""0.114"", ""0.166"", ""0.125""]
+
+
+Is the difference statistically significant at the 0.05-level? 
+  
+    [ Vælg ]
+  
+  [""Yes"", ""No""]
+
+",20.0,"941511: We want to find out how population size and citizens attitudes towards immigration (proportion who thinks Inger Støjberg can be minister) are related to one another.
+Run an OLS regression of immigration attitude on population size using lm().
+For each 10,000 more adults in a municipality, how much doestheproportion who thinks Inger Støjberg can be ministerchange 
+  
+    [ Select ]
+  
+  [""-0.00496"", ""-0.00596"", ""-0.00696"", ""-0.00796""]
+
+ (5 digits)?
+Is the correlation statistically significant at the 0.05-level? 
+  
+    [ Select ]
+  
+  [""Yes"", ""No""]
+
+
+Use the glance-function from the broom-package to inspect summary statistics for the model. What is the R2? 
+  
+    [ Select ]
+  
+  [""0.10877"", ""0.11877"", ""0.12877"", ""0.13877""]
+
+ (5 digits)",9.0,"941512: We want to find out how population size and citizens attitudes towards immigration (perceiving immigration as a threat) are related to one another.
+Run an OLS regression of immigration attitude on population size using lm().
+For each 10,000 more adults in a municipality, how many scale points doesmean perception of immigration as a threatchange 
+  
+    [ Select ]
+  
+  [""0.0110"", ""0.0109"", ""-0.0109"", ""-0.0110""]
+
+ (4 digits)?
+Is the correlation statistically significant at the 0.05-level? 
+  
+    [ Select ]
+  
+  [""Yes"", ""No""]
+
+
+Use the glance-function from the broom-package to inspect summary statistics for the model. What is the R2? 
+  
+    [ Select ]
+  
+  [""0.0439"", ""0.0539"", ""0.0639"", ""0.0739""]
+
+ (5 digits)",9.0,"941520: Run an OLS regression of immigration attitude (perceiving immigration as a threat) on urbanization.
+How much higher is the mean level of perceiving immigration as a threat in an ""provinsbykommune"" compared to a ""storbykommune""? 
+  
+    [ Select ]
+  
+  [""0.094"", ""0.114"", ""0.166"", ""0.125""]
+
+
+Is the difference statistically significant at the 0.05-level? 
+  
+    [ Select ]
+  
+  [""Yes"", ""No""]
+
+
+",20.0,n correct,n incorrect,score
+Lea Uno Joensen,432916,831177,Hold4;,190285,Hsyl224857,2025-10-09 21:59:59 UTC,1,Outliers can distort the estimated coefficients and reduce the model's accuracy,5.0,"the description field of available data series,BY2",5.0,99,5.0,"",0.0,"",0.0,"",0.0,"",0,"",0.0,"",0.0,"",0.0,"",0.0,"",0.0,"",0.0,"","","","","","","","","","","","",6,7,15.0
+Bjørk Sigurdsdóttir Lamhauge,447899,840721,Hold1;,190272,Hsyl224854,2025-10-09 21:59:59 UTC,1,Outliers can distort the estimated coefficients and reduce the model's accuracy,5.0,"an overview of available data series,BY2",2.5,99,5.0,"98,0.263,Christiansø,yes",4.5,"",0.0,"",0.0,"",0,"",0.0,"",0.0,"",0.0,"","","",0.0,"",0.0,"-0.005,No,0.109",6.0,"","","","","","","","","","",8,5,23.0
+Dina Werner Laursen,433429,808194,Hold4;,190285,Hsyl224857,2025-10-09 21:59:59 UTC,1,Outliers can distort the estimated coefficients and reduce the model's accuracy,5.0,"the description field of available data series,BY2",5.0,99,5.0,"10\,632,0.264,Christiansø,yes",6.75,"",0.0,"",0.0,"",0,"",0.0,"",0.0,"",0.0,"-0.011,No,0.074",6.0,"","","","","","","",0.0,"",0.0,"","","","","","",8,5,27.75
+Selma Robbert Larsen,367816,715851,Hold2;,190276,Hsyl224855,2025-10-09 21:59:59 UTC,1,Outliers can distort the estimated coefficients and reduce the model's accuracy,5.0,"",0.0,"",0.0,"",0.0,"",0.0,"",0.0,"",0,"",0.0,"",0.0,"",0.0,"","","",0.0,"",0.0,"","","","","","","",0.0,"","","","",4,9,5.0
+Josefine Degn Sørensen,432127,824419,Hold3;,190281,Hsyl224856,2025-10-09 21:59:59 UTC,1,Outliers can distort the estimated coefficients and reduce the model's accuracy,5.0,"the description field of available data series,FOLK3",2.5,12.474,0.0,"",0.0,"",0.0,"",0.0,"",0,"",0.0,"",0.0,"",0.0,"","","",0.0,"",0.0,"","","","","","","","","",0.0,"","",5,8,7.5
+Caroline Laura Carsten Kendal,428952,808652,Hold1;,190272,Hsyl224854,2025-10-09 21:59:59 UTC,1,Outliers can distort the estimated coefficients and reduce the model's accuracy,5.0,"the description field of available data series,BY2",5.0,99,5.0,"98,26.383,Christiansø,yes",4.5,"",0.0,"",0.0,"",0,"",0.0,"",0.0,"",0.0,"","","",0.0,"",0.0,-0.007,0.0,"","","","","","","","","","",7,6,19.5
+Elliot Ipsen Hamilton,431180,810458,Hold1;,190272,Hsyl224854,2025-10-08 09:24:19 UTC,1,Outliers can distort the estimated coefficients and reduce the model's accuracy,5.0,"the description field of available data series,BY2",5.0,99,5.0,"98,0.26,Christiansø,Yes",4.5,"",0.0,Landkommuner,0.0,"",0,"1,No",0.0,"",0.0,"",0.0,"","","","","0.114,Yes",0.0,"","","Samsø,København,No",9.0,"","","","","-0.0109,Yes,0.0739",9.0,"","",9,4,37.5
+Carl Worm Rønne,431137,811304,Hold4;,190285,Hsyl224857,2025-10-08 08:03:25 UTC,1,Outliers can distort the estimated coefficients and reduce the model's accuracy,5.0,"the description field of available data series,BY2",5.0,99,5.0,"1036,0.264,Christiansø,Yes",6.75,Købehavn er en outlier,0.0,Storbykommuner,9.0,"",0,"2,Yes",20.0,9,0.0,"",0.0,"0.011,Yes,0.064",3.0,"Rebild,København,Yes",9.0,"0.125,No",20.0,"","","","","","","","","","","","",13,0,82.75
+Emma Varshadi Schmidt,432645,808222,Hold4;,190285,Hsyl224857,2025-10-08 06:53:13 UTC,1,Outliers can distort the estimated coefficients and reduce the model's accuracy,5.0,"the description field of available data series,BY2",5.0,99,5.0,"10\,632,4.427,hvidovre,no",0.0,Copenhagen is way more diverse than other municipalities which can both be an argument for and against since it may not seem representative but it would not make sense to remove the biggest one and hence a big part of the population,0.0,Landkommuner,0.0,"",0,"0,No",0.0,5,0.0,e,0.0,"","","Rebild,København,No",6.0,"","","-0.006,Yes,0.119",3.0,"","","","","","","","","0.094,No",10.0,10,3,34.0
+Malou Larving Hvidkjær Thomsen,430267,810915,Hold1;,190272,Hsyl224854,2025-10-07 18:12:29 UTC,1,Outliers can distort the estimated coefficients and reduce the model's accuracy,5.0,"an overview of available data series,BY2",2.5,99,5.0,"98,0.264,Christiansø,yes",6.75,"",0.0,Provinsbykommuner,0.0,"",0,"2,Yes",20.0,8,0.0,"",0.0,"","","Rødovre,København,No",3.0,"","","","","","","","","-0.00496,Yes,0.10877",9.0,"","","0.166,Yes",0.0,11,2,51.25
+Emilie Buestad Lohmann,366003,718439,Hold1;,190272,Hsyl224854,2025-10-07 15:55:11 UTC,1,Outliers can distort the estimated coefficients and reduce the model's accuracy,5.0,"the description field of available data series,BY2",5.0,5,0.0,"9,7\,888,hovedstaden,no",0.0,No,0.0,Landkommuner,0.0,"",0,"1,Yes",10.0,10,0.0,   ,0.0,"","","Rødovre,Rebild,Yes",3.0,"0.094,Yes",0.0,"-0.006,No,0.109",3.0,"","","","","","","","","","",9,4,26.0
+Vår Oline Erga,429293,811688,Hold2;,190276,Hsyl224855,2025-10-07 13:05:16 UTC,1,Outliers can distort the estimated coefficients and reduce the model's accuracy,5.0,"the description field of available data series,BY2",5.0,99,5.0,"98,0.265,Christiansø,yes",4.5,"Copenhagen has a Cooks D of 0.04124, which is just above the 4/n-cut-off rule. This means that including the Copenhagen observation could distort the results of the regression outputs. Filtering out Copenhagen could therefore lead to a more fitting model for all the other municipalities.
+
+However, in order to get the full picture of to what extent Danes view immigration as a threat, it would make sense to include Copenhagen.
+
+A solution could be to create one model with and one model without Copenhagen",0.0,Storbykommuner,9.0,"",0,"2,Yes",20.0,6,0.0,"",0.0,"","","","","0.125,No",20.0,"","","Samsø,København,No",9.0,"","","-0.00496,Yes,0.10877",9.0,"","","","",13,0,86.5
+Celina Laura Strandbech,386446,752858,Hold3;,190281,Hsyl224856,2025-10-07 12:42:28 UTC,1,Outliers can distort the estimated coefficients and reduce the model's accuracy,5.0,"an overview of available data series,BY2",2.5,99,5.0,"10632,0.264,Christiansø,yes",9.0,No it should be included if we are looking to describe how the general population/all municipalities think of these issues. Copenhagen is densely populated compared to other municipalities and therefore it is important to conclude this large number of residents' opinions in the models(since we are looking to get an idea of what the general public thinks about these issues!),0.0,Landkommuner,0.0,"",0,"2,Yes",20.0,8,0.0,"",0.0,"","","","","0.114,No",10.0,"","","København,København,No",6.0,"","","","","-0.0109,Yes,0.0739",9.0,"","",12,1,66.5
+Josephine Louise Mattsson,431705,810914,Hold1;,190272,Hsyl224854,2025-10-06 14:57:56 UTC,1,Outliers can distort the estimated coefficients and reduce the model's accuracy,5.0,"the description field of available data series,BY1",2.5,198,0.0,"98,?,Christiansø,yes",4.5,"Against: a large part of the population lives in Copenhagen, so it would filter out important data
+
+For: Dominates the data result",0.0,Storbykommuner,9.0,"",0,"1,No",0.0,3,0.0,I would like a codebook where I can find the needed codes. I dont have this kind of overview of what code is needed when. I feel behind because of this,0.0,"","","København,Rebild,No",0.0,"0.125,Yes",10.0,"","","","","","","","","0.0109,Yes,0.0739",6.0,"","",10,3,37.0
+Nicoline Nielsen,429414,824753,Hold1;,190272,Hsyl224854,2025-10-06 09:42:04 UTC,1,Outliers can distort the estimated coefficients and reduce the model's accuracy,5.0,"the description field of available data series,BY2",5.0,99,5.0,"98,0.26,Christiansø,yes",4.5,"Not a good idea: Copenhagen is a part of Denmark, there are a lot of people and its results are important.
+
+Good idea: It is an outlier compared to other municipalities.
+
+I don't think we should remove it – or it should be made very clear that we have removed it and why",0.0,Storbykommuner,9.0,"",0,"2,Yes",20.0,3,0.0,I couldn't find the file.,0.0,"","","København,Aarhus,Yes",3.0,"","","","","","","0.114,Yes",10.0,"-0.00496,Yes,0.10877",9.0,"","","","",13,0,70.5
+Marlene Klinge Beck,432682,831289,Hold4;,190285,Hsyl224857,2025-10-06 08:34:31 UTC,1,Outliers can distort the estimated coefficients and reduce the model's accuracy,5.0,"the description field of available data series,BY2",5.0,99,5.0,"10632,0.264,Christiansø,yes",9.0,"I think it depends on the scope of the article. 
+
+I think one could argue that Copenhagen as the capitol in Denmark is quite a different from other municipalities. It is by far the biggest, and I would believe it is a lot more diverse than other municipalities in DK both in ethnicity and possibly other factors. With it being to big it pulls a lot of weight in the model and it probably in many cases has a different opinion than the rest of Denmark. 
+
+ 
+
+ ",0.0,Storbykommuner,9.0,"",0,"2,No",10.0,8,0.0,   ,0.0,"-0.011,Yes,0.074",9.0,"","","","","","","København,København,No",6.0,"0.166,No",10.0,"","","","","","",13,0,68.0
+Anna Sif Hagbard Binder,430556,807740,Hold3;,190281,Hsyl224856,2025-10-05 18:41:58 UTC,1,Outliers can distort the estimated coefficients and reduce the model's accuracy,5.0,"the description field of available data series,BY2",5.0,12474,5.0,"10632,0.264,Christiansø,Yes",9.0,"Since Copenhagen is a big outlier it might not be representative for the rest of the country and should therefore be filtered out.
+
+On the other hand, Copenhagen is the capital of Denmark and excluding it would mean we are deliberately leaving out a big part of the population.",0.0,Storbykommuner,9.0,"",0,"2,Yes",20.0,7,0.0,"",0.0,"","","København,København,Yes",6.0,"","","","","","","0.166,Yes",20.0,"","","-0.0109,Yes,0.0739",9.0,"","",13,0,88.0
+Jacqueline Schomacker Mayer,430691,825145,Hold4;,190285,Hsyl224857,2025-10-05 13:37:24 UTC,1,Outliers can distort the estimated coefficients and reduce the model's accuracy,5.0,"the description field of available data series,BY2",5.0,99,5.0,"10996,0.263,Christiansø,yes",4.5,.,0.0,Landkommuner,0.0,"",0,"1,No",0.0,"",0.0,"",0.0,"","","Rødovre,Rebild,Yes",3.0,"0.114,No",10.0,"","","","","","","","","0.0110,No,0.0639",0.0,"","",9,4,32.5
+Emma Gro Andersen,432947,811035,Hold3;,190281,Hsyl224856,2025-10-03 08:01:16 UTC,1,Outliers can distort the estimated coefficients and reduce the model's accuracy,5.0,"the description field of available data series,BY2",5.0,99,5.0,"98,0.26,Christiansø,yes",4.5,"",0.0,Storbykommuner,9.0,"",0,"1,Yes",10.0,4,0.0,.,0.0,"","","Rebild,København,No",6.0,"","","","","","","","","-0.00496,No,0.10877",6.0,"","","0.094,No",10.0,13,0,60.5
+Lærke Monk Pedersen,430206,819787,Hold3;,190281,Hsyl224856,2025-10-03 07:23:09 UTC,1,Outliers can distort the estimated coefficients and reduce the model's accuracy,5.0,"the description field of available data series,BY2",5.0,99,5.0,"1036,0.264,Christiansø,Yes",6.75,"For: København er en ekstrem outlier, så at fjerne de kan gøre resultaterne mere repræsentative for de øvrige kommuner.
+
+Imod: København er stadig en reel og vigtig kommune, og at udelade de kan skjule væsentlige forhold.
+
+Behodl derfor kæbenhavn, men vis evt både analuyser med og uden kbh",0.0,Storbykommuner,9.0,"",0,"2,Yes",20.0,5,0.0,"",0.0,"","","Rødovre,København,No",3.0,"0.114,No",10.0,"-0.006,Yes,0.139",3.0,"","","","","","","","","","",13,0,66.75
+Maria Helene Teuber,429516,811963,Hold2;,190276,Hsyl224855,2025-10-02 18:02:04 UTC,1,Outliers can distort the estimated coefficients and reduce the model's accuracy,5.0,"the description field of available data series,BY2",5.0,12474,5.0,"10632,0.264,Christiansø,yes",9.0,"It may be reasonable to exclude Copenhagen because it is a clear outlier in terms of population size, which can distort the regression results and give disproportionate weight to a single observation.
+
+On the other hand, Copenhagen is part of Denmark and thus a legitimate case in the dataset. Excluding it could reduce the representativeness of the model and obscure real structural differences between municipalities.",0.0,Storbykommuner,9.0,"",0,"2,Yes",20.0,6,0.0,.,0.0,"-0.011,Yes,0.074",9.0,"Rebild,København,Yes",9.0,"0.125,No",20.0,"","","","","","","","","","","","",13,0,91.0
+Clara Cornelia Joensen,429805,811245,Hold4;,190285,Hsyl224857,2025-10-02 17:46:12 UTC,1,Outliers can distort the estimated coefficients and reduce the model's accuracy,5.0,"an overview of available data series,BY2",2.5,99,5.0,"10632,0.264,Christiansø,Yes",9.0,"I think it shouldn't be filtered out as it is the capitol of Denmark, making it the largest municipality in the dataset, it does not make sense to filter out that big of a part of the danish population",0.0,Storbykommuner,9.0,"",0,"2,No",10.0,8,0.0,I think it was a little hard sometimes to know where to start with the codes ://,0.0,"","","","","0.125,No",20.0,"","","Lemvig,København,No",6.0,"","","-0.00496,Yes,0.10877",9.0,"","","","",13,0,75.5
+William Pank Gregersen,430101,811081,Hold3;,190281,Hsyl224856,2025-10-02 13:55:08 UTC,1,Outliers can distort the estimated coefficients and reduce the model's accuracy,5.0,"the description field of available data series,BY2",5.0,99,5.0,"10632,0.26,Christiansø,yes",6.75,"Argument against filtering: Copenhagen is the largest city in denmark by far which argues that it should be a part of the model. the Cooks D could be present because the municipality is greater in population.
+
+ 
+
+argument for filtering: The great difference in population size between copenhagen and the rest of the danish municipalities creates a subsided view of the general views in denmark. by filtering CPH it is clearer to identify the trend of the remaining municipalities",0.0,Storbykommuner,9.0,"",0,"2,No",10.0,7,0.0,no:),0.0,"","","","","0.125,No",20.0,"","","Samsø,København,No",9.0,"","","-0.00496,Yes,0.10877",9.0,"","","","",13,0,78.75
+Solvej Skadborg,388958,767016,Hold3;,190281,Hsyl224856,2025-10-02 13:20:12 UTC,1,Outliers can distort the estimated coefficients and reduce the model's accuracy,5.0,"an overview of available data series,BY2",2.5,99,5.0,"10632,0.263,Christiansø ,yes",6.75,"For: København er en ekstrem outlier, så at fjerne den kan gøre resultaterne mere repræsentative for de øvrige kommuner.
+Imod: København er stadig en reel og vigtig kommune, og at udelade den kan skjule væsentlige forhold.
+Bedste argument: Behold København, men vis evt. både analyser med og uden.",0.0,Storbykommuner,9.0,"",0,"2,Yes",20.0,6,0.0,"",0.0,"","","","","","","","","Lemvig,København,No",6.0,"","","","","-0.0110,Yes,0.0739",6.0,"0.114,No",20.0,13,0,80.25
+Silas Yi Hang Lo,429808,812829,Hold2;,190276,Hsyl224855,2025-10-02 12:38:08 UTC,1,Outliers can distort the estimated coefficients and reduce the model's accuracy,5.0,"the description field of available data series,BY2",5.0,99,5.0,"10632,0.264,Christiansø,yes",9.0,"Copenhagen had the highest Cooks D, probably because it is the city with by far the highest population, and so singlehandedly decides which 'direction' to 'pull' the regression and therefore the estimated coefficient and its confidence interval. 
+
+It could be excluded, as its both uniquely big and uniquely leftist and therefore has a positive attitude towards immigrants. However, this relationship between population size and political leanings is consistent with global trends, where concentrated and highly educated metropolitan areas lean more progressive compared to rural areas of the same nation and culture. ",0.0,Storbykommuner,9.0,"",0,"2,Yes",20.0,4,0.0,"",0.0,"","","","","","","-0.005,Yes,0.109",9.0,"Samsø,København,No",9.0,"","","","","","","0.114,No",20.0,13,0,91.0
+Oline Skovdal,434034,812329,Hold2;,190276,Hsyl224855,2025-10-02 11:59:00 UTC,1,Outliers can distort the estimated coefficients and reduce the model's accuracy,5.0,"the description field of available data series,BY2",5.0,"12\,474",0.0,"10\,632,0.263,Christiansø,yes",4.5,"You get a more representative estimate on the regressionline 
+
+But it is not repræsentative of the real data, when you filter out something 
+
+I think it is not okay to do ",0.0,Storbykommuner,9.0,"",0,"2,Yes",20.0,6,0.0,It was VERY hard to do without looking at the solutionscript og using ai...,0.0,"","","København,København,Yes",6.0,"","","","","","","","","","","-0.0109,Yes,0.0739",9.0,"0.114,No",20.0,12,1,78.5
+Frederikke Munkgård Degnbol,430786,830807,Hold2;,190276,Hsyl224855,2025-10-01 18:00:43 UTC,1,Outliers can distort the estimated coefficients and reduce the model's accuracy,5.0,"the description field of available data series,BY2",5.0,99,5.0,"98,0.263,Christiansø,Yes",4.5,"For: Copenhagen can be viewed as an outlier because of it's Cooks D which is way higher than other municipalities. This means that it likely skews the model, making it less reliable.
+
+Against: Copenhagen is the capital of Denmark, the biggest city and the most densely populated one. Removing it would perhaps make a model that is more straightforward, but it would not give a clear picture of the danish population.
+
+I believe that you should not filter out Copenhagen from the dataset.",0.0,Storbykommuner,9.0,"",0,"2,No",10.0,8,0.0,"",0.0,"","","Rebild,København,Yes",9.0,"0.125,No",20.0,"-0.005,Yes,0.109",9.0,"","","","","","","","","","",13,0,76.5
+Anna Mølbeck Olrik,431081,820303,Hold2;,190276,Hsyl224855,2025-10-01 16:53:50 UTC,1,Outliers can distort the estimated coefficients and reduce the model's accuracy,5.0,"an overview of available data series,BY2",2.5,99,5.0,"98,0.264,Christiansø,yes",6.75,"Argument for: Copenhagen is a much bigger city compared to the other ones in the data frame. By removing it our data might give a more realistic picture of the other municipalities 
+
+Argument against: When removing Copenhagen we are still removing real data that could give us a sense of reality. 
+
+I think it is best to leave Copenhagen out. ",0.0,Provinsbykommuner,0.0,"",0,"1,No",0.0,4,0.0,. ,0.0,"-0.011,No,0.074",6.0,"Rebild,København,Yes",9.0,"0.125,Yes",10.0,"","","","","","","","","","","","",11,2,44.25
+Siri Cifuentes Strandberg,430957,818422,Hold4;,190285,Hsyl224857,2025-10-01 15:30:05 UTC,1,Outliers can distort the estimated coefficients and reduce the model's accuracy,5.0,"the description field of available data series,BY2",5.0,99,5.0,"98,0.264,Christiansø,yes\, because it is not a municipality",4.5,"It would be very helpful to the accuracy of the model, to remove the municipality of Copenhagen, which would be an argument for doing it. However, an argument against is the fact that you cant shape reality, and removing Copenhagen would remove about 1.000.000 respondents from the survey, solely because of the fact that their municipality is an outlier. I think it is better to leave it be, since we sociologist cannot change the world, based on what would be most convenient in our OLS-regression table. ",0.0,Storbykommuner,9.0,"",0,"2,Yes",20.0,5,0.0,"",0.0,"-0.011,Yes,0.074",9.0,"","","0.125,Yes",10.0,"","","Lemvig,København,No",6.0,"","","","","","","","",13,0,73.5
+Emma Fæster Hansen,429475,823028,Hold2;,190276,Hsyl224855,2025-10-01 14:15:29 UTC,1,Outliers can distort the estimated coefficients and reduce the model's accuracy,5.0,"the description field of available data series,BY2",5.0,99,5.0,"10632,0.264,Christiansø,yes",9.0,"an argument for filtering out Copenhagen is that the result becomes more significant.
+
+an argument against, is that Copenhagen is the largest city and could very well play into giving a certain result and should be represented.",0.0,Hovedstadskommuner,0.0,"",0,"2,No",10.0,6,0.0,"",0.0,"","","Rebild,København,Yes",9.0,"","","-0.005,Yes,0.109",9.0,"","","","","","","","","0.114,No",20.0,12,1,72.0
+Ida Bonde Lenau,429662,827707,Hold1;,190272,Hsyl224854,2025-10-01 13:22:39 UTC,1,Outliers can distort the estimated coefficients and reduce the model's accuracy,5.0,"the description field of available data series,BY2",5.0,99,5.0,"98,0.007,Christiansø,yes",4.5,Det påvirker modellen meget fordi københavn står så meget ud,0.0,Storbykommuner,9.0,"",0,"0,No",0.0,3,0.0,.,0.0,"","","","","","","-0.005,Yes,0.119",6.0,"København,København,Yes",3.0,"","","","","","","0.114,Yes",10.0,12,1,47.5
+Chris Sandberg,429028,811521,Hold1;,190272,Hsyl224854,2025-09-30 20:08:39 UTC,1,Outliers can distort the estimated coefficients and reduce the model's accuracy,5.0,"an overview of available data series,BY2",2.5,99,5.0,"98,,,yes",2.25,"I don't really know what Cooks D is - in general I know that just removing an outlier can be harmless enough, but it's worth considering that this outlier represents the biggest municipality of the data, and therefore would be a little chaotic to filter out. But I don't really understand the question, since it's based on Cooks D. ",0.0,Storbykommuner,9.0,"",0,"",0.0,"",0.0,"",0.0,"","","","","","","-0.005,Yes,0.109",9.0,"Lemvig,København,No",6.0,"","","","","","","",0.0,10,3,38.75
+Ellen Holmstoel,431474,830813,Hold4;,190285,Hsyl224857,2025-09-30 11:27:32 UTC,1,Outliers can distort the estimated coefficients and reduce the model's accuracy,5.0,"the description field of available data series,BY2",5.0,99,5.0,"98,0.264,Christiansø,yes",6.75,"Argument for exclusion: Copenhagen is a statistical outlier with disproportionate influence on the model. Removing it can improve generalizability and prevent skewed results driven by one atypical case.
+
+Argument against exclusion: Copenhagen is a major part of Denmark — demographically, politically, and economically. Excluding it risks ignoring meaningful variation and misrepresenting national patterns.
+
+Better argument: Unless the goal is to model only “typical” municipalities, it’s better to include Copenhagen and account for its influence transparently",0.0,Storbykommuner,9.0,"",0,"2,Yes",20.0,5,0.0,.,0.0,"","","Rødovre,København,Yes",6.0,"","","","","","","","","","","-0.0109,Yes,0.0739",9.0,"0.114,No",20.0,13,0,85.75
+Caroline Kirketofte,433285,831394,Hold2;,190276,Hsyl224855,2025-09-30 10:57:59 UTC,1,Outliers can distort the estimated coefficients and reduce the model's accuracy,5.0,"an overview of available data series,BY2",2.5,99,5.0,"10996,0.264,Christiansø,yes",6.75,"For: The municipality Copenhagen can be percieved as an outlier, which interferes with the other observations, giving a wrong picture of the actual association between municipality and attitude toward immigration.
+
+Against: Copenhagen is the biggest municipality in Denmark and the different (compared to the other municipalities) attitude towards immigration might be an interesting finding.
+
+I think you could treat the municipality Copenhagen as an outlier in this case - that might provide a better answer for the association between the variables",0.0,Storbykommuner,9.0,"",0,"2,Yes",20.0,7,0.0,"",0.0,"","","","","0.125,No",20.0,"","","Lemvig,København,No",6.0,"","","","","-0.0109,Yes,0.0739",9.0,"","",13,0,83.25
+Vanessa Amalie Lynge Østerlund,433915,809735,Hold1;,190272,Hsyl224854,2025-09-30 07:54:28 UTC,1,Outliers can distort the estimated coefficients and reduce the model's accuracy,5.0,"the description field of available data series,BY2",5.0,99,5.0,"10.632,000,Christiansø,Yes",4.5,"No it Is not a good idea, I was still close to the trend line.",0.0,Storbykommuner,9.0,"",0,"2,No",10.0,6,0.0,..,0.0,"","","","","0.125,No",20.0,"-0.005,No,0.109",6.0,"Samsø,København,Yes",6.0,"","","","","","","","",13,0,70.5
+Ester Brandgård Busse,429021,809033,Hold4;,190285,Hsyl224857,2025-09-29 13:55:20 UTC,1,Outliers can distort the estimated coefficients and reduce the model's accuracy,5.0,"the description field of available data series,BY2",5.0,99,5.0,"10632,0.264,Chrsitiansø,yes",6.75,"Against: I don't think its a good idea to filter out Copenhagen, because even though its the highest Cooks D it also is the biggest city in Denmark, and it would be a large portion of the danish population one would be filtering out
+
+For: When filtering Copenhagen out, we get a better model for how the rest of Denmark thinks.
+
+ 
+
+I Think the arguments against filtering Copenhagen out are the best",0.0,Storbykommuner,9.0,"",0,"2,Yes",20.0,8,0.0,    ,0.0,"","","","","","","-0.005,No,0.109",6.0,"København,København,No",6.0,"0.166,Yes",20.0,"","","","","","",13,0,82.75
+Sara Maria Schæffer Jensen,433639,824288,Hold2;,190276,Hsyl224855,2025-09-28 17:41:10 UTC,1,Outliers can distort the estimated coefficients and reduce the model's accuracy,5.0,"the description field of available data series,BY2",5.0,99,5.0,"98,0.264,Christiansø,yes",6.75,"Argument for: It is a good idea to filter out CPH because cooks D is really high(especially compared to all other municipalities) and it can distort the results. 
+
+ 
+
+Argument against: CPH is the biggest municipality in Denmark, and filtering it out would probably also make a distorted result, just in another way. 
+
+What I think: I would not filter out CPH from the model because CPH is such a big part of the danish population, even though it might distort the regression. ",0.0,Storbykommuner,9.0,"",0,"2,Yes",20.0,8,0.0,"",0.0,"","","","","0.125,No",20.0,"","","Samsø,København,No",9.0,"","","-0.00496,Yes,0.10877",9.0,"","","","",13,0,88.75
+Isabell Bjerre Brinch,433851,815062,Hold4;,190285,Hsyl224857,2025-09-28 15:55:36 UTC,1,Outliers can distort the estimated coefficients and reduce the model's accuracy,5.0,"the description field of available data series,BY2",5.0,99,5.0,"10632,26.4,Christiansø,yes",6.75,"For
+
+Copenhagen has a very large population and unique politics that can give it extreme leverage. It has a very high Cook’s D that can pull the slope a lot, so excluding it might give a relationship that better reflects the typical municipality.
+
+Imod:
+
+Copenhagen is huge part of Denmark. If you drop it, your results do not describe all municipalities. Excluding Copenhagen would create selection bias and not show the true popularity in Denmark. 
+
+I think the best argument is to keep Copenhagen. ",0.0,Storbykommuner,9.0,"",0,"2,Yes",20.0,10,0.0,    ,0.0,"","","København,København,Yes",6.0,"","","","","","","","","-0.00496,Yes,0.10877",9.0,"","","0.114,Yes",10.0,13,0,75.75
+Maja Michelle Lander Danielsen,429799,814216,Hold4;,190285,Hsyl224857,2025-09-28 14:29:36 UTC,1,Outliers can distort the estimated coefficients and reduce the model's accuracy,5.0,"the description field of available data series,BY2",5.0,99,5.0,"98,0.264,Christiansø,yes",6.75,"No I don't think it's a good idea, because Cph is  a Municipality, just as much as all the other. And it's even the capital city!",0.0,Storbykommuner,9.0,"",0,"1,Yes",10.0,2,0.0,"It didn't work out for me - neither the solution script :(
+
+ 
+
+It said Fejl i .Call.graphics(C_palette2, .Call(C_palette2, NULL)) : invalid graphics state and much more which I don't know how to fix",0.0,"","","Rebild,København,Yes",9.0,"","","","","","","0.009,Yes",10.0,"","","-0.0109,Yes,0.0739",9.0,"","",13,0,68.75
+Linus Fischer Kern,428884,808165,Hold1;,190272,Hsyl224854,2025-09-28 13:24:21 UTC,1,Outliers can distort the estimated coefficients and reduce the model's accuracy,5.0,"the description field of available data series,BY2",5.0,99,5.0,"98,0.26,Christiansø,yes",4.5,"No, because there is no logical theoretical argument for removing copenhagen. Copenhagen is a municipality just like every other municipality and perhaps even very important to keep in the model as it is the one with the biggest population and represents a lot of people. ",0.0,Storbykommuner,9.0,"",0,"2,Yes",20.0,9,0.0,"",0.0,"","","","","","","-0.005,Yes,0.109",9.0,"Samsø,København,No",9.0,"","","","","","","0.114,No",20.0,13,0,86.5
+Isabel Saphaya Hall Andersen Nexø,434392,820312,Hold1;,190272,Hsyl224854,2025-09-28 12:12:59 UTC,1,Outliers can distort the estimated coefficients and reduce the model's accuracy,5.0,"the description field of available data series,BY2",5.0,99,5.0,"10632,0.264,Christiansø,Yes",9.0,"1: to get a better regression line 
+
+2: You cannot filter out because Copenhagen is such a big municipality ",0.0,Storbykommuner,9.0,"",0,"2,Yes",20.0,5,0.0,"",0.0,"","","København,København,Yes",6.0,"","","","","","","0.166,Yes",20.0,"-0.00496,Yes,0.10877",9.0,"","","","",13,0,88.0
+Carla Luisa Jung Jørgensen,432348,816104,Hold3;,190281,Hsyl224856,2025-09-28 09:57:02 UTC,1,Outliers can distort the estimated coefficients and reduce the model's accuracy,5.0,"the description field of available data series,BY2",5.0,99,5.0,"10632,0.264,Christiansø,yes",9.0,"It is a good ideas since the cooks d is higher than 0.2 and therefore has a high leverage obstructs the regression model. 
+
+However, copenhagen is the population-wise largest municipality in Denmark and removing it from the dataset will heavily affect the data and remove answers responding to almost a fifth of the full population. 
+
+It is relevant to look at why Copenhagen is abnormal compared to the other municipalities. ",0.0,Storbykommuner,9.0,"",0,"2,No",10.0,6,0.0,It was a very difficult quiz. ,0.0,"","","","","","","","","Samsø,København,No",9.0,"","","-0.00496,Yes,0.10877",9.0,"","","0.114,No",20.0,13,0,81.0
+Elba Louise Schenk,430857,807503,Hold4;,190285,Hsyl224857,2025-09-28 09:53:05 UTC,1,Outliers can distort the estimated coefficients and reduce the model's accuracy,5.0,"an overview of available data series,BY2",2.5,99,5.0,"10632,0.264,Christiansø,yes",9.0,København er en ekstrem outlier og påvirker modellen uforholdsmæssigt meget. Det kan skævvride resultaterne og gøre modellen mindre repræsentativ for andre kommuner.,0.0,Storbykommuner,9.0,"",0,"3,Yes",10.0,8,0.0,   ,0.0,"","","Rebild,København,Yes",9.0,"","","","","","","0.166,Yes",20.0,"-0.00496,Yes,0.10877",9.0,"","","","",13,0,78.5
+Jakob Johannes Weigelt Svendsen,429624,820251,Hold1;,190272,Hsyl224854,2025-09-27 11:49:44 UTC,1,Outliers can distort the estimated coefficients and reduce the model's accuracy,5.0,"the description field of available data series,BY2",5.0,2,0.0,"3,0.264,Christiansø,yes",6.75,"No. Copenhagen is a highly relevant municipality as it is the capital and can't just be removed like that. it is just as legitimate as the others. 
+
+ 
+
+Yes. we have determined that with Cooks D that copenhagen is an outlier for multiple variables and hence we should remove this municipality as it distorts the image of a correlation. 
+
+ 
+
+I agree with the first argument. We can't remove copenhagen. 
+
+ ",0.0,Storbykommuner,9.0,"",0,"2,Yes",20.0,4,0.0,more hints in script. I keep looking at the solutions to make it,0.0,"","","","","","","","","Lemvig,København,No",6.0,"","","-0.00496,Yes,0.10877",9.0,"","","0.114,No",20.0,12,1,80.75
+Mathilde Noboa Engberg,431887,824337,Hold3;,190281,Hsyl224856,2025-09-27 11:23:54 UTC,1,Outliers can distort the estimated coefficients and reduce the model's accuracy,5.0,"the description field of available data series,BY2",5.0,99,5.0,"10632,0.264,Christiansø,yes",9.0,"Copenhagen might distort the overall trend thereby removing it could improve the model fit of the other municipalities. However, an argument against removing it could be that Copenhagen is the capital city with a high with a big population, so by removing it it may risk excluding relevant variation in the danish population",0.0,Storbykommuner,9.0,"",0,"2,Yes",20.0,6,0.0,nope:),0.0,"","","Rebild,København,Yes",9.0,"","","","","","","0.114,No",0.0,"","","-0.0110,Yes,0.0639",3.0,"","",12,1,65.0
+Sarah Røjkjær Knudsen,427363,809452,Hold4;,190285,Hsyl224857,2025-09-27 11:10:53 UTC,1,Outliers can distort the estimated coefficients and reduce the model's accuracy,5.0,"the description field of available data series,FOLK1A",2.5,99,5.0,"98,0.264,Christiansø,Yes",6.75,"A lot of danes lives in the capital Copenhagen, so it could have an effect on how representative the data is. ",0.0,Storbykommuner,9.0,"",0,"2,Yes",20.0,5,0.0,  ,0.0,"","","","","","","-0.005,Yes,0.109",9.0,"København,København,Yes",3.0,"0.166,Yes",20.0,"","","","","","",13,0,80.25
+Dagmar Bjerregaard Inci,431395,827638,Hold1;,190272,Hsyl224854,2025-09-26 20:08:52 UTC,1,Outliers can distort the estimated coefficients and reduce the model's accuracy,5.0,"the description field of available data series,BY2",5.0,99,5.0,"98,0.26,Christiansø,yes",4.5,"For: Removing it could make the model more representative of the ""typical"" Danish municipality. Against: Copenhagen is the capital of Denmark, so removing it would not make sense, as its influence is real and meaningful. ",0.0,Storbykommuner,9.0,"",0,"2,Yes",20.0,3,0.0,"",0.0,"","","","","","","","","Lemvig,København,Yes",3.0,"","","-0.00496,Yes,0.10877",9.0,"","","0.114,No",20.0,13,0,80.5
+Olga Kirstine Vædele,428828,821147,Hold1;,190272,Hsyl224854,2025-09-26 17:55:36 UTC,1,Outliers can distort the estimated coefficients and reduce the model's accuracy,5.0,"the description field of available data series,BY2",5.0,99,5.0,"98,0.263,Christiansø,yes",4.5,"Copenhagen is the most populous municipality in Denmark, and municipal data would not be representative of the danish population, if 10% of the population is deliberatively filtered out. On the other hand, Copenhagen, for many reasons, is a very different municipality than any other, and could therefore be filtered.",0.0,Storbykommuner,9.0,"",0,"0,Yes",10.0,5,0.0,n,0.0,"-0.011,Yes,0.074",9.0,"Rebild,København,Yes",9.0,"0.125,No",20.0,"","","","","","","","","","","","",13,0,76.5
+Melika Andersen,433112,830902,Hold4;,190285,Hsyl224857,2025-09-26 17:02:43 UTC,1,Outliers can distort the estimated coefficients and reduce the model's accuracy,5.0,"the description field of available data series,BY2",5.0,99,5.0,"98,0.264,Christiansø,yes",6.75,"For:
+
+* When Cooks D is that hight for Copenhagen, it also means that it has an influential impact for the data because it is an outlier. Therefore the model tend to represent this area more than the other areas, and the Danish municipalities in general
+
+Agains:
+
+* Copenhagen is probably one of the biggest municipalities in Denmark. Therefore by removing it, we remove several data observations that are real and important observations. It is not a mistake or and error, but the true measurement.
+
+ 
+
+I probably think that it is best to keep Copenhagen in the dataset, because of the size and importantness for representation of the municalities. ",0.0,Storbykommuner,9.0,"",0,"2,No",10.0,5,0.0,   ,0.0,"-0.011,No,0.074",6.0,"","","","","","","København,København,Yes",3.0,"","","","","","","0.114,No",20.0,13,0,69.75
+Sofie Antonia Kousgaard Linneberg,429344,817496,Hold1;,190272,Hsyl224854,2025-09-26 14:33:36 UTC,1,Outliers can distort the estimated coefficients and reduce the model's accuracy,5.0,"the description field of available data series,BY2",5.0,99,5.0,"98,0.264,Christiansø,yes",6.75,"Jeg synes ikke det er en god idé nu hvor en stor del af Danmarks befolkning bor i København, og det især er her hvor højtuddannede danskere bor, hvilket ville gøre dataen mindre repræsentativ, hvis man tog dem fra - dette synes jeg er det bedste argument.
+
+Hvis man skulle gøre det, skulle det være fordi man vil have en bedre passende linje, der tegner et mere repræsentativt billede af den danske befolkning - en sammenhæng som København forstyrrer.",0.0,Storbykommuner,9.0,"",0,"2,Yes",20.0,8,0.0,         :),0.0,"","","","","","","","","København,Lemvig,Yes",0.0,"","","","","-0.0110,Yes,0.0739",6.0,"0.114,No",20.0,12,1,76.75
+Eva Haugsted Dehn,429267,823669,Hold3;,190281,Hsyl224856,2025-09-26 14:28:59 UTC,1,Outliers can distort the estimated coefficients and reduce the model's accuracy,5.0,"the description field of available data series,BY2",5.0,99,5.0,"10632,0.26,Christiansø,Yes",6.75,"One argument FOR filtering out Copenhagen would be that it can be seen as an outlier and therefore it may skew the regression unnecessarily. However, an argument AGAINST filtering out Copenhagen is that it is literally our capital - whereas Christiansø, that we had in one of the earlier questions, has a population of less than a hundred people",0.0,Storbykommuner,9.0,"",0,"2,Yes",20.0,6,0.0,"",0.0,"","","København,København,Yes",6.0,"","","","","","","0.166,Yes",20.0,"","","-0.0109,Yes,0.0739",9.0,"","",13,0,85.75
+Mathilde Vesterager Iversen,430533,825169,Hold3;,190281,Hsyl224856,2025-09-26 14:09:32 UTC,1,Outliers can distort the estimated coefficients and reduce the model's accuracy,5.0,"the description field of available data series,BY2",5.0,100,0.0,"98,0.264,Christiansø,yes",6.75,"Argument for: Since the r-squared is the same when Copenhagen is filteret out, and Copenhagen has the high cooks D that it has, it should be left out
+
+Argument against: Since the municipality of Copenhagen has the largest population, it will paint a wrong picture of reality if it is let out. Copenhagen is part of the real population, and must remain in the model
+
+ 
+
+ ",0.0,Storbykommuner,9.0,"",0,"1,Yes",10.0,8,0.0,"",0.0,"","","","","","","-0.005,Yes,0.129",6.0,"København,København,Yes",3.0,"","","","","","","0.114,No",20.0,12,1,64.75
+Rosa Zechner Behrens,431441,817111,Hold2;,190276,Hsyl224855,2025-09-26 13:56:37 UTC,1,Outliers can distort the estimated coefficients and reduce the model's accuracy,5.0,"the description field of available data series,BY2",5.0,99,5.0,"98,0.263,Christiansø,yes",4.5,"",0.0,Storbykommuner,9.0,"",0,"2,Yes",20.0,6,0.0,"",0.0,"","","Rebild,København,Yes",9.0,"","","","","","","0.166,Yes",20.0,"","","-0.0109,Yes,0.0739",9.0,"","",13,0,86.5
+Lærke Overgaard,433461,829543,Hold3;,190281,Hsyl224856,2025-09-26 12:27:18 UTC,1,Outliers can distort the estimated coefficients and reduce the model's accuracy,5.0,"the description field of available data series,BY2",5.0,99,5.0,"10632,0.264,Christiansø,yes",9.0,"Against:
+
+* Because Copenhagen is such a big part og Denmarks population. If the goal is to interpret on the whole of Denmark, leaving out the capitol city gives a distorted view.
+
+ 
+
+For
+
+- Copenhagen has bar far the higher Cooks D, which shows us that Copenhagen is distorting the regression line and the statistics. Filterting out Copenhagen might give a better fitting line for the other muncipalities.
+
+ ",0.0,Storbykommuner,9.0,"",0,"2,Yes",20.0,6,0.0,.,0.0,"-0.011,Yes,0.074",9.0,"Rebild,København,Yes",9.0,"","","","","","","","","","","","","0.114,No",20.0,13,0,91.0
+Luna Brun Becher,433848,808175,Hold3;,190281,Hsyl224856,2025-09-26 11:14:13 UTC,1,Outliers can distort the estimated coefficients and reduce the model's accuracy,5.0,"an overview of available data series,BY2",2.5,12474,5.0,"10632,0.264,Christiansø,yes",9.0,"Argument in advance: the model is relatively more accurate for all the other municipalities than Copenhagen
+
+Argument against: Copenhagen is the largest city in Denmark, and contains around 1/6 of danish citizens, meaning the data is a big weight and very meaningful to understand the ""super-population""",0.0,Storbykommuner,9.0,"",0,"2,Yes",20.0,2,0.0,I think i'm about confused about not using the same commands as in last semester with Mengnhi and Jesper. For example we used modelsummary() instead of tidy::broom() and i don't really see what the difference is,0.0,"","","Rebild,København,Yes",9.0,"","","","","","","","","","","-0.0109,Yes,0.0739",9.0,"0.114,No",20.0,13,0,88.5
+Sara Enevold Hansen,430906,824094,Hold3;,190281,Hsyl224856,2025-09-26 11:04:44 UTC,1,Outliers can distort the estimated coefficients and reduce the model's accuracy,5.0,"the description field of available data series,BY2",5.0,99,5.0,"10632,0.264,Christiansø,yes",9.0,"Against: 
+
+Copenhagens population is 1/6 of the entire country. It is a urban - quite young city, and therefore a big group of the young population gets sorted out - makes the model not as representative for inference to the Danish Population. Furthermore, the model is lesser significant than it were including Copenhagen 
+
+Better: 
+
+The model get more linear??? ",0.0,Storbykommuner,9.0,"",0,"2,Yes",20.0,5,0.0,"Very difficult quiz, and with a lot of coding we haven't been thaught. I don't understand why we don't use the modelsummary() function for regression models and instead new codings such as boom::tidy and what difference it makes. 
+
+The whole data-analysis was very difficult to understand ",0.0,"","","","","","","","","Samsø,København,Yes",6.0,"","","-0.00496,Yes,0.10877",9.0,"","","0.114,No",20.0,13,0,88.0
+Celina Lea Skau,432214,814721,Hold4;,190285,Hsyl224857,2025-09-26 10:58:53 UTC,1,Outliers can distort the estimated coefficients and reduce the model's accuracy,5.0,"the description field of available data series,BY2",5.0,99,5.0,"10632,26\,3%,Christiansø,yes",6.75," 
+
+?",0.0,Hovedstadskommuner,0.0,"",0,"2,No",10.0,3,0.0,"",0.0,"","","","","","","","","Samsø,København,Yes",6.0,"","","-0.00496,Yes,0.11877",6.0,"","","0.114,No",20.0,12,1,63.75
+Ida Granhøj,411241,785989,Hold2;,190276,Hsyl224855,2025-09-26 10:43:26 UTC,1,Outliers can distort the estimated coefficients and reduce the model's accuracy,5.0,"the description field of available data series,BY2",5.0,99,5.0,"98,,,",0.0,"No, since a lot of the population resides in Copenhagen, it would skew our perception of the support for Inger Støjberg nationwide",0.0,Storbykommuner,9.0,"",0,"2,Yes",20.0,6,0.0,"Delen med at omkode kommuner ville bare ikke virke, så det var lidt øv, men resten var en del bedre en sidst!",0.0,"","","","","","","-0.007,Yes,0.109",6.0,"Samsø,København,No",9.0,"0.114,Yes",10.0,"","","","","","",12,1,69.0
+Asbjørn Ørum Foss,430367,830203,Hold2;,190276,Hsyl224855,2025-09-26 10:38:12 UTC,1,Outliers can distort the estimated coefficients and reduce the model's accuracy,5.0,"the description field of available data series,BY2",5.0,99,5.0,"10\,632,0.264,Christiansø,yes",6.75,"It is fair because it is a very extreme municipality, being the biggest and most left leaning - maybe it is an extreme case? 
+
+BUT Copenhagen is not necessarily disturbing the model - it shows a tendency that is visible throughout all of the model
+
+ 
+
+i dont think it would be fair to remove copenhagen.",0.0,Storbykommuner,9.0,"",0,"3,Yes",10.0,6,0.0,"It was pretty okay, but a little long for my taste :)))",0.0,"","","","","","","","","Samsø,Samsø,Yes",3.0,"0.166,Yes",20.0,"-0.00496,No,0.10877",6.0,"","","","",13,0,69.75
+Mie Kimmer Lorentzen,429956,806762,Hold2;,190276,Hsyl224855,2025-09-26 10:32:16 UTC,1,Outliers can distort the estimated coefficients and reduce the model's accuracy,5.0,"the description field of available data series,BY2",5.0,99,5.0,"98,0.264,Christiansø,yes",6.75,"If the cooks D is very big the observation will pull the regressionline a lot, meaning that the observation has a large effect, and when you remove it the model will change drastically. 
+
+On one hand an observation can be really important because it might highlight something important, unusual etc
+
+On the other hand, the regression is very dependent on that observation and it effects things like the p-values, the intercept and so on --> the model becomes unstable 
+
+ 
+
+ 
+
+ ",0.0,Storbykommuner,9.0,"",0,"0,Yes",10.0,6,0.0,.,0.0,"","","","","","","-0.005,Yes,0.109",9.0,"København,København,Yes",3.0,"","","","","","","0.114,Yes",10.0,13,0,62.75
+Freja Liv Blicher Hybel,432028,806112,Hold2;,190276,Hsyl224855,2025-09-26 10:28:59 UTC,1,Outliers can distort the estimated coefficients and reduce the model's accuracy,5.0,"the description field of available data series,BY2",5.0,99,5.0,"98,0.264,Christiansø,yes",6.75,"No because Copenhagen is the biggest municipality in Denmark, and therefore it says a lot about Danes opinions",0.0,Storbykommuner,9.0,"",0,"1,Yes",10.0,5,0.0,"",0.0,"-0.012,Yes,0.074",6.0,"","","","","","","København,København,No",6.0,"0.114,Yes",10.0,"","","","","","",13,0,62.75
+Silke Krogh,429010,814183,Hold1;,190272,Hsyl224854,2025-09-26 10:19:57 UTC,1,Outliers can distort the estimated coefficients and reduce the model's accuracy,5.0,"the description field of available data series,BY2",5.0,99,5.0,"98,0.264,Christiansø,yes",6.75,"For: København er en outliner og har derfor stor betydning for hældningen af linjen. Den har for stor påvirkning på det gennemsnitlige resultatet 
+
+Imod: København er en rigtig by, og bør medtages. Det er hovedstaden og der er derfor en væsenligt større befolkning i byen end i de andre, og derfor skal den medtages, da den i princippet vægter mere end Lemvig.
+
+Resultat: det kommer an på hvad man vil undersøge. Jeg ville beholde den, for at kunne snakke om hele DK",0.0,Storbykommuner,9.0,"",0,"2,Yes",20.0,3,0.0,Very hard,0.0,"","","","","","","-0.005,Yes,0.109",9.0,"Lemvig,København,No",6.0,"","","","","","","0.114,No",20.0,13,0,85.75
+Philippa Heering Hindsdal,432239,825265,Hold1;,190272,Hsyl224854,2025-09-26 10:19:52 UTC,1,Outliers can distort the estimated coefficients and reduce the model's accuracy,5.0,"the description field of available data series,BY2",5.0,99,5.0,"98,0.264,Christiansø,yes",6.75,"No it is not a good idea since it would give a twisted view, since copenhagen is very urbanized, and is a big part of the country 
+
+ 
+
+it is a good idea if we want the average opinion towards immigration - because cph is very influentiel. so therefore it would makes sense to remove it if we want the mean. 
+
+ 
+
+jeg siger vi beholder den",0.0,Storbykommuner,9.0,"",0,"2,Yes",20.0,7,0.0,very hard,0.0,"","","","","0.125,No",20.0,"-0.005,Yes,0.109",9.0,"Lemvig,København,No",6.0,"","","","","","","","",13,0,85.75
+Dina Gylling Kristiansen,432545,817321,Hold2;,190276,Hsyl224855,2025-09-26 10:19:32 UTC,1,Outliers can distort the estimated coefficients and reduce the model's accuracy,5.0,"the description field of available data series,BY2",5.0,99,5.0,"10632,0.264,Christiansø,yes",9.0,"If you want to see the effect for smaller countys, it is a good idea to remove
+
+ 
+
+If you want to see a representative effect for all of Denmark, then it is a bad idea to remove",0.0,Storbykommuner,9.0,"",0,"2,Yes",20.0,8,0.0,"",0.0,"-0.011,Yes,0.074",9.0,"","","","","","","Lemvig,København,No",6.0,"","","","","","","0.114,No",20.0,13,0,88.0
+Ida Lund Järund,430785,819050,Hold3;,190281,Hsyl224856,2025-09-26 10:11:18 UTC,1,Outliers can distort the estimated coefficients and reduce the model's accuracy,5.0,"an overview of available data series,BY2",2.5,99,5.0,"10632,0.264,Christiansø,yes",9.0,"For: Copenhagen has a very high cooks d, which means it disproportionately affects the regression line
+
+Against: Excluding it could bias the result by ignoring one of the largest population centers",0.0,Storbykommuner,9.0,"",0,"2,No",10.0,7,0.0,    ,0.0,"-0.012,Yes,0.074",6.0,"","","0.125,No",20.0,"","","København,København,Yes",3.0,"","","","","","","","",13,0,69.5
+Rosa Celine Coban Olsen,431243,825167,Hold2;,190276,Hsyl224855,2025-09-26 10:09:02 UTC,1,Outliers can distort the estimated coefficients and reduce the model's accuracy,5.0,"the description field of available data series,BY2",5.0,12474,5.0,"10632,0.264,Christiansø,yes",9.0,"It can be a good idea to filter out Copenhagen, as capital cities often significantly differ in opinions in comparison with other cities.
+
+It can be a bad idea to filter out Copenhagen, as the size of the population of Copenhagen is significant.",0.0,Storbykommuner,9.0,"",0,"2,Yes",20.0,7,0.0,.,0.0,"","","Rebild,København,Yes",9.0,"0.125,No",20.0,"","","","","","","-0.00496,Yes,0.10877",9.0,"","","","",13,0,91.0
+Alberte Marie Niclasen,364206,730350,Hold2;,190276,Hsyl224855,2025-09-26 09:46:00 UTC,1,Outliers can distort the estimated coefficients and reduce the model's accuracy,5.0,"an overview of available data series,BY2",2.5,99,5.0,"98,0.074,Christiansø,yes",4.5,"An argument for removing Copenhagen would be that it could distort whatever relationship there might be with the other municipalities since it is of a bigger size - it is an outlier in the statistical sense, but in a real world view, you cannot remove Copenhagen because it would be changing reality. Cooks D just measures what influence a variable has on the generel regression, but it doesn't measure real live events. ",0.0,Storbykommuner,9.0,"",0,"2,Yes",20.0,7,0.0,..,0.0,"","","","","0.125,No",20.0,"","","København,København,Yes",3.0,"","","","","-0.0109,Yes,0.0739",9.0,"","",13,0,78.0
+Sigrid Koch Præstholm,433063,820936,Hold4;,190285,Hsyl224857,2025-09-26 09:23:38 UTC,1,Outliers can distort the estimated coefficients and reduce the model's accuracy,5.0,"the description field of available data series,BY2",5.0,99,5.0,"10632,26.4,Christiansø,yes",6.75,"Argument for at udelade:
+
+* Da Copenhagen har en høj Cooks D tyder det på, at denne observation forstyrrer eller dominerer regressionen. Dette tyder på, at København er et så ekstremt eksempel (og en så særlig by), at der er andre paramentre der spiller ind på den politiske attituden mod Inger Støjberg.  Derfor er københavne en by der er svær at sammenligne med andre danske kommuner, da den er så forskellig. Derfor burde man fjerne den.
+
+Argument imod at udelade: 
+
+- København er tydelig ekstrem i sin holdning, men det byen er også mere ekstrem i størrelse end andre danske kommuner. Det kunne fx tyde på at større befokninsgtæthed = mere modstand mod Støjberg. Det er altså bigtigt at have København med i analysen
+
+ ",0.0,Storbykommuner,9.0,"",0,"2,Yes",20.0,5,0.0,   ,0.0,"","","Rebild,København,Yes",9.0,"","","","","","","","","-0.00496,Yes,0.10877",9.0,"","","0.114,No",20.0,13,0,88.75
+Sigrid Marie Rungholt,433549,818558,Hold3;,190281,Hsyl224856,2025-09-26 09:18:49 UTC,1,Outliers can distort the estimated coefficients and reduce the model's accuracy,5.0,"the description field of available data series,BY2",5.0,99,5.0,"98,0\,264,Christiansø,yes",4.5,"an argument for filtering out copenhagen is that is distorts the data by having a very different value
+
+ 
+
+However, it does not surpass the limits og Cooks D, and therefore i do not find it neccesary to filter out",0.0,Storbykommuner,9.0,"",0,"2,Yes",20.0,5,0.0, .,0.0,"","","Rebild,København,Yes",9.0,"","","-0.005,Yes,0.109",9.0,"","","","","","","","","0.114,No",20.0,13,0,86.5
+Cilia Steven Lübbers,433484,830524,Hold3;,190281,Hsyl224856,2025-09-26 08:03:43 UTC,1,Outliers can distort the estimated coefficients and reduce the model's accuracy,5.0,"the description field of available data series,BY2",5.0,99,5.0,"10996,0\,265,Christiansø,yes",4.5,"It's a good idea to filter out Copenhagen, as it's an outlier and therefore the linear regression model will be more accurate.
+
+ 
+
+It's a bad idea as the reason why the cooks value is so high is due to the population count is higher, which is a real value and creates a more world-accurate model.",0.0,Storbykommuner,9.0,"",0,"3,Yes",10.0,7,0.0,it was hard,0.0,"0.011,Yes,0.074",6.0,"","","0.125,Yes",10.0,"","","Lemvig,København,No",6.0,"","","","","","","","",13,0,60.5
+Maria de Menezes Coelho Gadeberg,430950,806879,Hold3;,190281,Hsyl224856,2025-09-25 19:46:26 UTC,1,Outliers can distort the estimated coefficients and reduce the model's accuracy,5.0,"an overview of available data series,BY2",2.5,99,5.0,"10632,0.26,Christiansø,yes",6.75,"For: It is a good idea to filter out Copenhagen because outliers can change the OLS results. By removing it, the data might fit the model better. 
+
+ 
+
+Against: It is a bad idea, because you should'nt try and fit the data to show what you would like to show. This can be seen as manipulating the data. 
+
+ 
+
+I think it depends on the data, in this case i dont think you should remove it because it gives a great inside 
+
+ ",0.0,Storbykommuner,9.0,"",0,"2,Yes",20.0,5,0.0,"",0.0,"","","","","0.125,No",20.0,"","","Samsø,København,No",9.0,"","","-0.00496,Yes,0.10877",9.0,"","","","",13,0,86.25
+Joshua Peter Sidebotham,430224,825474,Hold1;,190272,Hsyl224854,2025-09-25 16:48:15 UTC,1,Outliers can distort the estimated coefficients and reduce the model's accuracy,5.0,"the description field of available data series,BY2",5.0,99,5.0,"10632,26\,4,Christiansø,Yes",6.75,"It distorts the regression a lot which can make it hard to tell across all municipalities and maybe Copenhagen is a special case that has som feature allowing for an extraordinary view
+
+ 
+
+It does not make sense to filter out Copenhagen because it is the capital city of Denmark and houses a sixth of the population - the data gets too skewed if we leave it out",0.0,Storbykommuner,9.0,"",0,"2,No",10.0,3,0.0,I just had a hard time following along this time. Did not get where to find the municipality data,0.0,"","","København,København,Yes",6.0,"0.114,Yes",0.0,"-0.005,Yes,0.109",9.0,"","","","","","","","","","",12,1,55.75
+Josephine Leth Førgaard,431208,821246,Hold2;,190276,Hsyl224855,2025-09-25 12:23:03 UTC,1,Outliers can distort the estimated coefficients and reduce the model's accuracy,5.0,"the description field of available data series,BY2",5.0,99,5.0,"10632,0.264,Christiansø,yes",9.0,"Argument for removing Copenhagen:
+
+Copenhagen is an extreme case compared to other municipalities (way bigger population, different structure). Its large Cook’s D means it has a lot of influence on the regression. Removing it could make the model better reflect the “typical” Danish municipality instead of being dominated by Copenhagen.
+
+Argument against removing Copenhagen:
+
+Copenhagen is still a real municipality in Denmark. Removing it could bias the results or make them less generalizable. We'd be ignoring an important part of Danish society just because it’s different.
+
+What I think is the better argument:
+
+I’d keep Copenhagen in the model. Even though it’s influential, it’s a real case and represents a meaningful part of Danish municipalities. ",0.0,Storbykommuner,9.0,"",0,"2,Yes",20.0,4,0.0, p,0.0,"","","","","","","","","Lemvig,København,Yes",3.0,"0.166,Yes",20.0,"-0.00496,Yes,0.10877",9.0,"","","","",13,0,85.0

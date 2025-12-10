@@ -25,6 +25,7 @@ library(essentials)
 library(tidyverse)
 library(equatiomatic) # Regression equations from model objects.
 library(estimatr)
+library(masteringmetrics)
 library(modelsummary)
 
 options(htmltools.preserve.raw = FALSE, tikzDefaultEngine = "xetex",
@@ -50,8 +51,8 @@ load("Result.RData")
 
 .font130[.center[.alert[Use data to discover patterns], <br> .alert[and the social mechanisms that bring them about.]]]
 
-```{r, echo = FALSE, out.width='70%', fig.align='center'}
-knitr::include_graphics('https://liu.se/-/media/istock-501261958.jpg?mw=1120&mh=1120&hash=DA8977CCE6A6E600AE80A40CFEE771C9')
+```{r, echo = FALSE, out.width='50%', fig.align='center'}
+knitr::include_graphics('https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgykJbXZbwIX-nd1oVOyzmEfj09ho8aQ4HBhfMH27t6YeTYSBevfrD2DFTEQSe7e3UwaVnv-fAJAOVpjW2pSGfG2QNrgHfkTmFtRWK4VXl6KmWK6vVlLud0DRU6lFXAqBF7iij420oOTLFh/s1600/photo.JPG')
 ```
 
 ---
@@ -204,7 +205,7 @@ ols <- lm_robust(mcorrect ~ gndr, data = plotdata) # OLS
 
 # Regression table with nice layout
 modelsummary(list("% Correct" = ols), stars = TRUE,
-  gof_map = c("nobs", "r.squared"))
+  gof_map = c("nobs", "r.squared"), output = "gt")
 ```
 ]
 
@@ -297,7 +298,7 @@ modelsummary(list("% Correct" = ols2), stars = TRUE,
              coef_rename = c("gndrWomen" = "Female", 
                              "Statistics" = "Stats skills",
                              "appearances" = "Nr. completed quizzes"),
-             gof_map = c("nobs", "r.squared"))
+             gof_map = c("nobs", "r.squared"), output = "gt")
 ```
 ]
 
@@ -335,7 +336,7 @@ ols3 <- lm_robust(mcorrect ~ gndr*appearances, data = plotdata) # OLS
 modelsummary(list("% Correct" = ols3), stars = TRUE,
              coef_rename = c("gndrWomen" = "Female", 
                              "appearances" = "Nr. completed quizzes"),
-             gof_map = c("nobs", "r.squared"))
+             gof_map = c("nobs", "r.squared"), output = "gt")
 ```
 ]
 
@@ -358,7 +359,7 @@ modelsummary(list("% Correct" = mod1, "% Correct" = mod2), stars = TRUE,
                              "poly(appearances, 3, raw = TRUE)1" = "Nr. completed quizzes",
                              "poly(appearances, 3, raw = TRUE)2" = "Nr. completed quizzes^2",
                              "poly(appearances, 3, raw = TRUE)3" = "Nr. completed quizzes^3"),
-             gof_map = c("nobs", "r.squared"))
+             gof_map = c("nobs", "r.squared"), output = "gt")
 ```
 ]
 
@@ -397,7 +398,7 @@ modder <- plotdata %>%
 modelsummary(list("% Correct" = modder), stars = TRUE,
              coef_rename = c("gndrWomen" = "Female", 
                              "appearances" = "Nr. completed quizzes"),
-             gof_map = c("nobs", "r.squared"))
+             gof_map = c("nobs", "r.squared"), output = "gt")
 ```
 ]
 
@@ -437,7 +438,7 @@ modelsummary(list("% Correct" = mod), stars = TRUE,
              coef_rename = c("gndrWomen" = "Female", 
                              "poly(appearances, 2, raw = TRUE)1" = "Nr. completed quizzes",
                              "poly(appearances, 2, raw = TRUE)2" = "Nr. completed quizzes^2"),
-             gof_map = c("nobs", "r.squared"))
+             gof_map = c("nobs", "r.squared"), output = "gt")
 ```
 ]
 
@@ -519,7 +520,7 @@ class: inverse middle center
 
 - If the $I$ntervention is continuous, one can test for a non-linear causal effect, for example: $Y = \alpha + \color{red}{\beta_1} I_i + \color{red}{\beta_2} I_i^2 + \epsilon_i$
 
-- We can use interaction effects to investiagte whether $X$ affects subpopulations differently: $Y = \alpha + \color{red}{\beta_1} I_i + \beta X_i + \color{red}{\beta_2} I_i*X_i + \epsilon_i$
+- We can use interaction effects to investigate whether $X$ affects subpopulations differently: $Y = \alpha + \color{red}{\beta_1} I_i + \beta X_i + \color{red}{\beta_2} I_i*X_i + \epsilon_i$
 
 
 ]
@@ -619,11 +620,11 @@ class: inverse middle center
 
 - In a "first step", $X$ can be the outcome of $I$ or $C$. Remember, the .alert2[blue part is explained] by $I | C$, the .alert[red part is unexplained] by it.
 
-- If you find a random $I$ that causes $X$, you use the blue variation of $X$ in a 2SLS-IV. We identify the blue variation by predicting the $\hat{X}$.
+- If you find a random $I$ that causes $X$, you use the blue variation of $X$ in a 2SLS-IV. We identify the blue variation by predicting $\hat{X}$.
 
-- If you have observed a counfounder $C$, you use the red variation of $X$ that is unconfounded by it. You can do that by adding $C$ to a multiple regression. Then the first step is incorporated.
+- If you have observed a counfounder $C$, you use the red variation of $X$ that is unconfounded by it. You can do that by adding $C$ to a multiple regression.
 
-- If you have a mediator $M$, You add it in a second step and see how much $X$ is reduced (aka explained \ mediated) by it. 
+- If you have a mediator $M$, you add it in a second step and see how much $X$ is reduced (aka explained \ mediated) by it. 
 ]
 .push-right[
 ```{r ref.label = "ols1", out.width = "80%", fig.height = 3.5, fig.width = 5, echo = FALSE}
@@ -655,6 +656,71 @@ class: inverse middle center
   \end{tikzpicture}
 ```
 ]
+
+---
+# RDD
+
+.left-column[
+- We estimate the effect of strict rules that define thresholds on otherwise continuous variables.
+
+- We use regression to use all available cases, but compare predictions of out models above and below the threshold exactly at the threshold.
+]
+.right-column[
+```{r RDD6, out.width='100%', fig.height = 5, fig.width = 8, echo = FALSE}
+# Get the Minimum legal drinking age data!
+data("mlda", package = "masteringmetrics")
+mlda <- mlda %>% drop_na() # Drop missings and print forst 10 rows of the data
+
+mlda <- mlda %>% mutate(
+  twentyone = case_when( 
+    agecell >= 21 ~ "Yes",
+    TRUE ~ "No"),
+  # Define those who are allowed to drink
+  close = case_when( 
+    agecell >= 20.7 & agecell < 21 ~ "No-close",
+    agecell >= 21 & agecell < 21.3 ~ "Yes-close",
+    agecell >= 21 ~ "Yes",
+    TRUE ~ "No"))
+
+# 1. Fit the underlying linear models manually
+# (We assume your dataframe is named 'mlda')
+model_left  <- lm(all ~ agecell, data = subset(mlda, agecell < 21))
+model_right <- lm(all ~ agecell, data = subset(mlda, agecell >= 21))
+
+# 2. Define helper functions to predict Y for any X
+pred_left  <- function(x) predict(model_left, newdata = data.frame(agecell = x))
+pred_right <- function(x) predict(model_right, newdata = data.frame(agecell = x))
+
+# 3. Get the range of the x-axis to know where lines should start/end
+min_x <- min(mlda$agecell)
+max_x <- max(mlda$agecell)
+
+# 4. Plot
+ggplot(data = mlda, aes(y = all, x = agecell, color = close)) +
+  geom_point() +
+  geom_vline(xintercept = 21, color = "#e41a1c") +
+  geom_smooth(aes(color = twentyone), method = "lm") +
+    geom_segment(aes(x = min_x, xend = 21, 
+                   y = pred_left(min_x), yend = pred_left(21)), 
+               color = "#9970ab", size = 1, inherit.aes = FALSE) +
+    geom_segment(aes(x = 21, xend = max_x, 
+                   y = pred_left(21), yend = pred_left(max_x)), 
+               color = "#9970ab", linetype = "dashed", size = 1, inherit.aes = FALSE) +
+    # Right Model (Green): Solid after 21, Dashed before 21
+  geom_segment(aes(x = 21, xend = max_x, 
+                   y = pred_right(21), yend = pred_right(max_x)), 
+               color = "#a6dba0", size = 1, inherit.aes = FALSE) +
+  geom_segment(aes(x = min_x, xend = 21, 
+                   y = pred_right(min_x), yend = pred_right(21)), 
+               color = "#a6dba0", linetype = "dashed", size = 1, inherit.aes = FALSE) +
+  theme_minimal() + 
+  scale_color_manual(values = c("#9970ab", "#c51b7d", "#a6dba0", "#2166ac")) +
+  labs(y = "Nr of deaths per 100.000 US Americans \n aged 20-22 (1997-2003)",
+       x = "Age in months") +
+  guides(color = "none")
+```
+]
+
 ---
 class: inverse middle center
 
