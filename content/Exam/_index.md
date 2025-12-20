@@ -21,6 +21,10 @@ This examination consists of two primary components. The first component require
 
 - Questionnaire: [Link to Questionnaire](https://absalon.ku.dk/courses/84288/modules/items/2912196)
 
+- Notes:
+  + "general welfare benefits" should be understood as benefits that apply to all as compared to equalize for immigrants.
+  + `Manipulation_check4_1_resp` is the affald item (physical disorder 1), `Manipulation_check4_2_resp` is the grafitti one (physical disorder 2), `Manipulation_check4_3_resp` is stoffer (social disorder 1), and `Manipulation_check4_4_resp` is ballade (social disorder 2).
+
 - Data: [Link to data for the exam](https://absalon.ku.dk/courses/84288/modules/items/2902800)
   + Under no circumstances are you allowed to share these data with persons who are not enrolled in the course, or to upload them to any (AI or otherwise) platform. You are only allowed to rpcoess them using R on your personal computer.
 
