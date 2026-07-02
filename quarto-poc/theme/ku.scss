@@ -1,0 +1,312 @@
+/*-- scss:defaults --*/
+// ============================================================================
+//  KU · Modern reveal.js theme for the OLS / Causal Inference course
+//  Keeps the KU identity (red #901A1E + logo); everything else is a clean,
+//  lean, high-readability redesign.
+// ============================================================================
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+$ku-red:        #901A1E;
+$ku-red-tint:   #fbeeee;   // pale red for callouts
+$ku-teal:       #4f9d94;   // refreshed "green"
+$ku-teal-tint:  #eef5f3;
+$ku-blue:       #3f6d94;
+$ku-blue-tint:  #eef2f7;
+
+$ink:           #1a1a1a;   // primary text
+$muted:         #6b6b6b;   // secondary text
+$hairline:      #e7e7e7;
+
+// Fonts
+$font-family-sans-serif: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !default;
+$font-family-monospace:  "JetBrains Mono", "Fira Mono", monospace !default;
+
+// Base look
+$body-bg:   #ffffff !default;
+$body-color: $ink !default;
+$presentation-font-size-root: 30px !default;
+$presentation-line-height: 1.4 !default;
+$presentation-slide-text-align: left !default;
+
+// Headings
+$presentation-heading-font: $font-family-sans-serif !default;
+$presentation-heading-color: $ku-red !default;
+$presentation-heading-font-weight: 700 !default;
+$presentation-heading-line-height: 1.1 !default;
+$presentation-h1-font-size: 1.7em !default;
+$presentation-h2-font-size: 1.35em !default;
+$presentation-h3-font-size: 1.1em !default;
+
+// Links & code
+$link-color: $ku-red !default;
+$link-color-hover: darken($ku-red, 8%) !default;
+$code-block-font-size: 0.6em !default;
+
+/*-- scss:rules --*/
+
+.reveal { -webkit-font-smoothing: antialiased; letter-spacing: -0.003em; }
+
+// ---- Headings: left, sentence-flow, tidy weights --------------------------
+.reveal h1, .reveal h2, .reveal h3, .reveal h4 {
+  text-transform: none;
+  text-align: left;
+  letter-spacing: -0.012em;
+}
+// A hairline red rule under normal slide titles gives clean structure.
+.reveal .slides section:not(.inverse):not(.clear):not(.title-slide) > h2 {
+  padding-bottom: 0.22em;
+  margin-bottom: 0.6em;
+  border-bottom: 2px solid rgba(144, 26, 30, 0.16);
+}
+// Image-only "clear" slides: drop the empty title bar entirely.
+.reveal .slides section.clear > h2 { display: none; }
+
+// ---- Body text, lists ------------------------------------------------------
+.reveal p { margin: 0.5em 0; }
+.reveal ul, .reveal ol { margin: 0.3em 0 0.3em 1em; }
+.reveal li { margin: 0.32em 0; line-height: 1.35; }
+.reveal ul:not(.nav):not(.pagination):not(.panel-tabset-tabby) { list-style: none; }
+.reveal ul:not(.nav):not(.pagination):not(.panel-tabset-tabby) > li { position: relative; }
+.reveal ul:not(.nav):not(.pagination):not(.panel-tabset-tabby) > li::before {   // custom red bullet
+  content: "";
+  position: absolute;             // out of flow: works for loose lists (<li><p>…) too
+  left: -1.1em; top: 0.5em;
+  width: 0.42em; height: 0.42em;
+  border-radius: 50%;
+  background: $ku-red;
+}
+// loose lists wrap items in <p> — strip the extra margins so the dot lines up
+.reveal li > p:first-child { margin-top: 0; }
+.reveal li > p:last-child { margin-bottom: 0; }
+.reveal ul:not(.nav):not(.panel-tabset-tabby) ul > li::before { background: none; border: 1.5px solid $ku-red; }
+// never restyle tab-strips / pagination as content bullets
+.reveal ul.panel-tabset-tabby > li::before, .reveal ul.nav > li::before { content: none; display: none; }
+.reveal strong { font-weight: 600; }
+.reveal em { color: inherit; }
+.reveal a { text-decoration: none; border-bottom: 1px solid rgba(144,26,30,0.35); }
+.reveal a:hover { border-bottom-color: $ku-red; }
+
+// ---- Tables: clean booktabs, no zebra, no grey chrome ---------------------
+.reveal table { border-collapse: collapse; margin: 0.4em auto; font-size: 0.92em; }
+.reveal table thead th {
+  font-weight: 600; color: $ink; background: none;
+  border-bottom: 1.5px solid #333;
+  padding: 0.35em 0.7em; text-align: left;
+}
+.reveal table tbody td {
+  border: none; padding: 0.3em 0.7em; background: none;
+}
+.reveal table { border-top: 1.5px solid #333; border-bottom: 1.5px solid #333; }
+.reveal table tbody tr { border: none; }
+.reveal table tbody tr:not(:last-child) td { border-bottom: 0.5px solid $hairline; }
+.reveal .caption, .reveal caption { color: $muted; font-size: 0.85em; padding-bottom: 0.3em; }
+
+// ---- Code ------------------------------------------------------------------
+.reveal pre {
+  box-shadow: none; margin: 0.5em 0; width: 100%;
+}
+.reveal pre code {
+  font-family: $font-family-monospace;
+  background: #f6f8fa;
+  border: 1px solid #eaecef;
+  border-radius: 8px;
+  padding: 0.6em 0.8em;
+  line-height: 1.45;
+  max-height: none;
+}
+.reveal code { font-family: $font-family-monospace; }
+.reveal :not(pre) > code {          // inline code = subtle red brand touch
+  color: $ku-red;
+  background: #f4f1f1;
+  border-radius: 4px;
+  padding: 0.08em 0.32em;
+  font-size: 0.86em;
+}
+
+// ---- Inverse (red) slides & section dividers ------------------------------
+.reveal section.inverse {
+  background-color: $ku-red;
+}
+.reveal section.inverse,
+.reveal section.inverse h1, .reveal section.inverse h2,
+.reveal section.inverse h3, .reveal section.inverse p,
+.reveal section.inverse li, .reveal section.inverse strong { color: #fff; }
+.reveal section.inverse h2 { border-bottom: none; }
+// Short white accent rule under inverse titles (mirrors the red hairline on
+// normal slides — same structure, flipped colours).
+.reveal .slides section.inverse > h2::after {
+  content: ""; display: block;
+  width: 2.2em; height: 3px; margin-top: 0.3em;
+  background: rgba(255,255,255,0.55);
+}
+// "Part n of 3" pill on section-divider slides:  [Part 2 of 3]{.part-pill}
+.part-pill {
+  display: inline-block;
+  font-size: 0.55em; font-weight: 600;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  border: 1.5px solid rgba(255,255,255,0.55); border-radius: 999px;
+  padding: 0.28em 1em; margin-bottom: 0.9em;
+  color: rgba(255,255,255,0.9);
+}
+.reveal section.inverse ul > li::before { background: rgba(255,255,255,0.9); border-color: rgba(255,255,255,0.9); }
+.reveal section.inverse ul ul > li::before { background: none; border-color: rgba(255,255,255,0.9); }
+.reveal section.inverse a { color: #fff; border-bottom-color: rgba(255,255,255,0.6); }
+
+// ---- Title slide -----------------------------------------------------------
+// Red background + UCPH logo come from `title-slide-attributes` in the qmd.
+// Hierarchy: course eyebrow (from CSS, same for all 14 decks) > lecture topic
+// (the deck's `title:`) > tagline (`subtitle:`) > author/date.
+#title-slide { text-align: left; }
+#title-slide .title::before {
+  content: "Multiple Regression & Fundamentals of Causal Inference";
+  display: block;
+  font-size: 0.34em; font-weight: 500;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: rgba(255,255,255,0.72);
+  margin-bottom: 1.4em;
+}
+#title-slide .title {
+  color: #fff; font-weight: 700; font-size: 2.1em;
+  line-height: 1.08; letter-spacing: -0.02em;
+  margin: 0.2em 0 0.35em 0; max-width: 13em;
+}
+#title-slide .subtitle {
+  color: rgba(255,255,255,0.92); font-weight: 300; font-style: normal;
+  font-size: 1.0em; line-height: 1.3; max-width: 24em;
+  padding-top: 0.6em; border-top: 2px solid rgba(255,255,255,0.35); display: inline-block;
+}
+#title-slide .quarto-title-authors,
+#title-slide .author, #title-slide .quarto-title-author-name,
+#title-slide .date {
+  color: rgba(255,255,255,0.85); font-weight: 300; text-align: left; font-size: 0.85em;
+}
+#title-slide .quarto-title-authors { margin-top: 1.4em; justify-content: flex-start; }
+// Quarto gives each author 0.5em side padding — kill it so the name sits flush left
+#title-slide .quarto-title-author { padding-left: 0; padding-right: 0; margin-left: 0; }
+
+// ---- KU seal watermark (Quarto-managed `logo:` asset), top-right -----------
+// The plain seal (img/ku_seal.png) — the full wordmark logos contain a
+// decorative rule that cuts across slide content.
+.reveal .slide-logo {
+  max-height: none !important;
+  height: 2.2em !important;
+  top: 0.45em; bottom: auto; right: 0.6em;
+  opacity: 0.55;              // watermark: content that runs under it stays legible
+}
+.reveal:has(section.present.inverse) .slide-logo,
+.reveal:has(#title-slide.present) .slide-logo { display: none; }
+
+// ---- Flat callouts (replace the old saturated fills) ----------------------
+.content-box-red, .content-box-green, .content-box-blue {
+  border-radius: 8px;
+  padding: 0.5em 0.9em;
+  margin: 0.7em 0;
+  color: $ink;
+}
+.content-box-red   { background: $ku-red-tint;  border-left: 4px solid $ku-red; }
+.content-box-green { background: $ku-teal-tint; border-left: 4px solid $ku-teal; }
+.content-box-blue  { background: $ku-blue-tint; border-left: 4px solid $ku-blue; }
+.content-box-red *, .content-box-green *, .content-box-blue * { color: $ink; }
+// keep callout text dark even on red inverse slides (beats .inverse white rules)
+.reveal section.inverse .content-box-red,
+.reveal section.inverse .content-box-green,
+.reveal section.inverse .content-box-blue,
+.reveal section.inverse .content-box-red *,
+.reveal section.inverse .content-box-green *,
+.reveal section.inverse .content-box-blue * { color: $ink; }
+
+// ---- Emphasis / helper utilities ------------------------------------------
+.alert  { color: $ku-red;  font-weight: 600; }
+.alert2 { color: $ku-blue; font-weight: 600; }
+.gray   { color: $muted; }
+.white  { color: #fff; }
+.center { text-align: center; }
+.backgrnote { color: $muted; line-height: 1.25; font-size: 70%; font-weight: 400; }
+.reveal blockquote {
+  border-left: 3px solid $hairline; padding: 0.1em 0 0.1em 0.9em;
+  margin: 0.5em 0; width: 100%; font-size: 0.92em; color: #333;
+  box-shadow: none; font-style: normal;
+}
+
+// ---- Layout columns (unchanged geometry, just clearfixed) -----------------
+.left-column  { width: 30%; float: left;  }
+.right-column { width: 65%; float: right; }
+.push-left    { width: 48%; float: left;  }
+.push-right   { width: 48%; float: right; }
+.left-column::after, .right-column::after,
+.push-left::after, .push-right::after { content: ""; display: table; clear: both; }
+.reveal .columns { gap: 1.2em; }
+
+// ---- Consistent type tiers (use these instead of ad-hoc .fontNN) ----------
+//  .lead  = large display statement · base = body · .small = dense block
+//  .backgrnote = caption/source (defined above)
+.reveal .lead  { font-size: 1.35em; font-weight: 500; line-height: 1.28; }
+.reveal .small { font-size: 0.82em; }
+.reveal .lead .alert { font-weight: 600; }
+
+// ---- Self-check list (closing slide): empty tick-boxes instead of bullets --
+//  ::: {.checklist}  +  a plain markdown list
+//  (the :not() chain matches the base bullet rule's specificity, so this wins)
+.reveal .checklist ul:not(.nav):not(.pagination):not(.panel-tabset-tabby) > li::before {
+  background: none;
+  width: 0.55em; height: 0.55em;
+  top: 0.4em;
+  border: 2px solid $ku-red; border-radius: 3px;
+}
+.reveal .checklist li { margin: 0.55em 0; }
+.reveal section.inverse .checklist ul:not(.nav):not(.pagination):not(.panel-tabset-tabby) > li::before {
+  border-color: rgba(255,255,255,0.9); background: none;
+}
+
+// ---- Legacy font-size utilities (kept as an escape hatch) ------------------
+@for $i from 1 through 20 { .font#{$i * 10} { font-size: #{$i * 10 * 1%}; } }
+
+// ---- Chrome: progress bar, controls, slide number, footer ------------------
+.reveal .progress { color: $ku-red; height: 4px; }
+.reveal .controls { color: $ku-red; }
+// slide number: bottom-right, clear of the top-right logo
+.reveal .slide-number {
+  background: none; color: $muted; font-size: 0.5em; font-weight: 500;
+  top: auto !important; bottom: 10px !important; right: 14px !important; left: auto !important;
+}
+// footer (course + lecture label from the deck YAML): bottom-left, quiet
+// (!important beats Quarto's own footer CSS + the inline display its JS sets)
+.reveal > .footer {
+  color: #c9c4c4; font-size: 0.4em !important; font-weight: 500;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  text-align: left !important; left: 56px; right: auto; bottom: 16px; width: auto;   // clear of the slide-menu button
+}
+.reveal > .footer p { margin: 0; }
+.reveal:has(#title-slide.present) > .footer { display: none !important; }   // not on the title
+.reveal:has(section.present.inverse) > .footer { color: rgba(255,255,255,0.55); }
+.reveal figure figcaption, .reveal .figure-caption { color: $muted; font-size: 0.8em; }
+
+// ---- R text output (tibbles, console prints): don't wrap, scale to fit -----
+.reveal .cell > pre:not(.sourceCode),
+.reveal .cell-output pre { overflow-x: auto; max-width: 100%; box-shadow: none; }
+.reveal .cell > pre:not(.sourceCode) code,
+.reveal .cell-output pre code {
+  white-space: pre;                 // never wrap mid-row
+  font-size: 0.66em; line-height: 1.35;
+  background: #fafafa; border: 1px solid #eee;
+}
+
+// ---- Local countdown timer (replaces external iframe timers) ---------------
+.ku-timer { text-align: center; margin: 1em auto 0; }
+.ku-timer .kt-display {
+  font-family: $font-family-monospace; font-weight: 600;
+  font-size: 3.6em; line-height: 1.1; color: $ku-red; letter-spacing: 0.02em;
+}
+.ku-timer.kt-done .kt-display { animation: kt-blink 1s steps(2, start) infinite; }
+.ku-timer .kt-btns { margin-top: 0.5em; display: flex; gap: 0.55em; justify-content: center; }
+.ku-timer .kt-btns button {
+  font-family: $font-family-sans-serif; font-size: 0.6em; font-weight: 500;
+  padding: 0.4em 1.1em; border-radius: 6px; cursor: pointer;
+  border: 1.5px solid $ku-red; background: transparent; color: $ku-red; transition: none;
+}
+.ku-timer .kt-btns button:hover { background: $ku-red; color: #fff; }
+.reveal section.inverse .ku-timer .kt-display { color: #fff; }
+.reveal section.inverse .ku-timer .kt-btns button { border-color: #fff; color: #fff; }
+.reveal section.inverse .ku-timer .kt-btns button:hover { background: #fff; color: $ku-red; }
+@keyframes kt-blink { 50% { opacity: 0.3; } }

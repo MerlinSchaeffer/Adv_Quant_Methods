@@ -1,0 +1,110 @@
+---
+title: "About & setup"
+---
+
+This advanced statistics course in sociology, *Multiple Regression and Fundamentals of Causal
+Inference*, gives you a working understanding of both the theory and the application of multiple
+regression analysis. You will learn to interpret regression coefficients and to use regression to
+test hypotheses and make predictions.
+
+Beyond regression itself, the course builds a solid grasp of the principles of **causal inference**:
+telling correlation from causation, spotting confounders, and using research designs — randomized
+controlled trials, quasi-experiments, and observational studies — to estimate causal effects. You
+get hands-on experience doing this in **R**, on real sociological questions such as the effect of
+news-media consumption on perceived ethno-racial discrimination, or of police interventions on
+repeat domestic violence.
+
+::: callout-start
+The steps below **must be done before the first session**, in order — whether or not you have used
+R before.
+:::
+
+# Before the first session
+
+1. [Get a recent version of R (≥ 4.6.0)](https://mirrors.dotsrc.org/cran/).
+2. [Install RStudio (≥ 2026.06)](https://posit.co/download/rstudio-desktop/), or update
+   to the most recent version. See also [this guide](https://psyteachr.github.io/msc-data-skills/installingr.html#installing-base-r).
+3. Open RStudio and set up a **Project** for this class (we walk through this together in the
+   first session — the setup slides will be linked here once they are ready).
+4. Run the lines below **step by step** in the RStudio Console. This can take a while. If asked
+   *"Do you want to install from sources the package which needs compilation?"* answer **No**. Wait
+   until the cursor blinks behind a `>` again before running the next step.
+
+```{r}
+#| eval: false
+
+# Step 1 — wait until done
+update.packages(ask = FALSE)
+
+# Step 2
+install.packages("pacman")
+
+# Step 3
+pacman::p_load(
+  tidyverse,    # Data manipulation
+  ggplot2,      # Figures
+  wbstats,      # World Bank data
+  estimatr,     # Regression for weighted data
+  modelr,       # Turn lm() results into a tibble
+  furniture,    # Row means
+  modelsummary, # Regression and balance tables
+  ivreg,        # IV 2SLS
+  countrycode,  # Recode country names
+  remotes, devtools)
+
+# Step 4
+remotes::install_github("jrnold/masteringmetrics", subdir = "masteringmetrics")
+# Step 5
+remotes::install_github("avehtari/ROS-Examples", subdir = "rpackage")
+# Step 6
+remotes::install_github("vdeminstitute/vdemdata")
+# Step 7
+remotes::install_github("xmarquez/democracyData")
+
+# If a remotes::install_github(...) fails, try from a non-KU internet connection.
+
+# Step 8
+pacman::p_load(wbstats, rosdata, masteringmetrics, vdemdata, democracyData)
+```
+
+5. Type `sessionInfo()` and check that these appear under *"other attached packages"*: tidyverse,
+   ggplot2, wbstats, estimatr, modelr, furniture, modelsummary, ivreg, countrycode, rosdata,
+   masteringmetrics, vdemdata, democracyData. **If any is missing, ask a tutor to help you set up.**
+
+Always bring your laptop to class.
+
+# Course components and expectations
+
+Methodological and substantive lectures introduce the key concepts and methods; exercise classes
+give you hands-on practice. Four expectations:
+
+1. Prepare each class by completing the assigned readings.
+2. Engage actively — ask questions, join discussions, complete the exercise-class tasks.
+3. **Online quizzes:** solve the weekly Absalon quizzes (**at least 10** to qualify for the exam).
+4. **Home assignment (final exam):** submit by **noon, 12 January 2026**.
+
+# Course structure
+
+A weekly three-hour **lecture every Wednesday at 10:00** — two lecture blocks, small exercises, and a
+15-minute break. A **tutoring session every Friday** offers a smaller setting for stats problems and
+hands-on R. Each week there is an **Absalon online quiz** — individual; you must submit at least 10 of
+the 14 to qualify for the exam.
+
+# Schedule & team
+
+| When | What | Where | Who |
+|:-----|:-----|:------|:----|
+| Wed 10–13 | Lecture | CSS 1-1-18 | Merlin |
+| Fri 08–10 | Exercise group | CSS 2-2-55 | Halfdan |
+| Fri 08–10 | Exercise group | CSS 4-0-02 | Sofie |
+| Fri 10–12 | Exercise group | CSS 2-2-55 | Halfdan |
+| Fri 10–12 | Exercise group | CSS 1-0-10 | Sofie |
+
+# Course literature
+
+Two textbooks, both available at Academic Books on City Campus and the university library:
+
+- **Stats: Data and Models, Global Edition** — De Veaux, Velleman & Bock (2021), Pearson. *(Reference
+  for regression and statistical inference, carried over from last semester.)*
+- **Mastering 'Metrics: The Path from Cause to Effect** — Angrist & Pischke (2014), Princeton
+  University Press. *(How regression identifies causal effects.)*

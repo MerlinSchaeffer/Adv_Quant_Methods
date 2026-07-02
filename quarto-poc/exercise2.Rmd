@@ -1,0 +1,112 @@
+---
+title: "Exercise 2 (20 minutes)"
+subtitle: "When you're done, assist some of the others ..."
+output: webexercises::webexercises_default
+---
+
+```{r setup, include = FALSE}
+options(htmltools.dir.version = FALSE, servr.interval = 0.5, width = 115, digits = 2)
+knitr::opts_chunk$set(
+  collapse = TRUE, message = FALSE,
+  warning = FALSE, cache = FALSE,
+  comment = "#", strip.white = TRUE)
+
+library(webexercises)
+library(tidyverse)
+
+# 1. Load packages
+pacman::p_load( # Load several R packages using the pacman package manager
+  tidyverse,  # A collection of packages for data manipulation and visualization
+  ggplot2,    # Powerful package for creating static, animated and interactive visualizations
+  estimatr,   # Package for fast estimators for regression with weighted data
+  modelr,     # Provides functions for modelling and prediction
+  kableExtra, # Enhances table creation in R
+  modelsummary) # Creates tables and plots to summarize statistical models
+
+# 2. read the APAD data
+load("../assets/APAD.RData") # Read APAD data,
+
+# 3. Process APAD data
+APAD <- APAD %>% mutate( # Process APAD data
+  # Convert news consumption to minutes
+  # Example: 2 hours and 30 minutes becomes 2*60 + 30 = 150 minutes
+  news = news_hrs*60 + news_mins,
+  # Create binary variable for news consumption
+  news_yn = case_when(
+    news < 15 ~ 0,  # 0 if less than 15 minutes
+    news >= 15 ~ 1, # 1 if 15 minutes or more
+    TRUE ~ as.numeric(NA)), # Handle other cases as missing
+  # Calculate average discrimination index across multiple domains
+  dis_index = rowMeans( # Calculate the mean for each row (participant)
+    select(., # Choose specific discrimination columns from "." (APAD)
+           dis_trainee, dis_job, dis_school,
+           dis_house, dis_gov, dis_public),
+    na.rm = TRUE), # Ignore NA values
+  # Standardize discrimination index
+  # scale() standardizes; as.numeric() converts to numeric vector
+  z_dis_index = scale(dis_index) %>% as.numeric()
+)
+```
+
+
+1.  The APAD data contains a variable `antidiscr_law`. It asks respondents how good or bad they think it is for a country to have a law against ethnic discrimination in the workplace. The answer categories are: (1) Very bad, (2) Bad, (3) So/so, (4) Good, (5) Very good. <br> Use the APAD survey experiment to estimate the causal effect of reading a news article about discrimination on support for anti-discrimination policy. Estimate z-standardized effects.
+`r hide("R solution -> dont' peak too early ;) !")`
+```{r}
+APAD <- APAD %>%
+  mutate( # Standardize 'antidiscr_law' variable
+    z_antidiscr_law = scale(antidiscr_law) %>% as.numeric())
+
+
+zols <- lm_robust(# Weighted regression:
+  z_antidiscr_law ~ article, # Effect of 'article' on standardized discrimination
+  weight = gewFAKT, data = APAD) # Specify weights and data
+
+
+modelsummary( # Summarize regression results with stars and fit statistics
+  list("Anti-discr. law" = zols), stars = TRUE,
+  gof_map = c("nobs", "r.squared"))
+```
+`r unhide()`
+
+```{r include = FALSE}
+coef <- coef(zols)["articleTreat_1"] %>% round(., 3) %>% unname()
+se <- vcov(zols) %>% diag()
+se <- se["articleTreat_1"] %>% sqrt() %>% round(., 3) %>% unname()
+```
+
+2. What is the causal effect of reading news about discrimination on supporting anti-discrimination policy? The causal effect is: `r fitb(coef, width = "5")`. What is the estimated standard error of this $\hat{\beta}$? `r fitb(se, width = "5")`. *What do these two statistics suggest about a causal effect?*
+
+```{r include = FALSE}
+coef <- coef(zols)["articleTreat_2"] %>% round(., 3) %>% unname()
+se <- vcov(zols) %>% diag()
+se <- se["articleTreat_2"] %>% sqrt() %>% round(., 3) %>% unname()
+```
+3. What is the causal effect of reading news about integration on supporting anti-discrimination policy? The causal effect is: `r fitb(coef, width = "5")`. What is the estimated standard error of this $\hat{\beta}$? `r fitb(se, width = "5")`. *What do these two statistics suggest about a causal effect?*
+
+4. Make a coeffient plot to visualize these results. Use an AI like ChatGPT or Google Bard to help you if you get stuck.
+`r hide("R solution -> dont' peak too early ;) !")`
+```{r}
+(plotdata <- zols %>% # Prepare data for plotting
+  tidy() %>% # Convert regression results to a tidy data frame
+  filter(term != "(Intercept)") %>% # Remove the intercept term
+  mutate( # Rename treatment variables for clarity
+    term = case_when(
+      term == "articleTreat_1" ~ "Discrimination",
+      term == "articleTreat_2" ~ "Acculturation")))
+
+# Create the plot
+ggplot(data = plotdata, aes(y = estimate, x = term)) +
+  geom_hline(yintercept = 0, color = "orange",
+             lty = "dashed") + # Add a horizontal line at y=0
+  # Plot point estimates and confidence intervals
+  geom_pointrange(aes(min = conf.low, max = conf.high)) +
+  coord_flip() + # Flip coordinates for horizontal display
+  labs(title = "Causal effect of news articles",
+       x = "Article on",
+       y = "Comparison to control group (article on Venus)
+    in standard deviations",
+    caption = "Note: Results are based on a weighted OLS with robust standard errors.
+    N = 1085, and R2 = 0.012.") +
+  theme_minimal() # Use a minimal theme for clean appearance
+```
+`r unhide()`

@@ -1,0 +1,52 @@
+project:
+  type: website
+  output-dir: _site
+  render:
+    - "index.qmd"
+    - "about.qmd"
+    - "lectures.qmd"
+    - "exam.qmd"
+    - "resources.qmd"
+    - "6-RCTees.qmd"
+  resources:
+    - "exercise1.html"
+    - "exercise2.html"
+    - "img/**"
+
+website:
+  title: "Multiple OLS & Causal Inference"
+  description: >
+    BSc Sociology course at the University of Copenhagen: multiple OLS regression
+    and the fundamentals of causal inference, hands-on in R.
+  favicon: img/ku_seal.png
+  open-graph: true
+  navbar:
+    background: primary
+    logo: img/UCPH_white.png
+    title: "Multiple OLS & Causal Inference"
+    left:
+      - text: Home
+        href: index.qmd
+      - text: About & setup
+        href: about.qmd
+      - text: Lectures
+        href: lectures.qmd
+      - text: "Exam & quizzes"
+        href: exam.qmd
+      - text: Resources
+        href: resources.qmd
+    right:
+      - text: "Absalon ↗"
+        href: https://absalon.ku.dk/courses/70545
+  page-footer:
+    center: "Prof. Dr. Merlin Schaeffer · Department of Sociology · University of Copenhagen"
+
+format:
+  html:
+    theme: [cosmo, theme/ku-web.scss]
+    toc: true
+    toc-depth: 2
+    anchor-sections: true
+    smooth-scroll: true
+    grid:
+      body-width: 900px

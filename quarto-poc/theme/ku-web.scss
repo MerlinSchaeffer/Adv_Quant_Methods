@@ -1,0 +1,171 @@
+/*-- scss:defaults --*/
+// ============================================================================
+//  KU brand theme for the course website (regular HTML pages).
+//  The reveal.js slide theme is separate (theme/ku.scss) — keep the two
+//  visually in sync: same red, same Inter type, same flat/lean language.
+// ============================================================================
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+// Brand + neutrals (shared vocabulary with theme/ku.scss)
+$ku-red:      #901A1E;
+$ku-red-dark: #6e1114;
+$ku-red-tint: #fbeeee;
+$ku-teal:     #4f9d94;
+$ku-teal-tint:#eef5f3;
+
+$ink:      #1c1c1c;
+$muted:    #6b6b6b;
+$hairline: #e8e6e3;
+$paper:    #faf9f8;   // warm off-white for cards/panels
+
+$primary:                 $ku-red;
+$body-color:              $ink;
+$link-color:              $ku-red;
+$link-hover-color:        $ku-red-dark;
+$font-family-sans-serif:  "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+$headings-font-weight:    650;
+$navbar-bg:               $ku-red;
+$border-radius:           .5rem;
+
+/*-- scss:rules --*/
+
+body { -webkit-font-smoothing: antialiased; letter-spacing: -0.003em; }
+
+h1, h2, h3 { color: $ku-red; letter-spacing: -0.015em; }
+h1 { font-weight: 700; }
+h2 { margin-top: 2.2rem; padding-bottom: .35rem; border-bottom: 1px solid $hairline; }
+
+a { text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+// ---- Navbar: white on KU red ------------------------------------------------
+.navbar { font-weight: 500; }
+.navbar-dark .navbar-nav .nav-link,
+.navbar .navbar-nav .nav-link { color: rgba(255,255,255,.85); }
+.navbar .navbar-nav .nav-link:hover,
+.navbar .navbar-nav .nav-link.active { color: #fff; }
+.navbar-brand { color: #fff !important; font-weight: 600; }
+.navbar .navbar-logo { max-height: 30px; }
+
+// ---- Hero (landing page) ----------------------------------------------------
+.hero {
+  background: linear-gradient(135deg, $ku-red 0%, $ku-red-dark 100%);
+  color: #fff;
+  border-radius: 16px;
+  padding: 3rem 2.6rem 2.7rem;
+  margin: .5rem 0 2.4rem;
+}
+.hero .eyebrow {
+  display: block;
+  font-size: .8rem; font-weight: 600;
+  letter-spacing: .09em; text-transform: uppercase;
+  color: rgba(255,255,255,.75);
+  margin-bottom: .9rem;
+}
+.hero h1 {
+  color: #fff; font-weight: 700; font-size: 2.3rem; line-height: 1.15;
+  margin: 0 0 1rem; max-width: 34rem; border: none; padding: 0;
+}
+.hero .lead-text {
+  color: rgba(255,255,255,.92); font-weight: 350;
+  max-width: 44rem; font-size: 1.06rem; line-height: 1.65;
+}
+// ---- "How the course works" steps -------------------------------------------
+.step-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(215px, 1fr));
+  gap: 1rem; margin: 1.4rem 0 2rem;
+}
+.step {
+  background: $paper; border: 1px solid $hairline; border-radius: 12px;
+  padding: 1.15rem 1.25rem;
+}
+.step .when {
+  display: block; font-size: .78rem; font-weight: 650;
+  letter-spacing: .08em; text-transform: uppercase; color: $ku-red;
+  margin-bottom: .4rem;
+}
+.step .what { font-weight: 600; display: block; margin-bottom: .25rem; }
+.step p { margin: 0; color: $muted; font-size: .92rem; line-height: 1.5; }
+
+// ---- Card grid (quick links) -------------------------------------------------
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 1rem; margin: 1.4rem 0 2rem;
+}
+.kucard {
+  display: block; border: 1px solid $hairline; border-radius: 12px;
+  padding: 1.15rem 1.25rem; color: inherit; background: #fff;
+  transition: border-color .12s ease;
+}
+.kucard:hover { border-color: $ku-red; text-decoration: none; }
+.kucard h3 {
+  margin: 0 0 .35rem; font-size: 1.02rem; font-weight: 650; border: none; padding: 0;
+}
+.kucard h3::after { content: " →"; color: $ku-red; font-weight: 400; }
+.kucard p { margin: 0; color: $muted; font-size: .92rem; line-height: 1.5; }
+
+// ---- Lecture list ------------------------------------------------------------
+.block-label {           // thematic group header on the Lectures page
+  font-size: .8rem; font-weight: 650; letter-spacing: .09em; text-transform: uppercase;
+  color: $muted; margin: 2.2rem 0 .3rem; padding-bottom: .35rem;
+  border-bottom: 1px solid $hairline;
+}
+.lecture {
+  display: flex; align-items: baseline; gap: 1rem;
+  padding: .75rem .25rem; border-bottom: 1px solid #f0eeec;
+}
+.lecture .num {
+  flex: 0 0 2.2rem; font-weight: 700; color: $ku-red;
+  font-variant-numeric: tabular-nums; text-align: right;
+}
+.lecture .body { flex: 1; }
+.lecture .body .t { font-weight: 600; }
+.lecture.soon .body .t { color: #7d7d7d; font-weight: 500; }
+.lecture.soon .num { color: #c5aeaf; }
+.lecture .links { margin-top: .15rem; }
+.lecture .links a {
+  display: inline-block; font-size: .85rem; font-weight: 550;
+  border: 1px solid $hairline; border-radius: 999px;
+  padding: .12rem .75rem; margin: .15rem .35rem 0 0;
+}
+.lecture .links a:hover { border-color: $ku-red; text-decoration: none; background: $ku-red-tint; }
+.badge-soon {
+  font-size: .72rem; font-weight: 600; letter-spacing: .04em;
+  color: #9a9a9a; background: #f4f3f1; border-radius: 999px;
+  padding: .12rem .6rem; margin-left: .5rem; vertical-align: .08rem;
+  white-space: nowrap;
+}
+
+// ---- Requirement cards (exam page) --------------------------------------------
+.req-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem; margin: 1.4rem 0;
+}
+.req {
+  background: $paper; border: 1px solid $hairline; border-left: 4px solid $ku-red;
+  border-radius: 12px; padding: 1.15rem 1.25rem;
+}
+.req .k {
+  display: block; font-size: .78rem; font-weight: 650; letter-spacing: .08em;
+  text-transform: uppercase; color: $ku-red; margin-bottom: .4rem;
+}
+.req p { margin: 0; font-size: .95rem; line-height: 1.55; }
+
+// ---- Callouts ------------------------------------------------------------------
+.callout-start {         // "start here" hint (teal = neutral positive, as on slides)
+  border-left: 4px solid $ku-teal; background: $ku-teal-tint;
+  border-radius: 8px; padding: .9rem 1.1rem; margin: 1.2rem 0;
+}
+
+// ---- Tables (about page schedule etc.): booktabs, like the slides ---------------
+table { font-size: .95rem; }
+thead th { border-bottom: 1.5px solid #333 !important; font-weight: 600; }
+tbody td { border: none; }
+tbody tr:not(:last-child) td { border-bottom: 1px solid $hairline; }
+
+// ---- Footer ----------------------------------------------------------------------
+.page-footer, .nav-footer { color: $muted; font-size: .85rem; }
+.nav-footer { border-top: 1px solid $hairline; margin-top: 3rem; }
