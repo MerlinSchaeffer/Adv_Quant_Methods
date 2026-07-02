@@ -20,6 +20,15 @@ The POC lives in **`quarto-poc/`** (self-contained, at repo root). It is a full 
 **Lecture 6 (RCTs)** — originally `static/Lectures/6-RCTees/`:
 - `6-RCTees.qmd` — the deck (35 slides), ported faithfully, then restyled, then **pedagogically
   edited**, then refined twice more with the professor (see "Second design pass" + "Feedback round").
+- `1-Introduction.qmd` — **Lecture 1 (40 slides), the first rollout deck (2026-07-02)**: faithful
+  port restructured into the template (goals → 3 part dividers → self-check; boxes per the colour
+  code; local `ku-timer` break; images in `img/L1/` — per-lecture image subfolders are the
+  convention from now on). Port notes: the two old "4 types of research questions" slides were
+  merged into one ask-then-reveal slide; TA table + recommendations merged into one "Course
+  structure" slide; the dead hotlinked Legewie coefficient-plot GIF (uchicago 403s hotlinks — also
+  broken in the old deck) was dropped, as was the full-bleed stock-photo "research agenda" slide
+  (now a clean inverse slide); Task 1 says R ≥ 4.6.0 to match about.qmd. **Check external images
+  when porting** — test every hotlinked URL (`curl -sIL`), and localize or drop dead ones.
 - `exercise1.Rmd`, `exercise2.Rmd` — the two in-class exercises (still `webexercises`; embedded via iframe).
 - `theme/ku.scss` — the modern KU reveal.js theme (see "Design system" below).
 - `img/` — figures + KU/UCPH logos.
@@ -80,8 +89,14 @@ A refinement round over both the deck and the website. New conventions that the 
   sits directly under the hero, before "Your week, every week".
 - Site config: `open-graph: true`, site `description:`, navbar right "Absalon ↗" external link,
   favicon = the seal.
-- **Known stale content to revisit:** exam deadline "12 January 2026" (about.qmd + exam.qmd) is
-  last year's; the about.qmd "set up a Project" step needs a link once the 0-Prep deck is ported.
+- ~~Stale exam deadline~~ — professor supplied the new date 2026-07-02: **14 January 2027, noon**
+  (updated in about.qmd + exam.qmd). Still open: the about.qmd "set up a Project" step needs a link
+  once the 0-Prep deck is ported.
+- **TA team 2026/27 (professor, 2026-07-02):** Sofie (Fri 8–10, CSS 2-2-49), Natalie (Fri 10–12,
+  CSS 2-0-30), Joakim (Fri 10–12, CSS 2-0-42) — in the L1 "Course structure" slide and the
+  about.qmd schedule table. Halfdan is out; update any other mention found while porting decks.
+- **Book covers localized** (`img/L1/cover_stats.jpg`, `cover_metrics.jpg`, pulled from the Saxo
+  CDN which blocks in-browser hotlinking) — reuse these files whenever a deck shows the textbooks.
 - **Setup steps fact-checked 2026-07-02** (about.qmd): R ≥ 4.6.0 (4.6.1 is current), RStudio
   ≥ 2026.06 (link now posit.co); dropped the GitHub `wbstats` install (repo renamed
   nset-ornl→gshs-ornl, CRAN version is current anyway); **added
@@ -148,14 +163,19 @@ These fixes are part of the template; apply the same standards to the other 13 d
   `RefManageR` tolerates it; Pandoc citeproc would not. Worth fixing at some point.
 - **TikZ: `step` is a reserved key** (grid spacing) — naming a node style `step/.style` fails with
   "The key '/tikz/step' requires a value". Use another name (we use `stage`).
-- **Quarto auto-applies reveal's `r-stretch` to lone images**, which can collapse a wide/short image
-  to 0 height. Put `{.nostretch}` on the slide heading when a figure vanishes.
-- **Claude-session tooling:** rendering used a scratch Quarto 1.9.38 living in another session's
-  scratchpad (`/private/tmp/claude-501/...3f2c8968.../scratchpad/quarto-dist/bin/quarto`) — this can
-  be garbage-collected; install Quarto properly (`brew install --cask quarto`) before relying on it.
+- **Quarto auto-applies reveal's `r-stretch` to lone images**, which collapses them to 0 height on
+  every slide except the one visible at load (bit us on 9 slides in Lecture 1). **Every deck must
+  set `auto-stretch: false` in its revealjs YAML** — all images are sized manually via `out.width`
+  anyway.
+- **Claude-session tooling:** Quarto is NOT installed system-wide; each session downloads the
+  macOS tarball (`https://github.com/quarto-dev/quarto-cli/releases/download/v1.9.38/quarto-1.9.38-macos.tar.gz`,
+  ~225 MB, extracts `bin/` + `share/` directly — no top-level dir) into its own scratchpad. This
+  already bit us once (a previous session's copy was garbage-collected mid-project). Install it
+  properly at some point: `brew install --cask quarto`.
   For browser previews: macOS TCC blocks the preview server from reading `~/Documents`, so
   `.claude/launch.json` serves a copy of `_site/` rsynced into the session scratchpad — after every
-  render, rsync `_site/` to the directory named in launch.json.
+  render, rsync `_site/` to the directory named in launch.json (update launch.json to the current
+  session's scratchpad first).
 
 ## Original source (for reference when migrating the rest)
 - Hugo site: `config/`, `content/` (Lectures landing pages `.Rmd`), `static/Lectures/<n>-.../` = the
@@ -166,13 +186,25 @@ These fixes are part of the template; apply the same standards to the other 13 d
 ## Next steps
 1. ~~POC deck look + pedagogy~~ — done, professor approved (incl. two refinement rounds).
 2. ~~Quarto website prototype~~ — done, refined, verified.
-3. **Commit the current state to git** — everything in `quarto-poc/` + this file is still
-   untracked. Do this before starting the rollout. *(recommended immediate next step)*
-4. **Roll the template out to the other 13 decks** (faithful port → restyle → pedagogical edit →
-   the feedback-round standards above), adding each to `lectures.qmd` + `_quarto.yml` `render:` as
-   it lands. Suggested order: teaching order (1 → 14), so the site is usable from week 1 of the
-   semester; Lecture 1 (`1-Intro/1-Introduction.Rmd`, 623 lines) is also the lightest full deck —
-   a good second data point for the template. The DAG/IV/RDD decks (7, 10, 13) are the heaviest.
+3. ~~Commit the POC to git~~ — done (bec0e7a, pushed).
+4. ~~Lecture 1~~ — done 2026-07-02 (`1-Introduction.qmd`, 40 slides, verified in browser; template
+   generalized well). **Continue the rollout in teaching order: Lecture 2
+   (`static/Lectures/2-Correlation-n-Regression/`, deck + 2 exercises) is next.** Then 3 → 14.
+   The DAG/IV/RDD decks (7, 10, 13) are the heaviest. For each deck: faithful port → template
+   standards (see "Feedback round") → check external image URLs → add to `lectures.qmd` +
+   `_quarto.yml` `render:` → render → verify slides fit in the browser.
+   Content flag for the professor: Lecture 1 says "13 online quizzes", about.qmd says "10 of the
+   14" — reconcile.
+   Pending image from the professor: Fig. 3 of Legewie & Schaeffer 2016 (AJS, "Contested
+   Boundaries") — the uchicago.edu hotlink is dead. When supplied, save it as
+   `quarto-poc/img/L1/Legewie_fg3.png` and restore it on the "Three learning goals" slide under
+   "(2) Visualization of regression results" (out.width ~55%, source cite `legewie_contested_2016`).
+   Convention: per-lecture images live in `quarto-poc/img/L<N>/`.
+   R-setup content audited 2026-07-02: all steps work with R 4.6 / RStudio 2026.06 (Project wizard
+   and reproducibility preferences unchanged). The three RStudio IDE screenshots (Tasks 2–3 +
+   workflow slide) are now local (`img/L1/rstudio-editor.png`, `rstudio-workspace.png`) but show
+   the pre-2023 RStudio UI — optionally replace with fresh screenshots from the professor
+   (same filenames, drop into `img/L1/`).
 5. Content updates the professor must supply: new exam deadline (replaces 12 Jan 2026 on
    about/exam pages); link the 0-Prep setup deck once ported.
 6. Polish the website (per-lecture landing pages with readings if wanted; a Quarto `listing`
