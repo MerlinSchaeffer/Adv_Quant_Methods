@@ -141,6 +141,16 @@ These fixes are part of the template; apply the same standards to the other 13 d
   attribute is what makes the red full-bleed; the `.inverse` class flips text white + hides the logo).
 - Citations: keep `RefManageR` inline (`Citet`, `PrintBibliography`) — no `@key` rewriting needed.
 
+## Live deployment
+- **The new site is LIVE (since 2026-07-02):** https://willowy-quokka-e604ee.netlify.app — a fresh
+  Netlify site published by the professor via `quarto publish netlify` from `quarto-poc/` (the old
+  Hugo site's Netlify deployment is untouched; switch the real course domain over when ready).
+- Deploy flow after each change: render locally, then `quarto publish netlify` (uploads `_site/`;
+  Netlify needs no R/Quarto). `quarto publish` remembers the site in `_publish.yml`.
+- Verified post-launch: all pages + both decks 200 (Netlify pretty-URLs 301 `.html` → lowercase
+  extensionless paths — fine), and all 86 referenced local assets resolve (no case-sensitivity
+  issues).
+
 ## Tooling / how to render
 - **Quarto** must be installed. On the professor's Mac: `brew install --cask quarto` (the POC was
   built with a scratch copy of Quarto 1.9.38). Then, from `quarto-poc/`:
