@@ -1,6 +1,6 @@
 ---
 title: "Exercise 2 (20 minutes)"
-subtitle: "When you're done, assist some of the others ..."
+subtitle: "You practice: estimating causal effects from an RCT, reading standard errors, and coefficient plots. When you're done, assist some of the others …"
 output: webexercises::webexercises_default
 ---
 
@@ -13,6 +13,12 @@ knitr::opts_chunk$set(
 
 library(webexercises)
 library(tidyverse)
+
+# Fill-in-the-blank that accepts point AND comma decimals (Danish keyboards!)
+num_fitb <- function(x, digits = 3, width = 6) {
+  a <- format(round(x, digits), nsmall = digits)
+  fitb(unique(c(a, sub(".", ",", a, fixed = TRUE))), width = width)
+}
 
 # 1. Load packages
 pacman::p_load( # Load several R packages using the pacman package manager
@@ -30,7 +36,7 @@ load("../assets/APAD.RData") # Read APAD data,
 APAD <- APAD %>% mutate( # Process APAD data
   # Convert news consumption to minutes
   # Example: 2 hours and 30 minutes becomes 2*60 + 30 = 150 minutes
-  news = news_hrs*60 + news_mins,
+  news = news_hrs * 60 + news_mins,
   # Create binary variable for news consumption
   news_yn = case_when(
     news < 15 ~ 0,  # 0 if less than 15 minutes
@@ -48,43 +54,61 @@ APAD <- APAD %>% mutate( # Process APAD data
 )
 ```
 
+*(Keep working in the R script from Exercise 1 — you already have the prepared `APAD` data.
+The "Stuck?" box is in Exercise 1.)*
 
-1.  The APAD data contains a variable `antidiscr_law`. It asks respondents how good or bad they think it is for a country to have a law against ethnic discrimination in the workplace. The answer categories are: (1) Very bad, (2) Bad, (3) So/so, (4) Good, (5) Very good. <br> Use the APAD survey experiment to estimate the causal effect of reading a news article about discrimination on support for anti-discrimination policy. Estimate z-standardized effects.
-`r hide("R solution -> dont' peak too early ;) !")`
+1. The APAD data contains a variable `antidiscr_law`. It asks respondents how good or bad they think it is for a country to have a law against ethnic discrimination in the workplace. The answer categories are: (1) Very bad, (2) Bad, (3) So/so, (4) Good, (5) Very good. <br> Use the APAD survey experiment to estimate the causal effect of reading a news article about discrimination on support for anti-discrimination policy. Estimate z-standardized effects.
+`r hide("R solution -> don't peek too early ;) !")`
 ```{r}
 APAD <- APAD %>%
   mutate( # Standardize 'antidiscr_law' variable
     z_antidiscr_law = scale(antidiscr_law) %>% as.numeric())
 
+zols <- lm_robust( # Weighted OLS on the survey experiment
+  z_antidiscr_law ~ article,
+  weights = gewFAKT,
+  data = APAD
+)
 
-zols <- lm_robust(# Weighted regression:
-  z_antidiscr_law ~ article, # Effect of 'article' on standardized discrimination
-  weight = gewFAKT, data = APAD) # Specify weights and data
-
-
-modelsummary( # Summarize regression results with stars and fit statistics
-  list("Anti-discr. law" = zols), stars = TRUE,
-  gof_map = c("nobs", "r.squared"))
+modelsummary( # Regression table with stars and fit statistics
+  list("Anti-discr. law" = zols),
+  stars = TRUE,
+  gof_map = c("nobs", "r.squared")
+)
 ```
 `r unhide()`
 
 ```{r include = FALSE}
-coef <- coef(zols)["articleTreat_1"] %>% round(., 3) %>% unname()
-se <- vcov(zols) %>% diag()
-se <- se["articleTreat_1"] %>% sqrt() %>% round(., 3) %>% unname()
+coef_1 <- coef(zols)["articleTreat_1"] %>% round(3) %>% unname()
+se_1 <- vcov(zols) %>% diag()
+se_1 <- se_1["articleTreat_1"] %>% sqrt() %>% round(3) %>% unname()
 ```
 
-2. What is the causal effect of reading news about discrimination on supporting anti-discrimination policy? The causal effect is: `r fitb(coef, width = "5")`. What is the estimated standard error of this $\hat{\beta}$? `r fitb(se, width = "5")`. *What do these two statistics suggest about a causal effect?*
+2. What is the causal effect of reading news about discrimination on supporting anti-discrimination policy? The causal effect is: `r num_fitb(coef_1)` (three digits; point or comma is fine). What is the estimated standard error of this $\hat{\beta}$? `r num_fitb(se_1)`. *What do these two statistics suggest about a causal effect?*
+
+`r hide("Model answer")`
+*Reading the discrimination article increased support for anti-discrimination law by
+`r coef_1` standard deviations. That estimate is about `r round(coef_1 / se_1, 1)` times its
+standard error (`r se_1`) — much larger than chance alone would produce, so we take it as
+evidence of a real (and because of randomization: causal) effect.*
+`r unhide()`
 
 ```{r include = FALSE}
-coef <- coef(zols)["articleTreat_2"] %>% round(., 3) %>% unname()
-se <- vcov(zols) %>% diag()
-se <- se["articleTreat_2"] %>% sqrt() %>% round(., 3) %>% unname()
+coef_2 <- coef(zols)["articleTreat_2"] %>% round(3) %>% unname()
+se_2 <- vcov(zols) %>% diag()
+se_2 <- se_2["articleTreat_2"] %>% sqrt() %>% round(3) %>% unname()
 ```
-3. What is the causal effect of reading news about integration on supporting anti-discrimination policy? The causal effect is: `r fitb(coef, width = "5")`. What is the estimated standard error of this $\hat{\beta}$? `r fitb(se, width = "5")`. *What do these two statistics suggest about a causal effect?*
 
-4. Make a coeffient plot to visualize these results. Use an AI like ChatGPT or Google Bard to help you if you get stuck.
-`r hide("R solution -> dont' peak too early ;) !")`
+3. What is the causal effect of reading news about integration on supporting anti-discrimination policy? The causal effect is: `r num_fitb(coef_2)`. What is the estimated standard error of this $\hat{\beta}$? `r num_fitb(se_2)`. *What do these two statistics suggest about a causal effect?*
+
+`r hide("Model answer")`
+*The estimate (`r coef_2` standard deviations) is only about `r round(coef_2 / se_2, 1)`
+times its standard error (`r se_2`) — a difference this small arises easily by chance, so
+the experiment gives no convincing evidence that the integration article changed support.*
+`r unhide()`
+
+4. Make a coefficient plot to visualize these results. Use an AI like ChatGPT or Google Gemini to help you if you get stuck.
+`r hide("R solution -> don't peek too early ;) !")`
 ```{r}
 (plotdata <- zols %>% # Prepare data for plotting
   tidy() %>% # Convert regression results to a tidy data frame

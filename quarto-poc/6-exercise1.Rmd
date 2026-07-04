@@ -1,6 +1,6 @@
 ---
 title: "Exercise 1 (20 minutes)"
-subtitle: "When you're done, assist some of the others ..."
+subtitle: "You practice: data preparation, simulating random assignment, and balance tables. When you're done, assist some of the others …"
 output: webexercises::webexercises_default
 ---
 
@@ -17,8 +17,8 @@ set.seed(831983)
 ```
 
 
-1. Use APAD survey dataset from Absalon. Replicate the variable preparation steps as demonstrated in my slides.
-`r hide("R solution -> dont' peak too early ;) !")`
+1. Use the APAD survey dataset from Absalon. Replicate the variable preparation steps as demonstrated in my slides.
+`r hide("R solution -> don't peek too early ;) !")`
 ```{r}
 # 1. Load packages
 pacman::p_load( # Load several R packages using the pacman package manager
@@ -45,7 +45,7 @@ load("APAD.RData") # Read APAD data,
 APAD <- APAD %>% mutate( # Process APAD data
   # Convert news consumption to minutes
   # Example: 2 hours and 30 minutes becomes 2*60 + 30 = 150 minutes
-  news = news_hrs*60 + news_mins,
+  news = news_hrs * 60 + news_mins,
   # Create binary variable for news consumption
   news_yn = case_when(
     news < 15 ~ 0,  # 0 if less than 15 minutes
@@ -64,9 +64,16 @@ APAD <- APAD %>% mutate( # Process APAD data
 ```
 `r unhide()`
 
-2. Create a new variable called `APAD$candy` that simulates randomly "giving" candy to half of the respondents in your dataset. Follow these steps: a) Use the `rbinom()` function to generate this variable. b) To understand how `rbinom()` works, you can Use R's built-in help function by typing `?rbinom()` in the console, search online for "R rbinom() examples", or use an AI assistant like ChatGPT or Google Gemini for an explanation. c) Make sure your code assigns a value of 1 (representing "received candy") to approximately 50% of the respondents, and 0 to the others.
+> **Stuck?**
+>
+> - Did the `pacman::p_load(...)` line run without red error messages? If not, fix that first.
+> - `load("APAD.RData")` fails? The file must sit **in your project folder** — download it from Absalon and check the *Files* pane.
+> - Strange results? *Session → Restart R*, then rerun your script from the top.
+> - Still stuck? Ask (and answer!) in the [t-R-ouble forum](https://absalon.ku.dk/courses/70545/discussion_topics/563046?module_item_id=2037268) on Absalon.
 
-`r hide("R solution -> dont' peak too early ;) !")`
+2. Create a new variable called `APAD$candy` that simulates randomly "giving" candy to half of the respondents in your dataset. Follow these steps: a) Use the `rbinom()` function to generate this variable. b) To understand how `rbinom()` works, you can use R's built-in help function by typing `?rbinom` in the console, search online for "R rbinom() examples", or use an AI assistant like ChatGPT or Google Gemini for an explanation. c) Make sure your code assigns a value of 1 (representing "received candy") to approximately 50% of the respondents, and 0 to the others.
+
+`r hide("R solution -> don't peek too early ;) !")`
 ```{r}
 APAD <- APAD %>% mutate( # Add new 'candy' variable to APAD dataset
   candy = rbinom( # Generate random binary values (0 or 1)
@@ -76,9 +83,9 @@ APAD <- APAD %>% mutate( # Add new 'candy' variable to APAD dataset
 ```
 `r unhide()`
 
-3. In the APAD survey, we also asked respondents about their gender and how their physical appearance is typically described in Germany, with answers ranging from White, over Black, to Asian. Conduct a balance test to determine if racial appearance is evenly distributed across getting candy. *What do you conclude from the balance table*? *Also, which groups seem rather well, and which ones seem less well balanced*?
+3. In the APAD survey, we also asked respondents about their gender and how their physical appearance is typically described in Germany, with answers ranging from White, over Black, to Asian. Conduct a balance test to determine if racial appearance is evenly distributed across getting candy. *What do you conclude from the balance table? Also, which groups seem rather well, and which ones seem less well balanced?*
 
-`r hide("R solution -> dont' peak too early ;) !")`
+`r hide("R solution -> don't peek too early ;) !")`
 ```{r}
 APAD %>%
   # Select variables for which I want my balance test,
@@ -89,4 +96,14 @@ APAD %>%
     data = . , # Pipe the APAD data here
     title = "Gender and physical appearance of those who got candy and those who didn't")
 ```
+`r unhide()`
+
+4. **Write one or two sentences** in your R script (as a `# comment`) with your conclusion
+   from the balance table. Then compare:
+
+`r hide("Model answer")`
+*Because the candy was assigned by a (simulated) coin flip, the groups look similar on
+gender and physical appearance — randomization balanced them without us controlling for
+anything. The remaining small differences are chance: with a finite sample, randomization
+balances groups only* **on average** *(and larger groups balance better than small ones).*
 `r unhide()`

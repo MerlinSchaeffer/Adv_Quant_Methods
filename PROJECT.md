@@ -152,6 +152,29 @@ These fixes are part of the template; apply the same standards to the other 13 d
   capitalized `#` comments, full argument names (e.g. `weights =`, not the partially-matched
   `weight =`). Apply this pass to every ported deck.
 
+## Exercise conventions (2026-07-04, professor approved — template for all decks)
+Implemented in `2-exercise*` and retrofitted to `6-exercise*`:
+1. **No slide transcription:** boilerplate code is printed in the exercise to copy; students
+   *write only the line that practices the day's concept* (L2: the `inner_join()`), with a
+   hidden Hint + Solution.
+2. **Predict-before-compute MCQ:** before `cor()`/regressions, students commit to a rough
+   estimate from the plot (options spaced widely so data drift can't flip the answer).
+3. **`num_fitb()` helper** (defined in each exercise's setup): fill-in-the-blank accepts point
+   AND comma decimals (Danish keyboards). Never use raw `fitb()` for numbers.
+4. **Write-then-compare:** after key statistics, students write a one-sentence interpretation
+   as a `# comment`, then open a hidden "Model answer" (names direction, size, units; no causal
+   language) — trains the exam skill.
+5. **"Stuck?" box** after the setup task: p_load check, restart-R advice, data fallback,
+   t-R-ouble forum link. L2's fallback: `readRDS(url(".../data/Dat_L2.rds"))` — the cache lives
+   in `quarto-poc/data/` (in `_quarto.yml` resources), regenerate it when re-rendering the deck
+   with fresh data; URL currently points at the netlify.app domain — update on domain switch.
+6. **Bonus task "for the fast"** with hidden solution (L2: `anti_join()` missing-countries
+   investigation; robustness check without China/Vietnam).
+7. **Scaffolded closing discussion** (3 concrete stepping stones + hidden talking points).
+8. **"You practice: …" line in the subtitle** naming the skills.
+Also: solutions say "don't peek" (typo fixed), full `weights =` argument, AI references say
+ChatGPT/Gemini (Bard is dead). REMEMBER: render exercises with `rmarkdown::render()` only.
+
 ## Design system / conventions (keep consistent across all decks)
 - **Callout colour code** (audited for consistency 2026-07-02):
   - **Blue box** (`.content-box-blue`) = a *question*; shown immediately. Prefix "**Discuss:**"

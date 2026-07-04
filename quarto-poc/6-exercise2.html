@@ -454,12 +454,16 @@ display: none;
 
 
 <h1 class="title toc-ignore">Exercise 2 (20 minutes)</h1>
-<h3 class="subtitle">When you&#39;re done, assist some of the others
-...</h3>
+<h3 class="subtitle">You practice: estimating causal effects from an
+RCT, reading standard errors, and coefficient plots. When you&#39;re done,
+assist some of the others …</h3>
 
 </div>
 
 
+<p><em>(Keep working in the R script from Exercise 1 — you already have
+the prepared <code>APAD</code> data. The &quot;Stuck?&quot; box is in Exercise
+1.)</em></p>
 <ol style="list-style-type: decimal">
 <li>The APAD data contains a variable <code>antidiscr_law</code>. It
 asks respondents how good or bad they think it is for a country to have
@@ -471,21 +475,23 @@ anti-discrimination policy. Estimate z-standardized effects.</li>
 </ol>
 <div class="webex-solution">
 <button>
-R solution -&gt; dont&#39; peak too early ;) !
+R solution -&gt; don&#39;t peek too early ;) !
 </button>
 <pre class="r"><code>APAD &lt;- APAD %&gt;%
   mutate( # Standardize &#39;antidiscr_law&#39; variable
     z_antidiscr_law = scale(antidiscr_law) %&gt;% as.numeric())
 
+zols &lt;- lm_robust( # Weighted OLS on the survey experiment
+  z_antidiscr_law ~ article,
+  weights = gewFAKT,
+  data = APAD
+)
 
-zols &lt;- lm_robust(# Weighted regression:
-  z_antidiscr_law ~ article, # Effect of &#39;article&#39; on standardized discrimination
-  weight = gewFAKT, data = APAD) # Specify weights and data
-
-
-modelsummary( # Summarize regression results with stars and fit statistics
-  list(&quot;Anti-discr. law&quot; = zols), stars = TRUE,
-  gof_map = c(&quot;nobs&quot;, &quot;r.squared&quot;))</code></pre>
+modelsummary( # Regression table with stars and fit statistics
+  list(&quot;Anti-discr. law&quot; = zols),
+  stars = TRUE,
+  gof_map = c(&quot;nobs&quot;, &quot;r.squared&quot;)
+)</code></pre>
 <!-- preamble start -->
 
     <script>// TinyTable JavaScript Framework
@@ -726,25 +732,25 @@ function tinytable_rank_sorter(a, b, aRow, bRow, column, dir, sorterParams) {
 
     <script>
       // Create table-specific functions using external factory
-      const tableFns_l8grro9omk0o7s92nuge = TinyTable.createTableFunctions("tinytable_l8grro9omk0o7s92nuge");
+      const tableFns_9vmw42o122oc1oys9k0m = TinyTable.createTableFunctions("tinytable_9vmw42o122oc1oys9k0m");
       // tinytable span after
       window.addEventListener('load', function () {
           var cellsToStyle = [
             // tinytable style arrays after
-          { positions: [ { i: '8', j: 2 } ], css_id: 'tinytable_css_3qaglzvjzhpcll6cyskv',}, 
-          { positions: [ { i: '6', j: 2 } ], css_id: 'tinytable_css_ewwuhplw60nznkg7sz4o',}, 
-          { positions: [ { i: '1', j: 2 }, { i: '2', j: 2 }, { i: '3', j: 2 }, { i: '4', j: 2 }, { i: '5', j: 2 }, { i: '7', j: 2 } ], css_id: 'tinytable_css_ixibejvkbjyb98rfc370',}, 
-          { positions: [ { i: '0', j: 2 } ], css_id: 'tinytable_css_sf6c6441193sm6j0o3mg',}, 
-          { positions: [ { i: '8', j: 1 } ], css_id: 'tinytable_css_pwslkxv7i1arw4by95pk',}, 
-          { positions: [ { i: '6', j: 1 } ], css_id: 'tinytable_css_132fows9z3vruj8iwshx',}, 
-          { positions: [ { i: '1', j: 1 }, { i: '2', j: 1 }, { i: '3', j: 1 }, { i: '4', j: 1 }, { i: '5', j: 1 }, { i: '7', j: 1 } ], css_id: 'tinytable_css_6wppowh22275k7kq0d8x',}, 
-          { positions: [ { i: '0', j: 1 } ], css_id: 'tinytable_css_7eyq8t20kjqbyquw3wam',}, 
+          { positions: [ { i: '8', j: 2 } ], css_id: 'tinytable_css_hiax367o017p5u9k9djb',}, 
+          { positions: [ { i: '6', j: 2 } ], css_id: 'tinytable_css_yd84sew9nozxvohqeuxj',}, 
+          { positions: [ { i: '1', j: 2 }, { i: '2', j: 2 }, { i: '3', j: 2 }, { i: '4', j: 2 }, { i: '5', j: 2 }, { i: '7', j: 2 } ], css_id: 'tinytable_css_iurqfczp4mynt3q9hiv0',}, 
+          { positions: [ { i: '0', j: 2 } ], css_id: 'tinytable_css_0wsmkv25sp6mr75rzmnd',}, 
+          { positions: [ { i: '8', j: 1 } ], css_id: 'tinytable_css_dgk7e5z2t2vrker8t3is',}, 
+          { positions: [ { i: '6', j: 1 } ], css_id: 'tinytable_css_u5qt4n5s29lq2nn6ll6i',}, 
+          { positions: [ { i: '1', j: 1 }, { i: '2', j: 1 }, { i: '3', j: 1 }, { i: '4', j: 1 }, { i: '5', j: 1 }, { i: '7', j: 1 } ], css_id: 'tinytable_css_7y3p5wisvlzf3yeuabnx',}, 
+          { positions: [ { i: '0', j: 1 } ], css_id: 'tinytable_css_pkcnbqqmt4thw29iaim4',}, 
           ];
 
           // Loop over the arrays to style the cells
           cellsToStyle.forEach(function (group) {
               group.positions.forEach(function (cell) {
-                  tableFns_l8grro9omk0o7s92nuge.styleCell(cell.i, cell.j, group.css_id);
+                  tableFns_9vmw42o122oc1oys9k0m.styleCell(cell.i, cell.j, group.css_id);
               });
           });
       });
@@ -947,17 +953,17 @@ line-height: var(--tt-line-height-footnote-tight);
 </style>
     <style>
 
-#tinytable_l8grro9omk0o7s92nuge td.tinytable_css_3qaglzvjzhpcll6cyskv, #tinytable_l8grro9omk0o7s92nuge th.tinytable_css_3qaglzvjzhpcll6cyskv { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.08em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: center }
-#tinytable_l8grro9omk0o7s92nuge td.tinytable_css_ewwuhplw60nznkg7sz4o, #tinytable_l8grro9omk0o7s92nuge th.tinytable_css_ewwuhplw60nznkg7sz4o { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.05em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: center }
-#tinytable_l8grro9omk0o7s92nuge td.tinytable_css_ixibejvkbjyb98rfc370, #tinytable_l8grro9omk0o7s92nuge th.tinytable_css_ixibejvkbjyb98rfc370 { text-align: center }
-#tinytable_l8grro9omk0o7s92nuge td.tinytable_css_sf6c6441193sm6j0o3mg, #tinytable_l8grro9omk0o7s92nuge th.tinytable_css_sf6c6441193sm6j0o3mg { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 1; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.05em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.08em; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: center }
-#tinytable_l8grro9omk0o7s92nuge td.tinytable_css_pwslkxv7i1arw4by95pk, #tinytable_l8grro9omk0o7s92nuge th.tinytable_css_pwslkxv7i1arw4by95pk { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.08em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: left }
-#tinytable_l8grro9omk0o7s92nuge td.tinytable_css_132fows9z3vruj8iwshx, #tinytable_l8grro9omk0o7s92nuge th.tinytable_css_132fows9z3vruj8iwshx { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.05em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: left }
-#tinytable_l8grro9omk0o7s92nuge td.tinytable_css_6wppowh22275k7kq0d8x, #tinytable_l8grro9omk0o7s92nuge th.tinytable_css_6wppowh22275k7kq0d8x { text-align: left }
-#tinytable_l8grro9omk0o7s92nuge td.tinytable_css_7eyq8t20kjqbyquw3wam, #tinytable_l8grro9omk0o7s92nuge th.tinytable_css_7eyq8t20kjqbyquw3wam { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 1; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.05em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.08em; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: left }
+#tinytable_9vmw42o122oc1oys9k0m td.tinytable_css_hiax367o017p5u9k9djb, #tinytable_9vmw42o122oc1oys9k0m th.tinytable_css_hiax367o017p5u9k9djb { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.08em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: center }
+#tinytable_9vmw42o122oc1oys9k0m td.tinytable_css_yd84sew9nozxvohqeuxj, #tinytable_9vmw42o122oc1oys9k0m th.tinytable_css_yd84sew9nozxvohqeuxj { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.05em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: center }
+#tinytable_9vmw42o122oc1oys9k0m td.tinytable_css_iurqfczp4mynt3q9hiv0, #tinytable_9vmw42o122oc1oys9k0m th.tinytable_css_iurqfczp4mynt3q9hiv0 { text-align: center }
+#tinytable_9vmw42o122oc1oys9k0m td.tinytable_css_0wsmkv25sp6mr75rzmnd, #tinytable_9vmw42o122oc1oys9k0m th.tinytable_css_0wsmkv25sp6mr75rzmnd { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 1; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.05em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.08em; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: center }
+#tinytable_9vmw42o122oc1oys9k0m td.tinytable_css_dgk7e5z2t2vrker8t3is, #tinytable_9vmw42o122oc1oys9k0m th.tinytable_css_dgk7e5z2t2vrker8t3is { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.08em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: left }
+#tinytable_9vmw42o122oc1oys9k0m td.tinytable_css_u5qt4n5s29lq2nn6ll6i, #tinytable_9vmw42o122oc1oys9k0m th.tinytable_css_u5qt4n5s29lq2nn6ll6i { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.05em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: left }
+#tinytable_9vmw42o122oc1oys9k0m td.tinytable_css_7y3p5wisvlzf3yeuabnx, #tinytable_9vmw42o122oc1oys9k0m th.tinytable_css_7y3p5wisvlzf3yeuabnx { text-align: left }
+#tinytable_9vmw42o122oc1oys9k0m td.tinytable_css_pkcnbqqmt4thw29iaim4, #tinytable_9vmw42o122oc1oys9k0m th.tinytable_css_pkcnbqqmt4thw29iaim4 { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 1; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.05em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.08em; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: left }
 </style>
     <div class="container">
-      <table class="tinytable" id="tinytable_l8grro9omk0o7s92nuge" style="width: auto; margin-left: auto; margin-right: auto;" data-quarto-disable-processing="true">
+      <table class="tinytable" id="tinytable_9vmw42o122oc1oys9k0m" style="width: auto; margin-left: auto; margin-right: auto;" data-quarto-disable-processing="true">
         
         <thead>
               <tr>
@@ -1005,26 +1011,50 @@ line-height: var(--tt-line-height-footnote-tight);
 <!-- hack to avoid NA insertion in last line -->
 </div>
 <ol start="2" style="list-style-type: decimal">
-<li><p>What is the causal effect of reading news about discrimination on
+<li>What is the causal effect of reading news about discrimination on
 supporting anti-discrimination policy? The causal effect is:
-<input class="webex-solveme nospaces" size="5" data-answer="[&quot;-0.031&quot;,&quot;-.031&quot;]"></input>.
-What is the estimated standard error of this <span class="math inline">\(\hat{\beta}\)</span>?
-<input class="webex-solveme nospaces" size="5" data-answer="[&quot;0.156&quot;,&quot;.156&quot;]"></input>.
+<input class="webex-solveme nospaces" size="6" data-answer="[&quot;-0.031&quot;,&quot;-0,031&quot;]"></input>
+(three digits; point or comma is fine). What is the estimated standard
+error of this <span class="math inline">\(\hat{\beta}\)</span>?
+<input class="webex-solveme nospaces" size="6" data-answer="[&quot;0.156&quot;,&quot;0,156&quot;]"></input>.
 <em>What do these two statistics suggest about a causal
-effect?</em></p></li>
-<li><p>What is the causal effect of reading news about integration on
-supporting anti-discrimination policy? The causal effect is:
-<input class="webex-solveme nospaces" size="5" data-answer="[&quot;0.214&quot;,&quot;.214&quot;]"></input>.
-What is the estimated standard error of this <span class="math inline">\(\hat{\beta}\)</span>?
-<input class="webex-solveme nospaces" size="5" data-answer="[&quot;0.139&quot;,&quot;.139&quot;]"></input>.
-<em>What do these two statistics suggest about a causal
-effect?</em></p></li>
-<li><p>Make a coeffient plot to visualize these results. Use an AI like
-ChatGPT or Google Bard to help you if you get stuck.</p></li>
+effect?</em></li>
 </ol>
 <div class="webex-solution">
 <button>
-R solution -&gt; dont&#39; peak too early ;) !
+Model answer
+</button>
+<p><em>Reading the discrimination article increased support for
+anti-discrimination law by -0.03 standard deviations. That estimate is
+about -0.2 times its standard error (0.16) — much larger than chance
+alone would produce, so we take it as evidence of a real (and because of
+randomization: causal) effect.</em></p>
+</div>
+<ol start="3" style="list-style-type: decimal">
+<li>What is the causal effect of reading news about integration on
+supporting anti-discrimination policy? The causal effect is:
+<input class="webex-solveme nospaces" size="6" data-answer="[&quot;0.214&quot;,&quot;0,214&quot;]"></input>.
+What is the estimated standard error of this <span class="math inline">\(\hat{\beta}\)</span>?
+<input class="webex-solveme nospaces" size="6" data-answer="[&quot;0.139&quot;,&quot;0,139&quot;]"></input>.
+<em>What do these two statistics suggest about a causal
+effect?</em></li>
+</ol>
+<div class="webex-solution">
+<button>
+Model answer
+</button>
+<p><em>The estimate (0.21 standard deviations) is only about 1.5 times
+its standard error (0.14) — a difference this small arises easily by
+chance, so the experiment gives no convincing evidence that the
+integration article changed support.</em></p>
+</div>
+<ol start="4" style="list-style-type: decimal">
+<li>Make a coefficient plot to visualize these results. Use an AI like
+ChatGPT or Google Gemini to help you if you get stuck.</li>
+</ol>
+<div class="webex-solution">
+<button>
+R solution -&gt; don&#39;t peek too early ;) !
 </button>
 <pre class="r"><code>(plotdata &lt;- zols %&gt;% # Prepare data for plotting
   tidy() %&gt;% # Convert regression results to a tidy data frame

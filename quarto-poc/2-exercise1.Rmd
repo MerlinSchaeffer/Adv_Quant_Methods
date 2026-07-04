@@ -1,6 +1,6 @@
 ---
 title: "Exercise 1 (20 minutes)"
-subtitle: "Edge ② of our triangle: freedom and poverty. When you're done, assist some of the others …"
+subtitle: "You practice: APIs, joins, scatter plots, and the correlation coefficient — edge ② of our triangle. When you're done, assist some of the others …"
 output: webexercises::webexercises_default
 ---
 
@@ -12,14 +12,19 @@ knitr::opts_chunk$set(
   comment = "#", strip.white = TRUE)
 
 library(webexercises)
+
+# Fill-in-the-blank that accepts point AND comma decimals (Danish keyboards!)
+num_fitb <- function(x, digits = 2, width = 6) {
+  a <- format(round(x, digits), nsmall = digits)
+  fitb(unique(c(a, sub(".", ",", a, fixed = TRUE))), width = width)
+}
 ```
 
 1. Do the [Setup](about.html), if you have not yet done so.
 
-2. Start a new R script and copy the lines of R code from the slides that generate `Dat`:
-   get the V-Dem data, download the World Bank poverty data via the API, and join the two.
+2. Start a new R script and copy in this starter code (it loads the packages and
+   downloads both data sets — we walked through every line on the slides):
 
-`r hide("R solution -> don't peek too early ;) !")`
 ```{r}
 pacman::p_load(
   tidyverse,    # Data manipulation & figures
@@ -29,17 +34,15 @@ pacman::p_load(
   modelsummary  # Nicely formatted regression tables
 )
 
-# 1. V-Dem: freedom, and state control of the economy
+# V-Dem: freedom, and state control of the economy
 Dat_vdem <- vdem %>%
   as_tibble() %>%
   select(country_text_id, year,
          equal_liberty = v2xcl_rol,    # Equality before the law & individual liberty
          state_owner   = v2clstown) %>% # State ownership of the economy
-  # v2clstown runs from "all state-owned" (low) to "all private" (high),
-  # so we flip it: higher = MORE state control
-  mutate(state_control = -state_owner)
+  mutate(state_control = -state_owner)  # Reverse: higher = MORE state control
 
-# 2. World Bank: extreme poverty (share below $3.00 a day, 2021 PPP)
+# World Bank: extreme poverty (share below $3.00 a day, 2021 PPP)
 Dat_poverty <- wb_data("SI.POV.DDAY", start_date = 1972, end_date = 2025) %>%
   rename(poverty = SI.POV.DDAY,
          year = date,
@@ -49,15 +52,33 @@ Dat_poverty <- wb_data("SI.POV.DDAY", start_date = 1972, end_date = 2025) %>%
   group_by(country) %>%
   filter(year == max(year)) %>% # Keep the most recent estimate per country
   ungroup()
+```
 
-# 3. Join the two data sets by country and year
+3. **Now write the join yourself:** combine `Dat_poverty` and `Dat_vdem` into one tibble
+   called `Dat`. Think first: *which* join do you want, and *which variables form the key*?
+
+`r hide("Hint")`
+We want only countries that appear in **both** tibbles (an *inner* join), and a country
+is identified by its ISO code *together with* the year.
+`r unhide()`
+
+`r hide("R solution -> don't peek too early ;) !")`
+```{r}
 Dat <- inner_join(Dat_poverty, Dat_vdem, by = c("country_text_id", "year"))
 ```
 `r unhide()`
 
-3. Make a scatter plot with poverty as outcome on the Y-axis and the index of equality
-   and liberty as predictor on the X-axis. Remember the four questions to ask a scatter plot:
-   direction, form, spread, outliers.
+> **Stuck?**
+>
+> - Did the `pacman::p_load(...)` line run without red error messages? If not, fix that first.
+> - Strange results? Clear leftovers with a fresh start: *Session → Restart R*, then rerun your script from the top.
+> - **World Bank API down or very slow?** Load our cached copy instead:
+>   `Dat <- readRDS(url("https://willowy-quokka-e604ee.netlify.app/data/Dat_L2.rds"))`
+> - Still stuck? Ask (and answer!) in the [t-R-ouble forum](https://absalon.ku.dk/courses/70545/discussion_topics/563046?module_item_id=2037268) on Absalon.
+
+4. Make a scatter plot with poverty as outcome on the Y-axis and the index of equality
+   and liberty as predictor on the X-axis. Ask it the four questions from the lecture:
+   *direction, form, spread, outliers*.
 
 `r hide("R solution -> don't peek too early ;) !")`
 ```{r out.width='100%', fig.height = 4, fig.width = 7.5, results = FALSE, echo = TRUE}
@@ -69,16 +90,19 @@ ggplot(data = Dat, aes(y = poverty, x = equal_liberty)) +
 ```
 `r unhide()`
 
+5. **Before you compute anything:** judging only from your scatter plot, the correlation
+   between poverty and equality & liberty is …
+`r mcq(c("close to −0.8", answer = "close to −0.3", "close to 0", "close to +0.3"))`
+
 ```{r results = FALSE, echo = FALSE}
 cor_povlib <- Dat %>%
   select(poverty, equal_liberty) %>%
-  cor() %>%
-  round(2)
+  cor()
 cor_povlib <- cor_povlib[1, 2]
 ```
 
-4. Estimate the correlation between poverty and the index of equality and liberty
-   (rounded to two digits): `r fitb(cor_povlib, width = "5")`
+6. Now check yourself: estimate the correlation with `cor()` (rounded to two digits;
+   point or comma is fine): `r num_fitb(cor_povlib)`
 
 `r hide("R solution -> don't peek too early ;) !")`
 ```{r}
@@ -89,6 +113,35 @@ Dat %>%
 ```
 `r unhide()`
 
-5. This is edge ② of our triangle. What does the correlation suggest about a
+7. This is edge ② of our triangle. What does the correlation suggest about a
    freedom–equality trade-off?
 `r mcq(c(answer = "No trade-off visible here: where people have more equality and liberty rights, there tends to be less poverty", "A trade-off: freedom comes at the price of more poverty", "The result says nothing about the relationship"))`
+
+8. **Write one sentence** in your R script (as a `# comment`) interpreting the correlation —
+   as if for your term paper. Then compare with the model answer:
+
+`r hide("Model answer")`
+*Across `r nrow(Dat)` countries, equality and liberty rights correlate moderately negatively with extreme poverty (r ≈ `r round(cor_povlib, 2)`): countries with stronger equality and liberty rights tend to have a smaller share of their population in extreme poverty.*
+
+(Yours doesn't need the same words — but it should name the **direction**, the rough
+**strength**, and the **units of analysis** (countries), and it should *not* claim causality.)
+`r unhide()`
+
+------------------------------------------------------------------------------
+
+**Bonus (for the fast):** `Dat` has ~160 countries, but V-Dem covers 179 — where did the
+rest go? Find the countries we *lost* in the join, using `anti_join()`. Why are they missing?
+
+`r hide("R solution")`
+```{r}
+Dat_vdem %>%
+  filter(year > 2015) %>% # Recent years only
+  anti_join(Dat_poverty, by = c("country_text_id", "year")) %>%
+  distinct(country_text_id)
+```
+
+They are countries (and country-years) with **no World Bank poverty estimate** — poverty
+data require household surveys, which some countries run rarely or not at all (e.g. North
+Korea). An `inner_join()` silently drops them. **Data that are missing are a finding, too:**
+our analysis can only speak about countries that measure poverty.
+`r unhide()`

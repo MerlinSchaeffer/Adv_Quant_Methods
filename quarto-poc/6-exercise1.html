@@ -454,19 +454,20 @@ display: none;
 
 
 <h1 class="title toc-ignore">Exercise 1 (20 minutes)</h1>
-<h3 class="subtitle">When you&#39;re done, assist some of the others
-...</h3>
+<h3 class="subtitle">You practice: data preparation, simulating random
+assignment, and balance tables. When you&#39;re done, assist some of the
+others …</h3>
 
 </div>
 
 
 <ol style="list-style-type: decimal">
-<li>Use APAD survey dataset from Absalon. Replicate the variable
+<li>Use the APAD survey dataset from Absalon. Replicate the variable
 preparation steps as demonstrated in my slides.</li>
 </ol>
 <div class="webex-solution">
 <button>
-R solution -&gt; dont&#39; peak too early ;) !
+R solution -&gt; don&#39;t peek too early ;) !
 </button>
 <pre class="r"><code># 1. Load packages
 pacman::p_load( # Load several R packages using the pacman package manager
@@ -482,7 +483,7 @@ load(&quot;APAD.RData&quot;) # Read APAD data,</code></pre>
 APAD &lt;- APAD %&gt;% mutate( # Process APAD data
   # Convert news consumption to minutes
   # Example: 2 hours and 30 minutes becomes 2*60 + 30 = 150 minutes
-  news = news_hrs*60 + news_mins,
+  news = news_hrs * 60 + news_mins,
   # Create binary variable for news consumption
   news_yn = case_when(
     news &lt; 15 ~ 0,  # 0 if less than 15 minutes
@@ -499,13 +500,27 @@ APAD &lt;- APAD %&gt;% mutate( # Process APAD data
   z_dis_index = scale(dis_index) %&gt;% as.numeric()
 )</code></pre>
 </div>
+<blockquote>
+<p><strong>Stuck?</strong></p>
+<ul>
+<li>Did the <code>pacman::p_load(...)</code> line run without red error
+messages? If not, fix that first.</li>
+<li><code>load(&quot;APAD.RData&quot;)</code> fails? The file must sit <strong>in
+your project folder</strong> — download it from Absalon and check the
+<em>Files</em> pane.</li>
+<li>Strange results? <em>Session → Restart R</em>, then rerun your
+script from the top.</li>
+<li>Still stuck? Ask (and answer!) in the <a href="https://absalon.ku.dk/courses/70545/discussion_topics/563046?module_item_id=2037268">t-R-ouble
+forum</a> on Absalon.</li>
+</ul>
+</blockquote>
 <ol start="2" style="list-style-type: decimal">
 <li>Create a new variable called <code>APAD$candy</code> that simulates
 randomly &quot;giving&quot; candy to half of the respondents in your dataset.
 Follow these steps: a) Use the <code>rbinom()</code> function to
 generate this variable. b) To understand how <code>rbinom()</code>
-works, you can Use R&#39;s built-in help function by typing
-<code>?rbinom()</code> in the console, search online for &quot;R rbinom()
+works, you can use R&#39;s built-in help function by typing
+<code>?rbinom</code> in the console, search online for &quot;R rbinom()
 examples&quot;, or use an AI assistant like ChatGPT or Google Gemini for an
 explanation. c) Make sure your code assigns a value of 1 (representing
 &quot;received candy&quot;) to approximately 50% of the respondents, and 0 to the
@@ -513,7 +528,7 @@ others.</li>
 </ol>
 <div class="webex-solution">
 <button>
-R solution -&gt; dont&#39; peak too early ;) !
+R solution -&gt; don&#39;t peek too early ;) !
 </button>
 <pre class="r"><code>APAD &lt;- APAD %&gt;% mutate( # Add new &#39;candy&#39; variable to APAD dataset
   candy = rbinom( # Generate random binary values (0 or 1)
@@ -526,13 +541,13 @@ R solution -&gt; dont&#39; peak too early ;) !
 how their physical appearance is typically described in Germany, with
 answers ranging from White, over Black, to Asian. Conduct a balance test
 to determine if racial appearance is evenly distributed across getting
-candy. <em>What do you conclude from the balance table</em>? <em>Also,
-which groups seem rather well, and which ones seem less well
-balanced</em>?</li>
+candy. <em>What do you conclude from the balance table? Also, which
+groups seem rather well, and which ones seem less well
+balanced?</em></li>
 </ol>
 <div class="webex-solution">
 <button>
-R solution -&gt; dont&#39; peak too early ;) !
+R solution -&gt; don&#39;t peek too early ;) !
 </button>
 <pre class="r"><code>APAD %&gt;%
   # Select variables for which I want my balance test,
@@ -1097,6 +1112,22 @@ line-height: var(--tt-line-height-footnote-tight);
       </table>
     </div>
 <!-- hack to avoid NA insertion in last line -->
+</div>
+<ol start="4" style="list-style-type: decimal">
+<li><strong>Write one or two sentences</strong> in your R script (as a
+<code># comment</code>) with your conclusion from the balance table.
+Then compare:</li>
+</ol>
+<div class="webex-solution">
+<button>
+Model answer
+</button>
+<p><em>Because the candy was assigned by a (simulated) coin flip, the
+groups look similar on gender and physical appearance — randomization
+balanced them without us controlling for anything. The remaining small
+differences are chance: with a finite sample, randomization balances
+groups only</em> <strong>on average</strong> <em>(and larger groups
+balance better than small ones).</em></p>
 </div>
 
 <script>
