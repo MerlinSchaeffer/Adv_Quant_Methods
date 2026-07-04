@@ -1,0 +1,134 @@
+---
+title: "Exercise 2 (20 minutes)"
+subtitle: "Edge ③ — and the verdict on the trade-off. When you're done, assist some of the others …"
+output: webexercises::webexercises_default
+---
+
+```{r setup, include = FALSE}
+options(htmltools.dir.version = FALSE, servr.interval = 0.5, width = 115, digits = 2)
+knitr::opts_chunk$set(
+  collapse = TRUE, message = FALSE,
+  warning = FALSE, cache = FALSE,
+  comment = "#", strip.white = TRUE)
+
+library(webexercises)
+
+pacman::p_load(
+  tidyverse,    # Data manipulation & figures
+  wbstats,      # World Bank data via API
+  vdemdata,     # Varieties of Democracy data
+  estimatr,     # OLS with robust standard errors
+  modelsummary  # Nicely formatted regression tables
+)
+
+# 1. V-Dem: freedom, and state control of the economy
+Dat_vdem <- vdem %>%
+  as_tibble() %>%
+  select(country_text_id, year,
+         equal_liberty = v2xcl_rol,
+         state_owner   = v2clstown) %>%
+  mutate(state_control = -state_owner)
+
+# 2. World Bank: extreme poverty (share below $3.00 a day, 2021 PPP)
+Dat_poverty <- wb_data("SI.POV.DDAY", start_date = 1972, end_date = 2025) %>%
+  rename(poverty = SI.POV.DDAY,
+         year = date,
+         country_text_id = iso3c) %>%
+  select(country_text_id, year, country, poverty) %>%
+  drop_na(poverty) %>%
+  group_by(country) %>%
+  filter(year == max(year)) %>%
+  ungroup()
+
+# 3. Join
+Dat <- inner_join(Dat_poverty, Dat_vdem, by = c("country_text_id", "year"))
+```
+
+```{r echo = FALSE}
+ols_1 <- lm_robust(poverty ~ state_control, data = Dat)
+ols_2 <- lm_robust(poverty ~ equal_liberty, data = Dat)
+```
+
+*(Keep working in the R script from Exercise 1 — you already have `Dat`.)*
+
+1. Regress poverty on state control of the economy (edge ① again, now as a regression).
+   With a one-unit increase in state control, poverty changes by:
+   `r fitb(round(coef(ols_1)[2], 2), width = "6")` percentage points (two digits).
+
+`r hide("R solution -> don't peek too early ;) !")`
+```{r results = 'asis'}
+ols_1 <- lm_robust(poverty ~ state_control, data = Dat)
+
+modelsummary(
+  list("Poverty" = ols_1),
+  statistic = NULL,                 # No statistical inference (yet)
+  gof_map = c("nobs", "r.squared")
+)
+```
+`r unhide()`
+
+2. Regress poverty on the index of equality and liberty (edge ② as a regression).
+   With a one-unit increase in equality and liberty rights, poverty changes by:
+   `r fitb(round(coef(ols_2)[2], 2), width = "6")` percentage points (two digits).
+
+`r hide("R solution -> don't peek too early ;) !")`
+```{r results = 'asis'}
+ols_2 <- lm_robust(poverty ~ equal_liberty, data = Dat)
+
+modelsummary(
+  list("Poverty" = ols_2),
+  statistic = NULL,
+  gof_map = c("nobs", "r.squared")
+)
+```
+`r unhide()`
+
+3. Which of the two is the better model of the variance of poverty across the world?
+`r mcq(c("The one with state control of the economy", answer = "The one with equality and liberty rights, as the R2 shows", "The one with equality and liberty rights, as the stronger beta coefficient shows"))`
+
+4. Now the missing edge ③: make a scatter plot with the index of equality and liberty
+   on the Y-axis and state control of the economy on the X-axis.
+
+`r hide("R solution -> don't peek too early ;) !")`
+```{r out.width='100%', fig.height = 4, fig.width = 7.5, results = FALSE, echo = TRUE}
+ggplot(data = Dat, aes(y = equal_liberty, x = state_control)) +
+  geom_text(aes(label = country)) +
+  labs(y = "Index of equality before the law and individual liberty",
+       x = "State control of the economy (V-Dem, reversed)") +
+  theme_minimal()
+```
+`r unhide()`
+
+```{r echo = FALSE}
+ols_3 <- lm_robust(equal_liberty ~ state_control, data = Dat)
+```
+
+5. Regress the index of equality and liberty on state control. With a one-unit increase
+   in state control, equality and liberty rights change by:
+   `r fitb(round(coef(ols_3)[2], 2), width = "6")` (two digits).
+
+`r hide("R solution -> don't peek too early ;) !")`
+```{r results = 'asis'}
+ols_3 <- lm_robust(equal_liberty ~ state_control, data = Dat)
+
+modelsummary(
+  list("Equality & liberty" = ols_3),
+  statistic = NULL,
+  gof_map = c("nobs", "r.squared")
+)
+```
+`r unhide()`
+
+6. Make one regression table with all three models — the complete triangle. Based on the
+   table, **discuss with your neighbour:** is there a freedom–equality trade-off? Which
+   edge of the triangle is strong, which is weak, and what does that mean?
+
+`r hide("R solution -> don't peek too early ;) !")`
+```{r results = 'asis'}
+modelsummary(
+  list("Poverty" = ols_1, "Poverty" = ols_2, "Equality & liberty" = ols_3),
+  statistic = NULL,
+  gof_map = c("nobs", "r.squared")
+)
+```
+`r unhide()`

@@ -47,6 +47,15 @@ $code-block-font-size: 0.6em !default;
 
 .reveal { -webkit-font-smoothing: antialiased; letter-spacing: -0.003em; }
 
+// ---- Readable line breaks --------------------------------------------------
+// `balance` evens out line lengths on headings/display text; `pretty` avoids
+// single-word orphan lines and prefers breaks at phrase boundaries.
+.reveal h1, .reveal h2, .reveal h3,
+#title-slide .title, #title-slide .subtitle,
+.reveal .lead { text-wrap: balance; }
+.reveal p, .reveal li,
+.content-box-red, .content-box-green, .content-box-blue { text-wrap: pretty; }
+
 // ---- Headings: left, sentence-flow, tidy weights --------------------------
 .reveal h1, .reveal h2, .reveal h3, .reveal h4 {
   text-transform: none;

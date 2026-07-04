@@ -104,6 +104,30 @@ A refinement round over both the deck and the website. New conventions that the 
   final checklist but was never actually installed by the old steps. All four GitHub installs
   verified to exist (masteringmetrics, ROS-Examples/rpackage, vdemdata, democracyData).
 
+## Lecture 2 (2026-07-04) — ported WITH a professor-approved didactic redesign
+`2-Corr-n-Reg.qmd` + `2-exercise1.Rmd` + `2-exercise2.Rmd` (30 slides). Not a faithful port —
+the professor found the old "socialism vs. democratic freedom" story "holprig" and approved:
+- **New operationalisation of socialism:** the hand-coded 40-line Wikipedia index is GONE
+  (deck + exercises). Instead: V-Dem `v2clstown` ("state ownership of the economy"),
+  reversed so higher = more state control (`state_control = -v2clstown`). A dedicated slide
+  defines socialism and justifies the operationalisation (valid/reliable/comparable), with an
+  ask-then-reveal on why self-declared labels fail. Face-validity "sanity check" tab (extremes
+  bar chart: Japan … North Korea, Denmark highlighted).
+- **The "triangle" is the thread device:** 3 variables (state control, freedom `v2xcl_rol`,
+  poverty), 3 edges. TikZ triangle map after the RQ: edge 1 = lecture, edges 2–3 = exercises
+  (each exercise's subtitle names its edge); a closing "verdict" slide completes the triangle.
+  Punchline (live data, checked): r(state control, poverty) ≈ +0.13, r(freedom, poverty) ≈ −0.33,
+  r(state control, freedom) ≈ −0.69 → **no freedom–equality trade-off**.
+- **World Bank content updated:** the international poverty line is now **$3.00/day (2021 PPP)**
+  (changed June 2025; SI.POV.DDAY returns the new line) — PPP box recomputed (≈ kr. 20/day,
+  kr. 600/month). The WB API also has outages (hit one while building) — worth a cached-data
+  fallback someday.
+- **Exercise files are now per-lecture:** `<N>-exercise<k>.Rmd/html` (L6's renamed to
+  `6-exercise*`; deck iframes + lectures.qmd + `_quarto.yml` resources glob updated).
+  Exercises no longer use the `essentials` package.
+- Dropped: "Goal of empirical sociology" slide (already in L1 + L6), the third break,
+  dead/stock transition images. External images localized into `img/L2/`.
+
 ## Feedback round on the deck (2026-07-02, professor's 9 comments — all done)
 These fixes are part of the template; apply the same standards to the other 13 decks:
 - **Title slide:** author line flush left (Quarto pads `.quarto-title-author` — zeroed in ku.scss).
@@ -171,6 +195,13 @@ These fixes are part of the template; apply the same standards to the other 13 d
   fills the content box).
 - **Bug in `Stats_II.bib`**: entry `wiedner_local_2025` has an unbraced `title` (invalid strict BibTeX).
   `RefManageR` tolerates it; Pandoc citeproc would not. Worth fixing at some point.
+- **Exercises (`*-exercise*.Rmd`) MUST be rendered with `rmarkdown::render()`, NOT `quarto render`.**
+  Inside the website project, Quarto ignores the Rmd's `output: webexercises::webexercises_default`
+  and produces plain HTML — the webexercises JS/CSS never gets embedded, so solution buttons and
+  answer boxes silently stop working (bit us on Lecture 2). From `quarto-poc/`:
+  `Rscript -e 'rmarkdown::render("2-exercise1.Rmd")'` (needs pandoc on the path, e.g.
+  `export RSTUDIO_PANDOC=<quarto>/bin/tools/aarch64`; in RStudio it just works). The rendered
+  HTML at the project root is then copied into `_site/` by the `resources:` glob.
 - **TikZ: `step` is a reserved key** (grid spacing) — naming a node style `step/.style` fails with
   "The key '/tikz/step' requires a value". Use another name (we use `stage`).
 - **Quarto auto-applies reveal's `r-stretch` to lone images**, which collapses them to 0 height on
@@ -197,9 +228,9 @@ These fixes are part of the template; apply the same standards to the other 13 d
 1. ~~POC deck look + pedagogy~~ — done, professor approved (incl. two refinement rounds).
 2. ~~Quarto website prototype~~ — done, refined, verified.
 3. ~~Commit the POC to git~~ — done (bec0e7a, pushed).
-4. ~~Lecture 1~~ — done 2026-07-02 (`1-Introduction.qmd`, 40 slides, verified in browser; template
-   generalized well). **Continue the rollout in teaching order: Lecture 2
-   (`static/Lectures/2-Correlation-n-Regression/`, deck + 2 exercises) is next.** Then 3 → 14.
+4. ~~Lecture 1~~ — done 2026-07-02. ~~Lecture 2~~ — done 2026-07-04 (incl. didactic redesign, see
+   its section above). **Next: Lecture 3 (`static/Lectures/3-Random/`, deck + 2 exercises).**
+   Then 4 → 14.
    The DAG/IV/RDD decks (7, 10, 13) are the heaviest. For each deck: faithful port → template
    standards (see "Feedback round") → check external image URLs → add to `lectures.qmd` +
    `_quarto.yml` `render:` → render → verify slides fit in the browser.

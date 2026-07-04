@@ -1,0 +1,94 @@
+---
+title: "Exercise 1 (20 minutes)"
+subtitle: "Edge ② of our triangle: freedom and poverty. When you're done, assist some of the others …"
+output: webexercises::webexercises_default
+---
+
+```{r setup, include = FALSE}
+options(htmltools.dir.version = FALSE, servr.interval = 0.5, width = 115, digits = 2)
+knitr::opts_chunk$set(
+  collapse = TRUE, message = FALSE,
+  warning = FALSE, cache = FALSE,
+  comment = "#", strip.white = TRUE)
+
+library(webexercises)
+```
+
+1. Do the [Setup](about.html), if you have not yet done so.
+
+2. Start a new R script and copy the lines of R code from the slides that generate `Dat`:
+   get the V-Dem data, download the World Bank poverty data via the API, and join the two.
+
+`r hide("R solution -> don't peek too early ;) !")`
+```{r}
+pacman::p_load(
+  tidyverse,    # Data manipulation & figures
+  wbstats,      # World Bank data via API
+  vdemdata,     # Varieties of Democracy data
+  estimatr,     # OLS with robust standard errors
+  modelsummary  # Nicely formatted regression tables
+)
+
+# 1. V-Dem: freedom, and state control of the economy
+Dat_vdem <- vdem %>%
+  as_tibble() %>%
+  select(country_text_id, year,
+         equal_liberty = v2xcl_rol,    # Equality before the law & individual liberty
+         state_owner   = v2clstown) %>% # State ownership of the economy
+  # v2clstown runs from "all state-owned" (low) to "all private" (high),
+  # so we flip it: higher = MORE state control
+  mutate(state_control = -state_owner)
+
+# 2. World Bank: extreme poverty (share below $3.00 a day, 2021 PPP)
+Dat_poverty <- wb_data("SI.POV.DDAY", start_date = 1972, end_date = 2025) %>%
+  rename(poverty = SI.POV.DDAY,
+         year = date,
+         country_text_id = iso3c) %>%
+  select(country_text_id, year, country, poverty) %>%
+  drop_na(poverty) %>%
+  group_by(country) %>%
+  filter(year == max(year)) %>% # Keep the most recent estimate per country
+  ungroup()
+
+# 3. Join the two data sets by country and year
+Dat <- inner_join(Dat_poverty, Dat_vdem, by = c("country_text_id", "year"))
+```
+`r unhide()`
+
+3. Make a scatter plot with poverty as outcome on the Y-axis and the index of equality
+   and liberty as predictor on the X-axis. Remember the four questions to ask a scatter plot:
+   direction, form, spread, outliers.
+
+`r hide("R solution -> don't peek too early ;) !")`
+```{r out.width='100%', fig.height = 4, fig.width = 7.5, results = FALSE, echo = TRUE}
+ggplot(data = Dat, aes(y = poverty, x = equal_liberty)) +
+  geom_text(aes(label = country)) +
+  labs(y = "% of population below $3.00 a day (2021 PPP)",
+       x = "Index of equality before the law and individual liberty") +
+  theme_minimal()
+```
+`r unhide()`
+
+```{r results = FALSE, echo = FALSE}
+cor_povlib <- Dat %>%
+  select(poverty, equal_liberty) %>%
+  cor() %>%
+  round(2)
+cor_povlib <- cor_povlib[1, 2]
+```
+
+4. Estimate the correlation between poverty and the index of equality and liberty
+   (rounded to two digits): `r fitb(cor_povlib, width = "5")`
+
+`r hide("R solution -> don't peek too early ;) !")`
+```{r}
+Dat %>%
+  select(poverty, equal_liberty) %>%
+  cor() %>%
+  round(2)
+```
+`r unhide()`
+
+5. This is edge ② of our triangle. What does the correlation suggest about a
+   freedom–equality trade-off?
+`r mcq(c(answer = "No trade-off visible here: where people have more equality and liberty rights, there tends to be less poverty", "A trade-off: freedom comes at the price of more poverty", "The result says nothing about the relationship"))`
