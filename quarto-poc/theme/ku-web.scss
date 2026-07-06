@@ -74,7 +74,7 @@ a:hover { text-decoration: underline; }
 // ---- "How the course works" steps -------------------------------------------
 .step-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(215px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(185px, 1fr));
   gap: 1rem; margin: 1.4rem 0 2rem;
 }
 .step {
@@ -132,6 +132,26 @@ a:hover { text-decoration: underline; }
   padding: .12rem .75rem; margin: .15rem .35rem 0 0;
 }
 .lecture .links a:hover { border-color: $ku-red; text-decoration: none; background: $ku-red-tint; }
+.lecture .readings {
+  margin: .4rem 0 0; padding: 0; list-style: none;
+}
+.lecture .readings li {
+  font-size: .85rem; color: #4a4a4a; line-height: 1.5;
+  padding-left: 1.1rem; position: relative; margin: .18rem 0;
+}
+.lecture .readings li::before {      // bullet
+  content: ""; position: absolute; left: .2rem; top: .62em;
+  width: .3rem; height: .3rem; border-radius: 50%; background: $ku-red;
+}
+.rtag {                              // READ / SKIM badge
+  display: inline-block; font-size: .64rem; font-weight: 700;
+  letter-spacing: .05em; text-transform: uppercase;
+  border-radius: 3px; padding: .05rem .4rem; margin-right: .45rem;
+  vertical-align: .08em;
+}
+.rtag-read { background: $ku-red-tint; color: $ku-red; }
+.rtag-skim { background: #f0eeec; color: #7d7d7d; }
+.lecture .reading-none { font-size: .85rem; color: #9a9a9a; font-style: italic; margin-left: .5rem; }
 .badge-soon {
   font-size: .72rem; font-weight: 600; letter-spacing: .04em;
   color: #9a9a9a; background: #f4f3f1; border-radius: 999px;

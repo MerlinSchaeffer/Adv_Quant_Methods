@@ -1,0 +1,138 @@
+---
+title: "Exercise 1 (20 minutes)"
+subtitle: "You practice: reading survey data, and how weights change a result. When you're done, assist some of the others …"
+output: webexercises::webexercises_default
+---
+
+```{r setup, include = FALSE}
+options(htmltools.dir.version = FALSE, servr.interval = 0.5, width = 115, digits = 2)
+knitr::opts_chunk$set(
+  collapse = TRUE, message = FALSE,
+  warning = FALSE, cache = FALSE,
+  comment = "#", strip.white = TRUE)
+
+library(webexercises)
+
+# Fill-in-the-blank that accepts point AND comma decimals (Danish keyboards!)
+num_fitb <- function(x, digits = 3, width = 6) {
+  a <- format(round(x, digits), nsmall = digits)
+  fitb(unique(c(a, sub(".", ",", a, fixed = TRUE))), width = width)
+}
+
+library(tidyverse); library(haven); library(estimatr); library(modelsummary)
+ESS <- read_spss("../assets/ESS9e03_1.sav") %>%
+  filter(cntry == "DK") %>%
+  select(idno, pspwght, gndr, eduyrs, agea, psppsgva, trstlgl, trstplc) %>%
+  mutate(across(c(psppsgva, trstlgl, trstplc, pspwght), zap_labels),
+         eduyrs = pmin(pmax(eduyrs, 9), 21),
+         gndr = as_factor(gndr)) %>%
+  drop_na()
+
+mod1 <- lm_robust(trstplc ~ eduyrs, data = ESS)
+b_edu <- coef(mod1)["eduyrs"] %>% unname()
+```
+
+Today we ask a new question of the same data: **do better-educated Danes trust the police
+more?** — and does the answer depend on whether we use **weights**?
+
+1. Do the [Setup](about.html) if you haven't, then start a new R script and copy in this
+   starter code (the same preparation we walked through on the slides):
+
+```{r starter, eval = FALSE}
+pacman::p_load(tidyverse, haven, estimatr, modelsummary)
+
+ESS <- read_spss("ESS9e03_1.sav") %>%
+  filter(cntry == "DK") %>%
+  select(idno, pspwght, gndr, eduyrs, agea, psppsgva, trstlgl, trstplc) %>%
+  mutate(across(c(psppsgva, trstlgl, trstplc, pspwght), zap_labels),
+         eduyrs = pmin(pmax(eduyrs, 9), 21), # Censor education at 9 & 21
+         gndr   = as_factor(gndr)) %>%
+  drop_na()
+```
+
+> **Stuck?**
+>
+> - `read_spss()` can't find the file? `ESS9e03_1.sav` must sit **in your project folder** —
+>   download it from Absalon and check the *Files* pane in RStudio.
+> - Did `pacman::p_load(...)` run without red errors? Fix that first.
+> - Odd results? *Session → Restart R*, then run your script from the top.
+> - Still stuck? Ask (and answer!) in the
+>   [t-R-ouble forum](https://absalon.ku.dk/courses/70545/discussion_topics/563046?module_item_id=2037268) on Absalon.
+
+2. **Now write the regression yourself:** ignoring weights for a moment, regress trust in
+   the police (`trstplc`) on years of education (`eduyrs`) with `lm_robust()`, and read off
+   the slope. A one-year increase in education goes with a change in police trust of
+   `r num_fitb(b_edu)` (three digits; point or comma is fine).
+
+`r hide("R solution -> don't peek too early ;) !")`
+```{r sol1, results = 'asis'}
+mod1 <- lm_robust(trstplc ~ eduyrs, data = ESS)
+
+modelsummary(list("Trust in police" = mod1),
+             statistic = NULL, gof_map = c("nobs", "r.squared"))
+```
+`r unhide()`
+
+3. Still ignoring weights: is there a **gender** difference in trust in the police? Regress
+   `trstplc` on `gndr`.
+`r mcq(c(answer = "Yes, women trust the police a little more than men", "No, women and men trust the police exactly equally", "Yes, men trust the police more than women"))`
+
+`r hide("R solution -> don't peek too early ;) !")`
+```{r sol2, results = 'asis'}
+mod2 <- lm_robust(trstplc ~ gndr, data = ESS)
+
+modelsummary(list("Trust in police" = mod2),
+             statistic = NULL, gof_map = c("nobs", "r.squared"))
+```
+`r unhide()`
+
+4. **Predict before you compute:** you are about to add survey **weights** to both models.
+   What do you expect?
+`r mcq(c("The estimates will change a lot — weights always matter", answer = "The estimates will shift a little — weights nudge the sample toward the population", "Nothing will change — weights never matter"))`
+
+5. Rerun **both** regressions *with* `weights = pspwght` and show all four models in one
+   table. Do the weights matter here?
+`r mcq(c("No, the results are basically identical", answer = "A little: the estimates shift modestly, but the overall story holds", "Completely: the signs flip"))`
+
+`r hide("R solution -> don't peek too early ;) !")`
+```{r sol3, results = 'asis'}
+mod1_w <- lm_robust(trstplc ~ eduyrs, data = ESS, weights = pspwght)
+mod2_w <- lm_robust(trstplc ~ gndr,   data = ESS, weights = pspwght)
+
+modelsummary(
+  list("Edu (unw.)" = mod1, "Gender (unw.)" = mod2,
+       "Edu (wt.)" = mod1_w, "Gender (wt.)" = mod2_w),
+  statistic = NULL, gof_map = c("nobs", "r.squared"))
+```
+`r unhide()`
+
+6. **Write one sentence** (as a `# comment`) on whether weighting changed your conclusion.
+   Then compare:
+
+`r hide("Model answer")`
+*Weighting nudged the coefficients only slightly and left the substantive story unchanged:
+better-educated people trust the police a little more, and the gender difference stays
+small. That the Danish ESS is already close to representative is exactly why weights move
+the numbers so little here — in a badly skewed sample they would matter far more.*
+`r unhide()`
+
+------------------------------------------------------------------------------
+
+**Bonus (for the fast):** how *big* are the ESS weights? Summarise `pspwght` with
+`summary()` and make a histogram. Which respondents get weights well above 1, and why?
+
+`r hide("R solution")`
+```{r bonus, out.width='60%', fig.height = 3.5, fig.width = 6, results = FALSE}
+summary(ESS$pspwght)
+
+ggplot(ESS, aes(x = pspwght)) +
+  geom_histogram(bins = 30) +
+  labs(x = "Post-stratification weight", y = "Count") +
+  theme_minimal()
+```
+
+Weights well above 1 belong to **under-represented** groups (e.g. younger, less-educated,
+harder-to-reach respondents): each such person "stands in" for several who were missed.
+Weights below 1 belong to over-represented groups. They cluster tightly around 1 because
+the ESS sample is already close to representative.
+`r unhide()`

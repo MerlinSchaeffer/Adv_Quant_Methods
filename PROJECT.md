@@ -87,6 +87,26 @@ A refinement round over both the deck and the website. New conventions that the 
 - **Homepage principle (professor):** no duplicate navigation — the hero has *no* buttons (the
   "Find your way" cards are the navigation), and the "New here? Start with About & setup" callout
   sits directly under the hero, before "Your week, every week".
+- **Weekly readings (added 2026-07-06):** each migrated lecture in `lectures.qmd` carries a
+  `<ul class="readings">` with one `<li>` per source (styled in `ku-web.scss`: red bullet +
+  a `.rtag` badge — `.rtag-read` / `.rtag-skim`). "Your week, every week" on `index.qmd` leads
+  with a **Readings** step card pointing there. Which chapters/pages to read are **bold** at the
+  end of each book citation.
+  - **Citations are FULL ASA style (deliberate — the professor is a sociologist and wants students
+    to learn good academic conduct):** full first names; year straight after author; book =
+    *Italic Title*. City, ST/Country: Publisher; article = "Quoted Headline-Case Title." *Journal*
+    Vol(Issue):Pages. with a clickable `doi:` link. **All 14 lectures already have their readings**
+    (even the not-yet-ported ones, so students can prepare) — done 2026-07-06.
+  - **When porting/citing, verify against Crossref, don't trust the bib:** the old Hugo landing
+    pages had only shorthand (`@key[Ch. x]`) and `Stats_II.bib` is often incomplete/mangled (the
+    Schaeffer & Kas article was "n/a" volume → real is *Political Psychology* 46(3):623–636;
+    Chetty had no DOI; `veaux_stats_2021` author field is garbled). `curl -s
+    https://api.crossref.org/works/<DOI>` (or `?query.bibliographic=…`) gets the real
+    volume/issue/pages/DOI.
+  - Readings sourced from `content/Lectures/<n>/*.Rmd` ("## Readings"). Core texts: De Veaux,
+    Velleman & Bock, *Stats: Data and Models* (Global ed., Pearson 2021); Angrist & Pischke,
+    *Mastering 'Metrics* (Princeton UP 2014); Huntington-Klein, *The Effect* (CRC 2022, free at
+    theeffectbook.net).
 - Site config: `open-graph: true`, site `description:`, navbar right "Absalon ↗" external link,
   favicon = the seal.
 - ~~Stale exam deadline~~ — professor supplied the new date 2026-07-02: **14 January 2027, noon**
@@ -103,6 +123,38 @@ A refinement round over both the deck and the website. New conventions that the 
   `remotes::install_github("xmarquez/democracyData")`** — it is used in Lecture 9 and was in the
   final checklist but was never actually installed by the old steps. All four GitHub installs
   verified to exist (masteringmetrics, ROS-Examples/rpackage, vdemdata, democracyData).
+
+## Lecture 3 (2026-07-06) — Randomness & statistical inference
+`3-Random.qmd` (32 slides) + `3-exercise1/2.Rmd`. The course's hardest lecture conceptually;
+kept the full pedagogical build but modernised the code.
+- **3-part structure:** (1) random samples & weights, (2) sampling error & the standard error,
+  (3) confidence intervals & hypothesis tests. Running question: does education predict political
+  efficacy (`psppsgva`)? Answered at the end with a weighted full-sample regression
+  (β≈0.025, t≈3.2, p≈0.0015 — significant).
+- **Sampling-distribution build (the crux):** pretend ESS = population → true β; draw one n=50
+  sample → different β̂; draw another → different again; **`replicate(1000, …)`** → live
+  histogram (bell curve, true β + ±1.96·SD marked); Gauss → estimate the SE from ONE sample
+  (its SE ≈ the 1000-sample SD).
+- **Animations (professor wanted them back, then refined, 2026-07-06):** FOUR GIFs drive the
+  build-up — `anim_samples.gif` (sample lines fanning around the truth), `anim_hist.gif` (a
+  **dot-plot** where each dot = one sample's slope, revealed one-per-frame at fps 8 so the unit is
+  unmistakable, bell emerging), `anim_ci.gif` (100 slope-CIs stacking, red = misses, live
+  coverage-% counter → ~95%), and `anim_band.gif` (sample regression **lines** accumulating under a
+  95% CI band — pairs with the "Uncertainty, drawn" slide; the professor asked to show the sloped
+  lines beneath the interval). **PRE-RENDERED once** by `img/L3/make_animations.R`
+  (needs `gganimate`+`gifski`) and committed as assets; the **deck just `include_graphics()`es
+  them, so a normal deck render needs neither package.** Regenerate only if the data/story change:
+  `cd quarto-poc && Rscript img/L3/make_animations.R` (UTF-8 locale). GIF labels stay plain ASCII
+  ("beta", "|") — the raster device + Inter font mangle Greek/unicode glyphs, and keep subtitles
+  short or they clip at the canvas edge.
+- **Dropped heavy deps from the deck render itself:** `fixest`, `ggforce`, `essentials`.
+  `essentials::as.scalar()` → base `unname()` everywhere.
+- **Data:** local SPSS file `../assets/ESS9e03_1.sav` (ESS round 9, Danish subset, 52 MB) read
+  with `haven::read_spss()` + `zap_labels()`. NOT an API — so the exercises' "Stuck?" box is about
+  file placement in the project folder, and there is no cached-RDS fallback (students download the
+  .sav from Absalon).
+- Exercises follow the 8-point template (police/legal-system trust ~ education, weighted vs
+  unweighted; t/p/CI reading). Both verified: solutions open, comma-tolerant blanks, MCQs.
 
 ## Lecture 2 (2026-07-04) — ported WITH a professor-approved didactic redesign
 `2-Corr-n-Reg.qmd` + `2-exercise1.Rmd` + `2-exercise2.Rmd` (30 slides). Not a faithful port —
@@ -251,9 +303,10 @@ ChatGPT/Gemini (Bard is dead). REMEMBER: render exercises with `rmarkdown::rende
 1. ~~POC deck look + pedagogy~~ — done, professor approved (incl. two refinement rounds).
 2. ~~Quarto website prototype~~ — done, refined, verified.
 3. ~~Commit the POC to git~~ — done (bec0e7a, pushed).
-4. ~~Lecture 1~~ — done 2026-07-02. ~~Lecture 2~~ — done 2026-07-04 (incl. didactic redesign, see
-   its section above). **Next: Lecture 3 (`static/Lectures/3-Random/`, deck + 2 exercises).**
-   Then 4 → 14.
+4. ~~Lecture 1~~ — done 2026-07-02. ~~Lecture 2~~ — done 2026-07-04 (didactic redesign).
+   ~~Lecture 3~~ — done 2026-07-06 (Randomness & inference, 32 slides + 2 exercises; see its
+   section below). **Next: Lecture 4 (`static/Lectures/4-OLS-Wisdom/`, deck + 2 exercises).**
+   Then 5, 7 → 14.
    The DAG/IV/RDD decks (7, 10, 13) are the heaviest. For each deck: faithful port → template
    standards (see "Feedback round") → check external image URLs → add to `lectures.qmd` +
    `_quarto.yml` `render:` → render → verify slides fit in the browser.
