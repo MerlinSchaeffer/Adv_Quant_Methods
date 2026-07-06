@@ -34,13 +34,13 @@ pacman::p_load(
   modelsummary  # Nicely formatted regression tables
 )
 
-# V-Dem: freedom, and state control of the economy
+# V-Dem: civil liberties, and state ownership of the economy
 Dat_vdem <- vdem %>%
   as_tibble() %>%
   select(country_text_id, year,
-         equal_liberty = v2xcl_rol,    # Equality before the law & individual liberty
-         state_owner   = v2clstown) %>% # State ownership of the economy
-  mutate(state_control = -state_owner)  # Reverse: higher = MORE state control
+         civ_liberties = v2xcl_rol,    # Equality before the law & individual liberty
+         state_own_raw   = v2clstown) %>% # State ownership of the economy
+  mutate(state_ownership = -state_own_raw)  # Reverse: higher = MORE state ownership
 
 # World Bank: extreme poverty (share below $3.00 a day, 2021 PPP).
 # Try the live API; if it is down, fall back to the cached copy.
@@ -80,27 +80,27 @@ Dat <- inner_join(Dat_poverty, Dat_vdem, by = c("country_text_id", "year"))
 >   `Dat <- readRDS(url("https://willowy-quokka-e604ee.netlify.app/data/Dat_L2.rds"))`
 > - Still stuck? Ask (and answer!) in the [t-R-ouble forum](https://absalon.ku.dk/courses/70545/discussion_topics/563046?module_item_id=2037268) on Absalon.
 
-4. Make a scatter plot with poverty as outcome on the Y-axis and the index of equality
-   and liberty as predictor on the X-axis. Ask it the four questions from the lecture:
+4. Make a scatter plot with poverty as outcome on the Y-axis and civil liberties as
+   predictor on the X-axis. Ask it the four questions from the lecture:
    *direction, form, spread, outliers*.
 
 `r hide("R solution -> don't peek too early ;) !")`
 ```{r out.width='100%', fig.height = 4, fig.width = 7.5, results = FALSE, echo = TRUE}
-ggplot(data = Dat, aes(y = poverty, x = equal_liberty)) +
+ggplot(data = Dat, aes(y = poverty, x = civ_liberties)) +
   geom_text(aes(label = country)) +
   labs(y = "% of population below $3.00 a day (2021 PPP)",
-       x = "Index of equality before the law and individual liberty") +
+       x = "Civil liberties") +
   theme_minimal()
 ```
 `r unhide()`
 
 5. **Before you compute anything:** judging only from your scatter plot, the correlation
-   between poverty and equality & liberty is …
+   between poverty and civil liberties is …
 `r mcq(c("close to −0.8", answer = "close to −0.3", "close to 0", "close to +0.3"))`
 
 ```{r results = FALSE, echo = FALSE}
 cor_povlib <- Dat %>%
-  select(poverty, equal_liberty) %>%
+  select(poverty, civ_liberties) %>%
   cor()
 cor_povlib <- cor_povlib[1, 2]
 ```
@@ -111,21 +111,21 @@ cor_povlib <- cor_povlib[1, 2]
 `r hide("R solution -> don't peek too early ;) !")`
 ```{r}
 Dat %>%
-  select(poverty, equal_liberty) %>%
+  select(poverty, civ_liberties) %>%
   cor() %>%
   round(2)
 ```
 `r unhide()`
 
 7. This is edge ② of our triangle. What does the correlation suggest about a
-   freedom–equality trade-off?
-`r mcq(c(answer = "No trade-off visible here: where people have more equality and liberty rights, there tends to be less poverty", "A trade-off: freedom comes at the price of more poverty", "The result says nothing about the relationship"))`
+   liberty–equality trade-off?
+`r mcq(c(answer = "No trade-off visible here: where people have more civil liberties, there tends to be less poverty", "A trade-off: stronger civil liberties come at the price of more poverty", "The result says nothing about the relationship"))`
 
 8. **Write one sentence** in your R script (as a `# comment`) interpreting the correlation —
    as if for your term paper. Then compare with the model answer:
 
 `r hide("Model answer")`
-*Across `r nrow(Dat)` countries, equality and liberty rights correlate moderately negatively with extreme poverty (r ≈ `r round(cor_povlib, 2)`): countries with stronger equality and liberty rights tend to have a smaller share of their population in extreme poverty.*
+*Across `r nrow(Dat)` countries, civil liberties correlate moderately negatively with extreme poverty (r ≈ `r round(cor_povlib, 2)`): countries with stronger civil liberties tend to have a smaller share of their population in extreme poverty.*
 
 (Yours doesn't need the same words — but it should name the **direction**, the rough
 **strength**, and the **units of analysis** (countries), and it should *not* claim causality.)

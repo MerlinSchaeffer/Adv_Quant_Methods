@@ -57,7 +57,7 @@ myBib <- ReadBib("../Stats_II.bib", check = FALSE)
 3. fit and **interpret a bivariate OLS regression** — and say when it may be read causally.
 
 ::: {.backgrnote}
-One part of today's lecture per goal. Our running question: **is there a freedom–equality trade-off?**
+One part of today's lecture per goal. Our running question: **is there a liberty–equality trade-off?**
 :::
 
 ## The question & the data {.inverse background-color="#901A1E"}
@@ -99,7 +99,7 @@ knitr::include_graphics('img/L2/poster_china.jpg')
 :::
 
 ::: {.content-box-blue}
-**Research question of the day:** is there a **freedom–equality trade-off**? Do state-controlled (socialist) economies reduce poverty — at the price of less freedom?
+**Research question of the day:** is there a **liberty–equality trade-off**? Do state-owned (socialist) economies reduce poverty — at the price of fewer civil liberties?
 :::
 
 ## Our map for today: a triangle
@@ -110,9 +110,9 @@ knitr::include_graphics('img/L2/poster_china.jpg')
 \begin{tikzpicture}[semithick, >=Latex]
 \sffamily
 \node[draw=kured, thick, rounded corners=3pt, inner xsep=0.4cm, inner ysep=0.3cm]
-  (S) at (0,0) {\textbf{State control of the economy}};
+  (S) at (0,0) {\textbf{State ownership of the economy}};
 \node[draw=black!75, rounded corners=3pt, inner xsep=0.4cm, inner ysep=0.3cm]
-  (F) at (11,0) {\textbf{Freedom} (equality \& liberty)};
+  (F) at (11,0) {\textbf{Civil liberties}};
 \node[draw=black!75, rounded corners=3pt, inner xsep=0.4cm, inner ysep=0.3cm]
   (P) at (5.5,-4.5) {\textbf{Poverty}};
 
@@ -133,11 +133,11 @@ Three variables → **three pairwise relationships**. Only all three together an
 **Socialism** (as an economic system): the means of production and distribution are<br>
 **owned or controlled by the state** or collectively — rather than privately.
 
-$\rightarrow$ The measurable core of the concept: **state ownership and control of the economy**.
+$\rightarrow$ The measurable core of the concept: **state ownership of the economy**.
 
 We use the expert-coded V-Dem indicator *state ownership of the economy* (`v2clstown`) —
 available for virtually **all countries since 1789** — and reverse it, so that **higher = more
-state control**.
+state ownership**.
 
 ::: {.content-box-blue}
 **Discuss:** why not simply code countries that *call themselves* socialist — say, from Wikipedia's list of socialist states?
@@ -177,11 +177,12 @@ knitr::include_graphics('img/L2/api_diagram.png')
 ## (1) Varieties of Democracy data
 
 ::: {.left-column}
-**Freedom**, measured as *equality before the law & individual liberty* (`v2xcl_rol`):
-impartial administration, access to justice, property rights, freedom from torture and
-political killings, freedom of religion and of movement — for men *and* women.
+**Civil liberties** — the V-Dem *equality before the law and individual liberty* index
+(`v2xcl_rol`): impartial administration, access to justice, property rights, freedom from
+torture and political killings, freedom of religion and of movement — for men *and* women.
+In T.H. Marshall's terms, the **civil** dimension of citizenship rights.
 
-**State control of the economy**: our reversed `v2clstown` (see previous slide).
+**State ownership of the economy**: our reversed `v2clstown` (see previous slide).
 :::
 
 ::: {.right-column}
@@ -196,10 +197,10 @@ political killings, freedom of religion and of movement — for men *and* women.
    as_tibble() %>%
    select(country = country_name, # Rename while selecting
           country_text_id, year,
-          equal_liberty = v2xcl_rol,
-          state_owner   = v2clstown) %>%
-   # Reverse, so that higher = MORE state control
-   mutate(state_control = -state_owner))
+          civ_liberties = v2xcl_rol,
+          state_own_raw   = v2clstown) %>%
+   # Reverse, so that higher = MORE state ownership
+   mutate(state_ownership = -state_own_raw))
 ```
 
 ### Sanity check
@@ -207,21 +208,21 @@ political killings, freedom of religion and of movement — for men *and* women.
 ```
 
 ::: {.content-box-green}
-**Reading the scale:** it works like a **z-score** (today's topic!): 0 ≈ the average country-year since 1789; around **+2** ≈ heavily state-controlled (North Korea); around **−2** ≈ almost fully private (Switzerland).
+**Reading the scale:** it works like a **z-score** (today's topic!): 0 ≈ the average country-year since 1789; around **+2** ≈ heavily state-owned (North Korea); around **−2** ≈ almost fully private (Switzerland).
 :::
 
 ### … its R code
 ```{r sanity, fig.show = 'hide'}
 Dat_vdem %>%
   filter(year == max(year)) %>%
-  arrange(state_control) %>%
+  arrange(state_ownership) %>%
   # Keep the 8 lowest, the 8 highest, and Denmark
   filter(row_number() <= 8 | row_number() > n() - 8 |
            country == "Denmark") %>%
-  ggplot(aes(y = state_control,
-             x = reorder(country, state_control))) +
+  ggplot(aes(y = state_ownership,
+             x = reorder(country, state_ownership))) +
   geom_col(fill = "#901A1E") +
-  labs(y = "State control of the economy", x = "",
+  labs(y = "State ownership of the economy", x = "",
        caption = "Source: V-Dem") +
   theme_minimal(base_size = 16) +
   theme(axis.text.x = element_text(angle = 60, hjust = 1))
@@ -234,7 +235,7 @@ Dat_vdem %>%
 
 ::: {.panel-tabset}
 
-### State control since 1900
+### State ownership since 1900
 ```{r ref.label = "gdr-control", out.width='72%', fig.height = 4.4, fig.width = 9, results = FALSE, echo = FALSE}
 ```
 
@@ -244,18 +245,18 @@ ggplot(data = Dat_vdem %>%
          filter(country %in% c("Denmark", "Germany",
                                "German Democratic Republic"),
                 year >= 1900),
-       aes(y = state_control, x = year, color = country)) +
+       aes(y = state_ownership, x = year, color = country)) +
   geom_line(linewidth = 1) +
   scale_color_manual(values = c("Denmark" = "#901A1E",
                                 "Germany" = "#425570",
                                 "German Democratic Republic" = "#b5892c")) +
-  labs(y = "State control of the economy", x = "", color = "",
+  labs(y = "State ownership of the economy", x = "", color = "",
        caption = "Source: V-Dem") +
   theme_minimal(base_size = 16) +
   theme(legend.position = "bottom")
 ```
 
-### Freedom since 1900
+### Civil liberties since 1900
 ```{r ref.label = "gdr-freedom", out.width='72%', fig.height = 4.4, fig.width = 9, results = FALSE, echo = FALSE}
 ```
 
@@ -265,12 +266,12 @@ ggplot(data = Dat_vdem %>%
          filter(country %in% c("Denmark", "Germany",
                                "German Democratic Republic"),
                 year >= 1900),
-       aes(y = equal_liberty, x = year, color = country)) +
+       aes(y = civ_liberties, x = year, color = country)) +
   geom_line(linewidth = 1) +
   scale_color_manual(values = c("Denmark" = "#901A1E",
                                 "Germany" = "#425570",
                                 "German Democratic Republic" = "#b5892c")) +
-  labs(y = "Equality before the law\nand individual liberty",
+  labs(y = "Civil liberties",
        x = "", color = "", caption = "Source: V-Dem") +
   theme_minimal(base_size = 16) +
   theme(legend.position = "bottom")
@@ -278,11 +279,11 @@ ggplot(data = Dat_vdem %>%
 
 ### What do we see?
 ::: {.content-box-blue}
-**Discuss:** socialist East Germany (1949–1990) in both plots — what happens to *state control* and to *freedom* while the GDR exists, and after 1990? What does this one case suggest about our research question?
+**Discuss:** socialist East Germany (1949–1990) in both plots — what happens to *state ownership* and to *civil liberties* while the GDR exists, and after 1990? What does this one case suggest about our research question?
 :::
 
 ::: {.content-box-red .fragment}
-The GDR ran a far more state-controlled economy **and** offered far less freedom than West Germany or Denmark — one historical case *previewing* edge 3 of our triangle. But one case is an anecdote; now we test the pattern across **all** countries.
+The GDR ran a far more state-owned economy **and** offered far fewer civil liberties than West Germany or Denmark — one historical case *previewing* edge 3 of our triangle. But one case is an anecdote; now we test the pattern across **all** countries.
 :::
 
 :::
@@ -405,7 +406,7 @@ knitr::include_graphics('img/L2/join_full.gif')
 *Source:* [Tidy Animated Verbs](https://github.com/gadenbuie/tidyexplain)
 :::
 
-## Inner join: poverty meets freedom & state control
+## Inner join: poverty meets civil liberties & state ownership
 
 ```{r}
 (Dat <- inner_join(Dat_poverty, Dat_vdem,
@@ -413,7 +414,7 @@ knitr::include_graphics('img/L2/join_full.gif')
 ```
 
 ::: {.content-box-green}
-One row per country: its most recent poverty estimate, matched to freedom and state control **in that same year**. All three corners of our triangle in one tibble.
+One row per country: its most recent poverty estimate, matched to civil liberties and state ownership **in that same year**. All three corners of our triangle in one tibble.
 :::
 
 ## Break {.inverse background-color="#901A1E"}
@@ -425,7 +426,7 @@ One row per country: its most recent poverty estimate, matched to freedom and st
 [Part 2 of 3]{.part-pill}
 
 ::: {.lead}
-Edge 1 of the triangle: state control and poverty — first as a picture, then as *one* number.
+Edge 1 of the triangle: state ownership and poverty — first as a picture, then as *one* number.
 :::
 
 ## Visual inspection: the scatter plot
@@ -444,14 +445,14 @@ Edge 1 of the triangle: state control and poverty — first as a picture, then a
 ::: {.right-column}
 ```{r scatter1, out.width='100%', fig.height = 5, fig.width = 7.5, echo = FALSE}
 ggplot(data = Dat,
-       aes(y = poverty, x = state_control, label = country)) +
+       aes(y = poverty, x = state_ownership, label = country)) +
   geom_text(size = 3) +
   geom_label_repel(data = Dat %>% filter(country == "Denmark"),
                    color = "#901A1E", size = 5,
                    box.padding = 1.5, point.padding = 0.5,
                    force = 100, segment.size = 1) +
   labs(y = "% below $3.00 a day (~ kr. 600 a month in DK)",
-       x = "State control of the economy") +
+       x = "State ownership of the economy") +
   theme_minimal(base_size = 14)
 ```
 :::
@@ -485,7 +486,7 @@ knitr::include_graphics('img/L2/Correlation.png')
 ```{r}
 (Dat <- Dat %>%
    mutate( # z-standardize both variables
-     z_state_control = scale(state_control) %>% as.numeric(),
+     z_state_ownership = scale(state_ownership) %>% as.numeric(),
      z_poverty       = scale(poverty) %>% as.numeric()
    ))
 ```
@@ -495,16 +496,16 @@ knitr::include_graphics('img/L2/Correlation.png')
 quad_plot <- Dat %>%
   mutate(
     quadrant = case_when(
-      (z_state_control < 0 & z_poverty > 0) |
-        (z_state_control > 0 & z_poverty < 0) ~ "opposite signs",
+      (z_state_ownership < 0 & z_poverty > 0) |
+        (z_state_ownership > 0 & z_poverty < 0) ~ "opposite signs",
       TRUE                                    ~ "same signs"
     )) %>%
-  ggplot(aes(y = z_poverty, x = z_state_control)) +
+  ggplot(aes(y = z_poverty, x = z_state_ownership)) +
   geom_text(aes(label = country, color = quadrant), size = 3) +
   scale_color_manual(values = c("#901A1E", "#425570")) +
   geom_hline(yintercept = 0, color = "#b5892c", lty = "longdash", linewidth = 1) +
   geom_vline(xintercept = 0, color = "#b5892c", lty = "longdash", linewidth = 1) +
-  labs(y = "Extreme poverty (z)", x = "State control of the economy (z)") +
+  labs(y = "Extreme poverty (z)", x = "State ownership of the economy (z)") +
   theme_minimal(base_size = 14) +
   guides(color = "none")
 
@@ -530,7 +531,7 @@ $$r_{y,x} = \frac{\sum^{n}_{i=1}z_y \times z_x}{n-1}$$
 ::: {.push-right}
 ```{r}
 Dat %>%
-  select(poverty, state_control) %>%
+  select(poverty, state_ownership) %>%
   cor() # Estimate the correlation
 ```
 
@@ -539,7 +540,7 @@ Dat %>%
 :::
 
 ::: {.content-box-red .fragment}
-Essentially **no linear association**: state-controlled economies do *not* have systematically less extreme poverty.
+Essentially **no linear association**: state-owned economies do *not* have systematically less extreme poverty.
 :::
 :::
 
@@ -566,7 +567,7 @@ knitr::include_graphics('https://www.laserfiche.com/wp-content/uploads/2014/10/f
 [Part 3 of 3]{.part-pill}
 
 ::: {.lead}
-From "is there a relationship?" to "**how much** does poverty differ with state control?"
+From "is there a relationship?" to "**how much** does poverty differ with state ownership?"
 :::
 
 ## Correlation = a linear trend
@@ -574,7 +575,7 @@ From "is there a relationship?" to "**how much** does poverty differ with state 
 ::: {.left-column}
 **How can we calculate that trend line directly?**
 
-Then we could state *how much* poverty differs, per unit of state control.
+Then we could state *how much* poverty differs, per unit of state ownership.
 
 ::: {.content-box-green}
 A **model** is a reduced representation of reality — it should capture the answer to our research question, not every data point. [And it should not be driven by a few singular cases.]{.backgrnote}
@@ -607,7 +608,7 @@ knitr::include_graphics('img/L2/LinearModel.png')
 ## Regressing linear models from data
 
 ```{r mod-prep, include = FALSE}
-mod <- lm(poverty ~ state_control, data = Dat)
+mod <- lm(poverty ~ state_ownership, data = Dat)
 
 Dat_ols <- Dat %>%
   add_residuals(model = mod) %>%
@@ -630,11 +631,11 @@ $e = `r round(dk_actual, 1)`\% - `r round(dk_pred, 1)`\% = `r round(dk_actual - 
 ::: {.right-column}
 ```{r residuals, out.width='100%', fig.height = 4.2, fig.width = 6.5, echo = FALSE}
 resid_plot <- ggplot(data = Dat_ols,
-                     aes(y = poverty, x = state_control, label = country)) +
+                     aes(y = poverty, x = state_ownership, label = country)) +
   geom_point(alpha = 0.6) +
   geom_smooth(method = "lm", se = FALSE, color = "#425570") +
   labs(y = "% below $3.00 a day (~ kr. 600 a month in DK)",
-       x = "State control of the economy") +
+       x = "State ownership of the economy") +
   theme_minimal(base_size = 13)
 
 resid_plot +
@@ -701,10 +702,10 @@ with $\text{TSS} = \sum (y_i - \bar{y})^2$ and $\text{RSS} = \sum (y_i - \hat{y}
 
 ::: {.right-column}
 ```{r r2-fig, out.width='86%', fig.height = 4.2, fig.width = 6.5, echo = FALSE}
-# A country with high state control AND high poverty, so the model's
+# A country with high state ownership AND high poverty, so the model's
 # prediction differs visibly from the plain mean (currently: South Sudan)
 example_country <- Dat_ols %>%
-  filter(state_control > 1) %>%
+  filter(state_ownership > 1) %>%
   slice_max(poverty, n = 1)
 
 resid_plot +
@@ -724,11 +725,11 @@ resid_plot +
 ::: {.push-left}
 ```{r ols, results = 'hide'}
 ols <- lm_robust( # OLS with robust standard errors
-  poverty ~ state_control,
+  poverty ~ state_ownership,
   data = Dat
 )
 zols <- lm_robust( # Same, on the z-standardized variables
-  z_poverty ~ z_state_control,
+  z_poverty ~ z_state_ownership,
   data = Dat
 )
 
@@ -757,11 +758,11 @@ The standardized slope of a bivariate OLS **is** the correlation coefficient $r$
 :::
 
 ::: {.push-right}
-$\widehat{\text{Poverty}} = `r round(coef(mod)[1], 2)` + `r round(coef(mod)[2], 2)` \times \text{State control}$
+$\widehat{\text{Poverty}} = `r round(coef(mod)[1], 2)` + `r round(coef(mod)[2], 2)` \times \text{State ownership}$
 
-At the scale's midpoint (state control $= 0$), predicted poverty is **`r round(coef(mod)[1], 2)`%**.
+At the scale's midpoint (state ownership $= 0$), predicted poverty is **`r round(coef(mod)[1], 2)`%**.
 
-With every unit more state control, average poverty is **`r round(coef(mod)[2], 2)` percentage points `r ifelse(coef(mod)[2] > 0, "higher", "lower")`** — and $R^2 = `r round(summary(mod)$r.squared, 3)`$: state control accounts for almost **none** of the variance in poverty across the world.
+With every unit more state ownership, average poverty is **`r round(coef(mod)[2], 2)` percentage points `r ifelse(coef(mod)[2] > 0, "higher", "lower")`** — and $R^2 = `r round(summary(mod)$r.squared, 3)`$: state ownership accounts for almost **none** of the variance in poverty across the world.
 :::
 
 :::
@@ -771,7 +772,7 @@ With every unit more state control, average poverty is **`r round(coef(mod)[2], 
 ::: {.push-left}
 **1. Causal**
 
-"More state control *changes* poverty by `r round(coef(mod)[2], 2)` percentage points."
+"More state ownership *changes* poverty by `r round(coef(mod)[2], 2)` percentage points."
 
 ::: {.content-box-red}
 **Beware:** the causal reading holds **only under specific conditions**. Learning what those conditions are — and how to meet them — is the point of this course.
@@ -781,7 +782,7 @@ With every unit more state control, average poverty is **`r round(coef(mod)[2], 
 ::: {.push-right}
 **2. Descriptive: conditional means** $\bar{y} \mid x$
 
-"*Among countries* with one unit more state control, average poverty is `r round(coef(mod)[2], 2)` percentage points different."
+"*Among countries* with one unit more state ownership, average poverty is `r round(coef(mod)[2], 2)` percentage points different."
 
 Regression as a (linear) model of **averages of the outcome** at different values of the predictor.
 
@@ -808,7 +809,7 @@ knitr::include_graphics('https://www.laserfiche.com/wp-content/uploads/2014/10/f
 <iframe src='2-exercise2.html' width='100%' height='620' frameborder='0' scrolling='auto'></iframe>
 :::
 
-## The verdict: no freedom–equality trade-off
+## The verdict: no liberty–equality trade-off
 
 ```{tikz, triangle-verdict, echo = FALSE, out.width='58%', fig.align='center'}
 \usetikzlibrary{arrows.meta, positioning}
@@ -816,20 +817,20 @@ knitr::include_graphics('https://www.laserfiche.com/wp-content/uploads/2014/10/f
 \begin{tikzpicture}[semithick, >=Latex]
 \sffamily
 \node[draw=kured, thick, rounded corners=3pt, inner xsep=0.4cm, inner ysep=0.3cm]
-  (S) at (0,0) {\textbf{State control of the economy}};
+  (S) at (0,0) {\textbf{State ownership of the economy}};
 \node[draw=black!75, rounded corners=3pt, inner xsep=0.4cm, inner ysep=0.3cm]
-  (F) at (11,0) {\textbf{Freedom} (equality \& liberty)};
+  (F) at (11,0) {\textbf{Civil liberties}};
 \node[draw=black!75, rounded corners=3pt, inner xsep=0.4cm, inner ysep=0.3cm]
   (P) at (5.5,-4.5) {\textbf{Poverty}};
 
 \draw[<->, black!50, thick] (S) -- node[below left=2pt] {{\small 1: $r \approx 0$ -- no poverty payoff}} (P);
-\draw[<->, kured, very thick] (F) -- node[below right=2pt] {{\small 2: $r < 0$ -- freer, less poor}} (P);
-\draw[<->, kured, very thick] (S) -- node[above=2pt] {{\small 3: $r \ll 0$ -- strong freedom cost}} (F);
+\draw[<->, kured, very thick] (F) -- node[below right=2pt] {{\small 2: $r < 0$ -- more liberties, less poor}} (P);
+\draw[<->, kured, very thick] (S) -- node[above=2pt] {{\small 3: $r \ll 0$ -- high civil-liberties cost}} (F);
 \end{tikzpicture}
 ```
 
 ::: {.content-box-green}
-State-controlled economies offer **much less freedom** (edge 3) and **no less poverty** (edge 1) — while freer countries tend to have *less* poverty (edge 2). The premise of the trade-off does not hold in today's data.
+State-owned economies offer **far fewer civil liberties** (edge 3) and **no less poverty** (edge 1) — while countries with stronger civil liberties tend to have *less* poverty (edge 2). The premise of the trade-off does not hold in today's data.
 :::
 
 ::: {.backgrnote}

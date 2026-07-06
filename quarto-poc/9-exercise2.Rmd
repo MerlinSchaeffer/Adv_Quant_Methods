@@ -1,0 +1,161 @@
+---
+title: "Exercise 2 (20 minutes)"
+subtitle: "You practice: visualizing the adjustment — a before/after coefficient plot and model predictions, on the carbon divide. When you're done, assist some of the others …"
+output: webexercises::webexercises_default
+---
+
+```{r setup, include = FALSE}
+options(htmltools.dir.version = FALSE, servr.interval = 0.5, width = 115, digits = 2)
+knitr::opts_chunk$set(
+  collapse = TRUE, message = FALSE,
+  warning = FALSE, cache = FALSE,
+  comment = "#", strip.white = TRUE)
+
+library(webexercises)
+
+num_fitb <- function(x, digits = 2, width = 6) {
+  a <- format(round(x, digits), nsmall = digits)
+  fitb(unique(c(a, sub(".", ",", a, fixed = TRUE))), width = width)
+}
+
+pacman::p_load(tidyverse, wbstats, estimatr, modelsummary)
+
+co2_raw <- tryCatch(
+  wb_data("EN.GHG.CO2.PC.CE.AR5", start_date = 2000, end_date = 2023),
+  error = function(e) readRDS("data/wb_co2_raw.rds"))
+gdp_raw <- tryCatch(
+  wb_data("NY.GDP.PCAP.PP.KD", start_date = 2000, end_date = 2023),
+  error = function(e) readRDS("data/wb_gdp_raw.rds"))
+countries <- tryCatch(
+  wb_countries(), error = function(e) readRDS("data/wb_countries_raw.rds"))
+
+Dat_co2 <- co2_raw %>%
+  rename(co2 = EN.GHG.CO2.PC.CE.AR5) %>%
+  select(iso3c, country, year = date, co2) %>%
+  drop_na(co2) %>% group_by(country) %>% filter(year == max(year)) %>% ungroup()
+Dat_gdp <- gdp_raw %>%
+  rename(gdp = NY.GDP.PCAP.PP.KD) %>%
+  select(iso3c, year = date, gdp) %>% drop_na(gdp) %>%
+  group_by(iso3c) %>% filter(year == max(year)) %>% ungroup() %>% select(iso3c, gdp)
+Dat_meta <- countries %>%
+  filter(region != "Aggregates") %>% select(iso3c, region, income_level)
+
+Dat <- Dat_co2 %>%
+  inner_join(Dat_gdp,  by = "iso3c") %>%
+  inner_join(Dat_meta, by = "iso3c") %>%
+  filter(country != "Palau") %>%
+  mutate(gdp_k  = gdp / 1000,
+         region = fct_relevel(region, "Sub-Saharan Africa"))
+
+ols_biv <- lm_robust(co2 ~ region, data = Dat)
+ols_adj <- lm_robust(co2 ~ region + gdp_k, data = Dat)
+```
+
+*(Keep working in the R script from Exercise 1 — you already have `Dat`, `ols_biv`, and
+`ols_adj`. If not, the starter code and the "Stuck?" box are in Exercise 1.)*
+
+1. **Write it yourself: a before/after coefficient plot.** Tidy *both* models, keep only the
+   region terms, stack them, and plot the two sets of region coefficients side by side with
+   `position_dodge()` — so you can see each gap shrink when GDP enters.
+
+`r hide("Hint")`
+`tidy()` each model, `filter(str_detect(term, "region"))`, then `bind_rows(bivariate, adjusted, .id = "model")`. Map `color = model` and add `position = position_dodge(width = 0.5)` to `geom_pointrange()`.
+`r unhide()`
+
+`r hide("R solution -> don't peek too early ;) !")`
+```{r out.width='90%', fig.height = 4, fig.width = 7.5, results = FALSE}
+tidy_reg <- function(m) {
+  m %>% tidy() %>%
+    filter(str_detect(term, "region")) %>%
+    mutate(term = str_remove(term, "region"))
+}
+
+plotdata <- bind_rows(tidy_reg(ols_biv), tidy_reg(ols_adj), .id = "model") %>%
+  mutate(model = if_else(model == "1", "Bivariate", "Adjusted for GDP"))
+
+ggplot(plotdata, aes(x = reorder(term, estimate), y = estimate, color = model)) +
+  geom_hline(yintercept = 0, color = "#901A1E", lty = "dashed") +
+  geom_pointrange(aes(ymin = conf.low, ymax = conf.high),
+                  position = position_dodge(width = 0.5)) +
+  coord_flip() +
+  labs(x = "", y = "Difference in CO2 vs. Sub-Saharan Africa (t per person)",
+       color = "") +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+```
+`r unhide()`
+
+2. Which statement matches your plot?
+`r mcq(c("Every region's gap grows once GDP is added", answer = "Most gaps shrink toward zero, but the oil-rich Middle East & North Africa stays clearly above it", "The two models are identical"))`
+
+3. **Write it yourself: a prediction plot.** From `ols_adj`, predict CO2 across a GDP range
+   (say 1–130) **holding region at the reference, Sub-Saharan Africa**, and plot the fitted line
+   with its confidence ribbon.
+
+`r hide("Hint")`
+Build `tibble(gdp_k = 1:130, region = "Sub-Saharan Africa")`, then `predict(ols_adj, newdata = ..., interval = "confidence")$fit`, `as_tibble()` it and `bind_cols()` back. Plot with `geom_ribbon()` + `geom_line()`.
+`r unhide()`
+
+`r hide("R solution -> don't peek too early ;) !")`
+```{r out.width='80%', fig.height = 4, fig.width = 6.5, results = FALSE}
+fict <- tibble(gdp_k = 1:130, region = "Sub-Saharan Africa")
+
+fict <- predict(ols_adj, newdata = fict,
+                interval = "confidence", level = 0.95)$fit %>%
+  as_tibble() %>% bind_cols(fict, .)
+
+ggplot(fict, aes(x = gdp_k, y = fit)) +
+  geom_ribbon(aes(ymin = lwr, ymax = upr), alpha = 0.3) +
+  geom_line(linewidth = 1) +
+  labs(x = "GDP per person (thousands of $, PPP)\n(region held at Sub-Saharan Africa)",
+       y = "Predicted tonnes of CO2 per person") +
+  theme_minimal()
+```
+`r unhide()`
+
+4. **Write one sentence** (as a `# comment`) describing what the prediction line shows, then
+   compare:
+
+`r hide("Model answer")`
+*Within a given region, predicted emissions rise steadily with national wealth — about
+`r round(coef(ols_adj)["gdp_k"], 2)` extra tonnes per person for every additional \$1,000 of GDP
+per person — which is why controlling for wealth absorbs so much of the raw regional gaps.*
+`r unhide()`
+
+------------------------------------------------------------------------------
+
+5. **Discuss with your neighbour** — three steps:
+
+   a. Your two figures make the same point differently. Which better tells a non-statistician
+      that "the regional gaps are mostly wealth" — the before/after coefficient plot or the
+      prediction line?
+   b. Can we say wealth *causes* emissions here? Name one thing, besides GDP, that differs
+      between rich and poor countries and could drive emissions.
+   c. Middle East & North Africa stays high even at equal GDP. What does a *large surviving*
+      coefficient, after controlling, tell you — and what does a *vanishing* one tell you?
+
+`r hide("Talking points")`
+**(a)** The prediction line reads like a graph and needs no reference-category vocabulary; the
+coefficient plot is compact but assumes the reader knows what "vs. Sub-Saharan Africa" means.
+**(b)** No — these are descriptive cross-country comparisons; energy mix, industry structure,
+climate, and fossil-fuel endowments all differ and could drive emissions (all potential
+confounders). **(c)** A *vanishing* coefficient means the raw gap was "just" the control (wealth);
+a *surviving* one (MENA) means there is something regional beyond wealth — here, oil and gas.
+`r unhide()`
+
+**Bonus (for the fast):** swap the continuous control `gdp_k` for the categorical
+`income_level`. Do the region gaps shrink in the same way?
+
+`r hide("R solution")`
+```{r results = 'asis'}
+Dat <- Dat %>% mutate(income_level = fct_relevel(income_level, "Low income"))
+
+modelsummary(
+  list("CO2 (+ GDP)" = ols_adj,
+       "CO2 (+ income group)" = lm_robust(co2 ~ region + income_level, data = Dat)),
+  stars = TRUE, gof_map = c("nobs", "r.squared"))
+```
+
+Both controls tell the same story — wealth, measured either way, absorbs most of the regional
+differences. Good findings should not hinge on one particular way of measuring the control.
+`r unhide()`

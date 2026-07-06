@@ -124,6 +124,50 @@ A refinement round over both the deck and the website. New conventions that the 
   final checklist but was never actually installed by the old steps. All four GitHub installs
   verified to exist (masteringmetrics, ROS-Examples/rpackage, vdemdata, democracyData).
 
+## Lecture 9 (2026-07-06) — Multiple OLS in practice (confounders, mediators, summary controls)
+`9-Mult-OLS-in-practice.qmd` (30 slides) + `9-exercise1/2.Rmd`. **Not a faithful port** — this is
+the deck the L4 flag was about: **both its exercises used the colonial `poverty ~ colonizer +
+years_indep` example** (same brittle hand-coded `case_when`), and the *deck's* Part 1 used a
+**hand-coded socialism index + Freedom House**, now inconsistent with the redesigned L2 (which
+replaced exactly those with V-Dem `state_control`/`equal_liberty`). Both were modernised;
+colonialism dropped entirely.
+- **Part 1 (confounders vs. mediators + Frisch–Waugh):**
+  - *Clear mediation, kept:* ESS Denmark **gender → gross wage, mediated by contracted work
+    hours** (`grwage ~ gndr` vs `+ wkhct`, weighted). ~**36%** of the gap runs through hours (the
+    exact % shifts with the sample kept by `drop_na()`; the slide computes it inline so it's
+    always self-consistent). Reads `../assets/ESS9e03_1.sav` (the 52 MB course-staple SPSS file,
+    also used by L3/11/12; no API, so no tryCatch — students download it from Absalon).
+  - *Ambiguous case, rebuilt on L2's V-Dem triangle:* `poverty ~ state_control + equal_liberty`.
+    On its own state control is ~+2.7 on poverty (R²≈0.02); **add freedom and its sign flips to
+    −3.8** (freedom −37, state-control/freedom corr −0.69). A sign-flip is the ideal "is freedom a
+    confounder or a mediator?" case and continues L2 directly. Reuses L2's exact vdem + WB-poverty
+    pipeline (tryCatch → `data/wb_poverty_raw.rds`, $3.00 line).
+  - *Frisch–Waugh* shown as the 3-step residualisation via `modelr::add_residuals()`; the
+    residualised slope on `e_state` **equals** the multiple-model `state_control` coefficient
+    (−3.781 both ways) — the payoff slide.
+- **Part 2 (smart summary controls), faithful port:** Angrist quote; **Card & Dahl 2011**
+  (upset home losses → +~10% at-home partner violence; the betting-market **point spread** is the
+  summary control); **Dale & Krueger 2002** (college-selectivity earnings premium +7.6% → ≈0 in
+  the **matched-applicant** model; the shared application portfolio summarises ambition/ability) →
+  "no Harvard premium ⇒ no KU premium". Images localised to `img/L9/` (Card_n_Dahl.png,
+  DaleKrueger0/2/3/4b.png, plus `football.jpg` pulled from the old S3 hotlink).
+- **Exercises = carbon divide (L4), professor's pick:** multiple OLS on `co2 ~ region` vs
+  `co2 ~ region + gdp_k` — the regional gaps **collapse** once wealth is controlled (N. America
+  +9.7 → +1.0; R² 0.24 → 0.47), *except* MENA (+5.8, the oil regions emit beyond their wealth).
+  Ex1 = fit + interpret the coefficient change (is GDP a mediator?); Ex2 = before/after
+  coefficient plot (`position_dodge`) + prediction plot. Reuses the L4 carbon pipeline + caches
+  (same `filter(year == max(year))` GDP fix). Bonus swaps `gdp_k` → `income_level`.
+- **New bib:** none needed — `frisch_partial_1933`, `angrist_mastering_2014`, `card_family_2011`,
+  `dale_estimating_2002` were all already in `Stats_II.bib`.
+- **TikZ gotcha (new):** the `ellipse` node shape needs `\usetikzlibrary{shapes.geometric,...}`
+  (not just `arrows.meta, positioning`) — the render dies with "I do not know the key '/tikz/
+  ellipse'" otherwise. Also: **a bare TikZ/image block placed *after* two `.push-left`/
+  `.push-right` floats collapses into the float gap (0 height)** — put the diagram *before* the
+  floated boxes (or inside a column). Bit us on the confounder/mediator DAG.
+- Verified in-browser: **30 slides, zero overflow, no collapsed images, no tofu, no R errors**;
+  all 5 DAGs render; Frisch–Waugh coefficients match; both exercises embed webexercises
+  (MCQs + fitb + solution toggles). Wired into `_quarto.yml` + `lectures.qmd`.
+
 ## Lecture 4 (2026-07-06) — OLS wisdoms, rebuilt as "the carbon divide"
 `4-OLS-Wisdoms.qmd` (35 slides) + `4-exercise1/2.Rmd`. **Not a faithful port** — the professor
 was unhappy with the old **colonialism** running example (both the loaded "which empire
@@ -307,6 +351,24 @@ Also: solutions say "don't peek" (typo fixed), full `weights =` argument, AI ref
 ChatGPT/Gemini (Bard is dead). REMEMBER: render exercises with `rmarkdown::render()` only.
 
 ## Design system / conventions (keep consistent across all decks)
+- **Canonical variable labels (harmonised across all decks 2026-07-06, professor-approved):**
+  the same construct must carry the **same academically sound label everywhere** — prose, plot
+  axes, table `coef_rename`, and TikZ DAG nodes.
+  - V-Dem `v2xcl_rol` → **"civil liberties"** (R variable `civ_liberties`). Introduced once (L2
+    measurement slide) as *"the V-Dem equality-before-the-law-and-individual-liberty index — in
+    T.H. Marshall's terms, the civil dimension of citizenship rights."* Do **not** relabel it
+    "freedom", "citizenship rights", or "equality & liberty" elsewhere. The old ideological
+    debate is the **"liberty–equality trade-off"** (liberty = the ideal, civil liberties = our
+    measure). Keep "Freedom House" (the org / `FreedomHouse.png`) and component descriptions
+    ("freedom from torture", "freedom of religion/movement") as-is — those are not the variable.
+  - V-Dem `v2clstown` (reversed) → **"state ownership of the economy"** (R variable
+    `state_ownership`; raw `state_own_raw`; z-score `z_state_ownership`). Higher = more state
+    ownership. "Socialism" stays as the *concept* it operationalises, not the variable label.
+  - WB `SI.POV.DDAY` → **"extreme poverty"** / "% below $3.00 a day (2021 PPP)".
+  - **Applied to L2 (deck + both exercises) and L9 (deck); pending decks that reuse these vars
+    — esp. L12 (Polynomials, uses `v2xcl_rol`) — must adopt the same labels.** The L2 exercises'
+    `data/Dat_L2.rds` fallback was regenerated with the new column names (`civ_liberties`,
+    `state_ownership`, `state_own_raw`) so live-path and fallback agree.
 - **Callout colour code** (audited for consistency 2026-07-02):
   - **Blue box** (`.content-box-blue`) = a *question*; shown immediately. Prefix "**Discuss:**"
     (in-class question) or "**Research question of the day:**" (the lecture's running RQ).
@@ -385,8 +447,10 @@ ChatGPT/Gemini (Bard is dead). REMEMBER: render exercises with `rmarkdown::rende
 4. ~~Lecture 1~~ — done 2026-07-02. ~~Lecture 2~~ — done 2026-07-04 (didactic redesign).
    ~~Lecture 3~~ — done 2026-07-06 (Randomness & inference, 32 slides + 2 exercises).
    ~~Lecture 4~~ — done 2026-07-06 (OLS wisdoms, rebuilt as "the carbon divide"; colonialism
-   dropped — see its section above). **Next: Lecture 5 (`static/Lectures/5-Selection-bias/`,
-   deck + exercises).** Then 7 → 14.
+   dropped). ~~Lecture 9~~ — done 2026-07-06 (Multiple OLS in practice; colonial exercises +
+   hand-coded socialism replaced with the V-Dem triangle + carbon divide — see its section
+   above). **Next: Lecture 5 (`static/Lectures/5-Selection-bias/`, deck + exercises).** Then
+   7, 8, 10 → 14. (Colonialism is now fully gone from the course.)
    The DAG/IV/RDD decks (7, 10, 13) are the heaviest. For each deck: faithful port → template
    standards (see "Feedback round") → check external image URLs → add to `lectures.qmd` +
    `_quarto.yml` `render:` → render → verify slides fit in the browser.

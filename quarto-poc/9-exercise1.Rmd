@@ -1,0 +1,128 @@
+---
+title: "Exercise 1 (20 minutes)"
+subtitle: "You practice: multiple OLS — adding a control that changes the story. Back to the carbon divide: do regions differ in emissions beyond their wealth? When you're done, assist some of the others …"
+output: webexercises::webexercises_default
+---
+
+```{r setup, include = FALSE}
+options(htmltools.dir.version = FALSE, servr.interval = 0.5, width = 115, digits = 2)
+knitr::opts_chunk$set(
+  collapse = TRUE, message = FALSE,
+  warning = FALSE, cache = FALSE,
+  comment = "#", strip.white = TRUE)
+
+library(webexercises)
+
+num_fitb <- function(x, digits = 2, width = 6) {
+  a <- format(round(x, digits), nsmall = digits)
+  fitb(unique(c(a, sub(".", ",", a, fixed = TRUE))), width = width)
+}
+```
+
+1. Do the [Setup](about.html) if needed, then copy in this starter code — the same carbon-divide
+   pipeline as Lecture 4 (World Bank CO2, GDP, and region), with Palau dropped and Sub-Saharan
+   Africa set as the reference region:
+
+```{r starter}
+pacman::p_load(tidyverse, wbstats, estimatr, modelsummary)
+
+co2_raw <- tryCatch(
+  wb_data("EN.GHG.CO2.PC.CE.AR5", start_date = 2000, end_date = 2023),
+  error = function(e) readRDS("data/wb_co2_raw.rds"))
+gdp_raw <- tryCatch(
+  wb_data("NY.GDP.PCAP.PP.KD", start_date = 2000, end_date = 2023),
+  error = function(e) readRDS("data/wb_gdp_raw.rds"))
+countries <- tryCatch(
+  wb_countries(), error = function(e) readRDS("data/wb_countries_raw.rds"))
+
+Dat_co2 <- co2_raw %>%
+  rename(co2 = EN.GHG.CO2.PC.CE.AR5) %>%
+  select(iso3c, country, year = date, co2) %>%
+  drop_na(co2) %>% group_by(country) %>% filter(year == max(year)) %>% ungroup()
+Dat_gdp <- gdp_raw %>%
+  rename(gdp = NY.GDP.PCAP.PP.KD) %>%
+  select(iso3c, year = date, gdp) %>% drop_na(gdp) %>%
+  group_by(iso3c) %>% filter(year == max(year)) %>% ungroup() %>% select(iso3c, gdp)
+Dat_meta <- countries %>%
+  filter(region != "Aggregates") %>% select(iso3c, region, income_level)
+
+Dat <- Dat_co2 %>%
+  inner_join(Dat_gdp,  by = "iso3c") %>%
+  inner_join(Dat_meta, by = "iso3c") %>%
+  filter(country != "Palau") %>%              # the artefact from Lecture 4
+  mutate(gdp_k  = gdp / 1000,
+         region = fct_relevel(region, "Sub-Saharan Africa"))
+```
+
+```{r solutions, include = FALSE}
+Dat_x <- readRDS("data/Dat_L4.rds") %>%
+  dplyr::filter(country != "Palau") %>%
+  dplyr::mutate(region = forcats::fct_relevel(factor(region), "Sub-Saharan Africa"))
+b_biv <- coef(lm_robust(co2 ~ region, data = Dat_x))
+b_adj <- coef(lm_robust(co2 ~ region + gdp_k, data = Dat_x))
+na_adj   <- b_adj["regionNorth America"]
+mena_adj <- b_adj[grep("Middle", names(b_adj))]
+```
+
+> **Stuck?**
+>
+> - Did `pacman::p_load(...)` run without red errors? Fix that first.
+> - Odd results? *Session → Restart R*, then rerun from the top.
+> - **World Bank API down?** Load the cached, ready-made data instead:
+>   `Dat <- readRDS(url("https://willowy-quokka-e604ee.netlify.app/data/Dat_L4.rds")) |> dplyr::filter(country != "Palau")`
+> - Still stuck? Ask in the [t-R-ouble forum](https://absalon.ku.dk/courses/70545/discussion_topics/563046?module_item_id=2037268) on Absalon.
+
+2. **Write it yourself.** Fit two models and put them side by side: a **bivariate** one,
+   `co2 ~ region`, and an **adjusted** one that adds wealth, `co2 ~ region + gdp_k`.
+
+`r hide("Hint")`
+Fit both with `lm_robust()`, then pass them as a named `list()` to `modelsummary()`.
+`r unhide()`
+
+`r hide("R solution -> don't peek too early ;) !")`
+```{r}
+ols_biv <- lm_robust(co2 ~ region, data = Dat)
+ols_adj <- lm_robust(co2 ~ region + gdp_k, data = Dat)
+
+modelsummary(list("CO2 (bivariate)" = ols_biv, "CO2 (+ GDP)" = ols_adj),
+             stars = TRUE, gof_map = c("nobs", "r.squared"))
+```
+`r unhide()`
+
+3. Compare the **region** coefficients across the two models. What happens when GDP enters?
+`r mcq(c("They barely change", answer = "They shrink sharply toward zero", "They all grow larger", "They change sign"))`
+
+4. Read off the **North America** coefficient in the *adjusted* model: compared with Sub-Saharan
+   Africa, North America emits about `r num_fitb(na_adj)` tonnes more per person **once wealth is
+   held constant** (two digits; point or comma is fine) — down from
+   `r round(b_biv["regionNorth America"], 1)` t in the bivariate model.
+
+5. **Write one sentence** (as a `# comment`) interpreting that change, then compare:
+
+`r hide("Model answer")`
+*Most of North America's raw emissions gap over Sub-Saharan Africa disappears once we compare
+countries of similar wealth — the regional gap largely reflects the fact that richer regions are
+rich, not something regional beyond wealth.*
+`r unhide()`
+
+6. So how is **GDP** best understood in the link between region and emissions?
+`r mcq(c("A confounder we must control to be fair", answer = "A mediator: richer regions emit more largely because they are rich — wealth is the channel", "Neither; it is irrelevant here"))`
+
+------------------------------------------------------------------------------
+
+**Bonus (for the fast):** one region stays high *even after* controlling for GDP — it emits more
+than its wealth alone would predict. Which is it, and why?
+
+`r hide("R solution")`
+```{r}
+lm_robust(co2 ~ region + gdp_k, data = Dat) %>%
+  tidy() %>%
+  filter(str_detect(term, "region")) %>%
+  arrange(desc(estimate)) %>%
+  select(term, estimate)
+```
+
+The **Middle East & North Africa** region stays about `r round(mena_adj, 1)` t above the
+reference even at equal GDP — the oil-and-gas economies emit far more than their income alone
+implies. Controlling for wealth reveals *which* regions are genuinely emission-intensive.
+`r unhide()`
