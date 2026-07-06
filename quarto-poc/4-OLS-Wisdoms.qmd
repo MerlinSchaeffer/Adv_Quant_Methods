@@ -1,0 +1,834 @@
+---
+title: "OLS Wisdoms"
+subtitle: "Assumptions, categorical predictors & how to show your results"
+author: "Merlin Schaeffer · Department of Sociology"
+date: today
+format:
+  revealjs:
+    theme: [default, theme/ku.scss]
+    width: 1600
+    height: 900
+    slide-number: c/t
+    footer: "Lecture 4 · OLS wisdoms"
+    incremental: false
+    highlight-style: github
+    logo: img/ku_seal.png
+    code-line-numbers: true
+    fig-align: center
+    auto-stretch: false
+execute:
+  echo: true
+  warning: false
+  message: false
+title-slide-attributes:
+  data-background-color: "#901A1E"
+  data-background-image: img/UCPH_white.png
+  data-background-size: 18%
+  data-background-position: 95% 5%
+---
+
+```{r setup, include = FALSE}
+library(RefManageR)
+library(knitr)
+library(ggrepel) # Nicely placed labels in figures
+
+options(htmltools.preserve.raw = FALSE,
+        htmltools.dir.version = FALSE, servr.interval = 0.5, width = 115, digits = 3)
+knitr::opts_chunk$set(
+  collapse = TRUE, message = FALSE, fig.retina = 3, error = TRUE,
+  warning = FALSE, cache = FALSE, fig.align = 'center',
+  comment = "#", strip.white = TRUE, tidy = FALSE)
+
+BibOptions(check.entries = FALSE,
+           bib.style = "authoryear",
+           style = "markdown",
+           hyperlink = FALSE,
+           no.print.fields = c("doi", "url", "ISSN", "urldate", "language", "note", "isbn", "volume"))
+myBib <- ReadBib("../Stats_II.bib", check = FALSE)
+```
+
+## By the end of today you can … {.inverse background-color="#901A1E"}
+
+1. **check the OLS assumptions that matter** — spot outliers with *Cook's D* and judge the *linearity* assumption — and decide what to do about a suspicious case;
+
+2. **use a categorical predictor** — dummy-code it, choose a reference category, and read the coefficients as differences between groups;
+
+3. **visualize regression results** — a *coefficient plot* for categorical predictors, and *predicted values* for a continuous one.
+
+::: {.backgrnote}
+One part of today's lecture per goal. Our running question: **the carbon divide** — who pollutes, and why?
+:::
+
+## Does the line fit? {.inverse background-color="#901A1E"}
+
+[Part 1 of 3]{.part-pill}
+
+::: {.lead}
+Regression is easy to *run* and easy to *fool*. Before we trust a line, we interrogate it.
+:::
+
+## The research question of the day {.inverse background-color="#901A1E"}
+
+::: {.push-left}
+The climate crisis is the defining North–South injustice of your generation: the countries that emit **most** are rarely the ones that suffer **most**.
+
+A first, blunt question before any of the justice: **do richer countries simply emit more CO₂?**
+:::
+
+::: {.push-right}
+::: {.content-box-blue}
+**Research question of the day:** across the world's countries, how does **CO₂ emitted per person** relate to a country's **wealth** — and to the **world region** it sits in?
+:::
+
+::: {.backgrnote}
+The gap is staggering: the average Qatari emits *hundreds of times* more CO₂ than the average person in Chad or the DR Congo `r Citet(myBib, "chancel_global_2022")`.
+:::
+:::
+
+## Preparation
+
+::: {.panel-tabset}
+
+### Packages for today's session
+```{r libraries}
+pacman::p_load( # Load (and install if needed) several R packages
+  tidyverse,    # Data manipulation and visualization
+  wbstats,      # Download data from the World Bank API
+  estimatr,     # OLS with robust standard errors
+  modelsummary  # Nicely formatted regression tables
+)
+```
+
+### Get the data
+```{r wb-data}
+# Download from the World Bank API; if it is unreachable, fall back to a
+# cached copy so the analysis still runs (smart habit for any live data!)
+co2_raw <- tryCatch(
+  wb_data("EN.GHG.CO2.PC.CE.AR5", # CO2 emissions, tonnes per person
+          start_date = 2000, end_date = 2023),
+  error = function(e) readRDS("data/wb_co2_raw.rds")
+)
+gdp_raw <- tryCatch(
+  wb_data("NY.GDP.PCAP.PP.KD", # GDP per person, PPP (constant 2021 $)
+          start_date = 2000, end_date = 2023),
+  error = function(e) readRDS("data/wb_gdp_raw.rds")
+)
+countries <- tryCatch( # Region & income group for every country
+  wb_countries(),
+  error = function(e) readRDS("data/wb_countries_raw.rds")
+)
+```
+
+### Build one tibble
+```{r wb-build}
+# Most recent CO2 value per country
+Dat_co2 <- co2_raw %>%
+  rename(co2 = EN.GHG.CO2.PC.CE.AR5) %>%
+  select(iso3c, country, year = date, co2) %>%
+  drop_na(co2) %>%
+  group_by(country) %>%
+  filter(year == max(year)) %>%
+  ungroup()
+
+# Most recent GDP value per country (keep only the key + GDP)
+Dat_gdp <- gdp_raw %>%
+  rename(gdp = NY.GDP.PCAP.PP.KD) %>%
+  select(iso3c, year = date, gdp) %>%
+  drop_na(gdp) %>%
+  group_by(iso3c) %>%
+  filter(year == max(year)) %>%
+  ungroup() %>%
+  select(iso3c, gdp)
+
+# Region & income group (drop the World Bank's aggregate "regions")
+Dat_meta <- countries %>%
+  filter(region != "Aggregates") %>%
+  select(iso3c, region, income_level)
+
+(Dat <- Dat_co2 %>%
+   inner_join(Dat_gdp,  by = "iso3c") %>%
+   inner_join(Dat_meta, by = "iso3c") %>%
+   mutate(
+     gdp_k  = gdp / 1000, # GDP in THOUSANDS of $, for readable slopes
+     region = fct_relevel(region, "Sub-Saharan Africa") # reference group
+   ))
+```
+
+:::
+
+## CO₂ emissions across the world
+
+```{r co2-world, out.width='100%', fig.height = 7, fig.width = 20, echo = FALSE}
+Dat %>%
+  arrange(co2) %>%
+  filter(row_number() <= 8 | row_number() > n() - 8 | country == "Denmark") %>%
+  ggplot(aes(y = co2, x = reorder(country, co2))) +
+  geom_col(fill = "#901A1E") +
+  labs(y = "Tonnes of CO2 per person, per year", x = "",
+       caption = "Source: World Bank (EDGAR). The 8 lowest, the 8 highest, and Denmark.") +
+  theme_minimal(base_size = 16) +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))
+```
+
+::: {.backgrnote}
+The extremes are oil-and-gas economies (Qatar, Kuwait, Brunei) and rich English-speaking countries; at the other end sit some of the world's poorest states.
+:::
+
+## Does wealth drive emissions?
+
+::: {.left-column}
+::: {.content-box-green}
+**Ask every scatter plot four questions:**
+
+1. *Direction* of the relationship?
+2. *Form* — is it a straight line?
+3. *Spread* around the trend?
+4. Any *outliers*?
+:::
+:::
+
+::: {.right-column}
+```{r scatter1, out.width='100%', fig.height = 5, fig.width = 8, echo = FALSE}
+ggplot(data = Dat, aes(y = co2, x = gdp_k, label = country)) +
+  geom_text(size = 3, alpha = 0.8) +
+  geom_label_repel(data = Dat %>% filter(country == "Denmark"),
+                   color = "#901A1E", size = 5,
+                   box.padding = 1.5, force = 60, segment.size = 1) +
+  labs(y = "Tonnes of CO2 per person",
+       x = "GDP per person (thousands of $, PPP)") +
+  theme_minimal(base_size = 14)
+```
+:::
+
+## A first regression
+
+::: {.push-left}
+```{r ols1, results = 'hide'}
+# OLS with robust standard errors
+ols_1 <- lm_robust(
+  co2 ~ gdp_k,
+  data = Dat
+)
+
+modelsummary(
+  list("CO2 per person" = ols_1),
+  stars = TRUE,
+  gof_map = c("nobs", "r.squared"),
+  output = "kableExtra"
+)
+```
+:::
+
+::: {.push-right}
+```{r ref.label = "ols1", echo = FALSE, results = 'asis'}
+```
+
+::: {.content-box-green}
+Each extra **\$1,000** of GDP per person comes with about **`r round(coef(lm_robust(co2 ~ gdp_k, data = Dat))[2], 2)`** more tonnes of CO₂ per person. But $R^2 \approx `r round(summary(lm_robust(co2 ~ gdp_k, data = Dat))$r.squared, 2)`$ — and a low $R^2$ is often a warning sign. *Should* we trust this line?
+:::
+:::
+
+## OLS makes assumptions
+
+::: {.left-column}
+::: {.content-box-blue}
+For OLS to describe the data honestly:
+
+1. **No influential outliers**
+2. **Linearity** (a straight line fits)
+3. Homoscedasticity — *don't worry*: `lm_robust()` handles it.
+4. Independent observations.
+
+$\rightarrow$ The first two we **check with plots**.
+:::
+:::
+
+::: {.right-column}
+::: {.content-box-red}
+**Beware:** a single strange country, or a curved relationship, can bend the OLS line away from the pattern in the *bulk* of the data — and quietly change your conclusion.
+:::
+
+A model is a *reduced representation of reality*. It should capture the general pattern — **not** be dictated by one or two singular cases.
+:::
+
+## Assumption 1: outliers
+
+::: {.left-column}
+- **Standardized residuals:** how far a country sits *from* the line. Watch:
+  + **Qatar** — CO₂ `r round(Dat$co2[Dat$country == "Qatar"], 1)` t: extremely rich *and* extremely high.
+  + **Palau** — CO₂ `r round(Dat$co2[Dat$country == "Palau"], 1)` t: only middling GDP, yet off the chart.
+
+- **Leverage:** influence on the line; $x_i$ far from $\bar{x}$ (Qatar's huge GDP).
+
+- **Cook's D:** how much *all* predictions shift if case $i$ were removed.
+  + Beyond the **dashed grey lines** = influential.
+:::
+
+::: {.right-column}
+```{r outlier, results = FALSE, fig.show = 'hide'}
+# Re-estimate with base lm(), then the best outlier plot: #<<
+lm(co2 ~ gdp_k, data = Dat) %>%
+  plot(which = 5)
+```
+
+```{r ref.label = "outlier", out.width='80%', fig.height = 4.2, fig.width = 5.5, results = FALSE, echo = FALSE}
+```
+:::
+
+## Assumption 2: linearity
+
+::: {.left-column}
+- **Fitted values** $\hat{Y}$ on the X-axis, **residuals** on the Y-axis.
+
+- **Red line:** the smoothed relationship between the two.
+
+- **Ideal:** the red line is *flat* — the straight line captured everything.
+
+- **Our case:** the red line bends — driven by the same rich, high-emitting outliers. The linearity assumption is strained.
+:::
+
+::: {.right-column}
+```{r linearity, results = FALSE, fig.show = 'hide'}
+# Same model, the best linearity plot: #<<
+lm(co2 ~ gdp_k, data = Dat) %>%
+  plot(which = 1)
+```
+
+```{r ref.label = "linearity", out.width='80%', fig.height = 4.2, fig.width = 5.5, results = FALSE, echo = FALSE}
+```
+:::
+
+## Not every outlier is an error
+
+::: {.content-box-blue}
+**Discuss:** the plots flag **two** countries. **Palau** — a tiny Pacific island whose per-person figure is distorted by a tanker-refuelling port and ~18,000 residents. **Qatar** — a genuine petro-state. Should we delete both?
+:::
+
+::: {.content-box-red .fragment}
+No — *judgement*, not reflex. **Palau** is a measurement artefact for our question (national wealth → emissions): we **drop** it. **Qatar** is a real, important case; we **keep** it, but stay aware it has high leverage. Never delete a case just because it is inconvenient.
+:::
+
+## Removing the artefact
+
+::: {.left-column}
+```{r drop-palau}
+Dat <- Dat %>%
+  filter(country != "Palau") #<<
+```
+
+::: {.content-box-green}
+With Palau gone, the outlier plot calms down and the red linearity line straightens — the same line now fits the *bulk* of countries far better.
+:::
+:::
+
+::: {.right-column}
+::: {.panel-tabset}
+
+### Outliers again
+```{r outlier2, out.width='72%', fig.height = 4, fig.width = 5.2, results = FALSE, echo = FALSE}
+lm(co2 ~ gdp_k, data = Dat) %>% plot(which = 5)
+```
+
+### Linearity again
+```{r linearity2, out.width='72%', fig.height = 4, fig.width = 5.2, results = FALSE, echo = FALSE}
+lm(co2 ~ gdp_k, data = Dat) %>% plot(which = 1)
+```
+
+:::
+:::
+
+## The line, re-fitted
+
+::: {.push-left}
+```{r ols1b, results = 'hide'}
+ols_1 <- lm_robust(co2 ~ gdp_k, data = Dat)
+
+modelsummary(
+  list("CO2 per person" = ols_1),
+  stars = TRUE,
+  gof_map = c("nobs", "r.squared"),
+  output = "kableExtra"
+)
+```
+
+::: {.backgrnote}
+Same specification, one artefact removed. The slope is now more stable and $R^2$ has roughly doubled: dropping *one* distorting case sharpened the whole picture.
+:::
+:::
+
+::: {.push-right}
+```{r ref.label = "ols1b", echo = FALSE, results = 'asis'}
+```
+:::
+
+## Comparing groups {.inverse background-color="#901A1E"}
+
+[Part 2 of 3]{.part-pill}
+
+::: {.lead}
+Wealth is continuous. But much of what we compare is **categorical** — here, the *world region* a country sits in.
+:::
+
+## CO₂ by world region
+
+```{r region-box, out.width='100%', fig.height = 5, fig.width = 16, echo = FALSE}
+ggplot(data = Dat, aes(y = co2, x = reorder(region, co2, FUN = median))) +
+  geom_boxplot(outlier.shape = NA, color = "#901A1E") +
+  geom_jitter(width = 0.12, alpha = 0.4, size = 1.5) +
+  scale_x_discrete(labels = function(x) str_wrap(x, 16)) +
+  labs(y = "Tonnes of CO2 per person", x = "",
+       caption = "Source: World Bank") +
+  theme_minimal(base_size = 15)
+```
+
+::: {.content-box-blue}
+**Discuss:** if we predict CO₂ from region alone, what would $\hat{Y}$ *be* for a Sub-Saharan African country? For a North American one? How does the difference between them relate to $\hat{\beta}$?
+:::
+
+## Dummy coding: from labels to 0/1
+
+::: {.push-left}
+A regression needs numbers, not words. R turns each category into a **dummy**: 1 if the case is in that category, 0 otherwise — leaving **one** category out as the **reference**.
+
+$$x = \begin{cases} 1, & \text{if in the category} \\ 0 & \text{otherwise} \end{cases}$$
+:::
+
+::: {.push-right}
+| Country | N. America | Europe | … |
+|---|:--:|:--:|:--:|
+| USA | 1 | 0 | 0 |
+| Canada | 1 | 0 | 0 |
+| Denmark | 0 | 1 | 0 |
+| Germany | 0 | 1 | 0 |
+| … | 0 | 0 | 1 |
+| Reference<br>[(Sub-Saharan Africa)]{.backgrnote} | 0 | 0 | 0 |
+
+Each coefficient = that region's **average difference** in CO₂ from the reference.
+:::
+
+## Categorical predictors in R
+
+::: {.panel-tabset}
+
+### The code
+```{r ols2, results = 'hide'}
+# R dummy-codes a factor (or character) automatically,
+# using its FIRST level as the reference category.
+ols_2 <- lm_robust(co2 ~ region, data = Dat)
+
+modelsummary(
+  list("CO2 per person" = ols_2),
+  stars = TRUE,
+  # Shorten the region labels for the table
+  coef_rename = c("regionEast Asia & Pacific" = "East Asia & Pacific",
+                  "regionEurope & Central Asia" = "Europe & Central Asia",
+                  "regionLatin America & Caribbean" = "Latin America",
+                  "regionMiddle East, North Africa, Afghanistan & Pakistan" = "Middle East & N. Africa",
+                  "regionNorth America" = "North America",
+                  "regionSouth Asia" = "South Asia"),
+  gof_map = c("nobs", "r.squared"),
+  output = "kableExtra"
+)
+```
+
+### The table
+```{r ref.label = "ols2", echo = FALSE, results = 'asis'}
+```
+
+### Interpretation
+```{r coefs, echo = FALSE}
+b <- coef(lm_robust(co2 ~ region, data = Dat))
+```
+
+- **Reference (Sub-Saharan Africa):** average CO₂ is the **intercept**, `r round(b[1], 2)` t per person — the value when *all* region dummies are 0.
+
+- **North America vs. Sub-Saharan Africa:** `r round(b["regionNorth America"], 2)` t per person **more**, on average → an average of `r round(b[1] + b["regionNorth America"], 2)` t.
+
+- Every coefficient is a **difference of group means** from the reference. No line, no linearity assumption to check — the model just reports averages.
+
+:::
+
+## Break {.inverse background-color="#901A1E"}
+
+<div class="ku-timer" data-min="15"></div>
+
+## Your turn: exercise 1
+
+::: {.left-column}
+You practice today's diagnostics and a categorical predictor — this time with **income groups** instead of regions.
+
+<div class="ku-timer" data-min="20"></div>
+:::
+
+::: {.right-column}
+<iframe src='4-exercise1.html' width='100%' height='620' frameborder='0' scrolling='auto'></iframe>
+:::
+
+## Break {.inverse background-color="#901A1E"}
+
+<div class="ku-timer" data-min="10"></div>
+
+## Showing your results {.inverse background-color="#901A1E"}
+
+[Part 3 of 3]{.part-pill}
+
+::: {.lead}
+A regression table is for you. A **figure** is for your reader. Two go-to plots: coefficients, and predictions.
+:::
+
+## (1) Coefficient plots
+
+::: {.panel-tabset}
+
+### Preparation
+```{r coefprep}
+(plotdata <- lm_robust(co2 ~ region, data = Dat) %>%
+   tidy() %>% # Turn the results into a tibble #<<
+   mutate(term = term %>% # Tidy up the region labels
+            str_remove("region") %>%
+            str_replace(", North Africa, Afghanistan & Pakistan", " & N. Africa")) %>%
+   filter(term != "(Intercept)")) # Drop the reference
+```
+
+### Plotting
+```{r coefplot, fig.show = 'hide'}
+ggplot(data = plotdata,
+       aes(y = estimate,
+           x = reorder(term, estimate))) + # Order by size
+  # Reference line at "no difference"
+  geom_hline(yintercept = 0, color = "#901A1E", lty = "dashed") +
+  # A point with its 95% confidence interval
+  geom_pointrange(aes(ymin = conf.low, ymax = conf.high)) + #<<
+  coord_flip() + # Flip the axes so labels are readable #<<
+  labs(x = "World region",
+       y = "Average difference in CO2 (t per person)\nvs. Sub-Saharan Africa") +
+  theme_minimal(base_size = 15)
+```
+
+### Plot
+```{r ref.label = "coefplot", out.width='78%', fig.height = 4.4, fig.width = 8, echo = FALSE}
+```
+
+:::
+
+## (2) Model predictions
+
+::: {.panel-tabset}
+
+### The model
+```{r ols-pred, results = 'hide'}
+# Back to the continuous predictor
+(ols_1 <- lm_robust(co2 ~ gdp_k, data = Dat))
+```
+```{r ref.label = "ols-pred", echo = FALSE}
+```
+
+### Step 1: synthetic data
+```{r synth}
+# Fictional countries spanning the observed GDP range
+(fict_dat <- tibble(
+  gdp_k = seq(from = 1, to = 120, by = 1)
+))
+```
+
+### Step 2: predict
+```{r predict}
+(fict_dat <- predict(  # Predicted CO2 + 95% interval
+  object   = ols_1,
+  newdata  = fict_dat,
+  interval = "confidence", level = 0.95)$fit %>%
+   as_tibble() %>%
+   bind_cols(fict_dat, .))
+```
+
+### Step 3: visualize
+```{r predplot, out.width='62%', fig.height = 4.2, fig.width = 6.5, echo = FALSE}
+ggplot(data = fict_dat, aes(y = fit, x = gdp_k)) +
+  # Mark a poor and a rich benchmark
+  geom_vline(xintercept = c(5, 60), color = "#901A1E", lty = "dashed") +
+  geom_ribbon(aes(ymin = lwr, ymax = upr), alpha = 0.3) +
+  geom_line(linewidth = 1) +
+  labs(x = "GDP per person (thousands of $, PPP)",
+       y = "Predicted tonnes of CO2 per person") +
+  theme_minimal(base_size = 14)
+```
+
+:::
+
+## The carbon divide, in two pictures
+
+::: {.push-left}
+```{r ref.label = "coefplot", out.width='100%', fig.height = 4.2, fig.width = 7, echo = FALSE}
+```
+:::
+
+::: {.push-right}
+```{r ref.label = "predplot", out.width='100%', fig.height = 4.2, fig.width = 7, echo = FALSE}
+```
+:::
+
+::: {.content-box-green}
+Richer countries and richer regions emit far more per person. Yet the people who emit the **least** — across Sub-Saharan Africa and South Asia — are the ones most exposed to the warming those emissions cause. That gap, not the slope, is the real research agenda `r Citet(myBib, "chancel_global_2022")`.
+:::
+
+## Your turn: exercise 2
+
+::: {.left-column}
+You practice visualizing regression: a **coefficient plot** and a **prediction plot** of your own.
+
+<div class="ku-timer" data-min="20"></div>
+:::
+
+::: {.right-column}
+<iframe src='4-exercise2.html' width='100%' height='620' frameborder='0' scrolling='auto'></iframe>
+:::
+
+## One last wisdom: whose carbon is it?
+
+::: {.left-column}
+Everything so far counted CO2 where it is **produced**. But Denmark burns little at home and **imports** carbon-heavy goods — steel, electronics, meat.
+
+**Consumption-based** accounting re-assigns them to whoever *consumes* the goods: Denmark's footprint jumps from `r round(readRDS("data/owid_consumption.rds") %>% filter(country == "Denmark") %>% pull(production), 1)` to **`r round(readRDS("data/owid_consumption.rds") %>% filter(country == "Denmark") %>% pull(consumption), 1)` t** — factory economies (China, India) carry what we outsourced.
+
+::: {.content-box-green}
+**The wisdom:** how you *measure the outcome* can flip the story — a fairer CO2 number makes the North–South gap **wider**, not smaller.
+:::
+:::
+
+::: {.right-column}
+```{r consumption, out.width='100%', fig.height = 5.0, fig.width = 8.5, echo = FALSE}
+cons <- readRDS("data/owid_consumption.rds")
+
+show <- c("Switzerland", "Denmark", "United Kingdom", "Sweden", "France",
+          "Germany", "United States", "Norway", "Nigeria",
+          "India", "China", "Qatar")
+
+plot_cons <- cons %>%
+  filter(country %in% show) %>%
+  mutate(flow = if_else(consumption >= production,
+                        "Net importer of CO2", "Net exporter of CO2"),
+         country = fct_reorder(country, consumption))
+
+ggplot(plot_cons, aes(y = country)) +
+  geom_segment(aes(x = production, xend = consumption, yend = country,
+                   color = flow), linewidth = 1.3) +
+  geom_point(aes(x = production), color = "grey45", size = 3) +
+  geom_point(aes(x = consumption, color = flow), size = 3.4) +
+  scale_color_manual(values = c("Net importer of CO2" = "#901A1E",
+                                "Net exporter of CO2" = "#425570")) +
+  labs(x = "Tonnes of CO2 per person  (grey = produced, coloured = consumed)",
+       y = "", color = "",
+       caption = "Source: Global Carbon Project, via Our World in Data (2023)") +
+  theme_minimal(base_size = 15) +
+  theme(legend.position = "top")
+```
+:::
+
+## Run the fit again — with the consumption footprint
+
+::: {.panel-tabset}
+
+### Fit both models
+```{r cons-fit, results = 'hide'}
+# Join each country's consumption footprint, then run the SAME regression
+Dat_cons <- Dat %>%
+  inner_join(
+    readRDS("data/owid_consumption.rds") %>%
+      select(iso3c = iso_code, consumption),
+    by = "iso3c"
+  )
+
+modelsummary(
+  list("Produced (WB)"  = lm_robust(co2 ~ gdp_k,         data = Dat_cons),
+       "Consumed (GCP)" = lm_robust(consumption ~ gdp_k, data = Dat_cons)),
+  stars = TRUE,
+  coef_rename = c("gdp_k" = "GDP per person ($1,000s)"),
+  gof_map = c("nobs", "r.squared"),
+  output = "kableExtra"
+)
+```
+
+### The comparison
+::: {.push-left}
+```{r ref.label = "cons-fit", echo = FALSE, results = 'asis'}
+```
+:::
+
+::: {.push-right}
+::: {.content-box-green}
+Same predictor, same countries — a different outcome. Wealth explains **far more** of the *consumption* footprint ($R^2 \approx `r round(summary(lm(consumption ~ gdp_k, data = Dat_cons))$r.squared, 2)`$) than of *production* ($R^2 \approx `r round(summary(lm(co2 ~ gdp_k, data = Dat_cons))$r.squared, 2)`$), and the slope is **steeper**. What a country *consumes* tracks its wealth more tightly than what it happens to *emit at home* — and Qatar is no longer the lone outlier.
+:::
+:::
+
+### The picture
+```{r cons-scatter, out.width='58%', fig.height = 4.2, fig.width = 7, echo = FALSE}
+Dat_cons %>%
+  select(gdp_k, Produced = co2, Consumed = consumption) %>%
+  pivot_longer(c(Produced, Consumed),
+               names_to = "measure", values_to = "co2t") %>%
+  ggplot(aes(x = gdp_k, y = co2t, color = measure)) +
+  geom_point(alpha = 0.35, size = 1.5) +
+  geom_smooth(method = "lm", se = FALSE, linewidth = 1) +
+  scale_color_manual(values = c("Consumed" = "#901A1E",
+                                "Produced" = "grey45")) +
+  labs(x = "GDP per person (thousands of $, PPP)",
+       y = "Tonnes of CO2 per person", color = "") +
+  theme_minimal(base_size = 14) +
+  theme(legend.position = "top")
+```
+
+:::
+
+## Today's general lessons {.inverse background-color="#901A1E"}
+
+1. Outliers can bend the OLS line. **Cook's D** (`plot(which = 5)`) finds the influential ones.
+
+2. OLS assumes a **linear** relationship for continuous predictors — check it (`plot(which = 1)`); it does *not* apply to categorical predictors.
+
+3. Not every outlier is deleted: separate **artefacts** (drop) from **real, important cases** (keep, but note their leverage).
+
+4. **Categorical predictors** are dummy-coded: each coefficient is a group's average difference from the **reference** category. R does this automatically.
+
+5. **Coefficient plots** show categorical results; **prediction plots** show what a continuous model implies across a range of values.
+
+6. **How you measure the outcome can flip the story** — production vs. consumption CO2 is the same countries, a different (and fairer) number.
+
+## Today's important functions
+
+::: {.small}
+- Post-`lm()` diagnostics:
+  + `plot(model, which = 5)` — identify influential outliers (Cook's D).
+  + `plot(model, which = 1)` — check the linearity assumption.
+
+- Building the figures:
+  + `tidy()` — turn a model into a tibble of coefficients + confidence intervals.
+  + `geom_pointrange()` + `coord_flip()` — the coefficient plot.
+  + `predict(model, newdata = ..., interval = "confidence")` — $\hat{Y}$ for synthetic data.
+
+- `fct_relevel()` — set which category is the **reference**.
+:::
+
+## Check yourself: today's goals
+
+Look back at the goals from the start. Can you tick all three?
+
+::: {.checklist}
+- Run `plot(model, which = 5)` and `which = 1` and say, in words, what each one is telling you.
+- Decide whether a flagged outlier is an *artefact* to drop or a *real case* to keep — and defend your call.
+- Read a coefficient on a **dummy** variable as a difference from the reference — and build a coefficient plot and a prediction plot for your reader.
+:::
+
+::: {.content-box-green}
+Anything shaky? That is what this week's **Absalon quiz** and the **Friday exercise class** are for.
+:::
+
+## References
+
+::: {.small}
+```{r ref, results = 'asis', echo = FALSE}
+PrintBibliography(myBib)
+```
+:::
+
+## Appendix: binary outcomes {.inverse background-color="#901A1E"}
+
+::: {.lead}
+What if the outcome is **yes/no**? A short preview of the Linear Probability Model.
+:::
+
+## LPM vs. generalized linear models
+
+::: {.left-column}
+**Linear Probability Model (LPM):** just OLS with a **0/1 outcome** — e.g. *is this a high-emitting country?* (above 2 t per person).
+
+- It predicts $\hat{\text{P}}(y_i = 1 \mid x_i)$.
+- Simple, and the coefficients read as **changes in probability**.
+- **But:** it can predict probabilities **below 0 or above 1**.
+:::
+
+::: {.right-column}
+```{r lpm, out.width='82%', fig.height = 4, fig.width = 6.5, echo = FALSE}
+Dat_lpm <- Dat %>% mutate(high = as.numeric(co2 > 2))
+ggplot(data = Dat_lpm, aes(y = high, x = gdp_k)) +
+  geom_point(alpha = 0.4) +
+  geom_smooth(method = "lm", color = "#901A1E", se = FALSE) +
+  geom_hline(yintercept = c(0, 1), lty = "dotted") +
+  scale_y_continuous(breaks = c(0, 1)) +
+  labs(y = "High emitter? (> 2 t per person)",
+       x = "GDP per person (thousands of $, PPP)") +
+  theme_minimal(base_size = 14)
+```
+
+::: {.backgrnote}
+The red line pierces 1 at high GDP — a *probability* above 100%. That is the LPM's controversial side.
+:::
+:::
+
+## Logistic regression — a GLM for binary outcomes
+
+::: {.push-left}
+$$\begin{aligned}
+\text{logit}(y_i) &= \alpha + \beta x, \\
+y_i &= \text{logit}^{-1}(\alpha + \beta x) \\
+&= \frac{1}{1 + e^{-(\alpha + \beta x)}}.
+\end{aligned}$$
+
+A **link function** squeezes the linear model into the $[0, 1]$ range. The sigmoid-shaped **logistic** function does exactly that.
+
+::: {.content-box-red}
+GLMs bring their own interpretation traps `r Citep(myBib, "breen_interpreting_2018")`. In this course we use **Linear Probability Models** for binary outcomes — and 0/1 coding for categorical ones.
+:::
+:::
+
+::: {.push-right}
+```{r logit-fun, out.width='82%', fig.height = 3.4, fig.width = 5, echo = FALSE}
+logistic <- function(x) 1 / (1 + exp(-x))
+
+ggplot(data = tibble(x = c(-6, 6)), aes(x = x)) +
+  stat_function(fun = logistic, geom = "line",
+                color = "#901A1E", linewidth = 1) +
+  geom_hline(yintercept = c(0, 1), lty = "dotted") +
+  labs(x = expression(alpha + beta * x),
+       y = expression(over(1, 1 + e^-(alpha + beta * x)))) +
+  theme_minimal(base_size = 14)
+```
+:::
+
+```{=html}
+<script>
+(function () {
+  function fmt(s) { var m = Math.floor(s / 60), ss = s % 60; return m + ":" + (ss < 10 ? "0" : "") + ss; }
+  function build(el) {
+    var total = (parseInt(el.getAttribute("data-min"), 10) || 5) * 60, rem = total, id = null;
+    el.innerHTML =
+      '<div class="kt-display">' + fmt(rem) + '</div>' +
+      '<div class="kt-btns">' +
+        '<button class="kt-start" type="button">Start</button>' +
+        '<button class="kt-pause" type="button">Pause</button>' +
+        '<button class="kt-reset" type="button">Reset</button>' +
+      '</div>';
+    var disp = el.querySelector(".kt-display");
+    function render() { disp.textContent = fmt(rem); el.classList.toggle("kt-done", rem <= 0); }
+    function start() { if (id) return; id = setInterval(function () { if (rem > 0) { rem--; render(); } else { stop(); } }, 1000); }
+    function stop() { clearInterval(id); id = null; }
+    function reset() { stop(); rem = total; render(); }
+    el.querySelector(".kt-start").onclick = start;
+    el.querySelector(".kt-pause").onclick = stop;
+    el.querySelector(".kt-reset").onclick = reset;
+    el._start = start; el._reset = reset; render();
+  }
+  function init() {
+    document.querySelectorAll(".ku-timer").forEach(build);
+    if (window.Reveal && Reveal.on) {
+      Reveal.on("slidechanged", function (e) {
+        document.querySelectorAll(".ku-timer").forEach(function (t) { if (t._reset) t._reset(); });
+        var here = e.currentSlide ? e.currentSlide.querySelectorAll(".ku-timer") : [];
+        here.forEach(function (t) { if (t._start) setTimeout(t._start, 250); });
+      });
+    }
+  }
+  if (document.readyState !== "loading") init();
+  else document.addEventListener("DOMContentLoaded", init);
+})();
+</script>
+```

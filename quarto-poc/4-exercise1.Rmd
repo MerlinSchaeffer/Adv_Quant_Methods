@@ -1,0 +1,177 @@
+---
+title: "Exercise 1 (20 minutes)"
+subtitle: "You practice: OLS diagnostics (outliers & linearity) and a categorical predictor — this time with income groups. When you're done, assist some of the others …"
+output: webexercises::webexercises_default
+---
+
+```{r setup, include = FALSE}
+options(htmltools.dir.version = FALSE, servr.interval = 0.5, width = 115, digits = 2)
+knitr::opts_chunk$set(
+  collapse = TRUE, message = FALSE,
+  warning = FALSE, cache = FALSE,
+  comment = "#", strip.white = TRUE)
+
+library(webexercises)
+
+# Fill-in-the-blank that accepts point AND comma decimals (Danish keyboards!)
+num_fitb <- function(x, digits = 2, width = 6) {
+  a <- format(round(x, digits), nsmall = digits)
+  fitb(unique(c(a, sub(".", ",", a, fixed = TRUE))), width = width)
+}
+```
+
+1. Do the [Setup](about.html), if you have not yet done so.
+
+2. Start a new R script and copy in this starter code (it loads the packages and builds
+   `Dat` — the very pipeline we walked through on the slides):
+
+```{r starter}
+pacman::p_load(
+  tidyverse,    # Data manipulation & figures
+  wbstats,      # World Bank data via API
+  estimatr,     # OLS with robust standard errors
+  modelsummary  # Nicely formatted regression tables
+)
+
+# World Bank: CO2 per person, GDP per person, and region/income metadata.
+# Try the live API; if it is down, fall back to the cached copies.
+co2_raw <- tryCatch(
+  wb_data("EN.GHG.CO2.PC.CE.AR5", start_date = 2000, end_date = 2023),
+  error = function(e) readRDS("data/wb_co2_raw.rds")
+)
+gdp_raw <- tryCatch(
+  wb_data("NY.GDP.PCAP.PP.KD", start_date = 2000, end_date = 2023),
+  error = function(e) readRDS("data/wb_gdp_raw.rds")
+)
+countries <- tryCatch(
+  wb_countries(),
+  error = function(e) readRDS("data/wb_countries_raw.rds")
+)
+
+Dat_co2 <- co2_raw %>%
+  rename(co2 = EN.GHG.CO2.PC.CE.AR5) %>%
+  select(iso3c, country, year = date, co2) %>%
+  drop_na(co2) %>% group_by(country) %>% filter(year == max(year)) %>% ungroup()
+
+Dat_gdp <- gdp_raw %>%
+  rename(gdp = NY.GDP.PCAP.PP.KD) %>%
+  select(iso3c, year = date, gdp) %>% drop_na(gdp) %>%
+  group_by(iso3c) %>% filter(year == max(year)) %>% ungroup() %>% select(iso3c, gdp)
+
+Dat_meta <- countries %>%
+  filter(region != "Aggregates") %>% select(iso3c, region, income_level)
+
+Dat <- Dat_co2 %>%
+  inner_join(Dat_gdp,  by = "iso3c") %>%
+  inner_join(Dat_meta, by = "iso3c") %>%
+  mutate(gdp_k = gdp / 1000)
+```
+
+```{r solutions, include = FALSE}
+# Values used to check your answers below
+Dat_x <- readRDS("data/Dat_L4.rds")
+Dat_x$income_level <- factor(Dat_x$income_level,
+  levels = c("Low income", "Lower middle income",
+             "Upper middle income", "High income"))
+ols_inc <- lm_robust(co2 ~ income_level, data = Dat_x)
+b_high  <- coef(ols_inc)["income_levelHigh income"]
+cor_cg  <- cor(Dat_x$co2, Dat_x$gdp_k)
+```
+
+> **Stuck?**
+>
+> - Did the `pacman::p_load(...)` line run without red error messages? If not, fix that first.
+> - Strange results? Start fresh: *Session → Restart R*, then rerun your script from the top.
+> - **World Bank API down or very slow?** Load our cached, ready-made `Dat` instead:
+>   `Dat <- readRDS(url("https://willowy-quokka-e604ee.netlify.app/data/Dat_L4.rds"))`
+> - Still stuck? Ask (and answer!) in the [t-R-ouble forum](https://absalon.ku.dk/courses/70545/discussion_topics/563046?module_item_id=2037268) on Absalon.
+
+3. **Now write it yourself.** The World Bank sorts countries into four *income groups*. Make
+   `income_level` an ordered **factor** with **`"Low income"` as the reference**, then regress
+   `co2` on it with `lm_robust()`. *(This is today's categorical-predictor skill.)*
+
+`r hide("Hint")`
+Use `fct_relevel()` inside `mutate()` to set the reference level, then `lm_robust(co2 ~ income_level, data = Dat)`.
+`r unhide()`
+
+`r hide("R solution -> don't peek too early ;) !")`
+```{r}
+Dat <- Dat %>%
+  mutate(income_level = fct_relevel(income_level, "Low income"))
+
+ols_inc <- lm_robust(co2 ~ income_level, data = Dat)
+
+modelsummary(list("CO2 per person" = ols_inc), stars = TRUE,
+             coef_rename = c("income_levelLower middle income" = "Lower middle",
+                             "income_levelUpper middle income" = "Upper middle",
+                             "income_levelHigh income" = "High income"),
+             gof_map = c("nobs", "r.squared"))
+```
+`r unhide()`
+
+4. Read off your table: on average, high-income countries emit
+   `r num_fitb(b_high)` tonnes of CO₂ per person **more** than low-income countries
+   (two digits; point or comma is fine).
+
+5. **Write one sentence** in your R script (as a `# comment`) interpreting that coefficient —
+   *descriptively*, as in the lecture. Then compare:
+
+`r hide("Model answer")`
+*Across the world's countries, high-income countries emit on average about
+`r round(b_high, 1)` tonnes more CO₂ per person than low-income countries — a difference of
+group means, not (yet) a causal effect.*
+
+(Name the **direction**, the rough **size**, and the **units** — and use associational, not
+causal, language.)
+`r unhide()`
+
+6. Now the **continuous** predictor. Make a scatter plot with `co2` on the Y-axis and `gdp_k`
+   (GDP in thousands) on the X-axis. Ask it the four questions: *direction, form, spread, outliers*.
+
+`r hide("R solution -> don't peek too early ;) !")`
+```{r out.width='100%', fig.height = 4, fig.width = 7.5, results = FALSE, echo = TRUE}
+ggplot(data = Dat, aes(y = co2, x = gdp_k)) +
+  geom_text(aes(label = country)) +
+  labs(y = "Tonnes of CO2 per person",
+       x = "GDP per person (thousands of $, PPP)") +
+  theme_minimal()
+```
+`r unhide()`
+
+7. **Before you compute anything:** judging only from your scatter plot, the correlation
+   between `co2` and `gdp_k` is …
+`r mcq(c("close to +0.8", answer = "close to +0.4", "close to 0", "close to −0.4"))`
+
+8. Re-fit the model with base `lm()` and run the two diagnostic plots. Which statement fits
+   what you see?
+`r mcq(c("No outliers, and the relationship is perfectly linear", answer = "Qatar and Palau are influential outliers, and the linearity assumption is strained", "Denmark is the single most influential outlier"))`
+
+`r hide("R solution -> don't peek too early ;) !")`
+```{r out.width='60%', fig.height = 4, fig.width = 5, results = FALSE, echo = TRUE}
+mod <- lm(co2 ~ gdp_k, data = Dat)
+plot(mod, which = 5) # Outliers (Cook's D)
+plot(mod, which = 1) # Linearity
+```
+`r unhide()`
+
+------------------------------------------------------------------------------
+
+**Bonus (for the fast):** the lecture dropped **Palau** (an artefact) but *kept* **Qatar**
+(a real petro-state). Re-fit `co2 ~ gdp_k` three ways — all countries, without Palau, and
+without both — and watch the slope. Which case moves it more?
+
+`r hide("R solution")`
+```{r results = 'asis'}
+m_all   <- lm_robust(co2 ~ gdp_k, data = Dat)
+m_noP   <- lm_robust(co2 ~ gdp_k, data = Dat %>% filter(country != "Palau"))
+m_noPQ  <- lm_robust(co2 ~ gdp_k,
+                     data = Dat %>% filter(!country %in% c("Palau", "Qatar")))
+
+modelsummary(list("All" = m_all, "No Palau" = m_noP, "No Palau & Qatar" = m_noPQ),
+             statistic = NULL, gof_map = c("nobs", "r.squared"))
+```
+
+Dropping **Palau** (a residual outlier) mainly lifts $R^2$; dropping **Qatar** (a
+high-*leverage* point at the far right) moves the **slope** more. Checking how far your
+conclusion depends on single cases is a *robustness check* — remember it for your term paper.
+`r unhide()`

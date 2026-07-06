@@ -124,6 +124,77 @@ A refinement round over both the deck and the website. New conventions that the 
   final checklist but was never actually installed by the old steps. All four GitHub installs
   verified to exist (masteringmetrics, ROS-Examples/rpackage, vdemdata, democracyData).
 
+## Lecture 4 (2026-07-06) — OLS wisdoms, rebuilt as "the carbon divide"
+`4-OLS-Wisdoms.qmd` (35 slides) + `4-exercise1/2.Rmd`. **Not a faithful port** — the professor
+was unhappy with the old **colonialism** running example (both the loaded "which empire
+colonised better" framing *and* its brittle ~60-line hand-typed `case_when` of country names +
+independence years, full of typos that silently drop cases — the same kind of hand-coding he'd
+already ripped out of L2). We surveyed every deck's running example to avoid collisions
+(poverty = L2/L9; democracy/freedom/socialism = L2; life expectancy = L12; wages = L10; race/
+discrimination = L5; xenophobia = L7/8/11) and picked a **fresh Global North/South topic**:
+- **The carbon divide:** `co2 ~ gdp` + **world region** (professor chose region as the
+  categorical). Same OLS wisdoms as the old deck — outliers, linearity, dummy coding,
+  coefficient plots, predictions, LPM — but with a climate-justice hook.
+- **Why it teaches better than the colonial version:** the Gulf petro-states are *both* the
+  Cook's D outliers *and* the source of the apparent non-linearity, so `plot(which=5)` and
+  `which=1` point at the same cases. Two outliers with different characters let us teach
+  **judgement**: **Palau** (Cook's D #2, a tiny-island data artefact — high residual, modest
+  GDP) is *dropped*; **Qatar** (Cook's D #1, a real high-*leverage* petro-state) is *kept but
+  flagged*. Dropping Palau ~doubles R². (Do **not** teach the log-transform fix here — that is
+  L12's job; L4 only diagnoses.)
+- **Data (all World Bank, no hand-coding):** CO₂ = `EN.GHG.CO2.PC.CE.AR5` — **the classic
+  `EN.ATM.CO2E.PC` was retired/archived by the WB in 2024** (verify with `wb_data`, it 404s);
+  the AR5/EDGAR per-capita series is the live replacement. GDP = `NY.GDP.PCAP.PP.KD` (PPP,
+  `/1000` → `gdp_k` for readable slopes). **Region + income group come free from
+  `wb_countries()`** (filter out `region == "Aggregates"`), joined by `iso3c`. Region ref =
+  Sub-Saharan Africa (`fct_relevel`); a clean monotonic gradient SSA 0.9 t → N. America 10.6 t.
+- **Exercises use INCOME GROUP** (Low→High, another free WB categorical) so students practise
+  the same skills on a *different* variable, not slide transcription: Ex1 = diagnostics +
+  categorical dummy coding; Ex2 = coefficient plot + prediction plot, with the scaffolded
+  "carbon divide" discussion. LPM binary = "high emitter (>2 t)"; splits 55/45 and predicts
+  P>1 for Qatar (the LPM cautionary tale, shown on the slide).
+- **tryCatch/offline fallback (L2 convention):** all three WB calls are wrapped
+  `tryCatch(wb_data/wb_countries(...), error = readRDS("data/wb_*_raw.rds"))`; caches committed
+  (`wb_co2_raw.rds`, `wb_gdp_raw.rds`, `wb_countries_raw.rds`) + a joined `data/Dat_L4.rds` for
+  the exercise "Stuck?" URL. Regenerate with the pipeline in the deck's `wb-data`/`wb-build`
+  chunks. (`wb_countries()` *does* hit the API in wbstats 1.1, so it needs the guard too.)
+- **New bib entry:** `chancel_global_2022` (Chancel, *Nature Sustainability* 5:931–938 —
+  global carbon inequality), cited on the RQ + payoff slides. `breen_interpreting_2018` kept
+  for the LPM/logistic appendix.
+- **Closing "consumption vs. production" slide (professor requested):** the WB series is
+  *territorial/production* CO₂ — **the World Bank has NO consumption-based (footprint/trade-
+  adjusted) indicator** (checked; the "…consumption" hits are just fuel-type production
+  emissions). The consumption-based data come from the **Global Carbon Project, via Our World
+  in Data** (`github.com/owid/co2-data`, cols `co2_per_capita` + `consumption_co2_per_capita`).
+  A dumbbell slide ("whose carbon is it?") makes the point that Denmark *produces* ~4.8 t but
+  *consumes* ~8.3 t (+72%) once imported goods count, while factory economies (China −11%,
+  India −17%) export embodied carbon — so the North–South gap *widens* under a fairer measure.
+  The full OWID CSV is 50 MB, so it is **NOT** pulled at render: a tiny committed snapshot
+  (`data/owid_consumption.rds`, 120 countries, latest year) drives the slide; regenerate with
+  `Rscript img/L4/make_consumption_cache.R`. Source cited inline (backgrnote), like WB.
+  A **follow-up slide** ("Run the fit again — with the consumption footprint") re-runs the
+  *same* `~ gdp_k` OLS on the consumption outcome (join the snapshot onto `Dat` by `iso3c`):
+  wealth explains **far more** of the footprint (R² 0.38 → **0.60**, steeper slope) than of
+  production, and Qatar stops being the lone outlier — a clean quantitative payoff for the
+  "how you measure the outcome changes the story" wisdom (panel-tabset: code / table / picture).
+- **BUG FOUND & FIXED (would bite any WB deck): `wb_data()` returns rows in ASCENDING date
+  order**, so the terse ``gdp_raw |> select(iso3c, gdp) |> distinct(iso3c, .keep_all = TRUE)``
+  keeps each country's **oldest** (year-2000) value, *not* the latest — silently regressing
+  ~2023 CO₂ on 2000 GDP (wrong slopes/R²). Always take the most recent explicitly:
+  `group_by(iso3c) |> filter(year == max(year)) |> ungroup()` (as the CO₂ pipeline and the
+  `Dat_L4.rds` cache already did). Fixed in the deck **and both exercises' starter code** —
+  they now match the cached expected answers. Verified post-fix: main model slope ≈ 0.12 /
+  R² ≈ 0.17 (doubles to ~0.36 after dropping Palau); consumption comparison R² 0.378 vs 0.602.
+- **Gotcha (new):** the ggplot raster device can't render the Unicode subscript **₂** — it
+  prints as a tofu box in axis/legend/caption labels. Use ASCII **"CO2"** *inside* `labs()`/
+  `caption`/`scale_*`; keep the pretty **CO₂** only in HTML prose/headings/callouts. (Same font
+  limitation PROJECT.md already noted for the L3 GIFs.)
+- Verified in-browser: 33 slides, **zero overflow**; all plots render (incl. base-R
+  `plot(which=5/1)` and the LPM line piercing 1); both exercises embed the webexercises JS/CSS
+  (2 MCQs + fitb + solution toggles each), no unresolved inline-R, no tofu.
+- **Flag for the professor:** **L9 still reuses the old colonial poverty/independence example.**
+  Dropping it here doesn't touch L9, but that deck will want the same rethink when ported.
+
 ## Lecture 3 (2026-07-06) — Randomness & statistical inference
 `3-Random.qmd` (32 slides) + `3-exercise1/2.Rmd`. The course's hardest lecture conceptually;
 kept the full pedagogical build but modernised the code.
@@ -312,9 +383,10 @@ ChatGPT/Gemini (Bard is dead). REMEMBER: render exercises with `rmarkdown::rende
 2. ~~Quarto website prototype~~ — done, refined, verified.
 3. ~~Commit the POC to git~~ — done (bec0e7a, pushed).
 4. ~~Lecture 1~~ — done 2026-07-02. ~~Lecture 2~~ — done 2026-07-04 (didactic redesign).
-   ~~Lecture 3~~ — done 2026-07-06 (Randomness & inference, 32 slides + 2 exercises; see its
-   section below). **Next: Lecture 4 (`static/Lectures/4-OLS-Wisdom/`, deck + 2 exercises).**
-   Then 5, 7 → 14.
+   ~~Lecture 3~~ — done 2026-07-06 (Randomness & inference, 32 slides + 2 exercises).
+   ~~Lecture 4~~ — done 2026-07-06 (OLS wisdoms, rebuilt as "the carbon divide"; colonialism
+   dropped — see its section above). **Next: Lecture 5 (`static/Lectures/5-Selection-bias/`,
+   deck + exercises).** Then 7 → 14.
    The DAG/IV/RDD decks (7, 10, 13) are the heaviest. For each deck: faithful port → template
    standards (see "Feedback round") → check external image URLs → add to `lectures.qmd` +
    `_quarto.yml` `render:` → render → verify slides fit in the browser.

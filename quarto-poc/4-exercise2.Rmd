@@ -1,0 +1,180 @@
+---
+title: "Exercise 2 (20 minutes)"
+subtitle: "You practice: visualizing regression — a coefficient plot and a prediction plot of your own. When you're done, assist some of the others …"
+output: webexercises::webexercises_default
+---
+
+```{r setup, include = FALSE}
+options(htmltools.dir.version = FALSE, servr.interval = 0.5, width = 115, digits = 2)
+knitr::opts_chunk$set(
+  collapse = TRUE, message = FALSE,
+  warning = FALSE, cache = FALSE,
+  comment = "#", strip.white = TRUE)
+
+library(webexercises)
+
+num_fitb <- function(x, digits = 2, width = 6) {
+  a <- format(round(x, digits), nsmall = digits)
+  fitb(unique(c(a, sub(".", ",", a, fixed = TRUE))), width = width)
+}
+
+pacman::p_load(
+  tidyverse, wbstats, estimatr, modelsummary
+)
+
+# Same pipeline as Exercise 1 (see its "Stuck?" box if the API is down)
+co2_raw <- tryCatch(
+  wb_data("EN.GHG.CO2.PC.CE.AR5", start_date = 2000, end_date = 2023),
+  error = function(e) readRDS("data/wb_co2_raw.rds"))
+gdp_raw <- tryCatch(
+  wb_data("NY.GDP.PCAP.PP.KD", start_date = 2000, end_date = 2023),
+  error = function(e) readRDS("data/wb_gdp_raw.rds"))
+countries <- tryCatch(
+  wb_countries(), error = function(e) readRDS("data/wb_countries_raw.rds"))
+
+Dat_co2 <- co2_raw %>%
+  rename(co2 = EN.GHG.CO2.PC.CE.AR5) %>%
+  select(iso3c, country, year = date, co2) %>%
+  drop_na(co2) %>% group_by(country) %>% filter(year == max(year)) %>% ungroup()
+Dat_gdp <- gdp_raw %>%
+  rename(gdp = NY.GDP.PCAP.PP.KD) %>%
+  select(iso3c, year = date, gdp) %>% drop_na(gdp) %>%
+  group_by(iso3c) %>% filter(year == max(year)) %>% ungroup() %>% select(iso3c, gdp)
+Dat_meta <- countries %>%
+  filter(region != "Aggregates") %>% select(iso3c, region, income_level)
+
+Dat <- Dat_co2 %>%
+  inner_join(Dat_gdp,  by = "iso3c") %>%
+  inner_join(Dat_meta, by = "iso3c") %>%
+  mutate(gdp_k = gdp / 1000,
+         income_level = fct_relevel(income_level, "Low income"))
+```
+
+*(Keep working in the R script from Exercise 1 — you already have `Dat` with `income_level`
+releveled. If not, the starter code and the "Stuck?" box are in Exercise 1.)*
+
+1. First, drop the artefact **Palau**, exactly as in the lecture:
+
+```{r drop}
+Dat <- Dat %>%
+  filter(country != "Palau")
+```
+
+```{r fitmodels, include = FALSE}
+ols_inc <- lm_robust(co2 ~ income_level, data = Dat)
+b_upper <- coef(ols_inc)["income_levelUpper middle income"]
+ols_gdp <- lm_robust(co2 ~ gdp_k, data = Dat)
+```
+
+2. **Write it yourself: a coefficient plot.** Fit `co2 ~ income_level`, `tidy()` it into a
+   tibble, drop the intercept, and plot each coefficient with its 95% confidence interval
+   (`geom_pointrange()` + `coord_flip()`).
+
+`r hide("Hint")`
+`tidy()` gives you `estimate`, `conf.low`, and `conf.high`. Filter out `"(Intercept)"`, then map `estimate` to `y`, the `term` to `x`, and add `geom_hline(yintercept = 0, ...)` as a reference line.
+`r unhide()`
+
+`r hide("R solution -> don't peek too early ;) !")`
+```{r out.width='80%', fig.height = 4, fig.width = 6.5, results = FALSE}
+plotdata <- lm_robust(co2 ~ income_level, data = Dat) %>%
+  tidy() %>%
+  mutate(term = str_remove(term, "income_level")) %>%
+  filter(term != "(Intercept)")
+
+ggplot(data = plotdata,
+       aes(y = estimate, x = reorder(term, estimate))) +
+  geom_hline(yintercept = 0, color = "#901A1E", lty = "dashed") +
+  geom_pointrange(aes(ymin = conf.low, ymax = conf.high)) +
+  coord_flip() +
+  labs(x = "Income group",
+       y = "Average difference in CO2 (t per person)\nvs. low-income countries") +
+  theme_minimal()
+```
+`r unhide()`
+
+3. Read your plot: compared with low-income countries, **upper-middle-income** countries emit
+   about `r num_fitb(b_upper)` tonnes more CO₂ per person (two digits).
+
+4. Which statement matches your coefficient plot?
+`r mcq(c("All income groups overlap zero — none differs from low income", answer = "Every group emits more than low income, and the gap widens with income", "Only high-income countries differ from the reference"))`
+
+5. **Write it yourself: a prediction plot.** Fit `co2 ~ gdp_k`, predict across a synthetic GDP
+   range, and plot the fitted line with its confidence ribbon. Add a dashed red line at a rich
+   benchmark (`gdp_k = 60`).
+
+`r hide("Hint")`
+Build `fict_dat <- tibble(gdp_k = 1:120)`, then `predict(ols_gdp, newdata = fict_dat, interval = "confidence")$fit`, turn it into a tibble and `bind_cols()` it back. Plot with `geom_ribbon()` + `geom_line()`.
+`r unhide()`
+
+`r hide("R solution -> don't peek too early ;) !")`
+```{r out.width='80%', fig.height = 4, fig.width = 6.5, results = FALSE}
+ols_gdp <- lm_robust(co2 ~ gdp_k, data = Dat)
+
+fict_dat <- tibble(gdp_k = 1:120)
+fict_dat <- predict(ols_gdp, newdata = fict_dat,
+                    interval = "confidence", level = 0.95)$fit %>%
+  as_tibble() %>%
+  bind_cols(fict_dat, .)
+
+ggplot(data = fict_dat, aes(y = fit, x = gdp_k)) +
+  geom_vline(xintercept = 60, color = "#901A1E", lty = "dashed") +
+  geom_ribbon(aes(ymin = lwr, ymax = upr), alpha = 0.3) +
+  geom_line(linewidth = 1) +
+  labs(x = "GDP per person (thousands of $, PPP)",
+       y = "Predicted tonnes of CO2 per person") +
+  theme_minimal()
+```
+`r unhide()`
+
+6. **Write one sentence** (as a `# comment`) that a reader of your term paper could follow,
+   describing what the prediction plot shows. Then compare:
+
+`r hide("Model answer")`
+*Predicted CO₂ emissions rise steadily with national wealth: a country at \$60,000 GDP per
+person is predicted to emit roughly `r round(coef(ols_gdp)[1] + coef(ols_gdp)[2] * 60, 1)`
+tonnes per person, several times more than a poor country — with the confidence ribbon
+widening where we have fewer rich countries to learn from.*
+`r unhide()`
+
+------------------------------------------------------------------------------
+
+7. **Discuss with your neighbour** — three steps toward the *carbon divide*:
+
+   a. Your two figures tell the same story two ways. Which is clearer for a reader who has
+      *never seen a regression table* — the coefficient plot or the prediction plot?
+   b. Both show that richer places emit more. Does that make wealth the *cause* of emissions?
+      Name one thing that differs between rich and poor countries besides GDP.
+   c. The countries emitting the **least** are often the most exposed to climate damage. What
+      does that mean for reading a "positive slope" as *good* or *bad* news?
+
+`r hide("Talking points")`
+**(a)** The prediction plot needs no statistics vocabulary — it reads like a line on a graph;
+the coefficient plot is compact but assumes the reader knows what a reference category is.
+**(b)** No — these are *descriptive* cross-country comparisons; rich and poor countries differ
+in industry mix, energy sources, climate, history … all potential confounders. **(c)** A
+positive slope is neither good nor bad by itself — it is the *injustice* that the low emitters
+bear the highest costs that turns the description into a research (and policy) agenda.
+`r unhide()`
+
+**Bonus (for the fast):** swap the coefficient plot's predictor from `income_level` to
+`region`. Which reference category does R pick, and how would you change it to
+`"Sub-Saharan Africa"`?
+
+`r hide("R solution")`
+```{r out.width='70%', fig.height = 4, fig.width = 6.5, results = FALSE}
+# R uses the first factor level (alphabetical for a character vector) as the
+# reference — so set it explicitly with fct_relevel(), as we did for income.
+Dat <- Dat %>% mutate(region = fct_relevel(region, "Sub-Saharan Africa"))
+
+lm_robust(co2 ~ region, data = Dat) %>%
+  tidy() %>%
+  mutate(term = str_remove(term, "region")) %>%
+  filter(term != "(Intercept)") %>%
+  ggplot(aes(y = estimate, x = reorder(term, estimate))) +
+  geom_hline(yintercept = 0, color = "#901A1E", lty = "dashed") +
+  geom_pointrange(aes(ymin = conf.low, ymax = conf.high)) +
+  coord_flip() +
+  labs(x = "", y = "Difference in CO2 vs. Sub-Saharan Africa") +
+  theme_minimal()
+```
+`r unhide()`
