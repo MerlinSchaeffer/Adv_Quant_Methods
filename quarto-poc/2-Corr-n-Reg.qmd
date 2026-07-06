@@ -300,8 +300,15 @@ With `wb_search()` you can search the World Bank archive for any keyword:
 
 ### Use the WB API
 ```{r wb-data}
-(Dat_poverty <- wb_data("SI.POV.DDAY", # Extreme poverty: below $3.00 a day (2021 PPP)
-                        start_date = 1972, end_date = 2025) %>%
+# Download from the World Bank API; if it is unreachable, fall back to a
+# cached copy so the analysis still runs (smart habit for any live data!)
+poverty_raw <- tryCatch(
+  wb_data("SI.POV.DDAY",                # Extreme poverty: below $3.00 a day (2021 PPP)
+          start_date = 1972, end_date = 2025),
+  error = function(e) readRDS("data/wb_poverty_raw.rds")
+)
+
+(Dat_poverty <- poverty_raw %>%
    rename(poverty = SI.POV.DDAY,
           year = date,
           country_text_id = iso3c) %>%

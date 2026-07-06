@@ -35,8 +35,12 @@ Dat_vdem <- vdem %>%
          state_owner   = v2clstown) %>%
   mutate(state_control = -state_owner)
 
-# World Bank: extreme poverty (share below $3.00 a day, 2021 PPP)
-Dat_poverty <- wb_data("SI.POV.DDAY", start_date = 1972, end_date = 2025) %>%
+# World Bank: extreme poverty (share below $3.00 a day, 2021 PPP).
+# Try the live API; if it is down, fall back to the cached copy.
+Dat_poverty <- tryCatch(
+  wb_data("SI.POV.DDAY", start_date = 1972, end_date = 2025),
+  error = function(e) readRDS("data/wb_poverty_raw.rds")
+) %>%
   rename(poverty = SI.POV.DDAY,
          year = date,
          country_text_id = iso3c) %>%

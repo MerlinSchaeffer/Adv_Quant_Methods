@@ -484,8 +484,12 @@ Dat_vdem &lt;- vdem %&gt;%
          state_owner   = v2clstown) %&gt;% # State ownership of the economy
   mutate(state_control = -state_owner)  # Reverse: higher = MORE state control
 
-# World Bank: extreme poverty (share below $3.00 a day, 2021 PPP)
-Dat_poverty &lt;- wb_data(&quot;SI.POV.DDAY&quot;, start_date = 1972, end_date = 2025) %&gt;%
+# World Bank: extreme poverty (share below $3.00 a day, 2021 PPP).
+# Try the live API; if it is down, fall back to the cached copy.
+Dat_poverty &lt;- tryCatch(
+  wb_data(&quot;SI.POV.DDAY&quot;, start_date = 1972, end_date = 2025),
+  error = function(e) readRDS(&quot;data/wb_poverty_raw.rds&quot;)
+) %&gt;%
   rename(poverty = SI.POV.DDAY,
          year = date,
          country_text_id = iso3c) %&gt;%
@@ -550,9 +554,9 @@ R solution -&gt; don&#39;t peek too early ;) !
 your scatter plot, the correlation between poverty and equality &amp;
 liberty is …
 <select class="webex-select"><option value="blank"></option><option value>close
-to &lt;U+2212&gt;0.8</option><option value="answer">close to
-&lt;U+2212&gt;0.3</option><option value>close to
-0</option><option value>close to +0.3</option></select></p></li>
+to −0.8</option><option value="answer">close to
+−0.3</option><option value>close to 0</option><option value>close
+to +0.3</option></select></p></li>
 <li><p>Now check yourself: estimate the correlation with
 <code>cor()</code> (rounded to two digits; point or comma is fine):
 <input class="webex-solveme nospaces" size="6" data-answer="[&quot;-0.33&quot;,&quot;-0,33&quot;]"></input></p></li>
@@ -608,7 +612,7 @@ R solution
   filter(year &gt; 2015) %&gt;% # Recent years only
   anti_join(Dat_poverty, by = c(&quot;country_text_id&quot;, &quot;year&quot;)) %&gt;%
   distinct(country_text_id)
-# # A tibble: 179 x 1
+# # A tibble: 179 × 1
 #    country_text_id
 #    &lt;chr&gt;          
 #  1 MEX            
@@ -621,7 +625,7 @@ R solution
 #  8 MMR            
 #  9 RUS            
 # 10 ALB            
-# # i 169 more rows</code></pre>
+# # ℹ 169 more rows</code></pre>
 <p>They are countries (and country-years) with <strong>no World Bank
 poverty estimate</strong> — poverty data require household surveys,
 which some countries run rarely or not at all (e.g. North Korea). An

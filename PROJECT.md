@@ -172,8 +172,16 @@ the professor found the old "socialism vs. democratic freedom" story "holprig" a
   r(state control, freedom) ≈ −0.69 → **no freedom–equality trade-off**.
 - **World Bank content updated:** the international poverty line is now **$3.00/day (2021 PPP)**
   (changed June 2025; SI.POV.DDAY returns the new line) — PPP box recomputed (≈ kr. 20/day,
-  kr. 600/month). The WB API also has outages (hit one while building) — worth a cached-data
-  fallback someday.
+  kr. 600/month).
+- **WB API outage fix (2026-07, the professor hit `object 'Dat' not found` mid-render):** the
+  `wb_data()` call is flaky and, when it fails, `Dat` never gets built → the whole deck halts. Every
+  `wb_data()` call (deck `wb-data` chunk + both exercises) is now wrapped
+  `tryCatch(wb_data(...), error = function(e) readRDS("data/wb_poverty_raw.rds"))`, falling back to
+  a committed raw cache (`quarto-poc/data/wb_poverty_raw.rds`, 11.7k rows — regenerate with
+  `wbstats::wb_data("SI.POV.DDAY", start_date=1972, end_date=2025)` and `saveRDS`). Live-first so
+  data stay fresh when the API is up; the fallback keeps renders reliable. `wb_search()` does NOT
+  need this — it queries the package's bundled `wb_cachelist`, not the network. Apply the same
+  tryCatch guard to any future deck that calls a live API.
 - **Exercise files are now per-lecture:** `<N>-exercise<k>.Rmd/html` (L6's renamed to
   `6-exercise*`; deck iframes + lectures.qmd + `_quarto.yml` resources glob updated).
   Exercises no longer use the `essentials` package.
@@ -283,11 +291,11 @@ ChatGPT/Gemini (Bard is dead). REMEMBER: render exercises with `rmarkdown::rende
   every slide except the one visible at load (bit us on 9 slides in Lecture 1). **Every deck must
   set `auto-stretch: false` in its revealjs YAML** — all images are sized manually via `out.width`
   anyway.
-- **Claude-session tooling:** Quarto is NOT installed system-wide; each session downloads the
-  macOS tarball (`https://github.com/quarto-dev/quarto-cli/releases/download/v1.9.38/quarto-1.9.38-macos.tar.gz`,
-  ~225 MB, extracts `bin/` + `share/` directly — no top-level dir) into its own scratchpad. This
-  already bit us once (a previous session's copy was garbage-collected mid-project). Install it
-  properly at some point: `brew install --cask quarto`.
+- **Quarto is now installed for real at `/Applications/quarto`** (v1.9.38; the professor did the
+  cask install 2026-07). Use it directly. For `rmarkdown::render()` of the exercises, its bundled
+  pandoc is at `/Applications/quarto/bin/tools/aarch64` → `export
+  RSTUDIO_PANDOC=/Applications/quarto/bin/tools/aarch64`. (Older sessions downloaded a scratch
+  Quarto tarball into the scratchpad; that's obsolete now and gets garbage-collected.)
   For browser previews: macOS TCC blocks the preview server from reading `~/Documents`, so
   `.claude/launch.json` serves a copy of `_site/` rsynced into the session scratchpad — after every
   render, rsync `_site/` to the directory named in launch.json (update launch.json to the current
