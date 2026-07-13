@@ -1,0 +1,123 @@
+---
+title: "Exercise 2 (20 minutes)"
+subtitle: "You practice: instrumental variables — does arrest deter repeat domestic violence? The Minneapolis experiment. When you're done, assist some of the others …"
+output: webexercises::webexercises_default
+---
+
+```{r setup, include = FALSE}
+options(htmltools.dir.version = FALSE, servr.interval = 0.5, width = 115, digits = 2)
+knitr::opts_chunk$set(
+  collapse = TRUE, message = FALSE,
+  warning = FALSE, cache = FALSE,
+  comment = "#", strip.white = TRUE)
+
+library(webexercises)
+
+num_fitb <- function(x, digits = 2, width = 6) {
+  a <- format(round(x, digits), nsmall = digits)
+  fitb(unique(c(a, sub(".", ",", a, fixed = TRUE))), width = width)
+}
+```
+
+```{r data, include = FALSE}
+pacman::p_load(tidyverse, estimatr, modelsummary, masteringmetrics)
+data("mdve", package = "masteringmetrics")
+```
+
+The **Minneapolis Domestic Violence Experiment** (Sherman & Berk 1984) *randomly* told officers
+how to respond to a domestic-violence call — but officers didn't always comply. Copy the starter:
+
+```{r starter, eval = FALSE}
+pacman::p_load(tidyverse, estimatr, modelsummary, masteringmetrics)
+data("mdve", package = "masteringmetrics") # ships with the package
+```
+
+1. `T_RANDOM` is the *randomly assigned* strategy, `T_FINAL` what the officer *actually did*
+   (1 = arrest; 2 & 3 = the lenient "coddle"; 4 = other → `NA`). Recode both into two-category
+   factors (**Arrest** as reference), then cross-tabulate. **How many officers complied** with
+   their randomly assigned strategy? `r fitb(268, width = "4")`
+
+`r hide("R solution -> don't peek too early ;) !")`
+```{r}
+mdve <- mdve %>%
+  mutate(
+    T_RANDOM = case_when(T_RANDOM %in% c(2, 3) ~ "Coddle!",
+                         T_RANDOM == 1 ~ "Arrest!", TRUE ~ NA_character_) %>%
+      fct_relevel("Arrest!"),
+    T_FINAL  = case_when(T_FINAL %in% c(2, 3) ~ "Coddled",
+                         T_FINAL == 1 ~ "Arrested", TRUE ~ NA_character_) %>%
+      fct_relevel("Arrested"))
+
+mdve %>% select(T_RANDOM, T_FINAL) %>% table()
+91 + 177 # compliers: arranged-and-arrested + coddle-and-coddled
+```
+`r unhide()`
+
+2. **Was the *randomly assigned* strategy balanced across the subject's race** (`S_RACE`)? Recode
+   race, then make a balance table across `T_RANDOM`.
+`r mcq(c("No — the absolute frequencies differ a lot", "Yes, and every single group is perfectly balanced", answer = "Broadly balanced across groups, though 'Indian' looks a bit off"))`
+
+`r hide("R solution -> don't peek too early ;) !")`
+```{r results = 'asis'}
+mdve <- mdve %>%
+  mutate(S_RACE = case_when(S_RACE == 1 ~ "White", S_RACE == 2 ~ "Black",
+                            S_RACE == 3 ~ "Indian", S_RACE == 4 ~ "Asian",
+                            S_RACE == 5 ~ "Hispanic", TRUE ~ "Other"))
+
+mdve %>% select(T_RANDOM, S_RACE) %>%
+  datasummary_balance(~ T_RANDOM, data = .,
+                      title = "Subject's race by *assigned* strategy")
+```
+`r unhide()`
+
+3. Now balance race across what officers **actually did** (`T_FINAL`). What changed?
+`r mcq(c("Still perfectly balanced", answer = "Now the groups look imbalanced — actual treatment is not random", "White subjects were treated more harshly than assigned"))`
+
+`r hide("R solution -> don't peek too early ;) !")`
+```{r results = 'asis'}
+mdve %>% select(T_FINAL, S_RACE) %>%
+  datasummary_balance(~ T_FINAL, data = .,
+                      title = "Subject's race by *actual* strategy")
+```
+`r unhide()`
+
+4. **First stage.** Regress actual coddling (1 = coddled) on the *assigned* strategy. How much more
+   likely was an officer to coddle when *randomly told* to, rather than arrest?
+   `r num_fitb(0.79)` — in IV language this is the `r mcq(c(answer = "first stage", "reduced form", "LATE estimate"))`.
+
+`r hide("R solution -> don't peek too early ;) !")`
+```{r results = 'asis'}
+mdve <- mdve %>%
+  mutate(T_FINAL_01 = if_else(T_FINAL == "Coddled", 1, 0))
+
+first_stage <- lm_robust(T_FINAL_01 ~ T_RANDOM, data = mdve)
+modelsummary(list("Coddled (0/1)" = first_stage), stars = TRUE,
+             coef_rename = c("T_RANDOMCoddle!" = "Randomly told to coddle"),
+             gof_map = c("nobs", "r.squared"))
+```
+`r unhide()`
+
+5. Sherman & Berk report that being *randomly told to coddle* raised the probability of a repeat
+   assault by **0.114**, versus being told to arrest (regardless of what the officer did). In IV
+   language this is the `r mcq(c(answer = "reduced form", "first stage", "LATE estimate"))`.
+
+6. **Put it together.** The IV estimate of the local average causal effect of *coddling* (vs.
+   arresting) on repeat assault is reduced form ÷ first stage:
+   `r num_fitb(0.114/0.79)` (two digits).
+
+`r hide("R solution")`
+```{r}
+0.114 / 0.79 # reduced form / first stage = LATE
+```
+
+So, for compliers, coddling rather than arresting raised the probability of a repeat assault by
+about 0.14 — evidence that arrest *did* deter. (Careful: it is a **LATE**, for the officers whose
+behaviour the random instruction actually changed.)
+`r unhide()`
+
+------------------------------------------------------------------------------
+
+**Discuss with your neighbour:** which of the **three IV requirements** is hardest to defend here —
+that the random instruction affects repeat violence *only* through what the officer actually did
+(the **exclusion restriction**)? Could being *told* to arrest change an officer's demeanour in
+other ways?

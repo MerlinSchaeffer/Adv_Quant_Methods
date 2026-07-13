@@ -134,6 +134,66 @@ A refinement round over both the deck and the website. New conventions that the 
   final checklist but was never actually installed by the old steps. All four GitHub installs
   verified to exist (masteringmetrics, ROS-Examples/rpackage, vdemdata, democracyData).
 
+## Lecture 7 (2026-07-13) — Natural experiments & instrumental variables
+`7-NatExp-IV1.qmd` (28 slides) + `7-exercise1/2.Rmd`. The heaviest deck so far (2 running studies +
+the whole IV apparatus). Mostly **faithful port**, restructured + trimmed (the original repeated the
+IV DAG ~8×; consolidated to ~5 clean DAGs). Co-authored deck: kept **"Andrew Herman & Merlin
+Schaeffer"**. **The deck itself uses NO live data** — all images + TikZ + hard-coded published
+numbers, so it renders fast and offline.
+- **3-part arc:** (1) **natural experiments** — can't RCT terrorism → John Snow cholera → Legewie's
+  Bali 2002 attack during ESS fieldwork (interview date = as-if random; `Joscha2.png` design,
+  `Joscha4.png` results: significant in PT/PL/FI, null in UK/NL/NO); RCT vs nat-exp = internal vs
+  external validity. (2) **non-compliance / ITT** — Moving to Opportunity (Chetty et al. 2016):
+  offer $Z$ ≠ move $D$, only ~48% comply (`Chetty_1.png`), ITT ≈ **+\$1,624** (`Chetty_2.png`).
+  (3) **IV** — 3 requirements (first stage / as-if random / exclusion restriction), the Wald
+  estimator $\lambda=\rho/\phi=1624/0.4766\approx\$3{,}400$, exclusion-restriction violation DAG
+  (lottery→optimism→income), **LATE**/complier tree + monotonicity, learning goal 2: moving ≈
+  **+\$3,477** (`Chetty_3.png`, TOT).
+- **Exercises:**
+  - Ex1 = **replicate Legewie** (`../assets/Legewie_ESS_02.dta`, 27 MB, from Absalon): weighted OLS
+    `anti_immi ~ treat` for **Portugal** (+0.33 SD, p≈0.005) then **Sweden** (n.s.), coefficient
+    plots. A `prepare()` helper factors out the date/treatment/index wrangling so the sample
+    restriction is the one line students change. Same hidden-load / shown-`eval=FALSE` pattern.
+  - Ex2 = **Minneapolis DV** (`masteringmetrics::mdve`, Sherman & Berk 1984): recode assigned vs
+    actual policing → compliers = **268**; race balance on *assigned* (balanced) vs *actual* (not);
+    first stage **0.79**; reduced form 0.114 (given); **IV/LATE = 0.114/0.79 ≈ 0.14**.
+  - **`masteringmetrics` was NOT actually installed** (despite the old about.qmd note) — had to
+    `remotes::install_github("jrnold/masteringmetrics", subdir="masteringmetrics")` (pulled
+    `clubSandwich`). Needed for ex2 rendering; it's in the course setup list.
+- **Modernised:** dropped `essentials::as.scalar` + `furniture::rowmeans` → base `rowMeans(across())`
+  + `sqrt(diag(vcov()))`.
+- **Images localised** to `img/L7/` (Joscha2/4, Chetty_1/2/3, `snow_map.jpg` — John Snow's 1854
+  cholera map, downloaded from Wikimedia at 20k px/19 MB, **`sips --resampleWidth 1400`** → 0.5 MB;
+  do this for any big downloaded image). Dropped the deck's many decorative stock hotlinks.
+- **TikZ gotcha (new):** edge **quote-labels** `to["?"]` / `to["$\phi$"]` need
+  `\usetikzlibrary{quotes}` (on top of `shapes.geometric` from L9) — render dies "I do not know
+  the key '/tikz/\"?\"'" otherwise.
+- Verified: **28 slides, zero overflow, no collapsed images**, all DAGs + the complier tree
+  render, no tofu/errors; both exercises embed webexercises (MCQs + fitb). Wired into `_quarto.yml`
+  + `lectures.qmd`.
+- **Two float-clearing bugs fixed** (the recurring one — see Design system): the "RCT vs.
+  natural experiment" DAG (moved *above* the two floated boxes) and the "RCT vs. ITT" green box
+  (`style="clear: both;"`). The overflow sweep misses these; caught by eyeballing.
+- **Didactic pass (professor asked "can students really follow IV?" — honest answer: not from the
+  slides alone).** He chose two on-slide additions (declined restoring speaker notes / rolling out
+  the exercise link): (1) a **"cast of characters"** anchor table mapping Z/D/Y/C/φ/ρ/λ to the MTO
+  story; (2) a **"why divide? dilution intuition"** slide before the Wald algebra; (3) the exclusion
+  restriction reworked into a **blue-question → red-reveal** ask-then-reveal ("the one requirement
+  you cannot test"); (4) a sharper **complier-cancellation** line (never/always-takers add nothing
+  to ρ or φ).
+- **Speaker notes restored + edited (2026-07-13, professor asked):** the "little text, lots of
+  visuals" style puts the didactic load on the lecturer's talk. Ported the original xaringan `???`
+  presenter notes into **concise, edited `::: {.notes}`** on ~18 slides (press **`s`** for speaker
+  view; they're `display:none` on the slide itself). Kept them to 2–3 presenter-cue sentences each,
+  tightened/improved vs. the originals (added "ask first, then reveal" prompts, misconception flags,
+  bridge lines). **Only L7 has notes so far — L1–6 and L9 still lack them** (offer to port those on
+  request; it's the same high-leverage move for every deck).
+- **Exercise scroll fix:** the embedded exercise iframe (content ~1485 px in a scaled-0.72, 620 px
+  window with macOS overlay scrollbars) is hard to scroll — added a prominent **"Open exercise N in
+  a new tab ↗"** link + `scrolling="yes"` + a border on both L7 "Your turn" slides. **Other decks
+  (L2–6, L9) still use the old `scrolling="auto"` iframe with no link** — professor declined the
+  course-wide rollout for now, but it's the same latent issue everywhere.
+
 ## Lecture 5 (2026-07-13) — Selection bias (potential outcomes, confounding, DAGs)
 `5-Selection-bias.qmd` (26 slides) + `5-exercise1/2.Rmd`. The course's conceptual core — a mostly
 **faithful port** (the pedagogy was already strong), restructured into the template + modernised
@@ -202,9 +262,14 @@ colonialism dropped entirely.
   `dale_estimating_2002` were all already in `Stats_II.bib`.
 - **TikZ gotcha (new):** the `ellipse` node shape needs `\usetikzlibrary{shapes.geometric,...}`
   (not just `arrows.meta, positioning`) — the render dies with "I do not know the key '/tikz/
-  ellipse'" otherwise. Also: **a bare TikZ/image block placed *after* two `.push-left`/
-  `.push-right` floats collapses into the float gap (0 height)** — put the diagram *before* the
-  floated boxes (or inside a column). Bit us on the confounder/mediator DAG.
+  ellipse'" otherwise. Also — **the recurring float bug (bit L9 once, L7 twice):** `.push-left`/
+  `.push-right` are `float:left/right`, so **any full-width element that follows both of them on the
+  same slide — an image, a TikZ DAG, *or* a callout box — gets sucked up into the float gap** (an
+  image collapses to ~0 height; a box's background slides *behind* the two and its text squeezes
+  into the gap). **Two fixes:** put the element *before* the two floats (works for a leading
+  diagram), or give the trailing element `style="clear: both;"` (works for a closing takeaway box,
+  e.g. `::: {.content-box-green style="clear: both;"}`). The overflow sweep does **not** catch this
+  — eyeball any slide that has two floats plus a third block.
 - Verified in-browser: **30 slides, zero overflow, no collapsed images, no tofu, no R errors**;
   all 5 DAGs render; Frisch–Waugh coefficients match; both exercises embed webexercises
   (MCQs + fitb + solution toggles). Wired into `_quarto.yml` + `lectures.qmd`.
@@ -491,8 +556,9 @@ ChatGPT/Gemini (Bard is dead). REMEMBER: render exercises with `rmarkdown::rende
    dropped). ~~Lecture 9~~ — done 2026-07-06 (Multiple OLS in practice; colonial exercises +
    hand-coded socialism replaced with the V-Dem triangle + carbon divide — see its section
    above). ~~Lecture 5~~ — done 2026-07-13 (Selection bias; faithful port + modernised, APAD
-   integration paradox). **Done so far: L1–6, 9. Next: Lecture 7 (`static/Lectures/7-NatExp-IV1/`,
-   deck + exercises).** Then 8, 10 → 14. (Colonialism is now fully gone from the course.)
+   integration paradox). ~~Lecture 7~~ — done 2026-07-13 (Natural experiments & IV; Legewie Bali +
+   MTO/IV + Minneapolis). **Done so far: L1–7, 9. Next: Lecture 8 (`static/Lectures/8-Multiple-OLS/`,
+   deck + exercises).** Then 10 → 14. (Colonialism is now fully gone from the course.)
    The DAG/IV/RDD decks (7, 10, 13) are the heaviest. For each deck: faithful port → template
    standards (see "Feedback round") → check external image URLs → add to `lectures.qmd` +
    `_quarto.yml` `render:` → render → verify slides fit in the browser.

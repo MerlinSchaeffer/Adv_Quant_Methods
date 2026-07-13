@@ -1,0 +1,157 @@
+---
+title: "Exercise 1 (20 minutes)"
+subtitle: "You practice: replicating a natural experiment — the causal effect of the Bali 2002 attack on xenophobia. When you're done, assist some of the others …"
+output: webexercises::webexercises_default
+---
+
+```{r setup, include = FALSE}
+options(htmltools.dir.version = FALSE, servr.interval = 0.5, width = 115, digits = 2)
+knitr::opts_chunk$set(
+  collapse = TRUE, message = FALSE,
+  warning = FALSE, cache = FALSE,
+  comment = "#", strip.white = TRUE)
+
+library(webexercises)
+
+num_fitb <- function(x, digits = 2, width = 6) {
+  a <- format(round(x, digits), nsmall = digits)
+  fitb(unique(c(a, sub(".", ",", a, fixed = TRUE))), width = width)
+}
+```
+
+```{r hidden-read, include = FALSE}
+pacman::p_load(tidyverse, haven, estimatr, modelsummary)
+ESS_raw <- read_dta("../assets/Legewie_ESS_02.dta") # rendered from the repo
+```
+
+1. Download `Legewie_ESS_02.dta` from Absalon, then copy in this starter code. It defines the
+   attack window and prepares the data — keeping only **Portuguese** mainstream respondents:
+
+```{r eval = FALSE}
+pacman::p_load(tidyverse, haven, estimatr, modelsummary)
+ESS_raw <- read_dta("Legewie_ESS_02.dta") # from your project folder
+```
+
+```{r prep}
+event_date <- as.Date("2002-10-13")   # the Bali attack
+win_begin  <- as.Date("2002-09-14")
+win_end    <- as.Date("2002-10-20")
+
+prepare <- function(data, countries) {
+  data %>%
+    mutate(
+      int_date = as.Date(sprintf("%s-%s-%s", inwyr, inwmm, inwdd)),
+      treat = case_when(
+        int_date > event_date & int_date <= win_end   ~ "After the attack",
+        int_date < event_date & int_date > win_begin  ~ "Before the attack",
+        TRUE ~ NA_character_) %>% fct_relevel("Before the attack", "After the attack"),
+      # Anti-immigrant index: average 7 items, z-standardise, flip so high = xenophobic
+      anti_immi = rowMeans(across(c(imtcjob, imbleco, imbgeco, imueclt,
+                                    imwbcnt, imwbcrm, imbghct)), na.rm = TRUE) %>%
+        scale() %>% as.numeric(),
+      anti_immi = max(anti_immi, na.rm = TRUE) - anti_immi,
+      across(c(brncntr, mocntr, facntr), as_factor),
+      pspwght = pweight * dweight
+    ) %>%
+    filter(str_detect(cntry, countries) &                 # <- sample restriction
+             brncntr == "yes" & mocntr == "yes" & facntr == "yes") %>%
+    select(treat, anti_immi, cntry, pspwght) %>%
+    drop_na()
+}
+
+ESS <- prepare(ESS_raw, "PT") # Portugal only
+```
+
+```{r solutions, include = FALSE}
+ols_pt <- lm_robust(anti_immi ~ treat, data = ESS, weights = pspwght)
+b_pt  <- coef(ols_pt)["treatAfter the attack"]
+se_pt <- sqrt(diag(vcov(ols_pt)))["treatAfter the attack"]
+
+ESS2 <- prepare(ESS_raw, "PT|SE")
+ols_se <- lm_robust(anti_immi ~ treat, data = ESS2 %>% filter(cntry == "SE"),
+                    weights = pspwght)
+b_se  <- coef(ols_se)["treatAfter the attack"]
+```
+
+> **Stuck?**
+>
+> - `read_dta()` can't find the file? `Legewie_ESS_02.dta` must sit **in your project folder**.
+> - Odd results? *Session → Restart R*, then rerun from the top.
+> - Still stuck? Ask in the [t-R-ouble forum](https://absalon.ku.dk/courses/70545/discussion_topics/563046?module_item_id=2037268) on Absalon.
+
+2. Estimate the treatment effect with a **weighted OLS** of `anti_immi` on `treat`. Among the
+   Portuguese, the average causal effect of the Bali attack is
+   `r num_fitb(b_pt)` standard deviations (two digits; point or comma is fine).
+
+`r hide("R solution -> don't peek too early ;) !")`
+```{r results = 'asis'}
+ols_pt <- lm_robust(anti_immi ~ treat, data = ESS, weights = pspwght)
+modelsummary(list("Xenophobia (PT)" = ols_pt), stars = TRUE,
+             coef_rename = c("treatAfter the attack" = "After the attack"),
+             gof_map = c("nobs", "r.squared"))
+```
+`r unhide()`
+
+3. Its standard error is `r num_fitb(se_pt)` — less than half the coefficient, so the effect **is**
+   statistically significant (the *t*-value clears the usual threshold of `r fitb(c("1.96","1,96"), width = "4")`).
+
+4. Make a **coefficient plot** of the Portuguese effect (drop the intercept).
+
+`r hide("R solution -> don't peek too early ;) !")`
+```{r out.width='90%', fig.height = 3, fig.width = 7, results = FALSE}
+plotdata_pt <- ols_pt %>% tidy() %>%
+  filter(term != "(Intercept)") %>%
+  mutate(term = "After the attack", cntry = "Portugal")
+
+ggplot(plotdata_pt, aes(y = estimate, x = cntry,
+                        ymin = conf.low, ymax = conf.high)) +
+  geom_hline(yintercept = 0, color = "#901A1E", lty = "dashed") +
+  geom_pointrange() + coord_flip() +
+  labs(x = "", y = "Change in xenophobia after the attack (SD)") +
+  theme_minimal()
+```
+`r unhide()`
+
+5. Now **add Sweden**: change the sample restriction to `"PT|SE"`, then estimate the effect for
+   Sweden only (`data = ESS2 %>% filter(cntry == "SE")`). The Swedish effect is
+   `r num_fitb(b_se)`, and it is `r mcq(c("statistically significant", answer = "not statistically significant"))`.
+
+`r hide("R solution -> don't peek too early ;) !")`
+```{r results = 'asis'}
+ESS2 <- prepare(ESS_raw, "PT|SE")
+ols_se <- lm_robust(anti_immi ~ treat, data = ESS2 %>% filter(cntry == "SE"),
+                    weights = pspwght)
+modelsummary(list("Xenophobia (SE)" = ols_se), stars = TRUE,
+             coef_rename = c("treatAfter the attack" = "After the attack"),
+             gof_map = c("nobs", "r.squared"))
+```
+`r unhide()`
+
+6. **Write one sentence** (as a `# comment`) comparing the two countries, then check:
+
+`r hide("Model answer")`
+*The Bali attack raised xenophobia by about `r round(b_pt, 2)` SD in Portugal (significant) but
+only `r round(b_se, 2)` SD in Sweden (not significant) — the same shock produced different
+reactions in different societies. Look at you: this is exactly the kind of natural-experiment
+analysis published in the American Journal of Sociology.*
+`r unhide()`
+
+------------------------------------------------------------------------------
+
+**Bonus (for the fast):** combine both into one coefficient plot with
+`bind_rows(plotdata_pt, plotdata_se, .id = "id")` and colour by country.
+
+`r hide("R solution")`
+```{r out.width='90%', fig.height = 3.2, fig.width = 7, results = FALSE}
+plotdata_se <- ols_se %>% tidy() %>%
+  filter(term != "(Intercept)") %>% mutate(cntry = "Sweden")
+
+bind_rows(plotdata_pt, plotdata_se) %>%
+  ggplot(aes(y = estimate, x = reorder(cntry, estimate),
+             ymin = conf.low, ymax = conf.high)) +
+  geom_hline(yintercept = 0, color = "#901A1E", lty = "dashed") +
+  geom_pointrange() + coord_flip() +
+  labs(x = "", y = "Change in xenophobia after the attack (SD)") +
+  theme_minimal()
+```
+`r unhide()`
