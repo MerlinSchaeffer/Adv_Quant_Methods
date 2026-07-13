@@ -1,0 +1,144 @@
+---
+title: "Exercise 1 (20 minutes)"
+subtitle: "You practice: the naïve comparison — on a new outcome, support for an anti-discrimination law. When you're done, assist some of the others …"
+output: webexercises::webexercises_default
+---
+
+```{r setup, include = FALSE}
+options(htmltools.dir.version = FALSE, servr.interval = 0.5, width = 115, digits = 2)
+knitr::opts_chunk$set(
+  collapse = TRUE, message = FALSE,
+  warning = FALSE, cache = FALSE,
+  comment = "#", strip.white = TRUE)
+
+library(webexercises)
+
+# Fill-in-the-blank that accepts point AND comma decimals (Danish keyboards!)
+num_fitb <- function(x, digits = 2, width = 6) {
+  a <- format(round(x, digits), nsmall = digits)
+  fitb(unique(c(a, sub(".", ",", a, fixed = TRUE))), width = width)
+}
+```
+
+```{r hidden-load, include = FALSE}
+pacman::p_load(tidyverse, estimatr, modelsummary)
+load("../assets/APAD.RData") # rendered from the repo; you use your own copy below
+```
+
+1. Download the **APAD** dataset from Absalon into your project folder, then copy in this starter
+   code — the same preparation as on the slides:
+
+```{r eval = FALSE}
+pacman::p_load(tidyverse, estimatr, modelsummary)
+load("APAD.RData") # from your project folder
+```
+
+```{r prep}
+APAD <- APAD %>%
+  mutate(
+    news    = news_hrs * 60 + news_mins,
+    news_yn = if_else(news >= 15, 1, 0)
+  )
+```
+
+```{r solutions, include = FALSE}
+ols_law <- lm_robust(antidiscr_law ~ news_yn, weights = gewFAKT, data = APAD)
+b_law  <- coef(ols_law)["news_yn"]
+se_law <- sqrt(diag(vcov(ols_law)))["news_yn"]
+```
+
+> **Stuck?**
+>
+> - Did `pacman::p_load(...)` run without red errors? Fix that first.
+> - **`load()` can't find the file?** `APAD.RData` must sit **in your project folder** — the same
+>   folder as your `.Rproj`. Check with `list.files()`.
+> - Odd results? *Session → Restart R*, then rerun from the top.
+> - Still stuck? Ask in the [t-R-ouble forum](https://absalon.ku.dk/courses/70545/discussion_topics/563046?module_item_id=2037268) on Absalon.
+
+2. The variable `antidiscr_law` asks how good it is for a country to have a law against ethnic
+   discrimination at work: (1) Very bad … (5) Very good. **Write it yourself:** a weighted scatter
+   plot with `news` on the x-axis and `antidiscr_law` on the y-axis, dot size = the weight
+   `gewFAKT`, and a weighted regression line.
+
+`r hide("Hint")`
+Map `size = gewFAKT` inside `geom_point()` and `weight = gewFAKT` inside `geom_smooth(method = "lm")`. Hide the size legend with `theme(legend.position = "none")`.
+`r unhide()`
+
+`r hide("R solution -> don't peek too early ;) !")`
+```{r out.width='100%', fig.height = 4, fig.width = 7.5, results = FALSE}
+ggplot(APAD, aes(y = antidiscr_law, x = news)) +
+  geom_point(aes(size = gewFAKT), alpha = 1/3) +
+  geom_smooth(aes(weight = gewFAKT), method = "lm") +
+  scale_y_continuous(breaks = 1:5,
+    labels = c("Very bad", "Bad", "So/so", "Good", "Very good")) +
+  labs(y = "How good is a law against ethnic discrimination?",
+       x = "Daily minutes of news consumption") +
+  theme_minimal() + theme(legend.position = "none")
+```
+`r unhide()`
+
+3. A day has only 1,440 minutes, yet some respondents reported implausibly high news time.
+   **Cap** everyone above 4 hours (240 min) at 240, then redraw. What does this cleaning step do?
+`r mcq(c("It reverses the direction of the relationship", answer = "It pulls in a few extreme outliers so the bulk of the data (and the line) is easier to read", "It makes the association strongly positive"))`
+
+`r hide("R solution -> don't peek too early ;) !")`
+```{r out.width='100%', fig.height = 4, fig.width = 7.5, results = FALSE}
+APAD <- APAD %>% mutate(news = if_else(news > 240, 240, news))
+
+ggplot(APAD, aes(y = antidiscr_law, x = news)) +
+  geom_point(aes(size = gewFAKT), alpha = 1/3) +
+  geom_smooth(aes(weight = gewFAKT), method = "lm") +
+  scale_y_continuous(breaks = 1:5,
+    labels = c("Very bad", "Bad", "So/so", "Good", "Very good")) +
+  labs(y = "How good is a law against ethnic discrimination?",
+       x = "Daily minutes of news consumption") +
+  theme_minimal() + theme(legend.position = "none")
+```
+`r unhide()`
+
+4. **Before you compute:** using the binary `news_yn`, do you expect news readers to support the
+   law *more* or *less* than non-readers — and strongly?
+`r mcq(c("Much more, clearly significant", answer = "Barely any difference, not significant", "Much less, clearly significant"))`
+
+5. Now run the weighted OLS `antidiscr_law ~ news_yn` and read off:
+
+- News readers support the law by `r num_fitb(b_law)` points more/less than non-readers
+  (two digits; a leading minus and point *or* comma are fine).
+- Its standard error is `r num_fitb(se_law)`.
+
+`r hide("R solution -> don't peek too early ;) !")`
+```{r results = 'asis'}
+ols_law <- lm_robust(antidiscr_law ~ news_yn, weights = gewFAKT, data = APAD)
+
+modelsummary(list("Anti-discr. law" = ols_law), stars = TRUE,
+             coef_rename = c("news_yn" = "Reads news"),
+             gof_map = c("nobs", "r.squared"))
+```
+`r unhide()`
+
+6. **Write one sentence** (as a `# comment`) interpreting the coefficient, then compare:
+
+`r hide("Model answer")`
+*Among these `r nrow(APAD)` respondents, news readers support an anti-discrimination law about
+`r abs(round(b_law, 2))` points **less** than non-readers, on average — but the difference is tiny
+and **not** statistically significant (SE `r round(se_law, 2)` is larger than the coefficient). And,
+as in the lecture, this is a **naïve, confounded** comparison, not a causal effect.*
+`r unhide()`
+
+------------------------------------------------------------------------------
+
+**Bonus (for the fast):** news readers and non-readers differ in age. Add `age` to the model
+(`antidiscr_law ~ news_yn + age`). Does the `news_yn` coefficient change once age is held constant?
+
+`r hide("R solution")`
+```{r results = 'asis'}
+modelsummary(
+  list("Naïve" = lm_robust(antidiscr_law ~ news_yn, weights = gewFAKT, data = APAD),
+       "+ age" = lm_robust(antidiscr_law ~ news_yn + age, weights = gewFAKT, data = APAD)),
+  stars = TRUE, coef_rename = c("news_yn" = "Reads news"),
+  gof_map = c("nobs", "r.squared"))
+```
+
+Adjusting for one confounder (age) already nudges the coefficient — a first taste of the multiple
+regression to come. But age is only *one observed* difference; unobserved ones remain.
+`r unhide()`

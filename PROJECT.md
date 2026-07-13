@@ -87,6 +87,16 @@ A refinement round over both the deck and the website. New conventions that the 
 - **Homepage principle (professor):** no duplicate navigation — the hero has *no* buttons (the
   "Find your way" cards are the navigation), and the "New here? Start with About & setup" callout
   sits directly under the hero, before "Your week, every week".
+- **Replicated studies flagged in the reading lists (2026-07-06, professor-requested):** every
+  study whose *original data students load and re-run in R* is listed as a **skim** reading under
+  its lecture in `lectures.qmd` (NOT on the landing page — professor moved it there), each with a
+  bold "— … you replicate in R." tag. The five (course-wide, migrated or not): Schaeffer & Kas 2024
+  (APAD survey experiment, L5–6), Sherman & Berk 1984 (Minneapolis DV field experiment, L7),
+  Legewie 2013 (terror-attack natural experiment, L7; also used L8/11, `Legewie_ESS_02.dta`),
+  Angrist & Krueger 1991 (quarter-of-birth IV, L10), Manacorda, Miguel & Vigorito 2011 (cash-transfer
+  RDD, L13). *Criterion = hands-on replication;* Card & Dahl 2011 and Dale & Krueger 2002 (L9) are
+  shown as published tables, **not** re-run, so they are excluded. Manacorda is **not** in
+  `Stats_II.bib` (cited inline only; DOI 10.1257/app.3.3.1 verified via Crossref).
 - **Weekly readings (added 2026-07-06):** each migrated lecture in `lectures.qmd` carries a
   `<ul class="readings">` with one `<li>` per source (styled in `ku-web.scss`: red bullet +
   a `.rtag` badge — `.rtag-read` / `.rtag-skim`). "Your week, every week" on `index.qmd` leads
@@ -123,6 +133,37 @@ A refinement round over both the deck and the website. New conventions that the 
   `remotes::install_github("xmarquez/democracyData")`** — it is used in Lecture 9 and was in the
   final checklist but was never actually installed by the old steps. All four GitHub installs
   verified to exist (masteringmetrics, ROS-Examples/rpackage, vdemdata, democracyData).
+
+## Lecture 5 (2026-07-13) — Selection bias (potential outcomes, confounding, DAGs)
+`5-Selection-bias.qmd` (26 slides) + `5-exercise1/2.Rmd`. The course's conceptual core — a mostly
+**faithful port** (the pedagogy was already strong), restructured into the template + modernised
+code. Co-authored deck: kept **"Friedolin Merhout & Merlin Schaeffer"** in the author line.
+- **Running example = the APAD "integration paradox"** (`schaeffer_integration_2024` — one of the
+  studies students replicate, now flagged in the L5 readings). RQ: does consuming **news** increase
+  how often immigrant minorities **report discrimination**? Naïve weighted OLS `dis_index ~ news_yn`
+  gives **−0.093 (SE 0.129, n.s.)** — looks like *no* effect, but the comparison is confounded.
+- **3-part arc:** (1) hypothesis = counterfactual comparison + the naïve OLS; (2) **potential
+  outcomes** (Ferda's personal effect; the fundamental problem; ACE; Ferda-vs-Tuki selection-bias
+  decomposition: observed diff = true effect +2 **+** selection bias −3; the population formula);
+  (3) **DAGs** — backdoor path, confounder = selection bias, the German-citizen → news & discr.
+  DAG, verdict "correlation ≠ causation". A **balance test** (`datasummary_balance`) shows news
+  readers are older (44 vs 37) & more often German citizens — the observed face of the bias.
+- **Data:** local `../assets/APAD.RData` (18 KB, ships with repo; students download from Absalon —
+  no API, so no tryCatch). Prep: `news` (mins), `news_yn` (≥15 min), `dis_index` = `rowMeans` of
+  6 domains. **Modernised:** dropped `essentials::as.scalar` / `furniture::rowmeans` (not on CRAN
+  for R 4.6) → base `rowMeans` + `sqrt(diag(vcov()))`.
+- **Exercises = APAD, a *different* outcome** (`antidiscr_law`, support for an anti-discrimination
+  law; naïve OLS ≈ −0.10, n.s.): Ex1 = weighted scatter + outlier-cap cleaning + weighted OLS
+  (coef/SE fitb) + bonus (add `age` control); Ex2 = draw a DAG + `datasummary_balance` on racial
+  `appearance` (5 categories) + brainstorm *unobserved* confounders. **Exercise data-load pattern:**
+  hidden `load("../assets/APAD.RData")` for the render + a shown `eval=FALSE` `load("APAD.RData")`
+  for students (same split as L3's ESS exercises — a bare visible `load()` would fail at render).
+- **Images localised** to `img/L5/` (`Meta.png` = the Schaeffer & Kas meta-analysis forest plot,
+  280 estimates; `fork.png` = the fundamental problem). Dropped the deck's many decorative stock
+  hotlinks. TikZ DAGs use the `shapes.geometric` library (L9 gotcha).
+- Verified: **26 slides, zero overflow** (balance table wrapped in `.small` to fit), DAGs + all
+  math render, no tofu/errors; both exercises embed webexercises. Wired into `_quarto.yml` +
+  `lectures.qmd` (L5 now links slides + 2 exercises).
 
 ## Lecture 9 (2026-07-06) — Multiple OLS in practice (confounders, mediators, summary controls)
 `9-Mult-OLS-in-practice.qmd` (30 slides) + `9-exercise1/2.Rmd`. **Not a faithful port** — this is
@@ -449,8 +490,9 @@ ChatGPT/Gemini (Bard is dead). REMEMBER: render exercises with `rmarkdown::rende
    ~~Lecture 4~~ — done 2026-07-06 (OLS wisdoms, rebuilt as "the carbon divide"; colonialism
    dropped). ~~Lecture 9~~ — done 2026-07-06 (Multiple OLS in practice; colonial exercises +
    hand-coded socialism replaced with the V-Dem triangle + carbon divide — see its section
-   above). **Next: Lecture 5 (`static/Lectures/5-Selection-bias/`, deck + exercises).** Then
-   7, 8, 10 → 14. (Colonialism is now fully gone from the course.)
+   above). ~~Lecture 5~~ — done 2026-07-13 (Selection bias; faithful port + modernised, APAD
+   integration paradox). **Done so far: L1–6, 9. Next: Lecture 7 (`static/Lectures/7-NatExp-IV1/`,
+   deck + exercises).** Then 8, 10 → 14. (Colonialism is now fully gone from the course.)
    The DAG/IV/RDD decks (7, 10, 13) are the heaviest. For each deck: faithful port → template
    standards (see "Feedback round") → check external image URLs → add to `lectures.qmd` +
    `_quarto.yml` `render:` → render → verify slides fit in the browser.

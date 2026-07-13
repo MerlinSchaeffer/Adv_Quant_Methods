@@ -1,0 +1,87 @@
+---
+title: "Exercise 2 (20 minutes)"
+subtitle: "You practice: DAGs and a balance test — is racial appearance balanced across news readers? When you're done, assist some of the others …"
+output: webexercises::webexercises_default
+---
+
+```{r setup, include = FALSE}
+options(htmltools.dir.version = FALSE, servr.interval = 0.5, width = 115, digits = 2)
+knitr::opts_chunk$set(
+  collapse = TRUE, message = FALSE,
+  warning = FALSE, cache = FALSE,
+  comment = "#", strip.white = TRUE)
+
+library(webexercises)
+
+pacman::p_load(tidyverse, estimatr, modelsummary)
+
+# Load and prepare APAD (see Exercise 1's "Stuck?" box if load() fails)
+load("../assets/APAD.RData")
+APAD <- APAD %>%
+  mutate(
+    news    = news_hrs * 60 + news_mins,
+    news_yn = if_else(news >= 15, 1, 0)
+  )
+```
+
+*(Keep working in the R script from Exercise 1 — you already have `APAD` prepared.)*
+
+1. **Draw a DAG with a neighbour** (pen and paper is fine). Start with two nodes — **News
+   consumption** and **Support for an anti-discrimination law** — and an arrow from the first to
+   the second. Now skim the APAD variables and add any **confounders** you can think of: a
+   confounder needs an arrow into *both* nodes.
+
+`r hide("Some candidates")`
+Age, German citizenship, immigrant generation, education, or racial appearance could all plausibly
+shape *both* how much news someone follows *and* their attitudes toward anti-discrimination law —
+each one opens a backdoor path.
+`r unhide()`
+
+2. **Write it yourself: a balance test.** The variable `appearance` records how a respondent's
+   looks are typically described in Germany (White, Black, Asian, Arabic, Southern). Test whether
+   `appearance` is balanced across news readers vs. non-readers.
+
+`r hide("Hint")`
+`select()` just `news_yn`, `appearance`, and `gewFAKT`; `rename(weights = gewFAKT)` so it is treated as a weight; then `datasummary_balance(~ news_yn, data = .)`.
+`r unhide()`
+
+`r hide("R solution -> don't peek too early ;) !")`
+```{r results = 'asis'}
+APAD %>%
+  select(news_yn, appearance, gewFAKT) %>%
+  rename(weights = gewFAKT) %>%
+  datasummary_balance(~ news_yn, data = .,
+                      title = "Racial appearance of news readers vs. non-readers")
+```
+`r unhide()`
+
+3. Read your balance table. What does it tell you?
+`r mcq(c("Appearance is perfectly balanced, so it cannot bias the comparison", answer = "The groups differ in their racial-appearance mix — a sign the comparison is confounded", "The table proves that appearance causes news reading"))`
+
+4. **Write one sentence** (as a `# comment`) explaining *why* an imbalance in `appearance` matters
+   for our estimate. Then compare:
+
+`r hide("Model answer")`
+*If people who are racialised differently both follow the news differently **and** face different
+levels of discrimination (and hold different views on anti-discrimination law), then appearance
+sits on a backdoor path — the raw news–attitude difference is partly selection bias, not a causal
+effect.*
+`r unhide()`
+
+------------------------------------------------------------------------------
+
+5. **Discuss with your neighbour** — the limits of a balance test:
+
+   a. A balance test can only check variables we **measured**. Name two **unobserved** confounders
+      that are *not* in the APAD data but could bias the news effect.
+   b. For each, say how it might shape *news consumption* and *support for the law*.
+   c. Why can no balance test ever *prove* that a comparison is unbiased?
+
+`r hide("Talking points")`
+**(a/b)** For example: political interest (drives more news *and* stronger pro-law attitudes);
+experiences of discrimination from family (shape both media diet and attitudes); trust in
+institutions; personality. **(c)** Balance on *observed* variables says nothing about the
+*unobserved* ones — and the baseline $Y_0$ we truly care about is never seen. Only a design that
+makes the groups comparable *by construction* (next week: **randomized experiments**) can close
+every backdoor at once.
+`r unhide()`
