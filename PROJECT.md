@@ -134,6 +134,60 @@ A refinement round over both the deck and the website. New conventions that the 
   final checklist but was never actually installed by the old steps. All four GitHub installs
   verified to exist (masteringmetrics, ROS-Examples/rpackage, vdemdata, democracyData).
 
+## Lecture 8 (2026-07-21) — Multiple OLS: adjusting for observed confounders
+`8-Multiple-OLS.qmd` (31 slides) + `8-exercise1/2.Rmd`. **Not a faithful port — deliberately
+rebuilt** (professor chose this after a pre-port review). The original L8 no longer fitted the
+course: as ported, **L7 had absorbed most of it**. The old deck's Part 1 was a Minneapolis/IV
+recap (= L7's exercise 2), its Part 2 re-taught the Legewie Bali design (= L7's lecture Part 1
+*and* exercise 1), and its single exercise was near-identical to L7's exercise 1. Its own schedule
+slide said "re-visited" twice. Students would have met Bali a third time.
+- **New spine = omitted variable bias**, which was the genuinely unique and best-taught content in
+  the original. **3-part arc:** (1) *the crack in last week's natural experiment* — Legewie's
+  balance table shows the treated are younger (reachability bias), age-as-confounder DAG, then a
+  **simulated toy example where we set the truth to 1** and watch bivariate OLS return 0.17 while
+  multiple OLS returns 1.14; (2) *omitted variable bias* — the gap built up arithmetically, the
+  formula $\tilde\beta = \beta + (\beta_{C \rightarrow Y} \times \beta_{D \rightarrow C})$ verified
+  on screen (1.135 + −0.961 = 0.174, exact), the **sign table** (bias direction from two signs),
+  and a vocabulary slide tidying selection/confounder/omitted-variable bias; (3) *how OLS does it*
+  — Frisch–Waugh 3 steps, "why it works" (down-weights typical cases, up-weights untypical),
+  estimation is still OLS, **what multiple OLS cannot fix** (observed vs unobserved confounder DAG,
+  the honesty slide), then the applied Bali/Portugal payoff.
+- **~10 slides of IV recap replaced by one "Where we are" bridge slide** ranking the three designs
+  by credibility: randomize (L6) > natural experiment (L7) > adjust (today). Blunt on purpose.
+- **Frisch–Waugh is deliberately in BOTH L8 and L9** (professor's call): L8 derives it on the toy
+  data, L9 revisits it on real cross-country data as spaced repetition. L8 carries a forward
+  reference; **L9 was not edited.**
+- **Real-data payoff (Portugal, `../assets/Legewie_ESS_02.dta`, 26 MB, from Absalon):** bivariate
+  **0.330** (matches L7's reported +0.33 — continuity is intentional) → adjusted for age **0.313**;
+  the decomposition closes exactly (0.313 + 0.0064 × 2.619 = 0.330). **The shift is deliberately
+  small and the slide teaches why:** in Portugal the treated are *older* (sign flips vs. Legewie's
+  pooled sample) but age barely predicts xenophobia (0.0064/year), so a big imbalance × a tiny
+  effect = a tiny bias. Reinforces the product rule from the formula slide.
+- **Exercises (both new):**
+  - Ex1 = the **adjusted** Bali effect for Portugal with age + gender + employment (0.330 → **0.279**,
+    still significant). Deliberately de-duplicated from L7 ex1, which did the *bivariate* PT + Sweden;
+    this one reuses last week's `prepare()` extended with the three controls. Bonus isolates age
+    alone (0.31) to show gender/employment do most of the remaining work.
+  - Ex2 = **NEW, no data needed**: students get a `simulate_toy(b_bali, b_age, selection, seed)`
+    function and turn the knobs. `b_age = 0.9` → the bivariate estimate goes **negative** (a strong
+    enough confounder flips the sign); `b_age = 0` → bias vanishes *despite* a 3-year imbalance
+    (the product rule); `selection = +0.1` → bias changes sign, estimate now too large;
+    **`selection = 0` → bivariate = adjusted, i.e. what an RCT looks like** (callback to L6).
+    Bonus: vary the seed to separate *bias* from *sampling error* (callback to L3).
+- **Images:** `img/L8/Joscha3.png` (balance table) + `Joscha5.png` (published adjusted models),
+  localized from the original. Joscha2/4 were already in `img/L7/` and are **not** duplicated.
+- **Readings:** Legewie added as a **skim** under L8 in `lectures.qmd` (students re-run his data
+  again this week) — per the replicated-studies convention.
+- Dropped from the original: `essentials`, `furniture::rowmeans`, `equatiomatic`, three
+  `letstimeit` iframes, the dead `api.time.com` hotlink (returns 000) and all other stock hotlinks.
+- Verified in-browser: **31 slides, 21 speaker notes, zero overflow, zero R errors, no tofu**; all
+  4 TikZ DAGs render (incl. the `double`-circle observed-confounder node); both exercises embed
+  webexercises and **grade correctly** — `num_fitb()` accepts the Danish comma (`0,17` marked
+  correct), MCQs mark correct/incorrect. Wired into `_quarto.yml` + `lectures.qmd`.
+- **One layout fix during the build** (the recurring pattern): the "Where the gap comes from" slide
+  overflowed by 40px with code + table + callout all stacked in the right column — fixed by moving
+  the Discuss box to the near-empty left column.
+
 ## Lecture 7 (2026-07-13) — Natural experiments & instrumental variables
 `7-NatExp-IV1.qmd` (28 slides) + `7-exercise1/2.Rmd`. The heaviest deck so far (2 running studies +
 the whole IV apparatus). Mostly **faithful port**, restructured + trimmed (the original repeated the
@@ -584,8 +638,13 @@ ChatGPT/Gemini (Bard is dead). REMEMBER: render exercises with `rmarkdown::rende
    hand-coded socialism replaced with the V-Dem triangle + carbon divide — see its section
    above). ~~Lecture 5~~ — done 2026-07-13 (Selection bias; faithful port + modernised, APAD
    integration paradox). ~~Lecture 7~~ — done 2026-07-13 (Natural experiments & IV; Legewie Bali +
-   MTO/IV + Minneapolis). **Done so far: L1–7, 9. Next: Lecture 8 (`static/Lectures/8-Multiple-OLS/`,
-   deck + exercises).** Then 10 → 14. (Colonialism is now fully gone from the course.)
+   MTO/IV + Minneapolis). ~~Lecture 8~~ — done 2026-07-21 (Multiple OLS, **rebuilt around omitted
+   variable bias** after a pre-port review found it duplicated L7 — see its section above).
+   **Done so far: L1–9. Next: Lecture 10 (`static/Lectures/10-IV-2SLS/`, deck + exercises).**
+   Then 11 → 14. (Colonialism is now fully gone from the course.)
+   **Review each deck against the already-ported ones before porting** — L8 showed that the later
+   decks were written against a course that the migration has since changed underneath them.
+   L10 (IV/2SLS) is the obvious next candidate for overlap: check it against L7's IV apparatus.
    The DAG/IV/RDD decks (7, 10, 13) are the heaviest. For each deck: faithful port → template
    standards (see "Feedback round") → check external image URLs → add to `lectures.qmd` +
    `_quarto.yml` `render:` → render → verify slides fit in the browser.

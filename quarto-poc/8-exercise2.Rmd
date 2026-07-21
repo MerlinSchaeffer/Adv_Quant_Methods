@@ -1,0 +1,230 @@
+---
+title: "Exercise 2 (20 minutes)"
+subtitle: "You practice: becoming the simulator — setting a confounder's strength and sign yourself, predicting the bias from the formula, and checking whether OLS agrees. When you're done, assist some of the others …"
+output: webexercises::webexercises_default
+---
+
+```{r setup, include = FALSE}
+options(htmltools.dir.version = FALSE, servr.interval = 0.5, width = 115, digits = 2)
+knitr::opts_chunk$set(
+  collapse = TRUE, message = FALSE,
+  warning = FALSE, cache = FALSE,
+  comment = "#", strip.white = TRUE)
+
+library(webexercises)
+
+num_fitb <- function(x, digits = 2, width = 6) {
+  a <- format(round(x, digits), nsmall = digits)
+  fitb(unique(c(a, sub(".", ",", a, fixed = TRUE))), width = width)
+}
+```
+
+```{r hidden-setup, include = FALSE}
+pacman::p_load(tidyverse, estimatr, modelsummary)
+```
+
+In exercise 1 you adjusted a real estimate — but you could never check whether the adjusted number
+was *right*, because nobody knows the true effect of the Bali attack. Here you do know it,
+**because you set it yourself.**
+
+1. Copy in this simulator. It is the lecture's toy example, wrapped in a function so you can turn
+   three knobs: the **true effect**, how strongly the confounder affects the **outcome**
+   ($\beta_{C \rightarrow Y}$), and how strongly it drives **selection into treatment**
+   ($\beta_{D \rightarrow C}$).
+
+```{r sim-fn}
+pacman::p_load(tidyverse, estimatr, modelsummary)
+
+simulate_toy <- function(b_bali    = 1,     # THE TRUTH: causal effect of Bali
+                         b_age     = 0.3,   # C -> Y : how much age drives xenophobia
+                         selection = -0.1,  # C -> D : how age drives interview timing
+                         seed      = 831983) {
+  set.seed(seed)
+  tibble(age = rnorm(n = 500, mean = 40, sd = 5)) %>%
+    mutate(
+      int_day = (selection * age) + rnorm(n = 500, mean = 0, sd = 1),
+      bali    = if_else(int_day >= mean(int_day), 1, 0),
+      xeno    = (b_bali * bali) + (b_age * age) + rnorm(n = 500, mean = 0, sd = 1)
+    )
+}
+
+toydat <- simulate_toy() # The lecture's settings
+```
+
+`r hide("Stuck?")`
+- Did `pacman::p_load(...)` run without red errors? Fix that first.
+- Getting *different* numbers from the ones below? Check you kept `seed = 831983` and did not
+  re-run `rnorm()` in between — the seed is what makes everyone's "random" data identical.
+- Odd results? *Session → Restart R*, then rerun from the top.
+- Still stuck? Ask in the [t-R-ouble forum](https://absalon.ku.dk/courses/70545/discussion_topics/563046?module_item_id=2037268) on Absalon.
+
+`r unhide()`
+
+```{r solutions, include = FALSE}
+fit3 <- function(d) {
+  bi <- coef(lm_robust(xeno ~ bali, data = d))["bali"]
+  m  <- lm_robust(xeno ~ bali + age, data = d)
+  list(bi = unname(bi),
+       adj = unname(coef(m)["bali"]),
+       cy = unname(coef(m)["age"]),
+       dc = unname(coef(lm_robust(age ~ bali, data = d))["bali"]))
+}
+A <- fit3(simulate_toy())
+B <- fit3(simulate_toy(b_age = 0.9))
+C <- fit3(simulate_toy(b_age = 0))
+D <- fit3(simulate_toy(selection = 0.1))
+E <- fit3(simulate_toy(selection = 0))
+```
+
+2. **Verify the formula.** Fit the three regressions you need, and confirm that
+   $\tilde\beta = \beta + (\beta_{C \rightarrow Y} \times \beta_{D \rightarrow C})$ actually holds.
+
+`r hide("Hint")`
+You need three models: `xeno ~ bali` (biased), `xeno ~ bali + age` (adjusted), and — the one
+students forget — `age ~ bali`, which measures the *imbalance*.
+`r unhide()`
+
+`r hide("R solution — don't peek too early ;) !")`
+```{r sol2}
+ols_bi   <- lm_robust(xeno ~ bali, data = toydat)        # biased estimate
+ols_mult <- lm_robust(xeno ~ bali + age, data = toydat)  # adjusted estimate
+ols_dc   <- lm_robust(age ~ bali, data = toydat)         # the imbalance
+
+b_bi <- coef(ols_bi)["bali"]
+b_mu <- coef(ols_mult)["bali"]
+b_cy <- coef(ols_mult)["age"]
+b_dc <- coef(ols_dc)["bali"]
+
+# Does the decomposition close?
+c(bivariate = b_bi, adjusted_plus_OVB = b_mu + (b_cy * b_dc))
+```
+`r unhide()`
+
+   The bivariate estimate is `r num_fitb(A$bi, digits = 2)`, the adjusted estimate is
+   `r num_fitb(A$adj, digits = 2)`, and the omitted variable bias is
+   `r num_fitb(A$cy * A$dc, digits = 2)`.
+   Given that you *set* the true effect to **1**, which estimate got closer?
+   `r mcq(c(answer = "The adjusted one — the bivariate estimate is badly biased downwards", "The bivariate one", "Both are equally close", "Neither is close"))`
+
+3. **Predict before you compute.** Now make the confounder *three times stronger* on the outcome —
+   `simulate_toy(b_age = 0.9)` — but change nothing else. What happens to the **bivariate**
+   estimate?
+   `r mcq(c("It gets closer to the truth of 1", "It stays about the same", answer = "It becomes even more biased — so much that it turns negative", "It doubles to about 2"))`
+
+`r hide("R solution — check your prediction")`
+```{r sol3, eval = FALSE}
+toy_strong <- simulate_toy(b_age = 0.9)
+
+lm_robust(xeno ~ bali, data = toy_strong)        # bivariate
+lm_robust(xeno ~ bali + age, data = toy_strong)  # adjusted
+```
+
+The bivariate estimate is now about **`r round(B$bi, 2)`** — it has the **wrong sign**. A strong
+enough confounder does not merely shrink an effect; it can make a genuinely positive effect look
+negative. The adjusted estimate still lands near **`r round(B$adj, 2)`**.
+`r unhide()`
+
+4. **Now break one arrow.** Set `b_age = 0` — age no longer affects xenophobia at all — but leave
+   `selection = -0.1`, so the two groups are *still* badly imbalanced on age.
+   What is the omitted variable bias now?
+
+   With `b_age = 0`, the bivariate estimate is `r num_fitb(C$bi, digits = 2)` and the
+   imbalance $\beta_{D \rightarrow C}$ is still about `r num_fitb(C$dc, digits = 1, width = 5)` years.
+   The bias is `r mcq(c(answer = "essentially zero", "still large and negative", "larger than before", "impossible to compute"))`.
+
+`r hide("Why?")`
+Because the bias is a **product**: $\beta_{C \rightarrow Y} \times \beta_{D \rightarrow C}$.
+Multiply a big imbalance by zero and you get zero. **An imbalanced variable is only a confounder
+if it also affects the outcome.** This is why "the groups differ on X" is not, by itself, an
+argument that your estimate is biased — you have to make the case for *both* arrows.
+`r unhide()`
+
+5. **Flip the selection.** Go back to `b_age = 0.3`, but set `selection = 0.1` — now *older*
+   people are more likely to end up in the treatment group. Predict the direction first, then run it.
+
+   The bivariate estimate becomes `r num_fitb(D$bi, digits = 2)`, which is
+   `r mcq(c(answer = "too large — the bias is now positive", "too small — the bias is still negative", "exactly right", "unchanged"))`
+
+`r hide("R solution")`
+```{r sol5, eval = FALSE}
+toy_flip <- simulate_toy(selection = 0.1)
+
+lm_robust(xeno ~ bali, data = toy_flip)
+lm_robust(xeno ~ bali + age, data = toy_flip)
+```
+
+Both arrows are now positive ($+ \times + = +$), so the bias is positive and the raw estimate
+**overstates** the true effect of 1. Same data-generating machinery, one sign flipped, and the
+error changes direction — exactly as the sign table on the slides predicted.
+`r unhide()`
+
+6. **The last knob is the interesting one.** Set `selection = 0`: interview timing no longer
+   depends on age at all. Fit *both* models and compare them.
+
+`r hide("R solution — don't peek too early ;) !")`
+```{r sol6}
+toy_rand <- simulate_toy(selection = 0)
+
+modelsummary(
+  list("Bivariate" = lm_robust(xeno ~ bali, data = toy_rand),
+       "Adjusted"  = lm_robust(xeno ~ bali + age, data = toy_rand)),
+  coef_rename = c("bali" = "Exposed to Bali", "age" = "Age"),
+  stars = TRUE, gof_map = c("nobs"),
+  output = "kableExtra"
+)
+```
+`r unhide()`
+
+   **Write one sentence** as a `# comment` saying what is special about this case — then compare:
+
+`r hide("Model answer")`
+With `selection = 0` the two models give essentially the **same** treatment estimate
+(≈ `r round(E$bi, 2)`), and both are close to the true effect of 1. Nothing is confounded, because
+age no longer predicts who gets treated — the imbalance term $\beta_{D \rightarrow C}$ is
+approximately zero, so the bias is zero no matter how strongly age affects xenophobia.
+
+**This is what a randomized controlled trial looks like** (Lecture 6). Randomisation sets
+$\beta_{D \rightarrow C}$ to zero *for every confounder at once* — measured or not — which is why
+an RCT needs no controls, and why it outranks anything you can do with a regression.
+`r unhide()`
+
+7. **Bonus, for the fast.** Everything above kept `seed = 831983`. Re-run the default simulation
+   with three or four different seeds and collect the adjusted estimate each time. How close to
+   the true value of 1 does it get, and why is it never *exactly* 1?
+
+`r hide("R solution")`
+```{r sol7, eval = FALSE}
+map_dbl(c(1, 42, 2024, 831983), function(s) {
+  coef(lm_robust(xeno ~ bali + age, data = simulate_toy(seed = s)))["bali"]
+})
+```
+
+The adjusted estimate scatters *around* 1 without ever landing exactly on it — that is
+**sampling error** (Lecture 3), not bias. Bias means being systematically off in one direction;
+sampling error means bouncing around the truth. Multiple OLS removed the bias here; only a larger
+sample would shrink the bounce.
+`r unhide()`
+
+8. **Discuss with your neighbour.** In this exercise you always knew the truth. Work through:
+
+   - In real research, which of the three quantities in the formula can you actually **estimate**
+     from your data, and which would you have to argue for on theoretical grounds?
+   - You adjust for a confounder and your estimate barely moves. Give **two** different
+     explanations for that.
+   - Someone claims: "I controlled for everything in the data set, so my estimate is causal."
+     What is wrong with that sentence?
+
+`r hide("Talking points")`
+- For an **observed** confounder you can estimate both arrows — $\beta_{C \rightarrow Y}$ from the
+  adjusted model and $\beta_{D \rightarrow C}$ from a balance table. For an **unobserved** one you
+  can estimate neither; you can only reason about the plausible *sign* of each arrow and thus the
+  likely direction of the bias. That reasoning is a normal, respectable part of a discussion section.
+- Two explanations: (i) the variable genuinely was not much of a confounder — one of the two arrows
+  is near zero, as in task 4; or (ii) it *is* a confounder, but its bias is being offset by another
+  confounder pulling the opposite way. A stable coefficient is evidence, not proof.
+- "Everything in the data set" is not "everything". The sentence quietly assumes the data set
+  happens to contain every variable that affects both treatment and outcome — which is an
+  assumption about the world, not a fact about the data, and it is untestable. The honest version
+  is: "I adjusted for the confounders I could observe, and here is why I think the remaining ones
+  are unlikely to overturn this."
+`r unhide()`

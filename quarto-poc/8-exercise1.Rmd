@@ -1,0 +1,234 @@
+---
+title: "Exercise 1 (20 minutes)"
+subtitle: "You practice: adjusting a natural experiment for observed confounders — and reading what the adjustment did. When you're done, assist some of the others …"
+output: webexercises::webexercises_default
+---
+
+```{r setup, include = FALSE}
+options(htmltools.dir.version = FALSE, servr.interval = 0.5, width = 115, digits = 2)
+knitr::opts_chunk$set(
+  collapse = TRUE, message = FALSE,
+  warning = FALSE, cache = FALSE,
+  comment = "#", strip.white = TRUE)
+
+library(webexercises)
+
+num_fitb <- function(x, digits = 2, width = 6) {
+  a <- format(round(x, digits), nsmall = digits)
+  fitb(unique(c(a, sub(".", ",", a, fixed = TRUE))), width = width)
+}
+```
+
+```{r hidden-read, include = FALSE}
+pacman::p_load(tidyverse, haven, estimatr, modelsummary)
+ESS_raw <- read_dta("../assets/Legewie_ESS_02.dta") # rendered from the repo
+```
+
+Last week you estimated the **raw** effect of the Bali attack in Portugal. Today you ask whether
+that estimate survives once we hold the **observed** confounders constant.
+
+1. Download `Legewie_ESS_02.dta` from Absalon, then copy in this starter code. It is last week's
+   `prepare()` — extended to keep three background variables: **age**, **gender** and
+   **employment status**.
+
+```{r eval = FALSE}
+pacman::p_load(tidyverse, haven, estimatr, modelsummary)
+ESS_raw <- read_dta("Legewie_ESS_02.dta") # from your project folder
+```
+
+```{r prep}
+event_date <- as.Date("2002-10-13")   # the Bali attack
+win_begin  <- as.Date("2002-09-14")
+win_end    <- as.Date("2002-10-20")
+
+prepare <- function(data, countries) {
+  data %>%
+    mutate(
+      int_date = as.Date(sprintf("%s-%s-%s", inwyr, inwmm, inwdd)),
+      treat = case_when(
+        int_date > event_date & int_date <= win_end   ~ "After the attack",
+        int_date < event_date & int_date > win_begin  ~ "Before the attack",
+        TRUE ~ NA_character_) %>% fct_relevel("Before the attack", "After the attack"),
+      # Anti-immigrant index: average 7 items, z-standardise, flip so high = xenophobic
+      anti_immi = rowMeans(across(c(imtcjob, imbleco, imbgeco, imueclt,
+                                    imwbcnt, imwbcrm, imbghct)), na.rm = TRUE) %>%
+        scale() %>% as.numeric(),
+      anti_immi = max(anti_immi, na.rm = TRUE) - anti_immi,
+      across(c(brncntr, mocntr, facntr), as_factor),
+      # --- the three observed confounders --------------------------
+      age  = inwyr - yrbrn,
+      gndr = as_factor(gndr) %>% fct_drop(),
+      empl_stat = case_when(
+        pdwrk  == 1 ~ "Working",
+        uempla == 1 ~ "Unemployed",
+        rtrd   == 1 ~ "Retired",
+        TRUE        ~ "Other"
+      ) %>% factor() %>% fct_relevel("Working"),
+      # -------------------------------------------------------------
+      pspwght = pweight * dweight
+    ) %>%
+    filter(str_detect(cntry, countries) &
+             brncntr == "yes" & mocntr == "yes" & facntr == "yes") %>%
+    select(treat, anti_immi, cntry, pspwght, age, gndr, empl_stat) %>%
+    drop_na()
+}
+
+ESS <- prepare(ESS_raw, "PT") # Portugal only
+```
+
+`r hide("Stuck?")`
+- Did `pacman::p_load(...)` run without red errors? Fix that first.
+- **`read_dta()` can't find the file?** `Legewie_ESS_02.dta` must sit **in your project folder** —
+  the same folder as your `.Rproj`. Check with `list.files()`.
+- Odd results? *Session → Restart R*, then rerun from the top.
+- Still stuck? Ask in the [t-R-ouble forum](https://absalon.ku.dk/courses/70545/discussion_topics/563046?module_item_id=2037268) on Absalon.
+
+`r unhide()`
+
+```{r solutions, include = FALSE}
+ols_bi  <- lm_robust(anti_immi ~ treat, data = ESS, weights = pspwght)
+ols_adj <- lm_robust(anti_immi ~ treat + age + gndr + empl_stat,
+                     data = ESS, weights = pspwght)
+
+b_bi  <- coef(ols_bi)["treatAfter the attack"]
+b_adj <- coef(ols_adj)["treatAfter the attack"]
+se_adj <- sqrt(diag(vcov(ols_adj)))["treatAfter the attack"]
+shift <- b_adj - b_bi
+```
+
+2. **Before you compute anything**, look at the balance table below. In Portugal, respondents
+   interviewed *after* the attack are on average **older**. Xenophobia tends to *rise* with age.
+   By the sign rule from the lecture, what should adjusting for age do to the estimate?
+   `r mcq(c("Push it up — the bias is negative", answer = "Push it down — the bias is positive", "Leave it unchanged — age is balanced", "Impossible to say without running the model"))`
+
+```{r balance-ex, echo = FALSE}
+ESS %>%
+  select(treat, age, anti_immi, pspwght) %>%
+  rename(weights = pspwght) %>%
+  datasummary_balance(~ treat, data = ., output = "kableExtra")
+```
+
+3. Now **write the line yourself.** Fit the **adjusted** model: regress `anti_immi` on `treat`
+   *plus* `age`, `gndr` and `empl_stat`, weighted by `pspwght`. Put it side by side with the
+   bivariate model.
+
+`r hide("Hint")`
+Add the controls with `+`, exactly as on the slides:
+`lm_robust(anti_immi ~ treat + age + gndr + empl_stat, data = ESS, weights = pspwght)`
+`r unhide()`
+
+`r hide("R solution — don't peek too early ;) !")`
+```{r sol3, eval = FALSE}
+# The unadjusted comparison from last week
+ols_bi <- lm_robust(anti_immi ~ treat, data = ESS, weights = pspwght)
+
+# ... now holding the three observed confounders constant
+ols_adj <- lm_robust(
+  anti_immi ~ treat + age + gndr + empl_stat,
+  data    = ESS,
+  weights = pspwght
+)
+
+modelsummary(
+  list("Bivariate" = ols_bi, "Adjusted" = ols_adj),
+  coef_rename = c("treatAfter the attack" = "After the attack",
+                  "age" = "Age", "gndrfemale" = "Female"),
+  stars = TRUE, gof_map = c("nobs", "r.squared"),
+  output = "kableExtra"
+)
+```
+
+```{r sol3-show, ref.label = "sol3", echo = FALSE, eval = TRUE}
+```
+`r unhide()`
+
+4. The **adjusted** effect of the Bali attack among the Portuguese is
+   `r num_fitb(b_adj, digits = 2)` standard deviations, with a standard error of
+   `r num_fitb(se_adj, digits = 2)`. Is it still statistically significant at the 5% level?
+   `r mcq(c(answer = "Yes — the coefficient is more than twice its standard error", "No — the confidence interval now covers zero", "Cannot be determined from these numbers"))`
+
+5. Compare the two columns. Adjusting moved the estimate by about
+   `r num_fitb(shift, digits = 2)` standard deviations. **Write one sentence** as a `# comment`
+   interpreting the *change* — then compare with the model answer.
+
+`r hide("Model answer")`
+Holding age, gender and employment status constant, respondents interviewed after the Bali attack
+score about **0.28 standard deviations** higher on the anti-immigrant index than those interviewed
+before — down slightly from the unadjusted **0.33**. The drop is what the omitted variable bias
+formula predicted: the treated group was somewhat *older*, and age is (weakly) associated with more
+xenophobia, so part of the raw gap was age, not the attack. The effect survives adjustment, which
+makes it more credible — but it is **not** proof, because only *observed* confounders were closed.
+`r unhide()`
+
+6. Make a **coefficient plot** comparing the two estimates of the treatment effect, so a reader can
+   see the adjustment at a glance. Drop the intercept and all the control coefficients.
+
+`r hide("Hint")`
+`bind_rows()` the two `tidy()` outputs with `.id = "model"`, then
+`filter(term == "treatAfter the attack")`.
+`r unhide()`
+
+`r hide("R solution — don't peek too early ;) !")`
+```{r sol6, out.width='90%', fig.height = 3, fig.width = 7, results = FALSE}
+plotdata <- bind_rows(
+  tidy(ols_bi),          # Model 1: unadjusted
+  tidy(ols_adj),         # Model 2: adjusted
+  .id = "model"
+) %>%
+  filter(term == "treatAfter the attack") %>%   # Keep only the treatment effect
+  mutate(model = if_else(model == "1", "Bivariate", "Adjusted"))
+
+ggplot(plotdata, aes(x = estimate, y = model)) +
+  geom_vline(xintercept = 0, colour = "#901A1E", linetype = "dashed") +
+  geom_pointrange(aes(xmin = conf.low, xmax = conf.high)) +
+  labs(
+    title = "The Bali effect in Portugal survives adjustment",
+    x = "Difference in xenophobia vs. before the attack (SD)",
+    y = ""
+  ) +
+  theme_minimal(base_size = 13)
+```
+`r unhide()`
+
+7. **Bonus, for the fast.** Age was only one of three controls. Fit a model with **age alone**
+   (`anti_immi ~ treat + age`) and compare it to the full adjusted model. Which of the three
+   controls is doing most of the work?
+
+`r hide("R solution")`
+```{r sol7, eval = FALSE}
+ols_age <- lm_robust(anti_immi ~ treat + age, data = ESS, weights = pspwght)
+
+modelsummary(
+  list("Bivariate" = ols_bi, "+ age" = ols_age, "+ age, gender, employment" = ols_adj),
+  coef_rename = c("treatAfter the attack" = "After the attack"),
+  coef_omit = "^(?!treat)", # Show only the treatment effect
+  stars = TRUE, gof_map = c("nobs"),
+  output = "kableExtra"
+)
+```
+
+Age alone moves the estimate only from 0.33 to about **0.31** — the remaining movement comes from
+gender and employment status. This is the product rule again: age is badly *imbalanced* here, but
+it barely predicts xenophobia in Portugal, so its bias contribution is small.
+`r unhide()`
+
+8. **Discuss with your neighbour.** Our estimate barely moved when we adjusted for three observed
+   confounders. Work through these three steps:
+
+   - Does a *small* change when adding controls make you **more** or **less** confident that the
+     remaining estimate is causal? Why?
+   - Name one confounder that is **not** in this data set but might plausibly affect both when
+     someone was interviewed *and* how xenophobic they are.
+   - If such a variable exists, can any regression on this data set fix it?
+
+`r hide("Talking points")`
+- A small change is **mildly reassuring**, not proof. It shows the observed confounders were not
+  driving the result. But it says nothing about unobserved ones — a stable coefficient is
+  consistent both with "no confounding left" and with "the confounding that remains is invisible".
+- Plausible unobserved candidates: whether someone lives in a rural area or a city (affects both
+  how easily interviewers reach them *and* their exposure to immigration), household composition,
+  media diet, or how politically engaged they are.
+- **No.** Multiple OLS can only close backdoor paths through variables that are *in the data*.
+  That is precisely why Legewie needed the as-if-random timing in the first place — the design,
+  not the regression, is what carries most of the credibility here.
+`r unhide()`
