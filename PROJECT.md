@@ -186,13 +186,40 @@ numbers, so it renders fast and offline.
   presenter notes into **concise, edited `::: {.notes}`** on ~18 slides (press **`s`** for speaker
   view; they're `display:none` on the slide itself). Kept them to 2–3 presenter-cue sentences each,
   tightened/improved vs. the originals (added "ask first, then reveal" prompts, misconception flags,
-  bridge lines). **Only L7 has notes so far — L1–6 and L9 still lack them** (offer to port those on
-  request; it's the same high-leverage move for every deck).
+  bridge lines). **Rolled out to every ported deck 2026-07-21 — see "Speaker notes" below.**
 - **Exercise scroll fix:** the embedded exercise iframe (content ~1485 px in a scaled-0.72, 620 px
   window with macOS overlay scrollbars) is hard to scroll — added a prominent **"Open exercise N in
-  a new tab ↗"** link + `scrolling="yes"` + a border on both L7 "Your turn" slides. **Other decks
-  (L2–6, L9) still use the old `scrolling="auto"` iframe with no link** — professor declined the
-  course-wide rollout for now, but it's the same latent issue everywhere.
+  a new tab ↗"** link + `scrolling="yes"` + a border on both L7 "Your turn" slides. **Rolled out
+  course-wide 2026-07-21 — see "Speaker notes & iframe rollout" below.**
+
+## Speaker notes & iframe rollout (2026-07-21, professor-requested)
+Both L7-only conventions rolled out to **every ported deck (L1–7, 9)**.
+- **Speaker notes** — `::: {.notes}` on the substantive slides of all 8 decks (press **`s`**):
+  L1 14, L2 16, L3 19, L4 18, L5 16, L6 20, L7 18, L9 19. Skipped by design: part dividers,
+  breaks, "Your turn", references, the closing function lists. Style = the L7 voice: 2–4
+  presenter-cue sentences, "ask first, then reveal" prompts, misconception flags, bridge lines
+  to the next lecture.
+  - **Only L5 and L7 had original xaringan `???` notes** (33 and 35). L5's were ported + edited
+    here; **L1, L2, L3, L4, L6 and L9 had none, so their notes were written from scratch** off the
+    deck content. Worth a read-through by the professor before teaching — they encode teaching
+    choices (where to pause, what to ask, what to warn about) that nobody has vetted yet.
+- **Exercise iframes** — all 12 remaining exercise embeds (L2–6, L9 × 2) now match L7:
+  `scrolling='yes'`, a 1px `#ddd` / 6px-radius border, and an **"Open exercise N in a new tab ↗"**
+  link (`{target="_blank"}`) in the left column above the timer. L1 has no exercise iframes.
+  The two *non-exercise* iframes were deliberately left alone: the V-Dem Wikipedia embed (L2)
+  and the Seeing Theory demo (L3).
+- Verified: all 8 decks render clean (zero R errors), note counts in the HTML match the source
+  exactly, every `aside.notes` is `display:none` on the slide, and the reveal `notes` plugin is
+  registered so **`s`** opens speaker view.
+- **Pre-existing overflow found in L6 (NOT caused by this work — proved by re-measuring with
+  every note removed: byte-identical).** 5 slides overflow the 1600×900 box: the opening
+  vaccine slide (+101px — the `polack_safety_2020` source line is clipped below the fold),
+  "Goal of empirical sociology" (+18px), and three panel-tabset slides (+110/+35/+43px, likely
+  a measurement artefact of stacked tab panels rather than a visible problem). The vaccine
+  slide is a real, visible clip — worth a fix. Every other deck: **zero overflow**.
+- Hotlink check: the `laserfiche.com` stock photo on the "Your turn" slides (L2 ×2, L3 ×2,
+  L6 ×2) still returns 200, so it was left in place — but it is an external hotlink on six
+  slides and a candidate for localising into `img/` on the next pass.
 
 ## Lecture 5 (2026-07-13) — Selection bias (potential outcomes, confounding, DAGs)
 `5-Selection-bias.qmd` (26 slides) + `5-exercise1/2.Rmd`. The course's conceptual core — a mostly

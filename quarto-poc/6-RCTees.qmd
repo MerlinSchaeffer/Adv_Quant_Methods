@@ -61,6 +61,10 @@ How do we *know* it works?
 *Source:* `r Citet(myBib, "polack_safety_2020")`
 :::
 
+::: {.notes}
+Open with the question, not the answer: they all took this vaccine — how does anyone actually *know* it works? Let them try for a moment. The answer is the design, not the statistics: tens of thousands of people, a coin flip deciding who got the shot. That design is today's whole lecture.
+:::
+
 ## Goal of empirical sociology
 
 ::: {.lead .center}
@@ -82,6 +86,10 @@ knitr::include_graphics('https://researchleap.com/wp-content/uploads/2021/12/Pop
 ::: {.backgrnote}
 One part of today's lecture per goal. Our running question throughout: **does news media
 consumption increase immigrant minorities' reports of discrimination?**
+:::
+
+::: {.notes}
+Three goals, three parts — say that explicitly so they can locate themselves later. Flag the arc: we start with a comparison that fails, then the one idea that repairs it, then they estimate a real causal effect themselves in R. Last week's lecture diagnosed the disease; today is the cure.
 :::
 
 ## The Integration Paradox {.inverse background-color="#901A1E"}
@@ -110,6 +118,10 @@ knitr::include_graphics('img/Steinmann3.png')
 ::: {.backgrnote .center}
 *Source:* `r Citet(myBib, "steinmann_paradox_2019")`
 :::
+:::
+
+::: {.notes}
+Remind them of the paradox from last week — better integrated, *more* reported discrimination. Today we chase one suspected channel: the news media. Put the research question on the board and leave it there; every slide today is in service of answering it.
 :::
 
 ## Why naïve comparisons mislead {.inverse background-color="#901A1E"}
@@ -222,6 +234,10 @@ ggplot(data = APAD, aes(y = dis_index, x = news)) +
 :::
 :::
 
+::: {.notes}
+Ask before revealing: we found a tiny association — can we read it as the effect of news? Most will hesitate, which is the right instinct. The reveal names why: readers and non-readers differ in many other ways, so we are not comparing like with like. Do not over-explain here — the next three slides do the work.
+:::
+
 ::: {.push-right}
 ::: {.small}
 ```{r naiv_OLS}
@@ -261,6 +277,10 @@ To know the *causal* effect, we'd compare the **same person** — reading news v
 Both worlds at once — impossible. The missing cell is the **counterfactual**: the [fundamental problem of causal inference]{.alert}.
 :::
 
+::: {.notes}
+Point at the grey question marks — one per person, always exactly one. Ask what we would *need* to measure a single person's causal effect, and let them arrive at the impossible answer: both worlds at once. Name it once, clearly: the missing cell is the counterfactual, and this is the fundamental problem of causal inference.
+:::
+
 ## Why the naïve comparison misleads
 
 ::: {.lead}
@@ -283,6 +303,10 @@ $$
 We want the causal effect $\color{#901A1E}{\kappa}$. **Selection bias** is the contamination: the groups already differed in baseline $Y_0$, *before any news*.
 :::
 
+::: {.notes}
+Do not read the formula symbol by symbol — point at the two braces instead. What we observe is one number; it silently contains two things. Ask which one they want and which one is in the way, then reveal. The phrase to repeat all day: the groups already differed *before any news*.
+:::
+
 ## Do the groups actually differ?
 
 ::: {.panel-tabset}
@@ -299,6 +323,10 @@ We want the causal effect $\color{#901A1E}{\kappa}$. **Selection bias** is the c
 
 ::: {.content-box-red .fragment}
 No — readers are **older and more often German citizens**. The comparison is **confounded**.
+:::
+
+::: {.notes}
+Let them inspect the columns before you reveal — ask them to find the biggest gap. Age and citizenship jump out. This is the abstract selection-bias term made visible in an actual table, so say so: this is what contamination looks like in data. And add the caveat — these are only the variables we happened to measure.
 :::
 
 ### R code
@@ -356,6 +384,10 @@ Citizenship drives *both* news use *and* discrimination → it opens a [backdoor
 :::
 :::
 
+::: {.notes}
+Same picture they met last week, so keep it quick. Trace the red link and ask why it is not a causal effect. The reveal: citizenship feeds *both* boxes, which opens a backdoor path — correlation flows along it without any causal arrow between news and discrimination.
+:::
+
 ## The fix: experiments & randomization {.inverse background-color="#901A1E"}
 
 [Part 2 of 3]{.part-pill}
@@ -406,6 +438,10 @@ knitr::include_graphics('img/randomization1.png')
 :::
 :::
 
+::: {.notes}
+The pivot of the lecture: we stop *watching* and start *acting*. We decide who gets the treatment, which means the confounders no longer get to. Pose the question and let them sit with it over the break — the answer is the next part.
+:::
+
 ##  {background-image="https://gummibaerenland.de/cdn/shop/products/212669_lakritz_schnecken_1.jpg?v=1649245056&width=1200" background-size="cover" background-position="center"}
 
 ## Break {.inverse background-color="#901A1E"}
@@ -419,11 +455,13 @@ knitr::include_graphics('img/randomization1.png')
 knitr::include_graphics('https://www.laserfiche.com/wp-content/uploads/2014/10/femalecoder.jpg')
 ```
 
+[**Open exercise 1 in a new tab ↗**](6-exercise1.html){target="_blank"}
+
 <div class="ku-timer" data-min="20"></div>
 :::
 
 ::: {.right-column}
-<iframe src='6-exercise1.html' width='100%' height='620' frameborder='0' scrolling='auto'></iframe>
+<iframe src='6-exercise1.html' width='100%' height='620' frameborder='0' scrolling='yes' style="border:1px solid #ddd; border-radius:6px;"></iframe>
 :::
 
 ## Break {.inverse background-color="#901A1E"}
@@ -449,6 +487,10 @@ Because assignment is random, it can **not** be driven by citizenship, age, or *
 :::
 :::
 
+::: {.notes}
+Define the RCT plainly: a coin, not a person and not a preference, decides who is treated. The consequence is the sentence in the green box — assignment *cannot* be driven by citizenship, age, or anything else, because a coin knows none of those things.
+:::
+
 ## Why randomization works: a fair coin
 
 ::: {.push-left}
@@ -464,6 +506,10 @@ So the two groups look alike on average — on age, citizenship, **and on things
 
 ::: {.content-box-green .center}
 Equal baselines: <br> $Avg_{n}[Y_{0i}|\text{News}=1] = Avg_{n}[Y_{0i}|\text{News}=0]$
+:::
+
+::: {.notes}
+This is the single most important idea of the course, so slow down. A fair coin gives everyone the same chance of treatment regardless of who they are — so the two groups end up alike on age, on citizenship, **and on everything we never thought to measure**. That last clause is what no amount of statistical adjustment can buy you.
 :::
 :::
 
@@ -490,6 +536,10 @@ $$
 & = \underbrace{\color{#901A1E}{\kappa}}_{\text{the average causal effect}}
 \end{aligned}
 $$
+:::
+
+::: {.notes}
+Walk the four lines slowly — it is the same decomposition as before, but now one term dies. Randomisation makes the baselines equal, so selection bias is zero and what remains *is* the causal effect. Do not skip the red box: randomisation can still fail by chance, especially in small samples, which is exactly why we run a balance test afterwards.
 :::
 
 ## Why it works: no backdoor in the DAG
@@ -528,6 +578,10 @@ $\Rightarrow$ no confounding, no selection bias.
 ```
 :::
 
+::: {.notes}
+The same result in pictures for the students who don't think in algebra. The point to make with your finger: nothing points *into* the red node, because we control it. No incoming arrow means no backdoor path, which means no confounding. Formula people and picture people should both leave convinced.
+:::
+
 ## A real experiment, in R {.inverse background-color="#901A1E"}
 
 [Part 3 of 3]{.part-pill}
@@ -558,6 +612,10 @@ knitr::include_graphics('img/randomization2.png')
 ```{r, echo = FALSE, out.width='100%', fig.align='center'}
 knitr::include_graphics('img/Contr.png')
 ```
+:::
+
+::: {.notes}
+Now it stops being hypothetical: we built an experiment *inside* the survey they already know. Everyone read an article; a random draw decided which one — Venus for the control, discrimination or acculturation for the two treatments. Stress that respondents could not choose, and did not know there was a draw.
 :::
 
 ## &nbsp; {.clear}
@@ -611,6 +669,10 @@ APAD %>% # Start with the APAD data, then pipe
 Randomised split: the groups are **balanced** — exactly what randomization buys us.
 :::
 
+::: {.notes}
+This pair of tabs is the payoff of the whole lecture, so put them side by side deliberately. Same data, same background variables, two different ways of splitting people: the *surveyed* split is imbalanced, the *randomised* split is balanced. Nothing about the respondents changed — only who decided. That contrast is worth a full minute of silence.
+:::
+
 ### R code
 ```{r ref.label = "balance2", results = FALSE}
 ```
@@ -661,6 +723,10 @@ Because assignment was random, this difference **is** the causal effect $\kappa$
 :::
 :::
 
+::: {.notes}
+Note how ordinary the code is — it is the same `lm_robust()` they have run for weeks. That is the lesson: the credibility came from the *design*, not from a fancier estimator. Read the discrimination-article coefficient aloud, then say the sentence they should be able to repeat: because assignment was random, this difference *is* the causal effect.
+:::
+
 ## Visualise the effect
 
 ::: {.panel-tabset}
@@ -697,6 +763,10 @@ ggplot(plotdata, aes(x = estimate, y = term)) +
 
 :::
 
+::: {.notes}
+Read the plot as a picture first: the grey line is "no effect", and a whole interval sitting clear of it is what a real finding looks like. Only the discrimination article moved people; acculturation did essentially nothing. Ask them what a bar crossing the grey line would have meant — good check of last week's inference.
+:::
+
 ## It's real research!
 
 ::: {.push-left}
@@ -723,16 +793,22 @@ Point estimates with 90% and 95% confidence intervals, post-stratification-weigh
 :::
 :::
 
+::: {.notes}
+Worth saying out loud: what they just estimated in class is a published paper, not a teaching toy. Their coefficient is in that figure. This is also the moment to mention that they will replicate this study themselves — it makes the exercise feel like research rather than homework.
+:::
+
 ## &nbsp; {.clear}
 
 ::: {.left-column}
 ```{r, echo = FALSE, out.width='72%'}
 knitr::include_graphics('https://www.laserfiche.com/wp-content/uploads/2014/10/femalecoder.jpg')
 ```
+
+[**Open exercise 2 in a new tab ↗**](6-exercise2.html){target="_blank"}
 :::
 
 ::: {.right-column}
-<iframe src='6-exercise2.html' width='100%' height='620' frameborder='0' scrolling='auto'></iframe>
+<iframe src='6-exercise2.html' width='100%' height='620' frameborder='0' scrolling='yes' style="border:1px solid #ddd; border-radius:6px;"></iframe>
 :::
 
 ## The logic in one line {.nostretch}
@@ -767,6 +843,10 @@ knitr::include_graphics('https://www.laserfiche.com/wp-content/uploads/2014/10/f
 - **Balance test:** our check that randomization worked.
 - **OLS on an RCT:** the coefficient *is* the causal effect.
 
+::: {.notes}
+Trace the chain left to right — it is the whole lecture in four boxes. "Randomize" is red because it is the only step that is a *choice we make*; everything downstream follows from it. If they remember one picture from today, this is the one.
+:::
+
 ## But what if you *can't* randomize? {.inverse background-color="#901A1E"}
 
 ::: {.lead}
@@ -777,6 +857,10 @@ Then we try to make groups comparable **after the fact** — by *statistically h
 
 ::: {.content-box-green}
 That tool is **multiple OLS regression** — the heart of the next weeks.
+:::
+
+::: {.notes}
+End on the honest limitation. We cannot randomise someone's citizenship, their neighbourhood, or their education — which rules out experiments for most of the questions sociologists actually care about. So the next weeks ask: can we make groups comparable *after the fact*? That is multiple regression, and it is a weaker tool than a coin — say that plainly now so they are properly sceptical later.
 :::
 
 ## Check yourself: today's goals

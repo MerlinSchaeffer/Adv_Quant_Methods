@@ -60,6 +60,10 @@ myBib <- ReadBib("../Stats_II.bib", check = FALSE)
 One part per goal. Two running questions: the **gender pay gap** in Denmark, and — back to Lecture 2 — does **state ownership of the economy** reduce poverty?
 :::
 
+::: {.notes}
+By now they can *run* a multiple regression; today is about deciding what belongs in it. Set the stakes early: adding a variable is not a neutral act — the same command can repair a comparison or quietly destroy it. Two running examples today, and one of them picks Lecture 2 back up.
+:::
+
 ## Confounders vs. mediators {.inverse background-color="#901A1E"}
 
 [Part 1 of 2]{.part-pill}
@@ -104,6 +108,10 @@ $\rightarrow$ **Usually leave it in.** Controlling a mediator removes *part of t
 :::
 :::
 
+::: {.notes}
+This one DAG is the whole first half. Make them read the arrowheads, not the positions: the confounder has an arrow running *into* the treatment, the mediator has one running *out of* it. Same shape on the page, opposite advice. If they can tell these apart on an exam DAG, today has worked.
+:::
+
 ## Why the direction matters
 
 ::: {.content-box-red}
@@ -112,6 +120,10 @@ To get closer to the overall causal effect $D \rightarrow Y$, **control observed
 
 ::: {.content-box-blue}
 The exception is deliberate: sometimes we *want* the **partial effect** of $D$ that does **not** run through $M$ — then controlling $M$ is exactly the point. Know which question you are asking.
+:::
+
+::: {.notes}
+Resist giving them a rule to memorise. "Never control a mediator" is the default, but the blue box is the honest version: sometimes the partial effect *is* the question. The discipline is not knowing the rule, it is knowing which question you asked before you typed the formula.
 :::
 
 ## A clear case of mediation
@@ -189,6 +201,10 @@ The raw gap of **`r format(round(-coef(mod1)["gndrFemale"]), big.mark = ",")` kr
 
 :::
 
+::: {.notes}
+An unambiguous mediator, so use it to build confidence: gender cannot be caused by working hours, the arrow only runs one way. Ask them to predict what happens to the gap before you show the second column. Then the interpretation that matters — the shrinkage is not a nuisance, it is the finding: about a third of the gap *is* the hours. And note what the remaining gap means: equal contracted hours, still unequal pay.
+:::
+
 ## An *unclear* case — back to Lecture 2
 
 ::: {.left-column}
@@ -219,6 +235,10 @@ The double-headed dashed arrow is the honest part: with cross-country data we ca
 :::
 :::
 
+::: {.notes}
+Now the hard case, and there is no clean answer — say that up front. Let them argue both readings: civil liberties as a confounder (regimes that restrict liberties also nationalise) or as a mediator (state ownership erodes liberties). Point at the double-headed arrow: with cross-country data we genuinely cannot settle the direction. The honest move is to change the question, which is the next slide.
+:::
+
 ## The revised research question {.inverse background-color="#901A1E"}
 
 ::: {.lead}
@@ -226,6 +246,10 @@ Would state-owned economies reduce poverty *more* — **if they did not also cur
 :::
 
 That is the **partial effect** of state ownership that does **not** run through civil liberties. Multiple OLS can estimate it.
+
+::: {.notes}
+This is the move worth teaching: when you cannot resolve the DAG, sharpen the question until your model answers something you can actually defend. We are no longer claiming the total effect — we are asking about the part that does not run through civil liberties. Say the revised question slowly; they will need it to read the next table honestly.
+:::
 
 ## Preparation
 
@@ -303,6 +327,10 @@ On its own, state ownership looks *harmless*. **Holding civil liberties constant
 :::
 :::
 
+::: {.notes}
+Show column one, ask them to predict column two, *then* reveal. A sign flip is dramatic and they will remember it — but immediately supply the careful reading: not "state ownership reduces poverty", but "among countries with **the same** civil liberties, more state ownership goes with less poverty". Same data, one extra column, opposite story. Nothing here is causal, and the comparison is only fairer, not fair.
+:::
+
 ## What does "holding constant" actually do? {.inverse background-color="#901A1E"}
 
 ::: {.lead}
@@ -338,6 +366,10 @@ Dat %>%
 ```
 :::
 
+::: {.notes}
+Frame the three steps before starting step 1: we are going to *earn* the phrase "holding constant" instead of just saying it. Step 1 strips civil liberties out of poverty — the red lines are what is left over, the part civil liberties cannot explain. Keep the pace brisk; the payoff is step 3.
+:::
+
 ## Frisch–Waugh, step 2
 
 ::: {.push-left}
@@ -365,6 +397,10 @@ Dat %>%
        y = "State ownership of the economy") +
   theme_minimal(base_size = 14)
 ```
+:::
+
+::: {.notes}
+Exactly the same operation, now on the treatment: strip civil liberties out of state ownership. What remains is variation in state ownership that has nothing to do with civil liberties. Point out that both variables have now been cleaned with the *same* rag — that symmetry is why the next step works.
 :::
 
 ## Frisch–Waugh, step 3
@@ -397,6 +433,10 @@ modelsummary(
 ::: {.content-box-green}
 Same number, two routes: the residualised slope on `e_stateown` equals the multiple model's `state_ownership` coefficient. That is all *controlling for civil liberties* does.
 :::
+:::
+
+::: {.notes}
+The payoff — let them see the two coefficients match to the decimal before you say anything. Then the point: multiple regression is not doing anything mysterious, it is subtracting away the control from both variables and fitting a simple line to what is left. "Holding constant" now has a mechanism, not just a phrase.
 :::
 
 ## Show the result
@@ -441,6 +481,10 @@ To predict, set the **control to an informative constant** (here: average civil 
 
 :::
 
+::: {.notes}
+Two ways to show the same model — they will need both for the exam and for exercise 2. On the prediction plot, stress the choice hiding in the code: you must *pin the control somewhere*, and we pinned civil liberties at their average. Different choice, different line — so always say where you pinned it.
+:::
+
 ## Break {.inverse background-color="#901A1E"}
 
 <div class="ku-timer" data-min="15"></div>
@@ -450,11 +494,13 @@ To predict, set the **control to an informative constant** (here: average civil 
 ::: {.left-column}
 You practice multiple OLS on the **carbon divide** from Lecture 4: do regions differ in emissions *beyond* their wealth?
 
+[**Open exercise 1 in a new tab ↗**](9-exercise1.html){target="_blank"}
+
 <div class="ku-timer" data-min="20"></div>
 :::
 
 ::: {.right-column}
-<iframe src='9-exercise1.html' width='100%' height='620' frameborder='0' scrolling='auto'></iframe>
+<iframe src='9-exercise1.html' width='100%' height='620' frameborder='0' scrolling='yes' style="border:1px solid #ddd; border-radius:6px;"></iframe>
 :::
 
 ## Smart summary controls {.inverse background-color="#901A1E"}
@@ -467,6 +513,10 @@ You practice multiple OLS on the **carbon divide** from Lecture 4: do regions di
 
 ::: {.backgrnote}
 — `r Citet(myBib, "angrist_mastering_2014", after = ", p. 51")`
+:::
+
+::: {.notes}
+Read the Angrist quote out loud — it names the anxiety they should be feeling by now. If good inference means controlling for everything, and the list is infinite and half of it unmeasurable, the project looks hopeless. Part 2 is the escape: sometimes *one* cleverly chosen variable stands in for the whole list.
 :::
 
 ## Football and domestic violence
@@ -503,6 +553,10 @@ The **point spread** already prices in everything the market knows about both te
 :::
 :::
 
+::: {.notes}
+Let them brainstorm confounders first — they will produce team quality, kind of fan, kind of city, and quickly run out of measurable ones. Then the trick: a betting market has already done that work, because thousands of people with money at stake priced every one of those factors into a single number. One column standing in for a list nobody could finish.
+:::
+
 ## Football and domestic violence
 
 ::: {.left-column}
@@ -511,6 +565,10 @@ By comparing games with the *same* pre-game point spread, `r Citet(myBib, "card_
 ::: {.content-box-green}
 An upset loss raises at-home male-on-female violence by about **10%** — and it barely moves as more controls are added (columns 1→5). The summary control did the work.
 :::
+:::
+
+::: {.notes}
+Define "upset loss" carefully: not just losing, but losing when the market expected you to win — the emotional shock is the *surprise*. Then read the table across, left to right: the estimate barely budges as controls pile up. That stability is the evidence the summary control already absorbed the confounding. A number that refuses to move is a number you can start to trust.
 :::
 
 ::: {.right-column}
@@ -549,12 +607,20 @@ Graduates of selective universities earn more. But the ambitious, well-connected
 ```
 :::
 
+::: {.notes}
+This one lands personally — they are all sitting in a selective university right now. Set up the problem honestly: graduates of selective schools *do* earn more, but the ambitious and able both choose those schools and would have earned more anyway. Let them chew on the blue box before the next slide; the answer is genuinely clever.
+:::
+
 ## The smart summary control: where you applied
 
 ::: {.push-left}
 `r Citet(myBib, "dale_estimating_2002")` compare students who **applied to and were admitted to the same set of schools** — then some went to the more selective one, some did not.
 
 Sharing an application portfolio is a **summary** of ambition and ability *as the system measured it*: a stand-in for the confounders no survey captures.
+:::
+
+::: {.notes}
+The insight: where you *applied* reveals how you saw yourself, and where you were *admitted* reveals how the system saw you. Two students with the same application portfolio and the same admissions letters are alike in ambition and ability without anyone ever measuring either. Then one enrolled at the selective school and the other did not — that is the comparison.
 :::
 
 ::: {.push-right}
@@ -582,6 +648,10 @@ Without selection controls, each **+100 points** of school-average SAT buys abou
 Among **matched applicants**, the effect collapses to **−0.016 ≈ 0**. The "selectivity premium" was mostly *who chose selective schools*, not the schools themselves.
 :::
 
+::: {.notes}
++7.6% to essentially zero — pause on that. The premium was never the education; it was who walked through the door. Expect pushback, and welcome it: networks and signalling are real arguments. The honest reply is that this design tests the *earnings* premium for people who got in, and it does not survive.
+:::
+
 ::: {.backgrnote .center}
 *Source:* `r Citet(myBib, "dale_estimating_2002")`
 :::
@@ -595,6 +665,10 @@ If a selective *US* university barely raises earnings once you compare like with
 
 $\rightarrow$ Your KU degree pays off **because you are able and put in the work** — the diploma mostly *reflects* that, it does not manufacture it.
 
+::: {.notes}
+Deliver this as encouragement, not deflation: what pays off is the ability and the work, and the diploma mostly reports that back to employers. Worth naming the extrapolation as an extrapolation — this is US data, and Danish institutions differ. Good moment to ask what would make Denmark different.
+:::
+
 ## Break {.inverse background-color="#901A1E"}
 
 <div class="ku-timer" data-min="10"></div>
@@ -604,11 +678,13 @@ $\rightarrow$ Your KU degree pays off **because you are able and put in the work
 ::: {.left-column}
 You visualise the adjustment: a **before/after coefficient plot** and **model predictions** — again on the carbon divide.
 
+[**Open exercise 2 in a new tab ↗**](9-exercise2.html){target="_blank"}
+
 <div class="ku-timer" data-min="20"></div>
 :::
 
 ::: {.right-column}
-<iframe src='9-exercise2.html' width='100%' height='620' frameborder='0' scrolling='auto'></iframe>
+<iframe src='9-exercise2.html' width='100%' height='620' frameborder='0' scrolling='yes' style="border:1px solid #ddd; border-radius:6px;"></iframe>
 :::
 
 ## Today's general lessons {.inverse background-color="#901A1E"}
@@ -622,6 +698,10 @@ You visualise the adjustment: a **before/after coefficient plot** and **model pr
 4. When confounders are unmeasurable, a **smart summary control** — a point spread, a shared application portfolio — can stand in for many of them at once.
 
 5. Multiple OLS **improves** comparisons; only a real experiment *guarantees* them.
+
+::: {.notes}
+Point five is the one to say slowly, because it is the whole course in one line: controlling makes a comparison *fairer*, never *fair*. You can only ever adjust for confounders you thought of and measured. That gap is exactly why the coming weeks look for natural experiments instead.
+:::
 
 ## Check yourself: today's goals
 

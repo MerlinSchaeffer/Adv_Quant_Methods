@@ -98,6 +98,10 @@ Do **better-educated** people *generally* believe more strongly that the **polit
 :::
 :::
 
+::: {.notes}
+Note the word "generally" in the question — that single word is what makes today necessary. We have 1,500-odd Danes from one year, and we want to say something about people in general. Let them answer the blue box; whatever they say will be some version of "the sample has to be like everyone else", which is precisely Part 1.
+:::
+
 ## Preparation
 
 ::: {.panel-tabset}
@@ -142,6 +146,10 @@ So we treat **any** data set — even a full register — as **one sample** draw
 :::
 :::
 
+::: {.notes}
+Reason two is the surprising one, so spend the time there. Even with Danish register data on *everybody*, we would still be doing inference — because we care about the social mechanism, not about these particular Danes in this particular year. That is why the super-population idea matters and why "but I have the whole population" is not an escape from statistics.
+:::
+
 ::: {.push-right}
 ```{r, echo = FALSE, out.width='82%'}
 knitr::include_graphics('img/L3/generalization.png')
@@ -166,6 +174,10 @@ Your friends resemble *you* (age, education, city, politics). Whole groups are s
 :::
 :::
 
+::: {.notes}
+Make it personal — ask them who their snowball sample would actually reach, and who it would never touch. The key phrase for the reveal: the sample is biased *before you compute anything*. No amount of clever analysis repairs a sample that never contained the people you care about.
+:::
+
 ::: {.push-right}
 ```{r, echo = FALSE, out.width='100%'}
 knitr::include_graphics('img/L3/Convenience_Sample.png')
@@ -182,6 +194,10 @@ Why do so many games use dice, coins, shuffled cards?
 :::
 
 A random sample is the equivalent of **stirring the soup before you taste it**: one spoonful then represents the whole pot.
+:::
+
+::: {.notes}
+The soup metaphor is the one they will remember, so say it twice: stir the pot, and one spoonful tells you about the whole thing — and note that the *size* of the spoon matters far less than the stirring. Same logic as the coin in a fair game: randomness is not about being unpredictable, it is about being **fair** to every group.
 :::
 
 ::: {.push-right}
@@ -218,6 +234,10 @@ ggplot(ESS, aes(y = pspwght, x = agea)) +
   labs(y = "Post-stratification weight", x = "Age in years",
        caption = "Danish ESS 2018")
 ```
+:::
+
+::: {.notes}
+Define it in one line: a weight is how many people in the population this respondent stands for. Then the blue box — older people are easier to reach and more willing to answer, so they are over-represented and get weighted *down*. Ask what would happen to our education result if the over-represented group also differed in education; that is the whole reason weights exist.
 :::
 
 ## How weights work: a worked example
@@ -266,6 +286,10 @@ weighted.mean(x = yes, w = weight) * 100
 :::
 :::
 
+::: {.notes}
+Get the unweighted answer out of them first — 60% voted yes — then run the weighted version and watch it drop. The deliberately unpleasant framing (a man's vote counting double) makes the mechanics obvious: weighting is just counting some rows more than others. Three routes to the same number, so nobody has to take `weighted.mean()` on faith.
+:::
+
 ## Weights can be powerful
 
 ::: {.push-left}
@@ -286,6 +310,10 @@ knitr::include_graphics('img/L3/Wang2.png')
 ::: {.backgrnote .center}
 *Source:* `r Citet(myBib, "wang_forecasting_2015")`
 :::
+:::
+
+::: {.notes}
+A genuinely fun result — Xbox gamers are about as unrepresentative of the US electorate as a sample can get, young and overwhelmingly male, and reweighted they still called the 2012 election well. Use it to make the honest point *and* its limit: weights repair imbalance on characteristics you can measure and know the population totals for. They cannot conjure back people the sample never reached at all.
 :::
 
 ## Using weights in regression
@@ -320,6 +348,10 @@ modelsummary(
 :::
 :::
 
+::: {.notes}
+Practical takeaway: add `weights =` and switch to `lm_robust()`. Explain *why* the switch is needed — weighting makes the residuals heteroscedastic, which breaks a standard OLS assumption, and `lm_robust()` repairs the standard errors. Compare the two columns: the coefficients move a little, which is exactly the correction doing its job.
+:::
+
 ## Sampling error & the standard error {.inverse background-color="#901A1E"}
 
 [Part 2 of 3]{.part-pill}
@@ -346,6 +378,10 @@ ggplot(ESS, aes(y = psppsgva, x = eduyrs)) +
   geom_smooth(method = "lm", se = FALSE, color = "#425570", linewidth = 1.2) +
   labs(y = efficacy_lab, x = "Years of education")
 ```
+:::
+
+::: {.notes}
+Set the fiction up carefully, because the next six slides depend on it: *pretend* these 1,500 Danes are the entire world. Under that pretence we can compute the **true** β — the blue line — which we never actually get in real research. Keep pointing back at the blue line; it is the fixed truth everything else will scatter around.
 :::
 
 ## Now draw one small sample
@@ -393,6 +429,10 @@ Draw a **different** 50 people and the line moves again: $\hat\beta = `r b2`$.
 :::
 :::
 
+::: {.notes}
+Nothing was done wrong, and that is the lesson — same population, same code, different 50 people, different answer. Insist on the vocabulary: this is sampling *error*, not a mistake. It is the unavoidable price of not seeing everyone, and the rest of the lecture is about measuring it rather than eliminating it.
+:::
+
 ::: {.push-right}
 ```{r s2, out.width='96%', fig.height = 4.2, fig.width = 6, echo = FALSE}
 ggplot(ESS_sample_2, aes(y = psppsgva, x = eduyrs)) +
@@ -420,6 +460,10 @@ The lines **fan out around the true line**. That fan *is* the sampling error —
 ```{r, echo = FALSE, out.width='100%'}
 knitr::include_graphics('img/L3/anim_samples.gif')
 ```
+:::
+
+::: {.notes}
+Let the animation run twice and just narrate it — every red line is one researcher's honest study. Two things to point out: they fan out *around* the blue truth rather than drifting off it, and the fan has a definite width. Both matter: unbiased, but noisy, and the noise is regular enough to be measured.
 :::
 
 ## Do it 1000 times: the sampling distribution
@@ -503,6 +547,10 @@ knitr::include_graphics('img/L3/t-dist.png')
 
 :::
 
+::: {.notes}
+The crux of the lecture — go slowly and use the "watch it build" tab. Each **dot is one whole study**; say that out loud, because students routinely think a dot is a person. As the dots pile up a bell curve appears around the truth, and once we know it is Normal we know its areas exactly: ±1.96 SD covers the middle 95%. The $t$ tab is a footnote — same idea, slightly fatter tails when $n$ is small.
+:::
+
 ## The catch — and Gauss's gift
 
 ::: {.push-left}
@@ -531,6 +579,10 @@ The estimated SE from this one sample (`r round(sqrt(diag(vcov(lm_robust(psppsgv
 :::
 :::
 
+::: {.notes}
+Ask the blue-box question and let it land as a real problem: everything so far needed 1000 samples, and in real research we get *one*. Then the payoff — Gauss showed the spread of that 1000-sample distribution can be estimated from a single sample. Put the two numbers side by side and let them see how close they are. That is what a standard error *is*, and it is why the SE column in every table they have ever seen is not magic.
+:::
+
 ## Your turn: samples & weights
 
 ::: {.left-column}
@@ -538,11 +590,13 @@ The estimated SE from this one sample (`r round(sqrt(diag(vcov(lm_robust(psppsgv
 knitr::include_graphics('https://www.laserfiche.com/wp-content/uploads/2014/10/femalecoder.jpg')
 ```
 
+[**Open exercise 1 in a new tab ↗**](3-exercise1.html){target="_blank"}
+
 <div class="ku-timer" data-min="20"></div>
 :::
 
 ::: {.right-column}
-<iframe src='3-exercise1.html' width='100%' height='620' frameborder='0' scrolling='auto'></iframe>
+<iframe src='3-exercise1.html' width='100%' height='620' frameborder='0' scrolling='yes' style="border:1px solid #ddd; border-radius:6px;"></iframe>
 :::
 
 ## Break {.inverse background-color="#901A1E"}
@@ -569,6 +623,10 @@ $$\hat\beta \pm \text{critical value} \times \hat\sigma$$
 :::
 
 [Watch the intervals accumulate: only about 1 in 20 (the red ones) misses the truth.]{.backgrnote}
+:::
+
+::: {.notes}
+Be pedantic here, because the wrong version is everywhere: 95% is a property of the **procedure**, not of the one interval in front of you. Run the animation and count the red misses — about 1 in 20, exactly as advertised. The sentence to forbid: "there is a 95% chance the true value is in *this* interval." The true β is fixed; it is our intervals that jump around.
 :::
 
 ::: {.push-right}
@@ -605,6 +663,10 @@ The band is exactly the region where those **sampled regression lines** plausibl
 :::
 :::
 
+::: {.notes}
+This connects the grey band they have been drawing since Lecture 2 to everything we did today. The animation is the point: the accumulating sample lines are the same red lines from earlier, and the band is where they live. Also note the shape — wide where the data are thin, narrow where they are dense, which is just sampling error depending on how much information sits at each x.
+:::
+
 ::: {.push-right}
 ```{r, echo = FALSE, out.width='100%'}
 knitr::include_graphics('img/L3/anim_band.gif')
@@ -633,6 +695,10 @@ $$\underbrace{H_{0}}_{\text{the } H_{\text{opponent}}}:\ \beta_{\text{education}
 We test whether the data can **overturn** this null.
 :::
 
+::: {.notes}
+Frame testing as an argument rather than a ritual: there is a sceptic in the room who says your finding is just a fluke of your sample. $H_0$ is *their* position, not yours. Everything that follows is the machinery for deciding whether the data embarrass them. Students who see the null as an opponent stop mixing up which hypothesis is being tested.
+:::
+
 ## The (weird) logic of a test
 
 ::: {.push-left}
@@ -649,6 +715,10 @@ We test whether the data can **overturn** this null.
 
 ::: {.push-right}
 We never *prove* our hypothesis. We show the sceptic's $H_0$ makes the data **too surprising to keep believing**.
+:::
+
+::: {.notes}
+The umbrella example is worth acting out. Notice the direction of reasoning — we never prove it is raining; we show that the umbrellas would be *too surprising* if the sun were shining. Say the last line twice, because it is the sentence they get wrong in exams: a significant result is evidence against $H_0$, never proof of $H_1$.
 :::
 
 ## Put it into practice
@@ -689,6 +759,10 @@ modelsummary(list("Political efficacy" = ols_goal),
 
 :::
 
+::: {.notes}
+The $t$-value is just "how many standard errors from zero" — no more mysterious than that. The three tabs make the real point: the *same* effect is not significant in the 50-person sample and clearly significant in the full one. Nothing about the world changed, only how much sampling error we were carrying. Non-significant does not mean "no effect"; it can simply mean "not enough people".
+:::
+
 ## Learning goal achieved
 
 ::: {.push-left}
@@ -708,6 +782,10 @@ gt <- tidy(lm_robust(psppsgva ~ eduyrs, weights = pspwght, data = ESS)) %>%
 :::
 :::
 
+::: {.notes}
+Close the loop on the opening question and make them read all four numbers — estimate, SE, $t$, $p$ — as one sentence. Then add the honest caveats, since both matter: the effect is small per year of education, and *significant* is not the same as *large*. And it is not causal — education is not randomly assigned, which is where the next lectures go.
+:::
+
 ::: {.push-right}
 ```{r goalfig, out.width='96%', fig.height = 4.4, fig.width = 6, echo = FALSE}
 ggplot(ESS, aes(y = psppsgva, x = eduyrs)) +
@@ -725,11 +803,13 @@ ggplot(ESS, aes(y = psppsgva, x = eduyrs)) +
 knitr::include_graphics('https://www.laserfiche.com/wp-content/uploads/2014/10/femalecoder.jpg')
 ```
 
+[**Open exercise 2 in a new tab ↗**](3-exercise2.html){target="_blank"}
+
 <div class="ku-timer" data-min="20"></div>
 :::
 
 ::: {.right-column}
-<iframe src='3-exercise2.html' width='100%' height='620' frameborder='0' scrolling='auto'></iframe>
+<iframe src='3-exercise2.html' width='100%' height='620' frameborder='0' scrolling='yes' style="border:1px solid #ddd; border-radius:6px;"></iframe>
 :::
 
 ## Check yourself: today's goals

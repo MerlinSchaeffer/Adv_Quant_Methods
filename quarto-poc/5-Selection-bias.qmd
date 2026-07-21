@@ -59,6 +59,10 @@ myBib <- ReadBib("../Stats_II.bib", check = FALSE)
 One part per goal. Our running question: does consuming **news** make immigrant minorities report **more discrimination**?
 :::
 
+::: {.notes}
+Frame the day: our goal is not describing patterns but *explaining* them — and today is about avoiding **false** explanations. Walk the arc once: a real-world puzzle, then a simple but flawed analysis, then the theory that fixes it (potential outcomes), then the tool that draws it (DAGs).
+:::
+
 ## From hypothesis to comparison {.inverse background-color="#901A1E"}
 
 [Part 1 of 3]{.part-pill}
@@ -89,6 +93,10 @@ knitr::include_graphics('img/L5/Meta.png')
 :::
 :::
 
+::: {.notes}
+Say the paradox out loud, because it is genuinely counterintuitive: the *better* integrated report *more* discrimination, not less. Point at the forest plot — 280 estimates from 42 studies, so this is a robust pattern, not one odd survey. Today we test one proposed mechanism: awareness, via news consumption.
+:::
+
 ## A hypothesis is a comparison
 
 A causal claim implies a [counterfactual]{.alert}: things would have been different had $X$ (not) happened.
@@ -105,6 +113,10 @@ $H_0:$ news consumption does **not** change it: the difference of the two group 
 **Discuss:** what comparison is implied by each classic claim? **Marx** — capitalist labour alienates people and *reduces* mental health. **Simmel** — city life *increases* nervous stimulation and makes residents distant.
 :::
 
+::: {.notes}
+The key idea: testing a hypothesis *always* implies a comparison — causality is a counterfactual, a "what if". Give them two minutes on Marx and Simmel, then collect: Marx compares capitalist against non-capitalist labour, Simmel urban against rural life. Every causal claim names two worlds, even when it doesn't say so.
+:::
+
 ## Why not just ask people?
 
 ::: {.push-left}
@@ -119,6 +131,10 @@ The obvious "study": ask people *"How does reading the news affect you?"*
 ::: {.content-box-red .fragment}
 People have **inaccurate perceptions** of what shapes them — social desirability, faulty memory, little self-insight. Statements by research subjects are valuable, but they are **not credible causal evidence**. We need a comparison, not an introspection.
 :::
+:::
+
+::: {.notes}
+Ask first — give them two minutes before you click the reveal. Expect: social desirability, poor memory, lack of self-awareness. The line to land: people tell interesting stories about their lives, they do not record causal facts about themselves. So we need a comparison, not an introspection.
 :::
 
 ## Preparation
@@ -162,6 +178,10 @@ APAD <- APAD %>%
 
 :::
 
+::: {.notes}
+Keep this short — it is scaffolding, not the point. Two things only: the outcome `dis_index` averages the six discrimination domains into one index, and the cause comes in two forms, total daily minutes and a "reads news" dummy at 15 minutes. Then move on; the payoff is the next slide.
+:::
+
 ## The naïve comparison
 
 ::: {.panel-tabset}
@@ -197,6 +217,10 @@ News readers report, if anything, **`r abs(round(coef(ols)["news_yn"], 2))` poin
 
 :::
 
+::: {.notes}
+Ask them to interpret the scatter *before* you show the table — two minutes with a neighbour. The line is flat, if anything slightly negative, so visually it does not support our hypothesis. Then the regression: about −0.09, not significant. Let them draw the obvious conclusion that the hypothesis is wrong — and then ask whether this is a *fair* comparison. That question is the rest of the lecture.
+:::
+
 ## Break {.inverse background-color="#901A1E"}
 
 <div class="ku-timer" data-min="15"></div>
@@ -206,11 +230,13 @@ News readers report, if anything, **`r abs(round(coef(ols)["news_yn"], 2))` poin
 ::: {.left-column}
 You run the naïve analysis yourself — on a *different* outcome: support for an anti-discrimination law.
 
+[**Open exercise 1 in a new tab ↗**](5-exercise1.html){target="_blank"}
+
 <div class="ku-timer" data-min="20"></div>
 :::
 
 ::: {.right-column}
-<iframe src='5-exercise1.html' width='100%' height='620' frameborder='0' scrolling='auto'></iframe>
+<iframe src='5-exercise1.html' width='100%' height='620' frameborder='0' scrolling='yes' style="border:1px solid #ddd; border-radius:6px;"></iframe>
 :::
 
 ## Potential outcomes & selection bias {.inverse background-color="#901A1E"}
@@ -245,6 +271,10 @@ knitr::include_graphics('img/L5/fork.png')
 ```
 :::
 
+::: {.notes}
+Ferda makes it concrete: 4 with news, 2 without, so her personal causal effect is +2. Now the hard part — in reality we see only *one* of those two rows; the other is gone forever. That is the fundamental problem of causal inference, and it is exactly why we cannot fix this by asking people to imagine the other path.
+:::
+
 ## The average causal effect
 
 $$\text{Avg}_n[Y_{1i} - Y_{0i}] = \frac{1}{n}\sum_{i=1}^{n} Y_{1i} - \frac{1}{n}\sum_{i=1}^{n} Y_{0i}$$
@@ -255,6 +285,10 @@ The **average causal effect** is just the average of everyone's *personal* causa
 
 ::: {.push-right}
 It compares two whole worlds: one where **everyone** reads the news, against one where **no one** does. Neither world is ever fully observed — but, under the right conditions, we can *estimate* the average.
+:::
+
+::: {.notes}
+We give up on personal effects and aim for the average instead. Conceptually it compares two whole worlds — everyone reads the news, nobody does — and neither is ever observed. But the average *is* estimable under the right conditions, and what those conditions are is essentially the rest of this course.
 :::
 
 ## Apples and oranges: Ferda vs. Tuki
@@ -281,6 +315,10 @@ $$\underbrace{Y_{1,\text{Ferda}}}_{4} - \underbrace{Y_{0,\text{Tuki}}}_{5} = -1$
 :::
 :::
 
+::: {.notes}
+Since we cannot see Ferda's missing future, we substitute a different person — that is what every observational comparison does. The result is −1, a terrible estimate of either person's true effect. Give them two minutes on "why is this so wrong?"; the answer you are steering to is that they were different people **to begin with**.
+:::
+
 ## The hidden term: selection bias
 
 $$\underbrace{Y_{1,\text{Ferda}}}_{4} - \underbrace{Y_{0,\text{Tuki}}}_{5}
@@ -289,6 +327,10 @@ $$\underbrace{Y_{1,\text{Ferda}}}_{4} - \underbrace{Y_{0,\text{Tuki}}}_{5}
 
 ::: {.content-box-red}
 **Selection bias** $= Y_{0,\text{Ferda}} - Y_{0,\text{Tuki}} \neq 0$: the two people **differ at baseline**. Even with *no* news at all, Tuki would report more discrimination than Ferda. That pre-existing gap contaminates the comparison.
+:::
+
+::: {.notes}
+Head off the panic: this looks like heavy algebra, but all we did was add and subtract the *same* term, Ferda's $Y_0$. That splits the observed −1 into the true effect, +2, plus something else worth −3. Name that something else: selection bias — Tuki's baseline is simply higher, so even with no news at all she would report more.
 :::
 
 ## From two people to two groups
@@ -304,6 +346,10 @@ the gap in the outcome's **baseline** ($Y_0$) between the groups we compare.
 
 ::: {.content-box-green}
 **Think:** if the minorities who read the news had *not* read them, would they report discrimination as often as those who never read news? If not — the comparison is biased.
+:::
+
+::: {.notes}
+Same logic as Ferda and Tuki, now for whole groups — the maths is identical, only the labels changed. Left of the equals sign is what we compute; right is what we want plus what contaminates it. Point hard at the unobserved term: it is the one we can never check directly. Then use the green box to let them brainstorm why news readers might differ at baseline — education, age, language, citizenship.
 :::
 
 ## (Im)balance of *observed* variables
@@ -338,6 +384,10 @@ APAD %>%
 The groups are **not** balanced — news readers are markedly **older** (≈ 44 vs. 37) and more often German citizens. Our naïve comparison is confounded — and these are only the *observed* differences.
 :::
 
+:::
+
+::: {.notes}
+The move here: we can never compare the *unobserved* baseline, but we can compare observed characteristics — and if the groups differ on those, they almost certainly differ on $Y_0$ too. Walk the code briefly, then read the table: readers are around 44 versus 37 and more often German citizens. State the conclusion flatly — the groups are imbalanced, so the naïve comparison is definitely biased. And stress: these are only the differences we can *see*.
 :::
 
 ## DAGs: seeing the bias {.inverse background-color="#901A1E"}
@@ -376,6 +426,10 @@ The red dashed arrow is not really part of the DAG — it just marks the **spuri
 :::
 :::
 
+::: {.notes}
+A DAG maps your causal *assumptions*, not your data. The puppet metaphor works well: grab a node, shake it, and the movement travels along the arrows. Shake $C$ and both $D$ and $Y$ move together — that is the spurious correlation. Shake $D$ and $Y$ does not move at all, because there is no arrow between them. A confounder is just a variable sitting on such a backdoor path.
+:::
+
 ## Our case: a confounded correlation
 
 ::: {.push-left}
@@ -400,6 +454,10 @@ It opens a **backdoor path** — so the raw news–discrimination correlation is
 ```
 :::
 
+::: {.notes}
+Now make it concrete with our own case. German citizenship plausibly drives *both* whether people follow German news *and* how much discrimination they actually encounter. Trace the backdoor path with your finger: reads news ← German citizen → discrimination. That path on its own could produce the negative correlation we saw — no causal arrow required. And this is exactly the imbalance the balance table found.
+:::
+
 ## The verdict: correlation ≠ causation
 
 ::: {.push-left}
@@ -417,16 +475,22 @@ Ice-cream sales and shark attacks correlate — but *temperature* drives both. A
 :::
 :::
 
+::: {.notes}
+Close the loop: they now know *why* this flat line cannot be read causally — confounders sort people into and out of reading the news, so the baselines differ. Ice cream and shark attacks is the throwaway example if anyone still resists. Then bridge to next week: if the problem is that the groups differ to begin with, the fix is to *make* them comparable — which is what randomisation does.
+:::
+
 ## Your turn: exercise 2
 
 ::: {.left-column}
 You draw the DAG and run a balance test yourself — is **racial appearance** balanced across news readers?
 
+[**Open exercise 2 in a new tab ↗**](5-exercise2.html){target="_blank"}
+
 <div class="ku-timer" data-min="20"></div>
 :::
 
 ::: {.right-column}
-<iframe src='5-exercise2.html' width='100%' height='620' frameborder='0' scrolling='auto'></iframe>
+<iframe src='5-exercise2.html' width='100%' height='620' frameborder='0' scrolling='yes' style="border:1px solid #ddd; border-radius:6px;"></iframe>
 :::
 
 ## Today's general lessons {.inverse background-color="#901A1E"}
@@ -440,6 +504,10 @@ You draw the DAG and run a balance test yourself — is **racial appearance** ba
 4. A **naïve comparison of groups** usually is *not* the causal effect — it adds **selection bias**: the groups differ in their baseline $Y_0$.
 
 5. A **balance test** exposes *observed* imbalance; a **DAG** shows *why* — a **confounder** on a **backdoor path**. Confounder bias *is* selection bias.
+
+::: {.notes}
+Run through this fast — they are tired by now. If only one sentence survives the day, make it this one: an observed difference in means is a causal effect **plus** selection bias, and everything we do from here on is about forcing that second term to zero.
+:::
 
 ## Check yourself: today's goals
 

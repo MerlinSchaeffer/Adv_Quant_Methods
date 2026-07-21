@@ -102,6 +102,10 @@ knitr::include_graphics('img/L2/poster_china.jpg')
 **Research question of the day:** is there a **liberty–equality trade-off**? Do state-owned (socialist) economies reduce poverty — at the price of fewer civil liberties?
 :::
 
+::: {.notes}
+An old and genuinely contested political claim: you can have equality or you can have liberty, but not both. Note that it is an *empirical* claim dressed as an ideological one — which means we can go and check it. Say up front that the answer today is descriptive, not causal; they will want to over-claim.
+:::
+
 ## Our map for today: a triangle
 
 ```{tikz, triangle-map, echo = FALSE, out.width='62%', fig.align='center'}
@@ -128,6 +132,10 @@ Three variables → **three pairwise relationships**. Only all three together an
 **The thread for today:** the lecture walks **edge 1** step by step. *You* walk **edges 2 and 3** in the exercises — with the same tools. The final slide assembles the verdict.
 :::
 
+::: {.notes}
+Spend a minute here — this triangle is the map for the whole day, exercises included. Three variables mean three pairwise relationships, and the research question needs all three. Tell them explicitly that the exercises are not busywork: without their two edges we cannot reach the verdict on the closing slide.
+:::
+
 ## What is socialism — and how do we measure it?
 
 **Socialism** (as an economic system): the means of production and distribution are<br>
@@ -145,6 +153,10 @@ state ownership**.
 
 ::: {.content-box-red .fragment}
 Self-description is cheap talk — North Korea calls itself a *Democratic People's Republic*. A good operationalisation is **valid** (measures what states *do*, not what they *say*), **reliable** (many independent country experts, aggregated by a measurement model), and **comparable** (one scale, all countries, all years).
+:::
+
+::: {.notes}
+This is the measurement slide, and it matters more than it looks. Ask the blue-box question and let someone defend the self-declared list before you reveal — the North Korea example usually ends the debate. Name the three criteria as the standard they should apply to *any* variable for the rest of the course: valid, reliable, comparable. Concepts are not variables until someone makes a defensible choice.
 :::
 
 ## Preparation
@@ -209,6 +221,10 @@ In T.H. Marshall's terms, the **civil** dimension of citizenship rights.
 
 ::: {.content-box-green}
 **Reading the scale:** it works like a **z-score** (today's topic!): 0 ≈ the average country-year since 1789; around **+2** ≈ heavily state-owned (North Korea); around **−2** ≈ almost fully private (Switzerland).
+:::
+
+::: {.notes}
+Introduce the two V-Dem variables, then use the sanity-check tab as a habit rather than a slide: whenever you meet a new variable, look at its extremes and ask whether they make sense. North Korea at one end, Switzerland at the other, Denmark where you would expect — that is face validity, cheap and worth doing every time. It also previews the z-score, which is the next big idea.
 :::
 
 ### … its R code
@@ -286,6 +302,10 @@ ggplot(data = Dat_vdem %>%
 The GDR ran a far more state-owned economy **and** offered far fewer civil liberties than West Germany or Denmark — one historical case *previewing* edge 3 of our triangle. But one case is an anecdote; now we test the pattern across **all** countries.
 :::
 
+::: {.notes}
+A natural comparison: two Germanies, one nation, split for forty years. Let them read both series and describe what happens in 1949 and again after 1990. Then the methodological turn, which is the real point — this is a vivid *anecdote*, and one case cannot establish a pattern. That is exactly why we now go to all countries at once.
+:::
+
 :::
 
 ## (2) World Bank data: poverty across the world
@@ -347,6 +367,10 @@ The World Bank raised the international poverty line from $2.15 (2017 prices) to
 :::
 :::
 
+::: {.notes}
+Do not rush the PPP explanation — "$3.00 a day" means nothing until they can convert it. Walk the three steps, then land the Danish figure: about kr. 600 a month for housing, food, clothes, transport, everything. Let that sit for a second. A number they can feel is a number they will interpret carefully later.
+:::
+
 ### Poverty across the world
 ```{r poverty-world, out.width='100%', fig.height = 7, fig.width = 20, echo = FALSE}
 ggplot(data = Dat_poverty,
@@ -406,6 +430,10 @@ knitr::include_graphics('img/L2/join_full.gif')
 *Source:* [Tidy Animated Verbs](https://github.com/gadenbuie/tidyexplain)
 :::
 
+::: {.notes}
+Let the animations play — they explain joins better than any sentence. The only question that matters is what happens to rows that find no partner: inner keeps just the matches, left keeps everything on the left, and so on. Flag the practical trap now: `inner_join()` silently drops unmatched countries, so always check how many rows you started and ended with. Their exercise uses `anti_join()` to find exactly those.
+:::
+
 ## Inner join: poverty meets civil liberties & state ownership
 
 ```{r}
@@ -415,6 +443,10 @@ knitr::include_graphics('img/L2/join_full.gif')
 
 ::: {.content-box-green}
 One row per country: its most recent poverty estimate, matched to civil liberties and state ownership **in that same year**. All three corners of our triangle in one tibble.
+:::
+
+::: {.notes}
+Point at the key: country code *and* year, both needed — matching on country alone would pair a country's poverty in one year with its politics in another. Note also why we join on the ISO code rather than the name; country names are spelled differently in every data set, which is a real and common source of silent errors.
 :::
 
 ## Break {.inverse background-color="#901A1E"}
@@ -440,6 +472,10 @@ Edge 1 of the triangle: state ownership and poverty — first as a picture, then
 3. How much *spread* is there?
 4. Are there *outliers*?
 :::
+:::
+
+::: {.notes}
+Always look before you compute — these four questions are a habit for every scatter plot in this course. Make them answer all four aloud for this plot. Find Denmark together, and ask where they *expected* it to sit. The eyeballed answer to edge 1 should already be "not much of a relationship", which sets up the correlation coefficient.
 :::
 
 ::: {.right-column}
@@ -514,6 +550,10 @@ quad_plot
 
 :::
 
+::: {.notes}
+Two moves, and give each its own sentence: subtracting the mean re-centres everything on zero, dividing by the SD changes the unit to standard deviations. The payoff is that percentages and an expert-coded index now share one scale. The quadrant picture is the bridge to the next slide — countries in the blue quadrants agree in sign, those in the red disagree, and the correlation is essentially a tally of which kind dominates.
+:::
+
 ## The correlation coefficient $r_{y,x}$
 
 Eye-balling is not evidence. One number summarises the scatter plot:
@@ -544,6 +584,10 @@ Essentially **no linear association**: state-owned economies do *not* have syste
 :::
 :::
 
+::: {.notes}
+Walk the formula through the quadrant picture rather than as algebra: same-side countries contribute positive products, opposite-side ones negative, and $r$ is essentially who wins. Then read our number — near zero, so edge 1 shows no poverty payoff. Insist on the word *linear*: $r$ near zero rules out a straight-line pattern, not any relationship whatsoever.
+:::
+
 ## Your turn: edge 2 of the triangle
 
 ::: {.left-column}
@@ -551,11 +595,13 @@ Essentially **no linear association**: state-owned economies do *not* have syste
 knitr::include_graphics('https://www.laserfiche.com/wp-content/uploads/2014/10/femalecoder.jpg')
 ```
 
+[**Open exercise 1 in a new tab ↗**](2-exercise1.html){target="_blank"}
+
 <div class="ku-timer" data-min="20"></div>
 :::
 
 ::: {.right-column}
-<iframe src='2-exercise1.html' width='100%' height='620' frameborder='0' scrolling='auto'></iframe>
+<iframe src='2-exercise1.html' width='100%' height='620' frameborder='0' scrolling='yes' style="border:1px solid #ddd; border-radius:6px;"></iframe>
 :::
 
 ## Break {.inverse background-color="#901A1E"}
@@ -597,6 +643,10 @@ $\alpha$, the [constant/intercept]{.alert}: the value of $y$ where the line cros
 $\beta$, the [slope]{.alert}: how $\hat{y}$ changes when $x$ increases by one unit.
 
 $$\hat{y} = \alpha + \beta x$$
+:::
+
+::: {.notes}
+Two numbers fully describe a straight line: where it starts and how steeply it climbs. Keep hammering the units — $\beta$ is "how much $y$ changes per **one unit** of $x$", and every interpretation they write this term should name that unit. Warn them that $\alpha$ is only meaningful if $x = 0$ is a real, interpretable value; here it is, because our scale is centred.
 :::
 
 ::: {.right-column}
@@ -751,6 +801,10 @@ The standardized slope of a bivariate OLS **is** the correlation coefficient $r$
 :::
 :::
 
+::: {.notes}
+A satisfying moment worth pausing on: run OLS on the z-standardised variables and the slope comes out as the correlation we computed earlier. Correlation and bivariate regression are the same fact in two costumes — regression just keeps the original units, which is what makes it interpretable.
+:::
+
 ### Interpretation
 ::: {.push-left}
 ```{r ref.label = "min-resid", out.width='100%', fig.height = 4.2, fig.width = 6.5, echo = FALSE}
@@ -765,6 +819,10 @@ At the scale's midpoint (state ownership $= 0$), predicted poverty is **`r round
 With every unit more state ownership, average poverty is **`r round(coef(mod)[2], 2)` percentage points `r ifelse(coef(mod)[2] > 0, "higher", "lower")`** — and $R^2 = `r round(summary(mod)$r.squared, 3)`$: state ownership accounts for almost **none** of the variance in poverty across the world.
 :::
 
+:::
+
+::: {.notes}
+Model them the full sentence, with units, and make someone repeat it back. Then $R^2$: state ownership explains almost none of the variation in world poverty. Say plainly that a tiny $R^2$ is not a failed analysis — it is a finding, and here it is the answer to edge 1.
 :::
 
 ## Two ways to read a regression
@@ -795,6 +853,10 @@ knitr::include_graphics('img/L2/conditional_means.png')
 :::
 :::
 
+::: {.notes}
+The most important slide in the deck for the rest of the course. Same coefficient, two readings — one says state ownership *changes* poverty, the other only says countries that differ in state ownership *have* different average poverty. Only the second is licensed by what we did today. Give them the discipline of the descriptive phrasing, "among countries with…", and tell them the whole course is about earning the right to the first reading.
+:::
+
 ## Your turn: edge 3 — and the verdict
 
 ::: {.left-column}
@@ -802,11 +864,13 @@ knitr::include_graphics('img/L2/conditional_means.png')
 knitr::include_graphics('https://www.laserfiche.com/wp-content/uploads/2014/10/femalecoder.jpg')
 ```
 
+[**Open exercise 2 in a new tab ↗**](2-exercise2.html){target="_blank"}
+
 <div class="ku-timer" data-min="20"></div>
 :::
 
 ::: {.right-column}
-<iframe src='2-exercise2.html' width='100%' height='620' frameborder='0' scrolling='auto'></iframe>
+<iframe src='2-exercise2.html' width='100%' height='620' frameborder='0' scrolling='yes' style="border:1px solid #ddd; border-radius:6px;"></iframe>
 :::
 
 ## The verdict: no liberty–equality trade-off
@@ -835,6 +899,10 @@ State-owned economies offer **far fewer civil liberties** (edge 3) and **no less
 
 ::: {.backgrnote}
 Careful: these are *descriptive* associations across countries — not yet causal effects. That distinction is where this course is headed.
+:::
+
+::: {.notes}
+Assemble the triangle with their exercise results — this is the moment the day pays off, so let them supply edges 2 and 3. The verdict: no poverty payoff, a real civil-liberties cost, and more liberties going with *less* poverty. The premise of the trade-off simply does not hold in these data. Then take it straight back: these are cross-country associations, and rich countries differ from poor ones in a thousand ways. That discomfort is the door into Lecture 3.
 :::
 
 ## Check yourself: today's goals

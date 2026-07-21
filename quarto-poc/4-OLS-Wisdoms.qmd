@@ -59,6 +59,10 @@ myBib <- ReadBib("../Stats_II.bib", check = FALSE)
 One part of today's lecture per goal. Our running question: **the carbon divide** — who pollutes, and why?
 :::
 
+::: {.notes}
+Today is craft, not new theory: they can already fit a line, so now they learn to distrust one. Frame it as three habits — interrogate the line, handle categories, show the result. The running example is the carbon divide, which is worth a sentence: this is their generation's justice question, and we are doing it with the same OLS they already know.
+:::
+
 ## Does the line fit? {.inverse background-color="#901A1E"}
 
 [Part 1 of 3]{.part-pill}
@@ -83,6 +87,10 @@ A first, blunt question before any of the justice: **do richer countries simply 
 ::: {.backgrnote}
 The gap is staggering: the average Qatari emits *hundreds of times* more CO₂ than the average person in Chad or the DR Congo `r Citet(myBib, "chancel_global_2022")`.
 :::
+:::
+
+::: {.notes}
+Name the injustice before the statistics: the countries that emit most are rarely the ones that suffer most. Then set today's much blunter question — do richer countries simply emit more? Be explicit that this is a *descriptive* question; nothing today is causal, and they should notice we are not claiming it is.
 :::
 
 ## Preparation
@@ -174,6 +182,10 @@ Dat %>%
 The extremes are oil-and-gas economies (Qatar, Kuwait, Brunei) and rich English-speaking countries; at the other end sit some of the world's poorest states.
 :::
 
+::: {.notes}
+Let the bars do the talking — ask them to find Denmark before you point at it. The shape of the distribution is the lesson: petro-states and rich anglophone countries at one end, the world's poorest at the other. Plant Qatar in their minds now; it comes back as our outlier in ten minutes.
+:::
+
 ## Does wealth drive emissions?
 
 ::: {.left-column}
@@ -198,6 +210,10 @@ ggplot(data = Dat, aes(y = co2, x = gdp_k, label = country)) +
        x = "GDP per person (thousands of $, PPP)") +
   theme_minimal(base_size = 14)
 ```
+:::
+
+::: {.notes}
+Drill the four questions — direction, form, spread, outliers — and make them answer all four out loud before any model is fitted. This is a habit, not a slide: every scatter, every time. They should already be uneasy about the top-right corner.
 :::
 
 ## A first regression
@@ -228,6 +244,10 @@ Each extra **\$1,000** of GDP per person comes with about **`r round(coef(lm_rob
 :::
 :::
 
+::: {.notes}
+Have them read the slope in words, with units — that habit is worth more than the number. Then point at the low $R^2$ and ask the question the whole first part answers: *should* we trust this line? The honest answer is that we do not know yet, because we have not looked at how it was produced.
+:::
+
 ## OLS makes assumptions
 
 ::: {.left-column}
@@ -249,6 +269,10 @@ $\rightarrow$ The first two we **check with plots**.
 :::
 
 A model is a *reduced representation of reality*. It should capture the general pattern — **not** be dictated by one or two singular cases.
+:::
+
+::: {.notes}
+Four assumptions, but be honest that only two need their attention today — `lm_robust()` already handles heteroscedasticity, and independence is a design question. The sentence to leave them with is the last one: a model should describe the *bulk* of the data, not be dictated by one or two strange cases.
 :::
 
 ## Assumption 1: outliers
@@ -275,6 +299,10 @@ lm(co2 ~ gdp_k, data = Dat) %>%
 ```
 :::
 
+::: {.notes}
+Three ideas, and they are genuinely different — keep them apart. Residual = far from the line. Leverage = far out on the x-axis, so the line has to pay attention. Cook's D combines both: how much everything moves if this case vanished. Qatar and Palau are the two names past the dashed lines; ask which is which before you read them out.
+:::
+
 ## Assumption 2: linearity
 
 ::: {.left-column}
@@ -298,6 +326,10 @@ lm(co2 ~ gdp_k, data = Dat) %>%
 ```
 :::
 
+::: {.notes}
+Flat red line means the straight line caught everything; a bend means it did not. Ours bends — and note *why*: the same rich, high-emitting countries cause both problems, so the outlier plot and this plot are pointing at the same cases. Resist the temptation to fix the curve with a log here; that is Lecture 12's job. Today we only diagnose.
+:::
+
 ## Not every outlier is an error
 
 ::: {.content-box-blue}
@@ -306,6 +338,10 @@ lm(co2 ~ gdp_k, data = Dat) %>%
 
 ::: {.content-box-red .fragment}
 No — *judgement*, not reflex. **Palau** is a measurement artefact for our question (national wealth → emissions): we **drop** it. **Qatar** is a real, important case; we **keep** it, but stay aware it has high leverage. Never delete a case just because it is inconvenient.
+:::
+
+::: {.notes}
+The most important slide of the lecture, and the least statistical. Make them vote before you reveal. The distinction: Palau's number is an artefact of *how it was measured* — a refuelling port divided by 18,000 residents — so it does not answer our question. Qatar's number is true and substantively interesting. Delete the artefact, keep the inconvenient truth. Say it flatly: dropping cases because they spoil your result is misconduct, and the defence is that you state what you dropped and why.
 :::
 
 ## Removing the artefact
@@ -356,6 +392,10 @@ Same specification, one artefact removed. The slope is now more stable and $R^2$
 :::
 :::
 
+::: {.notes}
+One row out of 190-odd, and $R^2$ roughly doubles — that is the number to dwell on. It should feel slightly alarming, and it should: a single case had that much say over the fit. Good moment to ask what would have happened if we had never looked at the diagnostic plots.
+:::
+
 ::: {.push-right}
 ```{r ref.label = "ols1b", echo = FALSE, results = 'asis'}
 ```
@@ -385,6 +425,10 @@ ggplot(data = Dat, aes(y = co2, x = reorder(region, co2, FUN = median))) +
 **Discuss:** if we predict CO₂ from region alone, what would $\hat{Y}$ *be* for a Sub-Saharan African country? For a North American one? How does the difference between them relate to $\hat{\beta}$?
 :::
 
+::: {.notes}
+Let them answer the blue box before you move on — the insight they should reach on their own is that with only a categorical predictor, the prediction *is* the group mean. Once they see that, dummy coding stops being a trick and becomes obvious. The gradient across regions is also worth reading aloud.
+:::
+
 ## Dummy coding: from labels to 0/1
 
 ::: {.push-left}
@@ -404,6 +448,10 @@ $$x = \begin{cases} 1, & \text{if in the category} \\ 0 & \text{otherwise} \end{
 | Reference<br>[(Sub-Saharan Africa)]{.backgrnote} | 0 | 0 | 0 |
 
 Each coefficient = that region's **average difference** in CO₂ from the reference.
+:::
+
+::: {.notes}
+Walk one row of the table so they see it: the USA gets a 1 in North America and 0 everywhere else. Then the bit that always confuses people — one category has to be left out, and it becomes the reference. Every other coefficient is a comparison *to that one*. Ask what would happen if we included all of them; you do not need the algebra, just the intuition that the last column is redundant.
 :::
 
 ## Categorical predictors in R
@@ -448,6 +496,10 @@ b <- coef(lm_robust(co2 ~ region, data = Dat))
 
 :::
 
+::: {.notes}
+Read the intercept first — it is Sub-Saharan Africa's average, the case where every dummy is zero. Then North America as a difference *from* that, and add the two to get its actual average. Flag the last bullet explicitly: with a categorical predictor there is no line, so the linearity assumption from Part 1 simply does not apply. Students routinely try to check it anyway.
+:::
+
 ## Break {.inverse background-color="#901A1E"}
 
 <div class="ku-timer" data-min="15"></div>
@@ -457,11 +509,13 @@ b <- coef(lm_robust(co2 ~ region, data = Dat))
 ::: {.left-column}
 You practice today's diagnostics and a categorical predictor — this time with **income groups** instead of regions.
 
+[**Open exercise 1 in a new tab ↗**](4-exercise1.html){target="_blank"}
+
 <div class="ku-timer" data-min="20"></div>
 :::
 
 ::: {.right-column}
-<iframe src='4-exercise1.html' width='100%' height='620' frameborder='0' scrolling='auto'></iframe>
+<iframe src='4-exercise1.html' width='100%' height='620' frameborder='0' scrolling='yes' style="border:1px solid #ddd; border-radius:6px;"></iframe>
 :::
 
 ## Break {.inverse background-color="#901A1E"}
@@ -511,6 +565,10 @@ ggplot(data = plotdata,
 
 :::
 
+::: {.notes}
+The pitch: nobody reads a table of seven coefficients, but everyone reads this picture in two seconds. Point out the three deliberate choices — the dashed line at zero for "no difference", ordering by size, and `coord_flip()` so the labels are legible. They rebuild this in exercise 2, so linger on the code tab.
+:::
+
 ## (2) Model predictions
 
 ::: {.panel-tabset}
@@ -555,6 +613,10 @@ ggplot(data = fict_dat, aes(y = fit, x = gdp_k)) +
 
 :::
 
+::: {.notes}
+Three steps, and step 1 is the one they forget: invent fictional countries spanning the GDP range, *then* predict for them. Stress that the ribbon is uncertainty about the average prediction, not a range where countries fall — that misreading is extremely common. The two dashed benchmarks make the divide concrete: a poor country and a rich one, and the gap between their predictions.
+:::
+
 ## The carbon divide, in two pictures
 
 ::: {.push-left}
@@ -571,16 +633,22 @@ ggplot(data = fict_dat, aes(y = fit, x = gdp_k)) +
 Richer countries and richer regions emit far more per person. Yet the people who emit the **least** — across Sub-Saharan Africa and South Asia — are the ones most exposed to the warming those emissions cause. That gap, not the slope, is the real research agenda `r Citet(myBib, "chancel_global_2022")`.
 :::
 
+::: {.notes}
+Both plots together, then the point that is not statistical at all: the regions at the bottom of the coefficient plot are the ones that will suffer most from the warming. Our slope describes the divide; it does not explain or excuse it. Say plainly that this is where description ends and the research agenda begins.
+:::
+
 ## Your turn: exercise 2
 
 ::: {.left-column}
 You practice visualizing regression: a **coefficient plot** and a **prediction plot** of your own.
 
+[**Open exercise 2 in a new tab ↗**](4-exercise2.html){target="_blank"}
+
 <div class="ku-timer" data-min="20"></div>
 :::
 
 ::: {.right-column}
-<iframe src='4-exercise2.html' width='100%' height='620' frameborder='0' scrolling='auto'></iframe>
+<iframe src='4-exercise2.html' width='100%' height='620' frameborder='0' scrolling='yes' style="border:1px solid #ddd; border-radius:6px;"></iframe>
 :::
 
 ## One last wisdom: whose carbon is it?
@@ -593,6 +661,10 @@ Everything so far counted CO2 where it is **produced**. But Denmark burns little
 ::: {.content-box-green}
 **The wisdom:** how you *measure the outcome* can flip the story — a fairer CO2 number makes the North–South gap **wider**, not smaller.
 :::
+:::
+
+::: {.notes}
+This lands well with a Danish audience: everything so far counted carbon where it is *burned*, and by that measure Denmark looks rather good. Re-assign imported steel, electronics and meat to whoever consumes them and the Danish figure jumps sharply, while China and India fall. Read the dumbbells left to right. The wisdom is about the outcome variable, not about climate: how you choose to measure $Y$ can reverse who looks responsible.
 :::
 
 ::: {.right-column}
@@ -677,6 +749,10 @@ Dat_cons %>%
   theme(legend.position = "top")
 ```
 
+:::
+
+::: {.notes}
+Same predictor, same countries, one different outcome column — and the fit improves markedly. Wealth tracks what a country *consumes* far more tightly than what it happens to burn at home. Note the bonus: Qatar stops being the lone outlier, because the production measure was partly an accounting artefact of where the gas is extracted. A nice closing echo of Part 1.
 :::
 
 ## Today's general lessons {.inverse background-color="#901A1E"}
