@@ -50,8 +50,8 @@ myBib <- ReadBib("../Stats_II.bib", check = FALSE)
 
 ## &nbsp; {.clear}
 
-```{r, echo = FALSE, out.width='55%', fig.align='center'}
-knitr::include_graphics('https://pbs.twimg.com/media/EouSsOKUUAM0P_y.jpg')
+```{r, echo = FALSE, out.width='44%', fig.align='center'}
+knitr::include_graphics('img/L6/vaccine_trial.jpg')
 ```
 
 ::: {.lead .center}
@@ -71,7 +71,7 @@ Open with the question, not the answer: they all took this vaccine — how does 
 Use data to discover patterns, <br> and the [social mechanisms that bring them about.]{.alert}
 :::
 
-```{r, echo = FALSE, out.width='60%', fig.align='center'}
+```{r, echo = FALSE, out.width='55%', fig.align='center'}
 knitr::include_graphics('https://researchleap.com/wp-content/uploads/2021/12/Population-data.jpeg')
 ```
 
@@ -621,7 +621,7 @@ Now it stops being hypothetical: we built an experiment *inside* the survey they
 ## &nbsp; {.clear}
 
 ::: {.push-right}
-```{r, echo = FALSE, out.width='89%', fig.align='center'}
+```{r, echo = FALSE, out.width='62%', fig.align='center'}
 knitr::include_graphics('img/Exp2.png')
 ```
 :::
@@ -629,7 +629,7 @@ knitr::include_graphics('img/Exp2.png')
 ## &nbsp; {.clear}
 
 ::: {.push-right}
-```{r, echo = FALSE, out.width='75%', fig.align='center'}
+```{r, echo = FALSE, out.width='52%', fig.align='center'}
 knitr::include_graphics('img/Exp1.png')
 ```
 :::
@@ -685,17 +685,10 @@ This pair of tabs is the payoff of the whole lecture, so put them side by side d
 ::: {.small}
 ```{r OLS_causal, results = 'hide'}
 # Weighted OLS on the survey experiment
-ols <- lm_robust(
-  dis_index ~ article,
-  weights = gewFAKT,
-  data = APAD
-)
+ols  <- lm_robust(dis_index ~ article, weights = gewFAKT, data = APAD)
+
 # Same, but on the z-standardised outcome (effect in SDs)
-zols <- lm_robust(
-  z_dis_index ~ article,
-  weights = gewFAKT,
-  data = APAD
-)
+zols <- lm_robust(z_dis_index ~ article, weights = gewFAKT, data = APAD)
 
 modelsummary( # Regression table with readable labels
   list("Discr." = ols, "Z-Discr." = zols),
@@ -715,10 +708,12 @@ modelsummary( # Regression table with readable labels
 . . .
 
 ::: {.push-right}
+::: {.small}
 ```{r ref.label = "OLS_causal", echo = FALSE, results = 'asis'}
 ```
+:::
 
-::: {.content-box-green}
+::: {.content-box-green style="clear: both;"}
 Because assignment was random, this difference **is** the causal effect $\kappa$ — no confounding to worry about.
 :::
 :::

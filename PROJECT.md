@@ -134,6 +134,29 @@ A refinement round over both the deck and the website. New conventions that the 
   final checklist but was never actually installed by the old steps. All four GitHub installs
   verified to exist (masteringmetrics, ROS-Examples/rpackage, vdemdata, democracyData).
 
+## L6 overflow cleanup (2026-07-21)
+Four pre-existing overflows fixed in `6-RCTees.qmd`. **Method worth reusing:** measure each
+element's `getBoundingClientRect().bottom` relative to the section, divided by reveal's scale, and
+flag anything past 900 slide-units — far more reliable than `scrollHeight - clientHeight`, which
+produces false positives on panel-tabsets and floated columns.
+- **Opening vaccine slide** (the reported bug): the `polack_safety_2020` source line was clipped.
+  The image is 1200×1065, so `out.width='55%'` made it ~780px tall. Now **44%**, and the image is
+  **localized to `img/L6/vaccine_trial.jpg`** — it was hotlinked from `pbs.twimg.com` (alive, but a
+  Twitter CDN dependency on a lecture's opening slide).
+- **"Goal of empirical sociology"** (+18px): image 60% → 55%. Its `researchleap.com` hotlink is
+  still live and is **shared with L1**, so localising it is a separate two-deck cleanup.
+- **"The causal effect"** (+43px, real): the 24-line code block was clipped mid-`)`. Compressed the
+  two `lm_robust()` calls to one line each (they are short enough; matches how L8/L9 write them),
+  wrapped the table in `::: {.small}`, and added `style="clear: both;"` to the green box — this
+  slide has the **float-collapse pattern** (a `. . .` fragment whose only child is a floated
+  `.push-right`, so the fragment measures 0px high).
+- **The `Exp1`/`Exp2` stimulus slides**: both images are strongly **portrait** (866×1456 and
+  941×1358), so a width-based `out.width` made them ~1000px tall — Exp1 ran 132px past the slide.
+  Now 52% / 62%. **Lesson: size portrait images from the aspect ratio, not by eye** — available
+  height is ~780px, so `out.width ≈ 780 × (w/h) / 800` as a fraction of the column.
+- Two residual measurements are **confirmed artefacts, not bugs** (checked visually): the
+  "Do the groups actually differ?" tabset (940) and "It's real research!" (925).
+
 ## Lecture 8 (2026-07-21) — Multiple OLS: adjusting for observed confounders
 `8-Multiple-OLS.qmd` (31 slides) + `8-exercise1/2.Rmd`. **Not a faithful port — deliberately
 rebuilt** (professor chose this after a pre-port review). The original L8 no longer fitted the
@@ -265,12 +288,9 @@ Both L7-only conventions rolled out to **every ported deck (L1–7, 9)**.
 - Verified: all 8 decks render clean (zero R errors), note counts in the HTML match the source
   exactly, every `aside.notes` is `display:none` on the slide, and the reveal `notes` plugin is
   registered so **`s`** opens speaker view.
-- **Pre-existing overflow found in L6 (NOT caused by this work — proved by re-measuring with
-  every note removed: byte-identical).** 5 slides overflow the 1600×900 box: the opening
-  vaccine slide (+101px — the `polack_safety_2020` source line is clipped below the fold),
-  "Goal of empirical sociology" (+18px), and three panel-tabset slides (+110/+35/+43px, likely
-  a measurement artefact of stacked tab panels rather than a visible problem). The vaccine
-  slide is a real, visible clip — worth a fix. Every other deck: **zero overflow**.
+- ~~Pre-existing overflow in L6~~ — **all fixed 2026-07-21** (see below). Every other deck had
+  **zero overflow**; the L6 problems were confirmed pre-existing by re-measuring with every note
+  removed (byte-identical results), so the notes rollout did not cause them.
 - Hotlink check: the `laserfiche.com` stock photo on the "Your turn" slides (L2 ×2, L3 ×2,
   L6 ×2) still returns 200, so it was left in place — but it is an external hotlink on six
   slides and a candidate for localising into `img/` on the next pass.
