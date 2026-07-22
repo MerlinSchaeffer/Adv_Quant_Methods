@@ -134,6 +134,60 @@ A refinement round over both the deck and the website. New conventions that the 
   final checklist but was never actually installed by the old steps. All four GitHub installs
   verified to exist (masteringmetrics, ROS-Examples/rpackage, vdemdata, democracyData).
 
+## Lecture 10 (2026-07-21) — IV & two-stage least squares
+`10-IV-2SLS.qmd` (29 slides, 19 notes) + `10-exercise1/2.Rmd`. **Faithful port** — the pre-port
+review confirmed L10 is *not* a repeat of L7 (see the note under "Next steps"). The Wald recap was
+**kept deliberately**: 2SLS reduces to Wald with one instrument and no controls, and the deck
+verifies that on screen to four decimals.
+- **3-part arc:** (1) *does education pay off?* — ability bias, why controlling fails here (the
+  decisive confounders are unmeasured), Angrist & Krueger's quarter-of-birth idea, the Wald recap;
+  (2) *2SLS* — what Wald cannot do, stage one **keeps the predicted part**, stage two, `ivreg()`,
+  the **2SLS = Wald** identity, and the control-vs-instrument mirror; (3) *the exclusion
+  restriction* — Buckles & Hungerman, instrument-turns-confounder, and the $1/\phi$ amplification.
+- **The L8 callback is the conceptual heart** and is now explicit: controlling keeps the
+  **residuals** of $D$ (the part *not* correlated with the confounder); instrumenting keeps the
+  **predicted values** of $D$ (the part that *is* correlated with the instrument). Same Frisch–Waugh
+  machinery, opposite half retained. Presented as an ask-then-reveal, since the inversion is what
+  confuses students.
+- **Key numbers (all verified, `masteringmetrics::ak91`, n = 329,509):** naïve OLS **0.0709**
+  (≈7.1%); first stage $\phi$ = **0.0516** years; reduced form $\rho$ = **0.00512**; Wald
+  $\rho/\phi$ = **0.0992**; `ivreg(lnw ~ s | qob)` = **0.0992** — identical, which is the lecture's
+  central demonstration.
+  - **Deliberate teaching moment:** IV (9.9%) comes out **larger** than OLS (7.1%), the *opposite*
+    of the ability-bias prediction students make earlier in the deck. The slide asks them to explain
+    it and gives three honest candidates: LATE≠ATE (compliers are legal-minimum leavers),
+    measurement error biasing OLS toward zero, and instrument weakness. Do not smooth this over —
+    the failed prediction is the best teaching moment in the deck.
+  - **The fragility payoff:** $\phi$ = 0.0516 years ≈ **19 days**, so $1/\phi \approx$ **19**. A
+    hypothetical direct effect of birth quarter on log wages of just **0.001** (undetectable) biases
+    the IV estimate by 0.0194 — **20% of the whole result**. That makes "weak instrument" concrete:
+    not merely imprecise, but *fragile*.
+- **Exercises:**
+  - Ex1 = **Acemoglu & Angrist child-labour laws** (`masteringmetrics::child_labor`, 648k rows):
+    first stage $\phi$ = **0.0801**, reduced form $\rho$ = **0.01121**, Wald = **0.1399**, and
+    `ivreg()` 2SLS = **0.1399** — identical *even with controls*, which is Frisch–Waugh again.
+    Modernised off `essentials::as.scalar`. Runtime ~12 s; that is normal, not a hang.
+  - Ex2 = **NEW, on instrument fragility**: measure $\phi$, convert to days, compute $1/\phi$,
+    quantify what a 0.001 violation does (20%), then show that recoding the instrument as a **Q4
+    dummy** changes the Wald estimate from 0.0992 to **0.0740** — same data, same idea, several
+    percentage points apart. Closes on why "n = 330,000 and highly significant" answers neither worry.
+- **`ivreg` was in `about.qmd`'s setup list but NOT actually installed** — same gap
+  `masteringmetrics` had for L7. Installed (0.6.8); no about.qmd edit needed. **Check the setup list
+  is actually installed, not just documented, when porting.**
+- **Dropped:** ~206 lines of commented-out Poland/Solidarity (Hager et al.) material and its
+  `img/Hager*.png` / `Ea*.png`; three `letstimeit` iframes; the dead `uniavisen.dk` hotlink and the
+  watermarked `c8.alamy.com` stock preview.
+- **The deck uses NO image files at all** — every figure is TikZ or ggplot, so it renders in ~16 s
+  with zero external dependencies (same virtue as L7). The 329k-row jitter scatters of the original
+  were replaced by the classic **AK91 sawtooth** (mean schooling by year×quarter of birth), which is
+  both better pedagogy and far lighter.
+- **Gotcha (new):** the deck sets `options(digits = 3)`, which silently truncates *inline* `r`
+  values — `round(wald, 4)` printed as `0.099` while the caption promised four decimals. Use
+  **`sprintf("%.4f", x)`** for any inline number whose precision the surrounding text claims.
+- Verified in-browser: **29 slides, zero overflow, zero R errors, no broken images**, all 7 TikZ
+  DAGs render; both exercises embed webexercises. Wired into `_quarto.yml` + `lectures.qmd`
+  (the "Lectures 1–7 and 9" callout on that page updated to **1–10**).
+
 ## L6 overflow cleanup (2026-07-21)
 Four pre-existing overflows fixed in `6-RCTees.qmd`. **Method worth reusing:** measure each
 element's `getBoundingClientRect().bottom` relative to the section, divided by reveal's scale, and
@@ -660,8 +714,10 @@ ChatGPT/Gemini (Bard is dead). REMEMBER: render exercises with `rmarkdown::rende
    integration paradox). ~~Lecture 7~~ — done 2026-07-13 (Natural experiments & IV; Legewie Bali +
    MTO/IV + Minneapolis). ~~Lecture 8~~ — done 2026-07-21 (Multiple OLS, **rebuilt around omitted
    variable bias** after a pre-port review found it duplicated L7 — see its section above).
-   **Done so far: L1–9. Next: Lecture 10 (`static/Lectures/10-IV-2SLS/`, deck + exercises).**
-   Then 11 → 14. (Colonialism is now fully gone from the course.)
+   ~~Lecture 10~~ — done 2026-07-21 (IV & 2SLS; **faithful port, Wald recap kept** — see its
+   section above).
+   **Done so far: L1–10. Next: Lecture 11 (`static/Lectures/11-Conditionals/`, deck + exercises).**
+   Then 12 → 14. (Colonialism is now fully gone from the course.)
    **Review each deck against the already-ported ones before porting** — L8 showed that the later
    decks were written against a course that the migration has since changed underneath them.
    **But do not over-apply the L8 lesson: checked 2026-07-21, L10 is NOT a repeat of L7.**

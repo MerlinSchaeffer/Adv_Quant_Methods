@@ -1,0 +1,222 @@
+---
+title: "Exercise 1 (25 minutes)"
+subtitle: "You practice: a full IV workflow on a new instrument — first stage, reduced form, Wald ratio, then 2SLS with controls. When you're done, assist some of the others …"
+output: webexercises::webexercises_default
+---
+
+```{r setup, include = FALSE}
+options(htmltools.dir.version = FALSE, servr.interval = 0.5, width = 115, digits = 3)
+knitr::opts_chunk$set(
+  collapse = TRUE, message = FALSE,
+  warning = FALSE, cache = FALSE,
+  comment = "#", strip.white = TRUE)
+
+library(webexercises)
+
+num_fitb <- function(x, digits = 3, width = 7) {
+  a <- format(round(x, digits), nsmall = digits)
+  fitb(unique(c(a, sub(".", ",", a, fixed = TRUE))), width = width)
+}
+```
+
+```{r hidden-setup, include = FALSE}
+pacman::p_load(tidyverse, estimatr, ivreg, modelsummary, masteringmetrics)
+data("child_labor", package = "masteringmetrics")
+```
+
+**Acemoglu & Angrist (2000) had an idea.** US federal states required children to have a minimum
+amount of schooling before they were allowed to work — and *how much* differed across states and
+changed over time. They argued that the exact year a given state reformed its child-labour law was
+essentially arbitrary. That gives us an instrument for schooling.
+
+```{tikz dag-ex1, echo = FALSE, out.width='42%'}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning}
+\definecolor{kured}{HTML}{901A1E}
+\begin{tikzpicture}[>=Latex, semithick]
+\sffamily
+\node[ellipse, draw=kured, thick, align=center] (Z) at (0,0) {Child-labour\\law};
+\node[ellipse, draw] (D) at (3.4,0) {Education};
+\node[ellipse, draw=gray, dashed, align=center] (C) at (3.4,2.2) {Ability, family\\background};
+\node[ellipse, draw] (Y) at (7,0) {Earnings};
+\draw[->, kured, thick] (Z) -- (D);
+\draw[->] (D) -- (Y);
+\draw[->, gray, dashed] (C) -- (D);
+\draw[->, gray, dashed] (C) -- (Y);
+\end{tikzpicture}
+```
+
+1. Load the data and build the instrument. `cl7`, `cl8` and `cl9` are dummies for living in a state
+   that required 7, 8 or 9 years of schooling. Collapse them into **one continuous** variable, and
+   make state of birth and census year **categorical**.
+
+```{r prep}
+pacman::p_load(tidyverse, estimatr, ivreg, modelsummary, masteringmetrics)
+
+data("child_labor", package = "masteringmetrics")
+
+child_labor <- child_labor %>%
+  mutate(
+    # One continuous child-labour-law variable: 7, 8 or 9 required years
+    chld_lb_lw = case_when(
+      cl7 == 1 ~ 7,
+      cl8 == 1 ~ 8,
+      cl9 == 1 ~ 9
+    ),
+    sob  = factor(sob),  # US state of birth
+    year = factor(year)  # Census year
+  ) %>%
+  drop_na(chld_lb_lw)
+```
+
+`r hide("Stuck?")`
+- Did `pacman::p_load(...)` run without red errors? `ivreg` is new this week — if it is missing,
+  run `install.packages("ivreg")` once.
+- `data()` can't find `child_labor`? It ships inside **`masteringmetrics`**, which is a GitHub
+  package — see **About & setup** on the course website.
+- This data set has ~650,000 rows, so models take a few seconds. That is normal, not a crash.
+- Still stuck? Ask in the [t-R-ouble forum](https://absalon.ku.dk/courses/70545/discussion_topics/563046?module_item_id=2037268) on Absalon.
+
+`r unhide()`
+
+```{r solutions, include = FALSE}
+fs <- lm_robust(indEduc ~ chld_lb_lw + yob + year + sob, data = child_labor)
+rf <- lm_robust(lnwkwage ~ chld_lb_lw + yob + year + sob, data = child_labor)
+phi <- coef(fs)["chld_lb_lw"]
+rho <- coef(rf)["chld_lb_lw"]
+wald <- rho / phi
+iv <- ivreg(lnwkwage ~ indEduc + yob + year + sob | chld_lb_lw + yob + year + sob,
+            data = child_labor)
+b_iv <- coef(iv)["indEduc"]
+```
+
+2. **Predict before you compute.** The instrument is "how many years of schooling the law required".
+   Before running anything: which sign do you expect for the **first stage** — the effect of the law
+   on actual years of education?
+   `r mcq(c(answer = "Positive — a stricter law should keep children in school longer", "Negative — stricter laws push children out of school", "Zero — laws are rarely enforced"))`
+
+3. **Estimate the first stage.** Regress `indEduc` on the instrument, controlling for year of birth
+   (`yob`), census year (`year`) and state of birth (`sob`).
+
+`r hide("Hint")`
+`lm_robust(indEduc ~ chld_lb_lw + yob + year + sob, data = child_labor)`
+`r unhide()`
+
+`r hide("R solution — don't peek too early ;) !")`
+```{r sol3, eval = FALSE}
+first_stage <- lm_robust(indEduc ~ chld_lb_lw + yob + year + sob,
+                         data = child_labor)
+
+modelsummary(list("Years of education" = first_stage),
+             coef_map = c("chld_lb_lw" = "Required years of schooling"),
+             stars = TRUE, gof_map = c("nobs"), output = "kableExtra")
+```
+`r unhide()`
+
+   One extra year of *required* schooling translates into `r num_fitb(phi)` extra years of
+   *actual* education. Call this $\phi$.
+
+4. **Estimate the reduced form.** `lnwkwage` is the log weekly wage. Use the **same** controls.
+
+`r hide("R solution — don't peek too early ;) !")`
+```{r sol4, eval = FALSE}
+reduced_form <- lm_robust(lnwkwage ~ chld_lb_lw + yob + year + sob,
+                          data = child_labor)
+
+modelsummary(list("log weekly wage" = reduced_form),
+             coef_map = c("chld_lb_lw" = "Required years of schooling"),
+             stars = TRUE, gof_map = c("nobs"), output = "kableExtra")
+```
+`r unhide()`
+
+   One extra required year raises log wages by `r num_fitb(rho, digits = 4)`. Call this $\rho$.
+   This number is the causal effect **of the law** — *not* of education —
+   `r mcq(c(answer = "provided the timing of state law reforms really is as-if random", "always, because it is a regression", "only if education is randomly assigned"))`.
+
+5. **Compute the Wald ratio by hand.** Divide, and mind which goes on top.
+
+   $$\lambda = \frac{\rho}{\phi} = \;?$$
+
+   Your answer: `r num_fitb(wald)`
+
+`r hide("R solution")`
+```{r sol5, eval = FALSE}
+phi <- coef(first_stage)["chld_lb_lw"]
+rho <- coef(reduced_form)["chld_lb_lw"]
+
+rho / phi
+```
+`r unhide()`
+
+6. **Now do it properly with `ivreg()`.** Write the 2SLS in one line. Remember: the controls must
+   appear on **both** sides of the `|`.
+
+`r hide("Hint")`
+The pattern is `ivreg(outcome ~ treatment + controls | instrument + controls, data = ...)`.
+Here the treatment is `indEduc` and the instrument is `chld_lb_lw`.
+`r unhide()`
+
+`r hide("R solution — don't peek too early ;) !")`
+```{r sol6, eval = FALSE}
+twosls <- ivreg(
+  lnwkwage ~ indEduc + yob + year + sob | chld_lb_lw + yob + year + sob,
+  data = child_labor
+)
+
+modelsummary(list("2SLS" = twosls),
+             coef_map = c("indEduc" = "Years of education"),
+             stars = TRUE, gof_map = c("nobs"), output = "kableExtra")
+```
+`r unhide()`
+
+   The 2SLS estimate is `r num_fitb(b_iv)` — compared with your hand-computed Wald ratio of
+   `r round(wald, 3)`. They are
+   `r mcq(c(answer = "identical — 2SLS reproduces the Wald ratio", "close but meaningfully different", "unrelated quantities"))`.
+
+7. **Write one sentence** as a `# comment` interpreting the 2SLS estimate in plain language, with
+   units — then compare:
+
+`r hide("Model answer")`
+Among men whose schooling was actually changed by child-labour laws, one additional year of
+education raises weekly wages by about **14%**. Because the estimate uses only the variation in
+schooling driven by the timing of state law reforms, it is not contaminated by ability or family
+background — *provided* that timing really was as-if random and affected wages only through
+schooling. Note this is a **LATE**: it describes compliers — children who would have left school
+earlier under a laxer law — not the population as a whole.
+`r unhide()`
+
+8. **Bonus, for the fast.** Compare the 2SLS estimate to a naïve OLS of `lnwkwage` on `indEduc`
+   with the same controls. Which is larger, and does that match the ability-bias prediction?
+
+`r hide("R solution")`
+```{r sol8, eval = FALSE}
+ols <- lm_robust(lnwkwage ~ indEduc + yob + year + sob, data = child_labor)
+
+modelsummary(list("OLS" = ols, "2SLS" = twosls),
+             coef_map = c("indEduc" = "Years of education"),
+             stars = TRUE, gof_map = c("nobs"), output = "kableExtra")
+```
+
+As in the lecture, the IV estimate comes out **larger** than OLS — the opposite of what simple
+ability bias predicts. The same three explanations apply: LATE versus ATE (compliers are people
+pushed through school by law, whose returns may be higher), measurement error in schooling biasing
+OLS toward zero, and instrument weakness.
+`r unhide()`
+
+9. **Discuss with your neighbour.** The whole design rests on one untestable claim.
+
+   - State the **exclusion restriction** for this instrument in one sentence.
+   - Give a concrete reason why the timing of a state's child-labour reform might affect wages
+     through something *other* than schooling.
+   - Would adding more control variables settle the question?
+
+`r hide("Talking points")`
+- **Exclusion restriction:** the required years of schooling in your state and birth year affect
+  your later wages *only* by changing how much education you actually got.
+- Plausible violations: states reform labour law when their **economy is changing** — industrialising
+  states may pass stricter schooling laws *and* offer better-paid jobs later. Reforms may travel
+  with other policies (public spending, health, minimum wages). Families may also move between states.
+- **No.** Controls close backdoors through variables you measured; the worry here is that the
+  *instrument itself* has a second route to wages. More controls cannot rule that out — only an
+  argument about how reforms happened can, which is why the paper spends its pages on institutional
+  history rather than on regression tables.
+`r unhide()`

@@ -1,0 +1,180 @@
+---
+title: "Exercise 2 (20 minutes)"
+subtitle: "You practice: putting a number on how fragile an instrument is — measuring the first stage, computing the 1/φ amplification, and seeing what an undetectable violation would do. When you're done, assist some of the others …"
+output: webexercises::webexercises_default
+---
+
+```{r setup, include = FALSE}
+options(htmltools.dir.version = FALSE, servr.interval = 0.5, width = 115, digits = 3)
+knitr::opts_chunk$set(
+  collapse = TRUE, message = FALSE,
+  warning = FALSE, cache = FALSE,
+  comment = "#", strip.white = TRUE)
+
+library(webexercises)
+
+num_fitb <- function(x, digits = 3, width = 7) {
+  a <- format(round(x, digits), nsmall = digits)
+  fitb(unique(c(a, sub(".", ",", a, fixed = TRUE))), width = width)
+}
+```
+
+```{r hidden-setup, include = FALSE}
+pacman::p_load(tidyverse, estimatr, ivreg, modelsummary, masteringmetrics)
+data("ak91", package = "masteringmetrics")
+```
+
+In the lecture we took Angrist & Krueger's quarter-of-birth instrument at face value. Now we
+stress-test it. **The exclusion restriction cannot be tested** — but you *can* work out how much
+damage a violation would do if there were one. That calculation is what separates a careful reader
+of IV papers from a credulous one.
+
+1. Load the data and rebuild the two ingredients of the Wald ratio.
+
+```{r prep}
+pacman::p_load(tidyverse, estimatr, ivreg, modelsummary, masteringmetrics)
+
+data("ak91", package = "masteringmetrics")
+
+first_stage  <- lm_robust(s ~ qob, data = ak91)    # instrument -> treatment
+reduced_form <- lm_robust(lnw ~ qob, data = ak91)  # instrument -> outcome
+```
+
+`r hide("Stuck?")`
+- Did `pacman::p_load(...)` run without red errors? `ivreg` is new this week — if it is missing,
+  run `install.packages("ivreg")` once.
+- `data()` can't find `ak91`? It ships inside **`masteringmetrics`** — see **About & setup**.
+- Odd results? *Session → Restart R*, then rerun from the top.
+- Still stuck? Ask in the [t-R-ouble forum](https://absalon.ku.dk/courses/70545/discussion_topics/563046?module_item_id=2037268) on Absalon.
+
+`r unhide()`
+
+```{r solutions, include = FALSE}
+phi  <- coef(lm_robust(s ~ qob, data = ak91))["qob"]
+rho  <- coef(lm_robust(lnw ~ qob, data = ak91))["qob"]
+wald <- rho / phi
+amp  <- 1 / phi
+days <- phi * 365
+bias_small <- 0.001 / phi
+share_small <- bias_small / wald
+
+ak91 <- ak91 %>% mutate(q4 = if_else(qob == 4, 1, 0))
+wald_q4 <- coef(lm_robust(lnw ~ q4, data = ak91))["q4"] /
+           coef(lm_robust(s ~ q4, data = ak91))["q4"]
+```
+
+2. **How hard does the instrument actually push?** Extract the first-stage coefficient $\phi$.
+
+   $\phi$ = `r num_fitb(phi, digits = 4)` years of schooling.
+
+   Expressed in days ($\phi \times 365$), being born one quarter later buys roughly
+   `r fitb(c("19", "19 days", "about 19"), width = "5")` days of extra education.
+
+`r hide("R solution")`
+```{r sol2, eval = FALSE}
+phi <- coef(first_stage)["qob"]
+phi
+phi * 365 # in days
+```
+`r unhide()`
+
+3. **The amplification factor.** The Wald estimator divides by $\phi$, so *anything* contaminating
+   the reduced form gets multiplied by $1/\phi$.
+
+   $1/\phi$ = `r num_fitb(amp, digits = 1, width = 6)`
+
+   `r mcq(c(answer = "A weak first stage magnifies any violation of the exclusion restriction", "A weak first stage only makes the estimate less precise", "A weak first stage has no consequences if the sample is large"))`
+
+4. **Now put a number on the damage.** Suppose — hypothetically — that quarter of birth had a tiny
+   *direct* effect on log wages of **0.001**, i.e. one tenth of one percent, quite apart from
+   schooling. That is far too small to notice in any table.
+
+   The resulting bias in the IV estimate is $0.001 / \phi$ = `r num_fitb(bias_small)`.
+
+   As a share of the IV estimate of `r round(wald, 3)`, that is about
+   `r mcq(c("2%", "5%", answer = "20%", "50%"))` of the whole result.
+
+`r hide("R solution")`
+```{r sol4, eval = FALSE}
+violation <- 0.001      # a 0.1% direct effect on wages
+bias <- violation / phi # amplified by 1/phi
+bias
+bias / (coef(reduced_form)["qob"] / phi) # as a share of the estimate
+```
+
+An effect you could never detect — one tenth of a percent — moves the headline number by a fifth.
+**That** is what "weak instrument" really means: not merely imprecise, but *fragile*.
+`r unhide()`
+
+5. **Write one sentence** as a `# comment` explaining, to someone who has not taken this course,
+   why a small first stage is dangerous. Then compare:
+
+`r hide("Model answer")`
+An instrumental-variables estimate is a ratio: the effect of the instrument on the outcome, divided
+by its effect on the treatment. When the instrument barely moves the treatment, that denominator is
+tiny — so the division blows up *everything* in the numerator, including any bias. Quarter of birth
+shifts schooling by about nineteen days, so any direct effect of birth timing on wages is magnified
+roughly twentyfold. A violation far too small to detect can still dominate the answer.
+`r unhide()`
+
+6. **Does the choice of instrument matter?** Instead of treating `qob` as continuous (1, 2, 3, 4),
+   build a **dummy** for being born in the fourth quarter and redo the Wald ratio.
+
+`r hide("Hint")`
+`ak91 %>% mutate(q4 = if_else(qob == 4, 1, 0))`, then a first stage and reduced form on `q4`.
+`r unhide()`
+
+`r hide("R solution — don't peek too early ;) !")`
+```{r sol6, eval = FALSE}
+ak91 <- ak91 %>% mutate(q4 = if_else(qob == 4, 1, 0))
+
+phi_q4 <- coef(lm_robust(s ~ q4, data = ak91))["q4"]
+rho_q4 <- coef(lm_robust(lnw ~ q4, data = ak91))["q4"]
+
+rho_q4 / phi_q4
+```
+`r unhide()`
+
+   The Q4-dummy Wald estimate is `r num_fitb(wald_q4)`, against `r round(wald, 3)` for the
+   continuous version — a difference of several percentage points from **the same data and the same
+   idea**. What does that tell you?
+   `r mcq(c(answer = "The result depends on arbitrary-looking choices about how the instrument is coded", "One of the two is simply calculated wrongly", "Nothing — they are close enough to ignore"))`
+
+7. **Bonus, for the fast.** Use `ivreg()` to run 2SLS with year-of-birth controls
+   (`factor(yob)` on both sides of the `|`). Does controlling for birth cohort change the estimate?
+
+`r hide("R solution")`
+```{r sol7, eval = FALSE}
+ak91 <- ak91 %>% mutate(yob_f = factor(yob))
+
+iv_controls <- ivreg(lnw ~ s + yob_f | qob + yob_f, data = ak91)
+
+modelsummary(list("2SLS + cohort controls" = iv_controls),
+             coef_map = c("s" = "Years of schooling"),
+             stars = TRUE, gof_map = c("nobs"), output = "kableExtra")
+```
+
+The estimate moves only a little — but note that **this is something the Wald ratio simply cannot
+do**. Adding controls is exactly why 2SLS exists.
+`r unhide()`
+
+8. **Discuss with your neighbour.** You now have two separate worries about this famous study.
+
+   - Buckles & Hungerman showed winter-born children come from **different families**. Which of the
+     three IV requirements does that threaten — and why can no test settle it?
+   - You have just shown the first stage is tiny. Explain how the two problems **compound** each
+     other.
+   - A colleague says: "the estimate is highly significant, with 330,000 observations." Why is that
+     not a reply to either worry?
+
+`r hide("Talking points")`
+- It threatens the **exclusion restriction** (and arguably as-if randomness). No test can settle it
+  because the alleged path runs through *unobserved* family background — testing it would require
+  the very variable whose absence is the problem. It is an argument, not a hypothesis test.
+- They compound **multiplicatively**: Buckles & Hungerman give a reason to think the numerator is
+  contaminated, and the tiny $\phi$ means whatever contamination exists is amplified ~20×. Either
+  alone would be a caveat; together they are a serious threat to the finding.
+- Significance is about **sampling error**, not bias. A huge sample makes a *precisely estimated*
+  number — and if that number is biased, the extra precision simply makes you more confident in
+  the wrong answer. No sample size fixes a broken exclusion restriction.
+`r unhide()`
