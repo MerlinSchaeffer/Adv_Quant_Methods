@@ -664,7 +664,21 @@ ChatGPT/Gemini (Bard is dead). REMEMBER: render exercises with `rmarkdown::rende
    Then 11 → 14. (Colonialism is now fully gone from the course.)
    **Review each deck against the already-ported ones before porting** — L8 showed that the later
    decks were written against a course that the migration has since changed underneath them.
-   L10 (IV/2SLS) is the obvious next candidate for overlap: check it against L7's IV apparatus.
+   **But do not over-apply the L8 lesson: checked 2026-07-21, L10 is NOT a repeat of L7.**
+   L7 teaches the **Wald estimator**; L10 introduces **2SLS** and recaps Wald deliberately, because
+   2SLS *reduces to* Wald with a binary instrument and no controls — the recap is load-bearing
+   scaffolding for the generalisation, not redundancy. The running examples are also disjoint:
+   L7 = Legewie Bali / Chetty MTO / Minneapolis; **L10 = Angrist & Krueger 1991 quarter-of-birth**
+   (`masteringmetrics::ak91`), with its exercise on `masteringmetrics::child_labor`. Port L10
+   faithfully; **do not cut the Wald recap.**
+   - **Bonus the rebuilt L8 unlocks:** L10's *"Control vs. instrument variables"* slide pairs a
+     confounder DAG against an IV DAG — controlling for $C$ keeps the **residuals** of $D$ (the part
+     that does *not* correlate with $C$), while an instrument keeps the **predicted values** of $D$
+     (the part that *does* correlate with $Z$). It even reuses the `DAG_FrischWaugh` TikZ. That
+     symmetry now lands much harder, because the rebuilt L8 makes residualisation the *explicit
+     mechanism* of controlling (`add_residuals()`, the three Frisch–Waugh steps). Wire it up as a
+     deliberate callback to L8 when porting.
+   - L10 ships with **only one exercise** (148 lines) — same gap L8 had; it will need a second.
    The DAG/IV/RDD decks (7, 10, 13) are the heaviest. For each deck: faithful port → template
    standards (see "Feedback round") → check external image URLs → add to `lectures.qmd` +
    `_quarto.yml` `render:` → render → verify slides fit in the browser.
