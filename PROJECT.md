@@ -117,6 +117,20 @@ A refinement round over both the deck and the website. New conventions that the 
     Velleman & Bock, *Stats: Data and Models* (Global ed., Pearson 2021); Angrist & Pischke,
     *Mastering 'Metrics* (Princeton UP 2014); Huntington-Klein, *The Effect* (CRC 2022, free at
     theeffectbook.net).
+- **Angrist / Mastering 'Metrics videos migrated (2026-07-23, professor-requested):** the old Hugo
+  per-lecture landing pages each had a "Don't miss out on this video by Joshua Angrist" YouTube
+  embed. The new site has no per-lecture pages, so these are now **`▶ Watch` items in each
+  lecture's `<ul class="readings">`** on `lectures.qmd`, styled with a new `.rtag-watch` badge
+  (slate `#425570` on `#eef2f6`, added to `ku-web.scss` next to `.rtag-read`/`.rtag-skim`). They
+  **link out to YouTube** (`target="_blank"`), NOT embedded — keeps the page light and the homepage
+  clean (professor's no-clutter principle). All 6 IDs verified live via YouTube oembed. Mapping:
+  L5 `6YrIDhaUQOE` (Selection Bias/private university, Angrist·MRU); L6 `eGRd8jBdNYg` (Randomized
+  Trials, Angrist·MRU) + `QqN3eke9jXg` (Computers in the Classroom, Mastering Metrics); L7 & L10
+  both `yHypzxYikqk` (Old School IV, Mastering Metrics — same clip, flagged as a re-watch on L10);
+  L9 `OwNxEaOF8yY` (Regression Part I: Call in the CIA, Mastering Metrics); L11 `J8IHdu-oM64`
+  (interaction terms — **Nick Huntington-Klein, NOT Angrist**, labelled correctly). The Lectures
+  intro paragraph now explains the ▶ Watch tag. Any future ported lecture with an old video embed:
+  add the same `.rtag-watch` `<li>`.
 - Site config: `open-graph: true`, site `description:`, navbar right "Absalon ↗" external link,
   favicon = the seal.
 - ~~Stale exam deadline~~ — professor supplied the new date 2026-07-02: **14 January 2027, noon**
