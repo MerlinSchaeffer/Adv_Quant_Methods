@@ -1,0 +1,158 @@
+---
+title: "Exercise 1 (20 minutes)"
+subtitle: "You practice: fitting and reading a polynomial — does xenophobia keep rising with age, or level off? When you're done, assist some of the others …"
+output: webexercises::webexercises_default
+---
+
+```{r setup, include = FALSE}
+options(htmltools.dir.version = FALSE, servr.interval = 0.5, width = 115, digits = 3)
+knitr::opts_chunk$set(
+  collapse = TRUE, message = FALSE,
+  warning = FALSE, cache = FALSE,
+  comment = "#", strip.white = TRUE)
+
+library(webexercises)
+
+num_fitb <- function(x, digits = 2, width = 7) {
+  a <- format(round(x, digits), nsmall = digits)
+  fitb(unique(c(a, sub(".", ",", a, fixed = TRUE))), width = width)
+}
+```
+
+```{r hidden-read, include = FALSE}
+pacman::p_load(tidyverse, haven, estimatr, modelsummary)
+ESS <- read_spss("../assets/ESS9e03_1.sav")
+```
+
+Back to xenophobia and the ESS. Today you ask whether the effect of **age** on xenophobia is
+straight-line — or a **curve**.
+
+1. Prepare the data (Denmark and Bulgaria, as in Lecture 11).
+
+```{r read, eval = FALSE}
+pacman::p_load(tidyverse, haven, estimatr, modelsummary)
+ESS <- read_spss("ESS9e03_1.sav") # from your project folder
+```
+
+```{r prep}
+ESS <- ESS %>%
+  filter(cntry == "DK" | cntry == "BG") %>%          # DK = Denmark, BG = Bulgaria
+  mutate(
+    cntry  = as_factor(cntry) %>% fct_relevel("Denmark"),
+    gndr   = as_factor(gndr),
+    eduyrs = case_when(eduyrs < 9 ~ 9, eduyrs > 21 ~ 21, TRUE ~ zap_labels(eduyrs)),
+    agea    = zap_labels(agea),
+    imwbcnt = 10 - zap_labels(imwbcnt)               # reverse: higher = more xenophobic
+  ) %>%
+  select(idno, cntry, pspwght, gndr, eduyrs, agea, imwbcnt) %>%
+  drop_na()
+```
+
+`r hide("Stuck?")`
+- Did `pacman::p_load(...)` run without red errors? Fix that first.
+- `read_spss()` can't find the file? `ESS9e03_1.sav` must sit **in your project folder**.
+- Odd results? *Session → Restart R*, then rerun from the top.
+- Still stuck? Ask in the [t-R-ouble forum](https://absalon.ku.dk/courses/70545/discussion_topics/563046?module_item_id=2037268) on Absalon.
+
+`r unhide()`
+
+```{r solutions, include = FALSE}
+ols_poly <- lm_robust(imwbcnt ~ cntry + gndr + eduyrs + poly(I(agea / 10), 2, raw = TRUE),
+                      data = ESS, weights = pspwght)
+b <- coef(ols_poly)
+b1 <- b["poly(I(agea/10), 2, raw = TRUE)1"]
+b2 <- b["poly(I(agea/10), 2, raw = TRUE)2"]
+turn <- (-b1 / (2 * b2)) * 10   # turning point back in years
+```
+
+2. **Predict before you compute.** Do you expect the effect of age on xenophobia to be a straight
+   line, or to **bend** (rise faster at some ages than others)? There is no wrong guess — commit to
+   one, then test it.
+
+3. **Fit a quadratic** of age. Use `poly(I(agea / 10), 2, raw = TRUE)` so the coefficients are
+   *per decade*, and keep country, gender and education as controls, weighted by `pspwght`.
+
+`r hide("Hint")`
+`lm_robust(imwbcnt ~ cntry + gndr + eduyrs + poly(I(agea / 10), 2, raw = TRUE), data = ESS, weights = pspwght)`
+`r unhide()`
+
+`r hide("R solution — don't peek too early ;) !")`
+```{r sol3, eval = FALSE}
+ols_poly <- lm_robust(
+  imwbcnt ~ cntry + gndr + eduyrs + poly(I(agea / 10), 2, raw = TRUE),
+  data = ESS, weights = pspwght
+)
+
+modelsummary(list("Xenophobia" = ols_poly),
+             coef_rename = c("poly(I(agea/10), 2, raw = TRUE)1" = "Age (per decade)",
+                             "poly(I(agea/10), 2, raw = TRUE)2" = "Age² (per decade)"),
+             stars = TRUE, gof_map = c("nobs", "r.squared"), output = "kableExtra")
+```
+`r unhide()`
+
+   The linear term is `r num_fitb(b1)` and the squared term is `r num_fitb(b2, digits = 3)`.
+   Because the squared term is **negative**, the age slope
+   `r mcq(c(answer = "gets smaller as people get older — the curve flattens", "gets steeper as people get older", "stays exactly constant"))`.
+
+4. **Where would the curve turn around?** A quadratic peaks (or bottoms out) at
+   $-\beta_1 / (2\beta_2)$. With the coefficients *per decade*, multiply by 10 to get the age in
+   years. The turning point is at about `r fitb(c("182", "181", "180"), width = "5")` years.
+
+`r hide("R solution")`
+```{r sol4, eval = FALSE}
+b1 <- coef(ols_poly)["poly(I(agea/10), 2, raw = TRUE)1"]
+b2 <- coef(ols_poly)["poly(I(agea/10), 2, raw = TRUE)2"]
+
+(-b1 / (2 * b2)) * 10   # turning point, in years
+```
+`r unhide()`
+
+5. That turning point is far **outside** the ages anyone in the data actually has (15–90). So within
+   the real range, xenophobia
+   `r mcq(c(answer = "just keeps rising with age, flattening only slightly", "rises and then clearly falls among the elderly", "falls throughout"))`.
+
+6. **Write one sentence** as a `# comment` interpreting what the quadratic told you — then compare:
+
+`r hide("Model answer")`
+Xenophobia rises with age across the whole observed range, but the negative squared term means the
+rise **decelerates** — each additional decade adds a little less than the one before. The curve
+would technically turn around near age 180, which is meaningless for humans, so in practice this is
+a **gently flattening increase**, not a hump. A straight line would have been a defensible
+simplification here; the curvature is real but mild.
+`r unhide()`
+
+7. **Bonus, for the fast.** Plot the fitted curve to *see* the mild bend. Overlay a straight-line
+   fit for comparison.
+
+`r hide("R solution")`
+```{r sol7, eval = FALSE}
+ggplot(ESS, aes(x = agea, y = imwbcnt)) +
+  geom_jitter(alpha = 0.06, height = 0.2) +
+  geom_smooth(method = "lm", formula = y ~ x, se = FALSE, aes(colour = "Straight line")) +
+  geom_smooth(method = "lm", formula = y ~ poly(x, 2, raw = TRUE), se = FALSE,
+              aes(colour = "Quadratic")) +
+  scale_colour_manual(values = c("Straight line" = "#425570", "Quadratic" = "#901A1E"),
+                      name = NULL) +
+  labs(x = "Age", y = "Xenophobia (0–10)") +
+  theme_minimal()
+```
+
+The two lines barely diverge — visual confirmation that the curvature is slight.
+`r unhide()`
+
+8. **Discuss with your neighbour.**
+
+   - Why is a **turning point outside the observed data** a reason *not* to make much of the "curve"?
+   - A colleague reports "xenophobia peaks at age 180." What has gone wrong in how they read the model?
+   - When *would* you expect a genuine hump in age — a real rise-then-fall — for some social outcome?
+
+`r hide("Talking points")`
+- A model can only be trusted where it has data. A turning point at 180 is an **extrapolation** far
+  beyond anyone in the sample; the quadratic is not really claiming a peak, it is just gently
+  flattening within the observed range, and the formula happens to turn around off in fantasy land.
+- They have read a mathematical feature of the fitted curve as if it were a finding. Nobody in the
+  data is anywhere near 180, so the "peak" is an artefact of extrapolation, not evidence about old age.
+- Genuine humps are common: earnings over the life course (rise, peak in middle age, decline),
+  physical performance, risk-taking, or the crime–age curve. There the turning point sits *inside*
+  the data and a quadratic earns its second coefficient.
+`r unhide()`

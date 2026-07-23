@@ -148,6 +148,46 @@ A refinement round over both the deck and the website. New conventions that the 
   final checklist but was never actually installed by the old steps. All four GitHub installs
   verified to exist (masteringmetrics, ROS-Examples/rpackage, vdemdata, democracyData).
 
+## Lecture 12 (2026-07-23) — Polynomials & transformations
+`12-Polynomials.qmd` (24 slides, 15 notes) + `12-exercise1/2.Rmd`. **Faithful on the core,
+re-vehicled controls** (professor's call, mirroring L11). The payoff of L4's "don't fix the curve
+here — that's L12's job" note.
+- **Core (new, no collision):** LOESS to see the shape; **polynomials** (`I(x^2)`,
+  `poly(x, 2, raw = TRUE)`, quadratic interpretation, higher-order **overfitting** warning); **log₂
+  transformation** ("per doubling"); a **fit comparison** (linear vs quadratic vs log). Running
+  example = **life expectancy ~ health spending** (WB `SP.DYN.LE00.IN` + `SH.XPD.CHEX.PP.CD`),
+  which is used nowhere else. **Verified numbers:** linear R²=**0.455** → quadratic R²=**0.588**
+  (β₁=7.47, β₂=−0.68; \$1k→\$2k slope = 6.12 yrs, diminishing returns) → **log₂ R²=0.710** (a
+  doubling of spending ≈ **+3.6 years**). Log wins on fit *and* interpretability.
+- **Re-vehicled the controls (like L11):** the original threaded the **hand-coded 19-arm socialism
+  index × `equal_liberty`** through *every* model as a control. Replaced with a single **canonical
+  `civ_liberties`** control (v2xcl_rol, "Civil liberties" label) + `year`. The interaction recap is
+  now a **conceptual bridge** ("a polynomial is a variable interacted with itself" → callback to
+  L11), **no socialism, no `rockchalk`/3D**. `tryCatch` on `wb_data` with a committed cache
+  (`data/wb_life_raw.rds`, 60 KB).
+- **Panel data:** every model uses `clusters = country` (repeated country-years are not
+  independent) — kept from the original and flagged on a slide.
+- **OWID embed kept** (professor's pick): one Our World in Data life-expectancy grapher iframe as
+  the opening hook; the rest dropped. Localized `img/L12/LOWESS.png`; dropped the Wikipedia/BBC baby
+  photos and the helpingwithmath log diagram (replaced by a clean inline `log2` demo plot).
+- **Exercises (ESS xenophobia ~ age, different data from the deck):** Ex1 = fit & read a quadratic
+  of age (β₁=0.19, β₂=−0.005/decade; **turning point ≈ 182 — far outside the 15–90 range**, so it's
+  a gently flattening rise, not a hump — teaches recognising a meaningless extrapolated turn). Ex2 =
+  log₂ of age (doubling ≈ +0.41) + poly-vs-log comparison (**equally good**, R²≈0.128) → prefer the
+  simpler log + a prediction plot. **Fixed a bug carried from the original:** ex1 filtered
+  `cntry == "DE"` (Germany) but relabelled the reference "Denmark" — corrected to `DK`.
+- **Two bugs found & fixed during the build (both would have shipped broken):**
+  - The three-model **fit-comparison table** used `coef_omit = ".*"` to show only GOF stats —
+    modern `modelsummary` **errors** ("matched and omitted all coefficients") and rendered the error
+    text onto the slide. Replaced with a manual `tibble`/`kable` (in a Fit / R-code tabset). **Never
+    use `coef_omit = ".*"`; build a small glance table by hand instead.**
+  - `civ_liberties`/`year` showed as raw variable names in the tables — added them to every
+    `coef_rename` for the canonical "Civil liberties" label (design-system requirement).
+- Verified in-browser: **24 slides, 15 notes, zero overflow, zero code clips, zero R errors, no
+  broken images**; OWID embed + both exercises' iframes load; exercises **grade correctly** (Danish
+  comma accepted, turning-point tolerance 180–182). Wired into `_quarto.yml` + `lectures.qmd`
+  (callout → **1–12**).
+
 ## Lecture 11 (2026-07-23) — Interaction effects
 `11-Conditionals.qmd` (26 slides, 18 notes) + `11-exercise1/2.Rmd`. **Part 1 faithful; Part 2
 re-vehicled** after a pre-port review (professor's call across three questions). Two halves, both
@@ -707,7 +747,7 @@ ChatGPT/Gemini (Bard is dead). REMEMBER: render exercises with `rmarkdown::rende
     `state_ownership`; raw `state_own_raw`; z-score `z_state_ownership`). Higher = more state
     ownership. "Socialism" stays as the *concept* it operationalises, not the variable label.
   - WB `SI.POV.DDAY` → **"extreme poverty"** / "% below $3.00 a day (2021 PPP)".
-  - **Applied to L2 (deck + both exercises), L9 (deck), and L11 (deck + exercise 2); pending decks
+  - **Applied to L2 (deck + both exercises), L9 (deck), L11 (deck + exercise 2), and L12 (deck); pending decks
     that reuse these vars — esp. L12 (Polynomials, uses `v2xcl_rol`) — must adopt the same labels.**
     The L2 exercises'
     `data/Dat_L2.rds` fallback was regenerated with the new column names (`civ_liberties`,
@@ -798,9 +838,11 @@ ChatGPT/Gemini (Bard is dead). REMEMBER: render exercises with `rmarkdown::rende
    variable bias** after a pre-port review found it duplicated L7 — see its section above).
    ~~Lecture 10~~ — done 2026-07-21 (IV & 2SLS; **faithful port, Wald recap kept** — see its
    section above). ~~Lecture 11~~ — done 2026-07-23 (Interactions; Part 1 faithful, Part 2
-   re-vehicled onto the L9 triangle — see its section above).
-   **Done so far: L1–11. Next: Lecture 12 (`static/Lectures/12-Polynomials/`, deck + exercises).**
-   Then 13 → 14. (Colonialism is now fully gone from the course.)
+   re-vehicled onto the L9 triangle). ~~Lecture 12~~ — done 2026-07-23 (Polynomials &
+   transformations; re-vehicled controls to canonical `civ_liberties` — see its section above).
+   **Done so far: L1–12. Next: Lecture 13 (`static/Lectures/13-RegDD/`, RDD, deck + exercises).**
+   Then 14. (Colonialism is now fully gone from the course.) **L13 (RDD) is one of the heaviest —
+   review it against L7/L10 (IV) before porting.**
    **Review each deck against the already-ported ones before porting** — L8 showed that the later
    decks were written against a course that the migration has since changed underneath them.
    **But do not over-apply the L8 lesson: checked 2026-07-21, L10 is NOT a repeat of L7.**

@@ -1,0 +1,158 @@
+---
+title: "Exercise 2 (20 minutes)"
+subtitle: "You practice: the log₂ transformation, comparing it to a polynomial, and visualising the fit. When you're done, assist some of the others …"
+output: webexercises::webexercises_default
+---
+
+```{r setup, include = FALSE}
+options(htmltools.dir.version = FALSE, servr.interval = 0.5, width = 115, digits = 3)
+knitr::opts_chunk$set(
+  collapse = TRUE, message = FALSE,
+  warning = FALSE, cache = FALSE,
+  comment = "#", strip.white = TRUE)
+
+library(webexercises)
+
+num_fitb <- function(x, digits = 2, width = 7) {
+  a <- format(round(x, digits), nsmall = digits)
+  fitb(unique(c(a, sub(".", ",", a, fixed = TRUE))), width = width)
+}
+```
+
+```{r hidden-read, include = FALSE}
+pacman::p_load(tidyverse, haven, estimatr, modelsummary)
+ESS <- read_spss("../assets/ESS9e03_1.sav") %>%
+  filter(cntry == "DK" | cntry == "BG") %>%
+  mutate(
+    cntry  = as_factor(cntry) %>% fct_relevel("Denmark"),
+    gndr   = as_factor(gndr),
+    eduyrs = case_when(eduyrs < 9 ~ 9, eduyrs > 21 ~ 21, TRUE ~ zap_labels(eduyrs)),
+    agea    = zap_labels(agea),
+    imwbcnt = 10 - zap_labels(imwbcnt)
+  ) %>%
+  select(idno, cntry, pspwght, gndr, eduyrs, agea, imwbcnt) %>%
+  drop_na()
+```
+
+Same ESS data as exercise 1 (Denmark & Bulgaria; run that setup first). In exercise 1 you fitted a
+**polynomial** of age. Now you try the **log₂ transformation** instead — and decide which you prefer.
+
+```{r solutions, include = FALSE}
+ols_log  <- lm_robust(imwbcnt ~ cntry + gndr + eduyrs + log2(agea),
+                      data = ESS, weights = pspwght)
+ols_poly <- lm_robust(imwbcnt ~ cntry + gndr + eduyrs + poly(I(agea / 10), 2, raw = TRUE),
+                      data = ESS, weights = pspwght)
+b_log <- coef(ols_log)["log2(agea)"]
+se_log <- sqrt(diag(vcov(ols_log)))["log2(agea)"]
+```
+
+1. **Fit a log₂ model.** Replace the age polynomial with `log2(agea)`, keeping the same controls,
+   weighted by `pspwght`.
+
+`r hide("Hint")`
+`lm_robust(imwbcnt ~ cntry + gndr + eduyrs + log2(agea), data = ESS, weights = pspwght)`
+`r unhide()`
+
+`r hide("R solution — don't peek too early ;) !")`
+```{r sol1, eval = FALSE}
+ols_log <- lm_robust(imwbcnt ~ cntry + gndr + eduyrs + log2(agea),
+                     data = ESS, weights = pspwght)
+
+modelsummary(list("Xenophobia" = ols_log),
+             coef_rename = c("log2(agea)" = "Age (log2)"),
+             stars = TRUE, gof_map = c("nobs", "r.squared"), output = "kableExtra")
+```
+`r unhide()`
+
+2. The `log2(agea)` coefficient is `r num_fitb(b_log)`. Because the predictor is on a **log₂**
+   scale, this reads as: a **doubling of age** (say from 20 to 40, or 40 to 80) is associated with
+   about `r num_fitb(b_log)` scale points
+   `r mcq(c(answer = "more xenophobia", "less xenophobia", "no change in xenophobia"))`.
+
+3. **Compare the two curves.** Put the log₂ model next to the quadratic from exercise 1 and look at
+   the fit statistics.
+
+`r hide("R solution — don't peek too early ;) !")`
+```{r sol3, eval = FALSE}
+ols_poly <- lm_robust(imwbcnt ~ cntry + gndr + eduyrs + poly(I(agea / 10), 2, raw = TRUE),
+                      data = ESS, weights = pspwght)
+
+modelsummary(list("Quadratic" = ols_poly, "log2" = ols_log),
+             gof_map = c("nobs", "r.squared", "adj.r.squared"),
+             stars = TRUE, output = "kableExtra")
+```
+`r unhide()`
+
+   According to $R^2$ and adjusted $R^2$, which model fits better?
+   `r mcq(c("The quadratic is clearly better", "The log₂ is clearly better", answer = "They are essentially equally good"))`
+
+4. Given that the two fit about equally well, which would you **report** — and why?
+   `r mcq(c(answer = "The log₂ model — it is simpler (one coefficient) and reads as 'per doubling of age'", "The quadratic — more coefficients always means a better model", "It does not matter at all which you report"))`
+
+5. **Write one sentence** as a `# comment` justifying your choice — then compare:
+
+`r hide("Model answer")`
+The log₂ and quadratic models fit the age–xenophobia relationship about equally well (nearly
+identical $R^2$ and adjusted $R^2$). When fit is a tie, prefer the **simpler, more interpretable**
+model: the log₂ needs a single coefficient and reads cleanly as "a doubling of age is associated
+with about 0.4 points more xenophobia", whereas the quadratic needs two coefficients and a turning
+point to interpret. The one reason to prefer the quadratic would be a genuine **rise-then-fall** in
+age — which we did not find here.
+`r unhide()`
+
+6. **Visualise the log₂ fit.** Make predictions across the age range and plot the implied curve.
+
+`r hide("R solution")`
+```{r sol6, eval = FALSE}
+# 1. Fictional data spanning the observed ages, controls held constant
+fict <- tibble(
+  agea   = seq(15, 90, by = 1),
+  cntry  = "Denmark",
+  gndr   = "Female",
+  eduyrs = mean(ESS$eduyrs)
+)
+
+# 2. Predicted xenophobia + 95% interval
+fict <- predict(ols_log, newdata = fict, interval = "confidence")$fit %>%
+  as_tibble() %>%
+  bind_cols(fict, .)
+
+# 3. Plot
+ggplot(fict, aes(x = agea, y = fit)) +
+  geom_ribbon(aes(ymin = lwr, ymax = upr), alpha = 0.25) +
+  geom_line(linewidth = 1, colour = "#901A1E") +
+  labs(x = "Age", y = "Predicted xenophobia (0–10)") +
+  theme_minimal()
+```
+
+The curve rises quickly among the young and flattens among the old — the signature shape of a log
+predictor.
+`r unhide()`
+
+7. **Bonus, for the fast.** The log of a variable is only defined for **positive** values. Which
+   variables in a typical survey could you *not* log without a fix — and what is the usual trick?
+
+`r hide("Talking points")`
+`log()` is undefined at 0 and for negatives. Income with zeros, counts that include 0, or anything
+centred around 0 cannot be logged directly. Common fixes: add a small constant (`log(x + 1)`, i.e.
+`log1p`), or use a different transformation. Age is safe because everyone is older than zero.
+`r unhide()`
+
+8. **Discuss with your neighbour.**
+
+   - The deck's health-spending example was a case where **log₂ clearly won**. Here it only **ties**
+     the polynomial. What is different about the two relationships?
+   - "The coefficient on `log2(agea)` is 0.4." Why is *"per doubling"* a more honest way to say this
+     than *"per year"*?
+   - If you logged the **outcome** instead of the predictor, how would the interpretation change?
+
+`r hide("Talking points")`
+- Health spending spans a huge range (from a few dollars to over \$10,000) and flattens sharply, so
+  the log dramatically straightens it. Age spans a much narrower range (15–90, barely more than two
+  doublings) and bends only gently, so both tools capture the mild curve about equally.
+- A log predictor means the effect is **not** constant per year — it is larger among the young and
+  smaller among the old. "Per doubling" states that honestly; "per year" would falsely imply a
+  constant effect, which is exactly the linearity assumption the log was meant to relax.
+- Logging the *outcome* makes coefficients read as **approximate percentage** changes in $Y$ per
+  unit of $X$ — the convention you already met with log wages in Lecture 10.
+`r unhide()`
