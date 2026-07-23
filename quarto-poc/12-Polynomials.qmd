@@ -189,19 +189,19 @@ Two things to flag and then move on. First, civil liberties rides along as a sin
 ::: {.panel-tabset}
 
 ### The picture
-```{r lin-plot, echo = FALSE, out.width='48%', fig.height = 3.8, fig.width = 7.5}
+```{r lin-plot, echo = FALSE, out.width='70%', fig.height = 4.1, fig.width = 10}
 ggplot(Dat, aes(y = LifeExpect, x = HealthExp)) +
   geom_line(aes(colour = country, group = country), alpha = 0.25) +
   geom_point(aes(colour = country), alpha = 0.4, size = 1) +
   ggrepel::geom_text_repel(data = Dat_lab, aes(label = country, colour = country),
-                           size = 3.4, fontface = "bold", seed = 1, min.segment.length = 0) +
+                           size = 4, fontface = "bold", seed = 1, min.segment.length = 0) +
   geom_smooth(method = "lm", se = FALSE, colour = "black", linewidth = 1.2) +
   labs(y = "Life expectancy at birth", x = "Health spending per person ($, PPP)") +
-  theme_minimal(base_size = 14) + guides(colour = "none")
+  theme_minimal(base_size = 15) + guides(colour = "none")
 ```
 
 ::: {.content-box-red}
-**The line misses the shape.** It under-predicts in the middle and over-predicts at the extremes — a textbook sign the **linearity assumption is violated**.
+**The line misses the shape — linearity is violated.**
 :::
 
 ### The model
@@ -439,34 +439,62 @@ You fit a **polynomial** yourself — does xenophobia rise and then fall with **
 A polynomial adds a term. A **transformation** reshapes the variable itself — and our favourite is the **logarithm**.
 :::
 
-## The log₂ idea: counting doublings
+## What is a logarithm? {data-auto-animate="true"}
 
 ::: {.push-left}
-The **base-2 logarithm** answers *"how many times do I double?"*
+A logarithm is just a **power question, asked backwards.**
 
+Raising 2 to a power means **repeated doubling** — multiply 2 by itself that many times:
+$$2^{\color{#901A1E}{3}} = 2 \times 2 \times 2 = 8$$
+
+The **base-2 logarithm asks the reverse:** *"2 raised to **which power** gives this number?"* — and the answer is exactly that **exponent**:
+$$\log_2(8) = \color{#901A1E}{3} \quad\text{because}\quad 2^{\color{#901A1E}{3}} = 8$$
+:::
+
+::: {.push-right}
+| exponent | power of 2 | value | log₂(value) |
+|:--:|:--:|:--:|:--:|
+| 1 | $2^1$ | 2 | 1 |
+| 2 | $2^2$ | 4 | 2 |
+| 3 | $2^3$ | 8 | 3 |
+| 4 | $2^4$ | 16 | 4 |
+| 10 | $2^{10}$ | 1,024 | 10 |
+
+::: {.backgrnote}
+Read a row left to right: multiply 2 by itself *exponent* times to get the *value*. **log₂ hands that count back to you.**
+:::
+:::
+
+::: {.notes}
+Assume they have genuinely forgotten what a logarithm is — most have, and that is fine. Anchor everything on one sentence: a logarithm is a power question asked backwards. Powers run forwards — 2 to the 3rd is 8 — and logs run back — the log base 2 of 8 is 3. Walk the table one row at a time, out loud: "two, times two, times two, is eight; so log base two of eight is three." Do not move on until the exponent-in / value-out / count-back-out loop feels automatic. This is the slide the whole transformation idea rests on.
+:::
+
+## …so log₂ counts doublings {data-auto-animate="true"}
+
+::: {.push-left}
+Because the exponent **counts doublings**, moving **+1 on the log₂ scale = one doubling** of the original value:
 $$\log_2(2) = 1, \quad \log_2(4) = 2, \quad \log_2(8) = 3$$
 
-Each **+1 on the log₂ scale = a doubling** of the original value.
-
 ::: {.content-box-green}
-Perfect for health spending: going \$500 → \$1,000 is *one doubling*, and so is \$4,000 → \$8,000. If each doubling buys the **same** extra years, a curve on the raw scale becomes a **straight line** on the log scale.
+Perfect for health spending: \$500 → \$1,000 is *one doubling*, and so is \$4,000 → \$8,000. If each doubling buys the **same** extra years, a curve on the raw dollar scale becomes a **straight line** on the log₂ scale.
 :::
 :::
 
 ::: {.push-right}
 ```{r log-demo, echo = FALSE, out.width='92%', fig.height = 4.2, fig.width = 6}
-tibble(x = 2^(0:8)) %>%
+tibble(x = 2^(0:10)) %>%
   mutate(log2x = log2(x)) %>%
   ggplot(aes(x = x, y = log2x)) +
+  geom_step(colour = "grey70", linewidth = 0.4, direction = "hv") +
   geom_line(colour = "#901A1E", linewidth = 1) +
   geom_point(colour = "#901A1E", size = 2) +
-  labs(x = "Original value", y = expression(log[2](x))) +
+  labs(x = "Original value (dollars)", y = expression(log[2](x)~"= number of doublings")) +
   theme_minimal(base_size = 13)
 ```
 :::
 
 ::: {.notes}
-Log base 2 is the most teachable log because the unit is concrete: one step is one doubling. Do a couple out loud — 2, 4, 8 — until they feel the pattern. Then the key insight for modelling: if life expectancy rises by a constant amount per *doubling* of spending rather than per dollar, then plotting against log-spending turns the curve into a straight line, and a straight line is something OLS handles perfectly. That is why the transform works.
+Now connect the backwards-power idea to why it helps us model. The exponent is literally a count of doublings, so a one-step move on the log scale always means "twice as much", whether that is 500 to 1,000 or 4,000 to 8,000. The modelling payoff, in the green box: if life expectancy gains a fixed amount per doubling rather than per dollar, then against log-spending the curve becomes a straight line — and straight lines are exactly what OLS fits. Point at the plot: equal steps up the y-axis correspond to ever-bigger jumps in dollars.
 :::
 
 ## The log₂ model
@@ -500,11 +528,13 @@ ggplot(Dat, aes(y = LifeExpect, x = HealthExp)) +
   geom_point(aes(colour = country), alpha = 0.4, size = 1) +
   ggrepel::geom_text_repel(data = Dat_lab, aes(label = country, colour = country),
                            size = 3, fontface = "bold", seed = 1, min.segment.length = 0) +
-  stat_smooth(method = "lm", formula = y ~ log2(x),
-              se = FALSE, colour = "black", linewidth = 1.2) +
+  # The log2 axis transforms x BEFORE the fit, so a plain lm is already
+  # the log-linear fit — and it comes out perfectly straight here.
+  stat_smooth(method = "lm", se = FALSE, colour = "black", linewidth = 1.2) +
   scale_x_continuous(trans = log2_trans(),
-                     breaks = c(25, 100, 400, 1600, 6400)) +
-  labs(y = "Life expectancy", x = "Health spending per person ($, PPP) - log2 scale") +
+                     breaks = c(50, 100, 200, 400, 800, 1600, 3200, 6400)) +
+  labs(y = "Life expectancy",
+       x = "Health spending per person ($, PPP) - doubling each step (log2)") +
   theme_minimal(base_size = 13) + guides(colour = "none")
 ```
 
