@@ -71,6 +71,12 @@ Dat_vdem <- vdem %>%
 Dat <- inner_join(Dat_life, Dat_vdem, by = c("country_text_id", "year")) %>%
   drop_na(LifeExpect, HealthExp, civ_liberties)
 
+# A few salient countries to label on the scatter plots (latest year each)
+label_countries <- c("United States", "Switzerland", "Norway", "Denmark", "Nigeria")
+Dat_lab <- Dat %>%
+  filter(country %in% label_countries) %>%
+  group_by(country) %>% filter(year == max(year)) %>% ungroup()
+
 # Models used across the deck
 ols_lin  <- lm_robust(LifeExpect ~ I(HealthExp / 1000) + year + civ_liberties,
                       data = Dat, clusters = country)
@@ -183,12 +189,15 @@ Two things to flag and then move on. First, civil liberties rides along as a sin
 ::: {.panel-tabset}
 
 ### The picture
-```{r lin-plot, echo = FALSE, out.width='62%', fig.height = 4.4, fig.width = 8}
+```{r lin-plot, echo = FALSE, out.width='48%', fig.height = 3.8, fig.width = 7.5}
 ggplot(Dat, aes(y = LifeExpect, x = HealthExp)) +
-  geom_point(alpha = 0.15, colour = "grey45") +
-  geom_smooth(method = "lm", se = FALSE, colour = "#901A1E", linewidth = 1.2) +
+  geom_line(aes(colour = country, group = country), alpha = 0.25) +
+  geom_point(aes(colour = country), alpha = 0.4, size = 1) +
+  ggrepel::geom_text_repel(data = Dat_lab, aes(label = country, colour = country),
+                           size = 3.4, fontface = "bold", seed = 1, min.segment.length = 0) +
+  geom_smooth(method = "lm", se = FALSE, colour = "black", linewidth = 1.2) +
   labs(y = "Life expectancy at birth", x = "Health spending per person ($, PPP)") +
-  theme_minimal(base_size = 14)
+  theme_minimal(base_size = 14) + guides(colour = "none")
 ```
 
 ::: {.content-box-red}
@@ -220,7 +229,7 @@ modelsummary(
 :::
 
 ::: {.notes}
-Show the picture first — the straight red line slicing through an obvious curve is more persuasive than any statistic. Name the tell-tale pattern: the line sits below the cloud in the middle and above it at both ends, which is exactly what a mis-specified linear fit looks like. The $R^2$ of about 0.45 is not terrible, which is the trap — a mediocre linear fit can still look respectable in a table while being the wrong shape.
+Show the picture first — the straight black line slicing through an obvious curve is more persuasive than any statistic. Name the tell-tale pattern: the line sits below the cloud in the middle and above it at both ends, which is exactly what a mis-specified linear fit looks like. Point at the labelled countries: the **United States** spends the *most* of anyone (far right) yet lives *shorter* than Switzerland or Norway — it sits well below the curve, a vivid reminder that beyond a point more money buys little life. Each faint coloured thread is one country tracked across years. The $R^2$ of about 0.45 is not terrible, which is the trap — a mediocre linear fit can still look respectable in a table while being the wrong shape.
 :::
 
 ## LOESS: let the data draw the curve
@@ -244,10 +253,13 @@ knitr::include_graphics("img/L12/LOWESS.png")
 ### On our data
 ```{r loess-fit, echo = FALSE, out.width='90%', fig.height = 4.2, fig.width = 6}
 ggplot(Dat, aes(y = LifeExpect, x = HealthExp)) +
-  geom_point(alpha = 0.15, colour = "grey45") +
-  geom_smooth(se = FALSE, colour = "#901A1E", linewidth = 1.2) +   # LOESS is the default
+  geom_line(aes(colour = country, group = country), alpha = 0.25) +
+  geom_point(aes(colour = country), alpha = 0.4, size = 1) +
+  ggrepel::geom_text_repel(data = Dat_lab, aes(label = country, colour = country),
+                           size = 3, fontface = "bold", seed = 1, min.segment.length = 0) +
+  geom_smooth(se = FALSE, colour = "black", linewidth = 1.2) +   # LOESS is the default
   labs(y = "Life expectancy", x = "Health spending per person ($, PPP)") +
-  theme_minimal(base_size = 13)
+  theme_minimal(base_size = 13) + guides(colour = "none")
 ```
 
 :::
@@ -320,11 +332,14 @@ $$Y_i = \alpha + \beta_1 X + \beta_2 X^2 + \dots + e_i$$
 ::: {.push-right}
 ```{r poly-plot, echo = FALSE, out.width='92%', fig.height = 4.2, fig.width = 6}
 ggplot(Dat, aes(y = LifeExpect, x = HealthExp)) +
-  geom_point(alpha = 0.15, colour = "grey45") +
+  geom_line(aes(colour = country, group = country), alpha = 0.25) +
+  geom_point(aes(colour = country), alpha = 0.4, size = 1) +
+  ggrepel::geom_text_repel(data = Dat_lab, aes(label = country, colour = country),
+                           size = 3, fontface = "bold", seed = 1, min.segment.length = 0) +
   geom_smooth(method = "lm", formula = y ~ poly(x, 2, raw = TRUE),
-              se = FALSE, colour = "#901A1E", linewidth = 1.2) +
+              se = FALSE, colour = "black", linewidth = 1.2) +
   labs(y = "Life expectancy", x = "Health spending per person ($, PPP)") +
-  theme_minimal(base_size = 13)
+  theme_minimal(base_size = 13) + guides(colour = "none")
 ```
 
 ::: {.content-box-green}
@@ -481,13 +496,16 @@ modelsummary(
 ::: {.push-right}
 ```{r log-plot, echo = FALSE, out.width='92%', fig.height = 4.4, fig.width = 6}
 ggplot(Dat, aes(y = LifeExpect, x = HealthExp)) +
-  geom_point(alpha = 0.15, colour = "grey45") +
+  geom_line(aes(colour = country, group = country), alpha = 0.25) +
+  geom_point(aes(colour = country), alpha = 0.4, size = 1) +
+  ggrepel::geom_text_repel(data = Dat_lab, aes(label = country, colour = country),
+                           size = 3, fontface = "bold", seed = 1, min.segment.length = 0) +
   stat_smooth(method = "lm", formula = y ~ log2(x),
-              se = FALSE, colour = "#901A1E", linewidth = 1.2) +
+              se = FALSE, colour = "black", linewidth = 1.2) +
   scale_x_continuous(trans = log2_trans(),
                      breaks = c(25, 100, 400, 1600, 6400)) +
-  labs(y = "Life expectancy", x = "Health spending per person ($, PPP) — log₂ scale") +
-  theme_minimal(base_size = 13)
+  labs(y = "Life expectancy", x = "Health spending per person ($, PPP) - log2 scale") +
+  theme_minimal(base_size = 13) + guides(colour = "none")
 ```
 
 ::: {.backgrnote .center}
