@@ -1,0 +1,188 @@
+---
+title: "Exercise 2 (20 minutes)"
+subtitle: "You practice: reading a continuous × continuous interaction from BOTH sides — and deciding whether it is real. When you're done, assist some of the others …"
+output: webexercises::webexercises_default
+---
+
+```{r setup, include = FALSE}
+options(htmltools.dir.version = FALSE, servr.interval = 0.5, width = 115, digits = 3)
+knitr::opts_chunk$set(
+  collapse = TRUE, message = FALSE,
+  warning = FALSE, cache = FALSE,
+  comment = "#", strip.white = TRUE)
+
+library(webexercises)
+
+num_fitb <- function(x, digits = 2, width = 7) {
+  a <- format(round(x, digits), nsmall = digits)
+  fitb(unique(c(a, sub(".", ",", a, fixed = TRUE))), width = width)
+}
+```
+
+```{r hidden-setup, include = FALSE}
+pacman::p_load(tidyverse, estimatr, vdemdata, wbstats, modelsummary)
+```
+
+In the lecture we interacted **state ownership** with **civil liberties** and read the result as
+*"the state-ownership slope at different levels of civil liberties"*. But an interaction is
+**symmetric** — the very same term also tells us how the **civil-liberties** slope changes with
+state ownership. Here you read it from that other side, and then decide whether the pattern is real.
+
+1. Rebuild the Lecture 9 / 11 triangle. (Same pipeline: V-Dem, the World Bank `$3.00` poverty line,
+   a cached fallback, and both predictors mean-centred.)
+
+```{r prep}
+pacman::p_load(tidyverse, estimatr, vdemdata, wbstats, modelsummary)
+
+Dat_vdem <- vdem %>%
+  as_tibble() %>%
+  select(country_text_id, year,
+         civ_liberties = v2xcl_rol, state_own_raw = v2clstown) %>%
+  mutate(state_ownership = -state_own_raw)
+
+Dat_pov <- tryCatch(
+  wb_data("SI.POV.DDAY", start_date = 1972, end_date = 2025),
+  error = function(e) readRDS("data/wb_poverty_raw.rds")   # offline fallback
+) %>%
+  rename(poverty = SI.POV.DDAY, year = date, country_text_id = iso3c) %>%
+  select(country_text_id, year, country, poverty) %>%
+  drop_na(poverty) %>%
+  group_by(country) %>% filter(year == max(year)) %>% ungroup()
+
+Dat <- inner_join(Dat_pov, Dat_vdem, by = c("country_text_id", "year")) %>%
+  drop_na(poverty, state_ownership, civ_liberties) %>%
+  mutate(
+    mc_state = state_ownership - mean(state_ownership),
+    mc_civ   = civ_liberties  - mean(civ_liberties)
+  )
+```
+
+`r hide("Stuck?")`
+- Did `pacman::p_load(...)` run without red errors? Fix that first.
+- The `wb_data()` call needs the internet. If it fails, the `tryCatch` falls back to the cached file
+  `data/wb_poverty_raw.rds` — download it from Absalon into a `data/` sub-folder of your project.
+- Odd results? *Session → Restart R*, then rerun from the top.
+- Still stuck? Ask in the [t-R-ouble forum](https://absalon.ku.dk/courses/70545/discussion_topics/563046?module_item_id=2037268) on Absalon.
+
+`r unhide()`
+
+```{r solutions, include = FALSE}
+ols_int <- lm_robust(poverty ~ mc_state * mc_civ, data = Dat)
+b <- coef(ols_int)
+p_int <- tidy(ols_int) %>% filter(term == "mc_state:mc_civ") %>% pull(p.value)
+sd_s <- sd(Dat$mc_state)
+civ_lo   <- b["mc_civ"] + b["mc_state:mc_civ"] * (-sd_s)
+civ_mean <- b["mc_civ"]
+civ_hi   <- b["mc_civ"] + b["mc_state:mc_civ"] * ( sd_s)
+```
+
+2. **Fit the interaction** — exactly the lecture model.
+
+`r hide("R solution — don't peek too early ;) !")`
+```{r sol2, eval = FALSE}
+ols_int <- lm_robust(poverty ~ mc_state * mc_civ, data = Dat)
+
+modelsummary(list("Poverty" = ols_int),
+             coef_rename = c("mc_state" = "State ownership",
+                             "mc_civ" = "Civil liberties",
+                             "mc_state:mc_civ" = "State own. × Civ. lib."),
+             stars = TRUE, gof_map = c("nobs", "r.squared"),
+             output = "kableExtra")
+```
+`r unhide()`
+
+   The interaction coefficient is `r num_fitb(b["mc_state:mc_civ"])`. In the lecture we read this as
+   "how the **state-ownership** slope changes per unit of civil liberties". Because the interaction
+   is symmetric, it *also* means:
+   `r mcq(c(answer = "how the civil-liberties slope changes per unit of state ownership", "how much poverty there is on average", "the effect of state ownership when civil liberties are zero"))`
+
+3. **Read the civil-liberties slope at three levels of state ownership.** The civil-liberties slope
+   is `b_civ + b_interaction × (state ownership)`. With `mc_state` centred, one standard deviation is
+   about `r round(sd_s, 2)`. Compute the slope at low, average and high state ownership:
+
+   - Low state ownership ($-1$ SD): `r num_fitb(civ_lo)`
+   - Average state ownership: `r num_fitb(civ_mean)`
+   - High state ownership ($+1$ SD): `r num_fitb(civ_hi)`
+
+`r hide("R solution")`
+```{r sol3, eval = FALSE}
+b    <- coef(ols_int)
+sd_s <- sd(Dat$mc_state)
+
+b["mc_civ"] + b["mc_state:mc_civ"] * (-sd_s) # low state ownership
+b["mc_civ"]                                  # average
+b["mc_civ"] + b["mc_state:mc_civ"] * ( sd_s) # high state ownership
+```
+`r unhide()`
+
+4. **Draw the predicted lines** — civil liberties on the x-axis, one line per level of state
+   ownership. This is the mirror image of the lecture's plot.
+
+`r hide("R solution — don't peek too early ;) !")`
+```{r sol4, eval = FALSE}
+grid <- expand.grid(
+  mc_civ   = seq(min(Dat$mc_civ), max(Dat$mc_civ), length.out = 50),
+  mc_state = c(-sd_s, 0, sd_s)
+)
+grid$poverty <- predict(ols_int, newdata = grid)
+grid$Ownership <- factor(grid$mc_state,
+  labels = c("Low", "Average", "High"))
+
+ggplot(grid, aes(x = mc_civ, y = poverty, color = Ownership)) +
+  geom_line(linewidth = 1.1) +
+  labs(x = "Civil liberties (centred)",
+       y = "Predicted % below $3.00 a day",
+       color = "State ownership") +
+  theme_minimal(base_size = 14)
+```
+`r unhide()`
+
+5. **Now the decision that matters.** Look back at the model table from task 2. Is the interaction
+   term statistically significant at the 5% level?
+   `r mcq(c("Yes — so the slopes genuinely differ", answer = "No — so we cannot conclude the slopes really differ", "The table does not say"))`
+
+6. **Write one sentence** as a `# comment` stating what you may — and may **not** — conclude from
+   this analysis. Then compare:
+
+`r hide("Model answer")`
+The fitted lines fan out, which *suggests* that civil liberties are more strongly associated with
+lower poverty where state ownership is high. But the interaction term is **not statistically
+significant** (p ≈ `r round(p_int, 2)`), so we **cannot** conclude that the civil-liberties slope
+genuinely depends on state ownership — the fanning may just be sampling noise. A suggestive picture
+is a hypothesis, not a finding. And even had it been significant, this is a cross-country
+*association*, not evidence about which variable causes which.
+`r unhide()`
+
+7. **Bonus, for the fast.** Confirm the symmetry numerically: the interaction coefficient is
+   *identical* whether you write `mc_state * mc_civ` or `mc_civ * mc_state`. Fit both and compare.
+
+`r hide("R solution")`
+```{r sol7, eval = FALSE}
+coef(lm_robust(poverty ~ mc_state * mc_civ, data = Dat))["mc_state:mc_civ"]
+coef(lm_robust(poverty ~ mc_civ * mc_state, data = Dat))["mc_civ:mc_state"]
+```
+
+They are the same number: `mc_state:mc_civ` and `mc_civ:mc_state` are one and the same product
+column. "Which variable moderates which" is a *story we tell*, not something the maths distinguishes.
+`r unhide()`
+
+8. **Discuss with your neighbour.**
+
+   - You read the same interaction two ways (lecture: state-ownership slope by civil liberties;
+     here: civil-liberties slope by state ownership). Which framing is "correct"?
+   - The interaction was not significant. Would collecting more country-years be a legitimate way to
+     "get" a significant result?
+   - When *is* a non-significant interaction still worth reporting?
+
+`r hide("Talking points")`
+- **Neither is more correct** — they are the same coefficient. Which variable you cast as the
+  "moderator" is a rhetorical and theoretical choice, guided by your research question, not by the
+  statistics. The maths is perfectly symmetric.
+- Collecting more data to shrink standard errors is fine *in principle*, but hunting for
+  significance by adding data, dropping cases, or trying specifications until p < 0.05 is
+  **p-hacking**. The honest move is to decide the analysis first, then report whatever it gives.
+- A non-significant interaction is worth reporting when the question itself matters: "we tested
+  whether the effect of state ownership depends on civil liberties and found no reliable evidence
+  that it does" is a genuine, publishable answer — and it guards the next researcher against
+  over-reading the suggestive picture you just drew.
+`r unhide()`

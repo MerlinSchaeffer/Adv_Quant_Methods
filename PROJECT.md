@@ -134,6 +134,65 @@ A refinement round over both the deck and the website. New conventions that the 
   final checklist but was never actually installed by the old steps. All four GitHub installs
   verified to exist (masteringmetrics, ROS-Examples/rpackage, vdemdata, democracyData).
 
+## Lecture 11 (2026-07-23) — Interaction effects
+`11-Conditionals.qmd` (26 slides, 18 notes) + `11-exercise1/2.Rmd`. **Part 1 faithful; Part 2
+re-vehicled** after a pre-port review (professor's call across three questions). Two halves, both
+kept, but Part 2's example was rebuilt.
+- **Part 1 (continuous × categorical), faithful:** xenophobia ~ education × country (ESS r9,
+  Denmark vs. Bulgaria). The full pedagogy — the multiplicative spec (`cntry * eduyrs`), the
+  **conditional main-terms trap** (each main term now holds only where the other = 0), **mean-
+  centring** as the fix, the interaction term's **dual/symmetric reading**, and an education × gender
+  second example. **Verified numbers:** education slope in **Denmark −0.113** (educated Danes less
+  xenophobic) vs. **+0.040 in Bulgaria** (flat), interaction **+0.153**. Centring moves the country
+  coefficient from an uninterpretable −0.375 (gap at zero years' schooling) to +1.650 (gap at
+  average) — the classic demonstration.
+- **Part 2 (continuous × continuous), RE-VEHICLED onto the L9 triangle:** the original used the
+  **hand-coded 19-arm socialism `case_when`** the professor already had removed from L2/L9, plus the
+  stale `$2.15` line (mislabelled `$5.50`). Replaced with `poverty ~ state_ownership * civ_liberties`
+  — L9's exact variables, canonical "civil liberties" label, `$3.00` line, `tryCatch` fallback, both
+  predictors mean-centred. Continues the L9 thread ("confounder or mediator?") into "**do they
+  interact?**". The additive `state_ownership` slope is **−3.781**, *identical to L9* — deliberate
+  continuity.
+- **CRITICAL honesty fix (professor cares about academic conduct):** with the re-vehicled V-Dem data
+  the interaction term is **not significant (p = 0.24)**. The original deck read its interaction as a
+  substantive finding; that would be over-claiming. The ported deck now teaches the **non-
+  significance as the lesson** — a red "read the table first / a picture is not a p-value" box on the
+  interpretation slide, and a closing "**two layers of humility**" slide (the interaction isn't even
+  significant; *and even if it were*, an interaction is still only description, not causation).
+  **When re-vehicling an example onto different data, re-check significance — a story that held on
+  the old data may not survive.**
+- **Visuals — professor chose "both":** a static 3D `persp()` plane per example to build the
+  "interaction = a warped/twisting surface" intuition, then **2D predicted-line plots** (focal slope
+  at low/mean/high moderator) for actually reading off the conditional slopes. **Used base R
+  `persp()`, NOT `rockchalk`/`plotly`** — both were missing, and `plotly` would embed heavy
+  interactive widgets that don't print in speaker/PDF view. `persp()` is what `rockchalk::plotPlane`
+  wraps anyway; renders as a static PNG, zero new dependencies. There is a `plane()` helper in the
+  setup chunk.
+- **Exercises:**
+  - Ex1 = the Legewie **treatment × country** interaction across 10 countries (PT reference). A
+    *third* use of the Legewie data (L7 replicate, L8 adjust, L11 interact) but a genuinely different
+    analysis; professor kept it. PT effect **0.330** (continuity again), Slovenia **1.232**, most
+    `treat:cntry` terms significantly negative → "most effects significantly smaller than Portugal".
+  - Ex2 = **NEW**: read the *same* V-Dem interaction from the **other** side (civil-liberties slope at
+    levels of state ownership), driving home the **symmetry** lesson (`mc_state:mc_civ` ≡
+    `mc_civ:mc_state`), then decide it is **not significant** — a deliberate cautionary counterpart to
+    ex1's significant interaction. Teaches recognising a null interaction and the p-hacking trap.
+- **The deck uses NO image files** — all TikZ + ggplot + `persp()`, so it renders in ~10 s offline.
+  Dropped from the original: the hand-coded socialism index, two DW news `<iframe>`s, `letstimeit`
+  timers, `essentials`/`furniture`, and the stock hotlinks (Marx-Engels-Lenin-Stalin etc.). The
+  `xeno_quest.png` image was not needed (the RQ is now a clean text slide).
+- **Gotcha (new):** a long `modelsummary(list(...), ...)` call on ONE line overflows a half-column
+  (`.push-left`) code block — the content scrolls under `overflow:auto`, which on a projector reads
+  as a hard clip (caught it 64 px over). **Break `modelsummary()` arguments across lines in
+  half-column code chunks.** The `getBoundingClientRect().bottom` overflow sweep does *not* catch
+  horizontal code overflow; measure `code`-content right vs. the block's right edge separately.
+- **Exercise data-load pattern reminder:** the visible student `read_dta("file.dta")` must be
+  `eval = FALSE` with a separate hidden `../assets/` read for the render — a bare evaluated student
+  path fails at render (bit ex1 first pass).
+- Verified in-browser: **26 slides, 18 notes, zero overflow, zero R errors, no broken images**; all
+  3 `persp()` planes + the DAG render; both exercises embed webexercises and **grade correctly**
+  (Danish comma accepted). Wired into `_quarto.yml` + `lectures.qmd` (callout updated to **1–11**).
+
 ## Lecture 10 (2026-07-21) — IV & two-stage least squares
 `10-IV-2SLS.qmd` (29 slides, 19 notes) + `10-exercise1/2.Rmd`. **Faithful port** — the pre-port
 review confirmed L10 is *not* a repeat of L7 (see the note under "Next steps"). The Wald recap was
@@ -626,8 +685,9 @@ ChatGPT/Gemini (Bard is dead). REMEMBER: render exercises with `rmarkdown::rende
     `state_ownership`; raw `state_own_raw`; z-score `z_state_ownership`). Higher = more state
     ownership. "Socialism" stays as the *concept* it operationalises, not the variable label.
   - WB `SI.POV.DDAY` → **"extreme poverty"** / "% below $3.00 a day (2021 PPP)".
-  - **Applied to L2 (deck + both exercises) and L9 (deck); pending decks that reuse these vars
-    — esp. L12 (Polynomials, uses `v2xcl_rol`) — must adopt the same labels.** The L2 exercises'
+  - **Applied to L2 (deck + both exercises), L9 (deck), and L11 (deck + exercise 2); pending decks
+    that reuse these vars — esp. L12 (Polynomials, uses `v2xcl_rol`) — must adopt the same labels.**
+    The L2 exercises'
     `data/Dat_L2.rds` fallback was regenerated with the new column names (`civ_liberties`,
     `state_ownership`, `state_own_raw`) so live-path and fallback agree.
 - **Callout colour code** (audited for consistency 2026-07-02):
@@ -715,9 +775,10 @@ ChatGPT/Gemini (Bard is dead). REMEMBER: render exercises with `rmarkdown::rende
    MTO/IV + Minneapolis). ~~Lecture 8~~ — done 2026-07-21 (Multiple OLS, **rebuilt around omitted
    variable bias** after a pre-port review found it duplicated L7 — see its section above).
    ~~Lecture 10~~ — done 2026-07-21 (IV & 2SLS; **faithful port, Wald recap kept** — see its
-   section above).
-   **Done so far: L1–10. Next: Lecture 11 (`static/Lectures/11-Conditionals/`, deck + exercises).**
-   Then 12 → 14. (Colonialism is now fully gone from the course.)
+   section above). ~~Lecture 11~~ — done 2026-07-23 (Interactions; Part 1 faithful, Part 2
+   re-vehicled onto the L9 triangle — see its section above).
+   **Done so far: L1–11. Next: Lecture 12 (`static/Lectures/12-Polynomials/`, deck + exercises).**
+   Then 13 → 14. (Colonialism is now fully gone from the course.)
    **Review each deck against the already-ported ones before porting** — L8 showed that the later
    decks were written against a course that the migration has since changed underneath them.
    **But do not over-apply the L8 lesson: checked 2026-07-21, L10 is NOT a repeat of L7.**

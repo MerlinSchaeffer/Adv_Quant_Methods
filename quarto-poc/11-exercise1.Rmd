@@ -1,0 +1,169 @@
+---
+title: "Exercise 1 (20 minutes)"
+subtitle: "You practice: a treatment × country interaction — did one natural experiment hit ten countries the same way? When you're done, assist some of the others …"
+output: webexercises::webexercises_default
+---
+
+```{r setup, include = FALSE}
+options(htmltools.dir.version = FALSE, servr.interval = 0.5, width = 115, digits = 3)
+knitr::opts_chunk$set(
+  collapse = TRUE, message = FALSE,
+  warning = FALSE, cache = FALSE,
+  comment = "#", strip.white = TRUE)
+
+library(webexercises)
+
+num_fitb <- function(x, digits = 3, width = 7) {
+  a <- format(round(x, digits), nsmall = digits)
+  fitb(unique(c(a, sub(".", ",", a, fixed = TRUE))), width = width)
+}
+```
+
+```{r hidden-read, include = FALSE}
+pacman::p_load(tidyverse, haven, estimatr, modelsummary)
+ESS_raw <- read_dta("../assets/Legewie_ESS_02.dta")
+```
+
+Back to Legewie's Bali natural experiment — but this time across **ten** countries. Was the effect
+of the terror attack on xenophobia the *same* everywhere, or did it **depend on the country**? That
+is an **interaction** between the treatment and country.
+
+1. Prepare the data. This keeps ten countries and makes **Portugal the reference** (it had the
+   clearest effect, so it is the natural baseline to compare the others against).
+
+```{r read, eval = FALSE}
+pacman::p_load(tidyverse, haven, estimatr, modelsummary)
+ESS_raw <- read_dta("Legewie_ESS_02.dta") # from your project folder
+```
+
+```{r prep}
+event_date <- as.Date("2002-10-13")   # the Bali attack
+win_begin  <- as.Date("2002-09-14")
+win_end    <- as.Date("2002-10-20")
+
+ESS <- ESS_raw %>%
+  mutate(
+    int_date = as.Date(sprintf("%s-%s-%s", inwyr, inwmm, inwdd)),
+    treat = case_when(
+      int_date > event_date & int_date <= win_end   ~ "After the attack",
+      int_date < event_date & int_date > win_begin  ~ "Before the attack",
+      TRUE ~ NA_character_) %>% fct_relevel("Before the attack", "After the attack"),
+    anti_immi = rowMeans(across(c(imtcjob, imbleco, imbgeco, imueclt,
+                                  imwbcnt, imwbcrm, imbghct)), na.rm = TRUE) %>%
+      scale() %>% as.numeric(),
+    anti_immi = max(anti_immi, na.rm = TRUE) - anti_immi,
+    across(c(brncntr, mocntr, facntr), as_factor),
+    age  = inwyr - yrbrn,
+    empl_stat = case_when(
+      pdwrk == 1 ~ "Working", uempla == 1 ~ "Unemployed",
+      rtrd == 1 ~ "Retired", TRUE ~ "Other"),
+    pspwght = pweight * dweight
+  ) %>%
+  filter(!cntry %in% c("DK", "IL", "HU") &                # keep 10 countries
+           brncntr == "yes" & mocntr == "yes" & facntr == "yes") %>%
+  select(treat, anti_immi, cntry, pspwght, age, empl_stat) %>%
+  drop_na() %>%
+  mutate(cntry = fct_relevel(cntry, "PT"))               # Portugal = reference
+```
+
+`r hide("Stuck?")`
+- Did `pacman::p_load(...)` run without red errors? Fix that first.
+- `read_dta()` can't find the file? `Legewie_ESS_02.dta` must sit **in your project folder**.
+- Odd results? *Session → Restart R*, then rerun from the top.
+- Still stuck? Ask in the [t-R-ouble forum](https://absalon.ku.dk/courses/70545/discussion_topics/563046?module_item_id=2037268) on Absalon.
+
+`r unhide()`
+
+```{r solutions, include = FALSE}
+ols_int <- lm_robust(anti_immi ~ treat * cntry, data = ESS, weights = pspwght)
+b <- coef(ols_int)
+pt <- b["treatAfter the attack"]
+si <- b["treatAfter the attack"] + b["treatAfter the attack:cntrySI"]
+```
+
+2. **Predict before you compute.** You are about to fit `anti_immi ~ treat * cntry`. In that model,
+   what will the plain `treatAfter the attack` coefficient represent?
+   `r mcq(c(answer = "The attack effect in Portugal, the reference country", "The average attack effect across all ten countries", "The attack effect in every country"))`
+
+3. **Fit the interaction** and look at whether the country-specific terms differ from Portugal.
+
+`r hide("Hint")`
+`lm_robust(anti_immi ~ treat * cntry, data = ESS, weights = pspwght)` — the `treat:cntryXX` rows are
+how much each country's effect differs from Portugal's.
+`r unhide()`
+
+`r hide("R solution — don't peek too early ;) !")`
+```{r sol3, eval = FALSE}
+ols_int <- lm_robust(anti_immi ~ treat * cntry, data = ESS, weights = pspwght)
+
+modelsummary(list("Xenophobia" = ols_int),
+             stars = TRUE, gof_map = c("nobs", "r.squared"),
+             output = "kableExtra")
+```
+`r unhide()`
+
+   Compared with Portugal, are the effects in the other countries mostly weaker or stronger?
+   `r mcq(c("No significant differences", answer = "Most are significantly smaller", "Most are significantly larger"))`
+
+4. **Read a main term.** What was the effect of the Bali attack **in Portugal** (the reference)?
+   `r num_fitb(pt)`
+
+5. **Read a conditional effect.** The effect in **Slovenia** (`SI`) is the Portugal effect *plus*
+   the `treatAfter the attack:cntrySI` interaction term. Compute it:
+   `r num_fitb(si)`
+
+`r hide("R solution")`
+```{r sol5, eval = FALSE}
+coef(ols_int)["treatAfter the attack"] +
+  coef(ols_int)["treatAfter the attack:cntrySI"]
+```
+`r unhide()`
+
+6. **Write one sentence** as a `# comment` explaining, in plain words, what a significant
+   `treat:cntryXX` interaction *means* — then compare:
+
+`r hide("Model answer")`
+A significant `treat:cntryXX` term means the effect of the Bali attack in country XX was
+significantly **different** from its effect in Portugal — the attack's impact on xenophobia
+**depended on the country**. Because most of these terms are negative and significant, the strong
+Portuguese reaction was unusual: in most other countries the same attack moved xenophobia much less,
+or not at all. The interaction is what lets one model carry ten different effects at once.
+`r unhide()`
+
+7. **Bonus, for the fast.** Add `age` and `empl_stat` as additive controls to the interaction model.
+   Do the country differences survive?
+
+`r hide("R solution")`
+```{r sol7, eval = FALSE}
+ols_int2 <- lm_robust(anti_immi ~ treat * cntry + age + empl_stat,
+                      data = ESS, weights = pspwght)
+
+modelsummary(list("No controls" = ols_int, "+ controls" = ols_int2),
+             stars = TRUE, gof_map = c("nobs"), output = "kableExtra")
+```
+
+The interaction pattern is broadly robust — some countries even become statistically
+indistinguishable from Portugal once age and employment are held constant. Note you can freely mix
+an **interaction** (`treat * cntry`) with ordinary **additive controls** (`+ age + empl_stat`) in
+the same model.
+`r unhide()`
+
+8. **Discuss with your neighbour.**
+
+   - Why is it more honest to *interact* treatment with country than to run ten separate
+     country-by-country regressions?
+   - The Portuguese effect is the reference. If we had made **Sweden** the reference instead, would
+     any of the underlying country effects change?
+   - A significant treatment × country interaction tells us the effect varies. Does it tell us
+     *why* it varies?
+
+`r hide("Talking points")`
+- One interaction model uses **all** the data to estimate a common baseline and lets each country
+  deviate from it, with proper standard errors for the *differences*. Ten separate regressions throw
+  away that shared information and make it awkward to test whether countries really differ.
+- **No.** Changing the reference relabels the coefficients — every country's actual predicted effect
+  is identical; only which one is called "the baseline" changes. The model is the same.
+- **No.** The interaction establishes *that* the effect depends on country, not *why*. Explaining it
+  — history, media, prior immigration — is the substantive sociology that begins where the
+  regression ends.
+`r unhide()`
