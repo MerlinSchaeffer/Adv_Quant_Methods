@@ -541,7 +541,7 @@ The additive state-ownership slope is **`r round(coef(lm_robust(poverty ~ mc_sta
 m2 <- lm(poverty ~ mc_state + mc_civ, data = Dat)
 plane(m2, "mc_state", "mc_civ", Dat,
       xlab = "State own.", ylab = "Civ. lib.", zlab = "Poverty",
-      theta = 45, phi = 15)
+      theta = 300, phi = 20)
 ```
 :::
 
@@ -576,7 +576,7 @@ modelsummary(
 m3 <- lm(poverty ~ mc_state * mc_civ, data = Dat)
 plane(m3, "mc_state", "mc_civ", Dat,
       xlab = "State own.", ylab = "Civ. lib.", zlab = "Poverty",
-      theta = 45, phi = 15)
+      theta = 300, phi = 20)
 ```
 :::
 
@@ -587,7 +587,10 @@ Here is the intuition the 3D view is for: adding the product warps the plane int
 ## Read it as lines, not a surface
 
 ::: {.push-left}
-```{r p2-lines, echo = FALSE, out.width='96%', fig.height = 4.4, fig.width = 6}
+::: {.panel-tabset}
+
+### Plot
+```{r p2-lines, echo = FALSE, out.width='94%', fig.height = 4.4, fig.width = 6}
 b <- coef(ols_int2)
 sd_c <- sd(Dat$mc_civ)
 grid <- expand.grid(
@@ -605,6 +608,34 @@ ggplot(grid, aes(x = mc_state, y = poverty, color = Liberties)) +
        color = "Civil liberties") +
   theme_minimal(base_size = 14) + theme(legend.position = "bottom")
 ```
+
+### R code
+```{r p2-lines-code, eval = FALSE}
+# 1. One standard deviation of the moderator (civil liberties)
+sd_c <- sd(Dat$mc_civ)
+
+# 2. A grid: many state-ownership values, at THREE civil-liberties levels
+grid <- expand.grid(
+  mc_state = seq(min(Dat$mc_state), max(Dat$mc_state), length.out = 50),
+  mc_civ   = c(-sd_c, 0, sd_c)             # low, average, high
+)
+
+# 3. Predict poverty from the interaction model on that grid
+grid$poverty   <- predict(ols_int2, newdata = grid)
+grid$Liberties <- factor(grid$mc_civ,
+  labels = c("Low (autocratic)", "Average", "High (liberal)"))
+
+# 4. One line per civil-liberties level
+ggplot(grid, aes(x = mc_state, y = poverty, color = Liberties)) +
+  geom_line(linewidth = 1.1) +
+  scale_color_manual(values = c("#901A1E", "#b5892c", "#425570")) +
+  labs(x = "State ownership (centred)",
+       y = "Predicted % below $3.00 a day",
+       color = "Civil liberties") +
+  theme_minimal(base_size = 14) + theme(legend.position = "bottom")
+```
+
+:::
 :::
 
 ::: {.push-right}
@@ -642,7 +673,7 @@ The most important slide in Part 2, and the reason to teach it: the picture prac
 :::
 :::
 
-::: {.lead .center}
+::: {.lead .center style="clear: both;"}
 For that we would need a clever causal research design — exactly the kind the rest of the course is about.
 :::
 

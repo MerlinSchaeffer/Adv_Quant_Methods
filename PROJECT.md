@@ -167,7 +167,11 @@ kept, but Part 2's example was rebuilt.
   `persp()`, NOT `rockchalk`/`plotly`** — both were missing, and `plotly` would embed heavy
   interactive widgets that don't print in speaker/PDF view. `persp()` is what `rockchalk::plotPlane`
   wraps anyway; renders as a static PNG, zero new dependencies. There is a `plane()` helper in the
-  setup chunk.
+  setup chunk. **Viewing angle `theta = 300, phi = 20`, kept IDENTICAL on the additive and
+  interaction planes** (2026-07-23, professor asked) so you can flip between the two slides and watch
+  the surface go from flat to twisted — the default `theta = 45` made the warp nearly invisible.
+  The "Read it as lines" slide now carries the predicted-lines **R code in a Plot / R-code
+  panel-tabset** (`expand.grid` → `predict` → `geom_line` — the workflow students must learn).
 - **Exercises:**
   - Ex1 = the Legewie **treatment × country** interaction across 10 countries (PT reference). A
     *third* use of the Legewie data (L7 replicate, L8 adjust, L11 interact) but a genuinely different
@@ -189,6 +193,10 @@ kept, but Part 2's example was rebuilt.
 - **Exercise data-load pattern reminder:** the visible student `read_dta("file.dta")` must be
   `eval = FALSE` with a separate hidden `../assets/` read for the render — a bare evaluated student
   path fails at render (bit ex1 first pass).
+- **Float bug bit the closing slide too (2026-07-23):** the "two layers of humility" `.lead`
+  sentence sat *after* two `.push-left`/`.push-right` boxes and got sucked into the float gap — it
+  "flew around" (professor's words). Fix: `::: {.lead .center style="clear: both;"}`. Same recurring
+  pattern PROJECT.md flags for L7/L9 — any full-width block after two floats needs `clear: both`.
 - Verified in-browser: **26 slides, 18 notes, zero overflow, zero R errors, no broken images**; all
   3 `persp()` planes + the DAG render; both exercises embed webexercises and **grade correctly**
   (Danish comma accepted). Wired into `_quarto.yml` + `lectures.qmd` (callout updated to **1–11**).
