@@ -497,6 +497,39 @@ tibble(x = 2^(0:10)) %>%
 Now connect the backwards-power idea to why it helps us model. The exponent is literally a count of doublings, so a one-step move on the log scale always means "twice as much", whether that is 500 to 1,000 or 4,000 to 8,000. The modelling payoff, in the green box: if life expectancy gains a fixed amount per doubling rather than per dollar, then against log-spending the curve becomes a straight line — and straight lines are exactly what OLS fits. Point at the plot: equal steps up the y-axis correspond to ever-bigger jumps in dollars.
 :::
 
+## The same fit, two ways to draw it
+
+::: {.push-left}
+We fit life expectancy on **log₂(spending)**. Drawn back on the **normal dollar axis**, that fit is a **curve** — rising fast, then flattening. Exactly the shape we needed.
+
+::: {.content-box-green}
+Same model, same fit. The **next slide** shows it on a **log₂ axis** — where the very same curve becomes a perfectly **straight line**. Flip back and forth.
+:::
+:::
+
+::: {.push-right}
+```{r log-plot-raw, echo = FALSE, out.width='92%', fig.height = 4.4, fig.width = 6}
+ggplot(Dat, aes(y = LifeExpect, x = HealthExp)) +
+  geom_line(aes(colour = country, group = country), alpha = 0.25) +
+  geom_point(aes(colour = country), alpha = 0.4, size = 1) +
+  ggrepel::geom_text_repel(data = Dat_lab, aes(label = country, colour = country),
+                           size = 3, fontface = "bold", seed = 1, min.segment.length = 0) +
+  # No axis transform here, so the log fit shows as a CURVE on the dollar scale
+  stat_smooth(method = "lm", formula = y ~ log2(x),
+              se = FALSE, colour = "black", linewidth = 1.2) +
+  labs(y = "Life expectancy", x = "Health spending per person ($, PPP) - normal scale") +
+  theme_minimal(base_size = 13) + guides(colour = "none")
+```
+
+::: {.backgrnote .center}
+On the normal dollar axis, the log fit is a **curve**.
+:::
+:::
+
+::: {.notes}
+This is the first half of a back-and-forth pair — flip between this slide and the next to make the point land. Here the axis is ordinary dollars, and the log fit is a curve that hugs the data: steep among poor countries, flat among rich ones. On the next slide the axis becomes log₂ and that identical fit straightens into a line. Same model both times; only the ruler on the x-axis changed. That is the whole idea of a transformation.
+:::
+
 ## The log₂ model
 
 ::: {.push-left}
@@ -539,7 +572,7 @@ ggplot(Dat, aes(y = LifeExpect, x = HealthExp)) +
 ```
 
 ::: {.backgrnote .center}
-On a log₂ x-axis, the curve straightens into a line.
+On a log₂ axis, that **same curve** is a straight **line**.
 :::
 :::
 
