@@ -148,6 +148,57 @@ A refinement round over both the deck and the website. New conventions that the 
   final checklist but was never actually installed by the old steps. All four GitHub installs
   verified to exist (masteringmetrics, ROS-Examples/rpackage, vdemdata, democracyData).
 
+## Lecture 14 (2026-07-25) — Conclusion — MIGRATION COMPLETE (L1–14)
+`14-Concl.qmd` (25 slides, 19 notes). **The final deck.** A course synthesis on a lovely
+self-referential running example — **the class's own weekly-quiz results**. Two-goals structure:
+*(1) describe patterns* (dummy → multiple → interaction → polynomial → transformation → combined) and
+*(2) identify causal mechanisms* (OVB → RCT → ITT/Wald → 2SLS → control → mediator → RDD), each on the
+quiz data or a clean DAG. No exercises (it's a wrap-up), so lighter than the other ports.
+- **PRIVACY — the key decision (professor: anonymise; also asked "does the data need committing?"):**
+  the source `Result.RData` holds **75 real student first names** + quiz scores + LLM-inferred
+  gender/skill. The rendered deck never displays a name (they're only in `eval=FALSE` code), but
+  committing the file would ship them. **Fix: `data/quiz_results.rds`** — real names replaced with
+  **gender-matched synthetic Danish names** (seeded; `woman > 0.5` → female name), every numeric
+  column untouched, so **all plots/models are numerically identical** (verified mean %correct =
+  92.24). The real `Result.RData` stays in the old `static/Lectures/` tree, outside `quarto-poc/`, so
+  **no real student data enters the repo or the site.** Answer to the professor's question: the data
+  is needed to *render* but **not to serve** (the published deck is static images); committing the
+  tiny anonymised file keeps the deck re-renderable (the "you can update it yourself" principle),
+  which is why we commit it rather than gitignoring. **Any future deck built on class data: anonymise
+  the same way before committing.**
+- **Harmonised to the ported course (the L8 lesson, amplified — this deck recaps everything):**
+  - **Wald notation:** the original wrote λ = ITT/r; ported to **λ = ρ/φ = reduced form / first
+    stage = ITT/r** (shows all three, bridging L7/L10's ρ/φ with the original symbols). Same fix as
+    the variable-label harmonisation convention.
+  - **RDD added to the "Two Goals" overview** (it was missing — now a full lecture, L13), and the RDD
+    recap slide redrawn with **L13's palette** (slate below / KU red above / black jump bar) instead
+    of the old purple/green.
+  - Subtitle **"13. Conclusion" → Lecture 14**.
+- **Honesty touches (professor cares):** the LLM gender split in this cohort is **63 women / 9 men**,
+  so the deck's gender regression rests on nine men — added a red "read it with humility" caveat, and
+  the coefficient is **n.s. (−1.6, p = 0.32)**. Kept the LLM **"stats-skill-from-your-name"** slide as
+  a *measurement-validity* lesson: the model returns a confident number that is **pure noise**
+  (slope −0.43, p = 0.45, R² = 0.006) — a nice spurious-correlation punchline.
+- **Packages:** `equatiomatic` (used for `extract_eq()` — the model-equation display on the OLS-knife
+  slide) was **documented-but-not-installed** — installed it. `essentials` dropped (unused / not on
+  CRAN for R 4.6). `masteringmetrics` present (the RDD recap reuses `mlda`).
+- **Kept the deck's best pedagogy:** the **variance-decomposition plots** (blue = explained from the
+  mean to the fitted line, red = residual from the line to the point) on the null / OLS-knife / poly /
+  transform slides — the clearest R² picture in the course. Jitter is now **visual only** (integer
+  `appearances` stays clean for the models; the original jittered the modelling variable in place,
+  which slightly attenuates slopes — fixed).
+- **Same structural gotcha as L13 bit again:** wrote the two part dividers as `#` (level-1) → Quarto
+  nested the following `##` as **vertical stacks** (only 8 top-level sections). **Dividers must be
+  `##` with `.inverse`.** (Now flagged twice — worth remembering for any future deck.)
+- **No images** — all ggplot + 4 TikZ DAGs (OVB, RCT, ITT, I/C/M-mediator), so it renders in ~10 s
+  offline. Dropped the Durkheim blogger-hotlink opener (made "The goal of empirical sociology" a clean
+  inverse text slide, bookending the course — same treatment as the L1/L6/L13 openers).
+- Verified in-browser: **25 slides, zero overflow, zero R errors, no `&nbsp;`, no tofu**; `extract_eq`
+  equation renders, all 4 DAGs render, the variance-decomposition + RDD recap plots render. Wired into
+  `_quarto.yml` + `lectures.qmd` (**"All 14 lectures are fully migrated"**, no "coming soon" badges
+  left). **The Quarto migration of the lecture decks is now complete: L1–14 + the 0-Prep setup page
+  (about.qmd).**
+
 ## Lecture 13 (2026-07-24) — Regression discontinuity designs (RDD)
 `13-RegDD.qmd` (34 slides, 24 notes) + `13-exercise1/2.Rmd`. **Faithful port, restructured into the
 template + two deliberate cross-references woven in** (the pre-port review confirmed L13 is *not* a
@@ -929,8 +980,13 @@ ChatGPT/Gemini (Bard is dead). REMEMBER: render exercises with `rmarkdown::rende
    transformations; re-vehicled controls to canonical `civ_liberties` — see its section above).
    ~~Lecture 13~~ — done 2026-07-24 (RDD; faithful port + the sharp-RDD↔Wald φ=1 bridge to L7/L10,
    polynomials kept as an L12 recap — see its section above).
-   **Done so far: L1–13. Next: Lecture 14 (Conclusion — the last deck).**
-   (Colonialism is now fully gone from the course.)
+   ~~Lecture 14~~ — done 2026-07-25 (Conclusion; course synthesis on the class's own quiz data,
+   **anonymised**; Wald harmonised to ρ/φ, RDD added to the recap — see its section above).
+   **✅ MIGRATION COMPLETE — all lecture decks L1–14 are ported, verified, and live.** (Colonialism
+   fully gone from the course.) Remaining work is polish/content, not deck ports — see items 5–7
+   below and the two content flags (quiz-count L1 "13" vs about "10 of 14"; the pending Legewie
+   Fig. 3 image for L1). The `0-Prep` setup deck was folded into `about.qmd`; a standalone port is
+   optional.
    **Review each deck against the already-ported ones before porting** — L8 showed that the later
    decks were written against a course that the migration has since changed underneath them.
    **But do not over-apply the L8 lesson: checked 2026-07-21, L10 is NOT a repeat of L7.**
