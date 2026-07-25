@@ -1,0 +1,675 @@
+---
+title: "Conclusion"
+subtitle: "The whole course, on one dataset — your own"
+author: "Merlin Schaeffer · Department of Sociology"
+date: today
+format:
+  revealjs:
+    theme: [default, theme/ku.scss]
+    width: 1600
+    height: 900
+    slide-number: c/t
+    footer: "Lecture 14 · Conclusion"
+    incremental: false
+    highlight-style: github
+    logo: img/ku_seal.png
+    code-line-numbers: true
+    fig-align: center
+    auto-stretch: false
+execute:
+  echo: true
+  warning: false
+  message: false
+title-slide-attributes:
+  data-background-color: "#901A1E"
+  data-background-image: img/UCPH_white.png
+  data-background-size: 18%
+  data-background-position: 95% 5%
+---
+
+```{r setup, include = FALSE}
+library(knitr)
+options(htmltools.preserve.raw = FALSE,
+        htmltools.dir.version = FALSE, servr.interval = 0.5, width = 115, digits = 3)
+knitr::opts_chunk$set(
+  collapse = TRUE, message = FALSE, fig.retina = 3, error = TRUE,
+  warning = FALSE, cache = FALSE, fig.align = 'center',
+  comment = "#", strip.white = TRUE, tidy = FALSE)
+```
+
+```{r data, include = FALSE}
+pacman::p_load(tidyverse, estimatr, modelr, modelsummary, equatiomatic, masteringmetrics)
+
+# Our running example: the class's own weekly-quiz results.
+# NOTE: anonymised — real first names replaced by synthetic ones (nothing else changed).
+result <- readRDS("data/quiz_results.rds")
+
+plotdata <- result %>%
+  filter(appearances > 7) %>%                 # students who did most weeks
+  mutate(gndr = if_else(woman > 0.5, "Women", "Men"))
+
+# Palette for the variance-decomposition plots
+col_expl  <- "#005b96"   # blue  = explained by the model
+col_resid <- "#901A1E"   # red   = residual, unexplained
+
+ybar <- mean(plotdata$mcorrect)
+
+# Models used across the deck (clean predictors; plots jitter only visually)
+moderat <- lm(mcorrect ~ appearances, data = plotdata)
+ols   <- lm_robust(mcorrect ~ gndr, data = plotdata)
+ols2  <- lm_robust(mcorrect ~ gndr + Statistics + appearances, data = plotdata)
+ols3  <- lm_robust(mcorrect ~ gndr * appearances, data = plotdata)
+mod1  <- lm_robust(mcorrect ~ appearances, data = plotdata)
+mod2  <- lm_robust(mcorrect ~ poly(appearances, 3, raw = TRUE), data = plotdata)
+modder <- lm_robust(mcorrect ~ I(log2(appearances)), data = plotdata)
+modcomb <- lm_robust(mcorrect ~ gndr * poly(appearances, 2, raw = TRUE), data = plotdata)
+ols_stat <- lm_robust(mcorrect ~ Statistics, data = plotdata)
+
+# modelsummary prepends a stray &nbsp; to a lone column header — strip it. Use with results='asis'.
+ms <- function(...) {
+  cat(gsub("&amp;nbsp;", "", as.character(modelsummary(..., output = "kableExtra"))))
+}
+```
+
+## The goal of empirical sociology {.inverse background-color="#901A1E"}
+
+::: {.lead}
+Use data to discover **patterns** — and the **social mechanisms** that bring them about.
+:::
+
+::: {.backgrnote}
+Fourteen weeks in two verbs: *describe* accurately, then *explain* causally. Today we put the whole toolkit on one table.
+:::
+
+::: {.notes}
+Open by naming the through-line of the entire course. Everything we did serves one of two verbs — describe a pattern well, or establish that one thing causes another. Tell them today is a map, not new material: we will walk the two halves of the course on a single, familiar dataset and see how the pieces fit. Keep it warm — it is the last lecture.
+:::
+
+## One dataset: your own quizzes
+
+::: {.push-left}
+Our running example today is **you**: the weekly-quiz results of this class.
+
+- `mcorrect` — a student's **% correct** across the weeks.
+- `appearances` — how many **quizzes** they completed.
+- `woman`, `Statistics` — two labels we'll build with an LLM in a moment.
+
+::: {.backgrnote}
+Anonymised: real first names were replaced with synthetic ones. Everything numeric is exactly as it was.
+:::
+:::
+
+::: {.push-right}
+```{r hist, echo = FALSE, out.width='94%', fig.height = 4.2, fig.width = 6}
+ggplot(plotdata, aes(x = mcorrect)) +
+  geom_histogram(aes(y = after_stat(count / sum(count))), bins = 15,
+                 fill = "grey75", colour = "white") +
+  geom_vline(xintercept = ybar, colour = col_resid, linewidth = 1) +
+  scale_y_continuous(labels = scales::percent) +
+  theme_minimal(base_size = 14) +
+  labs(x = "% of correct answers", y = "% of students")
+```
+
+::: {.content-box-green}
+Most of you did very well — the class average is **`r round(ybar, 1)`%** (red line).
+:::
+:::
+
+::: {.notes}
+Ground the abstractions in their own data — it lands because it is about them. Point out the average line: that single number is the simplest possible "model" of the outcome, and it is where the next slide starts. Reassure them the data are anonymised, so nobody is being singled out.
+:::
+
+## The Null model: just the average
+
+::: {.push-left}
+The simplest prediction of anyone's score is the **overall average** $\bar{Y}$.
+
+It explains **none** of the variation between students — every red line is a full miss from the mean.
+
+::: {.backgrnote}
+This is the baseline every model must beat. All of "describing patterns" is the effort to shrink those red lines.
+:::
+:::
+
+::: {.push-right}
+```{r null, echo = FALSE, out.width='100%', fig.height = 4.6, fig.width = 6}
+ggplot(plotdata, aes(y = mcorrect, x = appearances)) +
+  geom_hline(yintercept = ybar, colour = "grey40") +
+  geom_linerange(aes(ymin = ybar, ymax = mcorrect), colour = col_resid, alpha = .7) +
+  geom_point(alpha = 1/3, size = 2.6) +
+  theme_minimal(base_size = 14) +
+  labs(y = "% of correct answers", x = "Nr. of completed quizzes")
+```
+:::
+
+::: {.notes}
+The null model is the conceptual anchor of the whole descriptive half. Predict everyone with the mean and you are wrong by the red distance for each person; that total red is the variation we have not yet explained. Frame every technique that follows as a way to convert red (unexplained) into blue (explained).
+:::
+
+## OLS: a knife that cuts the variation
+
+::: {.push-left}
+OLS fits a line by $\min(\sum e^2)$. It **splits** each student's distance from the mean into two:
+
+- [**Blue** — explained by the model.]{style="color:#005b96;font-weight:600"}
+- [**Red** — residual, left unexplained.]{style="color:#901A1E;font-weight:600"}
+
+::: {.backgrnote}
+Here the model is `r extract_eq(moderat, use_coefs = FALSE)` — score as a function of quizzes completed.
+:::
+:::
+
+::: {.push-right}
+```{r knife, echo = FALSE, out.width='100%', fig.height = 4.6, fig.width = 6}
+d <- plotdata %>% add_predictions(moderat) %>% add_residuals(moderat)
+ggplot(d, aes(y = mcorrect, x = appearances)) +
+  geom_hline(yintercept = ybar, colour = "grey40") +
+  geom_linerange(aes(ymin = pred, ymax = mcorrect), colour = col_resid, alpha = .7) +
+  geom_linerange(aes(ymin = ybar, ymax = pred), colour = col_expl, alpha = .7) +
+  geom_smooth(method = "lm", colour = col_expl, se = FALSE) +
+  geom_point(alpha = 1/3, size = 2.6) +
+  theme_minimal(base_size = 14) +
+  labs(y = "% of correct answers", x = "Nr. of completed quizzes")
+```
+:::
+
+::: {.notes}
+This is the single most important picture of the course, so linger. The blue segment is how far the line moved us away from the naive mean — that is explained variation. The red segment is what the line still misses. R² is simply the share of the total that turned blue. Every descriptive tool in Part 1 is a differently-shaped knife trying to turn more red into blue.
+:::
+
+## Two goals, one course {.inverse background-color="#901A1E"}
+
+::: {.push-left}
+**1 · Describe patterns accurately**
+
+Shrink the red, grow the blue.
+
+1. **Dummy coding** — categorical predictors *(L4)*
+2. **Multiple OLS** — several predictors at once *(L8)*
+3. **Interaction effects** — conditional associations *(L11)*
+4. **Polynomials & transformations** — non-linear shapes *(L12)*
+:::
+
+::: {.push-right}
+**2 · Identify causal mechanisms**
+
+Isolate variation in $X$ that is **as good as random**.
+
+- *Assign it:* RCTs *(L6)*, natural experiments, ITT & the **Wald** estimator *(L7)*
+- *Find it with OLS:* **2SLS** *(L10)*, **control** for confounders *(L8/9)*, and **regression discontinuity** *(L13)*
+:::
+
+::: {.notes}
+Give them the map they can carry into the exam. The left column is bookkeeping on variance; the right column is a search for trustworthy variation. Stress that the whole right column exists because, in the social world, almost no variation in X is random on its own — so we either engineer randomness or hunt for a slice of it we can defend. Note RDD joined this list only last week.
+:::
+
+## Goal 1 · Describe patterns accurately {.inverse background-color="#901A1E"}
+
+[Part 1 of 2]{.part-pill}
+
+::: {.lead}
+Turn red into blue: give the model better-shaped predictors.
+:::
+
+## Categorical predictors → dummy variables
+
+::: {.push-left}
+A category becomes a **0/1 dummy**:
+
+$$x = \begin{cases} 1 & \text{if the condition holds} \\ 0 & \text{otherwise} \end{cases}$$
+
+::: {.content-box-blue}
+**Do women and men score differently?** Let's regress `mcorrect` on a gender dummy.
+:::
+
+::: {.content-box-red}
+**Beware:** this cohort is **`r sum(plotdata$gndr=="Women")` women vs. `r sum(plotdata$gndr=="Men")` men** — the "Men" estimate rests on nine people. Read it with humility.
+:::
+:::
+
+::: {.push-right}
+```{r dummy-tab, echo = FALSE, results = 'asis'}
+ms(list("% Correct" = ols),
+   coef_rename = c("gndrWomen" = "Women (vs. Men)"),
+   stars = TRUE, gof_map = c("nobs", "r.squared"))
+```
+
+::: {.backgrnote}
+The gap is about **`r round(coef(ols)["gndrWomen"], 1)`** points and **not significant** ($p = `r sprintf("%.2f", ols$p.value["gndrWomen"])`$) — no real gender difference here.
+:::
+:::
+
+::: {.notes}
+Recall dummy coding from Lecture 4, then use it honestly. The coefficient is the mean gap between the two groups. Two teaching moments: the estimate is not significant, so we should not claim a gender difference; and it is built on nine men, so even the point estimate is fragile. This is exactly the "read the table, and read the sample" discipline from the interaction lecture.
+:::
+
+## Where did "gender" come from? An LLM
+
+::: {.push-left}
+We never asked your gender. We **inferred** it from first names with a zero-shot language model — the same tooling sociologists now use to code open text at scale.
+
+::: {.backgrnote}
+Shown for transparency; the label is a **prediction**, not ground truth — another reason not to over-read the gap.
+:::
+:::
+
+::: {.push-right}
+```{r llm-code, eval = FALSE}
+library(text)  # Hugging Face models from R
+
+# Zero-shot: is a person with this name a woman?
+zeroshot <- text::textZeroShot(
+  sequences        = result$name,
+  candidate_labels = c("woman"),
+  multi_label      = FALSE,
+  hypothesis_template = "A person with this name is a {}.",
+  model = "alexandrainst/scandi-nli-base")
+```
+:::
+
+::: {.notes}
+A short methods aside that students find genuinely modern: language models let us turn unstructured text — names, open answers, documents — into variables. Be candid that the gender label is a model's guess, which compounds the earlier caution. This also sets up the joke on the next slide about what happens when you feed a model a nonsense hypothesis.
+:::
+
+## Stats skill = f(your name)? {background-color="#f5f0e8"}
+
+::: {.push-left}
+Ask the same model a **silly** question — *"A person with this name is great at Statistics"* — and it will happily return a number for every name.
+
+::: {.content-box-red}
+**Beware:** a model will always answer. Slope `r round(coef(ols_stat)["Statistics"], 2)`, $p = `r sprintf("%.2f", ols_stat$p.value["Statistics"])`$, $R^2 = `r sprintf("%.3f", ols_stat$r.squared)`$ — pure noise. Your **name** does not predict your **stats skill**.
+:::
+:::
+
+::: {.push-right}
+```{r joke, echo = FALSE, out.width='100%', fig.height = 4.4, fig.width = 6}
+ggplot(plotdata, aes(y = mcorrect, x = Statistics)) +
+  geom_point(alpha = 1/2, size = 2.6, colour = "grey45") +
+  geom_smooth(method = "lm", colour = col_expl, se = TRUE) +
+  theme_minimal(base_size = 14) +
+  labs(y = "% of correct answers", x = "LLM-guessed stats skill (from your name)")
+```
+:::
+
+::: {.notes}
+The comic relief with a real lesson: measurement validity. The model produces a confident-looking variable that is meaningless, and a flat, non-significant line is exactly what a garbage predictor should give. Tie it back to the whole course — a coefficient is only as good as the construct behind the variable. Great note to end the "measurement" thread on before moving to multiple predictors.
+:::
+
+## Multiple OLS: several predictors at once
+
+::: {.push-left}
+$$Y_i = \alpha + \beta_1 X_{1i} + \dots + \beta_k X_{ki} + \epsilon_i$$
+
+Each slope is the association of **that** predictor, **holding the others fixed** — the Frisch–Waugh logic of Lectures 8–9.
+
+::: {.content-box-green}
+Together, quizzes + gender + (nonsense) stats-skill explain $R^2 = `r sprintf("%.3f", ols2$r.squared)`$ of the variation — a little more blue.
+:::
+:::
+
+::: {.push-right}
+```{r mult-tab, echo = FALSE, results = 'asis'}
+ms(list("% Correct" = ols2),
+   coef_rename = c("gndrWomen" = "Women (vs. Men)",
+                   "Statistics" = "Stats skill (LLM)",
+                   "appearances" = "Nr. of quizzes"),
+   stars = TRUE, gof_map = c("nobs", "r.squared"))
+```
+:::
+
+::: {.notes}
+Recall the meaning of a multiple-regression slope: the unique association, netting out the others — the residualisation picture from Lecture 8. Note the only predictor doing real work is the number of quizzes completed; practice helps, name-noise does not. Keep it brief, it is a recap.
+:::
+
+## Interaction effects: it depends
+
+::: {.push-left}
+$$Y_i = \alpha + \beta_1 X_{1i} + \beta_2 X_{2i} + \color{orange}{\beta_3\, X_{1i} X_{2i}} + \epsilon_i$$
+
+An **interaction** lets the slope of one predictor **depend on** another — the effect of practice could differ by group *(L11)*.
+
+::: {.backgrnote}
+Here the two slopes are nearly parallel — little evidence the quiz–score link differs by gender (and remember: nine men).
+:::
+:::
+
+::: {.push-right}
+```{r inter, echo = FALSE, out.width='100%', fig.height = 4.4, fig.width = 6}
+ggplot(plotdata, aes(y = mcorrect, x = appearances, colour = gndr, fill = gndr)) +
+  geom_point(alpha = 1/2, size = 2.6) +
+  geom_smooth(method = "lm") +
+  scale_colour_manual(values = c(Men = col_resid, Women = col_expl)) +
+  scale_fill_manual(values = c(Men = col_resid, Women = col_expl)) +
+  theme_minimal(base_size = 14) +
+  theme(legend.position = "bottom") +
+  labs(colour = "Gender", fill = "Gender",
+       y = "% of correct answers", x = "Nr. of completed quizzes")
+```
+:::
+
+::: {.notes}
+The one-line recap of interactions: the product term asks whether a slope changes across groups. Read the picture, not just the star — two near-parallel lines mean no real interaction, whatever the coefficient's p-value says. Reinforce the humility point one more time given the tiny male group.
+:::
+
+## Polynomials: let the line bend
+
+::: {.push-left}
+$$Y_i = \alpha + \beta_1 X_i + \color{orange}{\beta_2 X_i^2 + \beta_3 X_i^3} + \epsilon_i$$
+
+Adding powers of $X$ bends the fit *(L12)* — but every extra term risks **overfitting** the wiggles.
+
+::: {.content-box-green}
+A cubic nudges fit to $R^2 = `r sprintf("%.3f", mod2$r.squared)`$ vs. the straight line's $`r sprintf("%.3f", mod1$r.squared)`$ — barely worth the two extra terms here.
+:::
+:::
+
+::: {.push-right}
+```{r poly, echo = FALSE, out.width='100%', fig.height = 4.4, fig.width = 6}
+d <- plotdata %>%
+  mutate(pred = predict(mod2, newdata = plotdata), resid = mcorrect - pred)
+ggplot(d, aes(y = mcorrect, x = appearances)) +
+  geom_hline(yintercept = ybar, colour = "grey40") +
+  geom_linerange(aes(ymin = pred, ymax = mcorrect), colour = col_resid, alpha = .6) +
+  geom_linerange(aes(ymin = ybar, ymax = pred), colour = col_expl, alpha = .6) +
+  geom_smooth(method = "lm", formula = y ~ poly(x, 3), colour = col_expl, se = FALSE) +
+  geom_point(alpha = 1/3, size = 2.6) +
+  theme_minimal(base_size = 14) +
+  labs(y = "% of correct answers", x = "Nr. of completed quizzes")
+```
+:::
+
+::: {.notes}
+Recall the overfitting discipline from Lecture 12: use the lowest degree that captures a shape you can defend. Here the cubic barely improves on the line, so the honest choice is the line. Point at the wiggle near the edges as the visual signature of a polynomial reaching too hard.
+:::
+
+## Transformations: change the scale
+
+::: {.push-left}
+$$Y_i = \alpha + \color{orange}{\beta_1 \log_2(X_i)} + \epsilon_i$$
+
+A `log2` transform reads as *"per doubling"* *(L12)* — often a cleaner, one-coefficient way to capture a curve.
+
+::: {.content-box-green}
+Each **doubling** of quizzes completed is worth about **`r round(coef(modder)[2], 1)`** points — one interpretable number.
+:::
+:::
+
+::: {.push-right}
+```{r trans, echo = FALSE, out.width='100%', fig.height = 4.4, fig.width = 6}
+d <- plotdata %>%
+  mutate(pred = predict(modder, newdata = plotdata), resid = mcorrect - pred)
+ggplot(d, aes(y = mcorrect, x = appearances)) +
+  geom_hline(yintercept = ybar, colour = "grey40") +
+  geom_linerange(aes(ymin = pred, ymax = mcorrect), colour = col_resid, alpha = .6) +
+  geom_linerange(aes(ymin = ybar, ymax = pred), colour = col_expl, alpha = .6) +
+  geom_smooth(method = "lm", formula = y ~ log2(x), colour = col_expl, se = FALSE) +
+  geom_point(alpha = 1/3, size = 2.6) +
+  theme_minimal(base_size = 14) +
+  labs(y = "% of correct answers", x = "Nr. of completed quizzes")
+```
+:::
+
+::: {.notes}
+The transformation half of Lecture 12: a log turns a curve into a straight line you can read as "per doubling". Contrast with the polynomial — one interpretable coefficient instead of three nuisance ones. The takeaway is to match the tool to the shape you expect and can defend.
+:::
+
+## And you can combine them
+
+::: {.push-left}
+$$\small Y_i = \alpha + \beta_1 X_{1i} + \beta_2 X_{2i} + \color{orange}{\beta_3 X_{1i}^2 + \beta_4 X_{1i}X_{2i} + \beta_5 X_{1i}^2 X_{2i}} + \epsilon_i$$
+
+Dummies, curves and interactions are **one toolbox** — a group-specific bend is just a polynomial interacted with a dummy.
+
+::: {.backgrnote}
+Power comes with responsibility: every term you add must earn its place, or you are fitting noise.
+:::
+:::
+
+::: {.push-right}
+```{r combi, echo = FALSE, out.width='100%', fig.height = 4.4, fig.width = 6}
+ggplot(plotdata, aes(y = mcorrect, x = appearances, colour = gndr, fill = gndr)) +
+  geom_point(alpha = 1/2, size = 2.6) +
+  geom_smooth(method = "lm", formula = y ~ poly(x, 2)) +
+  scale_colour_manual(values = c(Men = col_resid, Women = col_expl)) +
+  scale_fill_manual(values = c(Men = col_resid, Women = col_expl)) +
+  theme_minimal(base_size = 14) +
+  theme(legend.position = "bottom") +
+  labs(colour = "Gender", fill = "Gender",
+       y = "% of correct answers", x = "Nr. of completed quizzes")
+```
+:::
+
+::: {.notes}
+Synthesise Part 1: the descriptive tools all live in one formula and combine freely. But close on the warning that runs through Lectures 11 and 12 — flexibility buys fit on this sample and can cost you on the next. Describing well is disciplined, not maximal.
+:::
+
+## Goal 2 · Identify causal mechanisms {.inverse background-color="#901A1E"}
+
+[Part 2 of 2]{.part-pill}
+
+::: {.lead}
+A good description is not a cause. To claim causation we need variation in $X$ that is **as good as random**.
+:::
+
+## The enemy: selection / omitted-variable bias
+
+::: {.push-left}
+A raw group difference mixes the **causal effect** with **selection bias**:
+
+$$\small \underbrace{\bar{Y}_{D=1} - \bar{Y}_{D=0}}_{\text{observed gap}} = \underbrace{\text{ATT}}_{\text{causal}} + \underbrace{\bar{Y}_{0\mid D=1} - \bar{Y}_{0\mid D=0}}_{\text{selection bias}}$$
+
+Equivalently, an omitted confounder $C$ bends the slope:
+
+$$\tilde{\beta}_{Y\leftarrow X} = \beta_{Y\leftarrow X} + \underbrace{\beta_{Y\leftarrow C}\,\beta_{C\leftarrow X}}_{\text{omitted-variable bias}}$$
+:::
+
+::: {.push-right}
+```{tikz dag-ovb, echo = FALSE, out.width='58%'}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning}
+\definecolor{kured}{HTML}{901A1E}
+\begin{tikzpicture}[>=Latex, semithick, node distance = 14mm and 16mm]
+\sffamily
+\node[ellipse, draw] (C) {$C$};
+\node[ellipse, draw, below = of C] (X) {$X$};
+\node[ellipse, draw, right = of X] (Y) {$Y$};
+\draw[->] (C) -- (X);
+\draw[->] (C) -- (Y);
+\draw[->, kured, dashed] (X) to[bend right=45] node[below]{?} (Y);
+\end{tikzpicture}
+```
+
+::: {.backgrnote}
+This one equation — Lectures 5 and 8 — is the reason the whole second half of the course exists.
+:::
+:::
+
+::: {.notes}
+Return to the conceptual heart of the causal half. The observed gap is contaminated whenever the treated and untreated would have differed anyway — that residual term is selection bias, and its regression twin is omitted-variable bias. Everything that follows is a strategy for killing that term: either make it zero by design, or subtract it with a control or an instrument.
+:::
+
+## Strategy A — assign $X$ at random {.inverse background-color="#901A1E"}
+
+::: {.lead}
+Intervene so that **all** variation in $X$ is random. Then the raw difference *is* the effect.
+:::
+
+## RCTs & natural experiments
+
+::: {.push-left}
+We **intervene** with $I$, and $I$ decides $X$ **perfectly** $(|r| = 1)$: treatment and control differ only by chance.
+
+- Categorical treatment → a simple $Y = \alpha + \color{red}{\beta} I_i + \epsilon_i$ *(L6)*.
+- A **natural experiment** — the world does the randomising *(L7)* — is read the same way, *if* you can defend the "as-if random" arrow.
+
+::: {.backgrnote}
+Continuous or subgroup questions still use polynomials and interactions from Part 1.
+:::
+:::
+
+::: {.push-right}
+```{tikz dag-rct, echo = FALSE, out.width='92%'}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning, quotes}
+\definecolor{kured}{HTML}{901A1E}
+\begin{tikzpicture}[>=Latex, semithick, node distance = 12mm and 16mm]
+\sffamily
+\node[ellipse, draw=kured, thick] (I) {$I$};
+\node[ellipse, draw, right = of I] (X) {$X$};
+\node[ellipse, draw, above = of X] (C) {$C$};
+\node[ellipse, draw, right = of X] (Y) {$Y$};
+\draw[->, kured, thick] (I) to["$|r| = 1$"] (X);
+\draw[->] (X) -- (Y);
+\draw[->, gray, dashed] (C) -- (X);
+\draw[->, gray, dashed] (C) -- (Y);
+\end{tikzpicture}
+```
+:::
+
+::: {.notes}
+Recall Lecture 6 and 7. Randomisation cuts both dashed confounder arrows at once, which is why a bivariate model recovers the effect. A natural experiment claims the same picture but with an argument rather than a coin flip — the honesty is all in defending that the assignment really was as good as random.
+:::
+
+## When assignment is imperfect: ITT & Wald
+
+::: {.push-left}
+Often $I$ only **nudges** $X$ $(|r| < 1)$ — an offer some ignore.
+
+- The **intention-to-treat** effect (the **reduced form**, $\rho$) is the effect of the *offer* $I$ on $Y$ *(L7)*.
+- Scale it by the **first stage** $\phi$ (how much $I$ moved $X$) to recover the effect of $X$ on compliers — the **Wald** estimator:
+
+$$\lambda = \frac{\rho}{\phi} = \frac{\text{reduced form}}{\text{first stage}} = \frac{\text{ITT}}{r}$$
+:::
+
+::: {.push-right}
+```{tikz dag-itt, echo = FALSE, out.width='92%'}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning, quotes}
+\definecolor{kured}{HTML}{901A1E}
+\begin{tikzpicture}[>=Latex, semithick, node distance = 12mm and 16mm]
+\sffamily
+\node[ellipse, draw=kured, thick] (I) {$I$};
+\node[ellipse, draw, right = of I] (X) {$X$};
+\node[ellipse, draw, above = of X] (C) {$C$};
+\node[ellipse, draw, right = of X] (Y) {$Y$};
+\draw[->, kured, thick] (I) to["$\phi:\;|r| < 1$"] (X);
+\draw[->] (X) -- (Y);
+\draw[->, gray, dashed] (C) -- (X);
+\draw[->, gray, dashed] (C) -- (Y);
+\end{tikzpicture}
+```
+
+::: {.backgrnote}
+Same idea, harmonised symbols: $\rho$ = ITT, $\phi$ = compliance $r$. This is exactly the L7/L10 Wald ratio.
+:::
+:::
+
+::: {.notes}
+This is the notation bridge to keep consistent: the reduced form rho is the ITT, the first stage phi is the compliance rate r, and their ratio is the Wald estimate for compliers. Say the order of operations aloud — divide the offer's effect by how many actually complied — because students reliably invert it. It also previews why a weak first stage is dangerous: dividing by a small phi magnifies everything.
+:::
+
+## Strategy B — find random variation with OLS {.inverse background-color="#901A1E"}
+
+::: {.lead}
+Most variation in $X$ is **not** random. So carve out the slice that *is* — and use only that.
+:::
+
+## Instruments, confounders, mediators
+
+::: {.push-left}
+OLS lets us split $X$ into a trustworthy part and a contaminated part:
+
+- **Instrument $I$** — keep the **predicted** part of $X$ driven by a random $I$: **2SLS** *(L10)*.
+- **Confounder $C$** — throw it away by **controlling**: keep the part of $X$ *unrelated* to $C$ *(L8/9)*.
+- **Mediator $M$** — add it in a *second* step to see how much of $X$'s effect runs **through** it *(L9)*.
+
+::: {.backgrnote}
+Instrument vs. control — mirror images: keep the **predicted** values vs. keep the **residuals** of $X$.
+:::
+:::
+
+::: {.push-right}
+```{tikz dag-icm, echo = FALSE, out.width='100%'}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning, quotes}
+\definecolor{kured}{HTML}{901A1E}
+\begin{tikzpicture}[>=Latex, semithick, node distance = 12mm and 15mm]
+\sffamily
+\node[ellipse, draw=kured, thick] (I) {$I$};
+\node[ellipse, draw, right = of I] (X) {$X$};
+\node[ellipse, draw, above = of X] (C) {$C$};
+\node[ellipse, draw, right = of X] (M) {$M$};
+\node[ellipse, draw, right = of M] (Y) {$Y$};
+\draw[->, kured, thick] (I) -- (X);
+\draw[->] (X) -- (M);
+\draw[->] (M) -- (Y);
+\draw[->, gray, dashed] (C) -- (X);
+\draw[->, gray, dashed] (C) -- (Y);
+\end{tikzpicture}
+```
+:::
+
+::: {.notes}
+The unifying slide of the causal half, tying Lectures 8 through 10 together. Same residualisation machine, three uses: an instrument keeps the predicted part of X, a control discards the confounded part and keeps the residual, and a mediator is added deliberately to measure how much runs through it. If they can state the instrument-versus-control mirror cleanly, they have understood the second half of the course.
+:::
+
+## Regression discontinuity: the causal effect of rules
+
+::: {.push-left}
+A **strict rule** creates a threshold on a running variable *(L13)*. Barely below vs. barely above is **as good as random** — so the **jump** at the cutoff is the causal effect.
+
+We fit lines on both sides using **all** the data, but read the gap **exactly at the threshold**.
+:::
+
+::: {.push-right}
+```{r rdd, echo = FALSE, out.width='100%', fig.height = 4.6, fig.width = 8}
+data("mlda", package = "masteringmetrics")
+mlda <- mlda %>% drop_na() %>%
+  mutate(side = if_else(agecell < 21, "Below 21", "21 or older"))
+ml <- lm(all ~ agecell, data = subset(mlda, agecell < 21))
+mr <- lm(all ~ agecell, data = subset(mlda, agecell >= 21))
+g  <- data.frame(agecell = seq(min(mlda$agecell), max(mlda$agecell), length.out = 200))
+g$pl <- predict(ml, g); g$pr <- predict(mr, g)
+jl <- predict(ml, data.frame(agecell = 21)); jr <- predict(mr, data.frame(agecell = 21))
+
+ggplot(mlda, aes(y = all, x = agecell)) +
+  annotate("segment", x = 21, xend = 21, y = jl, yend = jr, colour = "#111111", linewidth = 1.3) +
+  geom_vline(xintercept = 21, colour = "#111111", linetype = "dashed") +
+  geom_point(aes(colour = side), size = 2.2, alpha = .85) +
+  geom_line(data = subset(g, agecell <= 21), aes(y = pl), colour = "#6b7f95", linewidth = 1.3) +
+  geom_line(data = subset(g, agecell >  21), aes(y = pl), colour = "#6b7f95", linewidth = 1, linetype = "dashed") +
+  geom_line(data = subset(g, agecell >= 21), aes(y = pr), colour = "#901A1E", linewidth = 1.3) +
+  geom_line(data = subset(g, agecell <  21), aes(y = pr), colour = "#901A1E", linewidth = 1, linetype = "dashed") +
+  scale_colour_manual(values = c("Below 21" = "#6b7f95", "21 or older" = "#901A1E")) +
+  theme_minimal(base_size = 14) + guides(colour = "none") +
+  labs(y = "Deaths per 100,000", x = "Age (running variable)",
+       caption = "Legal drinking at 21 — the black bar is the jump")
+```
+:::
+
+::: {.notes}
+Close the causal tour with last week's design. Emphasise that RDD is the natural-experiment idea sharpened to a knife-edge: a rule, not a coin, does the splitting, and with perfect compliance the reduced-form jump is the whole effect. Point at the black bar — that vertical gap at 21 is the causal effect of legal drinking on mortality.
+:::
+
+## The whole course, in one line {.inverse background-color="#901A1E"}
+
+::: {.lead}
+**Describe** patterns honestly — then hunt for variation that is *as good as random* to **explain** them.
+:::
+
+::: {.checklist}
+- Read and build a regression: dummies, multiple predictors, interactions, curves.
+- Name selection / omitted-variable bias — and the design that defeats it.
+- Tell RCT, natural experiment, IV/2SLS, control, and RDD apart, and say what each assumes.
+:::
+
+::: {.notes}
+The send-off. Compress fourteen weeks into the two verbs from the opening slide, and remind them the checklist is the exam in miniature. Thank them, and mean it — then open the floor.
+:::
+
+## Tak — spørgsmål? {.inverse background-color="#901A1E"}
+
+::: {.lead}
+Thank you for a great semester.
+:::
+
+::: {.backgrnote}
+The weekly quiz, the Friday exercises, and this deck are your revision map for the exam.
+:::
+```
