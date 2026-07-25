@@ -148,6 +148,93 @@ A refinement round over both the deck and the website. New conventions that the 
   final checklist but was never actually installed by the old steps. All four GitHub installs
   verified to exist (masteringmetrics, ROS-Examples/rpackage, vdemdata, democracyData).
 
+## Lecture 13 (2026-07-24) — Regression discontinuity designs (RDD)
+`13-RegDD.qmd` (34 slides, 24 notes) + `13-exercise1/2.Rmd`. **Faithful port, restructured into the
+template + two deliberate cross-references woven in** (the pre-port review confirmed L13 is *not* a
+repeat of L7/L10 — it reuses their λ/LATE/natural-experiment vocabulary as load-bearing scaffolding,
+the same relationship L10 has with L7).
+- **3-part arc:** (1) *the logic* — RCT recap (κ) → rules-not-randomness → the "just barely either
+  side is as-good-as-random" intuition (`RDD_intuition{,2}.png`) → continuity + no-sorting → the
+  central bias-vs-reliability trade-off (LATE); (2) *parametric OLS* — MLDA drinking-age example,
+  the centred-running-variable / dummy / interaction spec, **problem 1 = functional form (the L12
+  recap)**, **problem 2 = bandwidth** (`rdbwselect`); (3) *non-parametric* — local-linear beats
+  global polynomial at the boundary, the triangular kernel, `rdrobust()`, the mva placebo check, then
+  three real studies (Pereira women/corruption, Schaeffer far-right/discrimination).
+- **The load-bearing new slide (the L7/L10 check the professor asked for): "You already know this λ"**
+  (beige `#f5f0e8` ask-then-reveal). Sharp RDD = **IV with perfect compliance**: everyone above the
+  cutoff is treated, so **φ = 1** and $\lambda = \rho/\phi$ = **the jump itself** — no dividing. Also
+  flags the **two senses of "local"**: L7's LATE is local to *compliers*, RDD's is local to the
+  *cutoff*. This is what stops students filing RDD as an unrelated trick; wire the same bridge if the
+  design ever recurs.
+- **Polynomials kept as a recap, not re-derived (professor asked to keep some recap).** "Problem 1"
+  explicitly says **"Recall Lecture 12"** and reuses L12's `poly(age0, 2, raw = TRUE)` idiom + the
+  overfitting-beware box, sharpened to the RDD-specific point (a wild boundary swing lands right on
+  λ). Do **not** re-teach polynomials from scratch — L12 now owns them.
+- **Running example = minimum legal drinking age → mortality** (`masteringmetrics::mlda`, n = **48**
+  binned one-month age cells — *not* individuals; flagged on the data slide). **Verified numbers:**
+  linear parametric λ = **7.66** → quadratic **9.55** → `rdrobust` all-cause **9.60** (robust CI
+  [1.1, 18.3], **robust p = 0.027**, h = 0.493, 12 cells); motor-vehicle **4.9 = 51 %** of the
+  all-cause jump. **Report robust inference, not conventional** — `rdrobust`'s `summary()` headline
+  row is the *robust* p (`$pv[3]`/`$ci[3,]`), which differs from `$pv[1]`; I first wrote the
+  conventional p (0.008) and it contradicted the on-screen output. **Honesty fix (professor cares):**
+  the mva subgroup is only **marginally** significant under robust inference (p = 0.06, CI
+  [−0.2, 9.7]) — the slide gives the point estimate as a logic check, *not* a second significance
+  claim, with a backgrnote saying so.
+- **Exercises = Manacorda, Miguel & Vigorito 2011 (Uruguay PANES, `causaldata::gov_transfers`,
+  n = 1948)** — the RDD replication PROJECT.md already flagged. Ex1 = **parametric** RDD, welfare →
+  political support, **λ = +0.10** (p ≈ 0.001, significant; D = 1 *below* the cutoff = received the
+  transfer — the treated side is flipped vs. the deck, flagged in a callout). Ex2 = **`rdrobust`**:
+  at the MSE-optimal bandwidth (h ≈ 0.005) the estimate is a tiny, **insignificant** +0.025 (too few
+  obs); widen to h = 0.02 and it becomes **−0.096, significant**. **The sign lesson (new, honest):**
+  `rdrobust` reports *above − below*, and here the treated sit *below*, so its −0.10 is the **same
+  finding** as Ex1's +0.10 — bookkeeping, not contradiction; Ex2 teaches this explicitly (MCQ enforces
+  the sign) plus a bias-vs-reliability + p-hacking discussion.
+- **Bugs found & fixed during the build (all would have shipped broken):**
+  - The **original exercises had `ref.label="nonlinear_rdds"`** pointing at a chunk that doesn't exist
+    → empty/erroring solutions. Rewrote the solution chunks.
+  - The **original ex1 mislabelled the treated side** (`rule` = "Welfare" for `Income_Centered >= 0`,
+    but PANES paid households *below* the line). Corrected.
+  - `rdrobust`/`rdbwselect` `summary()` is **25/20 lines and overflows a slide** — it clipped the
+    actual estimate table (the payoff). Fix: `trim_rd()`/`trim_bw()` helpers (`capture.output` →
+    `cat` the essential lines) shown in a **panel-tabset** (Estimate / R code). **Any long console
+    output on a slide needs trimming — the overflow just hides the important tail silently.**
+  - **`modelsummary` prepends a stray `&amp;nbsp;` to a *single*-model column header** (double-model
+    tables are clean) — it rendered as literal "&nbsp;Deaths per 100,000". Fix: an `ms()` wrapper
+    (`gsub("&amp;nbsp;", "", as.character(modelsummary(..., output="kableExtra")))` + `results='asis'`).
+    Reuse for any single-model table. (Also: all `modelsummary` chunks need `results = 'asis'`, else
+    the whole table double-escapes.)
+  - **`num_fitb` (the L12 helper) is too strict for these answers:** it accepts only the 2-decimal
+    form (`0.10`), but `modelsummary` shows `0.100` and `rdrobust` shows `0.025`/`−0.096`, so a
+    student typing exactly what they read was marked wrong. Replaced with an `ans("0.1","0.10",
+    "0.100")`-style helper that lists the natural decimal forms and auto-adds Danish-comma variants.
+    **Watch this on any exercise whose answer comes from `rdrobust`/`modelsummary` output.**
+- **Packages:** `causaldata` + `rdrobust` were **documented but not installed** (same gap as
+  `masteringmetrics` L7, `ivreg` L10) — installed both. `essentials`/`equatiomatic` dropped from the
+  setup (not on CRAN for R 4.6 / unused). `masteringmetrics` already present.
+- **Structural gotcha (new): `#` (level-1) headings become vertical stacks in Quarto reveal.** I first
+  wrote the three part dividers as `#` — Quarto nested each following `##` under them as a *vertical*
+  slide (5 top-level `<section>`s, broken linear nav). **Dividers must be `##` with the `.inverse`
+  class**, like every other deck; there is no `#` heading in a ported deck except code comments.
+- **Images:** localized to `img/L13/` — `RDD_intuition{,2}.png`, `electoral_threshold.png` (was an
+  epthinktank hotlink), `women_elected_{threshold,effects}.png`, `Krzysz.png`, `Figure_1.png`
+  (audit-study baseline), `Figure2a-1.png` (the RDD plot), `Map_Italy.png` (resized to 1200px).
+  **Dropped the theeffectbook fuzzy-RDD DAG** (the deck teaches only *sharp* RDD — showing a fuzzy DAG
+  was a quiet mismatch), the two `laserfiche` stock photos, the blogger "goal of social science"
+  photo (L1/L6 already have that slide), the `pbs.twimg` decorative shot, and the commented-out
+  NBA/Matthew-effect example.
+- **Bib fix:** `pereira_does_nodate` was mangled (`volume = n/a`, no year) — verified via Crossref
+  (DOI 10.1111/lsq.12409 → *LSQ* 48(4):731–763, 2023) and added `year`/`volume`/`pages`. Manacorda
+  stays inline-only (still not in `Stats_II.bib`, per convention). `schaeffer_when_2025` +
+  `romarri_far-right_2020` already present.
+- **RDD plot palette:** control (below cutoff) = slate `#6b7f95`, treated (above) = KU red `#901A1E`,
+  cutoff line black dashed. The "OLS finds the trade-off" slide draws both local lines + dashed
+  counterfactual extensions + a **black bar = the jump at 21** (the single clearest RDD teaching plot).
+- Verified in-browser: **34 slides, zero overflow, zero R errors, no broken images, no tofu**; all
+  ggplot RDD plots + the kernel plot render; the ask-then-reveal φ=1 payoff shows; both exercise
+  iframes load with new-tab links + ku-timers; **both exercises grade correctly** (Danish comma
+  accepted, natural decimal forms accepted, Ex2's sign enforced). Wired into `_quarto.yml` +
+  `lectures.qmd` (callout → **1–13**, L13 un-"soon"ed with slides + 2 exercises).
+
 ## Lecture 12 (2026-07-23) — Polynomials & transformations
 `12-Polynomials.qmd` (24 slides, 15 notes) + `12-exercise1/2.Rmd`. **Faithful on the core,
 re-vehicled controls** (professor's call, mirroring L11). The payoff of L4's "don't fix the curve
@@ -840,9 +927,10 @@ ChatGPT/Gemini (Bard is dead). REMEMBER: render exercises with `rmarkdown::rende
    section above). ~~Lecture 11~~ — done 2026-07-23 (Interactions; Part 1 faithful, Part 2
    re-vehicled onto the L9 triangle). ~~Lecture 12~~ — done 2026-07-23 (Polynomials &
    transformations; re-vehicled controls to canonical `civ_liberties` — see its section above).
-   **Done so far: L1–12. Next: Lecture 13 (`static/Lectures/13-RegDD/`, RDD, deck + exercises).**
-   Then 14. (Colonialism is now fully gone from the course.) **L13 (RDD) is one of the heaviest —
-   review it against L7/L10 (IV) before porting.**
+   ~~Lecture 13~~ — done 2026-07-24 (RDD; faithful port + the sharp-RDD↔Wald φ=1 bridge to L7/L10,
+   polynomials kept as an L12 recap — see its section above).
+   **Done so far: L1–13. Next: Lecture 14 (Conclusion — the last deck).**
+   (Colonialism is now fully gone from the course.)
    **Review each deck against the already-ported ones before porting** — L8 showed that the later
    decks were written against a course that the migration has since changed underneath them.
    **But do not over-apply the L8 lesson: checked 2026-07-21, L10 is NOT a repeat of L7.**

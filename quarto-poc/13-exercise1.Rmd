@@ -1,0 +1,154 @@
+---
+title: "Exercise 1 (20 minutes)"
+subtitle: "You practice: building and reading a parametric RDD — did a cash transfer buy political support? When you're done, assist some of the others …"
+output: webexercises::webexercises_default
+---
+
+```{r setup, include = FALSE}
+options(htmltools.dir.version = FALSE, servr.interval = 0.5, width = 115, digits = 3)
+knitr::opts_chunk$set(
+  collapse = TRUE, message = FALSE,
+  warning = FALSE, cache = FALSE,
+  comment = "#", strip.white = TRUE)
+
+library(webexercises)
+
+# Accept a set of answer strings; auto-add Danish-comma variants of each.
+ans <- function(..., width = 6) {
+  v <- c(...)
+  fitb(unique(c(v, sub(".", ",", v, fixed = TRUE))), width = width)
+}
+```
+
+```{r hidden-data, include = FALSE}
+pacman::p_load(tidyverse, estimatr, modelsummary, causaldata)
+data("gov_transfers", package = "causaldata")
+```
+
+**Can a government buy the loyalty of the poor?** Whether welfare and patronage translate into
+political support — or whether citizens keep the help they receive separate from the party that
+governs — is one of the oldest questions in political sociology (clientelism, the "moral economy" of
+redistribution). Uruguay's **PANES** programme is a natural experiment on exactly that: a monthly
+cash transfer went to poor households, and eligibility ran off a **predicted income score** — score
+**below** the threshold and you got the money; **above** it, nothing. Did receiving it raise
+**political support** for the government that sent it? Marco Manacorda, Edward Miguel and Andrea
+Vigorito studied this, and you get their data to replicate it.
+
+> Manacorda, Marco, Edward Miguel, and Andrea Vigorito. 2011. "Government Transfers and Political
+> Support." *American Economic Journal: Applied Economics* 3(3):1–28.
+
+```{r show-load, eval = FALSE}
+pacman::p_load(tidyverse, estimatr, modelsummary, causaldata)
+
+# The data ship inside the causaldata package — no file to download.
+data("gov_transfers", package = "causaldata")
+```
+
+The running variable is `Income_Centered`: income **relative to the threshold**, already centred at
+0 and in logarithmic units (so `0.01` ≈ 1 % above the threshold). The outcome `Support` runs from 0
+to 1 (both adults said "no" = 0, one each = 0.5, both "yes" = 1).
+
+::: {.callout-note}
+**Watch the treated side.** In the drinking-age lecture the treated were *above* the cutoff. Here it
+is the other way round: households **below** the threshold (`Income_Centered < 0`) are the ones who
+**received** the transfer. RDD does not care which side is treated — only that a rule splits it.
+:::
+
+1. **Plot the discontinuity.** Draw `Support` against `Income_Centered`, add a vertical line at the
+   cutoff (0), and use `geom_smooth(method = "lm")` fitted **separately** on each side. Does support
+   appear to **jump** at the cutoff? `r mcq(c("No, the two sides line up", answer = "Yes, support is higher just below the cutoff", "It is impossible to tell"))`
+
+`r hide("R solution — don't peek too early ;) !")`
+```{r sol1, eval = FALSE}
+gov_transfers <- gov_transfers %>%
+  mutate(rule = if_else(Income_Centered < 0, "Received transfer", "No transfer"))
+
+ggplot(gov_transfers, aes(y = Support, x = Income_Centered)) +
+  geom_jitter(alpha = 0.15, height = 0.02, width = 0) +
+  geom_vline(xintercept = 0, colour = "red", linetype = "dashed") +
+  geom_smooth(aes(group = rule), method = "lm") +
+  labs(title = "Uruguay PANES programme",
+       x = "Income relative to cutoff (0.01 ≈ 1%)",
+       y = "Support for the government") +
+  theme_minimal()
+```
+`r unhide()`
+
+2. **Predict before you compute.** The eye is easily fooled. Before running any regression, commit
+   to a guess: did receiving the transfer *raise* support, *lower* it, or do *nothing*? There is no
+   wrong guess — pick one, then test it.
+
+3. **Estimate the jump.** Create a dummy `D` that is **1 when `Income_Centered < 0`** (received the
+   transfer) and 0 otherwise. Fit a parametric RDD: `Support` on `D`, the running variable, and their
+   interaction, with `lm_robust()`.
+
+`r hide("Hint")`
+`lm_robust(Support ~ D * Income_Centered, data = gov_transfers)` — after you have built `D`.
+`r unhide()`
+
+`r hide("R solution — don't peek too early ;) !")`
+```{r sol3, eval = FALSE}
+gov_transfers <- gov_transfers %>%
+  mutate(D = if_else(Income_Centered < 0, 1, 0))
+
+RDD <- lm_robust(Support ~ D * Income_Centered, data = gov_transfers)
+
+modelsummary(list("Support for the government" = RDD),
+             coef_rename = c("D" = "Received transfer (λ)",
+                             "Income_Centered" = "Income (centred)",
+                             "D:Income_Centered" = "Transfer × income"),
+             stars = TRUE, gof_map = c("nobs", "r.squared"), output = "kableExtra")
+```
+`r unhide()`
+
+   The local effect of the transfer, $\lambda$ (the coefficient on `D`), is about
+   `r ans("0.1", "0.10", "0.100")`. Is it statistically significant? `r mcq(c("No", answer = "Yes"))`
+
+4. **Write one sentence** as a `# comment` interpreting $\lambda$ — then compare:
+
+`r hide("Model answer")`
+Receiving the PANES transfer **raised** support for the government by about **0.10** on the 0–1
+scale, right at the eligibility cutoff — and the effect is statistically significant. Because the
+comparison is between households *just* below and *just* above the threshold, who are otherwise
+alike, we can read this **causally**: the cash bought goodwill.
+`r unhide()`
+
+5. **How far does this generalise?** Suppose the government had set a far **higher** income threshold,
+   letting many richer households in too. What does your estimate tell us about the effect *there*?
+   `r mcq(c("The effect would be the same everywhere", "Since more households would benefit, the effect would be larger", answer = "We do not know — the estimate is local to the cutoff"))`
+
+6. **Discuss with your neighbour.**
+
+   - Why is a household on `Income_Centered = -0.01` a good comparison for one on `+0.01`, but a
+     household on `-0.5` a poor one?
+   - The "no sorting" assumption says households must not be able to place themselves just below the
+     line. How might that fail for an **income-based** rule — and how would it break the design?
+   - Support is *revealed*, not the household's private opinion. Does that change what we have shown?
+
+`r hide("Talking points")`
+- Near the cutoff the two households are near-identical in income and everything correlated with it,
+  so the only systematic difference is the transfer — as good as random. Far apart, `-0.5` is a much
+  poorer household that differs in many ways, reintroducing selection bias.
+- Income can be under-reported or timed to fall just under an eligibility line, especially once the
+  rule is known. Households who manipulate their way below are self-selected (perhaps more motivated
+  or better informed), so a jump could reflect *who sorts below*, not the transfer itself.
+- It shifts the interpretation from private attitudes to expressed/behavioural support, which is
+  arguably what matters politically — but it is a different construct, and worth being precise about.
+`r unhide()`
+
+7. **Bonus, for the fast.** The parametric model used **all** the data. Re-fit on a narrow window
+   around the cutoff (e.g. `abs(Income_Centered) < 0.05`). Does $\lambda$ change much? What happens
+   to the standard error, and why?
+
+`r hide("R solution")`
+```{r sol7, eval = FALSE}
+RDD_narrow <- lm_robust(Support ~ D * Income_Centered,
+                        data = gov_transfers %>% filter(abs(Income_Centered) < 0.05))
+modelsummary(list("Narrow window" = RDD_narrow),
+             stars = TRUE, gof_map = c("nobs", "r.squared"), output = "kableExtra")
+```
+
+The point estimate stays in the same ballpark, but the standard error **grows** — fewer
+observations mean less precision. That is the bias–reliability trade-off in miniature, and it is
+exactly what next week's `rdrobust()` bandwidth automates.
+`r unhide()`

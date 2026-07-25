@@ -1,0 +1,103 @@
+---
+title: "Exercise 2 (15 minutes)"
+subtitle: "You practice: a non-parametric RDD with rdrobust(), and what the bandwidth does to your answer. When you're done, assist some of the others …"
+output: webexercises::webexercises_default
+---
+
+```{r setup, include = FALSE}
+options(htmltools.dir.version = FALSE, servr.interval = 0.5, width = 115, digits = 3)
+knitr::opts_chunk$set(
+  collapse = TRUE, message = FALSE,
+  warning = FALSE, cache = FALSE,
+  comment = "#", strip.white = TRUE)
+
+library(webexercises)
+
+# Accept a set of answer strings; auto-add Danish-comma variants of each.
+ans <- function(..., width = 6) {
+  v <- c(...)
+  fitb(unique(c(v, sub(".", ",", v, fixed = TRUE))), width = width)
+}
+```
+
+```{r hidden-data, include = FALSE}
+pacman::p_load(tidyverse, rdrobust, causaldata)
+data("gov_transfers", package = "causaldata")
+```
+
+Same study as exercise 1 — Uruguay's cash transfer and the question of whether welfare **buys
+political loyalty** — but now the **state-of-the-art** estimator: `rdrobust()`, which fits a **local
+linear** regression inside an **optimal bandwidth** with **triangular-kernel** weights.
+
+```{r show-load, eval = FALSE}
+pacman::p_load(tidyverse, rdrobust, causaldata)
+data("gov_transfers", package = "causaldata")
+```
+
+1. **Run it.** Estimate the RDD with `rdrobust()`: outcome `Support`, running variable
+   `Income_Centered`, cutoff `c = 0`. Read the **Conventional** coefficient. The estimate is about
+   `r ans("0.025", "0.02", "0.03")`. Is it statistically significant? `r mcq(c(answer = "No", "Yes"))`
+
+`r hide("R solution — don't peek too early ;) !")`
+```{r sol1, eval = FALSE}
+RDD <- rdrobust(gov_transfers$Support, gov_transfers$Income_Centered, c = 0)
+summary(RDD)
+```
+`r unhide()`
+
+2. **Why so uncertain?** In exercise 1 the parametric model — using **all** the data — found a
+   clear, significant effect of about 0.10. Here `rdrobust()` cannot even reach significance. Look at
+   the **bandwidth** it chose (`h ≈ 0.005`) and the number of observations left inside it. The most
+   likely reason the non-parametric estimate is so imprecise is that
+   `r mcq(c(answer = "the optimal bandwidth is tiny, so very few households are used — low reliability", "rdrobust ignores the running variable", "the effect is genuinely zero"))`
+
+3. **Turn the bandwidth up by hand.** `rdrobust()` takes an argument `h` to set the bandwidth
+   yourself. Re-run it with `h = 0.02`. The estimate is now about `r ans("-0.096", "-0.1", "-0.10")`,
+   and it **is** statistically significant. `r mcq(c("The wider window changed the study", answer = "A wider window uses far more households, so the estimate becomes precise enough to detect the effect"))`
+
+`r hide("R solution")`
+```{r sol3, eval = FALSE}
+RDD_wide <- rdrobust(gov_transfers$Support, gov_transfers$Income_Centered, c = 0, h = 0.02)
+summary(RDD_wide)
+```
+`r unhide()`
+
+4. **Mind the sign.** In exercise 1 the parametric $\lambda$ was **+0.10**; here `rdrobust()` reports
+   about **−0.10** for the same effect. `rdrobust()` always estimates *(value just above the cutoff)
+   − (value just below)*. In this study the households who **received** the transfer are **below** the
+   cutoff. So the negative sign means:
+   `r mcq(c("the transfer reduced support", answer = "the same finding as exercise 1 — support is higher on the treated (below-cutoff) side, just measured above-minus-below", "rdrobust made an error"))`
+
+5. **Write one sentence** as a `# comment` reconciling the two exercises — then compare:
+
+`r hide("Model answer")`
+Both exercises say the transfer raised government support by roughly **0.10** on the 0–1 scale. The
+parametric model reported it as **+0.10** for a below-cutoff dummy; `rdrobust()` reports it as
+**−0.10** because it measures the jump as above-minus-below, and the treated sit below. The sign is
+bookkeeping — the substantive finding is identical. The lesson is that at the **MSE-optimal**
+bandwidth the local estimate was too imprecise to detect, and widening the window traded a little
+bias for the precision needed to see the effect.
+`r unhide()`
+
+6. **Discuss with your neighbour.**
+
+   - `rdrobust()` picked a *smaller* bandwidth than the one that finally revealed the effect. Is the
+     algorithm "wrong"? What is it optimising, and why might that differ from "find me a significant
+     result"?
+   - You could keep widening `h` until the stars pile up. Why would that be **p-hacking**, and what
+     protects an honest RDD against it?
+   - Which estimate would you report in a paper — the parametric 0.10, the optimal-bandwidth
+     `rdrobust`, or the hand-widened one? Defend your choice.
+
+`r hide("Talking points")`
+- The optimal bandwidth minimises **expected error (bias + variance)**, *not* the p-value. A tiny
+  window here means minimal bias but high variance — a wide, honest confidence interval. It is not
+  "wrong"; it is telling you this dataset cannot pin the effect down tightly at the cutoff.
+- Choosing the bandwidth *after* seeing which one gives significance is fishing — you are no longer
+  running one test but many, and a "significant" result becomes meaningless. The protection is to
+  **pre-commit** to the algorithm's bandwidth (and report robustness across a *reported* range),
+  exactly as you would pre-register an analysis.
+- Defensible answers differ. Best practice is to lead with the `rdrobust` optimal-bandwidth estimate
+  (the principled default), *and* show the estimate is stable across a range of bandwidths — honesty
+  about uncertainty beats a single starred number.
+`r unhide()`
