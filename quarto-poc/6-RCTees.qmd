@@ -1,5 +1,5 @@
 ---
-title: "Randomized Controlled Trials"
+title: "Randomised Controlled Trials"
 subtitle: "The gold standard of causal inference"
 author: "Merlin Schaeffer · Department of Sociology"
 date: today
@@ -9,7 +9,7 @@ format:
     width: 1600
     height: 900
     slide-number: c/t
-    footer: "Lecture 6 · Randomized Controlled Trials"
+    footer: "Lecture 6 · Randomised Controlled Trials"
     incremental: false
     highlight-style: github
     logo: img/ku_seal.png
@@ -79,7 +79,7 @@ knitr::include_graphics('https://researchleap.com/wp-content/uploads/2021/12/Pop
 
 1. explain why a simple group comparison can **mislead** us — *selection bias*;
 
-2. see how **randomization** fixes it — in one picture *and* one formula;
+2. see how **randomisation** fixes it — in one picture *and* one formula;
 
 3. **estimate a causal effect** from a real experiment in R.
 
@@ -144,7 +144,7 @@ pacman::p_load( # Load several R packages using the pacman package manager
   estimatr,   # Package for fast estimators for regression with weighted data
   modelr,     # Provides functions for modelling and prediction
   kableExtra, # Enhances table creation in R
-  modelsummary) # Creates tables and plots to summarize statistical models
+  modelsummary) # Creates tables and plots to summarise statistical models
 ```
 
 ### The APAD survey
@@ -388,7 +388,7 @@ Citizenship drives *both* news use *and* discrimination → it opens a [backdoor
 Same picture they met last week, so keep it quick. Trace the red link and ask why it is not a causal effect. The reveal: citizenship feeds *both* boxes, which opens a backdoor path — correlation flows along it without any causal arrow between news and discrimination.
 :::
 
-## The fix: experiments & randomization {.inverse background-color="#901A1E"}
+## The fix: experiments & randomisation {.inverse background-color="#901A1E"}
 
 [Part 2 of 3]{.part-pill}
 
@@ -468,7 +468,7 @@ knitr::include_graphics('https://www.laserfiche.com/wp-content/uploads/2014/10/f
 
 <div class="ku-timer" data-min="10"></div>
 
-## Randomized Controlled Trial (RCT)
+## Randomised Controlled Trial (RCT)
 
 ::: {.push-left}
 ```{r, echo = FALSE, out.width='100%', fig.align='center'}
@@ -491,7 +491,7 @@ Because assignment is random, it can **not** be driven by citizenship, age, or *
 Define the RCT plainly: a coin, not a person and not a preference, decides who is treated. The consequence is the sentence in the green box — assignment *cannot* be driven by citizenship, age, or anything else, because a coin knows none of those things.
 :::
 
-## Why randomization works: a fair coin
+## Why randomisation works: a fair coin
 
 ::: {.push-left}
 ```{r, echo = FALSE, out.width='78%', fig.align='center'}
@@ -523,7 +523,7 @@ $\rightarrow$ similar on average *in every way*, **including their baseline $Y_0
 $\rightarrow$ so $E[Y_{0i}|D=1] = E[Y_{0i}|D=0]$, and **selection bias = 0**.
 
 ::: {.content-box-red}
-**Beware:** randomization can still fail by chance — especially in *small* samples.
+**Beware:** randomisation can still fail by chance — especially in *small* samples.
 :::
 :::
 
@@ -634,7 +634,7 @@ knitr::include_graphics('img/Exp1.png')
 ```
 :::
 
-## Did randomization balance the groups?
+## Did randomisation balance the groups?
 
 ::: {.panel-tabset}
 
@@ -666,7 +666,7 @@ APAD %>% # Start with the APAD data, then pipe
 :::
 
 ::: {.content-box-green}
-Randomised split: the groups are **balanced** — exactly what randomization buys us.
+Randomised split: the groups are **balanced** — exactly what randomisation buys us.
 :::
 
 ::: {.notes}
@@ -821,7 +821,7 @@ knitr::include_graphics('https://www.laserfiche.com/wp-content/uploads/2014/10/f
 \begin{tikzpicture}
 \sffamily
 \node[stage] (a) at (0,0) {Confounding};
-\node[hero] (b) [right = of a] {Randomize};
+\node[hero] (b) [right = of a] {Randomise};
 \node[stage] (c) [right = of b] {Balanced groups};
 \node[stage] (d) [right = of c] {Raw difference $=$ causal effect $\kappa$};
 
@@ -835,14 +835,14 @@ knitr::include_graphics('https://www.laserfiche.com/wp-content/uploads/2014/10/f
 
 - **Experiment:** *we* set the treatment, then watch the outcome.
 - **RCT:** treatment assigned by chance → groups alike on *everything*, even the unmeasured.
-- **Balance test:** our check that randomization worked.
+- **Balance test:** our check that randomisation worked.
 - **OLS on an RCT:** the coefficient *is* the causal effect.
 
 ::: {.notes}
-Trace the chain left to right — it is the whole lecture in four boxes. "Randomize" is red because it is the only step that is a *choice we make*; everything downstream follows from it. If they remember one picture from today, this is the one.
+Trace the chain left to right — it is the whole lecture in four boxes. "Randomise" is red because it is the only step that is a *choice we make*; everything downstream follows from it. If they remember one picture from today, this is the one.
 :::
 
-## But what if you *can't* randomize? {.inverse background-color="#901A1E"}
+## But what if you *can't* randomise? {.inverse background-color="#901A1E"}
 
 ::: {.lead}
 Most of sociology can't run experiments.
@@ -864,12 +864,21 @@ Look back at the goals from the start of the lecture. Can you tick all three?
 
 ::: {.checklist}
 - Explain **selection bias** to a friend in one sentence — *why can a raw group comparison mislead?*
-- Show — with the DAG *or* the formula — **why randomization removes it**.
+- Show — with the DAG *or* the formula — **why randomisation removes it**.
 - Run `lm_robust()` on an experiment in R and **read the coefficient as a causal effect**.
 :::
 
 ::: {.content-box-green}
 Anything feel shaky? That is what this week's **Absalon quiz** and the **Friday exercise class** are for.
+:::
+
+## Today's important functions
+
+::: {.small}
+- `estimatr::lm_robust(y ~ d, weights = ...)`: the RCT effect — a bivariate OLS of the outcome on the **randomly assigned** treatment (survey-weighted here).
+- `modelsummary::datasummary_balance(~ d, data = ...)`: the **balance table** — check treatment and control look alike on background traits (the payoff of randomisation).
+- `modelsummary(list("Model" = ...), stars = TRUE)`: a clean regression table.
+- `rowMeans(across(...))`: average several survey items into one index.
 :::
 
 ## References

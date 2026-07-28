@@ -494,6 +494,10 @@ $$\lambda = E[Y_{1i} - Y_{0i} \mid \text{complier}]$$
 
 - **Why only compliers?** Never- and always-takers do the *same* thing whether offered or not — the offer shifts neither their $D$ nor their $Y$, so they add **nothing** to $\rho$ or $\phi$ and cancel out of the ratio. Only compliers are left.
 - **Monotonicity:** assume **no defiers** (who do the *opposite* of their assignment). Almost always reasonable.
+
+::: {.backgrnote}
+**Why a new letter?** In Lecture 6 an RCT gave us $\kappa$ — the effect for *everyone*. An instrument is weaker: $\lambda$ is the same kind of causal effect, but only for the **compliers**. Same idea, narrower population — hence $\lambda$, not $\kappa$.
+:::
 :::
 
 ::: {.push-right}
@@ -583,6 +587,15 @@ Recap the four ideas: natural experiment (nature randomises), ITT (the effect of
 
 ::: {.content-box-green}
 Shaky on any of these? That is what this week's **Absalon quiz** and the **Friday exercise class** are for.
+:::
+
+## Today's important functions
+
+::: {.small}
+- `estimatr::lm_robust(y ~ z, weights = ...)`: the **reduced form** ($\rho$, effect of the offer) and — with the treatment as the outcome — the **first stage** ($\phi$).
+- The **Wald estimator** is then just arithmetic: `lambda <- rho / phi`. No special function needed.
+- `masteringmetrics::mdve`: the Minneapolis domestic-violence experiment (exercise 2).
+- *(Next week)* `ivreg::ivreg(y ~ d | z)` runs the first stage, reduced form and division in **one step** — 2SLS.
 :::
 
 ## References

@@ -193,7 +193,7 @@ Shrink the red, grow the blue.
 ::: {.push-right}
 **2 · Identify causal mechanisms**
 
-Isolate variation in $X$ that is **as good as random**.
+Isolate variation in the treatment $D$ that is **as good as random**.
 
 - *Assign it:* RCTs *(L6)*, natural experiments, ITT & the **Wald** estimator *(L7)*
 - *Find it with OLS:* **2SLS** *(L10)*, **control** for confounders *(L8/9)*, and **regression discontinuity** *(L13)*
@@ -448,7 +448,7 @@ Synthesise Part 1: the descriptive tools all live in one formula and combine fre
 [Part 2 of 2]{.part-pill}
 
 ::: {.lead}
-A good description is not a cause. To claim causation we need variation in $X$ that is **as good as random**.
+A good description is not a cause. To claim causation we need variation in the treatment $D$ that is **as good as random**.
 :::
 
 ## The enemy: selection / omitted-variable bias
@@ -460,7 +460,7 @@ $$\small \underbrace{\bar{Y}_{D=1} - \bar{Y}_{D=0}}_{\text{observed gap}} = \und
 
 Equivalently, an omitted confounder $C$ bends the slope:
 
-$$\tilde{\beta}_{Y\leftarrow X} = \beta_{Y\leftarrow X} + \underbrace{\beta_{Y\leftarrow C}\,\beta_{C\leftarrow X}}_{\text{omitted-variable bias}}$$
+$$\tilde{\beta}_{Y\leftarrow D} = \beta_{Y\leftarrow D} + \underbrace{\beta_{Y\leftarrow C}\,\beta_{C\leftarrow D}}_{\text{omitted-variable bias}}$$
 :::
 
 ::: {.push-right}
@@ -470,7 +470,7 @@ $$\tilde{\beta}_{Y\leftarrow X} = \beta_{Y\leftarrow X} + \underbrace{\beta_{Y\l
 \begin{tikzpicture}[>=Latex, semithick, node distance = 14mm and 16mm]
 \sffamily
 \node[ellipse, draw] (C) {$C$};
-\node[ellipse, draw, below = of C] (X) {$X$};
+\node[ellipse, draw, below = of C] (X) {$D$};
 \node[ellipse, draw, right = of X] (Y) {$Y$};
 \draw[->] (C) -- (X);
 \draw[->] (C) -- (Y);
@@ -487,16 +487,16 @@ This one equation — Lectures 5 and 8 — is the reason the whole second half o
 Return to the conceptual heart of the causal half. The observed gap is contaminated whenever the treated and untreated would have differed anyway — that residual term is selection bias, and its regression twin is omitted-variable bias. Everything that follows is a strategy for killing that term: either make it zero by design, or subtract it with a control or an instrument.
 :::
 
-## Strategy A — assign $X$ at random {.inverse background-color="#901A1E"}
+## Strategy A — assign $D$ at random {.inverse background-color="#901A1E"}
 
 ::: {.lead}
-Intervene so that **all** variation in $X$ is random. Then the raw difference *is* the effect.
+Intervene so that **all** variation in the treatment $D$ is random. Then the raw difference *is* the effect.
 :::
 
 ## RCTs & natural experiments
 
 ::: {.push-left}
-We **intervene** with $I$, and $I$ decides $X$ **perfectly** $(|r| = 1)$: treatment and control differ only by chance.
+We **intervene** with an as-if-random $Z$, and $Z$ decides the treatment $D$ **perfectly** $(|r| = 1)$: treatment and control differ only by chance.
 
 - Categorical treatment → a simple $Y = \alpha + \color{red}{\beta} I_i + \epsilon_i$ *(L6)*.
 - A **natural experiment** — the world does the randomising *(L7)* — is read the same way, *if* you can defend the "as-if random" arrow.
@@ -512,8 +512,8 @@ Continuous or subgroup questions still use polynomials and interactions from Par
 \definecolor{kured}{HTML}{901A1E}
 \begin{tikzpicture}[>=Latex, semithick, node distance = 12mm and 16mm]
 \sffamily
-\node[ellipse, draw=kured, thick] (I) {$I$};
-\node[ellipse, draw, right = of I] (X) {$X$};
+\node[ellipse, draw=kured, thick] (I) {$Z$};
+\node[ellipse, draw, right = of I] (X) {$D$};
 \node[ellipse, draw, above = of X] (C) {$C$};
 \node[ellipse, draw, right = of X] (Y) {$Y$};
 \draw[->, kured, thick] (I) to["$|r| = 1$"] (X);
@@ -531,10 +531,10 @@ Recall Lecture 6 and 7. Randomisation cuts both dashed confounder arrows at once
 ## When assignment is imperfect: ITT & Wald
 
 ::: {.push-left}
-Often $I$ only **nudges** $X$ $(|r| < 1)$ — an offer some ignore.
+Often $Z$ only **nudges** $D$ $(|r| < 1)$ — an offer some ignore.
 
-- The **intention-to-treat** effect (the **reduced form**, $\rho$) is the effect of the *offer* $I$ on $Y$ *(L7)*.
-- Scale it by the **first stage** $\phi$ (how much $I$ moved $X$) to recover the effect of $X$ on compliers — the **Wald** estimator:
+- The **intention-to-treat** effect (the **reduced form**, $\rho$) is the effect of the *offer* $Z$ on $Y$ *(L7)*.
+- Scale it by the **first stage** $\phi$ (how much $Z$ moved $D$) to recover the effect of $D$ on compliers — the **Wald** estimator:
 
 $$\lambda = \frac{\rho}{\phi} = \frac{\text{reduced form}}{\text{first stage}} = \frac{\text{ITT}}{r}$$
 :::
@@ -545,8 +545,8 @@ $$\lambda = \frac{\rho}{\phi} = \frac{\text{reduced form}}{\text{first stage}} =
 \definecolor{kured}{HTML}{901A1E}
 \begin{tikzpicture}[>=Latex, semithick, node distance = 12mm and 16mm]
 \sffamily
-\node[ellipse, draw=kured, thick] (I) {$I$};
-\node[ellipse, draw, right = of I] (X) {$X$};
+\node[ellipse, draw=kured, thick] (I) {$Z$};
+\node[ellipse, draw, right = of I] (X) {$D$};
 \node[ellipse, draw, above = of X] (C) {$C$};
 \node[ellipse, draw, right = of X] (Y) {$Y$};
 \draw[->, kured, thick] (I) to["$\phi:\;|r| < 1$"] (X);
@@ -568,20 +568,20 @@ This is the notation bridge to keep consistent: the reduced form rho is the ITT,
 ## Strategy B — find random variation with OLS {.inverse background-color="#901A1E"}
 
 ::: {.lead}
-Most variation in $X$ is **not** random. So carve out the slice that *is* — and use only that.
+Most variation in $D$ is **not** random. So carve out the slice that *is* — and use only that.
 :::
 
 ## Instruments, confounders, mediators
 
 ::: {.push-left}
-OLS lets us split $X$ into a trustworthy part and a contaminated part:
+OLS lets us split $D$ into a trustworthy part and a contaminated part:
 
-- **Instrument $I$** — keep the **predicted** part of $X$ driven by a random $I$: **2SLS** *(L10)*.
-- **Confounder $C$** — throw it away by **controlling**: keep the part of $X$ *unrelated* to $C$ *(L8/9)*.
-- **Mediator $M$** — add it in a *second* step to see how much of $X$'s effect runs **through** it *(L9)*.
+- **Instrument $Z$** — keep the **predicted** part of $D$ driven by a random $Z$: **2SLS** *(L10)*.
+- **Confounder $C$** — throw it away by **controlling**: keep the part of $D$ *unrelated* to $C$ *(L8/9)*.
+- **Mediator $M$** — add it in a *second* step to see how much of $D$'s effect runs **through** it *(L9)*.
 
 ::: {.backgrnote}
-Instrument vs. control — mirror images: keep the **predicted** values vs. keep the **residuals** of $X$.
+Instrument vs. control — mirror images: keep the **predicted** values vs. keep the **residuals** of $D$.
 :::
 :::
 
@@ -591,8 +591,8 @@ Instrument vs. control — mirror images: keep the **predicted** values vs. keep
 \definecolor{kured}{HTML}{901A1E}
 \begin{tikzpicture}[>=Latex, semithick, node distance = 12mm and 15mm]
 \sffamily
-\node[ellipse, draw=kured, thick] (I) {$I$};
-\node[ellipse, draw, right = of I] (X) {$X$};
+\node[ellipse, draw=kured, thick] (I) {$Z$};
+\node[ellipse, draw, right = of I] (X) {$D$};
 \node[ellipse, draw, above = of X] (C) {$C$};
 \node[ellipse, draw, right = of X] (M) {$M$};
 \node[ellipse, draw, right = of M] (Y) {$Y$};
