@@ -148,6 +148,30 @@ A refinement round over both the deck and the website. New conventions that the 
   final checklist but was never actually installed by the old steps. All four GitHub installs
   verified to exist (masteringmetrics, ROS-Examples/rpackage, vdemdata, democracyData).
 
+## Cross-lecture coherence pass (2026-07-25, after L14 — "meta overview")
+With all 14 decks done, a bird's-eye consistency review (language, notation, design, flow,
+chronology, difficulty). **Verdict: highly coherent** — one template, one callout colour code, a
+connected cross-reference web (the L4→L12 forward-ref resolves; every "last week" lines up). Four
+fixes applied (commit `d8a187a`, all rendered/verified/published):
+1. **Notation — L14 causal DAGs I/X → Z/D.** The Conclusion used the original's I (instrument) / X
+   (treatment); the whole course teaches **Z / D**. Relabelled the DAGs + prose so the synthesis
+   matches (descriptive-half generic `X`, e.g. polynomial powers, left as-is). Wald stays λ=ρ/φ=ITT/r.
+2. **Language — standardised to British** across L1/L4/L6/L8/L12 (course was ~90 % British already;
+   L6 was the worst, incl. a visible "randomize?" title → "randomise?"; also `generalized`→`generalised`).
+   **Left alone:** external Angrist/MRU video titles in `lectures.qmd` (proper citations), and image
+   **filenames** — a first `sed` pass over-reached and rewrote `img/randomization*.png` paths to
+   `randomisation`, breaking `include_graphics` (files on disk keep the `z`); reverted the paths only.
+   **Lesson: scope spelling seds to prose — never touch `include_graphics()` paths or factor levels.**
+3. **Design — added "Today's important functions" to L6 & L7**, the only two method decks missing the
+   R-reference slide every other one has. L7's forward-references `ivreg()` as next week's one-step 2SLS.
+4. **Didactics — κ→λ bridge on L7's LATE slide:** a one-line backgrnote ("RCT gave us κ for *everyone*;
+   an instrument gives λ for **compliers** only — hence the new letter"). The effect-symbol shift
+   L6(κ)→L7+(λ) is now explicit.
+- **Not changed (noted, not defects):** L14's two-goals split reorganises lectures thematically (the
+  descriptive L11/L12 are taught *after* the causal L6–L10, since L13 RDD needs L12's polynomials) —
+  right teaching order, so the synthesis regroups rather than replays; and the many relative "last
+  week" references are fine **as long as the course is always taught 1→14**.
+
 ## Lecture 14 (2026-07-25) — Conclusion — MIGRATION COMPLETE (L1–14)
 `14-Concl.qmd` (25 slides, 19 notes). **The final deck.** A course synthesis on a lovely
 self-referential running example — **the class's own weekly-quiz results**. Two-goals structure:
