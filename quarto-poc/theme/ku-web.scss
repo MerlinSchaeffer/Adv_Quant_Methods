@@ -190,3 +190,12 @@ tbody tr:not(:last-child) td { border-bottom: 1px solid $hairline; }
 // ---- Footer ----------------------------------------------------------------------
 .page-footer, .nav-footer { color: $muted; font-size: .85rem; }
 .nav-footer { border-top: 1px solid $hairline; margin-top: 3rem; }
+
+// ---- Literal code: no programming ligatures --------------------------------------
+// Same rule as on the slides (theme/ku.scss): never let a font fuse `<-`, `<=`,
+// `>=`, `==`, `!=`, `|>` or `%>%` into a single glyph. Students retype the code
+// they see, so it must show the exact characters they have to type.
+pre, pre code, code, kbd, samp {
+  font-variant-ligatures: none;
+  font-feature-settings: "liga" 0, "clig" 0, "calt" 0;
+}

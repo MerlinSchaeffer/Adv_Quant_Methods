@@ -1,6 +1,6 @@
 ---
 title: "Correlation & OLS Regression"
-subtitle: "A recap — put to work on a real question"
+subtitle: "A recap"
 author: "Merlin Schaeffer · Department of Sociology"
 date: today
 format:
@@ -50,23 +50,15 @@ myBib <- ReadBib("../Stats_II.bib", check = FALSE)
 
 ## By the end of today you can … {.inverse background-color="#901A1E"}
 
-1. **download real data via APIs** (World Bank, V-Dem) and **join** data sets in R;
+1. **download data via APIs** (World Bank, V-Dem) and **join** them in R;
 
 2. describe a relationship with **scatter plots, z-scores, and the correlation coefficient** $r$;
 
-3. fit and **interpret a bivariate OLS regression** — and say when it may be read causally.
-
-::: {.backgrnote}
-One part of today's lecture per goal. Our running question: **is there a liberty–equality trade-off?**
-:::
+3. fit and **interpret a bivariate OLS regression**.
 
 ## The question & the data {.inverse background-color="#901A1E"}
 
 [Part 1 of 3]{.part-pill}
-
-::: {.lead}
-A real sociological debate — and the data to weigh in on it, four function calls away.
-:::
 
 ## Remember? Citizenship rights across the world
 
@@ -79,7 +71,7 @@ knitr::include_graphics('img/L2/FreedomHouse.png')
 :::
 
 ::: {.left-column}
-Last semester's course mapped *civic and political* citizenship rights.
+Last semester, we discussed *civic and political* citizenship rights.
 
 One may criticize: *aren't socialist countries better at providing* **social** *citizenship rights — affordable housing, healthcare, work, a minimum quality of life?*
 :::
@@ -99,7 +91,8 @@ knitr::include_graphics('img/L2/poster_china.jpg')
 :::
 
 ::: {.content-box-blue}
-**Research question of the day:** is there a **liberty–equality trade-off**? Do state-owned (socialist) economies reduce poverty — at the price of fewer civil liberties?
+**Research question of the day:** is there a **liberty–equality trade-off**? 
+Do state-owned (socialist) economies reduce poverty — at the price of fewer civil liberties?
 :::
 
 ::: {.notes}
@@ -126,10 +119,8 @@ An old and genuinely contested political claim: you can have equality or you can
 \end{tikzpicture}
 ```
 
-Three variables → **three pairwise relationships**. Only all three together answer the research question.
-
 ::: {.content-box-green}
-**The thread for today:** the lecture walks **edge 1** step by step. *You* walk **edges 2 and 3** in the exercises — with the same tools. The final slide assembles the verdict.
+**The thread for today:** the lecture covers **edge 1**. *You* do **edges 2 and 3** in the exercises with the same tools.
 :::
 
 ::: {.notes}
@@ -139,12 +130,12 @@ Spend a minute here — this triangle is the map for the whole day, exercises in
 ## What is socialism — and how do we measure it?
 
 **Socialism** (as an economic system): the means of production and distribution are<br>
-**owned or controlled by the state** or collectively — rather than privately.
+**owned or controlled by the state** or collectively.
 
 $\rightarrow$ The measurable core of the concept: **state ownership of the economy**.
 
 We use the expert-coded V-Dem indicator *state ownership of the economy* (`v2clstown`) —
-available for virtually **all countries since 1789** — and reverse it, so that **higher = more
+available for **most countries since 1789** — and reverse it, so that **higher = more
 state ownership**.
 
 ::: {.content-box-blue}
@@ -152,7 +143,7 @@ state ownership**.
 :::
 
 ::: {.content-box-red .fragment}
-Self-description is cheap talk — North Korea calls itself a *Democratic People's Republic*. A good operationalisation is **valid** (measures what states *do*, not what they *say*), **reliable** (many independent country experts, aggregated by a measurement model), and **comparable** (one scale, all countries, all years).
+Self-description is cheap talk; North Korea calls itself a *Democratic People's Republic*. A good operationalisation is **valid** (measures what states *do*, not what they *say*), **reliable** (many independent country experts, aggregated by a measurement model), and **comparable** (one scale, all countries, all years).
 :::
 
 ::: {.notes}
@@ -177,8 +168,7 @@ pacman::p_load( # Load (and install if needed) several R packages
 
 ### Working with APIs
 
-An **API** (Application Programming Interface) lets R talk directly to a data provider —
-no clicking, no downloading files by hand, fully reproducible.
+An **API** (Application Programming Interface) lets R talk directly to a data provider; no clicking, no downloading files by hand, fully reproducible.
 
 ```{r, echo = FALSE, out.width='62%', fig.align='center'}
 knitr::include_graphics('img/L2/api_diagram.png')
@@ -189,9 +179,9 @@ knitr::include_graphics('img/L2/api_diagram.png')
 ## (1) Varieties of Democracy data
 
 ::: {.left-column}
-**Civil liberties** — the V-Dem *equality before the law and individual liberty* index
+**Civil liberties**, the V-Dem *equality before the law and individual liberty* index
 (`v2xcl_rol`): impartial administration, access to justice, property rights, freedom from
-torture and political killings, freedom of religion and of movement — for men *and* women.
+torture and political killings, freedom of religion and of movement (for men *and* women).
 In T.H. Marshall's terms, the **civil** dimension of citizenship rights.
 
 **State ownership of the economy**: our reversed `v2clstown` (see previous slide).
@@ -220,7 +210,7 @@ In T.H. Marshall's terms, the **civil** dimension of citizenship rights.
 ```
 
 ::: {.content-box-green}
-**Reading the scale:** it works like a **z-score** (today's topic!): 0 ≈ the average country-year since 1789; around **+2** ≈ heavily state-owned (North Korea); around **−2** ≈ almost fully private (Switzerland).
+**Reading the scale:** it works like a **z-score** (see later): 0 ≈ the average country-year since 1789; around **+2** ≈ heavily state-owned (North Korea); around **−2** ≈ almost fully private (Switzerland).
 :::
 
 ::: {.notes}
@@ -295,7 +285,7 @@ ggplot(data = Dat_vdem %>%
 
 ### What do we see?
 ::: {.content-box-blue}
-**Discuss:** socialist East Germany (1949–1990) in both plots — what happens to *state ownership* and to *civil liberties* while the GDR exists, and after 1990? What does this one case suggest about our research question?
+**Discuss:** socialist East Germany (1949–1990) in both plots: what happens to *state ownership* and to *civil liberties* while the GDR exists, and after 1990?
 :::
 
 ::: {.content-box-red .fragment}
@@ -321,13 +311,9 @@ With `wb_search()` you can search the World Bank archive for any keyword:
 
 ### Use the WB API
 ```{r wb-data}
-# Download from the World Bank API; if it is unreachable, fall back to a
-# cached copy so the analysis still runs (smart habit for any live data!)
-poverty_raw <- tryCatch(
-  wb_data("SI.POV.DDAY",                # Extreme poverty: below $3.00 a day (2021 PPP)
-          start_date = 1972, end_date = 2025),
-  error = function(e) readRDS("data/wb_poverty_raw.rds")
-)
+# Download from the World Bank API
+poverty_raw <- wb_data("SI.POV.DDAY", # Extreme poverty: below $3.00 a day (2021 PPP)
+          start_date = 1972, end_date = 2025)
 
 (Dat_poverty <- poverty_raw %>%
    rename(poverty = SI.POV.DDAY,
@@ -342,15 +328,15 @@ poverty_raw <- tryCatch(
 
 ### What does "$3.00 a day" mean?
 ::: {.push-left}
-**Step 1 — exchange rates mislead.** At the bank, about kr. 6.4 buy $1. But *prices*
+**Step 1, exchange rates mislead.** At the bank, about kr. 6.4 buy $1. But *prices*
 differ between countries: the same money buys far less in Copenhagen than in Kampala.
 
-**Step 2 — compare what money *buys*.** Price the *same basket of goods* in two
+**Step 2, compare what money *buys*.** Price the *same basket of goods* in two
 countries. That "exchange rate of living costs" is called
 [purchasing power parity (PPP)]{.alert}: what costs $1 in the US costs about kr. 6.6 in Denmark.
 
-**Step 3 — read the poverty line.** "Below $3.00 a day (PPP)" means living on what
-**$3 buys in the US** — in Danish prices: about kr. 20 a day.
+**Step 3, read the poverty line.** "Below $3.00 a day (PPP)" means living on what
+**$3 buys in the US**; in Danish prices: about kr. 20 a day.
 :::
 
 ::: {.push-right}
@@ -359,7 +345,7 @@ knitr::include_graphics('img/L2/PPP.png')
 ```
 
 ::: {.content-box-green}
-**The poverty line in Danish terms:** less than $30 \times \text{kr. } 20 \approx$ **kr. 600 a month** — for housing, food, clothes, transport, *everything*.
+**The poverty line in Danish terms:** less than $30 \times \text{kr. } 20 \approx$ **kr. 600 a month** (for housing, food, clothes, transport, *everything*).
 :::
 
 ::: {.backgrnote}
@@ -442,7 +428,7 @@ Let the animations play — they explain joins better than any sentence. The onl
 ```
 
 ::: {.content-box-green}
-One row per country: its most recent poverty estimate, matched to civil liberties and state ownership **in that same year**. All three corners of our triangle in one tibble.
+One row per country: its most recent poverty estimate, matched to civil liberties and state ownership **in that same year**.
 :::
 
 ::: {.notes}
@@ -458,7 +444,7 @@ Point at the key: country code *and* year, both needed — matching on country a
 [Part 2 of 3]{.part-pill}
 
 ::: {.lead}
-Edge 1 of the triangle: state ownership and poverty — first as a picture, then as *one* number.
+Edge 1 of the triangle: state ownership and poverty, first as a picture, then as *one* number.
 :::
 
 ## Visual inspection: the scatter plot

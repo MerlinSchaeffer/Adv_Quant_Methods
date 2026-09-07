@@ -133,6 +133,18 @@ $code-block-font-size: 0.6em !default;
   font-size: 0.86em;
 }
 
+// ---- Literal code: no programming ligatures --------------------------------
+// JetBrains Mono ships with contextual ligatures that fuse operators into a
+// single glyph: `<-` becomes an arrow, `<=`/`>=` become the maths symbols,
+// `==` a long equals, `!=` a crossed equals, `|>`/`%>%` a pipe glyph. Students
+// retype what they see on the slides, so code must show the exact characters
+// they have to type. Turn the ligatures off everywhere code appears.
+.reveal pre, .reveal pre code, .reveal code, .reveal kbd, .reveal samp,
+pre, code, kbd, samp {
+  font-variant-ligatures: none;
+  font-feature-settings: "liga" 0, "clig" 0, "calt" 0;
+}
+
 // ---- Inverse (red) slides & section dividers ------------------------------
 .reveal section.inverse {
   background-color: $ku-red;
