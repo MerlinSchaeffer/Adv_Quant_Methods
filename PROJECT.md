@@ -277,7 +277,11 @@ the same relationship L10 has with L7).
     tables are clean) — it rendered as literal "&nbsp;Deaths per 100,000". Fix: an `ms()` wrapper
     (`gsub("&amp;nbsp;", "", as.character(modelsummary(..., output="kableExtra")))` + `results='asis'`).
     Reuse for any single-model table. (Also: all `modelsummary` chunks need `results = 'asis'`, else
-    the whole table double-escapes.)
+    the whole table double-escapes.) **Update 2026-09-15:** it is not only single-model tables
+    (L10's 3-model table and L11's 2-model tables were hit too). Where the `modelsummary()` call is
+    *echoed* to students (L4, L10, L11), don't wrap it — those decks instead wrap knitr's `chunk` hook
+    in the setup chunk to `gsub()` the `&amp;nbsp;` out of all output, so the visible code stays plain.
+    L3's one (hidden) table uses the inline gsub. Check with `grep -c '&amp;nbsp;' _site/*.html`.
   - **`num_fitb` (the L12 helper) is too strict for these answers:** it accepts only the 2-decimal
     form (`0.10`), but `modelsummary` shows `0.100` and `rdrobust` shows `0.025`/`−0.096`, so a
     student typing exactly what they read was marked wrong. Replaced with an `ans("0.1","0.10",
@@ -806,6 +810,18 @@ kept the full pedagogical build but modernised the code.
   `cd quarto-poc && Rscript img/L3/make_animations.R` (UTF-8 locale). GIF labels stay plain ASCII
   ("beta", "|") — the raster device + Inter font mangle Greek/unicode glyphs, and keep subtitles
   short or they clip at the canvas edge.
+- **Hypothesis-test build (added 2026-09-15, professor-requested — restores the old deck's
+  "normal around the null" figure):** new slide "A test, step by step" after the umbrella slide
+  (umbrella photo restored too, localized as `img/L3/umbrella_kids.jpg`). A hidden
+  `test_plot(b, se, df, step)` function draws 7 cumulative layers — H0 → SE ruler → t-curve under
+  H0 → 95% test interval → our estimate (t) → share closer to 0 (1 − p) → both red tails (p).
+  The `test-build` chunk prints all 7 into a `.r-stack` as `.fragment`s (`results='asis'` loop);
+  the left-column step texts carry matching `fragment-index` so text and picture advance together.
+  Plots need an opaque white `plot.background` or earlier layers show through. Uses the 50-person
+  `lm_robust` (HC2) model, so numbers match "Put it into practice" (β̂ .042, SE .043, t .98,
+  p .33 — inside). That slide's old text-only "In one small sample" tab became **"Small vs. full
+  sample"**: same function, `detail = FALSE`, shared x-axis, 50 people (inside) above all 1,511
+  (smaller estimate, far outside, p = .0015). Deck is now 35 slides.
 - **Dropped heavy deps from the deck render itself:** `fixest`, `ggforce`, `essentials`.
   `essentials::as.scalar()` → base `unname()` everywhere.
 - **Data:** local SPSS file `../assets/ESS9e03_1.sav` (ESS round 9, Danish subset, 52 MB) read

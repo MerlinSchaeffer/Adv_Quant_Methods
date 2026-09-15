@@ -570,8 +570,10 @@ $$\hat{\sigma}(\hat\beta) = \sqrt{\frac{1}{n-2}\,\frac{\text{SD}(e)}{\text{SD}(x
 ```{r se-demo, echo = FALSE, results = 'asis'}
 mod_se <- lm_robust(psppsgva ~ eduyrs, se_type = "classical",
                     data = ESS_sample)
-modelsummary(list("50-person sample" = mod_se),
-             gof_map = c("nobs", "r.squared"), output = "kableExtra")
+# modelsummary prepends a stray &nbsp; to a lone column header — strip it
+cat(gsub("&amp;nbsp;", "",
+         as.character(modelsummary(list("50-person sample" = mod_se),
+                                   gof_map = c("nobs", "r.squared"), output = "kableExtra"))))
 ```
 
 ::: {.backgrnote}
@@ -714,11 +716,134 @@ Frame testing as an argument rather than a ritual: there is a sceptic in the roo
 :::
 
 ::: {.push-right}
+```{r, echo = FALSE, out.width='90%'}
+knitr::include_graphics('img/L3/umbrella_kids.jpg')
+```
+
 We never *prove* our hypothesis. We show the sceptic's $H_0$ makes the data **too surprising to keep believing**.
 :::
 
 ::: {.notes}
 The umbrella example is worth acting out. Notice the direction of reasoning — we never prove it is raining; we show that the umbrellas would be *too surprising* if the sun were shining. Say the last line twice, because it is the sentence they get wrong in exams: a significant result is evidence against $H_0$, never proof of $H_1$.
+:::
+
+## A test, step by step
+
+```{r test-plot, include = FALSE}
+# One hypothesis test, drawn layer by layer. `step` = how many layers to show:
+#   1 H0 · 2 SE ruler · 3 t-curve if H0 were true · 4 95% test interval
+#   5 our estimate · 6 area closer to 0 than ours · 7 p-value (both tails)
+# `detail = FALSE` drops the SE ruler and % labels (for the small-vs-full comparison).
+test_plot <- function(b, se, df, step = 7, xmax = 3.6 * se, detail = TRUE) {
+  crit <- qt(0.975, df); t <- b / se; p <- 2 * pt(-abs(t), df)
+  ymax <- dt(0, df) / se                                  # height of the curve's peak
+  curve <- tibble(x = seq(-xmax, xmax, length.out = 1001), y = dt(x / se, df) / se)
+  area  <- function(lo, hi) bind_rows(tibble(x = lo, y = 0),
+                                      filter(curve, x >= lo, x <= hi), tibble(x = hi, y = 0))
+  k <- -3:3; ry <- -0.13 * ymax                           # the SE ruler below the curve
+  red <- "#901A1E"; blue <- "#425570"; gold <- "#b5892c"
+
+  g <- ggplot() +
+    scale_x_continuous(limits = c(-xmax, xmax), expand = c(0, 0)) +
+    scale_y_continuous(limits = (if (detail) c(-0.25, 1.38) else c(-0.04, 1.45)) * ymax,
+                       expand = c(0, 0)) +
+    labs(x = expression("Possible estimates of "*beta), y = NULL) +
+    theme(axis.text.y = element_blank(), panel.grid = element_blank(),
+          axis.line.x = element_line(colour = "grey70"),
+          plot.background = element_rect(fill = "white", colour = NA)) # opaque: layers stack
+
+  if (step >= 7) g <- g +
+    geom_polygon(data = area(-xmax, -abs(b)), aes(x, y), fill = red, alpha = 0.85) +
+    geom_polygon(data = area(abs(b), xmax),  aes(x, y), fill = red, alpha = 0.85)
+  if (step >= 6) g <- g +
+    geom_polygon(data = area(-abs(b), abs(b)), aes(x, y), fill = blue, alpha = 0.2)
+  if (step >= 4) g <- g +
+    annotate("segment", x = c(-1, 1) * crit * se, xend = c(-1, 1) * crit * se, y = 0,
+             yend = 1.08 * ymax, colour = gold, linetype = "longdash", linewidth = 1) +
+    annotate("segment", x = -crit * se, xend = crit * se, y = 1.08 * ymax, yend = 1.08 * ymax,
+             colour = gold, linewidth = 0.8,
+             arrow = arrow(ends = "both", length = unit(0.1, "inches"), type = "closed")) +
+    annotate("text", x = -crit * se, y = 1.08 * ymax, hjust = 1.06, colour = "#8a6a1f",
+             size = 4.6, fontface = "bold", label = "95% test interval")
+  if (step >= 3) g <- g + geom_line(data = curve, aes(x, y), colour = "grey15", linewidth = 1)
+  if (step >= 2 && detail) g <- g +
+    annotate("segment", x = -3 * se, xend = 3 * se, y = ry, yend = ry, colour = "grey40") +
+    annotate("segment", x = k * se, xend = k * se, y = ry - 0.025 * ymax,
+             yend = ry + 0.025 * ymax, colour = "grey40") +
+    annotate("text", x = k * se, y = ry - 0.07 * ymax, size = 3.9, colour = "grey40",
+             label = ifelse(k == 0, "0", sprintf("%s%d SE", ifelse(k > 0, "+", "−"), abs(k)))) +
+    annotate("text", x = 0.5 * se, y = ry + 0.065 * ymax, size = 3.9, colour = "grey20",
+             fontface = "bold", label = sprintf("1 SE = %.3f", se))
+  g <- g +
+    annotate("segment", x = 0, xend = 0, y = 0, yend = 1.24 * ymax, colour = blue, linewidth = 1.3) +
+    annotate("text", x = 0, y = 1.31 * ymax, label = "H[0]:~beta == 0", parse = TRUE,
+             colour = blue, size = 6)
+  if (step >= 5) g <- g +
+    annotate("segment", x = b, xend = b, y = 0, yend = 1.17 * ymax, colour = red, linewidth = 1.3) +
+    annotate("text", x = b, y = 1.2 * ymax, hjust = 0, vjust = 0, colour = red, size = 4.8,
+             fontface = "bold", label = sprintf(" our estimate %.3f (t = %.2f)", b, t))
+  if (step >= 6) g <- g +
+    annotate("segment", x = -b, xend = -b, y = 0, yend = dt(t, df) / se,
+             colour = red, linewidth = 0.8, linetype = "dashed")
+  if (step >= 6 && detail) g <- g +
+    annotate("label", x = 0, y = 0.45 * ymax, label = sprintf("%.0f%%", 100 * (1 - p)),
+             colour = blue, fill = "white", size = 6.5, fontface = "bold", linewidth = 0)
+  if (step >= 7 && detail) g <- g +
+    annotate("text", x = c(-1, 1) * (abs(b) + crit * se) / 2, y = 0.12 * ymax, colour = "white",
+             size = 4.6, fontface = "bold", label = sprintf("%.1f%%", 100 * p / 2))
+  if (step >= 7) g <- g +
+    annotate("label", x = 0.97 * xmax, y = 0.72 * ymax, hjust = 1, colour = "white", fill = red,
+             size = 7, fontface = "bold", linewidth = 0, label = sprintf("p = %s", signif(p, 2)))
+  g
+}
+
+# The test in our 50-person sample (same model as on the next slide)
+ht <- tidy(lm_robust(psppsgva ~ eduyrs, data = ESS_sample)) %>% filter(term == "eduyrs")
+```
+
+::: {.left-column .small}
+[1]{.alert} **The sceptic's claim:** $H_0: \beta = 0$.
+
+::: {.fragment fragment-index=1}
+[2]{.alert} **The ruler:** our sample's standard error, $\hat\sigma = `r round(ht$std.error, 3)`$.
+:::
+
+::: {.fragment fragment-index=2}
+[3]{.alert} **If $H_0$ were true,** samples of 50 would scatter around 0 like this ($t$-distribution, df = `r ht$df`).
+:::
+
+::: {.fragment fragment-index=3}
+[4]{.alert} **Test interval:** 95% of those chance estimates land within $0 \pm `r round(qt(0.975, ht$df), 2)` \times \hat\sigma$.
+:::
+
+::: {.fragment fragment-index=4}
+[5]{.alert} **Our estimate** $\hat\beta = `r round(ht$estimate, 3)`$ is $t = `r round(ht$statistic, 2)`$ standard errors from 0 — **inside** the interval.
+:::
+
+::: {.fragment fragment-index=5}
+[6]{.alert} `r round(100 * (1 - ht$p.value))`% of chance estimates are *closer* to 0 than ours …
+:::
+
+::: {.fragment fragment-index=6}
+[7]{.alert} … and the other $p = `r round(ht$p.value, 2)`$ are at least as far out. Not surprising → we **can't reject** $H_0$.
+:::
+:::
+
+::: {.right-column}
+```{r test-build, echo = FALSE, results = 'asis', out.width = '100%', fig.width = 9, fig.height = 6.1}
+# Seven stacked pictures; each click fades in the next (fragment-index matches the text)
+cat("::: {.r-stack}\n\n")
+for (s in 1:7) {
+  if (s > 1) cat(sprintf("::: {.fragment fragment-index=%d}\n\n", s - 1))
+  print(test_plot(ht$estimate, ht$std.error, ht$df, step = s))
+  cat(if (s > 1) "\n\n:::\n\n" else "\n\n")
+}
+cat(":::\n")
+```
+:::
+
+::: {.notes}
+Click through slowly — one idea per click, and each picture only *adds* to the last. (1) Start from the sceptic's claim, not ours. (2) The standard error is the ruler: it tells us how far estimates stray by chance alone. (3) Put the two together and we know exactly how estimates would scatter if the sceptic were right — the same bell curve as the 1000 samples, only now centred on 0. (4) 95% of those chance estimates fall in the gold interval. (5) Only *now* bring in our estimate: about one standard error out, comfortably inside. (6–7) The blue share is closer to 0 than ours; the red tails are at least as extreme — both tails, because a fluke could go either way. The red share *is* the $p$-value. A third of the sceptic's world looks like our data, so the umbrellas are not surprising.
 :::
 
 ## Put it into practice
@@ -745,9 +870,33 @@ tidy(ols) %>%                    # Tidy result table
 ```
 :::
 
-### In one small sample
-In our 50-person sample the estimate is positive but **not** significant — with so few
-people, sampling error is simply too large to rule out $H_0$.
+### Small vs. full sample
+```{r test-full, include = FALSE}
+ht_full <- tidy(lm_robust(psppsgva ~ eduyrs, weights = pspwght, data = ESS)) %>%
+  filter(term == "eduyrs")
+```
+
+::: {.left-column}
+**50 people:** the estimate lands **inside** the test interval → $p = `r round(ht$p.value, 2)`$, can't reject $H_0$.
+
+**All `r format(nrow(ESS), big.mark = ",")` Danes:** a *smaller* estimate, but far **outside** a much narrower interval → $p = `r format(signif(ht_full$p.value, 2))`$, reject $H_0$.
+
+::: {.content-box-green}
+Same question, same axis. Only the **standard error** shrank.
+:::
+:::
+
+::: {.right-column}
+```{r test-small, echo = FALSE, out.width = '100%', fig.width = 9, fig.height = 2.5}
+test_plot(ht$estimate, ht$std.error, ht$df, xmax = 0.17, detail = FALSE) +
+  labs(title = "50 people", x = NULL)
+```
+
+```{r test-large, echo = FALSE, out.width = '100%', fig.width = 9, fig.height = 2.85}
+test_plot(ht_full$estimate, ht_full$std.error, ht_full$df, xmax = 0.17, detail = FALSE) +
+  labs(title = paste("All", format(nrow(ESS), big.mark = ","), "Danes (weighted)"))
+```
+:::
 
 ### The full sample
 ```{r goal-model, echo = FALSE, results = 'asis'}
@@ -760,7 +909,7 @@ modelsummary(list("Political efficacy" = ols_goal),
 :::
 
 ::: {.notes}
-The $t$-value is just "how many standard errors from zero" — no more mysterious than that. The three tabs make the real point: the *same* effect is not significant in the 50-person sample and clearly significant in the full one. Nothing about the world changed, only how much sampling error we were carrying. Non-significant does not mean "no effect"; it can simply mean "not enough people".
+The $t$-value is just "how many standard errors from zero" — no more mysterious than that; the numbers in the R output are exactly the ones from the step-by-step picture. The comparison tab makes the real point: the *same* question is not significant in the 50-person sample and clearly significant in the full one — even though the full-sample estimate is smaller. The null's bell curve simply got much narrower. Nothing about the world changed, only how much sampling error we were carrying. Non-significant does not mean "no effect"; it can simply mean "not enough people".
 :::
 
 ## Learning goal achieved

@@ -45,6 +45,14 @@ BibOptions(check.entries = FALSE,
            hyperlink = FALSE,
            no.print.fields = c("doi", "url", "ISSN", "urldate", "language", "note", "isbn", "volume"))
 myBib <- ReadBib("../Stats_II.bib", check = FALSE)
+
+# modelsummary prepends a stray &nbsp; to some column headers (shows as a literal "&nbsp;").
+# Strip it from every chunk's output, so the code students see stays a plain modelsummary().
+local({
+  chunk_hook <- knit_hooks$get("chunk")
+  knit_hooks$set(chunk = function(x, options)
+    chunk_hook(gsub("&amp;nbsp;", "", x, fixed = TRUE), options))
+})
 ```
 
 ## By the end of today you can … {.inverse background-color="#901A1E"}
