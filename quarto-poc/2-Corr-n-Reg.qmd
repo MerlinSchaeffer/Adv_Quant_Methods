@@ -444,7 +444,7 @@ Point at the key: country code *and* year, both needed — matching on country a
 [Part 2 of 3]{.part-pill}
 
 ::: {.lead}
-Edge 1 of the triangle: state ownership and poverty, first as a picture, then as *one* number.
+Edge 1 of the triangle: state ownership and poverty.
 :::
 
 ## Visual inspection: the scatter plot
@@ -473,7 +473,7 @@ ggplot(data = Dat,
                    color = "#901A1E", size = 5,
                    box.padding = 1.5, point.padding = 0.5,
                    force = 100, segment.size = 1) +
-  labs(y = "% below $3.00 a day (~ kr. 600 a month in DK)",
+  labs(y = "% below $3.00 a day \n (~ kr. 600 a month in DK)",
        x = "State ownership of the economy") +
   theme_minimal(base_size = 14)
 ```
@@ -542,7 +542,7 @@ Two moves, and give each its own sentence: subtracting the mean re-centres every
 
 ## The correlation coefficient $r_{y,x}$
 
-Eye-balling is not evidence. One number summarises the scatter plot:
+Eye-balling is not evidence; a single number summarises the scatter plot:
 
 $$r_{y,x} = \frac{\sum^{n}_{i=1}z_y \times z_x}{n-1}$$
 
@@ -558,15 +558,15 @@ $$r_{y,x} = \frac{\sum^{n}_{i=1}z_y \times z_x}{n-1}$$
 ```{r}
 Dat %>%
   select(poverty, state_ownership) %>%
-  cor() # Estimate the correlation
+  cor() # Estimate the correlation matrix
 ```
 
 ::: {.content-box-blue}
-**Discuss:** how do we interpret this $r$? What does it say about **edge 1** of our triangle?
+**Discuss:** how do we interpret this $r$? What does it say about edge 1 of our triangle?
 :::
 
 ::: {.content-box-red .fragment}
-Essentially **no linear association**: state-owned economies do *not* have systematically less extreme poverty.
+Essentially a small, postive **(linear) association**: state-owned economies have somewhat *more* extreme poverty.
 :::
 :::
 
@@ -599,7 +599,7 @@ knitr::include_graphics('https://www.laserfiche.com/wp-content/uploads/2014/10/f
 [Part 3 of 3]{.part-pill}
 
 ::: {.lead}
-From "is there a relationship?" to "**how much** does poverty differ with state ownership?"
+From "is there a relationship?" to <br> "**how much** does poverty change with state ownership?"
 :::
 
 ## Correlation = a linear trend
@@ -607,10 +607,10 @@ From "is there a relationship?" to "**how much** does poverty differ with state 
 ::: {.left-column}
 **How can we calculate that trend line directly?**
 
-Then we could state *how much* poverty differs, per unit of state ownership.
+Then we could state *how much* poverty changes, per unit of state ownership.
 
 ::: {.content-box-green}
-A **model** is a reduced representation of reality — it should capture the answer to our research question, not every data point. [And it should not be driven by a few singular cases.]{.backgrnote}
+A **model** is a reduced representation of reality; it should capture the answer to our research question, not every data point. [And it should not be driven by a few singular cases.]{.backgrnote}
 :::
 :::
 
@@ -658,7 +658,7 @@ dk_pred   <- Dat_ols %>% filter(country == "Denmark") %>% pull(pred)
 
 ### Residuals, $e$
 ::: {.left-column}
-**Residuals**: $e_{i} = y_{i} - \hat{y}_i$ — the differences between what the model predicts and the actual data.
+**Residuals**: $e_{i} = y_{i} - \hat{y}_i$; the differences between what the model predicts and the actual data.
 
 For Denmark:
 $e = `r round(dk_actual, 1)`\% - `r round(dk_pred, 1)`\% = `r round(dk_actual - dk_pred, 1)`\%$
@@ -670,7 +670,7 @@ resid_plot <- ggplot(data = Dat_ols,
                      aes(y = poverty, x = state_ownership, label = country)) +
   geom_point(alpha = 0.6) +
   geom_smooth(method = "lm", se = FALSE, color = "#425570") +
-  labs(y = "% below $3.00 a day (~ kr. 600 a month in DK)",
+  labs(y = "% below $3.00 a day \n (~ kr. 600 a month in DK)",
        x = "State ownership of the economy") +
   theme_minimal(base_size = 13)
 
@@ -729,7 +729,7 @@ knitr::include_graphics('img/L2/ols_fitting.gif')
 
 ### $R^2$: model fit
 ::: {.left-column}
-How much smaller are the residuals from our model, compared to simply predicting the average $\bar{y}$ for everyone?
+How much smaller are the residuals from our model, compared using the average $\bar{y}$ as a simple model for everyone?
 
 $$R^2 = \frac{\text{TSS} - \text{RSS}}{\text{TSS}}$$
 
@@ -764,6 +764,7 @@ ols <- lm_robust( # OLS with robust standard errors
   poverty ~ state_ownership,
   data = Dat
 )
+
 zols <- lm_robust( # Same, on the z-standardized variables
   z_poverty ~ z_state_ownership,
   data = Dat
@@ -800,9 +801,11 @@ A satisfying moment worth pausing on: run OLS on the z-standardised variables an
 ::: {.push-right}
 $\widehat{\text{Poverty}} = `r round(coef(mod)[1], 2)` + `r round(coef(mod)[2], 2)` \times \text{State ownership}$
 
-At the scale's midpoint (state ownership $= 0$), predicted poverty is **`r round(coef(mod)[1], 2)`%**.
+At the state ownership $= 0$ (here the scale's midpoint), predicted poverty is **`r round(coef(mod)[1], 2)`%**.
 
-With every unit more state ownership, average poverty is **`r round(coef(mod)[2], 2)` percentage points `r ifelse(coef(mod)[2] > 0, "higher", "lower")`** — and $R^2 = `r round(summary(mod)$r.squared, 3)`$: state ownership accounts for almost **none** of the variance in poverty across the world.
+With every unit more state ownership, average poverty is **`r round(coef(mod)[2], 2)` percentage points `r ifelse(coef(mod)[2] > 0, "higher", "lower")`**
+
+$R^2 = `r round(summary(mod)$r.squared, 3)`$: state ownership accounts for almost **none** of the variance in poverty across the world.
 :::
 
 :::
@@ -816,21 +819,21 @@ Model them the full sentence, with units, and make someone repeat it back. Then 
 ::: {.push-left}
 **1. Causal**
 
-"More state ownership *changes* poverty by `r round(coef(mod)[2], 2)` percentage points."
+"More state ownership *increases* poverty by `r round(coef(mod)[2], 2)` percentage points."
 
 ::: {.content-box-red}
-**Beware:** the causal reading holds **only under specific conditions**. Learning what those conditions are — and how to meet them — is the point of this course.
+**Beware:** the causal reading holds **only under specific conditions**. Learning what those conditions are, and how to meet them, is the point of this course.
 :::
 :::
 
 ::: {.push-right}
 **2. Descriptive: conditional means** $\bar{y} \mid x$
 
-"*Among countries* with one unit more state ownership, average poverty is `r round(coef(mod)[2], 2)` percentage points different."
+"*Among countries* with one unit more state ownership, average poverty is `r round(coef(mod)[2], 2)` percentage points higher."
 
 Regression as a (linear) model of **averages of the outcome** at different values of the predictor.
 
-```{r, echo = FALSE, out.width='62%'}
+```{r, echo = FALSE, out.width='80%'}
 knitr::include_graphics('img/L2/conditional_means.png')
 ```
 
@@ -843,7 +846,7 @@ knitr::include_graphics('img/L2/conditional_means.png')
 The most important slide in the deck for the rest of the course. Same coefficient, two readings — one says state ownership *changes* poverty, the other only says countries that differ in state ownership *have* different average poverty. Only the second is licensed by what we did today. Give them the discipline of the descriptive phrasing, "among countries with…", and tell them the whole course is about earning the right to the first reading.
 :::
 
-## Your turn: edge 3 — and the verdict
+## Your turn: edge 3
 
 ::: {.left-column}
 ```{r, echo = FALSE, out.width='72%'}
@@ -859,7 +862,7 @@ knitr::include_graphics('https://www.laserfiche.com/wp-content/uploads/2014/10/f
 <iframe src='2-exercise2.html' width='100%' height='620' frameborder='0' scrolling='yes' style="border:1px solid #ddd; border-radius:6px;"></iframe>
 :::
 
-## The verdict: no liberty–equality trade-off
+## No liberty–equality trade-off
 
 ```{tikz, triangle-verdict, echo = FALSE, out.width='58%', fig.align='center'}
 \usetikzlibrary{arrows.meta, positioning}
@@ -880,11 +883,11 @@ knitr::include_graphics('https://www.laserfiche.com/wp-content/uploads/2014/10/f
 ```
 
 ::: {.content-box-green}
-State-owned economies offer **far fewer civil liberties** (edge 3) and **no less poverty** (edge 1) — while countries with stronger civil liberties tend to have *less* poverty (edge 2). The premise of the trade-off does not hold in today's data.
+State-owned economies offer **far fewer civil liberties** (edge 3) and **slightly more poverty** (edge 1), while countries that guarantee stronger civil liberties tend to have *less* poverty (edge 2).
 :::
 
 ::: {.backgrnote}
-Careful: these are *descriptive* associations across countries — not yet causal effects. That distinction is where this course is headed.
+Careful: these are *descriptive* associations across countries, not yet causal effects.
 :::
 
 ::: {.notes}
@@ -896,13 +899,9 @@ Assemble the triangle with their exercise results — this is the moment the day
 Look back at the goals from the start of the lecture. Can you tick all three?
 
 ::: {.checklist}
-- Download a World Bank indicator with `wb_data()` and **join** it to another data set — which variables form the *key*?
-- Explain to your neighbour what $r = -0.7$ **means** — using the word *z-score* at least once.
-- Read $\alpha$ and $\beta$ from a regression table and give the **descriptive** interpretation of $\beta$ — and say why the *causal* one needs more.
-:::
-
-::: {.content-box-green}
-Anything feel shaky? That is what this week's **Absalon quiz** and the **Friday exercise class** are for.
+- Download a World Bank indicator with `wb_data()` and **join** it to another data set; which variables form the *key*?
+- Explain to your neighbour what $r = -0.7$ **means**; use the word *z-score* at least once.
+- Read $\alpha$ and $\beta$ from a regression table and give the **descriptive** interpretation of $\beta$.
 :::
 
 ## Today's important functions
@@ -910,8 +909,8 @@ Anything feel shaky? That is what this week's **Absalon quiz** and the **Friday 
 ::: {.small}
 1. `wb_search()` / `wb_data()`: search and download World Bank indicators via the API.
 2. `inner_join()`, `left_join()`, `right_join()`, `full_join()`: combine tibbles that share a key.
-3. `scale(x) %>% as.numeric()`: z-standardize a variable (`as.numeric()` ensures a vector, not a matrix).
-4. `cor()`: estimate the correlation coefficient.
+3. `scale(x) %>% as.numeric()`: z-standardize a variable `x`; (`as.numeric()` ensures a vector, not a matrix).
+4. `cor()`: estimate the correlation matrix composed of correlation coefficients.
 5. `estimatr::lm_robust()`: linear OLS regression (with robust standard errors).
 6. `modelsummary()`: nicely formatted tables of one or several regression models.
 :::

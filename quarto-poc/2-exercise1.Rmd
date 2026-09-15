@@ -44,10 +44,7 @@ Dat_vdem <- vdem %>%
 
 # World Bank: extreme poverty (share below $3.00 a day, 2021 PPP).
 # Try the live API; if it is down, fall back to the cached copy.
-Dat_poverty <- tryCatch(
-  wb_data("SI.POV.DDAY", start_date = 1972, end_date = 2025),
-  error = function(e) readRDS("data/wb_poverty_raw.rds")
-) %>%
+Dat_poverty <- wb_data("SI.POV.DDAY", start_date = 1972, end_date = 2025) %>%
   rename(poverty = SI.POV.DDAY,
          year = date,
          country_text_id = iso3c) %>%
@@ -76,9 +73,6 @@ Dat <- inner_join(Dat_poverty, Dat_vdem, by = c("country_text_id", "year"))
 >
 > - Did the `pacman::p_load(...)` line run without red error messages? If not, fix that first.
 > - Strange results? Clear leftovers with a fresh start: *Session → Restart R*, then rerun your script from the top.
-> - **World Bank API down or very slow?** Load our cached copy instead:
->   `Dat <- readRDS(url("https://willowy-quokka-e604ee.netlify.app/data/Dat_L2.rds"))`
-> - Still stuck? Ask (and answer!) in the [t-R-ouble forum](https://absalon.ku.dk/courses/70545/discussion_topics/563046?module_item_id=2037268) on Absalon.
 
 4. Make a scatter plot with poverty as outcome on the Y-axis and civil liberties as
    predictor on the X-axis. Ask it the four questions from the lecture:
