@@ -481,11 +481,8 @@ Dat_vdem &lt;- vdem %&gt;%
          civ_liberties = v2xcl_rol, state_own_raw = v2clstown) %&gt;%
   mutate(state_ownership = -state_own_raw)
 
-Dat_pov &lt;- tryCatch(
-  wb_data(&quot;SI.POV.DDAY&quot;, start_date = 1972, end_date = 2025),
-  error = function(e) readRDS(&quot;data/wb_poverty_raw.rds&quot;)   # offline fallback
-) %&gt;%
-  rename(poverty = SI.POV.DDAY, year = date, country_text_id = iso3c) %&gt;%
+Dat_pov &lt;- wb_data(c(poverty = &quot;SI.POV.DDAY&quot;), start_date = 1972, end_date = 2025) %&gt;%
+  rename(year = date, country_text_id = iso3c) %&gt;%
   select(country_text_id, year, country, poverty) %&gt;%
   drop_na(poverty) %&gt;%
   group_by(country) %&gt;% filter(year == max(year)) %&gt;% ungroup()
@@ -503,10 +500,8 @@ Stuck?
 <ul>
 <li>Did <code>pacman::p_load(...)</code> run without red errors? Fix
 that first.</li>
-<li>The <code>wb_data()</code> call needs the internet. If it fails, the
-<code>tryCatch</code> falls back to the cached file
-<code>data/wb_poverty_raw.rds</code> — download it from Absalon into a
-<code>data/</code> sub-folder of your project.</li>
+<li>The <code>wb_data()</code> call needs the internet — check your
+connection if it errors.</li>
 <li>Odd results? <em>Session → Restart R</em>, then rerun from the
 top.</li>
 <li>Still stuck? Ask in the <a href="https://absalon.ku.dk/courses/70545/discussion_topics/563046?module_item_id=2037268">t-R-ouble
@@ -519,7 +514,7 @@ model.</li>
 </ol>
 <div class="webex-solution">
 <button>
-R solution — don&#39;t peek too early ;) !
+R solution &lt;U+2014&gt; don&#39;t peek too early ;) !
 </button>
 <pre class="r"><code>ols_int &lt;- lm_robust(poverty ~ mc_state * mc_civ, data = Dat)
 
@@ -573,7 +568,7 @@ of the lecture&#39;s plot.</li>
 </ol>
 <div class="webex-solution">
 <button>
-R solution — don&#39;t peek too early ;) !
+R solution &lt;U+2014&gt; don&#39;t peek too early ;) !
 </button>
 <pre class="r"><code>grid &lt;- expand.grid(
   mc_civ   = seq(min(Dat$mc_civ), max(Dat$mc_civ), length.out = 50),
@@ -595,9 +590,10 @@ ggplot(grid, aes(x = mc_civ, y = poverty, color = Ownership)) +
 model table from task 2. Is the interaction term statistically
 significant at the 5% level?
 <select class="webex-select"><option value="blank"></option><option value>Yes
-— so the slopes genuinely differ</option><option value="answer">No — so
-we cannot conclude the slopes really differ</option><option value>The
-table does not say</option></select></p></li>
+&lt;U+2014&gt; so the slopes genuinely
+differ</option><option value="answer">No &lt;U+2014&gt; so we cannot
+conclude the slopes really differ</option><option value>The table
+does not say</option></select></p></li>
 <li><p><strong>Write one sentence</strong> as a <code># comment</code>
 stating what you may — and may <strong>not</strong> — conclude from this
 analysis. Then compare:</p></li>

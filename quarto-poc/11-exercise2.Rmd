@@ -40,11 +40,8 @@ Dat_vdem <- vdem %>%
          civ_liberties = v2xcl_rol, state_own_raw = v2clstown) %>%
   mutate(state_ownership = -state_own_raw)
 
-Dat_pov <- tryCatch(
-  wb_data("SI.POV.DDAY", start_date = 1972, end_date = 2025),
-  error = function(e) readRDS("data/wb_poverty_raw.rds")   # offline fallback
-) %>%
-  rename(poverty = SI.POV.DDAY, year = date, country_text_id = iso3c) %>%
+Dat_pov <- wb_data(c(poverty = "SI.POV.DDAY"), start_date = 1972, end_date = 2025) %>%
+  rename(year = date, country_text_id = iso3c) %>%
   select(country_text_id, year, country, poverty) %>%
   drop_na(poverty) %>%
   group_by(country) %>% filter(year == max(year)) %>% ungroup()
@@ -59,8 +56,7 @@ Dat <- inner_join(Dat_pov, Dat_vdem, by = c("country_text_id", "year")) %>%
 
 `r hide("Stuck?")`
 - Did `pacman::p_load(...)` run without red errors? Fix that first.
-- The `wb_data()` call needs the internet. If it fails, the `tryCatch` falls back to the cached file
-  `data/wb_poverty_raw.rds` — download it from Absalon into a `data/` sub-folder of your project.
+- The `wb_data()` call needs the internet — check your connection if it errors.
 - Odd results? *Session → Restart R*, then rerun from the top.
 - Still stuck? Ask in the [t-R-ouble forum](https://absalon.ku.dk/courses/70545/discussion_topics/563046?module_item_id=2037268) on Absalon.
 

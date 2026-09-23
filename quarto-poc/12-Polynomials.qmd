@@ -51,15 +51,13 @@ myBib <- ReadBib("../Stats_II.bib", check = FALSE)
 pacman::p_load(tidyverse, estimatr, modelsummary, wbstats, vdemdata, ggrepel, scales)
 
 # World Bank: life expectancy at birth + health spending per capita (PPP $).
-# Live, with a committed cache so the render never dies on an API outage.
-life_raw <- tryCatch(
-  wb_data(c("SP.DYN.LE00.IN", "SH.XPD.CHEX.PP.CD"), start_date = 2000, end_date = 2025),
-  error = function(e) readRDS("data/wb_life_raw.rds")
-)
+# Both indicators in ONE call; naming them makes wbstats name the columns.
+life_raw <- wb_data(c(LifeExpect = "SP.DYN.LE00.IN",
+                      HealthExp  = "SH.XPD.CHEX.PP.CD"),
+                    start_date = 2000, end_date = 2025)
 
 Dat_life <- life_raw %>%
-  rename(LifeExpect = SP.DYN.LE00.IN, HealthExp = SH.XPD.CHEX.PP.CD,
-         year = date, country_text_id = iso3c) %>%
+  rename(year = date, country_text_id = iso3c) %>%
   select(country_text_id, country, year, LifeExpect, HealthExp) %>%
   drop_na(LifeExpect, HealthExp)
 

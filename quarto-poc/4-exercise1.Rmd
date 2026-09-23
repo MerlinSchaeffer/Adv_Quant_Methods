@@ -33,37 +33,22 @@ pacman::p_load(
   modelsummary  # Nicely formatted regression tables
 )
 
-# World Bank: CO2 per person, GDP per person, and region/income metadata.
-# Try the live API; if it is down, fall back to the cached copies.
-co2_raw <- tryCatch(
-  wb_data("EN.GHG.CO2.PC.CE.AR5", start_date = 2000, end_date = 2023),
-  error = function(e) readRDS("data/wb_co2_raw.rds")
-)
-gdp_raw <- tryCatch(
-  wb_data("NY.GDP.PCAP.PP.KD", start_date = 2000, end_date = 2023),
-  error = function(e) readRDS("data/wb_gdp_raw.rds")
-)
-countries <- tryCatch(
-  wb_countries(),
-  error = function(e) readRDS("data/wb_countries_raw.rds")
-)
+# World Bank: both indicators in ONE call. Naming them (co2 = ..., gdp = ...)
+# means wbstats names the columns for us.
+wb_raw <- wb_data(c(co2 = "EN.GHG.CO2.PC.CE.AR5",
+                    gdp = "NY.GDP.PCAP.PP.KD"),
+                  start_date = 2000, end_date = 2026)
 
-Dat_co2 <- co2_raw %>%
-  rename(co2 = EN.GHG.CO2.PC.CE.AR5) %>%
-  select(iso3c, country, year = date, co2) %>%
-  drop_na(co2) %>% group_by(country) %>% filter(year == max(year)) %>% ungroup()
+# Region & income group come from a different part of the API, so a second call
+wb_meta <- wb_countries()
 
-Dat_gdp <- gdp_raw %>%
-  rename(gdp = NY.GDP.PCAP.PP.KD) %>%
-  select(iso3c, year = date, gdp) %>% drop_na(gdp) %>%
-  group_by(iso3c) %>% filter(year == max(year)) %>% ungroup() %>% select(iso3c, gdp)
-
-Dat_meta <- countries %>%
-  filter(region != "Aggregates") %>% select(iso3c, region, income_level)
-
-Dat <- Dat_co2 %>%
-  inner_join(Dat_gdp,  by = "iso3c") %>%
-  inner_join(Dat_meta, by = "iso3c") %>%
+Dat <- wb_raw %>%
+  drop_na(co2, gdp) %>%          # Country-years where we observe both
+  group_by(country) %>%
+  filter(date == max(date)) %>%  # ...and of those, the most recent one
+  ungroup() %>%
+  left_join(wb_meta %>% select(iso3c, region, income_level), by = "iso3c") %>%
+  select(iso3c, country, date, co2, gdp, region, income_level) %>%
   mutate(gdp_k = gdp / 1000)
 ```
 
@@ -83,7 +68,7 @@ cor_cg  <- cor(Dat_x$co2, Dat_x$gdp_k)
 > - Did the `pacman::p_load(...)` line run without red error messages? If not, fix that first.
 > - Strange results? Start fresh: *Session → Restart R*, then rerun your script from the top.
 > - **World Bank API down or very slow?** Load our cached, ready-made `Dat` instead:
->   `Dat <- readRDS(url("https://willowy-quokka-e604ee.netlify.app/data/Dat_L4.rds"))`
+>   `Dat <- readRDS(url("https://merlin-ols.netlify.app/data/Dat_L4.rds"))`
 > - Still stuck? Ask (and answer!) in the [t-R-ouble forum](https://absalon.ku.dk/courses/70545/discussion_topics/563046?module_item_id=2037268) on Absalon.
 
 3. **Now write it yourself.** The World Bank sorts countries into four *income groups*. Make

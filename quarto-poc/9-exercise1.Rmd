@@ -26,29 +26,18 @@ num_fitb <- function(x, digits = 2, width = 6) {
 ```{r starter}
 pacman::p_load(tidyverse, wbstats, estimatr, modelsummary)
 
-co2_raw <- tryCatch(
-  wb_data("EN.GHG.CO2.PC.CE.AR5", start_date = 2000, end_date = 2023),
-  error = function(e) readRDS("data/wb_co2_raw.rds"))
-gdp_raw <- tryCatch(
-  wb_data("NY.GDP.PCAP.PP.KD", start_date = 2000, end_date = 2023),
-  error = function(e) readRDS("data/wb_gdp_raw.rds"))
-countries <- tryCatch(
-  wb_countries(), error = function(e) readRDS("data/wb_countries_raw.rds"))
+wb_raw <- wb_data(c(co2 = "EN.GHG.CO2.PC.CE.AR5",
+                    gdp = "NY.GDP.PCAP.PP.KD"),
+                  start_date = 2000, end_date = 2026)
+wb_meta <- wb_countries()
 
-Dat_co2 <- co2_raw %>%
-  rename(co2 = EN.GHG.CO2.PC.CE.AR5) %>%
-  select(iso3c, country, year = date, co2) %>%
-  drop_na(co2) %>% group_by(country) %>% filter(year == max(year)) %>% ungroup()
-Dat_gdp <- gdp_raw %>%
-  rename(gdp = NY.GDP.PCAP.PP.KD) %>%
-  select(iso3c, year = date, gdp) %>% drop_na(gdp) %>%
-  group_by(iso3c) %>% filter(year == max(year)) %>% ungroup() %>% select(iso3c, gdp)
-Dat_meta <- countries %>%
-  filter(region != "Aggregates") %>% select(iso3c, region, income_level)
-
-Dat <- Dat_co2 %>%
-  inner_join(Dat_gdp,  by = "iso3c") %>%
-  inner_join(Dat_meta, by = "iso3c") %>%
+Dat <- wb_raw %>%
+  drop_na(co2, gdp) %>%
+  group_by(country) %>%
+  filter(date == max(date)) %>%
+  ungroup() %>%
+  left_join(wb_meta %>% select(iso3c, region, income_level), by = "iso3c") %>%
+  select(iso3c, country, date, co2, gdp, region, income_level) %>%
   filter(country != "Palau") %>%              # the artefact from Lecture 4
   mutate(gdp_k  = gdp / 1000,
          region = fct_relevel(region, "Sub-Saharan Africa"))
@@ -69,7 +58,7 @@ mena_adj <- b_adj[grep("Middle", names(b_adj))]
 > - Did `pacman::p_load(...)` run without red errors? Fix that first.
 > - Odd results? *Session → Restart R*, then rerun from the top.
 > - **World Bank API down?** Load the cached, ready-made data instead:
->   `Dat <- readRDS(url("https://willowy-quokka-e604ee.netlify.app/data/Dat_L4.rds")) |> dplyr::filter(country != "Palau")`
+>   `Dat <- readRDS(url("https://merlin-ols.netlify.app/data/Dat_L4.rds")) |> dplyr::filter(country != "Palau")`
 > - Still stuck? Ask in the [t-R-ouble forum](https://absalon.ku.dk/courses/70545/discussion_topics/563046?module_item_id=2037268) on Absalon.
 
 2. **Write it yourself.** Fit two models and put them side by side: a **bivariate** one,

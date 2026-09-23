@@ -329,8 +329,8 @@ here — that's L12's job" note.
   index × `equal_liberty`** through *every* model as a control. Replaced with a single **canonical
   `civ_liberties`** control (v2xcl_rol, "Civil liberties" label) + `year`. The interaction recap is
   now a **conceptual bridge** ("a polynomial is a variable interacted with itself" → callback to
-  L11), **no socialism, no `rockchalk`/3D**. `tryCatch` on `wb_data` with a committed cache
-  (`data/wb_life_raw.rds`, 60 KB).
+  L11), **no socialism, no `rockchalk`/3D**. Life expectancy + health spending come in **one**
+  `wb_data(c(LifeExpect = ..., HealthExp = ...))` — the named vector supplies the column names.
 - **Panel data:** every model uses `clusters = country` (repeated country-years are not
   independent) — kept from the original and flagged on a slide.
 - **OWID embed kept** (professor's pick): one Our World in Data life-expectancy grapher iframe as
@@ -369,7 +369,7 @@ kept, but Part 2's example was rebuilt.
 - **Part 2 (continuous × continuous), RE-VEHICLED onto the L9 triangle:** the original used the
   **hand-coded 19-arm socialism `case_when`** the professor already had removed from L2/L9, plus the
   stale `$2.15` line (mislabelled `$5.50`). Replaced with `poverty ~ state_ownership * civ_liberties`
-  — L9's exact variables, canonical "civil liberties" label, `$3.00` line, `tryCatch` fallback, both
+  — L9's exact variables, canonical "civil liberties" label, `$3.00` line, both
   predictors mean-centred. Continues the L9 thread ("confounder or mediator?") into "**do they
   interact?**". The additive `state_ownership` slope is **−3.781**, *identical to L9* — deliberate
   continuity.
@@ -684,7 +684,7 @@ colonialism dropped entirely.
     On its own state control is ~+2.7 on poverty (R²≈0.02); **add freedom and its sign flips to
     −3.8** (freedom −37, state-control/freedom corr −0.69). A sign-flip is the ideal "is freedom a
     confounder or a mediator?" case and continues L2 directly. Reuses L2's exact vdem + WB-poverty
-    pipeline (tryCatch → `data/wb_poverty_raw.rds`, $3.00 line).
+    pipeline (live `wb_data(c(poverty = "SI.POV.DDAY"))`, $3.00 line).
   - *Frisch–Waugh* shown as the 3-step residualisation via `modelr::add_residuals()`; the
     residualised slope on `e_state` **equals** the multiple-model `state_control` coefficient
     (−3.781 both ways) — the payoff slide.
@@ -717,7 +717,7 @@ colonialism dropped entirely.
   (MCQs + fitb + solution toggles). Wired into `_quarto.yml` + `lectures.qmd`.
 
 ## Lecture 4 (2026-07-06) — OLS wisdoms, rebuilt as "the carbon divide"
-`4-OLS-Wisdoms.qmd` (35 slides) + `4-exercise1/2.Rmd`. **Not a faithful port** — the professor
+`4-OLS-Wisdoms.qmd` (39 slides) + `4-exercise1/2.Rmd`. **Not a faithful port** — the professor
 was unhappy with the old **colonialism** running example (both the loaded "which empire
 colonised better" framing *and* its brittle ~60-line hand-typed `case_when` of country names +
 independence years, full of typos that silently drop cases — the same kind of hand-coding he'd
@@ -737,19 +737,111 @@ discrimination = L5; xenophobia = L7/8/11) and picked a **fresh Global North/Sou
 - **Data (all World Bank, no hand-coding):** CO₂ = `EN.GHG.CO2.PC.CE.AR5` — **the classic
   `EN.ATM.CO2E.PC` was retired/archived by the WB in 2024** (verify with `wb_data`, it 404s);
   the AR5/EDGAR per-capita series is the live replacement. GDP = `NY.GDP.PCAP.PP.KD` (PPP,
-  `/1000` → `gdp_k` for readable slopes). **Region + income group come free from
-  `wb_countries()`** (filter out `region == "Aggregates"`), joined by `iso3c`. Region ref =
+  `/1000` → `gdp_k` for readable slopes). **Region + income group come from
+  `wb_countries()`**, joined by `iso3c`. Region ref =
   Sub-Saharan Africa (`fct_relevel`); a clean monotonic gradient SSA 0.9 t → N. America 10.6 t.
 - **Exercises use INCOME GROUP** (Low→High, another free WB categorical) so students practise
   the same skills on a *different* variable, not slide transcription: Ex1 = diagnostics +
   categorical dummy coding; Ex2 = coefficient plot + prediction plot, with the scaffolded
   "carbon divide" discussion. LPM binary = "high emitter (>2 t)"; splits 55/45 and predicts
   P>1 for Qatar (the LPM cautionary tale, shown on the slide).
-- **tryCatch/offline fallback (L2 convention):** all three WB calls are wrapped
-  `tryCatch(wb_data/wb_countries(...), error = readRDS("data/wb_*_raw.rds"))`; caches committed
-  (`wb_co2_raw.rds`, `wb_gdp_raw.rds`, `wb_countries_raw.rds`) + a joined `data/Dat_L4.rds` for
-  the exercise "Stuck?" URL. Regenerate with the pipeline in the deck's `wb-data`/`wb-build`
-  chunks. (`wb_countries()` *does* hit the API in wbstats 1.1, so it needs the guard too.)
+- **WB calls: TWO, no tryCatch (professor's call, 2026-09-22).** Both indicators come in **one**
+  `wb_data(c(co2 = "EN.GHG.CO2.PC.CE.AR5", gdp = "NY.GDP.PCAP.PP.KD"), ...)` — *naming* the
+  indicator vector makes wbstats name the columns, so the old `rename()` steps are gone. The
+  second call is `wb_countries()`, unavoidable: `region`/`income_level` live on a different
+  endpoint. `wb_data()` defaults to `country = "countries_only"`, so the old
+  `filter(region != "Aggregates")` is redundant and was dropped. Most-recent year is now a
+  single `drop_na(co2, gdp) %>% group_by(country) %>% filter(date == max(date))` — "the latest
+  year we observe both" instead of two separate extractions joined (N = 191 either way; slope
+  identical to 4 digits). **The `tryCatch` wrappers are gone** — students could not read them,
+  and the API is reliable enough. Column kept as `date` (not renamed to `year`) so the cached
+  `data/Dat_L4.rds` is a true drop-in for the exercise "Stuck?" URL; regenerate it with the
+  pipeline in the deck's `wb-data`/`wb-build` chunks. The per-indicator caches
+  (`wb_co2_raw.rds`, `wb_gdp_raw.rds`, `wb_countries_raw.rds`) are deleted. `9-exercise1/2.Rmd`
+  carry a copy of this pipeline and were updated in lockstep — keep them in sync.
+- **Ask-then-reveal on the first regression (professor's request, 2026-09-23):** slide 8
+  "A first regression" now ends on a blue `**Discuss:**` box asking students to say the
+  `gdp_k` slope out loud with units; the green payoff box moved to a new slide 9,
+  "Reading the slope". Both slides use the **identical** `push-left`/`push-right` layout and
+  the same `ref.label = "ols1"` chunk, so advancing swaps only the blue box for the green one
+  — that visual anchoring is what makes it read as a reveal rather than a new slide. Speaker
+  notes split accordingly (slide 8 = the three slips to listen for: missing units, forgetting
+  the /1000 rescale, causal verbs; slide 9 = the payoff, then the low-$R^2$ pivot into Part 1).
+- **Slides 13 / 14 / 15 / 18, as the professor settled them (2026-09-23):**
+  - **13 "Not every outlier is an error"** — Discuss box + the two photos side by side. No tabset.
+  - **14 "So: keep or drop?"** — the verdict box on its own slide. Not a preference: title +
+    Discuss box + verdict box alone eat 550px of the 900px slide, so keeping panels there forced
+    every figure to ~220px (illegible country labels). Also matches the 8/9 ask-then-reveal.
+  - **15 "Removing the artefact"** — FIVE panels: *Outliers again* · *Linearity again* ·
+    *The scatter* · *Petro vs. rest* · *Log–log*. All post-Palau, matching the slide's own
+    `drop-palau` chunk. The tab strip wraps to two rows in the 65% `.right-column`; harmless.
+  - **18 "CO2 by world region"** — boxplot now carries each region's **mean** as a white-outlined
+    diamond (`stat_summary(fun = mean, shape = 23, color = "white", stroke = 1.1)`). The white
+    outline is load-bearing: a solid marker disappears into the jitter cloud in the dense regions.
+    This answers the slide's own Discuss box — with only a categorical predictor the prediction
+    *is* the group mean — and lets you show the mean sitting above the median where a few heavy
+    emitters pull it up.
+- **Slide 20 "A dummy *is* a regression line" — restored from the PRE-QUARTO deck (2026-09-23).**
+  The professor missed it: the old Hugo deck
+  (`static/Lectures/4-OLS-Wisdom/4-OLS-Wisdoms.Rmd`, the `categorical` chunk in the
+  "Categorical predicators" panelset) explained dummies by coding **two** categories 0/1
+  (Belgium/Britain), scattering the outcome on that 0/1 X, and running `geom_smooth(method="lm")`
+  through it, with a green box asking what $\hat{Y}$ is for each group and how the gap relates to
+  $\hat{\beta}$. Adapted to CO2: **Sub-Saharan Africa (0) vs. Europe & Central Asia (1)** — chosen
+  over the SSA/North America pair the rest of the deck uses because **North America has only 3
+  countries** (Bermuda, Canada, US) and 46-vs-3 makes a lopsided scatter; 46 vs 48 reads properly.
+  The numbers do the teaching: intercept **0.91** = SSA's mean exactly, slope **4.68** = the
+  difference in means exactly (verified with `all.equal`). Jittered points, not country labels
+  (94 names on two x-positions is a pile), plus the **same white-outlined mean diamonds as slide
+  18** — the OLS line is pinned through both, which is the whole point. **Placed BEFORE dummy
+  coding** (professor's call): 18 boxplot → **19 "A dummy *is* a regression line"** (blue question
+  box) → **20 "$\hat{\beta}$ *is* a difference in means"** (red answer box, same figure via
+  `ref.label`, values live off `b_bi`) → 21 dummy-coding table → 22 R. The picture now motivates
+  the bookkeeping instead of explaining it afterwards. **Slide 18's Discuss box was deleted** — it
+  asked the same question worse, and asking it twice kills the reveal.
+- **Photos — full frames, no crop** (professor asked for scaling, not cropping): `img/L4/koror.jpg`
+  (1100×733, 3:2) and `img/L4/ras_laffan.jpg` (1100×825, 4:3). **Licensing — the credit lines must
+  stay, the site is public:** Koror–Babeldaob Bridge aerial by **Luka Peternel, CC BY-SA 4.0**;
+  Ras Laffan LNG terminal by **Matthew Smith (Flickr), CC BY 2.0**, in `.backgrnote` divs linking
+  to the Commons file pages. The two `out.width` values **differ on purpose** (86% / 76%): the
+  aspect ratios differ, so unequal widths are what make them the same height side by side.
+- **The photo pair uses flexbox, NOT `.push-left`/`.push-right`.** Those are floats, and floated
+  children give a container zero height — the photos then spill out and shove everything below
+  them off the slide. Cost an hour; do not "tidy" it back to the house float classes.
+- **`scatter_co2(d, log = FALSE)` lives in the deck's `setup` chunk.** The CO2-vs-GDP scatter (with
+  `geom_smooth(method = "lm")` → OLS line + 95% CI) is drawn on slide 7 and twice more in the
+  slide-15 panels; `log = TRUE` switches both axes to `log10` for the Log–log panel. One definition
+  so they cannot drift; all uses are `echo = FALSE`, so students never see the helper.
+  **The log panel is called as `scatter_co2(Dat %>% filter(co2 > 0), log = TRUE)`** — Tuvalu and
+  Nauru have CO2 recorded as exactly 0, and `log(0)` is `-Inf`. The professor chose to filter them
+  **silently** (no on-slide footnote), so that panel's n is 2 lower than the others by design.
+- **Petro panel:** petro = **oil + gas rents above 10% of GDP** (`NY.GDP.PETR.RT.ZS` +
+  `NY.GDP.NGAS.RT.ZS`), 25 countries (Libya, Iraq, Kuwait, Qatar, Saudi, Brunei, UAE, Russia,
+  Norway at exactly 10.0 …). Slopes: **petro 0.290 vs. 0.080** tonnes per $1k — 3.6× steeper.
+  **The rents series stops in 2021** while CO2/GDP run to 2023, so the flag is built from each
+  country's *most recent available* rents and treated as structural, not year-matched. The
+  `petro-data` chunk sits on slide 15 right after `drop-palau`, so Palau is already gone.
+  ⚠️ **This is a THIRD `wb_data()` call in L4**, in a hidden `include = FALSE` chunk, added after
+  the professor cut the deck down to two. The visible Preparation pipeline is untouched (and so
+  are all the exercises that mirror it). If that third call is unwanted, fold `oil`/`gas` into the
+  main `wb_data()` call — but that changes the code students copy and the exercise pipelines too.
+- **Two forward-references, both deliberate:** the Petro panel says interactions are **L11**; the
+  Log–log panel says re-scaling curved relationships is **L12**. Both in `.backgrnote` under the
+  figure, matching the linearity slide's existing "that is Lecture 12's job" note.
+- **Predictions slide (now 28) shows its ggplot code (2026-09-23).** Step 3 used to be
+  `echo = FALSE`, so students saw the prediction plot but never the code that drew it — while the
+  coefficient-plot slide right before it *did* show its code. Now split into **"Step 3: the code"**
+  (`fig.show = 'hide'`) and **"Step 4: the plot"** (`ref.label = "predplot"`), the same pattern as
+  the coefficient slide. The `synth` and `predict` chunks are also commented much more heavily at
+  the professor's request: why the countries are fictional, why `seq()` must stay inside the
+  observed range, what `newdata` is for, that "confidence" is uncertainty about the *average*
+  prediction and not where countries fall, and that `predict()` returns a **matrix** that has to be
+  `as_tibble()`d and `bind_cols()`ed back beside its `gdp_k`. Those last two are where student code
+  actually breaks.
+- **Preview-pane gotcha (not a deck bug):** clicking inside the Browser-pane preview makes reveal
+  re-scale the whole deck into a tiny corner. It reproduces on untouched slides, and a fresh
+  navigate fixes it. Drive fragments with `Reveal.nextFragment()` instead of clicking, and
+  cache-bust with `?v=N` after replacing an image — same filename is otherwise served stale.
 - **New bib entry:** `chancel_global_2022` (Chancel, *Nature Sustainability* 5:931–938 —
   global carbon inequality), cited on the RQ + payoff slides. `breen_interpreting_2018` kept
   for the LPM/logistic appendix.
@@ -848,15 +940,19 @@ the professor found the old "socialism vs. democratic freedom" story "holprig" a
 - **World Bank content updated:** the international poverty line is now **$3.00/day (2021 PPP)**
   (changed June 2025; SI.POV.DDAY returns the new line) — PPP box recomputed (≈ kr. 20/day,
   kr. 600/month).
-- **WB API outage fix (2026-07, the professor hit `object 'Dat' not found` mid-render):** the
-  `wb_data()` call is flaky and, when it fails, `Dat` never gets built → the whole deck halts. Every
-  `wb_data()` call (deck `wb-data` chunk + both exercises) is now wrapped
-  `tryCatch(wb_data(...), error = function(e) readRDS("data/wb_poverty_raw.rds"))`, falling back to
-  a committed raw cache (`quarto-poc/data/wb_poverty_raw.rds`, 11.7k rows — regenerate with
-  `wbstats::wb_data("SI.POV.DDAY", start_date=1972, end_date=2025)` and `saveRDS`). Live-first so
-  data stay fresh when the API is up; the fallback keeps renders reliable. `wb_search()` does NOT
-  need this — it queries the package's bundled `wb_cachelist`, not the network. Apply the same
-  tryCatch guard to any future deck that calls a live API.
+- **tryCatch/offline-cache convention: REMOVED course-wide (professor's call, 2026-09-22).** The
+  2026-07 outage fix wrapped every `wb_data()`/`wb_countries()` call in
+  `tryCatch(..., error = function(e) readRDS("data/wb_*_raw.rds"))`. **Students could not read it**
+  — it put error-handling machinery in front of the one line that was supposed to teach "this is
+  how you fetch data". All wrappers are gone (L2-ex2, L4 + both ex, L9 + both ex, L11 + ex2, L12),
+  and the five raw caches (`wb_co2_raw`, `wb_gdp_raw`, `wb_countries_raw`, `wb_poverty_raw`,
+  `wb_life_raw`) are deleted — recover from git history if ever needed. **Do NOT reintroduce the
+  pattern.** What stays: the student-facing "Stuck?" bullet pointing at the *joined* cache
+  `data/Dat_L4.rds` via the Netlify URL — that is plain prose a student can act on, not hidden
+  control flow. Caveat accepted with eyes open: the WB API *is* occasionally slow (it timed out
+  once during the 2026-09-22 verification pass), so a render can now fail on an outage — rerun it.
+  `wb_search()` never needed a guard: it queries the package's bundled `wb_cachelist`, not the
+  network.
 - **Exercise files are now per-lecture:** `<N>-exercise<k>.Rmd/html` (L6's renamed to
   `6-exercise*`; deck iframes + lectures.qmd + `_quarto.yml` resources glob updated).
   Exercises no longer use the `essentials` package.
@@ -943,7 +1039,10 @@ ChatGPT/Gemini (Bard is dead). REMEMBER: render exercises with `rmarkdown::rende
 - Citations: keep `RefManageR` inline (`Citet`, `PrintBibliography`) — no `@key` rewriting needed.
 
 ## Live deployment
-- **The new site is LIVE (since 2026-07-02):** https://willowy-quokka-e604ee.netlify.app — a fresh
+- **The new site is LIVE (since 2026-07-02):** **https://merlin-ols.netlify.app** (the site was
+  renamed from `willowy-quokka-e604ee`; that old hostname now 404s — it was still hard-coded in the
+  L4/L9 exercise "Stuck?" boxes until 2026-09-23, so students following that fallback got nothing.
+  `_publish.yml` is the source of truth for the target). A fresh
   Netlify site published by the professor via `quarto publish netlify` from `quarto-poc/` (the old
   Hugo site's Netlify deployment is untouched; switch the real course domain over when ready).
 - Deploy flow after each change: render locally, then `quarto publish netlify` (uploads `_site/`;

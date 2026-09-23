@@ -470,29 +470,18 @@ the reference region:</li>
 </ol>
 <pre class="r"><code>pacman::p_load(tidyverse, wbstats, estimatr, modelsummary)
 
-co2_raw &lt;- tryCatch(
-  wb_data(&quot;EN.GHG.CO2.PC.CE.AR5&quot;, start_date = 2000, end_date = 2023),
-  error = function(e) readRDS(&quot;data/wb_co2_raw.rds&quot;))
-gdp_raw &lt;- tryCatch(
-  wb_data(&quot;NY.GDP.PCAP.PP.KD&quot;, start_date = 2000, end_date = 2023),
-  error = function(e) readRDS(&quot;data/wb_gdp_raw.rds&quot;))
-countries &lt;- tryCatch(
-  wb_countries(), error = function(e) readRDS(&quot;data/wb_countries_raw.rds&quot;))
+wb_raw &lt;- wb_data(c(co2 = &quot;EN.GHG.CO2.PC.CE.AR5&quot;,
+                    gdp = &quot;NY.GDP.PCAP.PP.KD&quot;),
+                  start_date = 2000, end_date = 2026)
+wb_meta &lt;- wb_countries()
 
-Dat_co2 &lt;- co2_raw %&gt;%
-  rename(co2 = EN.GHG.CO2.PC.CE.AR5) %&gt;%
-  select(iso3c, country, year = date, co2) %&gt;%
-  drop_na(co2) %&gt;% group_by(country) %&gt;% filter(year == max(year)) %&gt;% ungroup()
-Dat_gdp &lt;- gdp_raw %&gt;%
-  rename(gdp = NY.GDP.PCAP.PP.KD) %&gt;%
-  select(iso3c, year = date, gdp) %&gt;% drop_na(gdp) %&gt;%
-  group_by(iso3c) %&gt;% filter(year == max(year)) %&gt;% ungroup() %&gt;% select(iso3c, gdp)
-Dat_meta &lt;- countries %&gt;%
-  filter(region != &quot;Aggregates&quot;) %&gt;% select(iso3c, region, income_level)
-
-Dat &lt;- Dat_co2 %&gt;%
-  inner_join(Dat_gdp,  by = &quot;iso3c&quot;) %&gt;%
-  inner_join(Dat_meta, by = &quot;iso3c&quot;) %&gt;%
+Dat &lt;- wb_raw %&gt;%
+  drop_na(co2, gdp) %&gt;%
+  group_by(country) %&gt;%
+  filter(date == max(date)) %&gt;%
+  ungroup() %&gt;%
+  left_join(wb_meta %&gt;% select(iso3c, region, income_level), by = &quot;iso3c&quot;) %&gt;%
+  select(iso3c, country, date, co2, gdp, region, income_level) %&gt;%
   filter(country != &quot;Palau&quot;) %&gt;%              # the artefact from Lecture 4
   mutate(gdp_k  = gdp / 1000,
          region = fct_relevel(region, &quot;Sub-Saharan Africa&quot;))</code></pre>
@@ -505,7 +494,7 @@ that first.</li>
 top.</li>
 <li><strong>World Bank API down?</strong> Load the cached, ready-made
 data instead:
-<code>Dat &lt;- readRDS(url(&quot;https://willowy-quokka-e604ee.netlify.app/data/Dat_L4.rds&quot;)) |&gt; dplyr::filter(country != &quot;Palau&quot;)</code></li>
+<code>Dat &lt;- readRDS(url(&quot;https://merlin-ols.netlify.app/data/Dat_L4.rds&quot;)) |&gt; dplyr::filter(country != &quot;Palau&quot;)</code></li>
 <li>Still stuck? Ask in the <a href="https://absalon.ku.dk/courses/70545/discussion_topics/563046?module_item_id=2037268">t-R-ouble
 forum</a> on Absalon.</li>
 </ul>
@@ -772,25 +761,25 @@ function tinytable_rank_sorter(a, b, aRow, bRow, column, dir, sorterParams) {
 
     <script>
       // Create table-specific functions using external factory
-      const tableFns_jrdamqm4yy70esu02fx8 = TinyTable.createTableFunctions("tinytable_jrdamqm4yy70esu02fx8");
+      const tableFns_6pptw14dzojkrqge3jte = TinyTable.createTableFunctions("tinytable_6pptw14dzojkrqge3jte");
       // tinytable span after
       window.addEventListener('load', function () {
           var cellsToStyle = [
             // tinytable style arrays after
-          { positions: [ { i: '18', j: 2 }, { i: '18', j: 3 } ], css_id: 'tinytable_css_wfkif1klp78yu80stb9j',}, 
-          { positions: [ { i: '16', j: 2 }, { i: '16', j: 3 } ], css_id: 'tinytable_css_givrwndl1c98g8vamcgk',}, 
-          { positions: [ { i: '1', j: 2 }, { i: '2', j: 2 }, { i: '3', j: 2 }, { i: '4', j: 2 }, { i: '5', j: 2 }, { i: '6', j: 2 }, { i: '7', j: 2 }, { i: '8', j: 2 }, { i: '9', j: 2 }, { i: '10', j: 2 }, { i: '11', j: 2 }, { i: '12', j: 2 }, { i: '13', j: 2 }, { i: '14', j: 2 }, { i: '15', j: 2 }, { i: '17', j: 2 }, { i: '1', j: 3 }, { i: '2', j: 3 }, { i: '3', j: 3 }, { i: '4', j: 3 }, { i: '5', j: 3 }, { i: '6', j: 3 }, { i: '7', j: 3 }, { i: '8', j: 3 }, { i: '9', j: 3 }, { i: '10', j: 3 }, { i: '11', j: 3 }, { i: '12', j: 3 }, { i: '13', j: 3 }, { i: '14', j: 3 }, { i: '15', j: 3 }, { i: '17', j: 3 } ], css_id: 'tinytable_css_wvix8a4fd00h0wib34h7',}, 
-          { positions: [ { i: '0', j: 2 }, { i: '0', j: 3 } ], css_id: 'tinytable_css_lp6jth1eg0k5ggoum6uh',}, 
-          { positions: [ { i: '18', j: 1 } ], css_id: 'tinytable_css_9hifxxtpky1fyubeq4gx',}, 
-          { positions: [ { i: '16', j: 1 } ], css_id: 'tinytable_css_lnnso42lluyryzwa8hp0',}, 
-          { positions: [ { i: '1', j: 1 }, { i: '2', j: 1 }, { i: '3', j: 1 }, { i: '4', j: 1 }, { i: '5', j: 1 }, { i: '6', j: 1 }, { i: '7', j: 1 }, { i: '8', j: 1 }, { i: '9', j: 1 }, { i: '10', j: 1 }, { i: '11', j: 1 }, { i: '12', j: 1 }, { i: '13', j: 1 }, { i: '14', j: 1 }, { i: '15', j: 1 }, { i: '17', j: 1 } ], css_id: 'tinytable_css_uq41dveviamvxr6r6r3g',}, 
-          { positions: [ { i: '0', j: 1 } ], css_id: 'tinytable_css_sn8oa34530g3t9aplfid',}, 
+          { positions: [ { i: '18', j: 2 }, { i: '18', j: 3 } ], css_id: 'tinytable_css_9z6z6rw7u1be06udjjdo',}, 
+          { positions: [ { i: '16', j: 2 }, { i: '16', j: 3 } ], css_id: 'tinytable_css_wdq75dbpvtyv499a9wu0',}, 
+          { positions: [ { i: '1', j: 2 }, { i: '2', j: 2 }, { i: '3', j: 2 }, { i: '4', j: 2 }, { i: '5', j: 2 }, { i: '6', j: 2 }, { i: '7', j: 2 }, { i: '8', j: 2 }, { i: '9', j: 2 }, { i: '10', j: 2 }, { i: '11', j: 2 }, { i: '12', j: 2 }, { i: '13', j: 2 }, { i: '14', j: 2 }, { i: '15', j: 2 }, { i: '17', j: 2 }, { i: '1', j: 3 }, { i: '2', j: 3 }, { i: '3', j: 3 }, { i: '4', j: 3 }, { i: '5', j: 3 }, { i: '6', j: 3 }, { i: '7', j: 3 }, { i: '8', j: 3 }, { i: '9', j: 3 }, { i: '10', j: 3 }, { i: '11', j: 3 }, { i: '12', j: 3 }, { i: '13', j: 3 }, { i: '14', j: 3 }, { i: '15', j: 3 }, { i: '17', j: 3 } ], css_id: 'tinytable_css_7ag9tb0bavxqwmlbnxmo',}, 
+          { positions: [ { i: '0', j: 2 }, { i: '0', j: 3 } ], css_id: 'tinytable_css_masrfr5iphjk6mm588tg',}, 
+          { positions: [ { i: '18', j: 1 } ], css_id: 'tinytable_css_h2kghdmmq395sal1218p',}, 
+          { positions: [ { i: '16', j: 1 } ], css_id: 'tinytable_css_oz61bpvjd9y07tvwm8yk',}, 
+          { positions: [ { i: '1', j: 1 }, { i: '2', j: 1 }, { i: '3', j: 1 }, { i: '4', j: 1 }, { i: '5', j: 1 }, { i: '6', j: 1 }, { i: '7', j: 1 }, { i: '8', j: 1 }, { i: '9', j: 1 }, { i: '10', j: 1 }, { i: '11', j: 1 }, { i: '12', j: 1 }, { i: '13', j: 1 }, { i: '14', j: 1 }, { i: '15', j: 1 }, { i: '17', j: 1 } ], css_id: 'tinytable_css_kc7jxgmjwc0mar5c9s7t',}, 
+          { positions: [ { i: '0', j: 1 } ], css_id: 'tinytable_css_s6tjwgmcrukh45is88gw',}, 
           ];
 
           // Loop over the arrays to style the cells
           cellsToStyle.forEach(function (group) {
               group.positions.forEach(function (cell) {
-                  tableFns_jrdamqm4yy70esu02fx8.styleCell(cell.i, cell.j, group.css_id);
+                  tableFns_6pptw14dzojkrqge3jte.styleCell(cell.i, cell.j, group.css_id);
               });
           });
       });
@@ -916,6 +905,11 @@ position: relative;
 --line-width-bottom: 0.1em;
 --line-width-left: 0.1em;
 
+--line-type-top: solid;
+--line-type-right: solid;
+--line-type-bottom: solid;
+--line-type-left: solid;
+
 --trim-top-left: 0%;
 --trim-top-right: 0%;
 --trim-right-top: 0%;
@@ -935,9 +929,9 @@ right: var(--trim-right-top, 0);
 bottom: 0;
 pointer-events: none;
 z-index: 1;
-border-top: calc(var(--border-top) * var(--line-width-top)) solid var(--line-color-top);
-border-right: calc(var(--border-right) * var(--line-width-right)) solid var(--line-color-right);
-border-left: calc(var(--border-left) * var(--line-width-left)) solid var(--line-color-left);
+border-top: calc(var(--border-top) * var(--line-width-top)) var(--line-type-top, solid) var(--line-color-top);
+border-right: calc(var(--border-right) * var(--line-width-right)) var(--line-type-right, solid) var(--line-color-right);
+border-left: calc(var(--border-left) * var(--line-width-left)) var(--line-type-left, solid) var(--line-color-left);
 }
 
 .tinytable :is(td, th)[class*="tinytable_css_"]::after {
@@ -946,8 +940,8 @@ position: absolute;
 left: var(--trim-bottom-left, 0);
 right: var(--trim-bottom-right, 0);
 bottom: var(--trim-left-bottom, var(--trim-right-bottom, 0));
-height: calc(var(--border-bottom) * var(--line-width-bottom));
-background: var(--line-color-bottom);
+height: 0;
+border-bottom: calc(var(--border-bottom) * var(--line-width-bottom)) var(--line-type-bottom, solid) var(--line-color-bottom);
 pointer-events: none;
 z-index: 2;
 }
@@ -993,17 +987,17 @@ line-height: var(--tt-line-height-footnote-tight);
 </style>
     <style>
 
-#tinytable_jrdamqm4yy70esu02fx8 td.tinytable_css_wfkif1klp78yu80stb9j, #tinytable_jrdamqm4yy70esu02fx8 th.tinytable_css_wfkif1klp78yu80stb9j { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.08em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: center }
-#tinytable_jrdamqm4yy70esu02fx8 td.tinytable_css_givrwndl1c98g8vamcgk, #tinytable_jrdamqm4yy70esu02fx8 th.tinytable_css_givrwndl1c98g8vamcgk { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.05em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: center }
-#tinytable_jrdamqm4yy70esu02fx8 td.tinytable_css_wvix8a4fd00h0wib34h7, #tinytable_jrdamqm4yy70esu02fx8 th.tinytable_css_wvix8a4fd00h0wib34h7 { text-align: center }
-#tinytable_jrdamqm4yy70esu02fx8 td.tinytable_css_lp6jth1eg0k5ggoum6uh, #tinytable_jrdamqm4yy70esu02fx8 th.tinytable_css_lp6jth1eg0k5ggoum6uh { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 1; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.05em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.08em; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: center }
-#tinytable_jrdamqm4yy70esu02fx8 td.tinytable_css_9hifxxtpky1fyubeq4gx, #tinytable_jrdamqm4yy70esu02fx8 th.tinytable_css_9hifxxtpky1fyubeq4gx { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.08em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: left }
-#tinytable_jrdamqm4yy70esu02fx8 td.tinytable_css_lnnso42lluyryzwa8hp0, #tinytable_jrdamqm4yy70esu02fx8 th.tinytable_css_lnnso42lluyryzwa8hp0 { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.05em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: left }
-#tinytable_jrdamqm4yy70esu02fx8 td.tinytable_css_uq41dveviamvxr6r6r3g, #tinytable_jrdamqm4yy70esu02fx8 th.tinytable_css_uq41dveviamvxr6r6r3g { text-align: left }
-#tinytable_jrdamqm4yy70esu02fx8 td.tinytable_css_sn8oa34530g3t9aplfid, #tinytable_jrdamqm4yy70esu02fx8 th.tinytable_css_sn8oa34530g3t9aplfid { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 1; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.05em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.08em; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: left }
+#tinytable_6pptw14dzojkrqge3jte td.tinytable_css_9z6z6rw7u1be06udjjdo, #tinytable_6pptw14dzojkrqge3jte th.tinytable_css_9z6z6rw7u1be06udjjdo { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.08em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: center }
+#tinytable_6pptw14dzojkrqge3jte td.tinytable_css_wdq75dbpvtyv499a9wu0, #tinytable_6pptw14dzojkrqge3jte th.tinytable_css_wdq75dbpvtyv499a9wu0 { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.05em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: center }
+#tinytable_6pptw14dzojkrqge3jte td.tinytable_css_7ag9tb0bavxqwmlbnxmo, #tinytable_6pptw14dzojkrqge3jte th.tinytable_css_7ag9tb0bavxqwmlbnxmo { text-align: center }
+#tinytable_6pptw14dzojkrqge3jte td.tinytable_css_masrfr5iphjk6mm588tg, #tinytable_6pptw14dzojkrqge3jte th.tinytable_css_masrfr5iphjk6mm588tg { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 1; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.05em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.08em; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: center }
+#tinytable_6pptw14dzojkrqge3jte td.tinytable_css_h2kghdmmq395sal1218p, #tinytable_6pptw14dzojkrqge3jte th.tinytable_css_h2kghdmmq395sal1218p { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.08em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: left }
+#tinytable_6pptw14dzojkrqge3jte td.tinytable_css_oz61bpvjd9y07tvwm8yk, #tinytable_6pptw14dzojkrqge3jte th.tinytable_css_oz61bpvjd9y07tvwm8yk { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.05em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: left }
+#tinytable_6pptw14dzojkrqge3jte td.tinytable_css_kc7jxgmjwc0mar5c9s7t, #tinytable_6pptw14dzojkrqge3jte th.tinytable_css_kc7jxgmjwc0mar5c9s7t { text-align: left }
+#tinytable_6pptw14dzojkrqge3jte td.tinytable_css_s6tjwgmcrukh45is88gw, #tinytable_6pptw14dzojkrqge3jte th.tinytable_css_s6tjwgmcrukh45is88gw { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 1; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.05em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.08em; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: left }
 </style>
     <div class="container">
-      <table class="tinytable" id="tinytable_jrdamqm4yy70esu02fx8" style="width: auto; margin-left: auto; margin-right: auto;" data-quarto-disable-processing="true">
+      <table class="tinytable" id="tinytable_6pptw14dzojkrqge3jte" style="width: auto; margin-left: auto; margin-right: auto;" data-quarto-disable-processing="true">
         
         <thead>
               <tr>
@@ -1016,83 +1010,83 @@ line-height: var(--tt-line-height-footnote-tight);
         <tbody>
                 <tr>
                   <td data-row="1" data-col="1">(Intercept)</td>
-                  <td data-row="1" data-col="2">0.911***</td>
-                  <td data-row="1" data-col="3">0.165</td>
+                  <td data-row="1" data-col="2">0.922***</td>
+                  <td data-row="1" data-col="3">0.208</td>
                 </tr>
                 <tr>
                   <td data-row="2" data-col="1"></td>
-                  <td data-row="2" data-col="2">(0.218)</td>
-                  <td data-row="2" data-col="3">(0.256)</td>
+                  <td data-row="2" data-col="2">(0.224)</td>
+                  <td data-row="2" data-col="3">(0.248)</td>
                 </tr>
                 <tr>
                   <td data-row="3" data-col="1">regionEast Asia &amp; Pacific</td>
-                  <td data-row="3" data-col="2">3.315***</td>
-                  <td data-row="3" data-col="3">0.799</td>
+                  <td data-row="3" data-col="2">3.320***</td>
+                  <td data-row="3" data-col="3">0.866</td>
                 </tr>
                 <tr>
                   <td data-row="4" data-col="1"></td>
-                  <td data-row="4" data-col="2">(0.943)</td>
-                  <td data-row="4" data-col="3">(0.856)</td>
+                  <td data-row="4" data-col="2">(0.926)</td>
+                  <td data-row="4" data-col="3">(0.820)</td>
                 </tr>
                 <tr>
                   <td data-row="5" data-col="1">regionEurope &amp; Central Asia</td>
-                  <td data-row="5" data-col="2">4.679***</td>
-                  <td data-row="5" data-col="3">-0.141</td>
+                  <td data-row="5" data-col="2">4.557***</td>
+                  <td data-row="5" data-col="3">-0.064</td>
                 </tr>
                 <tr>
                   <td data-row="6" data-col="1"></td>
-                  <td data-row="6" data-col="2">(0.471)</td>
-                  <td data-row="6" data-col="3">(1.471)</td>
+                  <td data-row="6" data-col="2">(0.463)</td>
+                  <td data-row="6" data-col="3">(1.379)</td>
                 </tr>
                 <tr>
                   <td data-row="7" data-col="1">regionLatin America &amp; Caribbean</td>
-                  <td data-row="7" data-col="2">2.065***</td>
-                  <td data-row="7" data-col="3">-0.171</td>
+                  <td data-row="7" data-col="2">2.109***</td>
+                  <td data-row="7" data-col="3">-0.118</td>
                 </tr>
                 <tr>
                   <td data-row="8" data-col="1"></td>
-                  <td data-row="8" data-col="2">(0.574)</td>
-                  <td data-row="8" data-col="3">(0.820)</td>
+                  <td data-row="8" data-col="2">(0.573)</td>
+                  <td data-row="8" data-col="3">(0.808)</td>
                 </tr>
                 <tr>
                   <td data-row="9" data-col="1">regionMiddle East, North Africa, Afghanistan &amp; Pakistan</td>
-                  <td data-row="9" data-col="2">8.728**</td>
-                  <td data-row="9" data-col="3">5.803***</td>
+                  <td data-row="9" data-col="2">8.617***</td>
+                  <td data-row="9" data-col="3">5.895***</td>
                 </tr>
                 <tr>
                   <td data-row="10" data-col="1"></td>
-                  <td data-row="10" data-col="2">(2.618)</td>
-                  <td data-row="10" data-col="3">(1.610)</td>
+                  <td data-row="10" data-col="2">(2.571)</td>
+                  <td data-row="10" data-col="3">(1.657)</td>
                 </tr>
                 <tr>
                   <td data-row="11" data-col="1">regionNorth America</td>
-                  <td data-row="11" data-col="2">9.711**</td>
-                  <td data-row="11" data-col="3">1.001</td>
+                  <td data-row="11" data-col="2">9.667**</td>
+                  <td data-row="11" data-col="3">1.360</td>
                 </tr>
                 <tr>
                   <td data-row="12" data-col="1"></td>
-                  <td data-row="12" data-col="2">(3.325)</td>
-                  <td data-row="12" data-col="3">(5.405)</td>
+                  <td data-row="12" data-col="2">(3.236)</td>
+                  <td data-row="12" data-col="3">(5.194)</td>
                 </tr>
                 <tr>
                   <td data-row="13" data-col="1">regionSouth Asia</td>
-                  <td data-row="13" data-col="2">0.703</td>
-                  <td data-row="13" data-col="3">-0.008</td>
+                  <td data-row="13" data-col="2">0.756</td>
+                  <td data-row="13" data-col="3">0.039</td>
                 </tr>
                 <tr>
                   <td data-row="14" data-col="1"></td>
-                  <td data-row="14" data-col="2">(0.499)</td>
-                  <td data-row="14" data-col="3">(0.352)</td>
+                  <td data-row="14" data-col="2">(0.517)</td>
+                  <td data-row="14" data-col="3">(0.368)</td>
                 </tr>
                 <tr>
                   <td data-row="15" data-col="1">gdp_k</td>
                   <td data-row="15" data-col="2"></td>
-                  <td data-row="15" data-col="3">0.121***</td>
+                  <td data-row="15" data-col="3">0.114***</td>
                 </tr>
                 <tr>
                   <td data-row="16" data-col="1"></td>
                   <td data-row="16" data-col="2"></td>
-                  <td data-row="16" data-col="3">(0.035)</td>
+                  <td data-row="16" data-col="3">(0.033)</td>
                 </tr>
                 <tr>
                   <td data-row="17" data-col="1">Num.Obs.</td>
@@ -1102,7 +1096,7 @@ line-height: var(--tt-line-height-footnote-tight);
                 <tr>
                   <td data-row="18" data-col="1">R2</td>
                   <td data-row="18" data-col="2">0.241</td>
-                  <td data-row="18" data-col="3">0.465</td>
+                  <td data-row="18" data-col="3">0.455</td>
                 </tr>
         </tbody>
       </table>
@@ -1120,7 +1114,7 @@ sign</option></select></p></li>
 <li><p>Read off the <strong>North America</strong> coefficient in the
 <em>adjusted</em> model: compared with Sub-Saharan Africa, North America
 emits about
-<input class="webex-solveme nospaces" size="6" data-answer="[&quot;1.00&quot;,&quot;1,00&quot;]"></input>
+<input class="webex-solveme nospaces" size="6" data-answer="[&quot;1.36&quot;,&quot;1,36&quot;]"></input>
 tonnes more per person <strong>once wealth is held constant</strong>
 (two digits; point or comma is fine) — down from 9.7 t in the bivariate
 model.</p></li>
@@ -1141,9 +1135,9 @@ something regional beyond wealth.</em></p>
 region and emissions?
 <select class="webex-select"><option value="blank"></option><option value>A
 confounder we must control to be fair</option><option value="answer">A
-mediator: richer regions emit more largely because they are rich —
-wealth is the channel</option><option value>Neither; it is irrelevant
-here</option></select></li>
+mediator: richer regions emit more largely because they are rich
+&lt;U+2014&gt; wealth is the channel</option><option value>Neither;
+it is irrelevant here</option></select></li>
 </ol>
 <hr />
 <p><strong>Bonus (for the fast):</strong> one region stays high <em>even
@@ -1159,14 +1153,14 @@ R solution
   arrange(desc(estimate)) %&gt;%
   select(term, estimate)
 #                                                      term estimate
-# 1 regionMiddle East, North Africa, Afghanistan &amp; Pakistan   5.8033
-# 2                                     regionNorth America   1.0012
-# 3                               regionEast Asia &amp; Pacific   0.7993
-# 4                                        regionSouth Asia  -0.0083
-# 5                             regionEurope &amp; Central Asia  -0.1414
-# 6                         regionLatin America &amp; Caribbean  -0.1714</code></pre>
+# 1 regionMiddle East, North Africa, Afghanistan &amp; Pakistan    5.895
+# 2                                     regionNorth America    1.360
+# 3                               regionEast Asia &amp; Pacific    0.866
+# 4                                        regionSouth Asia    0.039
+# 5                             regionEurope &amp; Central Asia   -0.064
+# 6                         regionLatin America &amp; Caribbean   -0.118</code></pre>
 <p>The <strong>Middle East &amp; North Africa</strong> region stays
-about 5.8 t above the reference even at equal GDP — the oil-and-gas
+about 5.9 t above the reference even at equal GDP — the oil-and-gas
 economies emit far more than their income alone implies. Controlling for
 wealth reveals <em>which</em> regions are genuinely
 emission-intensive.</p>

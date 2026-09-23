@@ -46,6 +46,28 @@ BibOptions(check.entries = FALSE,
            no.print.fields = c("doi", "url", "ISSN", "urldate", "language", "note", "isbn", "volume"))
 myBib <- ReadBib("../Stats_II.bib", check = FALSE)
 
+# The CO2-vs-GDP scatter is shown twice: once with every country, and again
+# without Palau in the panel on "Not every outlier is an error". Defined once
+# here so the two can never drift apart. (Both uses are echo = FALSE.)
+scatter_co2 <- function(d, log = FALSE) {
+  p <- ggplot(d, aes(y = co2, x = gdp_k, label = country)) +
+    geom_smooth(method = "lm", formula = y ~ x,
+                color = "#901A1E", fill = "#901A1E", alpha = 0.15) +
+    geom_text(size = 3, alpha = 0.8) +
+    geom_label_repel(data = d %>% filter(country == "Denmark"),
+                     color = "#901A1E", size = 5,
+                     box.padding = 1.5, force = 60, segment.size = 1) +
+    labs(y = "Tonnes of CO2 per person",
+         x = "GDP per person (thousands of $, PPP)") +
+    theme_minimal(base_size = 14)
+  if (log) {
+    p <- p + scale_x_log10() + scale_y_log10() +
+      labs(y = "Tonnes of CO2 per person (log scale)",
+           x = "GDP per person, PPP (log scale)")
+  }
+  p
+}
+
 # modelsummary prepends a stray &nbsp; to some column headers (shows as a literal "&nbsp;").
 # Strip it from every chunk's output, so the code students see stays a plain modelsummary().
 local({
@@ -57,15 +79,11 @@ local({
 
 ## By the end of today you can … {.inverse background-color="#901A1E"}
 
-1. **check the OLS assumptions that matter** — spot outliers with *Cook's D* and judge the *linearity* assumption — and decide what to do about a suspicious case;
+1. **check the OLS assumptions that matter**: spot outliers with *Cook's D*, judge the *linearity* assumption, and decide what to do about a suspicious case;
 
-2. **use a categorical predictor** — dummy-code it, choose a reference category, and read the coefficients as differences between groups;
+2. **use a categorical predictor**: dummy-code it, choose a reference category, and read the coefficients as differences between groups;
 
-3. **visualize regression results** — a *coefficient plot* for categorical predictors, and *predicted values* for a continuous one.
-
-::: {.backgrnote}
-One part of today's lecture per goal. Our running question: **the carbon divide** — who pollutes, and why?
-:::
+3. **visualize regression results**: a *coefficient plot* for categorical predictors, and *predicted values* for a continuous one.
 
 ::: {.notes}
 Today is craft, not new theory: they can already fit a line, so now they learn to distrust one. Frame it as three habits — interrogate the line, handle categories, show the result. The running example is the carbon divide, which is worth a sentence: this is their generation's justice question, and we are doing it with the same OLS they already know.
@@ -76,24 +94,20 @@ Today is craft, not new theory: they can already fit a line, so now they learn t
 [Part 1 of 3]{.part-pill}
 
 ::: {.lead}
-Regression is easy to *run* and easy to *fool*. Before we trust a line, we interrogate it.
+Regression is easy to *run* and easy to *fool*.
 :::
 
-## The research question of the day {.inverse background-color="#901A1E"}
+## Research question of the day {.inverse background-color="#901A1E"}
 
 ::: {.push-left}
 The climate crisis is the defining North–South injustice of your generation: the countries that emit **most** are rarely the ones that suffer **most**.
 
-A first, blunt question before any of the justice: **do richer countries simply emit more CO₂?**
+The gap is staggering: the average Qatari emits *hundreds of times* more CO₂ than the average person in Chad or the DR Congo `r Citep(myBib, "chancel_global_2022")`.
 :::
 
 ::: {.push-right}
 ::: {.content-box-blue}
-**Research question of the day:** across the world's countries, how does **CO₂ emitted per person** relate to a country's **wealth** — and to the **world region** it sits in?
-:::
-
-::: {.backgrnote}
-The gap is staggering: the average Qatari emits *hundreds of times* more CO₂ than the average person in Chad or the DR Congo `r Citet(myBib, "chancel_global_2022")`.
+Research question of the day: across the world's countries, how does **CO₂ emitted per person** relate to a country's **wealth**?
 :::
 :::
 
@@ -117,53 +131,24 @@ pacman::p_load( # Load (and install if needed) several R packages
 
 ### Get the data
 ```{r wb-data}
-# Download from the World Bank API; if it is unreachable, fall back to a
-# cached copy so the analysis still runs (smart habit for any live data!)
-co2_raw <- tryCatch(
-  wb_data("EN.GHG.CO2.PC.CE.AR5", # CO2 emissions, tonnes per person
-          start_date = 2000, end_date = 2023),
-  error = function(e) readRDS("data/wb_co2_raw.rds")
-)
-gdp_raw <- tryCatch(
-  wb_data("NY.GDP.PCAP.PP.KD", # GDP per person, PPP (constant 2021 $)
-          start_date = 2000, end_date = 2023),
-  error = function(e) readRDS("data/wb_gdp_raw.rds")
-)
-countries <- tryCatch( # Region & income group for every country
-  wb_countries(),
-  error = function(e) readRDS("data/wb_countries_raw.rds")
-)
+# Both indicators in ONE call: name them, and wbstats names the columns for us
+wb_raw <- wb_data(c(co2 = "EN.GHG.CO2.PC.CE.AR5", # CO2, tonnes per person
+                    gdp = "NY.GDP.PCAP.PP.KD"),   # GDP p.c., PPP (const. 2021 $)
+                  start_date = 2000, end_date = 2026)
+
+# Region & income group are part of a different API, so a second call
+wb_meta <- wb_countries()
 ```
 
 ### Build one tibble
 ```{r wb-build}
-# Most recent CO2 value per country
-Dat_co2 <- co2_raw %>%
-  rename(co2 = EN.GHG.CO2.PC.CE.AR5) %>%
-  select(iso3c, country, year = date, co2) %>%
-  drop_na(co2) %>%
-  group_by(country) %>%
-  filter(year == max(year)) %>%
-  ungroup()
-
-# Most recent GDP value per country (keep only the key + GDP)
-Dat_gdp <- gdp_raw %>%
-  rename(gdp = NY.GDP.PCAP.PP.KD) %>%
-  select(iso3c, year = date, gdp) %>%
-  drop_na(gdp) %>%
-  group_by(iso3c) %>%
-  filter(year == max(year)) %>%
-  ungroup() %>%
-  select(iso3c, gdp)
-
-# Region & income group (drop the World Bank's aggregate "regions")
-Dat_meta <- countries %>%
-  filter(region != "Aggregates") %>%
-  select(iso3c, region, income_level)
-
-(Dat <- Dat_co2 %>%
-   inner_join(Dat_gdp,  by = "iso3c") %>%
-   inner_join(Dat_meta, by = "iso3c") %>%
+(Dat <- wb_raw %>%
+   drop_na(co2, gdp) %>%     # Keep country-years where we observe both
+   group_by(country) %>%
+   filter(date == max(date)) %>% # ...and of those, the most recent one
+   ungroup() %>%
+   left_join(wb_meta %>% select(iso3c, region, income_level), by = "iso3c") %>%
+   select(iso3c, country, date, co2, gdp, region, income_level) %>%
    mutate(
      gdp_k  = gdp / 1000, # GDP in THOUSANDS of $, for readable slopes
      region = fct_relevel(region, "Sub-Saharan Africa") # reference group
@@ -187,7 +172,7 @@ Dat %>%
 ```
 
 ::: {.backgrnote}
-The extremes are oil-and-gas economies (Qatar, Kuwait, Brunei) and rich English-speaking countries; at the other end sit some of the world's poorest states.
+The extremes are oil-and-gas economies (Qatar, Kuwait, Brunei); at the other end sit some of the world's poorest states.
 :::
 
 ::: {.notes}
@@ -201,7 +186,7 @@ Let the bars do the talking — ask them to find Denmark before you point at it.
 **Ask every scatter plot four questions:**
 
 1. *Direction* of the relationship?
-2. *Form* — is it a straight line?
+2. *Form*; is it a straight line?
 3. *Spread* around the trend?
 4. Any *outliers*?
 :::
@@ -209,14 +194,7 @@ Let the bars do the talking — ask them to find Denmark before you point at it.
 
 ::: {.right-column}
 ```{r scatter1, out.width='100%', fig.height = 5, fig.width = 8, echo = FALSE}
-ggplot(data = Dat, aes(y = co2, x = gdp_k, label = country)) +
-  geom_text(size = 3, alpha = 0.8) +
-  geom_label_repel(data = Dat %>% filter(country == "Denmark"),
-                   color = "#901A1E", size = 5,
-                   box.padding = 1.5, force = 60, segment.size = 1) +
-  labs(y = "Tonnes of CO2 per person",
-       x = "GDP per person (thousands of $, PPP)") +
-  theme_minimal(base_size = 14)
+scatter_co2(Dat) # OLS line + 95% CI ribbon
 ```
 :::
 
@@ -247,13 +225,33 @@ modelsummary(
 ```{r ref.label = "ols1", echo = FALSE, results = 'asis'}
 ```
 
-::: {.content-box-green}
-Each extra **\$1,000** of GDP per person comes with about **`r round(coef(lm_robust(co2 ~ gdp_k, data = Dat))[2], 2)`** more tonnes of CO₂ per person. But $R^2 \approx `r round(summary(lm_robust(co2 ~ gdp_k, data = Dat))$r.squared, 2)`$ — and a low $R^2$ is often a warning sign. *Should* we trust this line?
+::: {.content-box-blue}
+**Discuss:** put the `gdp_k` coefficient into one plain sentence. *How much* of *what* goes with *how much* of *what* — and in which **units**?
 :::
 :::
 
 ::: {.notes}
-Have them read the slope in words, with units — that habit is worth more than the number. Then point at the low $R^2$ and ask the question the whole first part answers: *should* we trust this line? The honest answer is that we do not know yet, because we have not looked at how it was produced.
+Do not read the slope out for them — make them try it. Reading a coefficient aloud, with units, is the habit worth more than the number itself, and it is the thing that fails in exams. Listen for the three classic slips: dropping the units ("emissions go up by 0.12"), forgetting we rescaled to *thousands* of dollars, and sliding into causal language ("makes", "causes", "leads to"). Collect two or three attempts, then turn the page.
+:::
+
+## Reading the slope
+
+::: {.push-left}
+```{r ref.label = "ols1", echo = TRUE, results = 'hide'}
+```
+:::
+
+::: {.push-right}
+```{r ref.label = "ols1", echo = FALSE, results = 'asis'}
+```
+
+::: {.content-box-green}
+Each extra **\$1,000** of GDP per person comes with about **`r round(coef(lm_robust(co2 ~ gdp_k, data = Dat))[2], 2)`** more tonnes of CO₂ per person.
+:::
+:::
+
+::: {.notes}
+Put their best attempt next to this one. Three things to make explicit: the **\$1,000** (because we divided by 1,000 ourselves — the slope would be a near-invisible 0.0001 in raw dollars), the **units on both sides**, and the words "comes with" rather than "causes". Then point at the low $R^2$ and ask the question the whole first part of today answers: *should* we trust this line? The honest answer is that we do not know yet, because we have not looked at how it was produced.
 :::
 
 ## OLS makes assumptions
@@ -264,7 +262,7 @@ For OLS to describe the data honestly:
 
 1. **No influential outliers**
 2. **Linearity** (a straight line fits)
-3. Homoscedasticity — *don't worry*: `lm_robust()` handles it.
+3. Homoscedasticity; *don't worry*: `lm_robust()` handles it.
 4. Independent observations.
 
 $\rightarrow$ The first two we **check with plots**.
@@ -273,10 +271,10 @@ $\rightarrow$ The first two we **check with plots**.
 
 ::: {.right-column}
 ::: {.content-box-red}
-**Beware:** a single strange country, or a curved relationship, can bend the OLS line away from the pattern in the *bulk* of the data — and quietly change your conclusion.
-:::
+**Beware:** a single strange country, or a curved relationship, can bend the OLS line away from the pattern in the *bulk* of the data, and quietly change your conclusion.
 
-A model is a *reduced representation of reality*. It should capture the general pattern — **not** be dictated by one or two singular cases.
+A model is a *reduced representation of reality*. It should capture the general pattern; **not** be dictated by one or two singular cases.
+:::
 :::
 
 ::: {.notes}
@@ -286,19 +284,19 @@ Four assumptions, but be honest that only two need their attention today — `lm
 ## Assumption 1: outliers
 
 ::: {.left-column}
-- **Standardized residuals:** how far a country sits *from* the line. Watch:
-  + **Qatar** — CO₂ `r round(Dat$co2[Dat$country == "Qatar"], 1)` t: extremely rich *and* extremely high.
-  + **Palau** — CO₂ `r round(Dat$co2[Dat$country == "Palau"], 1)` t: only middling GDP, yet off the chart.
+- **Standardized residuals:** how many far (in standard deviations) a country sits *from* the OLS line.
+  + **Qatar (146):** CO₂ `r round(Dat$co2[Dat$country == "Qatar"], 1)` t: extremely rich *and* extremely polluting.
+  + **Palau (140):** CO₂ `r round(Dat$co2[Dat$country == "Palau"], 1)` t: only middling GDP, yet off the chart polluting.
 
-- **Leverage:** influence on the line; $x_i$ far from $\bar{x}$ (Qatar's huge GDP).
+- **Leverage:** influence on the OLS line; $x_i$ far from $\bar{x}$ (Qatar's huge GDP).
 
-- **Cook's D:** how much *all* predictions shift if case $i$ were removed.
-  + Beyond the **dashed grey lines** = influential.
+- **Cook's D:** how much *all* predictions shift if case $i$ were removed $(\hat{\beta} - \hat{\beta_{-i}})$.
+  + Beyond the **dashed grey lines** $\rightarrow$ influential.
 :::
 
 ::: {.right-column}
 ```{r outlier, results = FALSE, fig.show = 'hide'}
-# Re-estimate with base lm(), then the best outlier plot: #<<
+# Re-estimate with base lm(), then the best outlier plot:
 lm(co2 ~ gdp_k, data = Dat) %>%
   plot(which = 5)
 ```
@@ -314,13 +312,13 @@ Three ideas, and they are genuinely different — keep them apart. Residual = fa
 ## Assumption 2: linearity
 
 ::: {.left-column}
-- **Fitted values** $\hat{Y}$ on the X-axis, **residuals** on the Y-axis.
+- **Fitted values** $\hat{Y}$ on the X-axis; **residuals** on the Y-axis.
 
 - **Red line:** the smoothed relationship between the two.
 
-- **Ideal:** the red line is *flat* — the straight line captured everything.
+- **Ideal:** the red line is *flat* $\rightarrow$ OLS captures the relationship well.
 
-- **Our case:** the red line bends — driven by the same rich, high-emitting outliers. The linearity assumption is strained.
+- **Our case:** the red line bends slightly; the linearity assumption is hardly strained.
 :::
 
 ::: {.right-column}
@@ -341,15 +339,45 @@ Flat red line means the straight line caught everything; a bend means it did not
 ## Not every outlier is an error
 
 ::: {.content-box-blue}
-**Discuss:** the plots flag **two** countries. **Palau** — a tiny Pacific island whose per-person figure is distorted by a tanker-refuelling port and ~18,000 residents. **Qatar** — a genuine petro-state. Should we delete both?
+**Discuss:** the plots flag **two** countries. **Palau**, which is a tiny Pacific island whose per-person figure is distorted by a tanker-refuelling port and ~18,000 residents. **Qatar**, which is a genuine petro-state. Should we delete them?
 :::
 
-::: {.content-box-red .fragment}
-No — *judgement*, not reflex. **Palau** is a measurement artefact for our question (national wealth → emissions): we **drop** it. **Qatar** is a real, important case; we **keep** it, but stay aware it has high leverage. Never delete a case just because it is inconvenient.
+::: {style="display: flex; gap: 2.5rem; align-items: flex-start;"}
+
+::: {style="flex: 1; text-align: center;"}
+```{r palau-photo, echo = FALSE, out.width='86%'}
+knitr::include_graphics('img/L4/koror.jpg')
+```
+::: {.backgrnote}
+**Palau** — Koror, the main island. *Photo:* Luka Peternel, [CC BY-SA 4.0](https://commons.wikimedia.org/wiki/File:Koror-Babeldaob-Bridge-2016-Luka-Peternel.jpg).
+:::
+:::
+
+::: {style="flex: 1; text-align: center;"}
+```{r qatar-photo, echo = FALSE, out.width='76%'}
+knitr::include_graphics('img/L4/ras_laffan.jpg')
+```
+::: {.backgrnote}
+**Qatar** — the Ras Laffan LNG terminal. *Photo:* Matthew Smith, [CC BY 2.0](https://commons.wikimedia.org/wiki/File:Ras_Laffan_LNG_terminal_in_2012.jpg).
+:::
+:::
+
 :::
 
 ::: {.notes}
-The most important slide of the lecture, and the least statistical. Make them vote before you reveal. The distinction: Palau's number is an artefact of *how it was measured* — a refuelling port divided by 18,000 residents — so it does not answer our question. Qatar's number is true and substantively interesting. Delete the artefact, keep the inconvenient truth. Say it flatly: dropping cases because they spoil your result is misconduct, and the defence is that you state what you dropped and why.
+The most important slide of the lecture, and the least statistical. Put faces to the two names, then make them vote on "delete or keep?" before you turn the page — the verdict is the next slide.
+:::
+
+## So: keep or drop?
+
+::: {.content-box-red}
+Tough call! **Palau** is a real case, but a measurement artefact for our question (national wealth → emissions): one can argue to **drop** it. **Qatar** is a real, important case; we **keep** it, but stay aware it has high leverage. 
+
+Never delete a case just because it is an inconvenient outlier by DFbeta standards.
+:::
+
+::: {.notes}
+Their vote first, then this. The distinction: Palau's number is an artefact of *how it was measured* — a refuelling port divided by 18,000 residents — so it does not answer our question. Qatar's number is true and substantively interesting. Delete the artefact, keep the inconvenient truth. Say it flatly: dropping cases because they spoil your result is misconduct, and the defence is that you state what you dropped and why.
 :::
 
 ## Removing the artefact
@@ -357,11 +385,30 @@ The most important slide of the lecture, and the least statistical. Make them vo
 ::: {.left-column}
 ```{r drop-palau}
 Dat <- Dat %>%
-  filter(country != "Palau") #<<
+  filter(country != "Palau")
+```
+
+```{r petro-data, include = FALSE}
+# Petro economies, for the "Petro vs. rest" panel. The World Bank's oil + gas
+# rent series stops in 2021 while CO2/GDP run to 2023, so we take each country's
+# most recent available rents: being a petro economy is a structural trait, not a
+# year-specific one. Threshold: fuel rents above 10% of GDP.
+petro_flag <- wb_data(c(oil = "NY.GDP.PETR.RT.ZS",
+                        gas = "NY.GDP.NGAS.RT.ZS"),
+                      start_date = 2000, end_date = 2023) %>%
+  mutate(rents = coalesce(oil, 0) + coalesce(gas, 0)) %>%
+  filter(!is.na(oil) | !is.na(gas)) %>%
+  group_by(iso3c) %>% filter(date == max(date)) %>% ungroup() %>%
+  transmute(iso3c, rents)
+
+Dat_petro <- Dat %>% # Palau is already gone at this point
+  left_join(petro_flag, by = "iso3c") %>%
+  mutate(petro = if_else(coalesce(rents, 0) > 10,
+                         "Petro economy", "All other countries"))
 ```
 
 ::: {.content-box-green}
-With Palau gone, the outlier plot calms down and the red linearity line straightens — the same line now fits the *bulk* of countries far better.
+With Palau gone, Qatar becomes a clear outlier. Sometimes, removing an outlier starts a cascade.
 :::
 :::
 
@@ -377,6 +424,40 @@ lm(co2 ~ gdp_k, data = Dat) %>% plot(which = 5)
 ```{r linearity2, out.width='72%', fig.height = 4, fig.width = 5.2, results = FALSE, echo = FALSE}
 lm(co2 ~ gdp_k, data = Dat) %>% plot(which = 1)
 ```
+
+### The scatter
+```{r scatter-no-palau, out.width='92%', fig.height = 3.8, fig.width = 8, echo = FALSE}
+scatter_co2(Dat)
+```
+
+### Petro vs. rest
+```{r scatter-petro, out.width='86%', fig.height = 3.6, fig.width = 8, echo = FALSE}
+ggplot(Dat_petro, aes(y = co2, x = gdp_k, color = petro, fill = petro)) +
+  geom_point(size = 2, alpha = 0.6) +
+  geom_smooth(method = "lm", formula = y ~ x, alpha = 0.15) +
+  scale_color_manual(values = c("All other countries" = "grey45",
+                                "Petro economy" = "#901A1E")) +
+  scale_fill_manual(values = c("All other countries" = "grey45",
+                               "Petro economy" = "#901A1E")) +
+  labs(y = "Tonnes of CO2 per person", x = "GDP per person (thousands of $, PPP)",
+       color = NULL, fill = NULL,
+       caption = "Petro economy = oil + gas rents above 10% of GDP (World Bank).") +
+  theme_minimal(base_size = 14) +
+  theme(legend.position = "top")
+```
+
+::: {.backgrnote}
+**Two lines is an *interaction*** — wealth buying a *different* amount of CO₂ depending on where the wealth comes from. We only put that in a model in **Lecture 11**; today, just look. The story: wealth drives emissions above all when the wealth *is* fossil fuel.
+:::
+
+### Log–log
+```{r scatter-loglog, out.width='86%', fig.height = 3.6, fig.width = 8, echo = FALSE}
+scatter_co2(Dat %>% filter(co2 > 0), log = TRUE)
+```
+
+::: {.backgrnote}
+On **log** axes the bend disappears and the cloud tightens around a straight line — the same data, a fairer description. Re-scaling a curved relationship this way is **Lecture 12**'s job; today we only notice that it would help.
+:::
 
 :::
 :::
@@ -414,7 +495,7 @@ One row out of 190-odd, and $R^2$ roughly doubles — that is the number to dwel
 [Part 2 of 3]{.part-pill}
 
 ::: {.lead}
-Wealth is continuous. But much of what we compare is **categorical** — here, the *world region* a country sits in.
+Wealth is continuous. But much of what we compare is **categorical**.
 :::
 
 ## CO₂ by world region
@@ -422,19 +503,79 @@ Wealth is continuous. But much of what we compare is **categorical** — here, t
 ```{r region-box, out.width='100%', fig.height = 5, fig.width = 16, echo = FALSE}
 ggplot(data = Dat, aes(y = co2, x = reorder(region, co2, FUN = median))) +
   geom_boxplot(outlier.shape = NA, color = "#901A1E") +
-  geom_jitter(width = 0.12, alpha = 0.4, size = 1.5) +
+  geom_jitter(width = 0.12, alpha = 0.6, size = 1.5) +
+  # The region MEAN - which is exactly what a regression on region predicts
+  stat_summary(fun = mean, geom = "point", shape = 23, size = 4,
+               fill = "#901A1E", color = "white", stroke = 1.1) +
   scale_x_discrete(labels = function(x) str_wrap(x, 16)) +
   labs(y = "Tonnes of CO2 per person", x = "",
-       caption = "Source: World Bank") +
+       caption = "Source: World Bank. Diamonds mark each region's MEAN; the line inside the box is the median.") +
   theme_minimal(base_size = 15)
 ```
 
+::: {.notes}
+Read the gradient across regions out loud, then plant the diamonds: those are the region *means*, and the means are what a regression on region will predict. Point out that they sit above the median line in most regions, because a few heavy emitters pull the mean up; OLS predicts the mean, not the median. Do not explain why yet — the next two slides make them work it out. Once they have, dummy coding stops being a trick and becomes obvious.
+:::
+
+## A dummy *is* a regression line
+
+::: {.left-column}
 ::: {.content-box-blue}
-**Discuss:** if we predict CO₂ from region alone, what would $\hat{Y}$ *be* for a Sub-Saharan African country? For a North American one? How does the difference between them relate to $\hat{\beta}$?
+Take just **two** regions and code them **0/1**:
+
+1. What is $\hat{Y}$ for a **Sub-Saharan African** country?
+2. What is $\hat{Y}$ for a **European** one?
+3. How does the difference between them relate to $\hat{\beta}$?
+:::
+:::
+
+::: {.right-column}
+```{r binary-contrast, out.width='100%', fig.height = 4.6, fig.width = 7, echo = FALSE}
+Dat_bi <- Dat %>%
+  filter(region %in% c("Sub-Saharan Africa", "Europe & Central Asia")) %>%
+  mutate(europe = if_else(region == "Europe & Central Asia", 1, 0))
+
+ggplot(Dat_bi, aes(y = co2, x = europe)) +
+  geom_jitter(width = 0.035, height = 0, alpha = 0.45, size = 1.8) +
+  geom_smooth(method = "lm", formula = y ~ x,
+              color = "#901A1E", fill = "#901A1E", alpha = 0.15) +
+  # The two group MEANS again - the same diamonds as the region boxplot
+  stat_summary(aes(group = europe), fun = mean, geom = "point", shape = 23,
+               size = 4.5, fill = "#901A1E", color = "white", stroke = 1.2) +
+  scale_x_continuous(breaks = c(0, 1), limits = c(-0.18, 1.18),
+                     labels = c("0 =\nSub-Saharan Africa", "1 =\nEurope & Central Asia")) +
+  labs(y = "Tonnes of CO2 per person", x = NULL) +
+  theme_minimal(base_size = 14)
+```
+
+```{r binary-coefs, include = FALSE}
+b_bi <- coef(lm_robust(co2 ~ europe, data = Dat_bi))
+```
 :::
 
 ::: {.notes}
-Let them answer the blue box before you move on — the insight they should reach on their own is that with only a categorical predictor, the prediction *is* the group mean. Once they see that, dummy coding stops being a trick and becomes obvious. The gradient across regions is also worth reading aloud.
+This is the slide that makes dummies click, so do not rush it, and do **not** answer it yourself. Nothing new is happening here: it is the same OLS line as this morning, drawn over an X that only ever takes the values 0 and 1. Work the blue box in order and make them commit to a number for each of the first two questions before you turn the page. The diamonds are the same mean markers they just saw on the boxplot — point at them, say nothing more, and wait.
+:::
+
+## $\hat{\beta}$ *is* a difference in means
+
+::: {.left-column}
+::: {.content-box-red}
+1. $\hat{Y}$ at X = 0 is the **intercept**: `r round(b_bi[1], 2)` t — Sub-Saharan Africa's **mean**.
+
+2. $\hat{Y}$ at X = 1 is **intercept + slope**: `r round(b_bi[1] + b_bi[2], 2)` t — Europe's **mean**.
+
+3. So $\hat{\beta}$ = `r round(b_bi[2], 2)` is simply the **difference between two group means**.
+:::
+:::
+
+::: {.right-column}
+```{r ref.label = "binary-contrast", out.width='100%', fig.height = 4.6, fig.width = 7, echo = FALSE}
+```
+:::
+
+::: {.notes}
+Now confirm it, and make the geometry explicit: the line is *pinned* through both diamonds. With only two possible X values there is nowhere else for a straight line to go — it must hit the mean of each column, so the slope cannot be anything other than the gap between those means. That is the whole idea of a dummy coefficient, and it is why "average difference from the reference" is a description of a slope rather than a new kind of quantity. Then generalise out loud: with more than two categories R just draws one of these lines per dummy, all sharing the same reference. The next slide is only the bookkeeping for doing that.
 :::
 
 ## Dummy coding: from labels to 0/1
@@ -453,7 +594,7 @@ $$x = \begin{cases} 1, & \text{if in the category} \\ 0 & \text{otherwise} \end{
 | Denmark | 0 | 1 | 0 |
 | Germany | 0 | 1 | 0 |
 | … | 0 | 0 | 1 |
-| Reference<br>[(Sub-Saharan Africa)]{.backgrnote} | 0 | 0 | 0 |
+| Reference<br>[(Sub-Saharan Africa, see slide 5)]{.backgrnote} | 0 | 0 | 0 |
 
 Each coefficient = that region's **average difference** in CO₂ from the reference.
 :::
@@ -496,11 +637,11 @@ modelsummary(
 b <- coef(lm_robust(co2 ~ region, data = Dat))
 ```
 
-- **Reference (Sub-Saharan Africa):** average CO₂ is the **intercept**, `r round(b[1], 2)` t per person — the value when *all* region dummies are 0.
+- **Reference (Sub-Saharan Africa):** average CO₂ is the **intercept**, `r round(b[1], 2)` t per person; the value when *all* region dummies are 0.
 
-- **North America vs. Sub-Saharan Africa:** `r round(b["regionNorth America"], 2)` t per person **more**, on average → an average of `r round(b[1] + b["regionNorth America"], 2)` t.
+- **North America vs. Sub-Saharan Africa:** `r round(b["regionNorth America"], 2)` t per person **more**, on average → an average of (`r round(b[1], 2)` + `r round(b["regionNorth America"], 2)` =) `r round(b[1] + b["regionNorth America"], 2)` t.
 
-- Every coefficient is a **difference of group means** from the reference. No line, no linearity assumption to check — the model just reports averages.
+- Every coefficient is a **difference of group means** from the reference. No line, no linearity assumption to check.
 
 :::
 
@@ -515,7 +656,7 @@ Read the intercept first — it is Sub-Saharan Africa's average, the case where 
 ## Your turn: exercise 1
 
 ::: {.left-column}
-You practice today's diagnostics and a categorical predictor — this time with **income groups** instead of regions.
+You practice today's diagnostics and a categorical predictor. This time with **income groups** instead of regions.
 
 [**Open exercise 1 in a new tab ↗**](4-exercise1.html){target="_blank"}
 
@@ -535,7 +676,7 @@ You practice today's diagnostics and a categorical predictor — this time with 
 [Part 3 of 3]{.part-pill}
 
 ::: {.lead}
-A regression table is for you. A **figure** is for your reader. Two go-to plots: coefficients, and predictions.
+**Figures** are often much better for your reader. Two go-to plots: coefficient plots, and predictions.
 :::
 
 ## (1) Coefficient plots
@@ -591,38 +732,52 @@ The pitch: nobody reads a table of seven coefficients, but everyone reads this p
 
 ### Step 1: synthetic data
 ```{r synth}
-# Fictional countries spanning the observed GDP range
+# We want the line for a RANGE of wealth levels, so we invent countries to
+# predict FOR. They are fictional on purpose: no country has to exist at
+# exactly $37k - we only need X values to feed the model.
 (fict_dat <- tibble(
+  # One fictional country per $1,000 step, from $1k up to $120k.
+  # seq() builds 1, 2, 3, ... 120 - stay inside the OBSERVED range,
+  # because a model says nothing about wealth levels it never saw.
   gdp_k = seq(from = 1, to = 120, by = 1)
 ))
 ```
 
 ### Step 2: predict
 ```{r predict}
-(fict_dat <- predict(  # Predicted CO2 + 95% interval
-  object   = ols_1,
-  newdata  = fict_dat,
-  interval = "confidence", level = 0.95)$fit %>%
-   as_tibble() %>%
-   bind_cols(fict_dat, .))
+(fict_dat <- predict(
+  object   = ols_1,      # The fitted model: what we learned from real countries
+  newdata  = fict_dat,   # The fictional countries: where we want the line
+  # "confidence" = uncertainty about the AVERAGE prediction (a narrow ribbon),
+  # NOT where individual countries fall. level = 0.95 -> the usual 95%.
+  interval = "confidence", level = 0.95)$fit %>% # $fit = the fit/lwr/upr matrix
+   as_tibble() %>%                # predict() hands back a matrix; make it a tibble
+   bind_cols(fict_dat, .))        # Glue it beside the gdp_k it belongs to
 ```
 
-### Step 3: visualize
-```{r predplot, out.width='62%', fig.height = 4.2, fig.width = 6.5, echo = FALSE}
-ggplot(data = fict_dat, aes(y = fit, x = gdp_k)) +
-  # Mark a poor and a rich benchmark
+### Step 3: the code
+```{r predplot, fig.show = 'hide'}
+ggplot(data = fict_dat,        # The FICTIONAL countries, not Dat #<<
+       aes(y = fit,            # fit = the predicted CO2 #<<
+           x = gdp_k)) +
+  # Two benchmarks to talk about: a poor country and a rich one
   geom_vline(xintercept = c(5, 60), color = "#901A1E", lty = "dashed") +
-  geom_ribbon(aes(ymin = lwr, ymax = upr), alpha = 0.3) +
-  geom_line(linewidth = 1) +
+  # The 95% interval, drawn FIRST so the line sits on top of it
+  geom_ribbon(aes(ymin = lwr, ymax = upr), alpha = 0.3) + #<<
+  geom_line(linewidth = 1) + # The predicted line itself #<<
   labs(x = "GDP per person (thousands of $, PPP)",
        y = "Predicted tonnes of CO2 per person") +
   theme_minimal(base_size = 14)
 ```
 
+### Step 4: the plot
+```{r ref.label = "predplot", out.width='62%', fig.height = 4.2, fig.width = 6.5, echo = FALSE}
+```
+
 :::
 
 ::: {.notes}
-Three steps, and step 1 is the one they forget: invent fictional countries spanning the GDP range, *then* predict for them. Stress that the ribbon is uncertainty about the average prediction, not a range where countries fall — that misreading is extremely common. The two dashed benchmarks make the divide concrete: a poor country and a rich one, and the gap between their predictions.
+Four tabs now, but still three ideas, and step 1 is the one they forget: invent fictional countries spanning the GDP range, *then* predict for them. Walk the comments in step 2 — `newdata`, and the fact that `predict()` returns a matrix that has to be glued back beside its `gdp_k`, are the two places their own code will break. Stress that the ribbon is uncertainty about the average prediction, not a range where countries fall — that misreading is extremely common. The two dashed benchmarks make the divide concrete: a poor country and a rich one, and the gap between their predictions.
 :::
 
 ## The carbon divide, in two pictures
@@ -638,7 +793,7 @@ Three steps, and step 1 is the one they forget: invent fictional countries spann
 :::
 
 ::: {.content-box-green}
-Richer countries and richer regions emit far more per person. Yet the people who emit the **least** — across Sub-Saharan Africa and South Asia — are the ones most exposed to the warming those emissions cause. That gap, not the slope, is the real research agenda `r Citet(myBib, "chancel_global_2022")`.
+Richer countries and richer regions emit far more per person. Yet the people who emit the least (across Sub-Saharan Africa and South Asia) are the ones most vulnerable to the global warming those emissions cause `r Citep(myBib, "chancel_global_2022")`.
 :::
 
 ::: {.notes}
@@ -662,13 +817,10 @@ You practice visualizing regression: a **coefficient plot** and a **prediction p
 ## One last wisdom: whose carbon is it?
 
 ::: {.left-column}
-Everything so far counted CO2 where it is **produced**. But Denmark burns little at home and **imports** carbon-heavy goods — steel, electronics, meat.
+Everything so far counted CO2 where it is **produced**. But Denmark burns little at home and **imports** carbon-heavy goods, like steel, electronics, and gasoline.
 
-**Consumption-based** accounting re-assigns them to whoever *consumes* the goods: Denmark's footprint jumps from `r round(readRDS("data/owid_consumption.rds") %>% filter(country == "Denmark") %>% pull(production), 1)` to **`r round(readRDS("data/owid_consumption.rds") %>% filter(country == "Denmark") %>% pull(consumption), 1)` t** — factory economies (China, India) carry what we outsourced.
+**Consumption-based** accounting re-assigns them to whoever *consumes* the goods: "Green" Denmark's footprint jumps from `r round(readRDS("data/owid_consumption.rds") %>% filter(country == "Denmark") %>% pull(production), 1)` to **`r round(readRDS("data/owid_consumption.rds") %>% filter(country == "Denmark") %>% pull(consumption), 1)` t**; factory economies (China, India) produce what we outsourced.
 
-::: {.content-box-green}
-**The wisdom:** how you *measure the outcome* can flip the story — a fairer CO2 number makes the North–South gap **wider**, not smaller.
-:::
 :::
 
 ::: {.notes}
@@ -736,7 +888,7 @@ modelsummary(
 
 ::: {.push-right}
 ::: {.content-box-green}
-Same predictor, same countries — a different outcome. Wealth explains **far more** of the *consumption* footprint ($R^2 \approx `r round(summary(lm(consumption ~ gdp_k, data = Dat_cons))$r.squared, 2)`$) than of *production* ($R^2 \approx `r round(summary(lm(co2 ~ gdp_k, data = Dat_cons))$r.squared, 2)`$), and the slope is **steeper**. What a country *consumes* tracks its wealth more tightly than what it happens to *emit at home* — and Qatar is no longer the lone outlier.
+Same predictor, same countries, but a different outcome. Wealth explains **far more** of the *consumption* footprint ($R^2 \approx `r round(summary(lm(consumption ~ gdp_k, data = Dat_cons))$r.squared, 2)`$) than of *production* ($R^2 \approx `r round(summary(lm(co2 ~ gdp_k, data = Dat_cons))$r.squared, 2)`$), and the slope is **steeper**. What a country *consumes* tracks its wealth more tightly than what it happens to *emit at home*; and Qatar is no longer the lone outlier.
 :::
 :::
 
@@ -767,15 +919,13 @@ Same predictor, same countries, one different outcome column — and the fit imp
 
 1. Outliers can bend the OLS line. **Cook's D** (`plot(which = 5)`) finds the influential ones.
 
-2. OLS assumes a **linear** relationship for continuous predictors — check it (`plot(which = 1)`); it does *not* apply to categorical predictors.
+2. OLS assumes a **linear** relationship for continuous predictors: check it (`plot(which = 1)`); it does *not* apply to categorical predictors.
 
-3. Not every outlier is deleted: separate **artefacts** (drop) from **real, important cases** (keep, but note their leverage).
+3. Not every outlier should be deleted: separate **artefacts** (drop) from **real, important cases** (keep, but note their leverage).
 
 4. **Categorical predictors** are dummy-coded: each coefficient is a group's average difference from the **reference** category. R does this automatically.
 
 5. **Coefficient plots** show categorical results; **prediction plots** show what a continuous model implies across a range of values.
-
-6. **How you measure the outcome can flip the story** — production vs. consumption CO2 is the same countries, a different (and fairer) number.
 
 ## Today's important functions
 
@@ -798,8 +948,8 @@ Look back at the goals from the start. Can you tick all three?
 
 ::: {.checklist}
 - Run `plot(model, which = 5)` and `which = 1` and say, in words, what each one is telling you.
-- Decide whether a flagged outlier is an *artefact* to drop or a *real case* to keep — and defend your call.
-- Read a coefficient on a **dummy** variable as a difference from the reference — and build a coefficient plot and a prediction plot for your reader.
+- Decide whether a flagged outlier is an *artefact* to drop or a *real case* to keep and defend your call.
+- Read a coefficient on a **dummy** variable as a difference from the reference, and build a coefficient plot and a prediction plot for your reader.
 :::
 
 ::: {.content-box-green}
