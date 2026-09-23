@@ -1,6 +1,6 @@
 ---
 title: "Randomness & Statistical Inference"
-subtitle: "What a random sample can — and cannot — tell us"
+subtitle: "What a random sample can, and cannot, tell us"
 author: "Merlin Schaeffer · Department of Sociology"
 date: today
 format:
@@ -64,29 +64,25 @@ efficacy_lab <- "Feels the political system\nlets people have a say"
 
 ## By the end of today you can … {.inverse background-color="#901A1E"}
 
-1. explain why we rely on **random samples** — and how **weights** repair imperfect randomness;
+1. explain why we rely on **random samples**, and how **weights** repair imperfect randomness;
 
 2. see that every sample carries **sampling error**, and **estimate** it with a *standard error*;
 
-3. use **confidence intervals** and **hypothesis tests** to say what a sample can — and cannot — generalise.
-
-::: {.backgrnote}
-One part of today's lecture per goal. Our running question: **do better-educated people generally believe more in the political system's responsiveness?**
-:::
+3. use **confidence intervals** and **hypothesis tests** to say what a sample can, and cannot, generalise.
 
 ## Random samples & weights {.inverse background-color="#901A1E"}
 
 [Part 1 of 3]{.part-pill}
 
 ::: {.lead}
-All our data are *samples*. To generalise from them safely, we lean on one idea: **randomness**.
+All our data are *samples*. To generalise from them, we use one idea: **randomness**.
 :::
 
 ## The research question of the day
 
 ::: {.push-left}
 ::: {.lead}
-Do **better-educated** people *generally* believe more strongly that the **political system is responsive** — that people like them have a say?
+Do **better-educated** people *generally* believe more strongly that the **political system is responsive**, that people have a say?
 :::
 
 [*Political efficacy*: the belief that one's voice counts in politics.]{.backgrnote}
@@ -139,10 +135,10 @@ ESS <- read_spss("ESS9e03_1.sav") %>%
 ::: {.push-left}
 **(1) Populations are too large** to survey everyone.
 
-**(2) Even with data on everyone**, we care about *general patterns and social mechanisms* — not just this year's Danes or today's countries.
+**(2) Even with data on everyone**, we care about *general patterns and social mechanisms*, not just this year's people in DK or today's countries.
 
 ::: {.content-box-green}
-So we treat **any** data set — even a full register — as **one sample** drawn from an unobservable "super-population".
+So we treat **any** data set (even a full register) as **one sample** drawn from an unobservable "super-population".
 :::
 :::
 
@@ -163,14 +159,14 @@ knitr::include_graphics('img/L3/generalization.png')
 ## Convenience samples mislead
 
 ::: {.push-left}
-A good sample is **representative** — it mirrors the super-population.
+A good sample is **representative**, it mirrors the super-population.
 
 ::: {.content-box-blue}
-**Discuss:** you snowball-sample starting from your best friend. What bias creeps in — and who gets left out?
+**Discuss:** you snowball-sample starting from your best friend. What bias creeps in, and who gets left out?
 :::
 
 ::: {.content-box-red .fragment}
-Your friends resemble *you* (age, education, city, politics). Whole groups are systematically **missing** — the sample is biased before you compute anything.
+Your friends resemble *you* (age, education, city, politics). Whole groups are systematically **missing**; the sample is biased before you compute anything.
 :::
 :::
 
@@ -190,7 +186,7 @@ knitr::include_graphics('img/L3/Convenience_Sample.png')
 Why do so many games use dice, coins, shuffled cards?
 
 ::: {.content-box-green}
-**Fairness:** a random draw gives *everyone the same chance*, [regardless of who they are]{.alert}. No player — and no social group — can be systematically forgotten.
+**Fairness:** a random draw gives *everyone the same chance*, [regardless of who they are]{.alert}. No player, and no social group, can be systematically forgotten.
 :::
 
 A random sample is the equivalent of **stirring the soup before you taste it**: one spoonful then represents the whole pot.
@@ -208,11 +204,61 @@ knitr::include_graphics('img/L3/monopoly.jpg')
 
 ## But participation is *not* random {.inverse background-color="#901A1E"}
 
+::: {.push-left}
 ::: {.lead}
-Who answers a survey is never a perfect coin flip — some groups are harder to reach, or more willing to respond.
+Who answers a survey is never a perfect coin flip: <br> some groups are harder to reach, or more willing to respond.
 :::
 
-We repair this after the fact with [post-stratification weights]{.alert}.
+We repair this after the fact with **post-stratification weights**.
+
+::: {.fragment fragment-index=1}
+[**Denmark, 2015.** The last polls put **Dansk Folkeparti** at ~18% — it won **21.1%**. On the other side, **SF** and **Enhedslisten** polled about a point *above* what they got.]{.small}
+
+[Part of that gap is late deciders, not only refusals, but either way: who ends up in the data is not random.]{.small}
+:::
+:::
+
+::: {.push-right}
+::: {.r-stack}
+```{r, echo = FALSE, out.width='78%'}
+knitr::include_graphics('img/L3/zyglis_trust.jpg')
+```
+
+::: {.fragment fragment-index=1}
+```{r dk-polls, echo = FALSE, out.width='100%', fig.width = 8.5, fig.height = 5.4}
+# Final five polls, 17 June 2015 (Gallup, Greens, Voxmeter, Epinion, Megafon)
+# vs. the folketingsvalg result, 18 June 2015.
+polls <- tribble(
+  ~party,                  ~poll_avg,                             ~result,
+  "Enhedslisten (Ø)",      mean(c(8.0, 8.5, 9.8, 9.3, 8.6)),       7.8,
+  "SF (F)",                mean(c(5.3, 5.4, 6.3, 5.3, 5.2)),       4.2,
+  "Radikale (B)",          mean(c(5.2, 5.6, 4.6, 5.2, 5.0)),       4.6,
+  "Alternativet (Å)",      mean(c(4.7, 5.2, 4.5, 4.9, 4.6)),       4.7,
+  "Socialdemokratiet (A)", mean(c(25.9, 24.4, 25.9, 24.5, 25.5)), 26.3,
+  "Venstre (V)",           mean(c(20.6, 20.9, 19.6, 20.6, 20.6)), 19.5,
+  "Dansk Folkeparti (O)",  mean(c(18.1, 18.5, 17.2, 18.0, 17.9)), 21.1
+) %>% mutate(miss = result - poll_avg)
+
+ggplot(polls, aes(x = miss, y = fct_reorder(party, miss), fill = miss > 0)) +
+  geom_col(width = 0.65) +
+  geom_vline(xintercept = 0, colour = "grey30") +
+  geom_text(aes(label = sprintf("%+.1f", miss),
+                hjust = ifelse(miss > 0, -0.2, 1.2)), size = 4.5, fontface = "bold") +
+  scale_fill_manual(values = c("TRUE" = "#901A1E", "FALSE" = "#425570"), guide = "none") +
+  scale_x_continuous(limits = c(-2.2, 4.4)) +
+  labs(x = "Election result minus poll average (% points)", y = NULL,
+       caption = "Final five polls, 17 June 2015, vs. the folketingsvalg result") +
+  theme(plot.background = element_rect(fill = "white", colour = NA))
+```
+:::
+:::
+
+[Cartoon: Adam Zyglis, *The Buffalo News* / Cagle Cartoons]{.backgrnote}
+:::
+
+::: {.notes}
+Start with the cartoon: the people who most distrust researchers are exactly the ones who hang up on them — so they are missing from the data, and they are not a random slice. Then reveal the Danish numbers. Dansk Folkeparti was underestimated by more than three points in 2015; Voxmeter's own explanation was that new DF voters would not say who they backed. And it cuts both ways: SF and Enhedslisten polled *above* their result. Be honest that late deciders are part of the story too. This is the motivation for weights on the next slides.
+:::
 
 ## What is a weight?
 
@@ -260,7 +306,7 @@ tibble(
 :::
 :::
 
-::: {.push-right}
+::: {.push-right .fragment}
 Three equivalent ways to get the **weighted** share of "Yes":
 
 ::: {.panel-tabset}
@@ -268,7 +314,7 @@ Three equivalent ways to get the **weighted** share of "Yes":
 ### By hand
 ```{r}
 # (yes × weight) summed, over total weight
-((1*2 + 1 + 1) / (2 + 2 + 1 + 1 + 1)) * 100
+((0*2 + 1*2 + 1 + 1 + 0*1) / (2 + 2 + 1 + 1 + 1)) * 100
 ```
 
 ### With vectors
@@ -292,10 +338,11 @@ Get the unweighted answer out of them first — 60% voted yes — then run the w
 
 ## Weights can be powerful
 
-::: {.push-left}
 With the right weights, even a **wildly non-representative** sample can forecast well.
 
-`r Citet(myBib, "wang_forecasting_2015")` predicted the 2012 US election from **Xbox gamers** — young, male, unrepresentative — reweighted to the electorate.
+`r Citet(myBib, "wang_forecasting_2015")` predicted the 2012 US election from **Xbox gamers** (young, male, unrepresentative) reweighted to the electorate.
+
+::: {.push-left}
 
 ```{r, echo = FALSE, out.width='92%'}
 knitr::include_graphics('img/L3/Wang1.png')
@@ -322,7 +369,7 @@ A genuinely fun result — Xbox gamers are about as unrepresentative of the US e
 Most R functions take a `weights` argument. For weighted OLS use
 `estimatr::lm_robust()`.
 
-[Weights make the residuals heteroscedastic — which breaks a standard OLS assumption. `lm_robust()` fixes the standard errors for us.]{.backgrnote}
+[Weights make the residuals heteroscedastic, which breaks a standard OLS assumption. `lm_robust()` fixes the standard errors for us.]{.backgrnote}
 :::
 
 ::: {.push-right}
@@ -334,7 +381,8 @@ mod_unw <- lm_robust(psppsgva ~ eduyrs, data = ESS)
 mod_wt  <- lm_robust(psppsgva ~ eduyrs, data = ESS, weights = pspwght)
 
 modelsummary(
-  list("Unweighted" = mod_unw, "Weighted" = mod_wt),
+  list("Pol. Efficacy \n (unweighted)" = mod_unw, 
+       "Pol. Efficacy \n (weighted)" = mod_wt),
   statistic = NULL,
   gof_map = c("nobs", "r.squared"),
   output = "kableExtra"
@@ -357,7 +405,7 @@ Practical takeaway: add `weights =` and switch to `lm_robust()`. Explain *why* t
 [Part 2 of 3]{.part-pill}
 
 ::: {.lead}
-Randomness removes *bias* — but a random sample is still **noisy**. How noisy, exactly?
+Randomness removes *bias*, but a random sample is still **noisy**. How noisy, exactly?
 :::
 
 ## A thought experiment: pretend we see everyone
@@ -368,7 +416,7 @@ Suppose the Danish ESS (`r nrow(ESS)` people) **were** our whole super-populatio
 Then we could *calculate* the **true** slope of political efficacy on education (blue line):
 $$\beta = `r round(coef(lm(psppsgva ~ eduyrs, data = ESS))["eduyrs"], 3)`$$
 
-[No weights here — this is a make-believe population.]{.backgrnote}
+[No weights here; this is a make-believe population.]{.backgrnote}
 :::
 
 ::: {.push-right}
@@ -395,14 +443,14 @@ b2 <- round(coef(lm(psppsgva ~ eduyrs, data = ESS_sample_2))["eduyrs"], 3)
 ```
 
 ::: {.push-left}
-We rarely see the population — usually just a sample. Take **50 people at random**:
+We rarely see the population, usually just a sample. Take **50 people at random**:
 
 ```{r eval = FALSE}
-set.seed(1261990)
-ESS_sample <- ESS %>% sample_n(50)
+set.seed(1261990) # Make randomness reproducible
+ESS_sample <- ESS %>% sample_n(50) # Sample 50 cases at random
 ```
 
-The sample's own regression line (red) gives $\hat\beta = `r b1`$ —
+The sample's own regression line (red) gives $\hat\beta = `r b1`$; 
 **not** the true `r round(coef(lm(psppsgva ~ eduyrs, data = ESS))["eduyrs"], 3)`.
 :::
 
@@ -424,8 +472,8 @@ ggplot(ESS_sample, aes(y = psppsgva, x = eduyrs)) +
 ::: {.push-left}
 Draw a **different** 50 people and the line moves again: $\hat\beta = `r b2`$.
 
-::: {.content-box-red}
-**Beware:** each sample gives a *different* estimate. This scatter of estimates around the truth is **sampling error** — not a mistake, but the price of not seeing everyone.
+::: {.content-box-green}
+**Beware:** each sample gives a *different* estimate. This scatter of estimates around the truth is **sampling error**; not a mistake, but the price of randomness and seeing only a sample.
 :::
 :::
 
@@ -452,7 +500,7 @@ ggplot(ESS_sample_2, aes(y = psppsgva, x = eduyrs)) +
 Keep drawing fresh samples of 50. Every red line is a **new random sample**; the blue line is the unchanging truth.
 
 ::: {.content-box-green}
-The lines **fan out around the true line**. That fan *is* the sampling error — visible, and (as we'll see) predictable.
+The lines **fan out around the true line**. That fan *is* the sampling error: in this thought experiment visible, but normally (as we'll see) predictable.
 :::
 :::
 
@@ -472,7 +520,7 @@ Let the animation run twice and just narrate it — every red line is one resear
 
 ### The idea
 Repeat "draw 50, estimate $\hat\beta$" **1000 times** and collect all the estimates. Their
-spread *is* the sampling error — and it has a beautiful, predictable shape.
+spread *is* the sampling error; and it has a beautiful, predictable shape.
 
 ```{r sim, fig.show = 'hide'}
 set.seed(1261990)
@@ -513,6 +561,12 @@ The estimates pile up in a **Normal (bell) curve** around the truth. We know its
 
 - $\pm 1.65 \times$ SD covers the middle **90%**
 - $\pm 1.96 \times$ SD covers the middle **95%**
+
+::: {.content-box-green}
+Those multipliers, 1.65 and 1.96, are the **critical values**: how far out from the centre you must go, *counted in standard deviations*, to cover a given share of the curve. Want more coverage, walk further out.
+:::
+
+[We will soon multiply a **standard error** by a critical value to build confidence intervals and tests.]{.backgrnote}
 :::
 
 ::: {.push-right}
@@ -527,7 +581,7 @@ knitr::include_graphics('img/L3/68-90-99.png')
 
 ### Small samples: the *t*
 ::: {.push-left}
-With small $n$, the curve has slightly **fatter tails** — the $t$-distribution. Its critical value depends on the *degrees of freedom* ($n$ − parameters):
+With small $n$, the curve has slightly **fatter tails**: the $t$-distribution. Its critical value depends on the *degrees of freedom* ($n$ − parameters):
 
 ```{r}
 # 95% critical value, df = 50 − 2
@@ -536,7 +590,7 @@ qt(p = 0.975, df = 48)
 :::
 
 ::: {.push-right}
-```{r, echo = FALSE, out.width='72%'}
+```{r, echo = FALSE, out.width='80%'}
 knitr::include_graphics('img/L3/t-dist.png')
 ```
 
@@ -551,19 +605,29 @@ knitr::include_graphics('img/L3/t-dist.png')
 The crux of the lecture — go slowly and use the "watch it build" tab. Each **dot is one whole study**; say that out loud, because students routinely think a dot is a person. As the dots pile up a bell curve appears around the truth, and once we know it is Normal we know its areas exactly: ±1.96 SD covers the middle 95%. The $t$ tab is a footnote — same idea, slightly fatter tails when $n$ is small.
 :::
 
-## The catch — and Gauss's gift
+## Gauss's gift
 
 ::: {.push-left}
 ::: {.content-box-blue}
 **Discuss:** in real research we get **one** sample. We can't draw 1000. So how could we possibly know the sampling error?
 :::
 
-::: {.content-box-red .fragment}
+::: {.fragment}
+::: {.content-box-red}
 Thanks to **Carl Friedrich Gauss**, we can *estimate* the sampling error from a **single sample**. That estimate is the [standard error]{.alert} $\hat\sigma$.
+:::
+
+```{r, echo = FALSE, out.width='30%'}
+knitr::include_graphics('img/L3/gauss.jpg')
+```
+
+::: {.backgrnote .center}
+**Carl Friedrich Gauss** · 1777 – 1855
+:::
 :::
 :::
 
-::: {.push-right}
+::: {.push-right .fragment}
 For an OLS slope:
 $$\hat{\sigma}(\hat\beta) = \sqrt{\frac{1}{n-2}\,\frac{\text{SD}(e)}{\text{SD}(x)}}$$
 
@@ -572,7 +636,7 @@ mod_se <- lm_robust(psppsgva ~ eduyrs, se_type = "classical",
                     data = ESS_sample)
 # modelsummary prepends a stray &nbsp; to a lone column header — strip it
 cat(gsub("&amp;nbsp;", "",
-         as.character(modelsummary(list("50-person sample" = mod_se),
+         as.character(modelsummary(list("Pol. Efficacy \n (50-person sample)" = mod_se),
                                    gof_map = c("nobs", "r.squared"), output = "kableExtra"))))
 ```
 
@@ -621,7 +685,7 @@ Combine the estimate with its standard error:
 $$\hat\beta \pm \text{critical value} \times \hat\sigma$$
 
 ::: {.content-box-green}
-**What "95%" means:** if we drew samples over and over and built this interval each time, **95% of those intervals** would contain the true $\beta$ — the blue line. It is a statement about the *procedure*, not any single interval.
+**What "95%" means:** if we drew samples over and over and built this interval each time, **95% of those intervals** would contain the true $\beta$ (the blue line). It is a statement about the *procedure*, not any single interval.
 :::
 
 [Watch the intervals accumulate: only about 1 in 20 (the red ones) misses the truth.]{.backgrnote}
@@ -648,7 +712,7 @@ Play with samples, coverage, and interval width yourself:
 ## Uncertainty, drawn
 
 ::: {.push-left}
-`geom_smooth(method = "lm")` shades the 95% CI around the line — wide where data are thin, narrow where they are dense.
+`geom_smooth(method = "lm")` shades the 95% CI around the line.
 
 ```{r ci-code, eval = FALSE}
 ggplot(ESS_sample, aes(y = psppsgva, x = eduyrs)) +
@@ -661,7 +725,7 @@ ggplot(ESS_sample, aes(y = psppsgva, x = eduyrs)) +
 ```
 
 ::: {.content-box-green}
-The band is exactly the region where those **sampled regression lines** plausibly lie — watch them fall inside it.
+The band is exactly the region where those **sampled regression lines** plausibly lie. Watch them fall inside it.
 :::
 :::
 
@@ -690,7 +754,7 @@ The debate of Socrates and Aspasia
 ::: {.push-right}
 Research is a debate with a **sceptic** who dismisses your finding:
 
-> *"Sure, your educated respondents scored higher — but that's just a fluke of your sample. Really there's no difference at all."*
+> *"Sure, your educated respondents scored higher. But that's just a fluke of your 5-person sample. Really there's no difference at all."*
 
 $$\underbrace{H_{0}}_{\text{the } H_{\text{opponent}}}:\ \beta_{\text{education}} = 0$$
 
@@ -708,7 +772,7 @@ Frame testing as an argument rather than a ritual: there is a sceptic in the roo
 
 - I see **5 kids walking to school with umbrellas.** How likely is that *if the sun is really shining*?
 
-- If that probability is **below 5%**, I stop believing $H_0$ — I bet it's raining.
+- If that probability is **below 5%**, I stop believing $H_0$, and bet it's raining.
 
 ::: {.content-box-blue}
 **Discuss:** can you phrase your own everyday $H_0$-and-evidence example?
@@ -720,7 +784,7 @@ Frame testing as an argument rather than a ritual: there is a sceptic in the roo
 knitr::include_graphics('img/L3/umbrella_kids.jpg')
 ```
 
-We never *prove* our hypothesis. We show the sceptic's $H_0$ makes the data **too surprising to keep believing**.
+We never *prove* our $H_1$! We show the sceptic's $H_0$ makes the data **too surprising to keep believing** in $H_0$.
 :::
 
 ::: {.notes}
@@ -809,24 +873,21 @@ ht <- tidy(lm_robust(psppsgva ~ eduyrs, data = ESS_sample)) %>% filter(term == "
 :::
 
 ::: {.fragment fragment-index=2}
-[3]{.alert} **If $H_0$ were true,** samples of 50 would scatter around 0 like this ($t$-distribution, df = `r ht$df`).
+[3]{.alert} **The sampling distribution:** If $H_0$ were true, samples of 50 would scatter around 0 like this ($t$-distribution, df = `r ht$df`).
 :::
 
 ::: {.fragment fragment-index=3}
-[4]{.alert} **Test interval:** 95% of those chance estimates land within $0 \pm `r round(qt(0.975, ht$df), 2)` \times \hat\sigma$.
+[4]{.alert} **The test interval:** 95% of those chance estimates land within $0 \pm `r round(qt(0.975, ht$df), 2)` \times \hat\sigma$.
 :::
 
 ::: {.fragment fragment-index=4}
-[5]{.alert} **Our estimate** $\hat\beta = `r round(ht$estimate, 3)`$ is $t = `r round(ht$statistic, 2)`$ standard errors from 0 — **inside** the interval.
+[5]{.alert} **The $t$-value:** Our estimate** $\hat\beta = `r round(ht$estimate, 3)`$ is $t = `r round(ht$statistic, 2)`$ standard errors from 0; here inside the test interval.
 :::
 
 ::: {.fragment fragment-index=5}
-[6]{.alert} `r round(100 * (1 - ht$p.value))`% of chance estimates are *closer* to 0 than ours …
+[6]{.alert} **The $p$-value:** `r round(100 * (1 - ht$p.value))`% of chance estimates are *closer* to 0 than ours. And the other $p = `r round(ht$p.value, 2)`$ are at least as far out → the probability $p$ to draw a sample like ours if $H_0# is true, is $p = `r round(ht$p.value, 2)`$. Not surprising → we **can't reject** $H_0$.
 :::
 
-::: {.fragment fragment-index=6}
-[7]{.alert} … and the other $p = `r round(ht$p.value, 2)`$ are at least as far out. Not surprising → we **can't reject** $H_0$.
-:::
 :::
 
 ::: {.right-column}
@@ -852,11 +913,11 @@ Click through slowly — one idea per click, and each picture only *adds* to the
 
 ### $t$ and $p$
 ::: {.push-left}
-**$t$-value** $= \dfrac{\hat\beta}{\hat\sigma}$ — how many standard errors the estimate sits from 0.
+**$t$-value** $= \dfrac{\hat\beta}{\hat\sigma}$: how many standard errors the estimate sits from 0.
 
-**$p$-value** — if $H_0$ were true, the probability of an estimate this far from 0 (or further).
+**$p$-value**: if $H_0$ were true, the probability of an estimate this far from 0 (or further).
 
-A small $p$ (by convention $< 0.05$) means the data are **hard to reconcile with $H_0$** — evidence against it, not proof of $H_1$.
+A small $p$ (by convention $< 0.05$) means the data are **hard to reconcile with $H_0$**; evidence against it, not proof of $H_1$.
 :::
 
 ::: {.push-right}
@@ -879,7 +940,7 @@ ht_full <- tidy(lm_robust(psppsgva ~ eduyrs, weights = pspwght, data = ESS)) %>%
 ::: {.left-column}
 **50 people:** the estimate lands **inside** the test interval → $p = `r round(ht$p.value, 2)`$, can't reject $H_0$.
 
-**All `r format(nrow(ESS), big.mark = ",")` Danes:** a *smaller* estimate, but far **outside** a much narrower interval → $p = `r format(signif(ht_full$p.value, 2))`$, reject $H_0$.
+**All `r format(nrow(ESS), big.mark = ",")` people in DK:** a *smaller* estimate, but far **outside** a much narrower interval → $p = `r format(signif(ht_full$p.value, 2))`$, reject $H_0$.
 
 ::: {.content-box-green}
 Same question, same axis. Only the **standard error** shrank.
@@ -923,11 +984,11 @@ gt <- tidy(lm_robust(psppsgva ~ eduyrs, weights = pspwght, data = ESS)) %>%
 ```
 
 - $\hat\beta = `r round(gt$estimate, 3)`$ per year of education,
-- standard error $`r round(gt$std.error, 3)`$,
+- $\hat\sigma =`r round(gt$std.error, 3)`$,
 - $t = `r round(gt$statistic, 1)`$, $p = `r format.pval(gt$p.value, digits = 2)`$.
 
 ::: {.content-box-green}
-**Answer:** yes — better-educated Danes believe *significantly* more in the political system's responsiveness. The effect is small per year, but clearly not zero.
+**Answer:** Yes, better-educated people believe *significantly* more in the responsiveness of Denmark's political system.
 :::
 :::
 
@@ -966,8 +1027,8 @@ knitr::include_graphics('https://www.laserfiche.com/wp-content/uploads/2014/10/f
 Look back at the goals from the start of the lecture. Can you tick all three?
 
 ::: {.checklist}
-- Explain to your neighbour why a **random** sample beats a convenience sample — and what a **weight** repairs.
-- Say, in one sentence, what a **standard error** estimates — using the word *sampling distribution*.
+- Explain to your neighbour why a **random** sample beats a convenience sample, and what a **weight** repairs.
+- Say, in one sentence, what a **standard error** estimates; use the word *sampling distribution*.
 - Read a regression's **$t$- and $p$-value** and state what they do (and don't) let you conclude about $H_0$.
 :::
 
