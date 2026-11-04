@@ -484,8 +484,8 @@ Stuck?
 </button>
 <ul>
 <li>Did <code>pacman::p_load(...)</code> run without red errors?
-<code>ivreg</code> is new this week — if it is missing, run
-<code>install.packages(&quot;ivreg&quot;)</code> once.</li>
+<code>ivreg</code> is new this week — <code>pacman::p_load()</code>
+installs it automatically the first time (this needs internet).</li>
 <li><code>data()</code> can&#39;t find <code>ak91</code>? It ships inside
 <strong><code>masteringmetrics</code></strong> — see <strong>About &amp;
 setup</strong>.</li>
@@ -578,14 +578,16 @@ Wald ratio.</li>
 <button>
 Hint
 </button>
-<p><code>ak91 %&gt;% mutate(q4 = if_else(qob == 4, 1, 0))</code>, then a
-first stage and reduced form on <code>q4</code>.</p>
+<p><code>ak91 %&gt;% mutate(q4 = case_when(qob &lt; 4 ~ 0, qob == 4 ~ 1))</code>,
+then a first stage and reduced form on <code>q4</code>.</p>
 </div>
 <div class="webex-solution">
 <button>
 R solution — don&#39;t peek too early ;) !
 </button>
-<pre class="r"><code>ak91 &lt;- ak91 %&gt;% mutate(q4 = if_else(qob == 4, 1, 0))
+<pre class="r"><code>ak91 &lt;- ak91 %&gt;%
+  mutate(q4 = case_when(qob &lt; 4 ~ 0,    # born in quarters 1-3
+                        qob == 4 ~ 1))  # born in the 4th quarter
 
 phi_q4 &lt;- coef(lm_robust(s ~ q4, data = ak91))[&quot;q4&quot;]
 rho_q4 &lt;- coef(lm_robust(lnw ~ q4, data = ak91))[&quot;q4&quot;]
@@ -604,15 +606,15 @@ wrongly</option><option value>Nothing — they are close enough to
 ignore</option></select></p>
 <ol start="7" style="list-style-type: decimal">
 <li><strong>Bonus, for the fast.</strong> Use <code>ivreg()</code> to
-run 2SLS with year-of-birth controls (<code>factor(yob)</code> on both
-sides of the <code>|</code>). Does controlling for birth cohort change
-the estimate?</li>
+run 2SLS with year-of-birth controls (<code>as_factor(yob)</code> on
+both sides of the <code>|</code>). Does controlling for birth cohort
+change the estimate?</li>
 </ol>
 <div class="webex-solution">
 <button>
 R solution
 </button>
-<pre class="r"><code>ak91 &lt;- ak91 %&gt;% mutate(yob_f = factor(yob))
+<pre class="r"><code>ak91 &lt;- ak91 %&gt;% mutate(yob_f = as_factor(yob))
 
 iv_controls &lt;- ivreg(lnw ~ s + yob_f | qob + yob_f, data = ak91)
 

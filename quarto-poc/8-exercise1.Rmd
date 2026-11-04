@@ -28,7 +28,7 @@ Last week you estimated the **raw** effect of the Bali attack in Portugal. Today
 that estimate survives once we hold the **observed** confounders constant.
 
 1. Download `Legewie_ESS_02.dta` from Absalon, then copy in this starter code. It is last week's
-   `prepare()` — extended to keep three background variables: **age**, **gender** and
+   data preparation — extended to keep three background variables: **age**, **gender** and
    **employment status**.
 
 ```{r eval = FALSE}
@@ -37,49 +37,53 @@ ESS_raw <- read_dta("Legewie_ESS_02.dta") # from your project folder
 ```
 
 ```{r prep}
-event_date <- as.Date("2002-10-13")   # the Bali attack
-win_begin  <- as.Date("2002-09-14")
-win_end    <- as.Date("2002-10-20")
+# Bali terror attack, and the ESS fieldwork window around it
+event_date_begin <- as.Date("2002-09-14")
+event_date       <- as.Date("2002-10-13")
+event_date_end   <- as.Date("2002-10-20")
 
-prepare <- function(data, countries) {
-  data %>%
-    mutate(
-      int_date = as.Date(sprintf("%s-%s-%s", inwyr, inwmm, inwdd)),
-      treat = case_when(
-        int_date > event_date & int_date <= win_end   ~ "After the attack",
-        int_date < event_date & int_date > win_begin  ~ "Before the attack",
-        TRUE ~ NA_character_) %>% fct_relevel("Before the attack", "After the attack"),
-      # Anti-immigrant index: average 7 items, z-standardise, flip so high = xenophobic
-      anti_immi = rowMeans(across(c(imtcjob, imbleco, imbgeco, imueclt,
-                                    imwbcnt, imwbcrm, imbghct)), na.rm = TRUE) %>%
-        scale() %>% as.numeric(),
-      anti_immi = max(anti_immi, na.rm = TRUE) - anti_immi,
-      across(c(brncntr, mocntr, facntr), as_factor),
-      # --- the three observed confounders --------------------------
-      age  = inwyr - yrbrn,
-      gndr = as_factor(gndr) %>% fct_drop(),
-      empl_stat = case_when(
-        pdwrk  == 1 ~ "Working",
-        uempla == 1 ~ "Unemployed",
-        rtrd   == 1 ~ "Retired",
-        TRUE        ~ "Other"
-      ) %>% factor() %>% fct_relevel("Working"),
-      # -------------------------------------------------------------
-      pspwght = pweight * dweight
-    ) %>%
-    filter(str_detect(cntry, countries) &
-             brncntr == "yes" & mocntr == "yes" & facntr == "yes") %>%
-    select(treat, anti_immi, cntry, pspwght, age, gndr, empl_stat) %>%
-    drop_na()
-}
-
-ESS <- prepare(ESS_raw, "PT") # Portugal only
+ESS <- ESS_raw %>%
+  mutate(
+    # Day of the survey interview
+    int_date = sprintf("%s-%s-%s", inwyr, inwmm, inwdd) %>% as.Date(),
+    # Treatment indicator
+    treat = case_when(
+      int_date > event_date & int_date <= event_date_end ~ "After the attack",
+      int_date < event_date & int_date > event_date_begin ~ "Before the attack",
+      TRUE ~ as.character(NA)) %>% fct_relevel("Before the attack", "After the attack"),
+    # Attitudes towards immigrants: the average of 7 items, z-standardised
+    anti_immi = rowMeans(select(., imtcjob, imbleco, imbgeco, imueclt,
+                                imwbcnt, imwbcrm, imbghct), na.rm = TRUE) %>%
+      scale() %>% as.numeric(),
+    # Subtract from max to make larger values more xenophobic
+    anti_immi = max(anti_immi, na.rm = TRUE) - anti_immi,
+    # Immigrant origin
+    brncntr = as_factor(brncntr),
+    mocntr = as_factor(mocntr),
+    facntr = as_factor(facntr),
+    # The three observed confounders
+    age = inwyr - yrbrn,
+    gndr = case_when(gndr == 1 ~ "male",      # Gender
+                     gndr == 2 ~ "female") %>% fct_relevel("male"),
+    empl_stat = case_when(
+      pdwrk == 1 ~ "Working",
+      uempla == 1 ~ "Unemployed",
+      rtrd == 1 ~ "Retired",
+      TRUE ~ "Other") %>% fct_relevel("Working"),
+    # Weights
+    pspwght = pweight * dweight) %>%
+  # Sample restriction: mainstream members (no immigrant origin) in Portugal
+  filter(str_detect(cntry, "PT") &
+           brncntr == "yes" & mocntr == "yes" & facntr == "yes") %>%
+  # Keep only the variables we need
+  select(treat, anti_immi, cntry, pspwght, age, gndr, empl_stat) %>%
+  drop_na() # Delete cases with missing values
 ```
 
 `r hide("Stuck?")`
 - Did `pacman::p_load(...)` run without red errors? Fix that first.
 - **`read_dta()` can't find the file?** `Legewie_ESS_02.dta` must sit **in your project folder** —
-  the same folder as your `.Rproj`. Check with `list.files()`.
+  the same folder as your `.Rproj`. Check the *Files* pane in RStudio.
 - Odd results? *Session → Restart R*, then rerun from the top.
 - Still stuck? Ask in the [t-R-ouble forum](https://absalon.ku.dk/courses/70545/discussion_topics/563046?module_item_id=2037268) on Absalon.
 
@@ -176,7 +180,8 @@ plotdata <- bind_rows(
   .id = "model"
 ) %>%
   filter(term == "treatAfter the attack") %>%   # Keep only the treatment effect
-  mutate(model = if_else(model == "1", "Bivariate", "Adjusted"))
+  mutate(model = case_when(model == "1" ~ "Bivariate",   # Model 1
+                           model == "2" ~ "Adjusted"))   # Model 2
 
 ggplot(plotdata, aes(x = estimate, y = model)) +
   geom_vline(xintercept = 0, colour = "#901A1E", linetype = "dashed") +

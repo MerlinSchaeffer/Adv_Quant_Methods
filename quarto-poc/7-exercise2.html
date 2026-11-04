@@ -482,11 +482,15 @@ R solution -&gt; don&#39;t peek too early ;) !
 </button>
 <pre class="r"><code>mdve &lt;- mdve %&gt;%
   mutate(
-    T_RANDOM = case_when(T_RANDOM %in% c(2, 3) ~ &quot;Coddle!&quot;,
-                         T_RANDOM == 1 ~ &quot;Arrest!&quot;, TRUE ~ NA_character_) %&gt;%
+    T_RANDOM = case_when(
+      T_RANDOM == 2 | T_RANDOM == 3 ~ &quot;Coddle!&quot;, # Combine 2 &amp; 3 into &quot;Coddle!&quot;
+      T_RANDOM == 1 ~ &quot;Arrest!&quot;,                 # 1 becomes &quot;Arrest!&quot;
+      TRUE ~ as.character(NA)) %&gt;%               # 4 (&quot;other&quot;) becomes NA
       fct_relevel(&quot;Arrest!&quot;),
-    T_FINAL  = case_when(T_FINAL %in% c(2, 3) ~ &quot;Coddled&quot;,
-                         T_FINAL == 1 ~ &quot;Arrested&quot;, TRUE ~ NA_character_) %&gt;%
+    T_FINAL = case_when(
+      T_FINAL == 2 | T_FINAL == 3 ~ &quot;Coddled&quot;,   # Combine 2 &amp; 3 into &quot;Coddled&quot;
+      T_FINAL == 1 ~ &quot;Arrested&quot;,                 # 1 becomes &quot;Arrested&quot;
+      TRUE ~ as.character(NA)) %&gt;%               # 4 (&quot;other&quot;) becomes NA
       fct_relevel(&quot;Arrested&quot;))
 
 mdve %&gt;% select(T_RANDOM, T_FINAL) %&gt;% table()
@@ -759,27 +763,27 @@ function tinytable_rank_sorter(a, b, aRow, bRow, column, dir, sorterParams) {
 
     <script>
       // Create table-specific functions using external factory
-      const tableFns_gvr3dm4n697z43tgwqey = TinyTable.createTableFunctions("tinytable_gvr3dm4n697z43tgwqey");
+      const tableFns_vdpc64mbpraix7ancfbv = TinyTable.createTableFunctions("tinytable_vdpc64mbpraix7ancfbv");
       // tinytable span after
       window.addEventListener('load', function () {
           var cellsToStyle = [
             // tinytable style arrays after
-          { positions: [ { i: '-1', j: 6 } ], css_id: 'tinytable_css_6sf3jpl630uhh7cqyl23',}, 
-          { positions: [ { i: '-1', j: 4 } ], css_id: 'tinytable_css_4k1gm2907opvj3iqgc2j',}, 
-          { positions: [ { i: '6', j: 3 }, { i: '6', j: 4 }, { i: '6', j: 5 }, { i: '6', j: 6 } ], css_id: 'tinytable_css_5twjywlgbt3xo1lw4wnl',}, 
-          { positions: [ { i: '1', j: 3 }, { i: '2', j: 3 }, { i: '3', j: 3 }, { i: '4', j: 3 }, { i: '5', j: 3 }, { i: '1', j: 4 }, { i: '2', j: 4 }, { i: '3', j: 4 }, { i: '4', j: 4 }, { i: '5', j: 4 }, { i: '1', j: 5 }, { i: '2', j: 5 }, { i: '3', j: 5 }, { i: '4', j: 5 }, { i: '5', j: 5 }, { i: '1', j: 6 }, { i: '2', j: 6 }, { i: '3', j: 6 }, { i: '4', j: 6 }, { i: '5', j: 6 } ], css_id: 'tinytable_css_86pyn20446ahck6rt4bl',}, 
-          { positions: [ { i: '0', j: 3 }, { i: '0', j: 4 }, { i: '0', j: 5 }, { i: '0', j: 6 } ], css_id: 'tinytable_css_nvkmxbgwxgzi4vcl744z',}, 
-          { positions: [ { i: '-1', j: 3 }, { i: '-1', j: 5 } ], css_id: 'tinytable_css_o9hag38kdc6gxvmnmtpy',}, 
-          { positions: [ { i: '6', j: 1 }, { i: '6', j: 2 } ], css_id: 'tinytable_css_z0en8kvknt43idgtmir1',}, 
-          { positions: [ { i: '1', j: 1 }, { i: '2', j: 1 }, { i: '3', j: 1 }, { i: '4', j: 1 }, { i: '5', j: 1 }, { i: '1', j: 2 }, { i: '2', j: 2 }, { i: '3', j: 2 }, { i: '4', j: 2 }, { i: '5', j: 2 } ], css_id: 'tinytable_css_3gkwz57xe7vajvz5nlzt',}, 
-          { positions: [ { i: '0', j: 1 }, { i: '0', j: 2 } ], css_id: 'tinytable_css_x01mfuhkavzl4rhk7lgs',}, 
-          { positions: [ { i: '-1', j: 1 }, { i: '-1', j: 2 } ], css_id: 'tinytable_css_xnwd6phuizp4o8oamq9b',}, 
+          { positions: [ { i: '-1', j: 6 } ], css_id: 'tinytable_css_hxtlcsyj6pd3kncdnvwk',}, 
+          { positions: [ { i: '-1', j: 4 } ], css_id: 'tinytable_css_hzd0vp80ceyf2lvpp2wa',}, 
+          { positions: [ { i: '6', j: 3 }, { i: '6', j: 4 }, { i: '6', j: 5 }, { i: '6', j: 6 } ], css_id: 'tinytable_css_wqb30beim22yo16xrcbp',}, 
+          { positions: [ { i: '1', j: 3 }, { i: '2', j: 3 }, { i: '3', j: 3 }, { i: '4', j: 3 }, { i: '5', j: 3 }, { i: '1', j: 4 }, { i: '2', j: 4 }, { i: '3', j: 4 }, { i: '4', j: 4 }, { i: '5', j: 4 }, { i: '1', j: 5 }, { i: '2', j: 5 }, { i: '3', j: 5 }, { i: '4', j: 5 }, { i: '5', j: 5 }, { i: '1', j: 6 }, { i: '2', j: 6 }, { i: '3', j: 6 }, { i: '4', j: 6 }, { i: '5', j: 6 } ], css_id: 'tinytable_css_au2redoiugsseigndink',}, 
+          { positions: [ { i: '0', j: 3 }, { i: '0', j: 4 }, { i: '0', j: 5 }, { i: '0', j: 6 } ], css_id: 'tinytable_css_0de8hgyhk3t68h5g191c',}, 
+          { positions: [ { i: '-1', j: 3 }, { i: '-1', j: 5 } ], css_id: 'tinytable_css_h4fampwarf9axjja5vb0',}, 
+          { positions: [ { i: '6', j: 1 }, { i: '6', j: 2 } ], css_id: 'tinytable_css_jlt9tu8ygpeo3f4y3wuo',}, 
+          { positions: [ { i: '1', j: 1 }, { i: '2', j: 1 }, { i: '3', j: 1 }, { i: '4', j: 1 }, { i: '5', j: 1 }, { i: '1', j: 2 }, { i: '2', j: 2 }, { i: '3', j: 2 }, { i: '4', j: 2 }, { i: '5', j: 2 } ], css_id: 'tinytable_css_gf3h1u1zwp5kzm15rhqs',}, 
+          { positions: [ { i: '0', j: 1 }, { i: '0', j: 2 } ], css_id: 'tinytable_css_gghw0v8oinipoarrtlm5',}, 
+          { positions: [ { i: '-1', j: 1 }, { i: '-1', j: 2 } ], css_id: 'tinytable_css_wumnx43wkr8cz1mj38hc',}, 
           ];
 
           // Loop over the arrays to style the cells
           cellsToStyle.forEach(function (group) {
               group.positions.forEach(function (cell) {
-                  tableFns_gvr3dm4n697z43tgwqey.styleCell(cell.i, cell.j, group.css_id);
+                  tableFns_vdpc64mbpraix7ancfbv.styleCell(cell.i, cell.j, group.css_id);
               });
           });
       });
@@ -905,6 +909,11 @@ position: relative;
 --line-width-bottom: 0.1em;
 --line-width-left: 0.1em;
 
+--line-type-top: solid;
+--line-type-right: solid;
+--line-type-bottom: solid;
+--line-type-left: solid;
+
 --trim-top-left: 0%;
 --trim-top-right: 0%;
 --trim-right-top: 0%;
@@ -924,9 +933,9 @@ right: var(--trim-right-top, 0);
 bottom: 0;
 pointer-events: none;
 z-index: 1;
-border-top: calc(var(--border-top) * var(--line-width-top)) solid var(--line-color-top);
-border-right: calc(var(--border-right) * var(--line-width-right)) solid var(--line-color-right);
-border-left: calc(var(--border-left) * var(--line-width-left)) solid var(--line-color-left);
+border-top: calc(var(--border-top) * var(--line-width-top)) var(--line-type-top, solid) var(--line-color-top);
+border-right: calc(var(--border-right) * var(--line-width-right)) var(--line-type-right, solid) var(--line-color-right);
+border-left: calc(var(--border-left) * var(--line-width-left)) var(--line-type-left, solid) var(--line-color-left);
 }
 
 .tinytable :is(td, th)[class*="tinytable_css_"]::after {
@@ -935,8 +944,8 @@ position: absolute;
 left: var(--trim-bottom-left, 0);
 right: var(--trim-bottom-right, 0);
 bottom: var(--trim-left-bottom, var(--trim-right-bottom, 0));
-height: calc(var(--border-bottom) * var(--line-width-bottom));
-background: var(--line-color-bottom);
+height: 0;
+border-bottom: calc(var(--border-bottom) * var(--line-width-bottom)) var(--line-type-bottom, solid) var(--line-color-bottom);
 pointer-events: none;
 z-index: 2;
 }
@@ -982,19 +991,19 @@ line-height: var(--tt-line-height-footnote-tight);
 </style>
     <style>
 
-#tinytable_gvr3dm4n697z43tgwqey td.tinytable_css_6sf3jpl630uhh7cqyl23, #tinytable_gvr3dm4n697z43tgwqey th.tinytable_css_6sf3jpl630uhh7cqyl23 { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 1; --line-color-bottom: black; --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.03em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.08em; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: center }
-#tinytable_gvr3dm4n697z43tgwqey td.tinytable_css_4k1gm2907opvj3iqgc2j, #tinytable_gvr3dm4n697z43tgwqey th.tinytable_css_4k1gm2907opvj3iqgc2j { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 1; --line-color-bottom: black; --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.03em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.08em; --trim-bottom-left: 0%; --trim-bottom-right: 3%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: center }
-#tinytable_gvr3dm4n697z43tgwqey td.tinytable_css_5twjywlgbt3xo1lw4wnl, #tinytable_gvr3dm4n697z43tgwqey th.tinytable_css_5twjywlgbt3xo1lw4wnl { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.08em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: right }
-#tinytable_gvr3dm4n697z43tgwqey td.tinytable_css_86pyn20446ahck6rt4bl, #tinytable_gvr3dm4n697z43tgwqey th.tinytable_css_86pyn20446ahck6rt4bl { text-align: right }
-#tinytable_gvr3dm4n697z43tgwqey td.tinytable_css_nvkmxbgwxgzi4vcl744z, #tinytable_gvr3dm4n697z43tgwqey th.tinytable_css_nvkmxbgwxgzi4vcl744z { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.05em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: right }
-#tinytable_gvr3dm4n697z43tgwqey td.tinytable_css_o9hag38kdc6gxvmnmtpy, #tinytable_gvr3dm4n697z43tgwqey th.tinytable_css_o9hag38kdc6gxvmnmtpy { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 1; --line-color-bottom: black; --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.03em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.08em; --trim-bottom-left: 3%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: center }
-#tinytable_gvr3dm4n697z43tgwqey td.tinytable_css_z0en8kvknt43idgtmir1, #tinytable_gvr3dm4n697z43tgwqey th.tinytable_css_z0en8kvknt43idgtmir1 { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.08em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: left }
-#tinytable_gvr3dm4n697z43tgwqey td.tinytable_css_3gkwz57xe7vajvz5nlzt, #tinytable_gvr3dm4n697z43tgwqey th.tinytable_css_3gkwz57xe7vajvz5nlzt { text-align: left }
-#tinytable_gvr3dm4n697z43tgwqey td.tinytable_css_x01mfuhkavzl4rhk7lgs, #tinytable_gvr3dm4n697z43tgwqey th.tinytable_css_x01mfuhkavzl4rhk7lgs { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.05em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: left }
-#tinytable_gvr3dm4n697z43tgwqey td.tinytable_css_xnwd6phuizp4o8oamq9b, #tinytable_gvr3dm4n697z43tgwqey th.tinytable_css_xnwd6phuizp4o8oamq9b { position: relative; --border-bottom: 0; --border-left: 0; --border-right: 0; --border-top: 1; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.1em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.08em; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: center }
+#tinytable_vdpc64mbpraix7ancfbv td.tinytable_css_hxtlcsyj6pd3kncdnvwk, #tinytable_vdpc64mbpraix7ancfbv th.tinytable_css_hxtlcsyj6pd3kncdnvwk { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 1; --line-color-bottom: black; --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.03em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.08em; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: center }
+#tinytable_vdpc64mbpraix7ancfbv td.tinytable_css_hzd0vp80ceyf2lvpp2wa, #tinytable_vdpc64mbpraix7ancfbv th.tinytable_css_hzd0vp80ceyf2lvpp2wa { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 1; --line-color-bottom: black; --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.03em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.08em; --trim-bottom-left: 0%; --trim-bottom-right: 3%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: center }
+#tinytable_vdpc64mbpraix7ancfbv td.tinytable_css_wqb30beim22yo16xrcbp, #tinytable_vdpc64mbpraix7ancfbv th.tinytable_css_wqb30beim22yo16xrcbp { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.08em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: right }
+#tinytable_vdpc64mbpraix7ancfbv td.tinytable_css_au2redoiugsseigndink, #tinytable_vdpc64mbpraix7ancfbv th.tinytable_css_au2redoiugsseigndink { text-align: right }
+#tinytable_vdpc64mbpraix7ancfbv td.tinytable_css_0de8hgyhk3t68h5g191c, #tinytable_vdpc64mbpraix7ancfbv th.tinytable_css_0de8hgyhk3t68h5g191c { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.05em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: right }
+#tinytable_vdpc64mbpraix7ancfbv td.tinytable_css_h4fampwarf9axjja5vb0, #tinytable_vdpc64mbpraix7ancfbv th.tinytable_css_h4fampwarf9axjja5vb0 { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 1; --line-color-bottom: black; --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.03em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.08em; --trim-bottom-left: 3%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: center }
+#tinytable_vdpc64mbpraix7ancfbv td.tinytable_css_jlt9tu8ygpeo3f4y3wuo, #tinytable_vdpc64mbpraix7ancfbv th.tinytable_css_jlt9tu8ygpeo3f4y3wuo { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.08em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: left }
+#tinytable_vdpc64mbpraix7ancfbv td.tinytable_css_gf3h1u1zwp5kzm15rhqs, #tinytable_vdpc64mbpraix7ancfbv th.tinytable_css_gf3h1u1zwp5kzm15rhqs { text-align: left }
+#tinytable_vdpc64mbpraix7ancfbv td.tinytable_css_gghw0v8oinipoarrtlm5, #tinytable_vdpc64mbpraix7ancfbv th.tinytable_css_gghw0v8oinipoarrtlm5 { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.05em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: left }
+#tinytable_vdpc64mbpraix7ancfbv td.tinytable_css_wumnx43wkr8cz1mj38hc, #tinytable_vdpc64mbpraix7ancfbv th.tinytable_css_wumnx43wkr8cz1mj38hc { position: relative; --border-bottom: 0; --border-left: 0; --border-right: 0; --border-top: 1; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.1em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.08em; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: center }
 </style>
     <div class="container">
-      <table class="tinytable" id="tinytable_gvr3dm4n697z43tgwqey" style="width: auto; margin-left: auto; margin-right: auto;" data-quarto-disable-processing="true">
+      <table class="tinytable" id="tinytable_vdpc64mbpraix7ancfbv" style="width: auto; margin-left: auto; margin-right: auto;" data-quarto-disable-processing="true">
         <caption>Subject&#39;s race by *assigned* strategy</caption>
         <thead>
 <tr>
@@ -1323,27 +1332,27 @@ function tinytable_rank_sorter(a, b, aRow, bRow, column, dir, sorterParams) {
 
     <script>
       // Create table-specific functions using external factory
-      const tableFns_p7iv66qej0pt8yberawx = TinyTable.createTableFunctions("tinytable_p7iv66qej0pt8yberawx");
+      const tableFns_zvfoxma7a3j3yel09tru = TinyTable.createTableFunctions("tinytable_zvfoxma7a3j3yel09tru");
       // tinytable span after
       window.addEventListener('load', function () {
           var cellsToStyle = [
             // tinytable style arrays after
-          { positions: [ { i: '-1', j: 6 } ], css_id: 'tinytable_css_io6oamowvwxnhvix9iw0',}, 
-          { positions: [ { i: '-1', j: 4 } ], css_id: 'tinytable_css_pxerum6cmrbohprnny26',}, 
-          { positions: [ { i: '6', j: 3 }, { i: '6', j: 4 }, { i: '6', j: 5 }, { i: '6', j: 6 } ], css_id: 'tinytable_css_ppsk1e213eszoclz081j',}, 
-          { positions: [ { i: '1', j: 3 }, { i: '2', j: 3 }, { i: '3', j: 3 }, { i: '4', j: 3 }, { i: '5', j: 3 }, { i: '1', j: 4 }, { i: '2', j: 4 }, { i: '3', j: 4 }, { i: '4', j: 4 }, { i: '5', j: 4 }, { i: '1', j: 5 }, { i: '2', j: 5 }, { i: '3', j: 5 }, { i: '4', j: 5 }, { i: '5', j: 5 }, { i: '1', j: 6 }, { i: '2', j: 6 }, { i: '3', j: 6 }, { i: '4', j: 6 }, { i: '5', j: 6 } ], css_id: 'tinytable_css_a5vwcibf5k6ixu0ja1lr',}, 
-          { positions: [ { i: '0', j: 3 }, { i: '0', j: 4 }, { i: '0', j: 5 }, { i: '0', j: 6 } ], css_id: 'tinytable_css_jjk8oxs6t9j96oww5b12',}, 
-          { positions: [ { i: '-1', j: 3 }, { i: '-1', j: 5 } ], css_id: 'tinytable_css_3rhtucceu69g5tk9a70t',}, 
-          { positions: [ { i: '6', j: 1 }, { i: '6', j: 2 } ], css_id: 'tinytable_css_0gql2pmibchh7o54tbz4',}, 
-          { positions: [ { i: '1', j: 1 }, { i: '2', j: 1 }, { i: '3', j: 1 }, { i: '4', j: 1 }, { i: '5', j: 1 }, { i: '1', j: 2 }, { i: '2', j: 2 }, { i: '3', j: 2 }, { i: '4', j: 2 }, { i: '5', j: 2 } ], css_id: 'tinytable_css_sgn8g5109lt4g2hnxvxg',}, 
-          { positions: [ { i: '0', j: 1 }, { i: '0', j: 2 } ], css_id: 'tinytable_css_09nnrrhp3zyfgt3eq761',}, 
-          { positions: [ { i: '-1', j: 1 }, { i: '-1', j: 2 } ], css_id: 'tinytable_css_s3pt0ktvuwml0r30uljz',}, 
+          { positions: [ { i: '-1', j: 6 } ], css_id: 'tinytable_css_2d6sgt8dcbt43ajz1k01',}, 
+          { positions: [ { i: '-1', j: 4 } ], css_id: 'tinytable_css_qti31lg46gckde9qcq2u',}, 
+          { positions: [ { i: '6', j: 3 }, { i: '6', j: 4 }, { i: '6', j: 5 }, { i: '6', j: 6 } ], css_id: 'tinytable_css_5901fpsru8nnly7dnj9b',}, 
+          { positions: [ { i: '1', j: 3 }, { i: '2', j: 3 }, { i: '3', j: 3 }, { i: '4', j: 3 }, { i: '5', j: 3 }, { i: '1', j: 4 }, { i: '2', j: 4 }, { i: '3', j: 4 }, { i: '4', j: 4 }, { i: '5', j: 4 }, { i: '1', j: 5 }, { i: '2', j: 5 }, { i: '3', j: 5 }, { i: '4', j: 5 }, { i: '5', j: 5 }, { i: '1', j: 6 }, { i: '2', j: 6 }, { i: '3', j: 6 }, { i: '4', j: 6 }, { i: '5', j: 6 } ], css_id: 'tinytable_css_ob5onujjlwauamhna9q4',}, 
+          { positions: [ { i: '0', j: 3 }, { i: '0', j: 4 }, { i: '0', j: 5 }, { i: '0', j: 6 } ], css_id: 'tinytable_css_niou859o50ep26pnufj0',}, 
+          { positions: [ { i: '-1', j: 3 }, { i: '-1', j: 5 } ], css_id: 'tinytable_css_k0947185ffsyuhwj0hva',}, 
+          { positions: [ { i: '6', j: 1 }, { i: '6', j: 2 } ], css_id: 'tinytable_css_elh17a81tuwaldrz7ojq',}, 
+          { positions: [ { i: '1', j: 1 }, { i: '2', j: 1 }, { i: '3', j: 1 }, { i: '4', j: 1 }, { i: '5', j: 1 }, { i: '1', j: 2 }, { i: '2', j: 2 }, { i: '3', j: 2 }, { i: '4', j: 2 }, { i: '5', j: 2 } ], css_id: 'tinytable_css_wds4x9bqb6vwws9v4rpm',}, 
+          { positions: [ { i: '0', j: 1 }, { i: '0', j: 2 } ], css_id: 'tinytable_css_txaf4gceovhjkm2l8bnu',}, 
+          { positions: [ { i: '-1', j: 1 }, { i: '-1', j: 2 } ], css_id: 'tinytable_css_sc4j5hrnl9tn853bgs7o',}, 
           ];
 
           // Loop over the arrays to style the cells
           cellsToStyle.forEach(function (group) {
               group.positions.forEach(function (cell) {
-                  tableFns_p7iv66qej0pt8yberawx.styleCell(cell.i, cell.j, group.css_id);
+                  tableFns_zvfoxma7a3j3yel09tru.styleCell(cell.i, cell.j, group.css_id);
               });
           });
       });
@@ -1469,6 +1478,11 @@ position: relative;
 --line-width-bottom: 0.1em;
 --line-width-left: 0.1em;
 
+--line-type-top: solid;
+--line-type-right: solid;
+--line-type-bottom: solid;
+--line-type-left: solid;
+
 --trim-top-left: 0%;
 --trim-top-right: 0%;
 --trim-right-top: 0%;
@@ -1488,9 +1502,9 @@ right: var(--trim-right-top, 0);
 bottom: 0;
 pointer-events: none;
 z-index: 1;
-border-top: calc(var(--border-top) * var(--line-width-top)) solid var(--line-color-top);
-border-right: calc(var(--border-right) * var(--line-width-right)) solid var(--line-color-right);
-border-left: calc(var(--border-left) * var(--line-width-left)) solid var(--line-color-left);
+border-top: calc(var(--border-top) * var(--line-width-top)) var(--line-type-top, solid) var(--line-color-top);
+border-right: calc(var(--border-right) * var(--line-width-right)) var(--line-type-right, solid) var(--line-color-right);
+border-left: calc(var(--border-left) * var(--line-width-left)) var(--line-type-left, solid) var(--line-color-left);
 }
 
 .tinytable :is(td, th)[class*="tinytable_css_"]::after {
@@ -1499,8 +1513,8 @@ position: absolute;
 left: var(--trim-bottom-left, 0);
 right: var(--trim-bottom-right, 0);
 bottom: var(--trim-left-bottom, var(--trim-right-bottom, 0));
-height: calc(var(--border-bottom) * var(--line-width-bottom));
-background: var(--line-color-bottom);
+height: 0;
+border-bottom: calc(var(--border-bottom) * var(--line-width-bottom)) var(--line-type-bottom, solid) var(--line-color-bottom);
 pointer-events: none;
 z-index: 2;
 }
@@ -1546,19 +1560,19 @@ line-height: var(--tt-line-height-footnote-tight);
 </style>
     <style>
 
-#tinytable_p7iv66qej0pt8yberawx td.tinytable_css_io6oamowvwxnhvix9iw0, #tinytable_p7iv66qej0pt8yberawx th.tinytable_css_io6oamowvwxnhvix9iw0 { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 1; --line-color-bottom: black; --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.03em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.08em; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: center }
-#tinytable_p7iv66qej0pt8yberawx td.tinytable_css_pxerum6cmrbohprnny26, #tinytable_p7iv66qej0pt8yberawx th.tinytable_css_pxerum6cmrbohprnny26 { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 1; --line-color-bottom: black; --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.03em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.08em; --trim-bottom-left: 0%; --trim-bottom-right: 3%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: center }
-#tinytable_p7iv66qej0pt8yberawx td.tinytable_css_ppsk1e213eszoclz081j, #tinytable_p7iv66qej0pt8yberawx th.tinytable_css_ppsk1e213eszoclz081j { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.08em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: right }
-#tinytable_p7iv66qej0pt8yberawx td.tinytable_css_a5vwcibf5k6ixu0ja1lr, #tinytable_p7iv66qej0pt8yberawx th.tinytable_css_a5vwcibf5k6ixu0ja1lr { text-align: right }
-#tinytable_p7iv66qej0pt8yberawx td.tinytable_css_jjk8oxs6t9j96oww5b12, #tinytable_p7iv66qej0pt8yberawx th.tinytable_css_jjk8oxs6t9j96oww5b12 { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.05em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: right }
-#tinytable_p7iv66qej0pt8yberawx td.tinytable_css_3rhtucceu69g5tk9a70t, #tinytable_p7iv66qej0pt8yberawx th.tinytable_css_3rhtucceu69g5tk9a70t { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 1; --line-color-bottom: black; --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.03em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.08em; --trim-bottom-left: 3%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: center }
-#tinytable_p7iv66qej0pt8yberawx td.tinytable_css_0gql2pmibchh7o54tbz4, #tinytable_p7iv66qej0pt8yberawx th.tinytable_css_0gql2pmibchh7o54tbz4 { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.08em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: left }
-#tinytable_p7iv66qej0pt8yberawx td.tinytable_css_sgn8g5109lt4g2hnxvxg, #tinytable_p7iv66qej0pt8yberawx th.tinytable_css_sgn8g5109lt4g2hnxvxg { text-align: left }
-#tinytable_p7iv66qej0pt8yberawx td.tinytable_css_09nnrrhp3zyfgt3eq761, #tinytable_p7iv66qej0pt8yberawx th.tinytable_css_09nnrrhp3zyfgt3eq761 { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.05em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: left }
-#tinytable_p7iv66qej0pt8yberawx td.tinytable_css_s3pt0ktvuwml0r30uljz, #tinytable_p7iv66qej0pt8yberawx th.tinytable_css_s3pt0ktvuwml0r30uljz { position: relative; --border-bottom: 0; --border-left: 0; --border-right: 0; --border-top: 1; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.1em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.08em; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: center }
+#tinytable_zvfoxma7a3j3yel09tru td.tinytable_css_2d6sgt8dcbt43ajz1k01, #tinytable_zvfoxma7a3j3yel09tru th.tinytable_css_2d6sgt8dcbt43ajz1k01 { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 1; --line-color-bottom: black; --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.03em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.08em; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: center }
+#tinytable_zvfoxma7a3j3yel09tru td.tinytable_css_qti31lg46gckde9qcq2u, #tinytable_zvfoxma7a3j3yel09tru th.tinytable_css_qti31lg46gckde9qcq2u { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 1; --line-color-bottom: black; --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.03em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.08em; --trim-bottom-left: 0%; --trim-bottom-right: 3%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: center }
+#tinytable_zvfoxma7a3j3yel09tru td.tinytable_css_5901fpsru8nnly7dnj9b, #tinytable_zvfoxma7a3j3yel09tru th.tinytable_css_5901fpsru8nnly7dnj9b { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.08em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: right }
+#tinytable_zvfoxma7a3j3yel09tru td.tinytable_css_ob5onujjlwauamhna9q4, #tinytable_zvfoxma7a3j3yel09tru th.tinytable_css_ob5onujjlwauamhna9q4 { text-align: right }
+#tinytable_zvfoxma7a3j3yel09tru td.tinytable_css_niou859o50ep26pnufj0, #tinytable_zvfoxma7a3j3yel09tru th.tinytable_css_niou859o50ep26pnufj0 { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.05em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: right }
+#tinytable_zvfoxma7a3j3yel09tru td.tinytable_css_k0947185ffsyuhwj0hva, #tinytable_zvfoxma7a3j3yel09tru th.tinytable_css_k0947185ffsyuhwj0hva { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 1; --line-color-bottom: black; --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.03em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.08em; --trim-bottom-left: 3%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: center }
+#tinytable_zvfoxma7a3j3yel09tru td.tinytable_css_elh17a81tuwaldrz7ojq, #tinytable_zvfoxma7a3j3yel09tru th.tinytable_css_elh17a81tuwaldrz7ojq { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.08em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: left }
+#tinytable_zvfoxma7a3j3yel09tru td.tinytable_css_wds4x9bqb6vwws9v4rpm, #tinytable_zvfoxma7a3j3yel09tru th.tinytable_css_wds4x9bqb6vwws9v4rpm { text-align: left }
+#tinytable_zvfoxma7a3j3yel09tru td.tinytable_css_txaf4gceovhjkm2l8bnu, #tinytable_zvfoxma7a3j3yel09tru th.tinytable_css_txaf4gceovhjkm2l8bnu { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.05em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: left }
+#tinytable_zvfoxma7a3j3yel09tru td.tinytable_css_sc4j5hrnl9tn853bgs7o, #tinytable_zvfoxma7a3j3yel09tru th.tinytable_css_sc4j5hrnl9tn853bgs7o { position: relative; --border-bottom: 0; --border-left: 0; --border-right: 0; --border-top: 1; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.1em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.08em; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: center }
 </style>
     <div class="container">
-      <table class="tinytable" id="tinytable_p7iv66qej0pt8yberawx" style="width: auto; margin-left: auto; margin-right: auto;" data-quarto-disable-processing="true">
+      <table class="tinytable" id="tinytable_zvfoxma7a3j3yel09tru" style="width: auto; margin-left: auto; margin-right: auto;" data-quarto-disable-processing="true">
         <caption>Subject&#39;s race by *actual* strategy</caption>
         <thead>
 <tr>
@@ -1646,7 +1660,9 @@ form</option><option value>LATE estimate</option></select>.</li>
 R solution -&gt; don&#39;t peek too early ;) !
 </button>
 <pre class="r"><code>mdve &lt;- mdve %&gt;%
-  mutate(T_FINAL_01 = if_else(T_FINAL == &quot;Coddled&quot;, 1, 0))
+  mutate(T_FINAL_01 = case_when(
+    T_FINAL == &quot;Arrested&quot; ~ 0, # Code &quot;Arrested&quot; as 0
+    T_FINAL == &quot;Coddled&quot; ~ 1)) # Code &quot;Coddled&quot; as 1
 
 first_stage &lt;- lm_robust(T_FINAL_01 ~ T_RANDOM, data = mdve)
 modelsummary(list(&quot;Coddled (0/1)&quot; = first_stage), stars = TRUE,
@@ -1892,25 +1908,25 @@ function tinytable_rank_sorter(a, b, aRow, bRow, column, dir, sorterParams) {
 
     <script>
       // Create table-specific functions using external factory
-      const tableFns_26cpj6mxcp2y58jfo2n1 = TinyTable.createTableFunctions("tinytable_26cpj6mxcp2y58jfo2n1");
+      const tableFns_8b6s5bvx8unm2cttbjv5 = TinyTable.createTableFunctions("tinytable_8b6s5bvx8unm2cttbjv5");
       // tinytable span after
       window.addEventListener('load', function () {
           var cellsToStyle = [
             // tinytable style arrays after
-          { positions: [ { i: '6', j: 2 } ], css_id: 'tinytable_css_sjs0kwl2l023le7z1q2z',}, 
-          { positions: [ { i: '4', j: 2 } ], css_id: 'tinytable_css_0vdi6b7hshzecr74vrjy',}, 
-          { positions: [ { i: '1', j: 2 }, { i: '2', j: 2 }, { i: '3', j: 2 }, { i: '5', j: 2 } ], css_id: 'tinytable_css_hwgs3tze7etmqgmi7li2',}, 
-          { positions: [ { i: '0', j: 2 } ], css_id: 'tinytable_css_10lrh67u0otm5kwfm3kf',}, 
-          { positions: [ { i: '6', j: 1 } ], css_id: 'tinytable_css_l08uvpo7068pckit146w',}, 
-          { positions: [ { i: '4', j: 1 } ], css_id: 'tinytable_css_r8orjvgimd5fqrxmbut0',}, 
-          { positions: [ { i: '1', j: 1 }, { i: '2', j: 1 }, { i: '3', j: 1 }, { i: '5', j: 1 } ], css_id: 'tinytable_css_1w08pghglm8f9zydlcx9',}, 
-          { positions: [ { i: '0', j: 1 } ], css_id: 'tinytable_css_hmw4cu6ip7fkp1fwieev',}, 
+          { positions: [ { i: '6', j: 2 } ], css_id: 'tinytable_css_4lljzpk229sfgciwd79e',}, 
+          { positions: [ { i: '4', j: 2 } ], css_id: 'tinytable_css_14e3kydghd2zz35z7hf1',}, 
+          { positions: [ { i: '1', j: 2 }, { i: '2', j: 2 }, { i: '3', j: 2 }, { i: '5', j: 2 } ], css_id: 'tinytable_css_stcuh8ipme1swx4cks58',}, 
+          { positions: [ { i: '0', j: 2 } ], css_id: 'tinytable_css_mlvkqzzli9mdyls85zan',}, 
+          { positions: [ { i: '6', j: 1 } ], css_id: 'tinytable_css_92mq2pzynmlps3mfwp67',}, 
+          { positions: [ { i: '4', j: 1 } ], css_id: 'tinytable_css_vssddx4xwzfplezbcfp4',}, 
+          { positions: [ { i: '1', j: 1 }, { i: '2', j: 1 }, { i: '3', j: 1 }, { i: '5', j: 1 } ], css_id: 'tinytable_css_jyexuc067f86fks5i3hj',}, 
+          { positions: [ { i: '0', j: 1 } ], css_id: 'tinytable_css_i6atlsy3qdkfc2gcislx',}, 
           ];
 
           // Loop over the arrays to style the cells
           cellsToStyle.forEach(function (group) {
               group.positions.forEach(function (cell) {
-                  tableFns_26cpj6mxcp2y58jfo2n1.styleCell(cell.i, cell.j, group.css_id);
+                  tableFns_8b6s5bvx8unm2cttbjv5.styleCell(cell.i, cell.j, group.css_id);
               });
           });
       });
@@ -2036,6 +2052,11 @@ position: relative;
 --line-width-bottom: 0.1em;
 --line-width-left: 0.1em;
 
+--line-type-top: solid;
+--line-type-right: solid;
+--line-type-bottom: solid;
+--line-type-left: solid;
+
 --trim-top-left: 0%;
 --trim-top-right: 0%;
 --trim-right-top: 0%;
@@ -2055,9 +2076,9 @@ right: var(--trim-right-top, 0);
 bottom: 0;
 pointer-events: none;
 z-index: 1;
-border-top: calc(var(--border-top) * var(--line-width-top)) solid var(--line-color-top);
-border-right: calc(var(--border-right) * var(--line-width-right)) solid var(--line-color-right);
-border-left: calc(var(--border-left) * var(--line-width-left)) solid var(--line-color-left);
+border-top: calc(var(--border-top) * var(--line-width-top)) var(--line-type-top, solid) var(--line-color-top);
+border-right: calc(var(--border-right) * var(--line-width-right)) var(--line-type-right, solid) var(--line-color-right);
+border-left: calc(var(--border-left) * var(--line-width-left)) var(--line-type-left, solid) var(--line-color-left);
 }
 
 .tinytable :is(td, th)[class*="tinytable_css_"]::after {
@@ -2066,8 +2087,8 @@ position: absolute;
 left: var(--trim-bottom-left, 0);
 right: var(--trim-bottom-right, 0);
 bottom: var(--trim-left-bottom, var(--trim-right-bottom, 0));
-height: calc(var(--border-bottom) * var(--line-width-bottom));
-background: var(--line-color-bottom);
+height: 0;
+border-bottom: calc(var(--border-bottom) * var(--line-width-bottom)) var(--line-type-bottom, solid) var(--line-color-bottom);
 pointer-events: none;
 z-index: 2;
 }
@@ -2113,17 +2134,17 @@ line-height: var(--tt-line-height-footnote-tight);
 </style>
     <style>
 
-#tinytable_26cpj6mxcp2y58jfo2n1 td.tinytable_css_sjs0kwl2l023le7z1q2z, #tinytable_26cpj6mxcp2y58jfo2n1 th.tinytable_css_sjs0kwl2l023le7z1q2z { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.08em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: center }
-#tinytable_26cpj6mxcp2y58jfo2n1 td.tinytable_css_0vdi6b7hshzecr74vrjy, #tinytable_26cpj6mxcp2y58jfo2n1 th.tinytable_css_0vdi6b7hshzecr74vrjy { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.05em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: center }
-#tinytable_26cpj6mxcp2y58jfo2n1 td.tinytable_css_hwgs3tze7etmqgmi7li2, #tinytable_26cpj6mxcp2y58jfo2n1 th.tinytable_css_hwgs3tze7etmqgmi7li2 { text-align: center }
-#tinytable_26cpj6mxcp2y58jfo2n1 td.tinytable_css_10lrh67u0otm5kwfm3kf, #tinytable_26cpj6mxcp2y58jfo2n1 th.tinytable_css_10lrh67u0otm5kwfm3kf { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 1; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.05em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.08em; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: center }
-#tinytable_26cpj6mxcp2y58jfo2n1 td.tinytable_css_l08uvpo7068pckit146w, #tinytable_26cpj6mxcp2y58jfo2n1 th.tinytable_css_l08uvpo7068pckit146w { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.08em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: left }
-#tinytable_26cpj6mxcp2y58jfo2n1 td.tinytable_css_r8orjvgimd5fqrxmbut0, #tinytable_26cpj6mxcp2y58jfo2n1 th.tinytable_css_r8orjvgimd5fqrxmbut0 { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.05em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: left }
-#tinytable_26cpj6mxcp2y58jfo2n1 td.tinytable_css_1w08pghglm8f9zydlcx9, #tinytable_26cpj6mxcp2y58jfo2n1 th.tinytable_css_1w08pghglm8f9zydlcx9 { text-align: left }
-#tinytable_26cpj6mxcp2y58jfo2n1 td.tinytable_css_hmw4cu6ip7fkp1fwieev, #tinytable_26cpj6mxcp2y58jfo2n1 th.tinytable_css_hmw4cu6ip7fkp1fwieev { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 1; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.05em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.08em; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: left }
+#tinytable_8b6s5bvx8unm2cttbjv5 td.tinytable_css_4lljzpk229sfgciwd79e, #tinytable_8b6s5bvx8unm2cttbjv5 th.tinytable_css_4lljzpk229sfgciwd79e { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.08em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: center }
+#tinytable_8b6s5bvx8unm2cttbjv5 td.tinytable_css_14e3kydghd2zz35z7hf1, #tinytable_8b6s5bvx8unm2cttbjv5 th.tinytable_css_14e3kydghd2zz35z7hf1 { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.05em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: center }
+#tinytable_8b6s5bvx8unm2cttbjv5 td.tinytable_css_stcuh8ipme1swx4cks58, #tinytable_8b6s5bvx8unm2cttbjv5 th.tinytable_css_stcuh8ipme1swx4cks58 { text-align: center }
+#tinytable_8b6s5bvx8unm2cttbjv5 td.tinytable_css_mlvkqzzli9mdyls85zan, #tinytable_8b6s5bvx8unm2cttbjv5 th.tinytable_css_mlvkqzzli9mdyls85zan { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 1; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.05em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.08em; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: center }
+#tinytable_8b6s5bvx8unm2cttbjv5 td.tinytable_css_92mq2pzynmlps3mfwp67, #tinytable_8b6s5bvx8unm2cttbjv5 th.tinytable_css_92mq2pzynmlps3mfwp67 { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.08em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: left }
+#tinytable_8b6s5bvx8unm2cttbjv5 td.tinytable_css_vssddx4xwzfplezbcfp4, #tinytable_8b6s5bvx8unm2cttbjv5 th.tinytable_css_vssddx4xwzfplezbcfp4 { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.05em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: left }
+#tinytable_8b6s5bvx8unm2cttbjv5 td.tinytable_css_jyexuc067f86fks5i3hj, #tinytable_8b6s5bvx8unm2cttbjv5 th.tinytable_css_jyexuc067f86fks5i3hj { text-align: left }
+#tinytable_8b6s5bvx8unm2cttbjv5 td.tinytable_css_i6atlsy3qdkfc2gcislx, #tinytable_8b6s5bvx8unm2cttbjv5 th.tinytable_css_i6atlsy3qdkfc2gcislx { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 1; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.05em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.08em; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: left }
 </style>
     <div class="container">
-      <table class="tinytable" id="tinytable_26cpj6mxcp2y58jfo2n1" style="width: auto; margin-left: auto; margin-right: auto;" data-quarto-disable-processing="true">
+      <table class="tinytable" id="tinytable_8b6s5bvx8unm2cttbjv5" style="width: auto; margin-left: auto; margin-right: auto;" data-quarto-disable-processing="true">
         
         <thead>
               <tr>

@@ -99,15 +99,14 @@ cor_povlib <- Dat %>%
 cor_povlib <- cor_povlib[1, 2]
 ```
 
-6. Now check yourself: estimate the correlation with `cor()` (rounded to two digits;
+6. Now check yourself: estimate the correlation with `cor()` (two digits are enough;
    point or comma is fine): `r num_fitb(cor_povlib)`
 
 `r hide("R solution -> don't peek too early ;) !")`
 ```{r}
 Dat %>%
   select(poverty, civ_liberties) %>%
-  cor() %>%
-  round(2)
+  cor()
 ```
 `r unhide()`
 
@@ -127,19 +126,28 @@ Dat %>%
 
 ------------------------------------------------------------------------------
 
-**Bonus (for the fast):** `Dat` has ~160 countries, but V-Dem covers 179 — where did the
-rest go? Find the countries we *lost* in the join, using `anti_join()`. Why are they missing?
-
-`r hide("R solution")`
-```{r}
-Dat_vdem %>%
-  filter(year > 2015) %>% # Recent years only
-  anti_join(Dat_poverty, by = c("country_text_id", "year")) %>%
-  distinct(country_text_id)
+```{r bonus-values, include = FALSE}
+vdem_today <- Dat_vdem %>% filter(year == max(year)) %>% select(country_text_id)
+lost_vdem  <- vdem_today %>% anti_join(Dat, by = "country_text_id")
+lost_wb    <- Dat_poverty %>% select(country_text_id) %>% anti_join(Dat, by = "country_text_id")
 ```
 
-They are countries (and country-years) with **no World Bank poverty estimate** — poverty
-data require household surveys, which some countries run rarely or not at all (e.g. North
-Korea). An `inner_join()` silently drops them. **Data that are missing are a finding, too:**
-our analysis can only speak about countries that measure poverty.
+**Bonus (for the fast):** `Dat` has `r nrow(Dat)` countries, but V-Dem covers
+`r nrow(vdem_today)` countries today. So the `inner_join()` silently dropped
+`r nrow(lost_vdem)` of them. Before you open the answer: **which kinds of countries** do you
+think have no World Bank poverty estimate, and why?
+
+`r hide("Model answer")`
+The `r nrow(lost_vdem)` lost countries have **no World Bank poverty estimate**, and
+for *two* different reasons. Some states do not run, or do not publish, the household
+surveys poverty figures are built from — **North Korea, Somalia, Eritrea, Cuba, Libya,
+Afghanistan**, several Gulf states. Others are simply too rich for the \$3.00 line to be
+worth measuring — **New Zealand, Singapore, Hong Kong, Taiwan**. The join also loses
+`r nrow(lost_wb)` countries the other way round: small island states the World Bank surveys but
+V-Dem does not code.
+
+Check the arithmetic: `r nrow(Dat)` kept + `r nrow(lost_vdem)` lost = `r nrow(vdem_today)`.
+An `inner_join()` dropped them **silently**. **Data that are missing are a finding, too:**
+our analysis can only speak about countries that measure poverty — which excludes both the
+least free and some of the richest.
 `r unhide()`

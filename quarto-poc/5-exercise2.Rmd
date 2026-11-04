@@ -20,7 +20,9 @@ load("../assets/APAD.RData")
 APAD <- APAD %>%
   mutate(
     news    = news_hrs * 60 + news_mins,
-    news_yn = if_else(news >= 15, 1, 0)
+    news_yn = case_when( # reads news?
+      news < 5 ~ 0,      # 0 if less than 5 minutes
+      news >= 5 ~ 1)     # 1 if 5 minutes or more
   )
 ```
 
@@ -56,16 +58,18 @@ APAD %>%
 `r unhide()`
 
 3. Read your balance table. What does it tell you?
-`r mcq(c("Appearance is perfectly balanced, so it cannot bias the comparison", answer = "The groups differ in their racial-appearance mix — a sign the comparison is confounded", "The table proves that appearance causes news reading"))`
+`r mcq(c("Appearance is balanced, so the news comparison must be unbiased", answer = "Appearance is roughly balanced, but that says nothing about other variables: age and citizenship are clearly imbalanced (see the lecture)", "The table proves that appearance causes news reading"))`
 
-4. **Write one sentence** (as a `# comment`) explaining *why* an imbalance in `appearance` matters
-   for our estimate. Then compare:
+4. **Write one sentence** (as a `# comment`) explaining *why* an imbalance in `appearance` *would*
+   matter for our estimate — and why balance on this one variable does not make the comparison fair.
+   Then compare:
 
 `r hide("Model answer")`
 *If people who are racialised differently both follow the news differently **and** face different
 levels of discrimination (and hold different views on anti-discrimination law), then appearance
 sits on a backdoor path — the raw news–attitude difference is partly selection bias, not a causal
-effect.*
+effect. Here the appearance mix is roughly balanced, so it is not the main culprit — but age and
+citizenship are not, and a balance test cannot see the unobserved confounders at all.*
 `r unhide()`
 
 ------------------------------------------------------------------------------

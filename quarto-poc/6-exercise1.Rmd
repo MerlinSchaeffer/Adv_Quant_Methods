@@ -71,13 +71,15 @@ APAD <- APAD %>% mutate( # Process APAD data
 > - Strange results? *Session → Restart R*, then rerun your script from the top.
 > - Still stuck? Ask (and answer!) in the [t-R-ouble forum](https://absalon.ku.dk/courses/70545/discussion_topics/563046?module_item_id=2037268) on Absalon.
 
-2. Create a new variable called `APAD$candy` that simulates randomly "giving" candy to half of the respondents in your dataset. Follow these steps: a) Use the `rbinom()` function to generate this variable. b) To understand how `rbinom()` works, you can use R's built-in help function by typing `?rbinom` in the console, search online for "R rbinom() examples", or use an AI assistant like ChatGPT or Google Gemini for an explanation. c) Make sure your code assigns a value of 1 (representing "received candy") to approximately 50% of the respondents, and 0 to the others.
+2. Create a new variable `candy` in `APAD` that randomly "gives" candy to about half of the
+   respondents. Use the coin from the lecture: `rbinom()`, flipped once per respondent
+   (`nrow(APAD)` flips), so that 1 = "received candy" and 0 = "no candy".
 
 `r hide("R solution -> don't peek too early ;) !")`
 ```{r}
 APAD <- APAD %>% mutate( # Add new 'candy' variable to APAD dataset
   candy = rbinom( # Generate random binary values (0 or 1)
-    nrow(APAD), # One value per row
+    n = nrow(APAD), # One flip per respondent
     size = 1, # Each trial has two outcomes
     prob = 0.5)) # 50% chance of getting 1 (candy)
 ```

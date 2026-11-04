@@ -33,33 +33,38 @@ ESS_raw <- read_dta("Legewie_ESS_02.dta") # from your project folder
 ```
 
 ```{r prep}
-event_date <- as.Date("2002-10-13")   # the Bali attack
-win_begin  <- as.Date("2002-09-14")
-win_end    <- as.Date("2002-10-20")
+# Bali terror attack, and the ESS fieldwork window around it
+event_date_begin <- as.Date("2002-09-14")
+event_date       <- as.Date("2002-10-13")
+event_date_end   <- as.Date("2002-10-20")
 
-prepare <- function(data, countries) {
-  data %>%
-    mutate(
-      int_date = as.Date(sprintf("%s-%s-%s", inwyr, inwmm, inwdd)),
-      treat = case_when(
-        int_date > event_date & int_date <= win_end   ~ "After the attack",
-        int_date < event_date & int_date > win_begin  ~ "Before the attack",
-        TRUE ~ NA_character_) %>% fct_relevel("Before the attack", "After the attack"),
-      # Anti-immigrant index: average 7 items, z-standardise, flip so high = xenophobic
-      anti_immi = rowMeans(across(c(imtcjob, imbleco, imbgeco, imueclt,
-                                    imwbcnt, imwbcrm, imbghct)), na.rm = TRUE) %>%
-        scale() %>% as.numeric(),
-      anti_immi = max(anti_immi, na.rm = TRUE) - anti_immi,
-      across(c(brncntr, mocntr, facntr), as_factor),
-      pspwght = pweight * dweight
-    ) %>%
-    filter(str_detect(cntry, countries) &                 # <- sample restriction
-             brncntr == "yes" & mocntr == "yes" & facntr == "yes") %>%
-    select(treat, anti_immi, cntry, pspwght) %>%
-    drop_na()
-}
-
-ESS <- prepare(ESS_raw, "PT") # Portugal only
+ESS <- ESS_raw %>%
+  mutate(
+    # Day of the survey interview
+    int_date = sprintf("%s-%s-%s", inwyr, inwmm, inwdd) %>% as.Date(),
+    # Treatment indicator
+    treat = case_when(
+      int_date > event_date & int_date <= event_date_end ~ "After the attack",
+      int_date < event_date & int_date > event_date_begin ~ "Before the attack",
+      TRUE ~ as.character(NA)) %>% fct_relevel("Before the attack", "After the attack"),
+    # Attitudes towards immigrants: the average of 7 items, z-standardised
+    anti_immi = rowMeans(select(., imtcjob, imbleco, imbgeco, imueclt,
+                                imwbcnt, imwbcrm, imbghct), na.rm = TRUE) %>%
+      scale() %>% as.numeric(),
+    # Subtract from max to make larger values more xenophobic
+    anti_immi = max(anti_immi, na.rm = TRUE) - anti_immi,
+    # Immigrant origin
+    brncntr = as_factor(brncntr),
+    mocntr = as_factor(mocntr),
+    facntr = as_factor(facntr),
+    # Weights
+    pspwght = pweight * dweight) %>%
+  # Sample restriction: mainstream members (no immigrant origin) in Portugal
+  filter(str_detect(cntry, "PT") &
+           brncntr == "yes" & mocntr == "yes" & facntr == "yes") %>%
+  # Keep only the variables we need
+  select(treat, anti_immi, cntry, pspwght) %>%
+  drop_na() # Delete cases with missing values
 ```
 
 ```{r solutions, include = FALSE}
@@ -67,7 +72,33 @@ ols_pt <- lm_robust(anti_immi ~ treat, data = ESS, weights = pspwght)
 b_pt  <- coef(ols_pt)["treatAfter the attack"]
 se_pt <- sqrt(diag(vcov(ols_pt)))["treatAfter the attack"]
 
-ESS2 <- prepare(ESS_raw, "PT|SE")
+ESS2 <- ESS_raw %>%
+  mutate(
+    # Day of the survey interview
+    int_date = sprintf("%s-%s-%s", inwyr, inwmm, inwdd) %>% as.Date(),
+    # Treatment indicator
+    treat = case_when(
+      int_date > event_date & int_date <= event_date_end ~ "After the attack",
+      int_date < event_date & int_date > event_date_begin ~ "Before the attack",
+      TRUE ~ as.character(NA)) %>% fct_relevel("Before the attack", "After the attack"),
+    # Attitudes towards immigrants: the average of 7 items, z-standardised
+    anti_immi = rowMeans(select(., imtcjob, imbleco, imbgeco, imueclt,
+                                imwbcnt, imwbcrm, imbghct), na.rm = TRUE) %>%
+      scale() %>% as.numeric(),
+    # Subtract from max to make larger values more xenophobic
+    anti_immi = max(anti_immi, na.rm = TRUE) - anti_immi,
+    # Immigrant origin
+    brncntr = as_factor(brncntr),
+    mocntr = as_factor(mocntr),
+    facntr = as_factor(facntr),
+    # Weights
+    pspwght = pweight * dweight) %>%
+  # Sample restriction: mainstream members (no immigrant origin) in Portugal and Sweden
+  filter(str_detect(cntry, "PT|SE") &
+           brncntr == "yes" & mocntr == "yes" & facntr == "yes") %>%
+  # Keep only the variables we need
+  select(treat, anti_immi, cntry, pspwght) %>%
+  drop_na() # Delete cases with missing values
 ols_se <- lm_robust(anti_immi ~ treat, data = ESS2 %>% filter(cntry == "SE"),
                     weights = pspwght)
 b_se  <- coef(ols_se)["treatAfter the attack"]
@@ -118,7 +149,33 @@ ggplot(plotdata_pt, aes(y = estimate, x = cntry,
 
 `r hide("R solution -> don't peek too early ;) !")`
 ```{r results = 'asis'}
-ESS2 <- prepare(ESS_raw, "PT|SE")
+ESS2 <- ESS_raw %>%
+  mutate(
+    # Day of the survey interview
+    int_date = sprintf("%s-%s-%s", inwyr, inwmm, inwdd) %>% as.Date(),
+    # Treatment indicator
+    treat = case_when(
+      int_date > event_date & int_date <= event_date_end ~ "After the attack",
+      int_date < event_date & int_date > event_date_begin ~ "Before the attack",
+      TRUE ~ as.character(NA)) %>% fct_relevel("Before the attack", "After the attack"),
+    # Attitudes towards immigrants: the average of 7 items, z-standardised
+    anti_immi = rowMeans(select(., imtcjob, imbleco, imbgeco, imueclt,
+                                imwbcnt, imwbcrm, imbghct), na.rm = TRUE) %>%
+      scale() %>% as.numeric(),
+    # Subtract from max to make larger values more xenophobic
+    anti_immi = max(anti_immi, na.rm = TRUE) - anti_immi,
+    # Immigrant origin
+    brncntr = as_factor(brncntr),
+    mocntr = as_factor(mocntr),
+    facntr = as_factor(facntr),
+    # Weights
+    pspwght = pweight * dweight) %>%
+  # Sample restriction: mainstream members (no immigrant origin) in Portugal and Sweden
+  filter(str_detect(cntry, "PT|SE") &
+           brncntr == "yes" & mocntr == "yes" & facntr == "yes") %>%
+  # Keep only the variables we need
+  select(treat, anti_immi, cntry, pspwght) %>%
+  drop_na() # Delete cases with missing values
 ols_se <- lm_robust(anti_immi ~ treat, data = ESS2 %>% filter(cntry == "SE"),
                     weights = pspwght)
 modelsummary(list("Xenophobia (SE)" = ols_se), stars = TRUE,
@@ -138,20 +195,17 @@ analysis published in the American Journal of Sociology.*
 
 ------------------------------------------------------------------------------
 
-**Bonus (for the fast):** combine both into one coefficient plot with
-`bind_rows(plotdata_pt, plotdata_se, .id = "id")` and colour by country.
+**Bonus (for the fast):** put Portugal and Sweden side by side in **one** `modelsummary()`
+table, as in earlier lectures. Where exactly do the two countries differ?
 
 `r hide("R solution")`
-```{r out.width='90%', fig.height = 3.2, fig.width = 7, results = FALSE}
-plotdata_se <- ols_se %>% tidy() %>%
-  filter(term != "(Intercept)") %>% mutate(cntry = "Sweden")
-
-bind_rows(plotdata_pt, plotdata_se) %>%
-  ggplot(aes(y = estimate, x = reorder(cntry, estimate),
-             ymin = conf.low, ymax = conf.high)) +
-  geom_hline(yintercept = 0, color = "#901A1E", lty = "dashed") +
-  geom_pointrange() + coord_flip() +
-  labs(x = "", y = "Change in xenophobia after the attack (SD)") +
-  theme_minimal()
+```{r results = 'asis'}
+modelsummary(list("Portugal" = ols_pt, "Sweden" = ols_se), stars = TRUE,
+             coef_rename = c("treatAfter the attack" = "After the attack"),
+             gof_map = c("nobs", "r.squared"))
 ```
+
+The attack coefficient is about `r round(b_pt, 2)` SD and significant in Portugal, but only
+`r round(b_se, 2)` SD and not significant in Sweden. Next week you will learn to show two models
+in one coefficient plot.
 `r unhide()`

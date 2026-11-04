@@ -480,7 +480,7 @@ Dat &lt;- wb_raw %&gt;%
   group_by(country) %&gt;%
   filter(date == max(date)) %&gt;%
   ungroup() %&gt;%
-  left_join(wb_meta %&gt;% select(iso3c, region, income_level), by = &quot;iso3c&quot;) %&gt;%
+  inner_join(wb_meta %&gt;% select(iso3c, region, income_level), by = &quot;iso3c&quot;) %&gt;%
   select(iso3c, country, date, co2, gdp, region, income_level) %&gt;%
   filter(country != &quot;Palau&quot;) %&gt;%              # the artefact from Lecture 4
   mutate(gdp_k  = gdp / 1000,
@@ -493,8 +493,9 @@ that first.</li>
 <li>Odd results? <em>Session → Restart R</em>, then rerun from the
 top.</li>
 <li><strong>World Bank API down?</strong> Load the cached, ready-made
-data instead:
-<code>Dat &lt;- readRDS(url(&quot;https://merlin-ols.netlify.app/data/Dat_L4.rds&quot;)) |&gt; dplyr::filter(country != &quot;Palau&quot;)</code></li>
+data instead: download <a href="https://merlin-ols.netlify.app/data/Dat_L4.rds"><code>Dat_L4.rds</code></a>
+into your project folder, then
+<code>Dat &lt;- readRDS(&quot;Dat_L4.rds&quot;) %&gt;% filter(country != &quot;Palau&quot;)</code></li>
 <li>Still stuck? Ask in the <a href="https://absalon.ku.dk/courses/70545/discussion_topics/563046?module_item_id=2037268">t-R-ouble
 forum</a> on Absalon.</li>
 </ul>
@@ -761,25 +762,25 @@ function tinytable_rank_sorter(a, b, aRow, bRow, column, dir, sorterParams) {
 
     <script>
       // Create table-specific functions using external factory
-      const tableFns_6pptw14dzojkrqge3jte = TinyTable.createTableFunctions("tinytable_6pptw14dzojkrqge3jte");
+      const tableFns_g1bf9a7m8t6r77y801pl = TinyTable.createTableFunctions("tinytable_g1bf9a7m8t6r77y801pl");
       // tinytable span after
       window.addEventListener('load', function () {
           var cellsToStyle = [
             // tinytable style arrays after
-          { positions: [ { i: '18', j: 2 }, { i: '18', j: 3 } ], css_id: 'tinytable_css_9z6z6rw7u1be06udjjdo',}, 
-          { positions: [ { i: '16', j: 2 }, { i: '16', j: 3 } ], css_id: 'tinytable_css_wdq75dbpvtyv499a9wu0',}, 
-          { positions: [ { i: '1', j: 2 }, { i: '2', j: 2 }, { i: '3', j: 2 }, { i: '4', j: 2 }, { i: '5', j: 2 }, { i: '6', j: 2 }, { i: '7', j: 2 }, { i: '8', j: 2 }, { i: '9', j: 2 }, { i: '10', j: 2 }, { i: '11', j: 2 }, { i: '12', j: 2 }, { i: '13', j: 2 }, { i: '14', j: 2 }, { i: '15', j: 2 }, { i: '17', j: 2 }, { i: '1', j: 3 }, { i: '2', j: 3 }, { i: '3', j: 3 }, { i: '4', j: 3 }, { i: '5', j: 3 }, { i: '6', j: 3 }, { i: '7', j: 3 }, { i: '8', j: 3 }, { i: '9', j: 3 }, { i: '10', j: 3 }, { i: '11', j: 3 }, { i: '12', j: 3 }, { i: '13', j: 3 }, { i: '14', j: 3 }, { i: '15', j: 3 }, { i: '17', j: 3 } ], css_id: 'tinytable_css_7ag9tb0bavxqwmlbnxmo',}, 
-          { positions: [ { i: '0', j: 2 }, { i: '0', j: 3 } ], css_id: 'tinytable_css_masrfr5iphjk6mm588tg',}, 
-          { positions: [ { i: '18', j: 1 } ], css_id: 'tinytable_css_h2kghdmmq395sal1218p',}, 
-          { positions: [ { i: '16', j: 1 } ], css_id: 'tinytable_css_oz61bpvjd9y07tvwm8yk',}, 
-          { positions: [ { i: '1', j: 1 }, { i: '2', j: 1 }, { i: '3', j: 1 }, { i: '4', j: 1 }, { i: '5', j: 1 }, { i: '6', j: 1 }, { i: '7', j: 1 }, { i: '8', j: 1 }, { i: '9', j: 1 }, { i: '10', j: 1 }, { i: '11', j: 1 }, { i: '12', j: 1 }, { i: '13', j: 1 }, { i: '14', j: 1 }, { i: '15', j: 1 }, { i: '17', j: 1 } ], css_id: 'tinytable_css_kc7jxgmjwc0mar5c9s7t',}, 
-          { positions: [ { i: '0', j: 1 } ], css_id: 'tinytable_css_s6tjwgmcrukh45is88gw',}, 
+          { positions: [ { i: '18', j: 2 }, { i: '18', j: 3 } ], css_id: 'tinytable_css_fgykafmut3qgs05c91cj',}, 
+          { positions: [ { i: '16', j: 2 }, { i: '16', j: 3 } ], css_id: 'tinytable_css_m5ilzl3liorufovlstbm',}, 
+          { positions: [ { i: '1', j: 2 }, { i: '2', j: 2 }, { i: '3', j: 2 }, { i: '4', j: 2 }, { i: '5', j: 2 }, { i: '6', j: 2 }, { i: '7', j: 2 }, { i: '8', j: 2 }, { i: '9', j: 2 }, { i: '10', j: 2 }, { i: '11', j: 2 }, { i: '12', j: 2 }, { i: '13', j: 2 }, { i: '14', j: 2 }, { i: '15', j: 2 }, { i: '17', j: 2 }, { i: '1', j: 3 }, { i: '2', j: 3 }, { i: '3', j: 3 }, { i: '4', j: 3 }, { i: '5', j: 3 }, { i: '6', j: 3 }, { i: '7', j: 3 }, { i: '8', j: 3 }, { i: '9', j: 3 }, { i: '10', j: 3 }, { i: '11', j: 3 }, { i: '12', j: 3 }, { i: '13', j: 3 }, { i: '14', j: 3 }, { i: '15', j: 3 }, { i: '17', j: 3 } ], css_id: 'tinytable_css_niy99jqo730jcvpqzw2e',}, 
+          { positions: [ { i: '0', j: 2 }, { i: '0', j: 3 } ], css_id: 'tinytable_css_xofe6skh5huhh83jkvn4',}, 
+          { positions: [ { i: '18', j: 1 } ], css_id: 'tinytable_css_iouijadx6tbqod6pdfue',}, 
+          { positions: [ { i: '16', j: 1 } ], css_id: 'tinytable_css_bnxaqkmrfg6kr4ek533d',}, 
+          { positions: [ { i: '1', j: 1 }, { i: '2', j: 1 }, { i: '3', j: 1 }, { i: '4', j: 1 }, { i: '5', j: 1 }, { i: '6', j: 1 }, { i: '7', j: 1 }, { i: '8', j: 1 }, { i: '9', j: 1 }, { i: '10', j: 1 }, { i: '11', j: 1 }, { i: '12', j: 1 }, { i: '13', j: 1 }, { i: '14', j: 1 }, { i: '15', j: 1 }, { i: '17', j: 1 } ], css_id: 'tinytable_css_v9tb52ertp047vfsu5t1',}, 
+          { positions: [ { i: '0', j: 1 } ], css_id: 'tinytable_css_odp9tqw7wdt3iuvrgzbw',}, 
           ];
 
           // Loop over the arrays to style the cells
           cellsToStyle.forEach(function (group) {
               group.positions.forEach(function (cell) {
-                  tableFns_6pptw14dzojkrqge3jte.styleCell(cell.i, cell.j, group.css_id);
+                  tableFns_g1bf9a7m8t6r77y801pl.styleCell(cell.i, cell.j, group.css_id);
               });
           });
       });
@@ -987,17 +988,17 @@ line-height: var(--tt-line-height-footnote-tight);
 </style>
     <style>
 
-#tinytable_6pptw14dzojkrqge3jte td.tinytable_css_9z6z6rw7u1be06udjjdo, #tinytable_6pptw14dzojkrqge3jte th.tinytable_css_9z6z6rw7u1be06udjjdo { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.08em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: center }
-#tinytable_6pptw14dzojkrqge3jte td.tinytable_css_wdq75dbpvtyv499a9wu0, #tinytable_6pptw14dzojkrqge3jte th.tinytable_css_wdq75dbpvtyv499a9wu0 { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.05em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: center }
-#tinytable_6pptw14dzojkrqge3jte td.tinytable_css_7ag9tb0bavxqwmlbnxmo, #tinytable_6pptw14dzojkrqge3jte th.tinytable_css_7ag9tb0bavxqwmlbnxmo { text-align: center }
-#tinytable_6pptw14dzojkrqge3jte td.tinytable_css_masrfr5iphjk6mm588tg, #tinytable_6pptw14dzojkrqge3jte th.tinytable_css_masrfr5iphjk6mm588tg { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 1; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.05em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.08em; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: center }
-#tinytable_6pptw14dzojkrqge3jte td.tinytable_css_h2kghdmmq395sal1218p, #tinytable_6pptw14dzojkrqge3jte th.tinytable_css_h2kghdmmq395sal1218p { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.08em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: left }
-#tinytable_6pptw14dzojkrqge3jte td.tinytable_css_oz61bpvjd9y07tvwm8yk, #tinytable_6pptw14dzojkrqge3jte th.tinytable_css_oz61bpvjd9y07tvwm8yk { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.05em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: left }
-#tinytable_6pptw14dzojkrqge3jte td.tinytable_css_kc7jxgmjwc0mar5c9s7t, #tinytable_6pptw14dzojkrqge3jte th.tinytable_css_kc7jxgmjwc0mar5c9s7t { text-align: left }
-#tinytable_6pptw14dzojkrqge3jte td.tinytable_css_s6tjwgmcrukh45is88gw, #tinytable_6pptw14dzojkrqge3jte th.tinytable_css_s6tjwgmcrukh45is88gw { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 1; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.05em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.08em; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: left }
+#tinytable_g1bf9a7m8t6r77y801pl td.tinytable_css_fgykafmut3qgs05c91cj, #tinytable_g1bf9a7m8t6r77y801pl th.tinytable_css_fgykafmut3qgs05c91cj { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.08em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: center }
+#tinytable_g1bf9a7m8t6r77y801pl td.tinytable_css_m5ilzl3liorufovlstbm, #tinytable_g1bf9a7m8t6r77y801pl th.tinytable_css_m5ilzl3liorufovlstbm { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.05em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: center }
+#tinytable_g1bf9a7m8t6r77y801pl td.tinytable_css_niy99jqo730jcvpqzw2e, #tinytable_g1bf9a7m8t6r77y801pl th.tinytable_css_niy99jqo730jcvpqzw2e { text-align: center }
+#tinytable_g1bf9a7m8t6r77y801pl td.tinytable_css_xofe6skh5huhh83jkvn4, #tinytable_g1bf9a7m8t6r77y801pl th.tinytable_css_xofe6skh5huhh83jkvn4 { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 1; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.05em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.08em; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: center }
+#tinytable_g1bf9a7m8t6r77y801pl td.tinytable_css_iouijadx6tbqod6pdfue, #tinytable_g1bf9a7m8t6r77y801pl th.tinytable_css_iouijadx6tbqod6pdfue { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.08em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: left }
+#tinytable_g1bf9a7m8t6r77y801pl td.tinytable_css_bnxaqkmrfg6kr4ek533d, #tinytable_g1bf9a7m8t6r77y801pl th.tinytable_css_bnxaqkmrfg6kr4ek533d { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.05em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: left }
+#tinytable_g1bf9a7m8t6r77y801pl td.tinytable_css_v9tb52ertp047vfsu5t1, #tinytable_g1bf9a7m8t6r77y801pl th.tinytable_css_v9tb52ertp047vfsu5t1 { text-align: left }
+#tinytable_g1bf9a7m8t6r77y801pl td.tinytable_css_odp9tqw7wdt3iuvrgzbw, #tinytable_g1bf9a7m8t6r77y801pl th.tinytable_css_odp9tqw7wdt3iuvrgzbw { position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 1; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.05em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.08em; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: left }
 </style>
     <div class="container">
-      <table class="tinytable" id="tinytable_6pptw14dzojkrqge3jte" style="width: auto; margin-left: auto; margin-right: auto;" data-quarto-disable-processing="true">
+      <table class="tinytable" id="tinytable_g1bf9a7m8t6r77y801pl" style="width: auto; margin-left: auto; margin-right: auto;" data-quarto-disable-processing="true">
         
         <thead>
               <tr>
@@ -1135,9 +1136,9 @@ something regional beyond wealth.</em></p>
 region and emissions?
 <select class="webex-select"><option value="blank"></option><option value>A
 confounder we must control to be fair</option><option value="answer">A
-mediator: richer regions emit more largely because they are rich
-&lt;U+2014&gt; wealth is the channel</option><option value>Neither;
-it is irrelevant here</option></select></li>
+mediator: richer regions emit more largely because they are rich —
+wealth is the channel</option><option value>Neither; it is irrelevant
+here</option></select></li>
 </ol>
 <hr />
 <p><strong>Bonus (for the fast):</strong> one region stays high <em>even
@@ -1149,16 +1150,15 @@ R solution
 </button>
 <pre class="r"><code>lm_robust(co2 ~ region + gdp_k, data = Dat) %&gt;%
   tidy() %&gt;%
-  filter(str_detect(term, &quot;region&quot;)) %&gt;%
-  arrange(desc(estimate)) %&gt;%
+  filter(term != &quot;(Intercept)&quot; &amp; term != &quot;gdp_k&quot;) %&gt;% # Keep only the region terms
   select(term, estimate)
 #                                                      term estimate
-# 1 regionMiddle East, North Africa, Afghanistan &amp; Pakistan    5.895
-# 2                                     regionNorth America    1.360
-# 3                               regionEast Asia &amp; Pacific    0.866
-# 4                                        regionSouth Asia    0.039
-# 5                             regionEurope &amp; Central Asia   -0.064
-# 6                         regionLatin America &amp; Caribbean   -0.118</code></pre>
+# 1                               regionEast Asia &amp; Pacific    0.866
+# 2                             regionEurope &amp; Central Asia   -0.064
+# 3                         regionLatin America &amp; Caribbean   -0.118
+# 4 regionMiddle East, North Africa, Afghanistan &amp; Pakistan    5.895
+# 5                                     regionNorth America    1.360
+# 6                                        regionSouth Asia    0.039</code></pre>
 <p>The <strong>Middle East &amp; North Africa</strong> region stays
 about 5.9 t above the reference even at equal GDP — the oil-and-gas
 economies emit far more than their income alone implies. Controlling for

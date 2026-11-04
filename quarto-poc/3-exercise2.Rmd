@@ -23,8 +23,14 @@ library(tidyverse); library(haven); library(estimatr); library(modelsummary)
 ESS <- read_spss("../assets/ESS9e03_1.sav") %>%
   filter(cntry == "DK") %>%
   select(idno, pspwght, gndr, eduyrs, agea, psppsgva, trstlgl, trstplc) %>%
-  mutate(across(c(psppsgva, trstlgl, trstplc, pspwght), zap_labels),
-         eduyrs = pmin(pmax(eduyrs, 9), 21),
+  mutate(psppsgva = zap_labels(psppsgva), # Make numeric
+         trstlgl = zap_labels(trstlgl),   # Make numeric
+         trstplc = zap_labels(trstplc),   # Make numeric
+         pspwght = zap_labels(pspwght),   # Make numeric
+         eduyrs = case_when(              # Censor education at 9 and 21 years
+           eduyrs > 21 ~ 21,
+           eduyrs < 9 ~ 9,
+           TRUE ~ as.numeric(eduyrs)),
          gndr = as_factor(gndr)) %>%
   drop_na()
 
@@ -38,12 +44,12 @@ Now the same logic, on **trust in the legal system** (`trstlgl`). Keep the prepa
 from Exercise 1 (its "Stuck?" box still applies).
 
 1. **Write it yourself:** regress trust in the legal system on years of education, **with
-   weights**, and print the full output with `summary()`.
+   weights**, and look at the full results with `tidy()`.
 
 `r hide("R solution -> don't peek too early ;) !")`
 ```{r sol1}
 mod <- lm_robust(trstlgl ~ eduyrs, data = ESS, weights = pspwght)
-summary(mod)
+tidy(mod) # Estimate, standard error, t-value, p-value and 95% CI
 ```
 `r unhide()`
 

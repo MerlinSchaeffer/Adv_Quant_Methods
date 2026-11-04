@@ -691,30 +691,28 @@ check whether the adjusted number was <em>right</em>, because nobody
 knows the true effect of the Bali attack. Here you do know it,
 <strong>because you set it yourself.</strong></p>
 <ol style="list-style-type: decimal">
-<li>Copy in this simulator. It is the lecture&#39;s toy example, wrapped in
-a function so you can turn three knobs: the <strong>true
-effect</strong>, how strongly the confounder affects the
-<strong>outcome</strong> (<span class="math inline">\(\beta_{C
-\rightarrow Y}\)</span>), and how strongly it drives <strong>selection
-into treatment</strong> (<span class="math inline">\(\beta_{D
+<li>Copy in this simulation. It is the lecture&#39;s toy example, all three
+steps in one chunk. Three numbers in it are the knobs you will turn: the
+<strong>true effect</strong> (<code>1 * bali</code>), how strongly the
+confounder affects the <strong>outcome</strong> (<code>0.3 * age</code>,
+<span class="math inline">\(\beta_{C \rightarrow Y}\)</span>), and how
+strongly it drives <strong>selection into treatment</strong>
+(<code>-0.1 * age</code>, <span class="math inline">\(\beta_{D
 \rightarrow C}\)</span>).</li>
 </ol>
 <pre class="r"><code>pacman::p_load(tidyverse, estimatr, modelsummary)
 
-simulate_toy &lt;- function(b_bali    = 1,     # THE TRUTH: causal effect of Bali
-                         b_age     = 0.3,   # C -&gt; Y : how much age drives xenophobia
-                         selection = -0.1,  # C -&gt; D : how age drives interview timing
-                         seed      = 831983) {
-  set.seed(seed)
-  tibble(age = rnorm(n = 500, mean = 40, sd = 5)) %&gt;%
-    mutate(
-      int_day = (selection * age) + rnorm(n = 500, mean = 0, sd = 1),
-      bali    = if_else(int_day &gt;= mean(int_day), 1, 0),
-      xeno    = (b_bali * bali) + (b_age * age) + rnorm(n = 500, mean = 0, sd = 1)
-    )
-}
-
-toydat &lt;- simulate_toy() # The lecture&#39;s settings</code></pre>
+set.seed(831983) # So everyone gets the SAME &quot;random&quot; numbers
+toydat &lt;- tibble(
+  age = rnorm(n = 500, mean = 40, sd = 5)) %&gt;%     # Step 1: age
+  mutate(
+    # Step 2: who gets treated (older people are interviewed earlier)
+    int_day = (-0.1 * age) + rnorm(n = 500, mean = 0, sd = 1),
+    bali = case_when(
+      int_day &lt; mean(int_day) ~ 0,   # interviewed before the attack
+      int_day &gt;= mean(int_day) ~ 1), # interviewed after the attack
+    # Step 3: the outcome. THE TRUTH: the Bali effect is 1
+    xeno = (1 * bali) + (0.3 * age) + rnorm(n = 500, mean = 0, sd = 1))</code></pre>
 <div class="webex-solution">
 <button>
 Stuck?
@@ -723,9 +721,9 @@ Stuck?
 <li>Did <code>pacman::p_load(...)</code> run without red errors? Fix
 that first.</li>
 <li>Getting <em>different</em> numbers from the ones below? Check you
-kept <code>seed = 831983</code> and did not re-run <code>rnorm()</code>
-in between — the seed is what makes everyone&#39;s &quot;random&quot; data
-identical.</li>
+kept <code>set.seed(831983)</code> and re-ran the <em>whole</em> chunk,
+from <code>set.seed()</code> down — never just a part of it — the seed
+is what makes everyone&#39;s &quot;random&quot; data identical.</li>
 <li>Odd results? <em>Session → Restart R</em>, then rerun from the
 top.</li>
 <li>Still stuck? Ask in the <a href="https://absalon.ku.dk/courses/70545/discussion_topics/563046?module_item_id=2037268">t-R-ouble
@@ -779,9 +777,9 @@ one</option><option value>Both are equally
 close</option><option value>Neither is close</option></select></p>
 <ol start="3" style="list-style-type: decimal">
 <li><strong>Predict before you compute.</strong> Now make the confounder
-<em>three times stronger</em> on the outcome —
-<code>simulate_toy(b_age = 0.9)</code> — but change nothing else. What
-happens to the <strong>bivariate</strong> estimate?
+<em>three times stronger</em> on the outcome — change
+<code>0.3 * age</code> to <code>0.9 * age</code> — but change nothing
+else. What happens to the <strong>bivariate</strong> estimate?
 <select class="webex-select"><option value="blank"></option><option value>It
 gets closer to the truth of 1</option><option value>It stays about
 the same</option><option value="answer">It becomes even more biased — so
@@ -792,7 +790,17 @@ much that it turns negative</option><option value>It doubles to about
 <button>
 R solution — check your prediction
 </button>
-<pre class="r"><code>toy_strong &lt;- simulate_toy(b_age = 0.9)
+<pre class="r"><code>set.seed(831983) # So everyone gets the SAME &quot;random&quot; numbers
+toy_strong &lt;- tibble(
+  age = rnorm(n = 500, mean = 40, sd = 5)) %&gt;%     # Step 1: age
+  mutate(
+    # Step 2: who gets treated (older people are interviewed earlier)
+    int_day = (-0.1 * age) + rnorm(n = 500, mean = 0, sd = 1),
+    bali = case_when(
+      int_day &lt; mean(int_day) ~ 0,   # interviewed before the attack
+      int_day &gt;= mean(int_day) ~ 1), # interviewed after the attack
+    # Step 3: the outcome. THE TRUTH: the Bali effect is 1
+    xeno = (1 * bali) + (0.9 * age) + rnorm(n = 500, mean = 0, sd = 1)) #&lt;&lt; 0.9 instead of 0.3
 
 lm_robust(xeno ~ bali, data = toy_strong)        # bivariate
 lm_robust(xeno ~ bali + age, data = toy_strong)  # adjusted</code></pre>
@@ -803,11 +811,12 @@ negative. The adjusted estimate still lands near
 <strong>1.14</strong>.</p>
 </div>
 <ol start="4" style="list-style-type: decimal">
-<li><p><strong>Now break one arrow.</strong> Set <code>b_age = 0</code>
-— age no longer affects xenophobia at all — but leave
-<code>selection = -0.1</code>, so the two groups are <em>still</em>
-badly imbalanced on age. What is the omitted variable bias now?</p>
-<p>With <code>b_age = 0</code>, the bivariate estimate is
+<li><p><strong>Now break one arrow.</strong> Change
+<code>0.3 * age</code> to <code>0 * age</code> — age no longer affects
+xenophobia at all — but leave <code>-0.1 * age</code> in Step 2, so the
+two groups are <em>still</em> badly imbalanced on age. What is the
+omitted variable bias now?</p>
+<p>With <code>0 * age</code>, the bivariate estimate is
 <input class="webex-solveme nospaces" size="6" data-answer="[&quot;1.10&quot;,&quot;1,10&quot;]"></input>
 and the imbalance <span class="math inline">\(\beta_{D \rightarrow
 C}\)</span> is still about
@@ -832,9 +841,10 @@ make the case for <em>both</em> arrows.</p>
 </div>
 <ol start="5" style="list-style-type: decimal">
 <li><p><strong>Flip the selection.</strong> Go back to
-<code>b_age = 0.3</code>, but set <code>selection = 0.1</code> — now
-<em>older</em> people are more likely to end up in the treatment group.
-Predict the direction first, then run it.</p>
+<code>0.3 * age</code>, but change <code>-0.1 * age</code> in Step 2 to
+<code>0.1 * age</code> — now <em>older</em> people are more likely to
+end up in the treatment group. Predict the direction first, then run
+it.</p>
 <p>The bivariate estimate becomes
 <input class="webex-solveme nospaces" size="6" data-answer="[&quot;2.19&quot;,&quot;2,19&quot;]"></input>,
 which is
@@ -847,7 +857,17 @@ right</option><option value>unchanged</option></select></p></li>
 <button>
 R solution
 </button>
-<pre class="r"><code>toy_flip &lt;- simulate_toy(selection = 0.1)
+<pre class="r"><code>set.seed(831983) # So everyone gets the SAME &quot;random&quot; numbers
+toy_flip &lt;- tibble(
+  age = rnorm(n = 500, mean = 40, sd = 5)) %&gt;%     # Step 1: age
+  mutate(
+    # Step 2: who gets treated (older people are interviewed earlier)
+    int_day = (0.1 * age) + rnorm(n = 500, mean = 0, sd = 1),
+    bali = case_when(
+      int_day &lt; mean(int_day) ~ 0,   # interviewed before the attack
+      int_day &gt;= mean(int_day) ~ 1), # interviewed after the attack
+    # Step 3: the outcome. THE TRUTH: the Bali effect is 1
+    xeno = (1 * bali) + (0.3 * age) + rnorm(n = 500, mean = 0, sd = 1)) #&lt;&lt; Step 2 now uses 0.1
 
 lm_robust(xeno ~ bali, data = toy_flip)
 lm_robust(xeno ~ bali + age, data = toy_flip)</code></pre>
@@ -858,15 +878,25 @@ machinery, one sign flipped, and the error changes direction — exactly
 as the sign table on the slides predicted.</p>
 </div>
 <ol start="6" style="list-style-type: decimal">
-<li><strong>The last knob is the interesting one.</strong> Set
-<code>selection = 0</code>: interview timing no longer depends on age at
+<li><strong>The last knob is the interesting one.</strong> Change Step 2
+to <code>0 * age</code>: interview timing no longer depends on age at
 all. Fit <em>both</em> models and compare them.</li>
 </ol>
 <div class="webex-solution">
 <button>
 R solution — don&#39;t peek too early ;) !
 </button>
-<pre class="r"><code>toy_rand &lt;- simulate_toy(selection = 0)
+<pre class="r"><code>set.seed(831983) # So everyone gets the SAME &quot;random&quot; numbers
+toy_rand &lt;- tibble(
+  age = rnorm(n = 500, mean = 40, sd = 5)) %&gt;%     # Step 1: age
+  mutate(
+    # Step 2: who gets treated (older people are interviewed earlier)
+    int_day = (0 * age) + rnorm(n = 500, mean = 0, sd = 1),
+    bali = case_when(
+      int_day &lt; mean(int_day) ~ 0,   # interviewed before the attack
+      int_day &gt;= mean(int_day) ~ 1), # interviewed after the attack
+    # Step 3: the outcome. THE TRUTH: the Bali effect is 1
+    xeno = (1 * bali) + (0.3 * age) + rnorm(n = 500, mean = 0, sd = 1)) #&lt;&lt; Step 2 now uses 0
 
 modelsummary(
   list(&quot;Bivariate&quot; = lm_robust(xeno ~ bali, data = toy_rand),
@@ -978,10 +1008,10 @@ saying what is special about this case — then compare:</p>
 <button>
 Model answer
 </button>
-<p>With <code>selection = 0</code> the two models give essentially the
-<strong>same</strong> treatment estimate (≈ 1.04), and both are close to
-the true effect of 1. Nothing is confounded, because age no longer
-predicts who gets treated — the imbalance term <span class="math inline">\(\beta_{D \rightarrow C}\)</span> is approximately
+<p>With <code>0 * age</code> in Step 2 the two models give essentially
+the <strong>same</strong> treatment estimate (≈ 1.04), and both are
+close to the true effect of 1. Nothing is confounded, because age no
+longer predicts who gets treated — the imbalance term <span class="math inline">\(\beta_{D \rightarrow C}\)</span> is approximately
 zero, so the bias is zero no matter how strongly age affects
 xenophobia.</p>
 <p><strong>This is what a randomized controlled trial looks
@@ -992,8 +1022,8 @@ regression.</p>
 </div>
 <ol start="7" style="list-style-type: decimal">
 <li><strong>Bonus, for the fast.</strong> Everything above kept
-<code>seed = 831983</code>. Re-run the default simulation with three or
-four different seeds and collect the adjusted estimate each time. How
+<code>set.seed(831983)</code>. Re-run the default simulation with three
+or four different seeds and collect the adjusted estimate each time. How
 close to the true value of 1 does it get, and why is it never
 <em>exactly</em> 1?</li>
 </ol>
@@ -1001,9 +1031,15 @@ close to the true value of 1 does it get, and why is it never
 <button>
 R solution
 </button>
-<pre class="r"><code>map_dbl(c(1, 42, 2024, 831983), function(s) {
-  coef(lm_robust(xeno ~ bali + age, data = simulate_toy(seed = s)))[&quot;bali&quot;]
-})</code></pre>
+<pre class="r"><code>for (seed in c(1, 42, 2024, 831983)) { # Repeat the lecture&#39;s simulation with four seeds
+  set.seed(seed)
+  toy &lt;- tibble(age = rnorm(n = 500, mean = 40, sd = 5)) %&gt;%
+    mutate(int_day = (-0.1 * age) + rnorm(n = 500, mean = 0, sd = 1),
+           bali = case_when(int_day &lt; mean(int_day) ~ 0,
+                            int_day &gt;= mean(int_day) ~ 1),
+           xeno = (1 * bali) + (0.3 * age) + rnorm(n = 500, mean = 0, sd = 1))
+  print(coef(lm_robust(xeno ~ bali + age, data = toy))[&quot;bali&quot;]) # The adjusted estimate
+}</code></pre>
 <p>The adjusted estimate scatters <em>around</em> 1 without ever landing
 exactly on it — that is <strong>sampling error</strong> (Lecture 3), not
 bias. Bias means being systematically off in one direction; sampling

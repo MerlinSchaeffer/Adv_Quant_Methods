@@ -512,7 +512,9 @@ to tell</option></select></li>
 R solution — don&#39;t peek too early ;) !
 </button>
 <pre class="r"><code>gov_transfers &lt;- gov_transfers %&gt;%
-  mutate(rule = if_else(Income_Centered &lt; 0, &quot;Received transfer&quot;, &quot;No transfer&quot;))
+  mutate(rule = case_when(
+    Income_Centered &lt; 0 ~ &quot;Received transfer&quot;, # below the cutoff: eligible
+    TRUE ~ &quot;No transfer&quot;))
 
 ggplot(gov_transfers, aes(y = Support, x = Income_Centered)) +
   geom_jitter(alpha = 0.15, height = 0.02, width = 0) +
@@ -547,7 +549,9 @@ Hint
 R solution — don&#39;t peek too early ;) !
 </button>
 <pre class="r"><code>gov_transfers &lt;- gov_transfers %&gt;%
-  mutate(D = if_else(Income_Centered &lt; 0, 1, 0))
+  mutate(D = case_when(
+    Income_Centered &lt; 0 ~ 1, # treated: received the transfer
+    TRUE ~ 0))
 
 RDD &lt;- lm_robust(Support ~ D * Income_Centered, data = gov_transfers)
 
@@ -625,15 +629,17 @@ about.</li>
 <ol start="7" style="list-style-type: decimal">
 <li><strong>Bonus, for the fast.</strong> The parametric model used
 <strong>all</strong> the data. Re-fit on a narrow window around the
-cutoff (e.g. <code>abs(Income_Centered) &lt; 0.05</code>). Does <span class="math inline">\(\lambda\)</span> change much? What happens to the
-standard error, and why?</li>
+cutoff (e.g.
+<code>Income_Centered &gt; -0.05 &amp; Income_Centered &lt; 0.05</code>).
+Does <span class="math inline">\(\lambda\)</span> change much? What
+happens to the standard error, and why?</li>
 </ol>
 <div class="webex-solution">
 <button>
 R solution
 </button>
 <pre class="r"><code>RDD_narrow &lt;- lm_robust(Support ~ D * Income_Centered,
-                        data = gov_transfers %&gt;% filter(abs(Income_Centered) &lt; 0.05))
+                        data = gov_transfers %&gt;% filter(Income_Centered &gt; -0.05 &amp; Income_Centered &lt; 0.05))
 modelsummary(list(&quot;Narrow window&quot; = RDD_narrow),
              stars = TRUE, gof_map = c(&quot;nobs&quot;, &quot;r.squared&quot;), output = &quot;kableExtra&quot;)</code></pre>
 <p>The point estimate stays in the same ballpark, but the standard error

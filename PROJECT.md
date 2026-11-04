@@ -1,6 +1,6 @@
 # Course modernization project — Multiple OLS & Fundamentals of Causal Inference
 
-Working notes so any new session (or collaborator) can pick this up. Last updated 2026-07-02.
+Working notes so any new session (or collaborator) can pick this up. Last updated 2026-09-28.
 
 ## Goal
 Modernize Merlin Schaeffer's BSc course website + lecture slides. The professor must be able to
@@ -147,6 +147,245 @@ A refinement round over both the deck and the website. New conventions that the 
   `remotes::install_github("xmarquez/democracyData")`** — it is used in Lecture 9 and was in the
   final checklist but was never actually installed by the old steps. All four GitHub installs
   verified to exist (masteringmetrics, ROS-Examples/rpackage, vdemdata, democracyData).
+
+## Photo & illustration pass (2026-09-28, professor-requested)
+The professor felt the ports had become "abstract, dry and hard to relate to": many photos from the
+xaringan decks were dropped as "decorative stock". Inspired by Nicholas Christakis's lectures (photos
+that pull people in through imagination), this pass (1) **audited every image** in the original decks
+(`static/Lectures/*/*.Rmd`, ~95 hotlinks + local files) against the Quarto decks, (2) **recovered** the
+ones whose topic survives in the new decks, and (3) **added** new photos that make each research
+question concrete for ~22-year-old Copenhagen students. Principles:
+- **Put a photo on the research question / hook slide** (the place, object or people the question is
+  about), **give the researchers a face** (Legewie, Chetty, Card, Angrist, Snow, Rosling — Nobel
+  prizes are a hook), and **anchor in Danish everyday life** where possible (Superkilen,
+  studenterkørsel, pupils' protest on Slotspladsen, KU's main building, a Maersk ship).
+- **Free licences first:** new images come from **Wikimedia Commons** (PD / CC BY / CC BY-SA), each with
+  a credit line (author + licence link) in a `.backgrnote`. Downscaled to ≤1100 px (backgrounds 1600),
+  JPEG q≈84; nothing cropped. ShareAlike images are used unmodified (resize only), so the decks are a
+  collection, not an adaptation.
+- **Every remaining hotlink is gone** — L1 (researchleap, 2× Twitter, Giphy, Pexels), L2/L3/L6 (the
+  laserfiche "your turn" photo), L6 (Giphy coin, licorice background). Shared images live at the
+  `img/` root: `img/goal_population.jpg` (L1, L6, L14) and `img/your_turn.jpg` (L2, L3, L6).
+- **New theme device — photo-backed inverse slides:** `{.inverse .photo-bg background-color="#901A1E"
+  background-image="img/..." background-opacity="0.3" background-size="cover"}` gives a red-tinted
+  full-bleed photo. `.photo-bg` makes the section transparent (the `.inverse` red box otherwise hides
+  the photo); `::: {.photo-credit}` puts the credit in the bottom-right corner. Used on L1 "My research
+  agenda" (Superkilen), L8 "The crack in last week's natural experiment" (Bali memorial, a callback to
+  L7) and L9 "No Harvard premium → no KU premium" (KU main building). Use sparingly — dividers only.
+
+**Per lecture (R = recovered from the original deck, N = new):**
+| L | Slide | Image |
+|---|---|---|
+| 1 | My research agenda | N Superkilen, Nørrebro (tinted background) |
+| 2 | Denmark & the two Germanies — new first tab "One nation, split" | N East Berlin, Sept 1961: bride's mother & aunt wave to the wedding across the Wall |
+| 3 | Research question (political efficacy) | N pupils protesting the school reform at Christiansborg, 2016 |
+| 3 | Randomness = fairness | R soup pot (the "stir the soup" metaphor), beside Monopoly |
+| 4 | Research question | N NASA "Earth at night" |
+| 4 | Whose carbon is it? | N Maersk container ship (under the dumbbell chart) |
+| 5 | Why not just ask people? | R the microphone (UZH) |
+| 5 | Apples and oranges | N "Apple and Orange — they do not compare" |
+| 7 | Research question | N Flight 175 hits the south tower + N firefighter in the WTC rubble + N EDL "Shut down the mosque" march, Newcastle 2010 (2026-10-19: replaced WTC smoke + Bali memorial; all cropped 4:3) |
+| 7 | Nature can randomise for us | R John Snow portrait beside his map + R the RSC blue plaque honouring Snow, Soho (restored 2026-10-19) |
+| 7 | The Bali bombings | R Joscha Legewie portrait + R aerial of bombed Kuta (`img/L7/bali_aftermath.jpg`, from the original deck via IRI, ⚠️ **not free-licensed** — no free photo of the attack exists on Commons) above the Wikipedia iframe, then click → Legewie figure, validity question, two assumptions (2026-10-19) |
+| 7 | Learning goal 1 | R the truffle pig ("finding a natural experiment is as rare as truffles") |
+| 7 | Does your neighbourhood shape your future? | R/N Chicago public housing (Robert Taylor Homes, 1973) + N Raj Chetty |
+| 7 | Only some compliers move | R the "nail house" idea (original was a YouTube still; now a free Chongqing photo) |
+| 8 | The crack in last week's natural experiment | N Bali memorial (tinted background) |
+| 8 | Closer to home: Copenhagen, Feb 2015 (2026-10-23) | N police tape near Krudttønden + N flowers at the Krystalgade synagogue (Kim Bach, CC BY-SA 4.0); replaces the original's non-free Brookings photo |
+| 8 | Almost random is not random (2026-10-23) | R Joscha Legewie portrait ("My friend Joscha") |
+| 8 | A laboratory where we know the truth (2026-10-23) | N crash-test dummy (NHTSA, PD) |
+| 8 | Part 3 divider (2026-10-23) | N Ragnar Frisch (Borgens Atelier, PD) |
+| 8 | What multiple OLS cannot fix (2026-10-23) | N lamppost at night, the streetlight effect (Jess Mann, CC BY-SA 4.0) |
+| 9 | Football and domestic violence (2nd slide) | N David Card, Nobel 2021 |
+| 9 | Do selective universities pay off? | N Harvard's Johnston Gate |
+| 9 | No Harvard premium → no KU premium | R/N KU main building (replaces the old smiley; tinted background) |
+| 10 | Does education pay off? (divider) | R studenterkørsel (original was a watermarked Alamy photo; now a free one) |
+| 10 | Research question | R Karlson (2021) Danish schooling–earnings correlations |
+| 10 | Angrist & Krueger had an idea | N Joshua Angrist, Nobel 2021, co-author of *Mastering 'Metrics* |
+| 10 | **New slide** "Who is born in winter?" | R Buckles & Hungerman (2013) Fig. 1 — the evidence behind the exclusion-restriction critique |
+| 11 | Research question | R the ESS showcard for the xenophobia item |
+| 12 | Research question | R newborn (life expectancy *at birth*) |
+| 12 | Transformations (divider) | N Hans Rosling (his health-vs-wealth chart used a log scale) |
+| 13 | Research question (drinking age 21) | N beer pong / red cups |
+| 14 | The goal of empirical sociology | R the L1/L6 "people as a world map" image, as a callback |
+
+**L5 second round (2026-09-29, professor's slide-by-slide brief):**
+- *Research question* — the professor's integration-paradox illustration (`img/L5/integration_paradox.jpg`,
+  supplied by him, no credit line) + **Mesut Özil** (world champion 2014, quit the national team in 2018:
+  "German when we win, an immigrant when we lose"; `oezil.jpg`, Steindy CC BY-SA 3.0); **on click** both
+  are replaced by the meta-analysis plot. *Two potential futures* — a sketch of the same Ferda with and
+  without the newspaper, replaced on click by the green box + fork. *Apples and oranges* — the photo first,
+  the Discuss box on click. *From two persons to two groups* — formula, then two columns: Think box (+ the
+  green selection-bias box on click) | a sketch of two cinema queues (18+ horror vs. a children's film).
+  *APAD survey* tab and *The naïve comparison* picture tab are now two columns with a picture on the right
+  (first sketches, replaced by the professor's own photos in the third round, below).
+- **Third round (same day):** the professor swapped three sketches for pictures he supplied — a hand ticking
+  a questionnaire (`survey_pen.jpg`, APAD tab), a crowd reading newspapers (`newspaper_readers.jpg`, naïve
+  comparison) and **xkcd 2618 "Selection Bias"** (`xkcd_selection_bias.png`, *From two persons to two
+  groups*; credited as CC BY-NC 2.5). The first two came without a source, so they carry no credit line.
+  **New slide 16 "Selection is everywhere"** (between *The hidden term* and *From two persons*): a Discuss box
+  asking for self-selected "treatments" whose takers differ at baseline, a red reveal (dating app → overstated,
+  hospital → can look harmful), and two pictures side by side on the right: a sketched swipe-style
+  dating profile (`dating_profile.svg`, generic "swipe" app, no real brand; the professor asked for it
+  instead of a gym photo) and a Commons hospital outpatients' waiting room (CC BY-SA 4.0). L5 now has 27 slides. The now-unused sketches and their generator
+  functions were deleted; `make_sketches.py` now draws Ferda and the dating profile (its `person()` helper is generic).
+- **Swap-on-click pattern:** `::: {.r-stack}` holding `::: {.fragment .fade-out fragment-index=1
+  style="width: 100%;"}` and `::: {.fragment .fade-in fragment-index=1 style="width: 100%;"}`. The
+  `width: 100%` is load-bearing — r-stack children shrink to fit, and an image without intrinsic size
+  (an SVG) collapses to nothing. The SVGs also carry `width`/`height` attributes for the same reason.
+- **Sketches are generated, not drawn by hand:** `img/L5/make_sketches.py` (pure Python, no deps) writes
+  the four SVGs in one flat style whose palette echoes the professor's illustration; edit and rerun
+  `python3 img/L5/make_sketches.py`. The survey card uses the slide's English item wording — the real
+  German APAD wording/item number is not in the repo, so none is invented.
+- **"Reads news" dummy is now ≥ 5 minutes a day (was ≥ 15)** in the deck *and* both L5 exercises. Naïve
+  estimate −0.24, t ≈ −1.5 (was −0.09, t ≈ −0.7): same story, still not significant. Balance text now
+  "≈ 43 vs. 37". Exercise 1's model answer no longer claims "SE larger than the coefficient"; exercise 2's
+  appearance balance is now nearly perfect, so its MCQ/model answer teach "balanced on this variable ≠
+  unbiased" instead. ⚠️ **L6 (and its exercises) still use ≥ 15 minutes** — its naïve-comparison recap will
+  not match L5 until it is switched too.
+- **Fourth round (2026-09-29/30), restoring the old deck's didactics. L5 now has 30 slides:**
+  - Slide 8's R code tabs (plot + OLS) carry end-of-line comments explaining each step.
+  - **New slide 9 "Small recap: hypothesis tests, t- and p-values"** (from the old Rmd). It reuses L3's
+    `test_plot()` build (steps 1, 4, 5, 7 in an r-stack: H0, the sampling distribution with 95%, the
+    estimate, the p-value) on the naïve `news_yn` estimate (−0.237, SE 0.155, t −1.53, p 0.13).
+  - Slide 14 is now titled "Goal: The average causal effect (ATE)", so the ATE has a name to contrast with later.
+  - **New slide 16 "Observed vs. potential outcomes"**: a blue box (observed: Ferda 4, Tuki 5), then a red box
+    (counterfactuals: Ferda (2), Tuki (5)), then the takeaway.
+  - **Slide 17 "The hidden term"** again has the old deck's **stairs photo** (`img/L5/diverging_paths.jpg`,
+    Massimo Strazzeri, Flickr, ⚠️ *All Rights Reserved* — credited, not free) and the **two-step trick**:
+    step 1 adds and subtracts Ferda's unobserved $Y_0$ (in grey); step 2 regroups into true effect +2 and
+    selection bias −3. Each step is its own click.
+  - **Slide 19 "From two persons to two groups"** does the same two steps with group averages. The
+    regrouped terms are labelled **ATT** and selection bias.
+  - **New slide 20 "The ATT is not the ATE"**: ATT (over those who chose treatment) vs. ATE (over everyone).
+    Ferda/Tuki make it concrete: ATT = +2, ATE = +1. Takeaway: observed difference = ATT + selection bias.
+- Exercises need pandoc outside RStudio: `RSTUDIO_PANDOC=/Applications/quarto/bin/tools/aarch64 Rscript
+  -e 'rmarkdown::render("5-exercise1.Rmd")'`, then copy the HTML into `_site/`.
+
+**Deliberately NOT recovered:** the colonial images (L4, L9 — colonialism is out of the course), the
+Marx–Engels–Lenin–Stalin portraits (L9/L11 — L2's posters already cover socialism), the Solidarność /
+Hager material (dropped in the L10 port), the NBA/LeBron RDD example and Durkheim portrait (L13), the
+US race-relations Gallup chart (L5's story is now the integration paradox), and generic stock (3D
+question-mark men, AI-art "data science" heads, a skeptical senior, a smiley). Dead originals
+(CNN Bali, Time/Getty, UNHCR, PlayStation gamer) were replaced by free equivalents where the topic
+survives.
+
+**Not freely licensed — recovered as the professor originally used them (hotlinks, now local copies;
+flag if the public site should be 100 % free-licensed):** `img/goal_population.jpg` (Research Leap
+stock), `img/your_turn.jpg` (Laserfiche stock), `img/L1/rastrelli_poster.jpg` and
+`civitanova_protest.jpg` (Twitter/AP), `img/L1/chatgpt_dude.gif` and `img/L6/lottery.webp` (Giphy),
+`img/L6/lakrids.jpg` (shop photo), `img/L5/microphone.jpg` (UZH News), `img/L7/legewie.jpg`
+(Harvard Gazette; no free portrait exists). Same status as the earlier localised umbrella/Zyglis/
+vaccine images.
+
+**Sourcing workflow (reusable):** the Commons API — `action=query&list=search&srnamespace=6` to search,
+`prop=imageinfo&iiprop=url|size|extmetadata&iiurlwidth=1200` for licence, author and a thumbnail URL.
+It rate-limits (HTTP 429) at more than ~1 request/second — pause between calls. Read the full
+`ImageDescription` before captioning (it is how the Berlin-wedding story was found).
+
+**Verification gotchas:** the preview server cannot read `~/Documents` (macOS privacy) — mirror
+`_site/` into a scratch folder and serve that; when the Browser pane is hidden, screenshots fail, but
+headless Chrome works (`--headless=new --window-size=1600,900 --screenshot=… "…/deck.html#/<n>"`,
+kill the process after ~10 s — it does not exit on its own).
+
+## Storyline & didactics pass, Lectures 9–14 (2026-10-26, professor-requested)
+After the L8 rebuild ("much better now"), the professor asked to do the same for the remaining
+lectures: compare with the original xaringan deck, restore didactically important middle steps,
+bring storyline back, add own ideas, **no AI phrasing and no em dashes** (see the slide-writing
+memory). Done for the lectures still to be taught this term (L9–L14; L1–L7 were already taught).
+All six decks re-rendered and checked in the browser with a tab-aware overflow check (every tab
+and fragment state): zero overflow, zero scrolling code blocks, zero R errors. Several *older*
+overflows the new check caught were fixed too (long `coef_rename` lines, code > 512 px tall).
+- **L9 (36 slides):** new *What multiple OLS is good for* map (the original's schedule tree, L8 in
+  grey); new *Confounder or mediator?* quiz (KU degree → earnings; four variables, reveal per row);
+  gender-pay hook = **Reykjavík women's strike, 24 Oct 2005, 14:08** (Johannes Jansson, norden.org);
+  the original's **share formula** (1 − gap₂/gap₁) restored; *Last week's formula, on real data*:
+  the L8 OVB identity on 161 countries (2.748 = −3.884 + (−37.214 × −0.1782); sign rule predicts the
+  flip) plus a Discuss on the flip slide; FW recap with **Denmark labelled** (original idiom);
+  new *The flip, seen* (raw vs residualised scatter, from the original); predictions rebuilt as
+  **three visible steps** (exercise 2 needs exactly that code; it was hidden before); Card & Dahl
+  point spread now a double circle; Dale & Krueger: the paper's **Table I** (matched-applicant
+  groups, Discuss on students F, G, O) restored, the assumption quote moved to a new *Matching closes
+  the backdoor, if …* slide with a red "why they chose" node and a KU Discuss.
+- **L10 (34 slides):** *Where we are* = the L8 design map with the IV branch red; Alan Krueger
+  portrait (US Treasury, PD) next to Angrist; new *Carl and Luis* timeline plot (ggplot); new
+  *Would it work in Denmark?* (no first stage: Danish compulsory school = 10 school years, not a
+  birthday; Prince Christian's first school day, VisitCopenhagen, CC BY 2.0); new *The reduced form,
+  drawn* (wage sawtooth, original had both plots); stage one prints the new columns and plots
+  `pred_s` (four values); new *The second stage, drawn* (2SLS = line through four quarter means,
+  slope 0.0992); stray `#<<` removed.
+- **L11 (29 slides):** Part 1 divider shows **CSS (Kommunehospitalet, PD) and Sofia University (PD)**;
+  new *Additive means parallel lines* (worked prediction from the original + L8 link); new *The
+  interaction term is just a new column* (by-hand product, identical table, from the original);
+  trap slide plots lines extended to 0 years of education (original); second reading of the
+  interaction worked out at +4 years; new *Add controls, then draw it* (interaction + controls,
+  three prediction steps with `rep()`, from the original).
+- **L12 (28 slides):** new *One country at a time* (DK/SE/DE/US trajectories, from the original;
+  DK and US both 76.6 in 2000); Discuss "find the US" on the straight-line slide; new *Two
+  coefficients are hard to read, so plot them* (quadratic model predictions in three steps; the
+  parabola's steep fall at the top is shown as a warning that sets up the log).
+- **L13 (35 slides):** *Remember RCTs* now shows `randomization2.png` (the port had the RDD picture
+  there by mistake); *The intuition* is the original's two-step build (everyone → just either side,
+  full width); new *What sorting looks like* (simulated density with/without bunching; Swedish
+  teacher grading, Diamond & Persson 2016, NBER w22207, cited inline, not in the bib); Danish
+  Discuss on 16/18 drinking ages; data slide gets an *All or only the closest?* tab with Discuss.
+- **L14 (26 slides):** new *Thirteen questions, one toolkit* gallery (one hook photo per lecture,
+  raw HTML grid, images from the existing `img/L*/` folders) with a Discuss on design credibility.
+- **Reusable check:** the overflow script is kept as `measure.js` in the session scratchpad; it
+  toggles every `.panel-tabset .tab-content > div` and reveals all fragments. Reveal code blocks
+  scroll vertically above **512 px** (~20 lines); a 48 % column fits ~60 characters of code.
+
+## Storyline & didactics pass, Lectures 1–7 (2026-10-30, professor-requested)
+Same treatment as L9–L14, now for the lectures already taught (for next year). Changes are
+additive and light where the professor had done several revision rounds (L5, L7). Same style
+rules. All decks re-rendered and run through `measure.js` at 1600×900.
+- **L1 (41 slides):** the six research slides retitled as plain questions and answers; notes on
+  the first; Legewie's `Joscha4.png` previewed under learning goal 2; new *Thirteen questions we
+  will answer this term* gallery (same grid as L14, so the course opens and closes on it) + Discuss.
+- **L2:** Copenhagen metro map (tomtom, Commons) on the trend slide; new *One product per country*
+  slide (z-score products for Denmark and the two extremes, then r by hand); smaller GIFs/plots,
+  shorter comments; typo "postive". Printed-data vertical scrolls left on purpose.
+- **L3:** Xbox controller photo (Evan-Amos, PD) on *Weights can be powerful*. Older horizontal code
+  scrolls left (deck was mid-edit by the professor).
+- **L4:** outliers slide relaid (`.left-column .small`), outlier/linearity plots 72 %. Left as they
+  were: coefficient-plot tab (bottom 916), *whose carbon* (880), vertical scroll in prediction tabs.
+- **L5 (33 slides):** RQ slide gets a third step, the original's **Steinmann (2019)** evidence
+  (`Steinmann1-3.png`: the awareness quote + "reads German newspapers 0.09*"); new *The group split,
+  with numbers* (Ferda, Ali, Tuki, Lina: observed −1 = ATT +2 + selection bias −3; same numbers as
+  Ferda/Tuki); new *Selection bias in Danish schools* (the original's `ESR.png`, Hassan et al. 2023,
+  cited inline, not in the bib: refugees were placed in schools already doing worse); notes that sat
+  on the xkcd slide moved to the group-formula slide where they belong; "avergage" fixed; survey
+  items on one line (older overflow).
+- **L6 (37 slides):** three goals (the notes and checklist already said three); Part 1 pill on the
+  recap divider; naïve slide gets the Discuss and reveal its notes described; *The dream* table now
+  uses Ferda, Ali, Tuki, Lina (L5 continuity); fair-coin slide is ask-then-reveal (original's
+  question); new *Could a coin produce this age gap?* (1,000 coin splits of APAD, n = 20 vs all:
+  95 % within ±1.5 years vs ±11; readers are 4.6 years older; **unweighted** on purpose, since
+  survey weights make 20-person splits swing ±23 years); article slides captioned + notes;
+  randomised-balance tab gets its reveal; effect read out in points and SD; new *Two designs, two
+  answers* (naïve −0.10 SD vs experiment +0.26 SD; trust the experiment, but it tests one article
+  read once); printed data shows only the new variables; stray "n" in the coefplot axis label.
+- **L7 (37 slides):** new *Third research question of the day* (Minneapolis: deterrence vs
+  labelling, paraphrased from Sherman & Berk; photos moved here from the prep slide; reveal =
+  `Domestic.png`, already in `img/L7/` but unused); prep slide's cross-table Discuss gets a reveal;
+  *Why divide?* gets a 100-family waffle (48 red) and a forward check (48 × \$3,400 / 100 ≈ ITT);
+  notes on *Voucher ≠ move*; typos. The original's *Balance?* slide (`Joscha3.png`) was **not**
+  restored: L8 opens with it and the reachability story, so it would repeat.
+  Older r-stack slides (Snow, Bali iframe, RCT vs natural experiment) still measure 880–935 px with
+  all fragments forced visible; on screen they look fine.
+
+## L9 follow-up after the professor's review (2026-11-02)
+His slide numbers referred to the older published deck. Changes: Bristol 1942 part-time worker
+(IWM D 10550, Ministry of Information, PD) beside the gender DAG; the original's Marx/Engels/Lenin/
+Stalin painting (Kriyosxd, CC BY-SA 4.0) plus NYSE floor 1963 (Thomas J. O'Halloran, LOC, PD) on the
+state-ownership slide; every country named in the residual plots (FW steps 1–2 and the flip, as in
+the original); predictions run beyond the data (state ownership to 5; data stop at Turkmenistan 2.0)
+with a red dashed line at the data edge, an orange dashed line at 0 % and a new *Beyond the data*
+tab (Discuss: negative poverty); the original Dale & Krueger DAG (applied to / admitted to →
+matched students) restored on its own slide, plus a small applied → admitted arrow; the matching
+table on its own slide; the assumption DAG is the same drawing plus a red "why they chose" arrow.
+**Double ring = held constant** in every L9 DAG (generic C, work hours in model 2, point spread,
+matched students). DAG arcs use `\usetikzlibrary{bbox}` + `bezier bounding box` (no empty margin).
 
 ## Cross-lecture coherence pass (2026-07-25, after L14 — "meta overview")
 With all 14 decks done, a bird's-eye consistency review (language, notation, design, flow,
@@ -551,6 +790,45 @@ slide said "re-visited" twice. Students would have met Bali a third time.
 - **One layout fix during the build** (the recurring pattern): the "Where the gap comes from" slide
   overflowed by 40px with code + table + callout all stacked in the right column — fixed by moving
   the Discuss box to the near-empty left column.
+- **Second round (2026-10-23, professor: "you shortened it too much"):** restored the old deck's
+  didactic middle steps and pictures, plus new ones. **L8 now has 37 slides (36 + title).** New/changed:
+  - *Closer to home: Copenhagen, February 2015* (after the goals): Krudttønden police tape + flowers at
+    the Krystalgade synagogue (both Kim Bach, CC BY-SA 4.0), Discuss → natural experiment, then **"Why not
+    for Denmark?"**: only **2** Danes in Legewie's Bali window (DK fieldwork started end of Oct 2002;
+    verified in `Legewie_ESS_02.dta`). Replaces the original's (non-free) Brookings Copenhagen photo.
+  - *Where we are* = the original's **design tree**, rebuilt in TikZ with course notation (κ, ρ, λ = ρ/φ)
+    and a third red branch for today ("κ, *if* every confounder is measured").
+  - *Almost random* now has Legewie's portrait (`img/L7/legewie.jpg`) and the professor's "My friend
+    Joscha" framing. **New *Who opens the door first?***: generated sketch `img/L8/reachability.svg`
+    (Inge, 71, opens on visit 1 → control; Mikkel, 26, on visit 4 → treated; fieldwork timeline).
+    `img/L8/make_sketches.py` imports the L5 generator's helpers (`python3 img/L8/make_sketches.py`).
+  - **New *The hidden term is back***: L5's Avg_n decomposition; swap-on-click turns the selection-bias
+    term from "= 0 if as-if random (L6, L7)" into red "< 0: the treated are younger". *Age, the
+    confounder* now uses L5's `Avg_n[Y_0i | D_i]` notation.
+  - *A laboratory*: crash-test-dummy photo (NHTSA, PD) + a plot in every simulation tab (age histogram,
+    jittered exposure-vs-age with lm line, xenophobia-vs-age coloured by exposure). The stray xaringan
+    `#<<` marker is gone; line 5 is highlighted with `#| code-line-numbers: "5"`.
+  - *Where the gap comes from* = the original's **click-by-click build**: 1.135 = 1 + sampling error (L3)
+    → 3.07 years younger → Discuss → red −3.07 × 0.313 = −0.961 → green 1.135 + (−0.961) = 0.174.
+    **New *Seeing the gap***: 4-step r-stack of `gap_plot()` (group means 0.174 → mean ages 3.07 years →
+    parallel lines 1.135 apart "same age" → the climb triangle 0.313 × 3.07 = 0.961). Exact identity.
+  - *The formula* shows 3 decimals and "=" (it closes exactly); links OVB to L5's hidden term.
+  - Part 3 divider: **Ragnar Frisch** portrait (PD) + facts (coined "econometrics", first editor of
+    *Econometrica*, theorem in vol. 1, first economics Nobel 1969). **New *Say it in words***: the
+    parallel-lines plot + ask-then-reveal sentence template ("comparing two people of the same age…").
+  - Frisch–Waugh steps carry the **double-circle DAG** (`bali`/`age`/`xeno`) and print the data with the
+    professor's `(toydat <- …)` idiom (hidden `options(tibble.print_min = 4)`). *Why it works* fixed: its
+    text said "look at step 2" but showed step 3 — now both plots, the top-quarter |e_bali| "untypical"
+    cases red in both. *What OLS cannot fix*: streetlight-effect photo (Jess Mann, CC BY-SA 4.0).
+  - Treatment labels **"After/Before the attack"** (was "After/Before Bali"), matching L7 + both L8
+    exercises. Portugal decomposition now shows 0.330 ≈ 0.313 + (0.0064 × 2.62) (inline `round()` was
+    being cut to 3 decimals by `options(digits = 3)`; use `sprintf()` for inline numbers).
+  - **Gotcha (new): a jitter plot silently changed the toy numbers.** `geom_jitter()` with the default
+    seed draws from the global RNG, so a plot placed between two simulation chunks shifted every later
+    estimate (1.135 → 1.025). Fixed with `position_jitter(..., seed = 1)`, which restores the RNG state.
+    **Any plot with randomness inside a seeded simulation needs its own seed.**
+  - Verified in-browser: 37 slides, zero overflow, zero R errors, no broken images. The underbraces
+    look broken in the preview pane only because MathJax's web fonts don't load there (same on L5).
 
 ## Lecture 7 (2026-07-13) — Natural experiments & instrumental variables
 `7-NatExp-IV1.qmd` (28 slides) + `7-exercise1/2.Rmd`. The heaviest deck so far (2 running studies +
@@ -1005,6 +1283,58 @@ Implemented in `2-exercise*` and retrofitted to `6-exercise*`:
 8. **"You practice: …" line in the subtitle** naming the skills.
 Also: solutions say "don't peek" (typo fixed), full `weights =` argument, AI references say
 ChatGPT/Gemini (Bard is dead). REMEMBER: render exercises with `rmarkdown::render()` only.
+
+## R coding style — the professor's, everywhere students see code (2026-09-29, professor's instruction)
+"Other code confuses the students." All student-visible code (slides, exercise starters, solutions) is
+written in the style of the **original xaringan Rmds** (`static/Lectures/*/*.Rmd`), audited by counting
+idioms across all original vs. ported chunks. Rules:
+- **`case_when()`, never `if_else()`/`ifelse()`** — also in hidden chunks and inline R. Binary dummies
+  spell out both sides when the variable can be `NA` (`news < 5 ~ 0, news >= 5 ~ 1`); use the
+  professor's `TRUE ~ …` form only where the data have no `NA`s (`agecell < 21 ~ 0, TRUE ~ 1`), since
+  `TRUE ~ 0` would silently recode missings. Missing = `as.character(NA)`, not `NA_character_`.
+- **One line per variable, no `across()`:** `psppsgva = zap_labels(psppsgva), # Make numeric`,
+  `brncntr = as_factor(brncntr),` …
+- **Censoring with `case_when()`**, not `pmin()`/`pmax()`: `eduyrs > 21 ~ 21, eduyrs < 9 ~ 9,
+  TRUE ~ as.numeric(eduyrs)` (verbatim from the original L9).
+- **Indices:** `rowMeans(select(., a, b, c), na.rm = TRUE)`.
+- **Several values:** `country == "A" | country == "B"` (or `!=` joined with `&`), not `%in%`.
+- **Joins:** `inner_join()`; a `left_join()` only where rows must survive a missing match (L4 ex1's
+  petro flag — countries without oil/gas data stay in).
+- **No wrapper functions in visible code.** Pipelines are written out with a comment per step and
+  repeated when needed (the original L7 exercise repeats the Legewie pipeline for Sweden); L8 ex2's
+  simulation is the lecture's three steps in one chunk, and each question says which number to change.
+  Loops are `for` loops (L3's 1,000 samples), not `replicate()`/`map_dbl()`. Coefficient labels via
+  `case_when(term == … ~ …)`, not `recode()`. Model comparison via `modelsummary()`.
+- **Allowed exceptions:** hidden infrastructure (knit hooks, plot helpers, answer-key helpers,
+  `%in%` over long hidden label vectors) and L2's `arrange()` for the extremes chart.
+- **Verified by output, not by eye:** every changed deck/exercise was re-rendered and all numbers in
+  the output (source code stripped) compared with the previous render — identical, apart from prose
+  edits, the title-slide date and old `<U+2014>`/`<U+03B2>` encoding glitches that the UTF-8 render fixes.
+
+## Exercises use only code the slides have shown (2026-09-29, after student complaints)
+Students complained that exercises expected code they had never seen in the lectures. Rule: an
+exercise for Lecture N may only use functions that appear in **student-visible** slide code (or
+backticked slide prose) of Lectures 1…N. Checked mechanically: every function call in visible deck
+chunks (not `echo`/`include = FALSE`) up to lecture N vs. every call in the exercise's starter code,
+hints and solutions. Two ways a gap was closed:
+- **Show it on the slide** where the lecture already *used* the code but hid it, as the original decks
+  did: L2 scatter plot → "… its R code" tab (`geom_text()`); L3 histogram of the 1000 slopes → code
+  tab (`geom_histogram()`); L5 naïve plot → code tab (`geom_point()`, weighted `geom_smooth()`,
+  `scale_y_continuous()`); L6 coin slide → `rbinom()` + `nrow(APAD)`; **L7 two new slides**
+  "Preparation: Legewie's data in R" (`read_dta()`, `as.Date()`, `sprintf()`, `str_detect()`) and
+  "Preparation: the Minneapolis data" (`data()`, recode, `table()` cross-tab, run live); **L8 new slide**
+  "The adjusted effect, drawn" (`bind_rows(.id = "model")` + `position_dodge()`, restoring the original
+  L8's combined coefficient plot). Both decks' "Today's important functions" lists name them.
+- **Rewrite the exercise** with already-taught code: L2 ex1 drops `round()` and turns the
+  `anti_join()` bonus into a reasoning question; L3 exercises use `tidy()` instead of `summary()`;
+  L4 ex1 sums rents after `drop_na(oil, gas)` (same 27 petro economies as before); L7 ex1's bonus is
+  a side-by-side `modelsummary()` (the combined plot comes in L8); L8 ex1 codes gender with
+  `case_when()`; L9 exercises keep region terms with `filter(term != …)` instead of `str_detect()`;
+  L10 uses `as_factor()` (identical to `factor()` here); L12 `scale_color_manual()` spelling as on
+  the slides and `log2()` in prose; L13 filters `Income_Centered > -0.05 & < 0.05` instead of `abs()`.
+  "Stuck?" tips no longer use `list.files()` (→ RStudio Files pane) or `readRDS(url())` (→ download,
+  then `readRDS()`).
+- Hidden answer-key code in exercises is exempt (students never see it).
 
 ## Design system / conventions (keep consistent across all decks)
 - **Canonical variable labels (harmonised across all decks 2026-07-06, professor-approved):**

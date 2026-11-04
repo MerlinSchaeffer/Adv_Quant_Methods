@@ -46,7 +46,8 @@ result <- readRDS("data/quiz_results.rds")
 
 plotdata <- result %>%
   filter(appearances > 7) %>%                 # students who did most weeks
-  mutate(gndr = if_else(woman > 0.5, "Women", "Men"))
+  mutate(gndr = case_when(woman > 0.5 ~ "Women",   # LLM guess: more likely a woman
+                          woman <= 0.5 ~ "Men"))
 
 # Palette for the variance-decomposition plots
 col_expl  <- "#005b96"   # blue  = explained by the model
@@ -77,12 +78,16 @@ ms <- function(...) {
 Use data to discover **patterns** — and the **social mechanisms** that bring them about.
 :::
 
+```{r, echo = FALSE, out.width='42%', fig.align='center'}
+knitr::include_graphics('img/goal_population.jpg')
+```
+
 ::: {.backgrnote}
 Fourteen weeks in two verbs: *describe* accurately, then *explain* causally. Today we put the whole toolkit on one table.
 :::
 
 ::: {.notes}
-Open by naming the through-line of the entire course. Everything we did serves one of two verbs — describe a pattern well, or establish that one thing causes another. Tell them today is a map, not new material: we will walk the two halves of the course on a single, familiar dataset and see how the pieces fit. Keep it warm — it is the last lecture.
+The picture is the one from the first lecture and from Lecture 6 — say so; it closes the circle. Open by naming the through-line of the entire course. Everything we did serves one of two verbs — describe a pattern well, or establish that one thing causes another. Tell them today is a map, not new material: we will walk the two halves of the course on a single, familiar dataset and see how the pieces fit. Keep it warm — it is the last lecture.
 :::
 
 ## One dataset: your own quizzes
@@ -621,7 +626,7 @@ We fit lines on both sides using **all** the data, but read the gap **exactly at
 ```{r rdd, echo = FALSE, out.width='100%', fig.height = 4.6, fig.width = 8}
 data("mlda", package = "masteringmetrics")
 mlda <- mlda %>% drop_na() %>%
-  mutate(side = if_else(agecell < 21, "Below 21", "21 or older"))
+  mutate(side = case_when(agecell < 21 ~ "Below 21", TRUE ~ "21 or older"))
 ml <- lm(all ~ agecell, data = subset(mlda, agecell < 21))
 mr <- lm(all ~ agecell, data = subset(mlda, agecell >= 21))
 g  <- data.frame(agecell = seq(min(mlda$agecell), max(mlda$agecell), length.out = 200))
@@ -645,6 +650,42 @@ ggplot(mlda, aes(y = all, x = agecell)) +
 
 ::: {.notes}
 Close the causal tour with last week's design. Emphasise that RDD is the natural-experiment idea sharpened to a knife-edge: a rule, not a coin, does the splitting, and with perfect compliance the reduced-form jump is the whole effect. Point at the black bar — that vertical gap at 21 is the causal effect of legal drinking on mortality.
+:::
+
+## Thirteen questions, one toolkit
+
+```{=html}
+<style>
+.qgrid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px 18px; font-size: 0.52em; line-height: 1.25; margin-top: 0.4em; }
+.qgrid figure { margin: 0; }
+.qgrid img { width: 100%; height: 118px; object-fit: cover; border-radius: 4px; display: block; margin-bottom: 4px; }
+.qgrid b { color: #901A1E; }
+.qgrid .qend { display: flex; align-items: center; justify-content: center; text-align: center; font-size: 1.5em; color: #901A1E; font-weight: 600; }
+</style>
+<div class="qgrid">
+  <figure><img src="img/L1/superkilen.jpg" alt=""><b>L1</b> How does immigration transform societies?</figure>
+  <figure><img src="img/L2/berlin_wall_families.jpg" alt=""><b>L2</b> Liberty or equality: does state ownership reduce poverty?</figure>
+  <figure><img src="img/L3/school_protest.jpg" alt=""><b>L3</b> Do the better educated feel that their voice counts?</figure>
+  <figure><img src="img/L4/earth_night.jpg" alt=""><b>L4</b> Do richer countries emit more CO₂ per person?</figure>
+  <figure><img src="img/L5/oezil.jpg" alt=""><b>L5</b> Does reading news make minorities report more discrimination?</figure>
+  <figure><img src="img/L6/vaccine_trial.jpg" alt=""><b>L6</b> Why a coin flip settles it: randomised trials</figure>
+  <figure><img src="img/L7/bali_memorial.jpg" alt=""><b>L7</b> Do terror attacks raise xenophobia?</figure>
+  <figure><img src="img/L8/reachability.svg" alt="" style="object-fit: contain; background: #efe4d3;"><b>L8</b> Who opens the door first? Adjusting for age</figure>
+  <figure><img src="img/L9/reykjavik_strike.jpg" alt=""><b>L9</b> How much of the pay gap runs through hours?</figure>
+  <figure><img src="img/L10/studenterkoersel.jpg" alt=""><b>L10</b> Does an extra year of school pay off?</figure>
+  <figure><img src="img/L11/sofia_university.jpg" alt=""><b>L11</b> Does education fight xenophobia in Sofia as in Copenhagen?</figure>
+  <figure><img src="img/L12/newborn.jpg" alt=""><b>L12</b> Does more health spending buy longer lives?</figure>
+  <figure><img src="img/L13/beer_pong.jpg" alt=""><b>L13</b> Does legal drinking at 21 cost lives?</figure>
+  <div class="qend">… and the tools to answer them</div>
+</div>
+```
+
+::: {.content-box-blue}
+**Discuss:** pick one question. Which design answered it, and how far do you trust the answer?
+:::
+
+::: {.notes}
+A visual recap of the term through its stories rather than its formulas, and the same gallery that opened the course in Lecture 1. Let them look for a moment; most will remember the question before the method. Then the blue box: have a few students pick a question and say which design answered it (description, randomisation, natural experiment, instrument, adjustment, or a rule) and how credible the answer is. It is the same ranking from the map in Lecture 8, now applied by them.
 :::
 
 ## The whole course, in one line {.inverse background-color="#901A1E"}

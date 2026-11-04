@@ -109,10 +109,18 @@ The gap is staggering: the average Qatari emits *hundreds of times* more CO₂ t
 ::: {.content-box-blue}
 Research question of the day: across the world's countries, how does **CO₂ emitted per person** relate to a country's **wealth**?
 :::
+
+```{r, echo = FALSE, out.width='100%'}
+knitr::include_graphics('img/L4/earth_night.jpg')
+```
+
+::: {.backgrnote .center}
+Earth at night, a satellite composite. Where the lights are, the carbon is. *Image:* NASA / NOAA, public domain ([Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Earth%27s_City_Lights_by_DMSP,_1994-1995_(large).jpg)).
+:::
 :::
 
 ::: {.notes}
-Name the injustice before the statistics: the countries that emit most are rarely the ones that suffer most. Then set today's much blunter question — do richer countries simply emit more? Be explicit that this is a *descriptive* question; nothing today is causal, and they should notice we are not claiming it is.
+Name the injustice before the statistics: the countries that emit most are rarely the ones that suffer most. The night map says it without numbers: the lights trace wealth and energy use, and most of Africa is dark. Then set today's much blunter question — do richer countries simply emit more? Be explicit that this is a *descriptive* question; nothing today is causal, and they should notice we are not claiming it is.
 :::
 
 ## Preparation
@@ -147,7 +155,7 @@ wb_meta <- wb_countries()
    group_by(country) %>%
    filter(date == max(date)) %>% # ...and of those, the most recent one
    ungroup() %>%
-   left_join(wb_meta %>% select(iso3c, region, income_level), by = "iso3c") %>%
+   inner_join(wb_meta %>% select(iso3c, region, income_level), by = "iso3c") %>%
    select(iso3c, country, date, co2, gdp, region, income_level) %>%
    mutate(
      gdp_k  = gdp / 1000, # GDP in THOUSANDS of $, for readable slopes
@@ -222,8 +230,10 @@ modelsummary(
 :::
 
 ::: {.push-right}
+::: {.font80}
 ```{r ref.label = "ols1", echo = FALSE, results = 'asis'}
 ```
+:::
 
 ::: {.content-box-blue}
 **Discuss:** put the `gdp_k` coefficient into one plain sentence. *How much* of *what* goes with *how much* of *what* — and in which **units**?
@@ -237,8 +247,10 @@ Do not read the slope out for them — make them try it. Reading a coefficient a
 ## Reading the slope
 
 ::: {.push-left}
+::: {.font80}
 ```{r ref.label = "ols1", echo = TRUE, results = 'hide'}
 ```
+:::
 :::
 
 ::: {.push-right}
@@ -283,7 +295,7 @@ Four assumptions, but be honest that only two need their attention today — `lm
 
 ## Assumption 1: outliers
 
-::: {.left-column}
+::: {.left-column .small}
 - **Standardized residuals:** how many far (in standard deviations) a country sits *from* the OLS line.
   + **Qatar (146):** CO₂ `r round(Dat$co2[Dat$country == "Qatar"], 1)` t: extremely rich *and* extremely polluting.
   + **Palau (140):** CO₂ `r round(Dat$co2[Dat$country == "Palau"], 1)` t: only middling GDP, yet off the chart polluting.
@@ -301,7 +313,7 @@ lm(co2 ~ gdp_k, data = Dat) %>%
   plot(which = 5)
 ```
 
-```{r ref.label = "outlier", out.width='80%', fig.height = 4.2, fig.width = 5.5, results = FALSE, echo = FALSE}
+```{r ref.label = "outlier", out.width='72%', fig.height = 4.2, fig.width = 5.5, results = FALSE, echo = FALSE}
 ```
 :::
 
@@ -328,7 +340,7 @@ lm(co2 ~ gdp_k, data = Dat) %>%
   plot(which = 1)
 ```
 
-```{r ref.label = "linearity", out.width='80%', fig.height = 4.2, fig.width = 5.5, results = FALSE, echo = FALSE}
+```{r ref.label = "linearity", out.width='72%', fig.height = 4.2, fig.width = 5.5, results = FALSE, echo = FALSE}
 ```
 :::
 
@@ -396,15 +408,16 @@ Dat <- Dat %>%
 petro_flag <- wb_data(c(oil = "NY.GDP.PETR.RT.ZS",
                         gas = "NY.GDP.NGAS.RT.ZS"),
                       start_date = 2000, end_date = 2023) %>%
-  mutate(rents = coalesce(oil, 0) + coalesce(gas, 0)) %>%
-  filter(!is.na(oil) | !is.na(gas)) %>%
+  drop_na(oil, gas) %>%              # Years with both rent series
+  mutate(rents = oil + gas) %>%      # Oil + gas rents, in % of GDP
   group_by(iso3c) %>% filter(date == max(date)) %>% ungroup() %>%
-  transmute(iso3c, rents)
+  select(iso3c, rents)
 
 Dat_petro <- Dat %>% # Palau is already gone at this point
   left_join(petro_flag, by = "iso3c") %>%
-  mutate(petro = if_else(coalesce(rents, 0) > 10,
-                         "Petro economy", "All other countries"))
+  mutate(petro = case_when(
+    rents > 10 ~ "Petro economy",      # fuel rents above 10% of GDP
+    TRUE ~ "All other countries"))     # incl. countries without rents data
 ```
 
 ::: {.content-box-green}
@@ -486,8 +499,10 @@ One row out of 190-odd, and $R^2$ roughly doubles — that is the number to dwel
 :::
 
 ::: {.push-right}
+::: {.font80}
 ```{r ref.label = "ols1b", echo = FALSE, results = 'asis'}
 ```
+:::
 :::
 
 ## Comparing groups {.inverse background-color="#901A1E"}
@@ -532,8 +547,10 @@ Take just **two** regions and code them **0/1**:
 ::: {.right-column}
 ```{r binary-contrast, out.width='100%', fig.height = 4.6, fig.width = 7, echo = FALSE}
 Dat_bi <- Dat %>%
-  filter(region %in% c("Sub-Saharan Africa", "Europe & Central Asia")) %>%
-  mutate(europe = if_else(region == "Europe & Central Asia", 1, 0))
+  filter(region == "Sub-Saharan Africa" | region == "Europe & Central Asia") %>%
+  mutate(europe = case_when(
+    region == "Sub-Saharan Africa" ~ 0,
+    region == "Europe & Central Asia" ~ 1))
 
 ggplot(Dat_bi, aes(y = co2, x = europe)) +
   geom_jitter(width = 0.035, height = 0, alpha = 0.45, size = 1.8) +
@@ -629,8 +646,10 @@ modelsummary(
 ```
 
 ### The table
+::: {.font70}
 ```{r ref.label = "ols2", echo = FALSE, results = 'asis'}
 ```
+:::
 
 ### Interpretation
 ```{r coefs, echo = FALSE}
@@ -824,11 +843,11 @@ Everything so far counted CO2 where it is **produced**. But Denmark burns little
 :::
 
 ::: {.notes}
-This lands well with a Danish audience: everything so far counted carbon where it is *burned*, and by that measure Denmark looks rather good. Re-assign imported steel, electronics and meat to whoever consumes them and the Danish figure jumps sharply, while China and India fall. Read the dumbbells left to right. The wisdom is about the outcome variable, not about climate: how you choose to measure $Y$ can reverse who looks responsible.
+The ship is Danish on purpose: Maersk carries a large share of the world's containers, and those containers are how carbon gets imported. This lands well with a Danish audience: everything so far counted carbon where it is *burned*, and by that measure Denmark looks rather good. Re-assign imported steel, electronics and meat to whoever consumes them and the Danish figure jumps sharply, while China and India fall. Read the dumbbells left to right. The wisdom is about the outcome variable, not about climate: how you choose to measure $Y$ can reverse who looks responsible.
 :::
 
 ::: {.right-column}
-```{r consumption, out.width='100%', fig.height = 5.0, fig.width = 8.5, echo = FALSE}
+```{r consumption, out.width='100%', fig.height = 4.6, fig.width = 8.5, echo = FALSE}
 cons <- readRDS("data/owid_consumption.rds")
 
 show <- c("Switzerland", "Denmark", "United Kingdom", "Sweden", "France",
@@ -837,8 +856,9 @@ show <- c("Switzerland", "Denmark", "United Kingdom", "Sweden", "France",
 
 plot_cons <- cons %>%
   filter(country %in% show) %>%
-  mutate(flow = if_else(consumption >= production,
-                        "Net importer of CO2", "Net exporter of CO2"),
+  mutate(flow = case_when(
+           consumption >= production ~ "Net importer of CO2",
+           consumption < production ~ "Net exporter of CO2"),
          country = fct_reorder(country, consumption))
 
 ggplot(plot_cons, aes(y = country)) +
@@ -854,6 +874,17 @@ ggplot(plot_cons, aes(y = country)) +
   theme_minimal(base_size = 15) +
   theme(legend.position = "top")
 ```
+
+::: {style="display: flex; gap: 1.2rem; align-items: center;"}
+::: {.backgrnote style="flex: 1; text-align: right;"}
+Whose carbon is in these containers? *Photo:* Quintin Soloviev, [CC BY 4.0](https://commons.wikimedia.org/wiki/File:Volga_Maersk_container_ship_in_Montreal.jpg).
+:::
+::: {style="flex: 0 0 20%;"}
+```{r, echo = FALSE, out.width='100%'}
+knitr::include_graphics('img/L4/maersk_ship.jpg')
+```
+:::
+:::
 :::
 
 ## Run the fit again — with the consumption footprint
@@ -882,8 +913,10 @@ modelsummary(
 
 ### The comparison
 ::: {.push-left}
+::: {.font70}
 ```{r ref.label = "cons-fit", echo = FALSE, results = 'asis'}
 ```
+:::
 :::
 
 ::: {.push-right}

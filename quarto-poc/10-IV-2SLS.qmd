@@ -70,22 +70,42 @@ One part per goal. Our running question: **does education actually pay off?**
 Two weeks ago they met IV and the Wald ratio; last week they learned what controlling does. Today those two threads meet. Be explicit that goal 2 is the technical core and goal 3 is the one that matters when they read a paper — most published IV work lives or dies on the exclusion restriction, and it is the assumption nobody can test.
 :::
 
-## Where we are {.inverse background-color="#901A1E"}
+## Where we are
 
-::: {.push-left}
-- **L7 — the Wald estimator.** One instrument, no controls: divide the reduced form by the first stage, $\lambda = \rho/\phi$.
-- **L8 — controlling.** Residualise the confounder out of both $D$ and $Y$ (Frisch–Waugh).
-- **Today — 2SLS.** The same IV logic, rebuilt so it can carry **controls** and **more than one instrument**.
-:::
+```{tikz design-map, echo = FALSE, out.width='66%', fig.align='center'}
+\usetikzlibrary{arrows.meta}
+\definecolor{kured}{HTML}{901A1E}
+\begin{tikzpicture}[
+  box/.style = {draw, rounded corners = 3pt, align = center, inner sep = 4pt,
+                font = \sffamily\small, minimum height = 0.9cm},
+  today/.style = {box, draw = kured, very thick, text = kured},
+  level distance = 1.6cm,
+  level 1/.style = {sibling distance = 5.6cm},
+  level 2/.style = {sibling distance = 3.0cm},
+  edge from parent/.style = {draw, -{Latex}, semithick}]
+\node[box, font = \sffamily\bfseries] {Who decided who got treated?}
+  child {node[box] {A researcher\\randomised (L6)}
+    child {node[box] {RCT:\\bivariate OLS}
+      child {node[box] {$\kappa$: the average\\causal effect}}}}
+  child {node[box] {Nature randomised,\\as if (L7)}
+    child {node[box] {ITT: bivariate\\OLS on $Z$}
+      child {node[box] {$\rho$: effect of\\the assignment}}}
+    child {node[today] {IV: Wald (L7),\\2SLS (today)}
+      child {node[today] {$\lambda$: LATE for\\the compliers}
+        edge from parent [draw = kured, very thick]}
+      edge from parent [draw = kured, very thick]}}
+  child {node[box] {Nobody randomised\\(L8, L9)}
+    child {node[box] {measure $C$:\\multiple OLS}
+      child {node[box] {$\kappa$, \emph{if} every\\confounder is measured}}}};
+\end{tikzpicture}
+```
 
-::: {.push-right}
 ::: {.content-box-green}
-2SLS does **not** replace Wald. With a single instrument and no controls the two give **exactly the same number** — we will see that on screen. 2SLS is what you need the moment you want anything more.
-:::
+2SLS does **not** replace Wald. With a single instrument and no controls the two give **exactly the same number**, and we will see that on screen. 2SLS is what you need the moment you want controls or more than one instrument.
 :::
 
 ::: {.notes}
-Locate the day precisely, because they will otherwise think 2SLS is a new and unrelated tool. Say the punchline now rather than saving it: 2SLS *contains* Wald as a special case, and we will verify that to four decimal places later. What it buys you is the ability to add controls and extra instruments, which is why every published IV paper uses it.
+The same map as in Lecture 8, now with the instrument branch in red. Locate the day precisely, because they will otherwise think 2SLS is a new and unrelated tool. Say the punchline now rather than saving it: 2SLS *contains* Wald as a special case, and we will verify that to four decimal places later. What it buys you is the ability to add controls and extra instruments, which is why every published IV paper uses it. And it borrows the Frisch–Waugh idea from Lecture 8, which is why we did that first.
 :::
 
 ## Does education pay off? {.inverse background-color="#901A1E"}
@@ -96,10 +116,30 @@ Locate the day precisely, because they will otherwise think 2SLS is a new and un
 An old question with an obvious-looking answer — and a confounder problem that has defeated sociologists for decades.
 :::
 
+```{r, echo = FALSE, out.width='46%'}
+knitr::include_graphics('img/L10/studenterkoersel.jpg')
+```
+
+::: {.backgrnote .center}
+Studenterkørsel, 2017. Was it worth it? *Photo:* Thomas Dahlstrøm Nielsen, [CC BY-SA 4.0](https://commons.wikimedia.org/wiki/File:2017_Studenterfejring_-_6.jpg).
+:::
+
+::: {.notes}
+Most of them were on a truck like this three or four years ago. Ask it straight: did those extra years of school make you more productive, or did they mostly sort people who were going to do well anyway? Keep the question hanging; the whole lecture is about how you could possibly tell.
+:::
+
 ## The research question of the day {.inverse background-color="#901A1E"}
 
 ::: {.push-left}
-People with more education earn more. Every data set in the world agrees.
+People with more education earn more. Every data set in the world agrees, Danish registers included:
+
+```{r, echo = FALSE, out.width='100%'}
+knitr::include_graphics('img/L10/Karlson_1.png')
+```
+
+::: {.backgrnote}
+Denmark: correlation of years of schooling with earnings rank at age 34–36, by birth year. *Source:* `r Citet(myBib, "karlson_making_2021")`
+:::
 
 ::: {.content-box-blue}
 **Research question of the day:** does an **extra year of schooling** actually *cause* higher earnings — or do the people who get more schooling simply differ?
@@ -196,11 +236,24 @@ In the US at the time:
 
 $\rightarrow$ Children born **late** in the year start school **younger**, so they have completed **more** schooling by the time they may legally drop out.
 
-::: {.small}
-| | |
-|:--|:--|
-| **Carl** — born 1 January | starts aged 6½, drops out at 16 with **9** years |
-| **Luis** — born 31 December | starts aged 5½, drops out at 16 with **10** years |
+::: {style="display: flex; gap: 1.2rem; align-items: flex-start; margin-top: 0.6em;"}
+::: {style="flex: 0 0 20%;"}
+```{r, echo = FALSE, out.width='100%'}
+knitr::include_graphics('img/L10/angrist.jpg')
+```
+:::
+::: {style="flex: 0 0 20%;"}
+```{r, echo = FALSE, out.width='100%'}
+knitr::include_graphics('img/L10/krueger.jpg')
+```
+:::
+::: {.small style="flex: 1;"}
+**Joshua Angrist**, co-author of your *Mastering 'Metrics*, shared the 2021 Nobel Prize for methods like this one. **Alan Krueger** (1960–2019) worked with him on this design.
+
+::: {.backgrnote}
+*Photos:* [MeJudice](https://commons.wikimedia.org/wiki/File:Joshua_Angrist_-_2011_(cropped).jpg); [US Treasury](https://commons.wikimedia.org/wiki/File:Alan_Krueger_official_portrait_(cropped).jpg).
+:::
+:::
 :::
 :::
 
@@ -221,13 +274,78 @@ $\rightarrow$ Children born **late** in the year start school **younger**, so th
 \end{tikzpicture}
 ```
 
+:::
+
+::: {.notes}
+Two economists noticed that a school calendar can do what no ethics board would allow: hand some children an extra year of school for reasons that have nothing to do with who they are. Read the three rules slowly; the next slide shows what they mean for two boys.
+:::
+
+## Carl and Luis
+
+```{r carl-luis, echo = FALSE, out.width='80%', fig.height = 3.4, fig.width = 11}
+suppressMessages(library(tidyverse))
+kids <- tibble(
+  name  = factor(c("Luis, born 31 December 1930", "Carl, born 1 January 1930"),
+                 levels = c("Luis, born 31 December 1930", "Carl, born 1 January 1930")),
+  start = as.Date(c("1936-09-01", "1936-09-01")),
+  leave = as.Date(c("1946-12-31", "1946-01-01")),
+  years = c("10 years of school", "9 years of school"))
+
+ggplot(kids, aes(y = name)) +
+  geom_segment(aes(x = start, xend = leave, yend = name, colour = name), linewidth = 14) +
+  geom_text(aes(x = start + (leave - start) / 2, label = years), colour = "white", size = 6) +
+  geom_point(aes(x = leave), shape = 25, size = 6, fill = "black") +
+  annotate("text", x = as.Date("1936-09-01"), y = 2.55, hjust = 0, size = 5,
+           label = "Both start school in September 1936") +
+  annotate("text", x = as.Date("1947-02-01"), y = 2.55, hjust = 1, size = 5,
+           label = "16th birthday: free to leave") +
+  scale_colour_manual(values = c("#901A1E", "#425570"), guide = "none") +
+  scale_x_date(date_breaks = "2 years", date_labels = "%Y") +
+  scale_y_discrete(expand = expansion(add = 0.8)) +
+  labs(x = NULL, y = NULL) +
+  theme_minimal(base_size = 18)
+```
+
+::: {.push-left}
+Same school, same law, same year of entry. Luis gets **one more year** of school only because his birthday falls late in the year: the start of school depends on the *calendar year*, the right to leave on the *birthday*.
+:::
+
+::: {.push-right}
 ::: {.content-box-blue}
 **Discuss:** is quarter of birth a valid instrument? Check all **three** requirements from Lecture 7.
 :::
 :::
 
 ::: {.notes}
-Tell the Carl and Luis story properly — it is what makes the design click, and students remember the two boys long after they forget the algebra. Then run the three requirements as a genuine check, not a recital: first stage (plausible, and we will measure it), as-if random (nobody chooses their birth quarter — or do they? hold that thought for Part 3), exclusion restriction (the one that will occupy the rest of the lecture).
+Tell the Carl and Luis story properly. It is what makes the design click, and students remember the two boys long after they forget the algebra. Both enter school in the same September, because both turn six in 1936. Carl may leave on 1 January 1946, Luis only on 31 December 1946, almost a full school year later. Then run the three requirements as a genuine check, not a recital: first stage (plausible, and we will measure it), as-if random (nobody chooses their birth quarter, or do they? hold that thought for Part 3), exclusion restriction (the one that will occupy the rest of the lecture).
+:::
+
+## Would it work in Denmark?
+
+::: {.push-left}
+In Denmark, children also start school in the **calendar year they turn six**. So the December children are the youngest in their class.
+
+::: {.content-box-blue}
+**Discuss:** would quarter of birth be a useful instrument for schooling in Denmark? Which of the three requirements is at risk?
+:::
+
+::: {.content-box-red .fragment}
+**The first stage.** Danish compulsory schooling lasts **ten school years**, not until a birthday. A December child leaves after the same ten years as a January child, just younger. Quarter of birth would barely move schooling: $\phi \approx 0$.
+:::
+:::
+
+::: {.push-right}
+```{r, echo = FALSE, out.width='72%'}
+knitr::include_graphics('img/L10/prince_christian_school.jpg')
+```
+
+::: {.backgrnote .center}
+Prince Christian, born in October 2005, on his first school day in August 2011, aged five.<br> *Photo:* [VisitCopenhagen](https://commons.wikimedia.org/wiki/File:Prince_Christian_of_Denmark_on_his_first_day_of_school.jpg).
+:::
+:::
+
+::: {.notes}
+A Danish check of the design, and a good test of whether they understood where the extra year comes from. The start rule is the same as in the US: the calendar year you turn six. The leaving rule is different: in Denmark, compulsory schooling is ten years of school, not a birthday. So there is no Carl and Luis in Denmark, only a younger and an older classmate who leave together. No first stage, no instrument. The prince is a nice example of a late-year child: born in October, he started school at five.
 :::
 
 ## Preparation
@@ -334,6 +452,38 @@ ak91 %>%
 
 ::: {.notes}
 This is the single most persuasive slide in the lecture, so let them look before you talk. Within almost every birth year the Q4 men have *more* schooling than the Q1 men born a few months later — a regular sawtooth, repeated across a decade. Then the rhetorical move: what confounder could possibly generate a pattern that resets every January? That regularity is the argument for as-if randomness. Also flag how *small* the steps are on the y-axis; that comes back in Part 3.
+:::
+
+## The reduced form, drawn
+
+```{r sawtooth-wage, echo = FALSE, out.width='74%', fig.height = 4.2, fig.width = 12}
+ak91 %>%
+  group_by(yob, qob) %>%
+  summarise(lnw = mean(lnw), .groups = "drop") %>%
+  mutate(cohort = yob + (qob - 1) / 4) %>%
+  ggplot(aes(x = cohort, y = lnw)) +
+  geom_line(colour = "grey55") +
+  geom_point(aes(colour = factor(qob)), size = 3) +
+  scale_colour_manual(values = c("grey45", "grey45", "grey45", "#901A1E"),
+                      labels = c("Q1", "Q2", "Q3", "Q4 (born late)"),
+                      name = NULL) +
+  labs(x = "Year and quarter of birth", y = "Average log weekly wage") +
+  theme_minimal(base_size = 15) +
+  theme(legend.position = "top")
+```
+
+::: {.push-left}
+The same men, now their **wages**. The pattern is noisier, but within most birth years the men born **later** earn a little **more**.
+:::
+
+::: {.push-right}
+::: {.content-box-green}
+If birth quarter moves wages *only* through schooling, the wage steps divided by the schooling steps is the return to a year of school. That ratio is the **Wald estimator**.
+:::
+:::
+
+::: {.notes}
+The partner of the previous slide, recovered from the old deck, which plotted both the first stage and the reduced form. Let them compare the two pictures: the schooling sawtooth is clean, the wage sawtooth is noisier, but within most years the later-born men earn a little more. Do not compute anything yet. Just plant the idea that IV compares the size of two sets of steps; the next slide puts numbers on both.
 :::
 
 ## Recap: first stage, reduced form, Wald
@@ -475,14 +625,31 @@ first_stage <- lm_robust(s ~ qob, data = ak91)
 ak91 <- ak91 %>%
   add_predictions(first_stage, var = "pred_s") %>%
   add_residuals(first_stage,  var = "e_s")
+
+ak91 %>% select(s, qob, pred_s, e_s) %>% head(4)
 ```
 
 ::: {.content-box-blue}
-**Discuss:** last week we kept the **residuals**. Today we keep the **predictions**. Which of the two is unconfounded here — and why is it the opposite of last week?
+**Discuss:** in Lecture 8 we kept the **residuals**. Today we keep the **predictions**. Which of the two is unconfounded here, and why is it the opposite?
 :::
 :::
 
 ::: {.push-right}
+```{r stage1-plot, echo = FALSE, out.width='62%', fig.height = 3.2, fig.width = 6}
+ak91 %>%
+  group_by(qob) %>%
+  summarise(s = mean(s), pred_s = mean(pred_s)) %>%
+  ggplot(aes(x = qob)) +
+  geom_line(aes(y = pred_s), colour = "#901A1E", linewidth = 1.2) +
+  geom_point(aes(y = pred_s), colour = "#901A1E", size = 5, shape = 18) +
+  geom_point(aes(y = s), colour = "grey45", size = 3) +
+  annotate("text", x = 1.1, y = 12.86, hjust = 0, colour = "#901A1E", size = 5,
+           label = "pred_s: only four values") +
+  labs(x = "Quarter of birth", y = "Years of schooling",
+       caption = "Grey: average schooling per quarter. Red: the first-stage prediction.") +
+  theme_minimal(base_size = 16)
+```
+
 ::: {.content-box-red .fragment}
 `pred_s` — the part of schooling **driven by quarter of birth**, and therefore by nothing else. `e_s` is everything else about a person's schooling, ability and family included.
 
@@ -491,7 +658,7 @@ Last week the confounder was the *nuisance*, so we threw its part away. Today th
 :::
 
 ::: {.notes}
-The conceptual heart of the lecture, and the payoff of last week's Frisch–Waugh. Make them answer before revealing. The inversion is what confuses people: with a control we discard the predicted part and keep the residuals; with an instrument we discard the residuals and keep the predicted part. Same machinery, opposite half retained — because a confounder is contamination whereas an instrument is the only clean variation in the room.
+The conceptual heart of the lecture, and the payoff of Lecture 8's Frisch–Waugh. Point at the printout first: two new columns, as in Lecture 8. Then at the plot: the predicted schooling takes only four values, one per birth quarter, because quarter of birth is all the first stage knows about a person. Make them answer before revealing. The inversion is what confuses people: with a control we discard the predicted part and keep the residuals; with an instrument we discard the residuals and keep the predicted part. Same machinery, opposite half retained, because a confounder is contamination whereas an instrument is the only clean variation in the room.
 :::
 
 ## Stage two: use it as the predictor
@@ -513,11 +680,14 @@ second_stage <- lm_robust(lnw ~ pred_s, data = ak91)
 
 ::: {.push-right}
 ```{r iv-compare, results = 'hide'}
+#| code-line-numbers: "2"
 # The same thing, done properly, in one line
-iv <- ivreg(lnw ~ s | qob, data = ak91) #<<
+iv <- ivreg(lnw ~ s | qob, data = ak91)
 
 modelsummary(
-  list("OLS" = ols, "2nd stage by hand" = second_stage, "ivreg (2SLS)" = iv),
+  list("OLS" = ols,
+       "2nd stage by hand" = second_stage,
+       "ivreg (2SLS)" = iv),
   coef_map = c("s" = "Years of schooling",
                "pred_s" = "Years of schooling (predicted)"),
   stars = TRUE, gof_map = c("nobs"), output = "kableExtra"
@@ -532,6 +702,37 @@ modelsummary(
 
 ::: {.notes}
 Walk the two equations, then show that the hand-rolled second stage and `ivreg()` give the same coefficient. Do not skip the warning in the margin — students love doing 2SLS manually and then report standard errors that are too small, because the second stage treats the predicted values as if they were data rather than estimates. `ivreg()` fixes that for them.
+:::
+
+## The second stage, drawn
+
+```{r stage2-plot, echo = FALSE, out.width='54%', fig.height = 4.4, fig.width = 7.4}
+q_means <- ak91 %>%
+  group_by(qob) %>%
+  summarise(pred_s = mean(pred_s), lnw = mean(lnw), n = n())
+s2 <- coef(lm(lnw ~ pred_s, data = ak91))
+
+ggplot(q_means, aes(x = pred_s, y = lnw)) +
+  geom_abline(intercept = s2[1], slope = s2[2], colour = "#901A1E", linewidth = 1.2) +
+  geom_point(size = 5, colour = "grey30") +
+  geom_text(aes(label = paste0("Q", qob)), nudge_y = 0.0025, size = 5) +
+  labs(x = "Predicted years of schooling (pred_s)",
+       y = "Average log weekly wage") +
+  theme_minimal(base_size = 15)
+```
+
+::: {.push-left}
+The second stage only ever sees **four** values of predicted schooling, one per birth quarter. So 2SLS fits a line through the four quarter averages of wages.
+:::
+
+::: {.push-right}
+::: {.content-box-green}
+The slope of the red line is the IV estimate: **`r sprintf("%.4f", s2[2])`**, about `r round(s2[2] * 100)`% per year of school.
+:::
+:::
+
+::: {.notes}
+A picture of what the second stage does, and a good way to demystify 2SLS. Each dot is one birth quarter: how much schooling the first stage predicts for it, and how much those men actually earn. The red line is the second-stage regression. Its slope is the IV estimate. All the information IV uses is in these four dots, which is also why the estimate is so sensitive to anything else that differs between birth quarters. That thought leads straight into Part 3.
 :::
 
 ## 2SLS *is* Wald
@@ -686,6 +887,32 @@ If family background causes **both** birth timing and earnings, the red path byp
 
 ::: {.notes}
 The best critique in the course, and worth teaching as a model of how scholarship actually works: a famous design, taken apart a decade later by people who simply looked at who gives birth in which month. Trace the red path with your finger — it runs from family background to birth timing to earnings *without passing through education*, which is precisely what the exclusion restriction forbids. Note that this is an argument, not a test; nobody can prove the path is there.
+:::
+
+## Who is born in winter?
+
+::: {.push-left}
+```{r, echo = FALSE, out.width='100%'}
+knitr::include_graphics('img/L10/Buckles1.png')
+```
+
+::: {.backgrnote .center}
+All 52 million US births, 1989–2001, month by month. *Source:* `r Citet(myBib, "buckles_season_2013")`
+:::
+:::
+
+::: {.push-right}
+Every **January** (labelled), the share of **teenage** mothers peaks, while the shares who are **married**, **white**, and have a **high-school diploma** dip.
+
+The pattern repeats every single year: it is not noise.
+
+::: {.content-box-red}
+So quarter of birth is correlated with **family background** — and family background shapes earnings **directly**, not only through schooling.
+:::
+:::
+
+::: {.notes}
+Show them the evidence behind the previous slide rather than asking them to take it on trust. Let them find the rhythm themselves: the spikes line up with the "Jan" labels, and they recur for thirteen years. Then connect it back to the red path in the DAG — this is what family background driving birth timing looks like in the data.
 :::
 
 ## When the exclusion restriction fails

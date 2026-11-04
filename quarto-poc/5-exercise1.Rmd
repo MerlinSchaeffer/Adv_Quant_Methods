@@ -37,7 +37,9 @@ load("APAD.RData") # from your project folder
 APAD <- APAD %>%
   mutate(
     news    = news_hrs * 60 + news_mins,
-    news_yn = if_else(news >= 15, 1, 0)
+    news_yn = case_when( # reads news?
+      news < 5 ~ 0,      # 0 if less than 5 minutes
+      news >= 5 ~ 1)     # 1 if 5 minutes or more
   )
 ```
 
@@ -51,7 +53,7 @@ se_law <- sqrt(diag(vcov(ols_law)))["news_yn"]
 >
 > - Did `pacman::p_load(...)` run without red errors? Fix that first.
 > - **`load()` can't find the file?** `APAD.RData` must sit **in your project folder** — the same
->   folder as your `.Rproj`. Check with `list.files()`.
+>   folder as your `.Rproj`. Check the *Files* pane in RStudio.
 > - Odd results? *Session → Restart R*, then rerun from the top.
 > - Still stuck? Ask in the [t-R-ouble forum](https://absalon.ku.dk/courses/70545/discussion_topics/563046?module_item_id=2037268) on Absalon.
 
@@ -83,7 +85,9 @@ ggplot(APAD, aes(y = antidiscr_law, x = news)) +
 
 `r hide("R solution -> don't peek too early ;) !")`
 ```{r out.width='100%', fig.height = 4, fig.width = 7.5, results = FALSE}
-APAD <- APAD %>% mutate(news = if_else(news > 240, 240, news))
+APAD <- APAD %>%
+  mutate(news = case_when(news > 240 ~ 240, # cap at 4 hours
+                          TRUE ~ news))
 
 ggplot(APAD, aes(y = antidiscr_law, x = news)) +
   geom_point(aes(size = gewFAKT), alpha = 1/3) +
@@ -98,7 +102,7 @@ ggplot(APAD, aes(y = antidiscr_law, x = news)) +
 
 4. **Before you compute:** using the binary `news_yn`, do you expect news readers to support the
    law *more* or *less* than non-readers — and strongly?
-`r mcq(c("Much more, clearly significant", answer = "Barely any difference, not significant", "Much less, clearly significant"))`
+`r mcq(c("Much more, clearly significant", answer = "A small difference, not statistically significant", "Much less, clearly significant"))`
 
 5. Now run the weighted OLS `antidiscr_law ~ news_yn` and read off:
 
@@ -120,8 +124,9 @@ modelsummary(list("Anti-discr. law" = ols_law), stars = TRUE,
 
 `r hide("Model answer")`
 *Among these `r nrow(APAD)` respondents, news readers support an anti-discrimination law about
-`r abs(round(b_law, 2))` points **less** than non-readers, on average — but the difference is tiny
-and **not** statistically significant (SE `r round(se_law, 2)` is larger than the coefficient). And,
+`r abs(round(b_law, 2))` points **less** than non-readers, on average — but the difference is small
+and **not** statistically significant at the 5% level (with an SE of `r round(se_law, 2)`, the
+coefficient is less than two standard errors away from zero). And,
 as in the lecture, this is a **naïve, confounded** comparison, not a causal effect.*
 `r unhide()`
 

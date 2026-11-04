@@ -30,7 +30,7 @@ Dat <- wb_raw %>%
   group_by(country) %>%
   filter(date == max(date)) %>%
   ungroup() %>%
-  left_join(wb_meta %>% select(iso3c, region, income_level), by = "iso3c") %>%
+  inner_join(wb_meta %>% select(iso3c, region, income_level), by = "iso3c") %>%
   select(iso3c, country, date, co2, gdp, region, income_level) %>%
   filter(country != "Palau") %>%
   mutate(gdp_k  = gdp / 1000,
@@ -48,19 +48,24 @@ ols_adj <- lm_robust(co2 ~ region + gdp_k, data = Dat)
    `position_dodge()` — so you can see each gap shrink when GDP enters.
 
 `r hide("Hint")`
-`tidy()` each model, `filter(str_detect(term, "region"))`, then `bind_rows(bivariate, adjusted, .id = "model")`. Map `color = model` and add `position = position_dodge(width = 0.5)` to `geom_pointrange()`.
+As on the Lecture 8 slide *The adjusted effect, drawn*: `tidy()` each model, drop the intercept (and `gdp_k`) with `filter()`, then `bind_rows(bivariate, adjusted, .id = "model")`. Map `color = model` and add `position = position_dodge(width = 0.5)` to `geom_pointrange()`.
 `r unhide()`
 
 `r hide("R solution -> don't peek too early ;) !")`
 ```{r out.width='90%', fig.height = 4, fig.width = 7.5, results = FALSE}
-tidy_reg <- function(m) {
-  m %>% tidy() %>%
-    filter(str_detect(term, "region")) %>%
-    mutate(term = str_remove(term, "region"))
-}
+bivariate <- ols_biv %>%
+  tidy() %>%                                 # Coefficients as a tibble
+  filter(term != "(Intercept)") %>%          # Keep only the region terms
+  mutate(term = str_remove(term, "region"))  # "regionEurope ..." -> "Europe ..."
 
-plotdata <- bind_rows(tidy_reg(ols_biv), tidy_reg(ols_adj), .id = "model") %>%
-  mutate(model = if_else(model == "1", "Bivariate", "Adjusted for GDP"))
+adjusted <- ols_adj %>%
+  tidy() %>%
+  filter(term != "(Intercept)" & term != "gdp_k") %>%
+  mutate(term = str_remove(term, "region"))
+
+plotdata <- bind_rows(bivariate, adjusted, .id = "model") %>%
+  mutate(model = case_when(model == "1" ~ "Bivariate",           # Model 1
+                           model == "2" ~ "Adjusted for GDP"))  # Model 2
 
 ggplot(plotdata, aes(x = reorder(term, estimate), y = estimate, color = model)) +
   geom_hline(yintercept = 0, color = "#901A1E", lty = "dashed") +

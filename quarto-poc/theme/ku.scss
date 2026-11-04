@@ -149,6 +149,18 @@ pre, code, kbd, samp {
 .reveal section.inverse {
   background-color: $ku-red;
 }
+// Inverse slide over a red-tinted photo: {.inverse .photo-bg background-color="#901A1E"
+// background-image="img/..." background-opacity="0.3" background-size="cover"}.
+// The section itself must be see-through, or its red box hides the photo.
+.reveal section.inverse.photo-bg { background-color: transparent; }
+// Its credit line (::: {.photo-credit}): bottom-right corner, above the slide number.
+.reveal section .photo-credit {
+  position: absolute; right: 0; bottom: 2.4em; max-width: 60%;
+  text-align: right; font-size: 0.5em; line-height: 1.3;
+}
+.reveal section .photo-credit p, .reveal section .photo-credit a {
+  color: rgba(255,255,255,0.75); border-bottom-color: rgba(255,255,255,0.4); margin: 0;
+}
 .reveal section.inverse,
 .reveal section.inverse h1, .reveal section.inverse h2,
 .reveal section.inverse h3, .reveal section.inverse p,
@@ -331,3 +343,12 @@ pre, code, kbd, samp {
 .reveal section.inverse .ku-timer .kt-btns button { border-color: #fff; color: #fff; }
 .reveal section.inverse .ku-timer .kt-btns button:hover { background: #fff; color: $ku-red; }
 @keyframes kt-blink { 50% { opacity: 0.3; } }
+
+// TikZ PNGs have a white background; blend them into tinted content boxes
+.dag-blend img { mix-blend-mode: multiply; }
+
+// Captions (.backgrnote) sit tight under the figure they describe
+.reveal .cell:has(+ .backgrnote) .quarto-figure { margin-bottom: 0; }
+.reveal .cell:has(+ .backgrnote) .quarto-figure figure > p { line-height: 0; margin: 0; }
+.reveal .cell:has(+ .backgrnote) img { margin-bottom: 0.25em; }
+.reveal .backgrnote > p:first-child { margin-top: 0.1em; }

@@ -131,7 +131,7 @@ ggplot(ESS, aes(x = agea, y = imwbcnt)) +
   geom_smooth(method = "lm", formula = y ~ x, se = FALSE, aes(colour = "Straight line")) +
   geom_smooth(method = "lm", formula = y ~ poly(x, 2, raw = TRUE), se = FALSE,
               aes(colour = "Quadratic")) +
-  scale_colour_manual(values = c("Straight line" = "#425570", "Quadratic" = "#901A1E"),
+  scale_color_manual(values = c("Straight line" = "#425570", "Quadratic" = "#901A1E"),
                       name = NULL) +
   labs(x = "Age", y = "Xenophobia (0–10)") +
   theme_minimal()

@@ -36,7 +36,7 @@ Dat <- wb_raw %>%
   group_by(country) %>%
   filter(date == max(date)) %>%
   ungroup() %>%
-  left_join(wb_meta %>% select(iso3c, region, income_level), by = "iso3c") %>%
+  inner_join(wb_meta %>% select(iso3c, region, income_level), by = "iso3c") %>%
   select(iso3c, country, date, co2, gdp, region, income_level) %>%
   filter(country != "Palau") %>%              # the artefact from Lecture 4
   mutate(gdp_k  = gdp / 1000,
@@ -58,7 +58,8 @@ mena_adj <- b_adj[grep("Middle", names(b_adj))]
 > - Did `pacman::p_load(...)` run without red errors? Fix that first.
 > - Odd results? *Session → Restart R*, then rerun from the top.
 > - **World Bank API down?** Load the cached, ready-made data instead:
->   `Dat <- readRDS(url("https://merlin-ols.netlify.app/data/Dat_L4.rds")) |> dplyr::filter(country != "Palau")`
+>   download [`Dat_L4.rds`](https://merlin-ols.netlify.app/data/Dat_L4.rds) into your project folder, then
+>   `Dat <- readRDS("Dat_L4.rds") %>% filter(country != "Palau")`
 > - Still stuck? Ask in the [t-R-ouble forum](https://absalon.ku.dk/courses/70545/discussion_topics/563046?module_item_id=2037268) on Absalon.
 
 2. **Write it yourself.** Fit two models and put them side by side: a **bivariate** one,
@@ -106,8 +107,7 @@ than its wealth alone would predict. Which is it, and why?
 ```{r}
 lm_robust(co2 ~ region + gdp_k, data = Dat) %>%
   tidy() %>%
-  filter(str_detect(term, "region")) %>%
-  arrange(desc(estimate)) %>%
+  filter(term != "(Intercept)" & term != "gdp_k") %>% # Keep only the region terms
   select(term, estimate)
 ```
 

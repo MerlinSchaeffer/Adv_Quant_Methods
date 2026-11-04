@@ -178,7 +178,7 @@ change? What does that tell you about how sensitive our verdict is to single cas
 `r hide("R solution")`
 ```{r results = 'asis'}
 ols_1b <- lm_robust(poverty ~ state_ownership,
-                    data = Dat %>% filter(!country %in% c("China", "Viet Nam")))
+                    data = Dat %>% filter(country != "China" & country != "Viet Nam"))
 
 modelsummary(
   list("All countries" = ols_1, "Without CHN & VNM" = ols_1b),

@@ -59,9 +59,11 @@ data("mlda", package = "masteringmetrics")
 mlda <- mlda %>%
   drop_na() %>%
   mutate(
-    D    = if_else(agecell < 21, 0, 1),  # 1 = old enough to drink legally
+    D = case_when(agecell < 21 ~ 0,      # 1 = old enough to drink legally
+                  TRUE ~ 1),
     age0 = agecell - 21,                 # Running variable, centred at the cutoff
-    side = if_else(agecell < 21, "Below 21", "21 or older"))
+    side = case_when(agecell < 21 ~ "Below 21",
+                     TRUE ~ "21 or older"))
 
 # Brand palette for the RDD plots
 col_below <- "#6b7f95"   # control side (too young)
@@ -145,8 +147,8 @@ No randomiser, no instrument — just a strict rule that nature draws a sharp li
 ## Remember RCTs
 
 ::: {.push-left}
-```{r rct-img, echo = FALSE, out.width='72%'}
-knitr::include_graphics("img/L13/RDD_intuition.png")
+```{r rct-img, echo = FALSE, out.width='56%'}
+knitr::include_graphics("img/randomization2.png")
 ```
 
 If we **randomly** split people into treatment and control, they come from the same population — similar on average *in every way*, including their untreated potential outcome $Y_0$.
@@ -201,24 +203,32 @@ Get them generating examples — driving age, conscription cohorts, means-tested
 
 ## The intuition
 
-::: {.push-left}
-**Compare everyone** either side of the line? The two groups differ in all sorts of ways — a poor GPA student and a top one are simply different people. That is **selection bias**.
+**Compare everyone** either side of the line? The two groups differ in all sorts of ways: a poor GPA student and a top one are simply different people. That is **selection bias**.
 
-**Compare only those *just barely* either side?** A student on 6.09 and one on 6.11 are, for all practical purposes, **the same** — bar the luck of the line.
+::: {.fragment fragment-index=1}
+**Compare only those *just barely* either side?** A student on 6.09 and one on 6.11 are, for all practical purposes, **the same**, bar the luck of the line.
 :::
 
-::: {.push-right}
-```{r intu-img, echo = FALSE, out.width='100%'}
+::: {.r-stack}
+::: {.fragment .fade-out fragment-index=1 style="width: 100%;"}
+```{r intu-img-all, echo = FALSE, out.width='92%'}
+knitr::include_graphics("img/L13/RDD_intuition.png")
+```
+:::
+
+::: {.fragment fragment-index=1 style="width: 100%;"}
+```{r intu-img, echo = FALSE, out.width='92%'}
 knitr::include_graphics("img/L13/RDD_intuition2.png")
 ```
-
-::: {.content-box-green .center}
-Just below vs. barely above the threshold is often **as good as random**.
 :::
+:::
+
+::: {.content-box-green .center .fragment fragment-index=1}
+Just below vs. barely above the threshold is often **as good as random**.
 :::
 
 ::: {.notes}
-This is the emotional core of the lecture and the callback to L5/L7: near the cutoff, assignment is as-if random. Far from it, we are back to comparing apples and oranges. Make them feel the trade-off physically — squeeze the window and the comparison gets cleaner but the sample shrinks. That tension is Part 2 and Part 3.
+Recovered as a two-step build from the old deck. First picture: everyone either side of the line, the comparison that selection bias ruins. Click: zoom in to the cases just either side. This is the emotional core of the lecture and the callback to L5/L7: near the cutoff, assignment is as-if random. Far from it, we are back to comparing apples and oranges. Make them feel the trade-off physically: squeeze the window and the comparison gets cleaner but the sample shrinks. That tension is Part 2 and Part 3.
 :::
 
 ## Two assumptions
@@ -237,6 +247,50 @@ The rule is strict, not random — yet **barely below vs. barely above is as goo
 
 ::: {.notes}
 Both assumptions are about the counterfactual world without the rule. Continuity: nothing *else* changes discontinuously at 21 (nothing but the drinking law flips on your 21st birthday). No sorting: a GPA cutoff is dangerous if teachers bump borderline students over; a birthday cutoff is safe because nobody chooses their birthday. Foreshadow that "no sorting" is testable-ish (look for a jump in the *density* at the cutoff), continuity is not — the same untestable-assumption flavour as the exclusion restriction in L7/L10.
+:::
+
+## What sorting looks like
+
+```{r sort-sim, include = FALSE}
+set.seed(2016)
+score <- rnorm(4000, mean = 50, sd = 10)
+sorted <- score
+nudge <- sorted >= 45 & sorted < 50 & runif(4000) < 0.6  # teachers lift some just-failed students
+sorted[nudge] <- runif(sum(nudge), 50, 52)
+sort_dat <- bind_rows(
+  tibble(score = score,  world = "No sorting: a smooth density"),
+  tibble(score = sorted, world = "Sorting: a gap below, a pile above"))
+```
+
+::: {.push-left}
+**No sorting** can be checked: count the cases on each side. If people can push themselves over the line, they leave a **gap just below** it and a **pile just above** it.
+
+In Swedish national maths tests, teachers lifted students who were just below a grade threshold over it (Diamond and Persson 2016). Those students are self-selected, so a grade cutoff there is useless for an RDD.
+
+::: {.content-box-blue}
+**Discuss:** can people sort around their 21st birthday? And around a 5,000-resident population threshold?
+:::
+:::
+
+::: {.push-right}
+```{r sort-plot, echo = FALSE, out.width='94%', fig.height = 5, fig.width = 7}
+ggplot(sort_dat, aes(x = score, fill = score >= 50)) +
+  geom_histogram(binwidth = 1, boundary = 50, colour = "white") +
+  geom_vline(xintercept = 50, colour = col_cut, linetype = "dashed") +
+  facet_wrap(~ world, ncol = 1) +
+  scale_fill_manual(values = c(`FALSE` = col_below, `TRUE` = col_above), guide = "none") +
+  coord_cartesian(xlim = c(25, 75)) +
+  labs(x = "Running variable (e.g. a test score), cutoff at 50", y = "Number of cases") +
+  theme_minimal(base_size = 14)
+```
+
+::: {.backgrnote .center}
+Simulated data.
+:::
+:::
+
+::: {.notes}
+A picture of the no-sorting assumption, our own addition. Top: what a running variable should look like around the cutoff, a smooth hill. Bottom: what it looks like when people can manipulate their side: a hole just below the line and a spike just above. The Swedish example is real: Diamond and Persson (2016, NBER) found that teachers grading the national maths tests nudged borderline students over the thresholds, so the students just above differ from those just below in whom their teacher favoured. Then the discussion: nobody chooses their birthday, so the drinking-age design is safe; a population threshold is mostly safe, because towns cannot easily fake their census count.
 :::
 
 ## The central RDD trade-off
@@ -305,6 +359,10 @@ In the US you may drink legally at **21**. Nothing else about a person changes o
 ::: {.content-box-blue}
 **Research question of the day:** what is the **causal effect** of legal drinking on **mortality**?
 :::
+
+::: {.content-box-blue}
+**Discuss:** in Denmark you can buy beer and wine in a shop at **16**, and drink in a bar at **18**. Which cutoff would you study with Danish data, and what would you compare?
+:::
 :::
 
 ::: {.push-right}
@@ -313,10 +371,18 @@ The running variable is **age** (in month-wide cells); the cutoff is **21**; the
 ::: {.backgrnote}
 Data: US deaths per 100,000, ages 20–22, 1997–2003 — the `mlda` data from Angrist & Pischke's *Mastering 'Metrics*.
 :::
+
+```{r, echo = FALSE, out.width='58%'}
+knitr::include_graphics('img/L13/beer_pong.jpg')
+```
+
+::: {.backgrnote .center}
+Red cups and beer pong: in the US, legal only from your 21st birthday. *Photo:* Frank Schulenburg, [CC BY-SA 4.0](https://commons.wikimedia.org/wiki/File:A_game_of_beer_pong_in_Simi_Valley_during_the_pandemic-01957.jpg).
+:::
 :::
 
 ::: {.notes}
-Set the design out loud in the RDD vocabulary before any code: outcome = mortality, running variable = age, cutoff = 21, treatment = legal drinking. Ask what could confound a naive "do 21-year-olds die more than 20-year-olds?" comparison — maturation, income, independence — and note that none of those jump *discontinuously* at 21. Only the law does. That is the identifying idea.
+Most of them have been drinking legally since 18 (16 for beer in the shop), so the US rule sounds exotic; ask how their first year of gymnasium would have looked with a 21 limit. Then set the design out loud in the RDD vocabulary before any code: outcome = mortality, running variable = age, cutoff = 21, treatment = legal drinking. Ask what could confound a naive "do 21-year-olds die more than 20-year-olds?" comparison — maturation, income, independence — and note that none of those jump *discontinuously* at 21. Only the law does. That is the identifying idea.
 :::
 
 ## The data
@@ -353,6 +419,34 @@ ggplot(mlda, aes(y = all, x = agecell)) +
   geom_point(aes(colour = agecell >= 21)) +
   labs(y = "Deaths per 100,000", x = "Age (years + months)")
 ```
+
+### All or only the closest?
+::: {.push-left}
+```{r mlda-close, echo = FALSE, out.width='96%', fig.height = 4.2, fig.width = 7}
+mlda %>%
+  mutate(group = case_when(
+    agecell >= 20.75 & agecell < 21 ~ "Just too young",
+    agecell >= 21 & agecell < 21.25 ~ "Just old enough",
+    agecell < 21 ~ "Too young",
+    TRUE ~ "Old enough")) %>%
+  ggplot(aes(y = all, x = agecell, colour = group)) +
+  geom_vline(xintercept = 21, colour = col_cut, linetype = "dashed") +
+  geom_point(size = 2.6) +
+  scale_colour_manual(values = c("Too young" = "#b9c3ce", "Just too young" = col_below,
+                                 "Just old enough" = col_above, "Old enough" = "#d9a3a5")) +
+  labs(y = "Deaths per 100,000", x = "Age (years + months)", colour = NULL) +
+  theme_minimal(base_size = 14) + theme(legend.position = "bottom")
+```
+:::
+
+::: {.push-right}
+::: {.content-box-blue}
+**Discuss:** what are the advantages and disadvantages of comparing
+
+1. **everyone** who is too young with **everyone** who is old enough, or
+2. only the **three months** either side of the birthday (dark dots)?
+:::
+:::
 
 :::
 
@@ -409,8 +503,10 @@ $\color{red}{\lambda}$ is the jump at the cutoff: **`r sprintf("%.1f", b_lin)`**
 ::: {.push-right}
 ```{r lin-code}
 mlda <- mlda %>%
-  mutate(D    = if_else(agecell < 21, 0, 1),
-         age0 = agecell - 21)          # centre the running variable
+  mutate(D = case_when(
+           agecell < 21 ~ 0,     # too young to drink
+           TRUE ~ 1),            # 21 or older
+         age0 = agecell - 21)    # centre at the cutoff
 
 RDD_lin <- lm_robust(all ~ D * age0, data = mlda)
 ```
@@ -591,7 +687,7 @@ So a wild boundary swing lands exactly on $\lambda$ $\rightarrow$ **bias**. Insi
 ::: {.push-right}
 ```{r local-plot, echo = FALSE, out.width='100%', fig.height = 5, fig.width = 8}
 bw <- rd_bw
-mlda <- mlda %>% mutate(inbw = if_else(abs(age0) <= bw, "Inside", "Outside"))
+mlda <- mlda %>% mutate(inbw = case_when(abs(age0) <= bw ~ "Inside", TRUE ~ "Outside"))
 ll <- lm(all ~ agecell, data = subset(mlda, agecell < 21 & age0 >= -bw))
 lr <- lm(all ~ agecell, data = subset(mlda, agecell >= 21 & age0 <= bw))
 g2 <- data.frame(agecell = seq(21 - bw, 21 + bw, length.out = 100))
@@ -756,7 +852,7 @@ The quota **jumps** the share of women elected right at 5,000 — a textbook fir
 :::
 
 ::: {.push-right}
-```{r women1-img, echo = FALSE, out.width='84%'}
+```{r women1-img, echo = FALSE, out.width='68%'}
 knitr::include_graphics("img/L13/women_elected_threshold.png")
 ```
 

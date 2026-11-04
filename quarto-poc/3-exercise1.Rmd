@@ -23,8 +23,14 @@ library(tidyverse); library(haven); library(estimatr); library(modelsummary)
 ESS <- read_spss("../assets/ESS9e03_1.sav") %>%
   filter(cntry == "DK") %>%
   select(idno, pspwght, gndr, eduyrs, agea, psppsgva, trstlgl, trstplc) %>%
-  mutate(across(c(psppsgva, trstlgl, trstplc, pspwght), zap_labels),
-         eduyrs = pmin(pmax(eduyrs, 9), 21),
+  mutate(psppsgva = zap_labels(psppsgva), # Make numeric
+         trstlgl = zap_labels(trstlgl),   # Make numeric
+         trstplc = zap_labels(trstplc),   # Make numeric
+         pspwght = zap_labels(pspwght),   # Make numeric
+         eduyrs = case_when(              # Censor education at 9 and 21 years
+           eduyrs > 21 ~ 21,
+           eduyrs < 9 ~ 9,
+           TRUE ~ as.numeric(eduyrs)),
          gndr = as_factor(gndr)) %>%
   drop_na()
 
@@ -44,9 +50,15 @@ pacman::p_load(tidyverse, haven, estimatr, modelsummary)
 ESS <- read_spss("ESS9e03_1.sav") %>%
   filter(cntry == "DK") %>%
   select(idno, pspwght, gndr, eduyrs, agea, psppsgva, trstlgl, trstplc) %>%
-  mutate(across(c(psppsgva, trstlgl, trstplc, pspwght), zap_labels),
-         eduyrs = pmin(pmax(eduyrs, 9), 21), # Censor education at 9 & 21
-         gndr   = as_factor(gndr)) %>%
+  mutate(psppsgva = zap_labels(psppsgva), # Make numeric
+         trstlgl = zap_labels(trstlgl),   # Make numeric
+         trstplc = zap_labels(trstplc),   # Make numeric
+         pspwght = zap_labels(pspwght),   # Make numeric
+         eduyrs = case_when(              # Censor education at 9 and 21 years
+           eduyrs > 21 ~ 21,
+           eduyrs < 9 ~ 9,
+           TRUE ~ as.numeric(eduyrs)),
+         gndr = as_factor(gndr)) %>%
   drop_na()
 ```
 
@@ -118,13 +130,12 @@ the numbers so little here — in a badly skewed sample they would matter far mo
 
 ------------------------------------------------------------------------------
 
-**Bonus (for the fast):** how *big* are the ESS weights? Summarise `pspwght` with
-`summary()` and make a histogram. Which respondents get weights well above 1, and why?
+**Bonus (for the fast):** how *big* are the ESS weights? Make a histogram of `pspwght`,
+like the lecture's histogram of the 1000 sample slopes. Which respondents get weights well
+above 1, and why?
 
 `r hide("R solution")`
 ```{r bonus, out.width='60%', fig.height = 3.5, fig.width = 6, results = FALSE}
-summary(ESS$pspwght)
-
 ggplot(ESS, aes(x = pspwght)) +
   geom_histogram(bins = 30) +
   labs(x = "Post-stratification weight", y = "Count") +

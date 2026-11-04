@@ -473,29 +473,41 @@ it is the natural baseline to compare the others against).</li>
 </ol>
 <pre class="r"><code>pacman::p_load(tidyverse, haven, estimatr, modelsummary)
 ESS_raw &lt;- read_dta(&quot;Legewie_ESS_02.dta&quot;) # from your project folder</code></pre>
-<pre class="r"><code>event_date &lt;- as.Date(&quot;2002-10-13&quot;)   # the Bali attack
-win_begin  &lt;- as.Date(&quot;2002-09-14&quot;)
-win_end    &lt;- as.Date(&quot;2002-10-20&quot;)
+<pre class="r"><code># Bali terror attack, and the ESS fieldwork window around it
+event_date_begin &lt;- as.Date(&quot;2002-09-14&quot;)
+event_date       &lt;- as.Date(&quot;2002-10-13&quot;)
+event_date_end   &lt;- as.Date(&quot;2002-10-20&quot;)
 
 ESS &lt;- ESS_raw %&gt;%
   mutate(
-    int_date = as.Date(sprintf(&quot;%s-%s-%s&quot;, inwyr, inwmm, inwdd)),
+    # Day of the survey interview
+    int_date = sprintf(&quot;%s-%s-%s&quot;, inwyr, inwmm, inwdd) %&gt;% as.Date(),
+    # Treatment indicator
     treat = case_when(
-      int_date &gt; event_date &amp; int_date &lt;= win_end   ~ &quot;After the attack&quot;,
-      int_date &lt; event_date &amp; int_date &gt; win_begin  ~ &quot;Before the attack&quot;,
-      TRUE ~ NA_character_) %&gt;% fct_relevel(&quot;Before the attack&quot;, &quot;After the attack&quot;),
-    anti_immi = rowMeans(across(c(imtcjob, imbleco, imbgeco, imueclt,
-                                  imwbcnt, imwbcrm, imbghct)), na.rm = TRUE) %&gt;%
+      int_date &gt; event_date &amp; int_date &lt;= event_date_end ~ &quot;After the attack&quot;,
+      int_date &lt; event_date &amp; int_date &gt; event_date_begin ~ &quot;Before the attack&quot;,
+      TRUE ~ as.character(NA)) %&gt;% fct_relevel(&quot;Before the attack&quot;, &quot;After the attack&quot;),
+    # Attitudes towards immigrants: the average of 7 items, z-standardised
+    anti_immi = rowMeans(select(., imtcjob, imbleco, imbgeco, imueclt,
+                                imwbcnt, imwbcrm, imbghct), na.rm = TRUE) %&gt;%
       scale() %&gt;% as.numeric(),
+    # Subtract from max to make larger values more xenophobic
     anti_immi = max(anti_immi, na.rm = TRUE) - anti_immi,
-    across(c(brncntr, mocntr, facntr), as_factor),
-    age  = inwyr - yrbrn,
+    # Immigrant origin
+    brncntr = as_factor(brncntr),
+    mocntr = as_factor(mocntr),
+    facntr = as_factor(facntr),
+    # Background variables
+    age = inwyr - yrbrn,
     empl_stat = case_when(
-      pdwrk == 1 ~ &quot;Working&quot;, uempla == 1 ~ &quot;Unemployed&quot;,
-      rtrd == 1 ~ &quot;Retired&quot;, TRUE ~ &quot;Other&quot;),
-    pspwght = pweight * dweight
-  ) %&gt;%
-  filter(!cntry %in% c(&quot;DK&quot;, &quot;IL&quot;, &quot;HU&quot;) &amp;                # keep 10 countries
+      pdwrk == 1 ~ &quot;Working&quot;,
+      uempla == 1 ~ &quot;Unemployed&quot;,
+      rtrd == 1 ~ &quot;Retired&quot;,
+      TRUE ~ &quot;Other&quot;),
+    # Weights
+    pspwght = pweight * dweight) %&gt;%
+  # Sample restriction: 10 countries, mainstream members (no immigrant origin)
+  filter(cntry != &quot;DK&quot; &amp; cntry != &quot;IL&quot; &amp; cntry != &quot;HU&quot; &amp;
            brncntr == &quot;yes&quot; &amp; mocntr == &quot;yes&quot; &amp; facntr == &quot;yes&quot;) %&gt;%
   select(treat, anti_immi, cntry, pspwght, age, empl_stat) %&gt;%
   drop_na() %&gt;%
@@ -538,7 +550,7 @@ differs from Portugal&#39;s.</p>
 </div>
 <div class="webex-solution">
 <button>
-R solution &lt;U+2014&gt; don&#39;t peek too early ;) !
+R solution — don&#39;t peek too early ;) !
 </button>
 <pre class="r"><code>ols_int &lt;- lm_robust(anti_immi ~ treat * cntry, data = ESS, weights = pspwght)
 

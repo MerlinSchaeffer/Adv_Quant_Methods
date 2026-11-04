@@ -241,6 +241,27 @@ Dat_vdem %>%
 
 ::: {.panel-tabset}
 
+### One nation, split
+::: {.push-left}
+From 1949 to 1990 there were **two Germanies**: a market economy in the West, and the socialist **German Democratic Republic (GDR)** in the East, sealed off by the Berlin Wall from 1961.
+
+Denmark, next door, is our third case.
+
+::: {.content-box-blue}
+**Discuss:** before we look at any data: where do you *expect* the GDR to sit on state ownership, and on civil liberties?
+:::
+:::
+
+::: {.push-right}
+```{r, echo = FALSE, out.width='88%'}
+knitr::include_graphics('img/L2/berlin_wall_families.jpg')
+```
+
+::: {.backgrnote .center}
+East Berlin, 8 September 1961: the bride's mother and aunt wave to the newlyweds in the West. The Wall, weeks old, kept them from the wedding. *Photo:* Horst Siegmann, public domain ([Wikimedia Commons](https://commons.wikimedia.org/wiki/File:The_Berlin_Wall_1961_-_1989_HU99516.jpg)).
+:::
+:::
+
 ### State ownership since 1900
 ```{r ref.label = "gdr-control", out.width='72%', fig.height = 4.4, fig.width = 9, results = FALSE, echo = FALSE}
 ```
@@ -248,8 +269,9 @@ Dat_vdem %>%
 ### … its R code
 ```{r gdr-control, fig.show = 'hide'}
 ggplot(data = Dat_vdem %>%
-         filter(country %in% c("Denmark", "Germany",
-                               "German Democratic Republic"),
+         filter(country == "Denmark" |
+                  country == "Germany" |
+                  country == "German Democratic Republic",
                 year >= 1900),
        aes(y = state_ownership, x = year, color = country)) +
   geom_line(linewidth = 1) +
@@ -269,8 +291,9 @@ ggplot(data = Dat_vdem %>%
 ### … its R code
 ```{r gdr-freedom, fig.show = 'hide'}
 ggplot(data = Dat_vdem %>%
-         filter(country %in% c("Denmark", "Germany",
-                               "German Democratic Republic"),
+         filter(country == "Denmark" |
+                  country == "Germany" |
+                  country == "German Democratic Republic",
                 year >= 1900),
        aes(y = civ_liberties, x = year, color = country)) +
   geom_line(linewidth = 1) +
@@ -293,6 +316,8 @@ The GDR ran a far more state-owned economy **and** offered far fewer civil liber
 :::
 
 ::: {.notes}
+Start with the photo and its story: a wedding in West Berlin, and the bride's own mother and aunt can only wave from a window across the street, because weeks earlier the border was sealed. That is what state control meant for ordinary people. Ask them to predict both series before they see the plots.
+
 A natural comparison: two Germanies, one nation, split for forty years. Let them read both series and describe what happens in 1949 and again after 1990. Then the methodological turn, which is the real point — this is a vivid *anecdote*, and one case cannot establish a pattern. That is exactly why we now go to all countries at once.
 :::
 
@@ -340,7 +365,7 @@ countries. That "exchange rate of living costs" is called
 :::
 
 ::: {.push-right}
-```{r, echo = FALSE, out.width='66%', fig.align='center'}
+```{r, echo = FALSE, out.width='52%', fig.align='center'}
 knitr::include_graphics('img/L2/PPP.png')
 ```
 
@@ -393,21 +418,21 @@ Dat_poverty
 ## Join: four types
 
 ::: {.push-left}
-```{r, echo = FALSE, out.width='82%'}
+```{r, echo = FALSE, out.width='58%'}
 knitr::include_graphics('img/L2/join_inner.gif')
 ```
 
-```{r, echo = FALSE, out.width='82%'}
+```{r, echo = FALSE, out.width='58%'}
 knitr::include_graphics('img/L2/join_right.gif')
 ```
 :::
 
 ::: {.push-right}
-```{r, echo = FALSE, out.width='82%'}
+```{r, echo = FALSE, out.width='58%'}
 knitr::include_graphics('img/L2/join_left.gif')
 ```
 
-```{r, echo = FALSE, out.width='82%'}
+```{r, echo = FALSE, out.width='58%'}
 knitr::include_graphics('img/L2/join_full.gif')
 ```
 :::
@@ -465,7 +490,14 @@ Always look before you compute — these four questions are a habit for every sc
 :::
 
 ::: {.right-column}
-```{r scatter1, out.width='100%', fig.height = 5, fig.width = 7.5, echo = FALSE}
+::: {.panel-tabset}
+
+### The plot
+```{r ref.label = "scatter1", out.width='92%', fig.height = 5, fig.width = 7.5, echo = FALSE}
+```
+
+### … its R code
+```{r scatter1, fig.show = 'hide'}
 ggplot(data = Dat,
        aes(y = poverty, x = state_ownership, label = country)) +
   geom_text(size = 3) +
@@ -477,6 +509,8 @@ ggplot(data = Dat,
        x = "State ownership of the economy") +
   theme_minimal(base_size = 14)
 ```
+
+:::
 :::
 
 ## Z-standardization: a common unit
@@ -540,6 +574,51 @@ quad_plot
 Two moves, and give each its own sentence: subtracting the mean re-centres everything on zero, dividing by the SD changes the unit to standard deviations. The payoff is that percentages and an expert-coded index now share one scale. The quadrant picture is the bridge to the next slide — countries in the blue quadrants agree in sign, those in the red disagree, and the correlation is essentially a tally of which kind dominates.
 :::
 
+## One product per country
+
+```{r contrib, include = FALSE}
+contrib <- Dat %>%
+  mutate(product = z_state_ownership * z_poverty)
+show3 <- bind_rows(
+  contrib %>% filter(country == "Denmark"),
+  contrib %>% slice_max(product, n = 1),
+  contrib %>% slice_min(product, n = 1)) %>%
+  select(country, z_state_ownership, z_poverty, product)
+r_by_hand <- sum(contrib$product) / (nrow(contrib) - 1)
+```
+
+::: {.push-left}
+Multiply each country's two z-scores. Same side of both averages: **positive**. Opposite sides: **negative**.
+
+::: {.small}
+```{r contrib-tab, echo = FALSE}
+knitr::kable(show3, digits = 2,
+             col.names = c("Country", "z state ownership", "z poverty", "Product"))
+```
+:::
+
+::: {.fragment}
+Add up all `r nrow(contrib)` products and divide by $n - 1$:
+
+$$\frac{`r sprintf("%.1f", sum(contrib$product))`}{`r nrow(contrib) - 1`} = `r sprintf("%.3f", r_by_hand)`$$
+
+That is the correlation coefficient $r$, computed by hand.
+:::
+:::
+
+::: {.push-right}
+```{r contrib-plot, echo = FALSE, out.width='94%', fig.height = 4.4, fig.width = 7}
+quad_plot +
+  geom_label_repel(data = show3 %>% left_join(select(Dat, country), by = "country"),
+                   aes(label = country), size = 4.5, color = "black",
+                   box.padding = 1, min.segment.length = 0)
+```
+:::
+
+::: {.notes}
+A worked step before the formula, so the formula only names something they have already done. Take Denmark first: below average on both, so the product is positive (on the "same side"). Then the country that pulls most in the positive direction, and the one that pulls most in the negative direction. Click: add up all the products, divide by n minus one, and you get exactly the correlation that `cor()` reports on the next slide.
+:::
+
 ## The correlation coefficient $r_{y,x}$
 
 Eye-balling is not evidence; a single number summarises the scatter plot:
@@ -566,7 +645,7 @@ Dat %>%
 :::
 
 ::: {.content-box-red .fragment}
-Essentially a small, postive **(linear) association**: state-owned economies have somewhat *more* extreme poverty.
+Essentially a small, positive **(linear) association**: state-owned economies have somewhat *more* extreme poverty.
 :::
 :::
 
@@ -578,7 +657,7 @@ Walk the formula through the quadrant picture rather than as algebra: same-side 
 
 ::: {.left-column}
 ```{r, echo = FALSE, out.width='72%'}
-knitr::include_graphics('https://www.laserfiche.com/wp-content/uploads/2014/10/femalecoder.jpg')
+knitr::include_graphics('img/your_turn.jpg')
 ```
 
 [**Open exercise 1 in a new tab ↗**](2-exercise1.html){target="_blank"}
@@ -604,17 +683,32 @@ From "is there a relationship?" to <br> "**how much** does poverty change with s
 
 ## Correlation = a linear trend
 
-::: {.left-column}
+::: {.push-left}
 **How can we calculate that trend line directly?**
 
 Then we could state *how much* poverty changes, per unit of state ownership.
 
 ::: {.content-box-green}
-A **model** is a reduced representation of reality; it should capture the answer to our research question, not every data point. [And it should not be driven by a few singular cases.]{.backgrnote}
+A **model** is a reduced representation of reality, like a metro map: no streets, no distances, and still it gets you to Nørreport. A model should capture the answer to our research question, not every data point. [And it should not be driven by a few singular cases.]{.backgrnote}
+:::
+
+::: {style="display: flex; gap: 1rem; align-items: flex-end;"}
+::: {style="flex: 0 0 40%;"}
+```{r, echo = FALSE, out.width='100%'}
+knitr::include_graphics('img/L2/metro_map.png')
+```
+:::
+::: {.backgrnote style="flex: 1;"}
+*Map:* [tomtom](https://commons.wikimedia.org/wiki/File:Copenhagen_Metro_2019.svg).
+:::
 :::
 :::
 
-::: {.right-column}
+::: {.notes}
+The metro map is the easiest way to explain what a model is. It throws away almost everything about the city, the streets, the real distances, the buildings, and keeps only what you need for one question: how do I get from A to B? A regression line does the same for our question: it throws away every country's details and keeps one trend.
+:::
+
+::: {.push-right}
 ```{r trend, out.width='96%', fig.height = 4.4, fig.width = 7, echo = FALSE}
 quad_plot +
   geom_smooth(method = "lm", se = FALSE, color = "#425570")
@@ -772,8 +866,8 @@ zols <- lm_robust( # Same, on the z-standardized variables
 
 modelsummary(
   list("OLS" = ols, "Std. OLS" = zols),
-  statistic = NULL,                 # No statistical inference (yet)
-  gof_map = c("nobs", "r.squared"), # Two fit statistics only
+  statistic = NULL,       # No statistical inference (yet)
+  gof_map = c("nobs", "r.squared"), # Two fit statistics
   output = "kableExtra"
 )
 ```
@@ -803,7 +897,7 @@ $\widehat{\text{Poverty}} = `r round(coef(mod)[1], 2)` + `r round(coef(mod)[2], 
 
 At the state ownership $= 0$ (here the scale's midpoint), predicted poverty is **`r round(coef(mod)[1], 2)`%**.
 
-With every unit more state ownership, average poverty is **`r round(coef(mod)[2], 2)` percentage points `r ifelse(coef(mod)[2] > 0, "higher", "lower")`**
+With every unit more state ownership, average poverty is **`r round(coef(mod)[2], 2)` percentage points `r case_when(coef(mod)[2] > 0 ~ "higher", TRUE ~ "lower")`**
 
 $R^2 = `r round(summary(mod)$r.squared, 3)`$: state ownership accounts for almost **none** of the variance in poverty across the world.
 :::
@@ -850,7 +944,7 @@ The most important slide in the deck for the rest of the course. Same coefficien
 
 ::: {.left-column}
 ```{r, echo = FALSE, out.width='72%'}
-knitr::include_graphics('https://www.laserfiche.com/wp-content/uploads/2014/10/femalecoder.jpg')
+knitr::include_graphics('img/your_turn.jpg')
 ```
 
 [**Open exercise 2 in a new tab ↗**](2-exercise2.html){target="_blank"}

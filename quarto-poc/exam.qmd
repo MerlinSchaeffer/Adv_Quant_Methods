@@ -13,14 +13,59 @@ To pass the course you must fulfil **two** requirements:
     the exam.</p>
   </div>
   <div class="req"><span class="k">Requirement 2 · the exam</span>
-    <p><strong>Submit the home assignment by 14 January 2027, 12:00 (noon).</strong> You analyse a
-    dataset in R and write up your results — guidelines below.</p>
+    <p><strong>Submit the home assignment by 14 January 2027, 12:00 (noon).</strong> You find an
+    unexpected event during a survey's fieldwork, estimate its causal effect in R, and write up
+    your results. See the guidelines below.</p>
   </div>
 </div>
 ```
 
 # The exam
 
-::: callout-start
-Full exam guidelines, pre-registrations, and data will be published here later in the semester.
-:::
+## The task
+
+Big, unexpected events happen while surveys are in the field. A terror attack, a financial crash, a nuclear accident, an election result (abroad), a football World Cup win no one foresaw. Some respondents were interviewed just before the event, others just after. If the timing of the interview is as good as random, comparing the two groups reveals the event's causal effect on attitudes. Legewie (2013) used this idea to study the Bali attack of 2002 with the European Social Survey (see Lecture 7).
+
+Your task is to find such an event yourself and estimate its causal effect.
+
+1.  **Find an event and a survey.** Use generative AI, Google Scholar, and survey documentation to find a publicly accessible cross-sectional survey (e.g. ESS, EVS, ISSP, ALLBUS, Eurobarometer) that was in the field when an event happened. The event can be of any type. It does not have to be a terror attack.
+2.  **Check feasibility.** The data must contain the day of the interview. Verify the event date and the fieldwork period in the official survey documentation. Do not rely on what an AI tells you. You need enough respondents (min. 100) on both sides of the event.
+3.  **Search the literature.** Find out whether someone has already published a study of your event with your survey. Briefly document where you searched and what you found.
+4.  **Estimate the effect in two ways.** First, follow Legewie's design: compare respondents interviewed before and after the event with OLS. Check whether the two groups are balanced on pre-treatment characteristics, and control for potential confounders with multiple OLS. Second, estimate a regression discontinuity design with the interview date as the running variable. Here, control variables are not necessary. Use both a parametric RDD with `lm_robust()` and a non-parametric one with `rdrobust()`.
+5.  **Test for effect heterogeneity.** Use interaction effects to test whether the event affected some groups more than others. Justify your choice of moderators before you show the results.
+6.  **Discuss the assumptions of your design.** Explain which assumptions a causal reading of your estimates requires. Test them empirically as far as your data allow. Where you cannot test an assumption, argue why it is plausible or not.
+7.  **Visualise your results.** Use coefficient plots and plots of model predictions.
+
+### Novelty earns extra credit
+
+Analysing an event for which **no study has been published** with your survey earns extra credit. If a published study exists, you are welcome to use the same event. But you must go beyond it, for example with other outcomes, other effect heterogeneities, an RDD where the original used a simple before/after comparison. State clearly what your contribution is. An ambitious and well-argued analysis with a null result is better than a safe one with a significant result.
+
+### Other data
+
+You may also estimate a causal effect with other data (e.g. World Bank data) and another design from the course. In that case, you **must contact me before 1 December 2026** with a short proposal (research question, data, design) and get my OK.
+
+## Submission and formatting
+
+- Deadline: **14 January 2027 at 12:00 (noon)**. You must have submitted at least 10 weekly quizzes to qualify.
+- Scope: max 10 pages of 2,400 characters each for one student. 5 pages are added per additional student in a group.
+- Do not write your name in the assignment. All exam papers are anonymous.
+- Enclose a declaration on your use of generative AI, including how you used it to find your event.
+
+## Advisory guide for paper organization
+
+Read Legewie (2013) closely. You do not need a long theory section, but present your data, methods, and results the way he does. A reasonable (non-binding) page allocation for a 10-page group assignment:
+
+- **Introduction (1 page):** The event, the research question, why the event could change attitudes, and what is already known about it.
+- **Data and methods (3 pages):** The survey, its fieldwork, and how you selected respondents. How you operationalize the outcome, the treatment, and the moderators. Your strategy for missing values. The models you estimate. Use clear variable names (e.g. "Education level"), not programmatic ones (e.g. "eisced").
+- **Assumptions (2 pages):** What your design assumes, and how you test it.
+- **Results (3 pages):** The before/after estimates, the RDD estimates, and the heterogeneity analysis. Interpret results as you present them. Focus on coefficients and their confidence intervals, not on model fit.
+- **Conclusion (1 page):** A clear answer to your research question, and the limits of a causal reading.
+
+## Writing style
+
+- Do not copy-paste raw R output. Tables must be neatly formatted. All tables and figures need numbered, descriptive titles. A coefficient plot needs the number of observations (N) and R² in a note.
+- Use signposting: "Having established X, I now turn to Y."
+- Keep an objective, academic tone. Avoid normative language.
+- I strongly recommend peer review with a reading-group partner.
+
+No one expects perfection. The purpose of this exam is to learn and apply complex skills. Good luck!

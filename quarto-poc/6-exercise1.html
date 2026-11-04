@@ -515,16 +515,11 @@ forum</a> on Absalon.</li>
 </ul>
 </blockquote>
 <ol start="2" style="list-style-type: decimal">
-<li>Create a new variable called <code>APAD$candy</code> that simulates
-randomly &quot;giving&quot; candy to half of the respondents in your dataset.
-Follow these steps: a) Use the <code>rbinom()</code> function to
-generate this variable. b) To understand how <code>rbinom()</code>
-works, you can use R&#39;s built-in help function by typing
-<code>?rbinom</code> in the console, search online for &quot;R rbinom()
-examples&quot;, or use an AI assistant like ChatGPT or Google Gemini for an
-explanation. c) Make sure your code assigns a value of 1 (representing
-&quot;received candy&quot;) to approximately 50% of the respondents, and 0 to the
-others.</li>
+<li>Create a new variable <code>candy</code> in <code>APAD</code> that
+randomly &quot;gives&quot; candy to about half of the respondents. Use the coin
+from the lecture: <code>rbinom()</code>, flipped once per respondent
+(<code>nrow(APAD)</code> flips), so that 1 = &quot;received candy&quot; and 0 =
+&quot;no candy&quot;.</li>
 </ol>
 <div class="webex-solution">
 <button>
@@ -532,7 +527,7 @@ R solution -&gt; don&#39;t peek too early ;) !
 </button>
 <pre class="r"><code>APAD &lt;- APAD %&gt;% mutate( # Add new &#39;candy&#39; variable to APAD dataset
   candy = rbinom( # Generate random binary values (0 or 1)
-    nrow(APAD), # One value per row
+    n = nrow(APAD), # One flip per respondent
     size = 1, # Each trial has two outcomes
     prob = 0.5)) # 50% chance of getting 1 (candy)</code></pre>
 </div>
@@ -943,6 +938,11 @@ position: relative;
 --line-width-bottom: 0.1em;
 --line-width-left: 0.1em;
 
+--line-type-top: solid;
+--line-type-right: solid;
+--line-type-bottom: solid;
+--line-type-left: solid;
+
 --trim-top-left: 0%;
 --trim-top-right: 0%;
 --trim-right-top: 0%;
@@ -962,9 +962,9 @@ right: var(--trim-right-top, 0);
 bottom: 0;
 pointer-events: none;
 z-index: 1;
-border-top: calc(var(--border-top) * var(--line-width-top)) solid var(--line-color-top);
-border-right: calc(var(--border-right) * var(--line-width-right)) solid var(--line-color-right);
-border-left: calc(var(--border-left) * var(--line-width-left)) solid var(--line-color-left);
+border-top: calc(var(--border-top) * var(--line-width-top)) var(--line-type-top, solid) var(--line-color-top);
+border-right: calc(var(--border-right) * var(--line-width-right)) var(--line-type-right, solid) var(--line-color-right);
+border-left: calc(var(--border-left) * var(--line-width-left)) var(--line-type-left, solid) var(--line-color-left);
 }
 
 .tinytable :is(td, th)[class*="tinytable_css_"]::after {
@@ -973,8 +973,8 @@ position: absolute;
 left: var(--trim-bottom-left, 0);
 right: var(--trim-bottom-right, 0);
 bottom: var(--trim-left-bottom, var(--trim-right-bottom, 0));
-height: calc(var(--border-bottom) * var(--line-width-bottom));
-background: var(--line-color-bottom);
+height: 0;
+border-bottom: calc(var(--border-bottom) * var(--line-width-bottom)) var(--line-type-bottom, solid) var(--line-color-bottom);
 pointer-events: none;
 z-index: 2;
 }
@@ -1094,7 +1094,7 @@ line-height: var(--tt-line-height-footnote-tight);
                 </tr>
                 <tr>
                   <td data-row="6" data-col="1">gender</td>
-                  <td data-row="6" data-col="2">M<U+00E4>nnlich</td>
+                  <td data-row="6" data-col="2">Männlich</td>
                   <td data-row="6" data-col="3">279</td>
                   <td data-row="6" data-col="4">51.2</td>
                   <td data-row="6" data-col="5">284</td>

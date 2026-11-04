@@ -61,7 +61,9 @@ is the other way round: households **below** the threshold (`Income_Centered < 0
 `r hide("R solution — don't peek too early ;) !")`
 ```{r sol1, eval = FALSE}
 gov_transfers <- gov_transfers %>%
-  mutate(rule = if_else(Income_Centered < 0, "Received transfer", "No transfer"))
+  mutate(rule = case_when(
+    Income_Centered < 0 ~ "Received transfer", # below the cutoff: eligible
+    TRUE ~ "No transfer"))
 
 ggplot(gov_transfers, aes(y = Support, x = Income_Centered)) +
   geom_jitter(alpha = 0.15, height = 0.02, width = 0) +
@@ -89,7 +91,9 @@ ggplot(gov_transfers, aes(y = Support, x = Income_Centered)) +
 `r hide("R solution — don't peek too early ;) !")`
 ```{r sol3, eval = FALSE}
 gov_transfers <- gov_transfers %>%
-  mutate(D = if_else(Income_Centered < 0, 1, 0))
+  mutate(D = case_when(
+    Income_Centered < 0 ~ 1, # treated: received the transfer
+    TRUE ~ 0))
 
 RDD <- lm_robust(Support ~ D * Income_Centered, data = gov_transfers)
 
@@ -137,13 +141,13 @@ alike, we can read this **causally**: the cash bought goodwill.
 `r unhide()`
 
 7. **Bonus, for the fast.** The parametric model used **all** the data. Re-fit on a narrow window
-   around the cutoff (e.g. `abs(Income_Centered) < 0.05`). Does $\lambda$ change much? What happens
+   around the cutoff (e.g. `Income_Centered > -0.05 & Income_Centered < 0.05`). Does $\lambda$ change much? What happens
    to the standard error, and why?
 
 `r hide("R solution")`
 ```{r sol7, eval = FALSE}
 RDD_narrow <- lm_robust(Support ~ D * Income_Centered,
-                        data = gov_transfers %>% filter(abs(Income_Centered) < 0.05))
+                        data = gov_transfers %>% filter(Income_Centered > -0.05 & Income_Centered < 0.05))
 modelsummary(list("Narrow window" = RDD_narrow),
              stars = TRUE, gof_map = c("nobs", "r.squared"), output = "kableExtra")
 ```

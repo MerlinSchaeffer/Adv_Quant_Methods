@@ -62,15 +62,15 @@ child_labor <- child_labor %>%
       cl8 == 1 ~ 8,
       cl9 == 1 ~ 9
     ),
-    sob  = factor(sob),  # US state of birth
-    year = factor(year)  # Census year
+    sob  = as_factor(sob),  # US state of birth
+    year = as_factor(year)  # Census year
   ) %>%
   drop_na(chld_lb_lw)
 ```
 
 `r hide("Stuck?")`
-- Did `pacman::p_load(...)` run without red errors? `ivreg` is new this week — if it is missing,
-  run `install.packages("ivreg")` once.
+- Did `pacman::p_load(...)` run without red errors? `ivreg` is new this week — `pacman::p_load()`
+  installs it automatically the first time (this needs internet).
 - `data()` can't find `child_labor`? It ships inside **`masteringmetrics`**, which is a GitHub
   package — see **About & setup** on the course website.
 - This data set has ~650,000 rows, so models take a few seconds. That is normal, not a crash.

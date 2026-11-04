@@ -53,9 +53,15 @@ myBib <- ReadBib("../Stats_II.bib", check = FALSE)
 ESS <- read_spss("../assets/ESS9e03_1.sav") %>%
   filter(cntry == "DK") %>%
   select(idno, pspwght, gndr, eduyrs, agea, psppsgva, trstlgl, trstplc) %>%
-  mutate(across(c(psppsgva, trstlgl, trstplc, pspwght), zap_labels),
-         eduyrs = pmin(pmax(eduyrs, 9), 21), # Censor education at 9 & 21 years
-         gndr   = as_factor(gndr)) %>%
+  mutate(psppsgva = zap_labels(psppsgva), # Make numeric
+         trstlgl = zap_labels(trstlgl),   # Make numeric
+         trstplc = zap_labels(trstplc),   # Make numeric
+         pspwght = zap_labels(pspwght),   # Make numeric
+         eduyrs = case_when(              # Censor education at 9 and 21 years
+           eduyrs > 21 ~ 21,
+           eduyrs < 9 ~ 9,
+           TRUE ~ as.numeric(eduyrs)),
+         gndr = as_factor(gndr)) %>%
   drop_na()
 
 theme_set(theme_minimal(base_size = 15))
@@ -92,10 +98,18 @@ Do **better-educated** people *generally* believe more strongly that the **polit
 ::: {.content-box-blue}
 **Discuss:** we only ever have data on *some* people, in *some* year. What has to be true about those people for us to trust a general answer?
 :::
+
+```{r, echo = FALSE, out.width='92%'}
+knitr::include_graphics('img/L3/school_protest.jpg')
+```
+
+::: {.backgrnote .center}
+Pupils protest the school reform outside Christiansborg, May 2016. Did it change anything? *Photo:* Ole Ryhl Olsson, [CC BY-SA 4.0](https://commons.wikimedia.org/wiki/File:Demonstration_mod_folkeskolereformen_af_2014,_maj_2016_p%C3%A5_Christiansborg_Slotsplads_i_K%C3%B8benhavn.jpg).
+:::
 :::
 
 ::: {.notes}
-Note the word "generally" in the question — that single word is what makes today necessary. We have 1,500-odd Danes from one year, and we want to say something about people in general. Let them answer the blue box; whatever they say will be some version of "the sample has to be like everyone else", which is precisely Part 1.
+The photo could be them a few years ago: pupils on Slotspladsen against the 2014 school reform. Ask who has ever protested, signed something or voted, and whether it felt like it counted. That feeling is our outcome. Note the word "generally" in the question — that single word is what makes today necessary. We have 1,500-odd Danes from one year, and we want to say something about people in general. Let them answer the blue box; whatever they say will be some version of "the sample has to be like everyone else", which is precisely Part 1.
 :::
 
 ## Preparation
@@ -121,10 +135,15 @@ ESS <- read_spss("ESS9e03_1.sav") %>%
   # A minimal set of variables for today
   select(idno, pspwght, gndr, eduyrs, agea,
          psppsgva, trstlgl, trstplc) %>%
-  mutate(across(c(psppsgva, trstlgl, trstplc, pspwght),
-                zap_labels),                # Labelled -> numeric
-         eduyrs = pmin(pmax(eduyrs, 9), 21), # Censor at 9 & 21 years
-         gndr   = as_factor(gndr)) %>%
+  mutate(psppsgva = zap_labels(psppsgva), # Make numeric
+         trstlgl = zap_labels(trstlgl),   # Make numeric
+         trstplc = zap_labels(trstplc),   # Make numeric
+         pspwght = zap_labels(pspwght),   # Make numeric
+         eduyrs = case_when(              # Censor education at 9 and 21 years
+           eduyrs > 21 ~ 21,
+           eduyrs < 9 ~ 9,
+           TRUE ~ as.numeric(eduyrs)),
+         gndr = as_factor(gndr)) %>%
   drop_na() # Drop cases with missing values
 ```
 
@@ -147,7 +166,7 @@ Reason two is the surprising one, so spend the time there. Even with Danish regi
 :::
 
 ::: {.push-right}
-```{r, echo = FALSE, out.width='82%'}
+```{r, echo = FALSE, out.width='58%'}
 knitr::include_graphics('img/L3/generalization.png')
 ```
 
@@ -197,9 +216,17 @@ The soup metaphor is the one they will remember, so say it twice: stir the pot, 
 :::
 
 ::: {.push-right}
-```{r, echo = FALSE, out.width='78%'}
+```{r, echo = FALSE, out.width='64%'}
 knitr::include_graphics('img/L3/monopoly.jpg')
 ```
+
+```{r, echo = FALSE, out.width='50%'}
+knitr::include_graphics('img/L3/soup.jpg')
+```
+
+::: {.backgrnote .center}
+*Soup:* Michael W. Kolton, [CC BY-SA 3.0](https://commons.wikimedia.org/wiki/File:Soup_in_a_pot..JPG).
+:::
 :::
 
 ## But participation is *not* random {.inverse background-color="#901A1E"}
@@ -243,7 +270,7 @@ ggplot(polls, aes(x = miss, y = fct_reorder(party, miss), fill = miss > 0)) +
   geom_col(width = 0.65) +
   geom_vline(xintercept = 0, colour = "grey30") +
   geom_text(aes(label = sprintf("%+.1f", miss),
-                hjust = ifelse(miss > 0, -0.2, 1.2)), size = 4.5, fontface = "bold") +
+                hjust = case_when(miss > 0 ~ -0.2, miss <= 0 ~ 1.2)), size = 4.5, fontface = "bold") +
   scale_fill_manual(values = c("TRUE" = "#901A1E", "FALSE" = "#425570"), guide = "none") +
   scale_x_continuous(limits = c(-2.2, 4.4)) +
   labs(x = "Election result minus poll average (% points)", y = NULL,
@@ -338,9 +365,21 @@ Get the unweighted answer out of them first — 60% voted yes — then run the w
 
 ## Weights can be powerful
 
+::: {style="display: flex; gap: 1.4rem; align-items: center;"}
+::: {style="flex: 1;"}
 With the right weights, even a **wildly non-representative** sample can forecast well.
 
 `r Citet(myBib, "wang_forecasting_2015")` predicted the 2012 US election from **Xbox gamers** (young, male, unrepresentative) reweighted to the electorate.
+:::
+::: {style="flex: 0 0 13%;"}
+```{r, echo = FALSE, out.width='100%'}
+knitr::include_graphics('img/L3/xbox_controller.jpg')
+```
+::: {.backgrnote}
+*Photo:* [Evan-Amos](https://commons.wikimedia.org/wiki/File:Xbox-360-Controller-Black.jpg).
+:::
+:::
+:::
 
 ::: {.push-left}
 
@@ -524,10 +563,11 @@ spread *is* the sampling error; and it has a beautiful, predictable shape.
 
 ```{r sim, fig.show = 'hide'}
 set.seed(1261990)
-sample_betas <- replicate(1000, {          # 1000 repetitions of …
+sample_betas <- c() # An empty vector to collect the 1000 slopes
+for (draw in 1:1000) {                     # 1000 repetitions of …
   s <- ESS %>% sample_n(50)                # … draw 50 people
-  coef(lm(psppsgva ~ eduyrs, data = s))["eduyrs"] # … store the slope
-})
+  sample_betas[draw] <- coef(lm(psppsgva ~ eduyrs, data = s))["eduyrs"] # … store the slope
+}
 sd(sample_betas) # The true sampling error
 ```
 
@@ -541,11 +581,15 @@ knitr::include_graphics('img/L3/anim_hist.gif')
 :::
 
 ### Histogram
-```{r hist, out.width='62%', fig.height = 4.2, fig.width = 7, echo = FALSE}
+```{r ref.label = "hist", out.width='62%', fig.height = 4.2, fig.width = 7, echo = FALSE}
+```
+
+### … its R code
+```{r hist, fig.show = 'hide'}
 true_beta <- coef(lm(psppsgva ~ eduyrs, data = ESS))["eduyrs"] %>% unname()
 sd_b <- sd(sample_betas)
 
-ggplot(tibble(b = sample_betas), aes(x = b)) +
+ggplot(tibble(b = sample_betas), aes(x = b)) + # One row per sample's slope
   geom_histogram(binwidth = 0.008, fill = "#901A1E", alpha = 0.85) +
   geom_vline(xintercept = true_beta, color = "#425570", linewidth = 1.2) +
   geom_vline(xintercept = true_beta + c(-1.96, 1.96) * sd_b,
@@ -653,7 +697,7 @@ Ask the blue-box question and let it land as a real problem: everything so far n
 
 ::: {.left-column}
 ```{r, echo = FALSE, out.width='72%'}
-knitr::include_graphics('https://www.laserfiche.com/wp-content/uploads/2014/10/femalecoder.jpg')
+knitr::include_graphics('img/your_turn.jpg')
 ```
 
 [**Open exercise 1 in a new tab ↗**](3-exercise1.html){target="_blank"}
@@ -835,7 +879,9 @@ test_plot <- function(b, se, df, step = 7, xmax = 3.6 * se, detail = TRUE) {
     annotate("segment", x = k * se, xend = k * se, y = ry - 0.025 * ymax,
              yend = ry + 0.025 * ymax, colour = "grey40") +
     annotate("text", x = k * se, y = ry - 0.07 * ymax, size = 3.9, colour = "grey40",
-             label = ifelse(k == 0, "0", sprintf("%s%d SE", ifelse(k > 0, "+", "−"), abs(k)))) +
+             label = case_when(k == 0 ~ "0",
+                               k > 0  ~ sprintf("+%d SE", k),
+                               k < 0  ~ sprintf("−%d SE", abs(k)))) +
     annotate("text", x = 0.5 * se, y = ry + 0.065 * ymax, size = 3.9, colour = "grey20",
              fontface = "bold", label = sprintf("1 SE = %.3f", se))
   g <- g +
@@ -1010,7 +1056,7 @@ ggplot(ESS, aes(y = psppsgva, x = eduyrs)) +
 
 ::: {.left-column}
 ```{r, echo = FALSE, out.width='72%'}
-knitr::include_graphics('https://www.laserfiche.com/wp-content/uploads/2014/10/femalecoder.jpg')
+knitr::include_graphics('img/your_turn.jpg')
 ```
 
 [**Open exercise 2 in a new tab ↗**](3-exercise2.html){target="_blank"}

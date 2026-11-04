@@ -37,29 +37,41 @@ ESS_raw <- read_dta("Legewie_ESS_02.dta") # from your project folder
 ```
 
 ```{r prep}
-event_date <- as.Date("2002-10-13")   # the Bali attack
-win_begin  <- as.Date("2002-09-14")
-win_end    <- as.Date("2002-10-20")
+# Bali terror attack, and the ESS fieldwork window around it
+event_date_begin <- as.Date("2002-09-14")
+event_date       <- as.Date("2002-10-13")
+event_date_end   <- as.Date("2002-10-20")
 
 ESS <- ESS_raw %>%
   mutate(
-    int_date = as.Date(sprintf("%s-%s-%s", inwyr, inwmm, inwdd)),
+    # Day of the survey interview
+    int_date = sprintf("%s-%s-%s", inwyr, inwmm, inwdd) %>% as.Date(),
+    # Treatment indicator
     treat = case_when(
-      int_date > event_date & int_date <= win_end   ~ "After the attack",
-      int_date < event_date & int_date > win_begin  ~ "Before the attack",
-      TRUE ~ NA_character_) %>% fct_relevel("Before the attack", "After the attack"),
-    anti_immi = rowMeans(across(c(imtcjob, imbleco, imbgeco, imueclt,
-                                  imwbcnt, imwbcrm, imbghct)), na.rm = TRUE) %>%
+      int_date > event_date & int_date <= event_date_end ~ "After the attack",
+      int_date < event_date & int_date > event_date_begin ~ "Before the attack",
+      TRUE ~ as.character(NA)) %>% fct_relevel("Before the attack", "After the attack"),
+    # Attitudes towards immigrants: the average of 7 items, z-standardised
+    anti_immi = rowMeans(select(., imtcjob, imbleco, imbgeco, imueclt,
+                                imwbcnt, imwbcrm, imbghct), na.rm = TRUE) %>%
       scale() %>% as.numeric(),
+    # Subtract from max to make larger values more xenophobic
     anti_immi = max(anti_immi, na.rm = TRUE) - anti_immi,
-    across(c(brncntr, mocntr, facntr), as_factor),
-    age  = inwyr - yrbrn,
+    # Immigrant origin
+    brncntr = as_factor(brncntr),
+    mocntr = as_factor(mocntr),
+    facntr = as_factor(facntr),
+    # Background variables
+    age = inwyr - yrbrn,
     empl_stat = case_when(
-      pdwrk == 1 ~ "Working", uempla == 1 ~ "Unemployed",
-      rtrd == 1 ~ "Retired", TRUE ~ "Other"),
-    pspwght = pweight * dweight
-  ) %>%
-  filter(!cntry %in% c("DK", "IL", "HU") &                # keep 10 countries
+      pdwrk == 1 ~ "Working",
+      uempla == 1 ~ "Unemployed",
+      rtrd == 1 ~ "Retired",
+      TRUE ~ "Other"),
+    # Weights
+    pspwght = pweight * dweight) %>%
+  # Sample restriction: 10 countries, mainstream members (no immigrant origin)
+  filter(cntry != "DK" & cntry != "IL" & cntry != "HU" &
            brncntr == "yes" & mocntr == "yes" & facntr == "yes") %>%
   select(treat, anti_immi, cntry, pspwght, age, empl_stat) %>%
   drop_na() %>%

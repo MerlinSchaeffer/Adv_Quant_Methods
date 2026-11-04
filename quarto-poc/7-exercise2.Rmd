@@ -41,11 +41,15 @@ data("mdve", package = "masteringmetrics") # ships with the package
 ```{r}
 mdve <- mdve %>%
   mutate(
-    T_RANDOM = case_when(T_RANDOM %in% c(2, 3) ~ "Coddle!",
-                         T_RANDOM == 1 ~ "Arrest!", TRUE ~ NA_character_) %>%
+    T_RANDOM = case_when(
+      T_RANDOM == 2 | T_RANDOM == 3 ~ "Coddle!", # Combine 2 & 3 into "Coddle!"
+      T_RANDOM == 1 ~ "Arrest!",                 # 1 becomes "Arrest!"
+      TRUE ~ as.character(NA)) %>%               # 4 ("other") becomes NA
       fct_relevel("Arrest!"),
-    T_FINAL  = case_when(T_FINAL %in% c(2, 3) ~ "Coddled",
-                         T_FINAL == 1 ~ "Arrested", TRUE ~ NA_character_) %>%
+    T_FINAL = case_when(
+      T_FINAL == 2 | T_FINAL == 3 ~ "Coddled",   # Combine 2 & 3 into "Coddled"
+      T_FINAL == 1 ~ "Arrested",                 # 1 becomes "Arrested"
+      TRUE ~ as.character(NA)) %>%               # 4 ("other") becomes NA
       fct_relevel("Arrested"))
 
 mdve %>% select(T_RANDOM, T_FINAL) %>% table()
@@ -88,7 +92,9 @@ mdve %>% select(T_FINAL, S_RACE) %>%
 `r hide("R solution -> don't peek too early ;) !")`
 ```{r results = 'asis'}
 mdve <- mdve %>%
-  mutate(T_FINAL_01 = if_else(T_FINAL == "Coddled", 1, 0))
+  mutate(T_FINAL_01 = case_when(
+    T_FINAL == "Arrested" ~ 0, # Code "Arrested" as 0
+    T_FINAL == "Coddled" ~ 1)) # Code "Coddled" as 1
 
 first_stage <- lm_robust(T_FINAL_01 ~ T_RANDOM, data = mdve)
 modelsummary(list("Coddled (0/1)" = first_stage), stars = TRUE,

@@ -15,8 +15,12 @@ set.seed(1261990)
 ESS <- read_spss("../assets/ESS9e03_1.sav") %>%
   filter(cntry == "DK") %>%
   select(eduyrs, psppsgva, pspwght) %>%
-  mutate(across(c(psppsgva, pspwght), zap_labels),
-         eduyrs = pmin(pmax(eduyrs, 9), 21)) %>%
+  mutate(psppsgva = zap_labels(psppsgva), # Make numeric
+         pspwght = zap_labels(pspwght),   # Make numeric
+         eduyrs = case_when(              # Censor education at 9 and 21 years
+           eduyrs > 21 ~ 21,
+           eduyrs < 9 ~ 9,
+           TRUE ~ as.numeric(eduyrs))) %>%
   drop_na()
 
 true_beta <- coef(lm(psppsgva ~ eduyrs, data = ESS))["eduyrs"] %>% unname()

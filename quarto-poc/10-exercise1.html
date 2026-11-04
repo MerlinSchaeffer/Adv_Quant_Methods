@@ -487,8 +487,8 @@ child_labor &lt;- child_labor %&gt;%
       cl8 == 1 ~ 8,
       cl9 == 1 ~ 9
     ),
-    sob  = factor(sob),  # US state of birth
-    year = factor(year)  # Census year
+    sob  = as_factor(sob),  # US state of birth
+    year = as_factor(year)  # Census year
   ) %&gt;%
   drop_na(chld_lb_lw)</code></pre>
 <div class="webex-solution">
@@ -497,8 +497,8 @@ Stuck?
 </button>
 <ul>
 <li>Did <code>pacman::p_load(...)</code> run without red errors?
-<code>ivreg</code> is new this week — if it is missing, run
-<code>install.packages(&quot;ivreg&quot;)</code> once.</li>
+<code>ivreg</code> is new this week — <code>pacman::p_load()</code>
+installs it automatically the first time (this needs internet).</li>
 <li><code>data()</code> can&#39;t find <code>child_labor</code>? It ships
 inside <strong><code>masteringmetrics</code></strong>, which is a GitHub
 package — see <strong>About &amp; setup</strong> on the course

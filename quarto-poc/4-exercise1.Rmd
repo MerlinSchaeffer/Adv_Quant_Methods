@@ -1,6 +1,6 @@
 ---
 title: "Exercise 1 (20 minutes)"
-subtitle: "You practice: OLS diagnostics (outliers & linearity) and a categorical predictor — this time with income groups. When you're done, assist some of the others …"
+subtitle: "You practice: joining two sources, OLS diagnostics (outliers & linearity) and a categorical predictor. Today's question: does state control of the economy go with higher emissions? When you're done, assist some of the others …"
 output: webexercises::webexercises_default
 ---
 
@@ -22,45 +22,55 @@ num_fitb <- function(x, digits = 2, width = 6) {
 
 1. Do the [Setup](about.html), if you have not yet done so.
 
-2. Start a new R script and copy in this starter code (it loads the packages and builds
-   `Dat` — the very pipeline we walked through on the slides):
+2. Start a new R script and copy in this starter code. It is the lecture's World Bank
+   pipeline, **joined to V-Dem** — the same join you practised in Lecture 2:
 
 ```{r starter}
 pacman::p_load(
   tidyverse,    # Data manipulation & figures
   wbstats,      # World Bank data via API
+  vdemdata,     # Varieties of Democracy data
   estimatr,     # OLS with robust standard errors
   modelsummary  # Nicely formatted regression tables
 )
 
-# World Bank: both indicators in ONE call. Naming them (co2 = ..., gdp = ...)
-# means wbstats names the columns for us.
-wb_raw <- wb_data(c(co2 = "EN.GHG.CO2.PC.CE.AR5",
-                    gdp = "NY.GDP.PCAP.PP.KD"),
-                  start_date = 2000, end_date = 2026)
-
-# Region & income group come from a different part of the API, so a second call
-wb_meta <- wb_countries()
-
-Dat <- wb_raw %>%
-  drop_na(co2, gdp) %>%          # Country-years where we observe both
+# World Bank: CO2 and GDP per person, most recent year we observe both
+Dat_co2 <- wb_data(c(co2 = "EN.GHG.CO2.PC.CE.AR5",
+                     gdp = "NY.GDP.PCAP.PP.KD"),
+                   start_date = 2000, end_date = 2026) %>%
+  rename(country_text_id = iso3c, year = date) %>% # Rename to V-Dem's key
+  select(country_text_id, country, year, co2, gdp) %>%
+  drop_na(co2, gdp) %>%
   group_by(country) %>%
-  filter(date == max(date)) %>%  # ...and of those, the most recent one
+  filter(year == max(year)) %>%
   ungroup() %>%
-  left_join(wb_meta %>% select(iso3c, region, income_level), by = "iso3c") %>%
-  select(iso3c, country, date, co2, gdp, region, income_level) %>%
   mutate(gdp_k = gdp / 1000)
+
+# V-Dem: state ownership of the economy (our "how socialist is it?" measure)
+Dat_vdem <- vdem %>%
+  as_tibble() %>%
+  select(country_text_id, year, state_own_raw = v2clstown) %>%
+  mutate(state_ownership = -state_own_raw) # Reverse: higher = MORE state ownership
+
+# Region & income group, as in the lecture
+Dat_meta <- wb_countries() %>%
+  select(country_text_id = iso3c, region, income_level)
+
+# The join: a country is identified by its ISO code AND the year
+Dat <- Dat_co2 %>%
+  inner_join(Dat_vdem, by = c("country_text_id", "year")) %>% #<<
+  inner_join(Dat_meta, by = "country_text_id")
 ```
 
 ```{r solutions, include = FALSE}
-# Values used to check your answers below
-Dat_x <- readRDS("data/Dat_L4.rds")
+Dat_x <- readRDS("data/Dat_L4_ex1.rds")
 Dat_x$income_level <- factor(Dat_x$income_level,
   levels = c("Low income", "Lower middle income",
              "Upper middle income", "High income"))
 ols_inc <- lm_robust(co2 ~ income_level, data = Dat_x)
 b_high  <- coef(ols_inc)["income_levelHigh income"]
-cor_cg  <- cor(Dat_x$co2, Dat_x$gdp_k)
+cor_cs  <- cor(Dat_x$co2, Dat_x$state_ownership)
+n_join  <- nrow(Dat_x)
 ```
 
 > **Stuck?**
@@ -68,10 +78,16 @@ cor_cg  <- cor(Dat_x$co2, Dat_x$gdp_k)
 > - Did the `pacman::p_load(...)` line run without red error messages? If not, fix that first.
 > - Strange results? Start fresh: *Session → Restart R*, then rerun your script from the top.
 > - **World Bank API down or very slow?** Load our cached, ready-made `Dat` instead:
->   `Dat <- readRDS(url("https://merlin-ols.netlify.app/data/Dat_L4.rds"))`
+>   download [`Dat_L4_ex1.rds`](https://merlin-ols.netlify.app/data/Dat_L4_ex1.rds) into your project folder, then
+>   `Dat <- readRDS("Dat_L4_ex1.rds")`
 > - Still stuck? Ask (and answer!) in the [t-R-ouble forum](https://absalon.ku.dk/courses/70545/discussion_topics/563046?module_item_id=2037268) on Absalon.
 
-3. **Now write it yourself.** The World Bank sorts countries into four *income groups*. Make
+3. **First, check what the join cost you.** The World Bank gives us ~190 countries, but
+   `Dat` has `r num_fitb(n_join, digits = 0, width = 5)` rows. Nothing went wrong — V-Dem
+   simply does not code every microstate. (Our Lecture 4 artefact, **Palau**, is one of the
+   countries it drops.) *An `inner_join()` is a silent filter: always look at the row count.*
+
+4. **Now write it yourself.** The World Bank sorts countries into four *income groups*. Make
    `income_level` an ordered **factor** with **`"Low income"` as the reference**, then regress
    `co2` on it with `lm_robust()`. *(This is today's categorical-predictor skill.)*
 
@@ -94,11 +110,11 @@ modelsummary(list("CO2 per person" = ols_inc), stars = TRUE,
 ```
 `r unhide()`
 
-4. Read off your table: on average, high-income countries emit
+5. Read off your table: on average, high-income countries emit
    `r num_fitb(b_high)` tonnes of CO₂ per person **more** than low-income countries
    (two digits; point or comma is fine).
 
-5. **Write one sentence** in your R script (as a `# comment`) interpreting that coefficient —
+6. **Write one sentence** in your R script (as a `# comment`) interpreting that coefficient —
    *descriptively*, as in the lecture. Then compare:
 
 `r hide("Model answer")`
@@ -110,30 +126,39 @@ group means, not (yet) a causal effect.*
 causal, language.)
 `r unhide()`
 
-6. Now the **continuous** predictor. Make a scatter plot with `co2` on the Y-axis and `gdp_k`
-   (GDP in thousands) on the X-axis. Ask it the four questions: *direction, form, spread, outliers*.
+7. Now the **continuous** predictor, and today's real question: **does state control of the
+   economy go with higher emissions?** Make a scatter plot with `co2` on the Y-axis and
+   `state_ownership` on the X-axis. Ask it the four questions: *direction, form, spread,
+   outliers*.
 
 `r hide("R solution -> don't peek too early ;) !")`
 ```{r out.width='100%', fig.height = 4, fig.width = 7.5, results = FALSE, echo = TRUE}
-ggplot(data = Dat, aes(y = co2, x = gdp_k)) +
-  geom_text(aes(label = country)) +
+ggplot(data = Dat, aes(y = co2, x = state_ownership)) +
+  geom_text(aes(label = country), size = 3) +
+  geom_smooth(method = "lm", formula = y ~ x, color = "#901A1E") +
   labs(y = "Tonnes of CO2 per person",
-       x = "GDP per person (thousands of $, PPP)") +
+       x = "State ownership of the economy (V-Dem, higher = more)") +
   theme_minimal()
 ```
 `r unhide()`
 
-7. **Before you compute anything:** judging only from your scatter plot, the correlation
-   between `co2` and `gdp_k` is …
-`r mcq(c("close to +0.8", answer = "close to +0.4", "close to 0", "close to −0.4"))`
+8. **Before you compute anything:** judging only from your scatter plot, the correlation
+   between `co2` and `state_ownership` is …
+`r mcq(c("strongly positive, close to +0.7", answer = "weakly positive, close to +0.2", "close to −0.5", "exactly zero"))`
 
-8. Re-fit the model with base `lm()` and run the two diagnostic plots. Which statement fits
-   what you see?
-`r mcq(c("No outliers, and the relationship is perfectly linear", answer = "Qatar and Palau are influential outliers, and the linearity assumption is strained", "Denmark is the single most influential outlier"))`
+9. Fit `lm_robust(co2 ~ state_ownership, data = Dat)`. The slope is **positive** — tempting
+   headline: *state-run economies pollute more.* But look at how big its standard error is,
+   then re-fit with base `lm()` and run the two diagnostic plots. Which statement fits what
+   you see?
+`r mcq(c("No influential cases; the headline is safe", answer = "A handful of Gulf oil states (Qatar, Bahrain, Saudi Arabia, the UAE) dominate the fit", "Denmark is the single most influential case"))`
 
 `r hide("R solution -> don't peek too early ;) !")`
-```{r out.width='60%', fig.height = 4, fig.width = 5, results = FALSE, echo = TRUE}
-mod <- lm(co2 ~ gdp_k, data = Dat)
+```{r out.width='60%', fig.height = 4, fig.width = 5, echo = TRUE}
+ols_state <- lm_robust(co2 ~ state_ownership, data = Dat)
+modelsummary(list("CO2 per person" = ols_state), stars = TRUE,
+             gof_map = c("nobs", "r.squared"))
+
+mod <- lm(co2 ~ state_ownership, data = Dat)
 plot(mod, which = 5) # Outliers (Cook's D)
 plot(mod, which = 1) # Linearity
 ```
@@ -141,22 +166,96 @@ plot(mod, which = 1) # Linearity
 
 ------------------------------------------------------------------------------
 
-**Bonus (for the fast):** the lecture dropped **Palau** (an artefact) but *kept* **Qatar**
-(a real petro-state). Re-fit `co2 ~ gdp_k` three ways — all countries, without Palau, and
-without both — and watch the slope. Which case moves it more?
+**Bonus (for the fast):** those Gulf states nationalised their **oil**, which is a very
+different thing from a socialist economy. Flag the **petro economies** the way the lecture
+did — fuel rents above 10% of GDP — drop them, and re-fit. Does the headline survive?
 
 `r hide("R solution")`
 ```{r results = 'asis'}
-m_all   <- lm_robust(co2 ~ gdp_k, data = Dat)
-m_noP   <- lm_robust(co2 ~ gdp_k, data = Dat %>% filter(country != "Palau"))
-m_noPQ  <- lm_robust(co2 ~ gdp_k,
-                     data = Dat %>% filter(!country %in% c("Palau", "Qatar")))
+# Oil + gas rents, same definition as the lecture's "Petro vs. rest" panel
+petro_flag <- wb_data(c(oil = "NY.GDP.PETR.RT.ZS",
+                        gas = "NY.GDP.NGAS.RT.ZS"),
+                      start_date = 2000, end_date = 2026) %>%
+  drop_na(oil, gas) %>%              # Years with both rent series
+  mutate(rents = oil + gas) %>%      # Oil + gas rents, in % of GDP
+  group_by(iso3c) %>% filter(date == max(date)) %>% ungroup() %>%
+  select(country_text_id = iso3c, rents)
 
-modelsummary(list("All" = m_all, "No Palau" = m_noP, "No Palau & Qatar" = m_noPQ),
-             statistic = NULL, gof_map = c("nobs", "r.squared"))
+Dat <- Dat %>%
+  left_join(petro_flag, by = "country_text_id") %>% # keeps countries without rents data
+  mutate(petro = case_when(
+    rents > 10 ~ "Petro economy",       # fuel rents above 10% of GDP
+    TRUE ~ "Other country"))
+
+m_all   <- lm_robust(co2 ~ state_ownership, data = Dat)
+m_noOil <- lm_robust(co2 ~ state_ownership, data = Dat %>% filter(petro == "Other country"))
+
+modelsummary(list("All countries" = m_all, "Without petro economies" = m_noOil),
+             stars = TRUE, gof_map = c("nobs", "r.squared"))
 ```
 
-Dropping **Palau** (a residual outlier) mainly lifts $R^2$; dropping **Qatar** (a
-high-*leverage* point at the far right) moves the **slope** more. Checking how far your
-conclusion depends on single cases is a *robustness check* — remember it for your term paper.
+Look at what happens. With every country in, the slope is positive but its confidence
+interval comfortably includes zero — there was never a solid finding to report. Drop the
+petro economies and the slope **flips sign** and *becomes* significant: among the other
+`r nrow(Dat_x) - 24` countries, *more* state ownership goes with **less** CO₂ per person.
+
+So the "state-run economies pollute" headline was never about socialism. It was a couple of
+dozen petro economies that happen to keep their oil and gas in state hands — exactly the
+countries the diagnostic plots flagged in step 9.
+
+::: {.backgrnote}
+Two footnotes worth knowing. (1) Plain `lm()` would have called the first slope significant
+($p$ = 0.015); `lm_robust()` does not ($p$ = 0.11), because those same petro outliers make
+the errors wildly heteroscedastic. That is *why* we use robust standard errors. (2) Dropping
+cases you dislike is not a licence to hunt for the answer you want — it is a **robustness
+check**, and the honest write-up reports *both* models. Remember that for your term paper.
+:::
+`r unhide()`
+
+------------------------------------------------------------------------------
+
+**Special (for the very fast):** you have only ever controlled for *nothing* so far. Wealth is
+the obvious rival explanation — so put `gdp_k` in the model alongside `state_ownership` and
+see what happens to the slope. (This is **Lecture 8**'s skill; today just run it and look.)
+
+`r hide("R solution")`
+```{r results = 'asis'}
+m_biv <- lm_robust(co2 ~ state_ownership, data = Dat)
+m_mlt <- lm_robust(co2 ~ state_ownership + gdp_k, data = Dat) #<<
+
+modelsummary(list("Bivariate" = m_biv, "Controlling for wealth" = m_mlt),
+             stars = TRUE, gof_map = c("nobs", "r.squared"))
+```
+
+Surprise: controlling for wealth does not shrink the slope, it makes it **bigger** (about
+`r round(coef(lm_robust(co2 ~ state_ownership, data = Dat_x))[2], 2)` →
+`r round(coef(lm_robust(co2 ~ state_ownership + gdp_k, data = Dat_x))[2], 2)`) and now clearly
+significant, while $R^2$ jumps from about 0.04 to 0.48. That happens because state ownership
+is mildly *negatively* correlated with wealth (r ≈ −0.16): state-run economies tend to be
+**poorer**, and poverty holds emissions down. Wealth was **masking** the association, not
+inflating it — you will meet this as a *suppressor* in Lecture 8.
+
+`r unhide()`
+
+**Now put the two bonuses together.** Fit all four models — with and without the petro
+economies, with and without the wealth control — and read the pattern.
+
+`r hide("R solution + the punchline")`
+```{r results = 'asis'}
+modelsummary(
+  list("All"            = lm_robust(co2 ~ state_ownership, data = Dat),
+       "All + wealth"   = lm_robust(co2 ~ state_ownership + gdp_k, data = Dat),
+       "No petro"       = lm_robust(co2 ~ state_ownership, data = Dat %>% filter(petro == "Other country")),
+       "No petro + wealth" = lm_robust(co2 ~ state_ownership + gdp_k, data = Dat %>% filter(petro == "Other country"))),
+  stars = TRUE, gof_map = c("nobs", "r.squared"))
+```
+
+Read the `state_ownership` row across the four columns: **+1.03** (n.s.), **+1.63** (p < 0.01),
+**−0.65** (p < 0.05), **+0.14** (n.s.). Every apparently solid result disappears the moment
+you take the petro economies out. The honest conclusion is not "socialism pollutes", nor
+"socialism is green" — it is that **these data cannot tell us**, because the countries with
+the most state ownership are largely the countries sitting on oil.
+
+That is a perfectly publishable finding, and a much better answer than picking whichever of
+the four columns you liked best.
 `r unhide()`

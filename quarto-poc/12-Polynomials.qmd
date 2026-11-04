@@ -45,6 +45,14 @@ BibOptions(check.entries = FALSE,
            hyperlink = FALSE,
            no.print.fields = c("doi", "url", "ISSN", "urldate", "language", "note", "isbn", "volume"))
 myBib <- ReadBib("../Stats_II.bib", check = FALSE)
+
+# modelsummary prepends a stray &nbsp; to some column headers (shows as a literal "&nbsp;").
+# Strip it from every chunk's output, so the code students see stays a plain modelsummary().
+local({
+  chunk_hook <- knit_hooks$get("chunk")
+  knit_hooks$set(chunk = function(x, options)
+    chunk_hook(gsub("&amp;nbsp;", "", x, fixed = TRUE), options))
+})
 ```
 
 ```{r data, include = FALSE}
@@ -120,6 +128,14 @@ Richer countries spend more on health and live longer. But is the relationship a
 ::: {.content-box-blue}
 **Research question:** how does **life expectancy at birth** relate to **health spending per person** — linearly, or as a bending curve?
 :::
+
+```{r, echo = FALSE, out.width='52%'}
+knitr::include_graphics('img/L12/newborn.jpg')
+```
+
+::: {.backgrnote .center}
+Life expectancy *at birth*: how many years can this baby expect? *Photo:* Kimberly Vardeman, [CC BY 2.0](https://commons.wikimedia.org/wiki/File:The_newborn_baby_in_men.jpg).
+:::
 :::
 
 ::: {.push-right}
@@ -182,6 +198,42 @@ This is **panel data**: many countries, each observed over many years — so the
 Two things to flag and then move on. First, civil liberties rides along as a single control — the same V-Dem measure from Lectures 2, 9 and 11. Second, and more important: this is a *panel*, so observations repeat within countries and are not independent. `clusters = country` is not optional decoration; without it the standard errors are badly overconfident. Say that plainly and keep going.
 :::
 
+## One country at a time
+
+```{r traj-plot, echo = FALSE, out.width='70%', fig.height = 4.3, fig.width = 10}
+traj <- Dat %>%
+  filter(country %in% c("Denmark", "Sweden", "Germany", "United States")) %>%
+  arrange(country, year)
+traj_ends <- traj %>%
+  group_by(country) %>%
+  filter(year == min(year) | year == max(year)) %>%
+  ungroup()
+
+ggplot(traj, aes(x = HealthExp, y = LifeExpect, colour = country)) +
+  geom_path(linewidth = 1) +
+  geom_point(size = 1.5) +
+  geom_text(data = traj_ends, aes(label = year), vjust = -0.9, size = 4, show.legend = FALSE) +
+  scale_colour_manual(values = c("Denmark" = "#901A1E", "Sweden" = "#b5892c",
+                                 "Germany" = "grey45", "United States" = "#425570")) +
+  labs(y = "Life expectancy at birth", x = "Health spending per person ($, PPP)", colour = NULL) +
+  scale_y_continuous(expand = expansion(mult = c(0.05, 0.12))) +
+  theme_minimal(base_size = 15) + theme(legend.position = "right")
+```
+
+::: {.push-left}
+In 2000, a newborn in **Denmark** and one in the **United States** could both expect about **76.6 years**. Since then the US has spent far more per person, yet people in Denmark now live years longer.
+:::
+
+::: {.push-right}
+::: {.content-box-blue}
+**Discuss:** what besides money might matter for how long people live? And what happens to the US line around 2020?
+:::
+:::
+
+::: {.notes}
+Recovered from the old deck, which traced a few countries year by year. Each line is one country walking through time, from 2000 to the latest year. Denmark and the US start at the same life expectancy, but the US line runs far to the right (much more spending) and barely up. The dip at the end of the US line is COVID-19, together with the opioid crisis. Denmark also trails Sweden at similar spending; Danish studies have pointed to smoking and drinking. The point for today: money matters, but its returns clearly flatten, and that is a non-linear relationship.
+:::
+
 ## A straight line through a curve
 
 ::: {.panel-tabset}
@@ -198,11 +250,20 @@ ggplot(Dat, aes(y = LifeExpect, x = HealthExp)) +
   theme_minimal(base_size = 15) + guides(colour = "none")
 ```
 
+::: {.push-left}
+::: {.content-box-blue}
+**Discuss:** find the United States and Denmark. Which of the two gets more life per dollar?
+:::
+:::
+
+::: {.push-right}
 ::: {.content-box-red}
-**The line misses the shape — linearity is violated.**
+**The line misses the shape: linearity is violated.**
+:::
 :::
 
 ### The model
+::: {.push-left}
 ```{r lin-mod, results = 'hide'}
 # I() lets us rescale inside the formula: 1 unit = $1,000
 ols_lin <- lm_robust(
@@ -212,16 +273,21 @@ ols_lin <- lm_robust(
 
 modelsummary(
   list("Life expectancy" = ols_lin),
-  coef_rename = c("I(HealthExp/1000)" = "Health spend ($1,000s)",
-                  "year" = "Year", "civ_liberties" = "Civil liberties"),
+  coef_rename = c(
+    "I(HealthExp/1000)" = "Health spend ($1,000s)",
+    "year" = "Year", "civ_liberties" = "Civil liberties"),
   stars = TRUE, gof_map = c("nobs", "r.squared"),
   output = "kableExtra"
 )
 ```
 
+:::
+
+::: {.push-right}
 ::: {.small}
 ```{r lin-tab, ref.label = "lin-mod", echo = FALSE, results = 'asis'}
 ```
+:::
 :::
 
 :::
@@ -378,6 +444,68 @@ From \$1,000 to \$2,000: about $`r round(b1, 2)` + 2 \times (`r round(b2, 2)`) =
 The negative squared term is the whole story: it is what bends the line down. Walk the arithmetic slowly, because students reliably misread it — the effect of health spending is $\beta_1 + 2\beta_2 X$, so it shrinks as $X$ grows. Compute one concrete step, a poor country going from \$1,000 to \$2,000, and contrast it with what the same \$1,000 buys a rich country: almost nothing. That is diminishing returns made numerical, and it is a genuinely sociological point about where a health dollar does the most good.
 :::
 
+## Two coefficients are hard to read, so plot them
+
+```{r poly-print, include = FALSE}
+options(tibble.print_min = 4, tibble.print_max = 4) # Print only 4 rows below
+```
+
+::: {.panel-tabset}
+
+### Step 1: fictional data
+Countries we make up: every level of health spending, with the controls held constant.
+
+```{r poly-fict}
+(fict_dat <- tibble(
+  HealthExp = seq(min(Dat$HealthExp), max(Dat$HealthExp), by = 100),
+  year = 2022,                            # Hold time constant
+  civ_liberties = mean(Dat$civ_liberties)  # Hold the control constant
+))
+```
+
+### Step 2: predict
+```{r poly-pred}
+(fict_dat <- predict(
+  ols_poly, newdata = fict_dat,   # The quadratic model, on the fictional data
+  interval = "confidence", level = 0.95)$fit %>%
+  as_tibble() %>%                 # Turn into a tibble
+  bind_cols(fict_dat, .))         # next to the fictional data
+```
+
+### Step 3: the picture
+::: {.push-left}
+```{r poly-pred-plot, fig.show = 'hide'}
+ggplot(data = fict_dat, aes(x = HealthExp, y = fit)) +
+  geom_ribbon(aes(ymin = lwr, ymax = upr), alpha = 0.3) +
+  geom_line(linewidth = 1) +
+  geom_text(data = Dat_lab,       # A few real countries
+            aes(y = LifeExpect, label = country),
+            colour = "#901A1E", size = 4) +
+  labs(x = "Health spending per person ($, PPP)",
+       y = "Predicted life expectancy") +
+  theme_minimal(base_size = 14)
+```
+
+::: {.content-box-red}
+**Beware:** at the top, the parabola has to come down again and predicts a steep fall that no country shows. Look where the United States really is.
+:::
+:::
+
+::: {.push-right}
+```{r ref.label = "poly-pred-plot", echo = FALSE, out.width='88%', fig.height = 4, fig.width = 6}
+```
+
+::: {.backgrnote .center}
+Predictions for 2022, at average civil liberties.
+:::
+:::
+
+:::
+
+::: {.notes}
+Recovered from the old deck ("this is complex, so plot it"), and the same three steps as in Lectures 9 and 11, so let the class dictate them. Make up countries across the whole range of spending, hold year and civil liberties fixed, predict, and draw. The curve now comes from *our* model with its controls, not from `geom_smooth`. Point at the bend: a steep rise, then a peak, and then a steep fall at the very top. That fall is not in the data; it is the quadratic's habit of turning down, pulled by the few very high spenders such as the United States. Compare the curve with where the US actually sits. This artefact leads straight into the overfitting slide and, later, into the log, which cannot turn down.
+:::
+
 ## Higher orders — and the overfitting trap
 
 ::: {.panel-tabset}
@@ -435,6 +563,18 @@ You fit a **polynomial** yourself — does xenophobia rise and then fall with **
 
 ::: {.lead}
 A polynomial adds a term. A **transformation** reshapes the variable itself — and our favourite is the **logarithm**.
+:::
+
+```{r, echo = FALSE, out.width='34%'}
+knitr::include_graphics('img/L12/rosling.jpg')
+```
+
+::: {.backgrnote .center}
+**Hans Rosling** (1948–2017) made "health against wealth" famous in his TED talks, always drawn on a **log** scale. *Photo:* pmo, [CC BY 2.0](https://commons.wikimedia.org/wiki/File:Hans_Rosling_1.jpg).
+:::
+
+::: {.notes}
+If anyone has seen Rosling's TED talk, the bubbles racing across the screen, ask them what the x-axis was: income, on a log scale. That is exactly the move we make today, and for the same reason: equal steps should mean equal *doublings*, not equal dollars.
 :::
 
 ## What is a logarithm? {data-auto-animate="true"}
@@ -584,25 +724,24 @@ The payoff of the transform is interpretability: one number, and it means "years
 ::: {.panel-tabset}
 
 ### Fit
-```{r compare-tab, echo = FALSE}
-tibble(
-  Model       = c("Linear", "Quadratic", "log₂"),
-  `R²`        = c(ols_lin$r.squared, ols_poly$r.squared, ols_log$r.squared),
-  `Adj. R²`   = c(ols_lin$adj.r.squared, ols_poly$adj.r.squared, ols_log$adj.r.squared)
-) %>%
-  kable(digits = 3)
+```{r compare-tab, ref.label = "compare-code", echo = FALSE, results = 'asis'}
 ```
 
 ### R code
 ```{r compare-code, eval = FALSE}
-# Pull R² and adjusted R² from each fitted model
-gof <- function(m) c(R2 = m$r.squared, adj = m$adj.r.squared)
-
-rbind(
-  Linear    = gof(ols_lin),
-  Quadratic = gof(ols_poly),
-  log2      = gof(ols_log)
-) %>% round(3)
+# The three models side by side
+modelsummary(
+  list("Linear" = ols_lin, "Quadratic" = ols_poly,
+       "log2" = ols_log),
+  coef_omit = "Intercept|year|civ_liberties",
+  coef_rename = c(
+    "I(HealthExp/1000)" = "Spend ($1,000s)",
+    "poly(I(HealthExp/1000), 2, raw = TRUE)1" = "Spend",
+    "poly(I(HealthExp/1000), 2, raw = TRUE)2" = "Spend²",
+    "log2(HealthExp)" = "log2(Spend)"),
+  statistic = NULL,         # No standard errors
+  gof_map = c("r.squared", "adj.r.squared"),
+  output = "kableExtra")
 ```
 
 :::

@@ -110,7 +110,30 @@ Make the hidden assumption visible, because students never notice it until you n
 [Part 1 of 2]{.part-pill}
 
 ::: {.lead}
-Education is the classic antidote to prejudice — in the *West*. Does the same hold in a very different context?
+Education is the classic antidote to prejudice in the *West*. Does a university degree do the same in Copenhagen and in Sofia?
+:::
+
+::: {style="display: flex; gap: 1.6rem; align-items: flex-start; justify-content: center; margin-top: 0.8em;"}
+::: {style="flex: 0 0 34%;"}
+```{r, echo = FALSE, out.width='100%'}
+knitr::include_graphics('img/L11/css_campus.jpg')
+```
+::: {.photo-credit style="position: static; text-align: left;"}
+Your campus: CSS, the former Kommunehospital, Copenhagen. *Photo:* [Mahlum](https://commons.wikimedia.org/wiki/File:Kommunehospitalet_K%C3%B8benhavn.jpg).
+:::
+:::
+::: {style="flex: 0 0 30%;"}
+```{r, echo = FALSE, out.width='100%'}
+knitr::include_graphics('img/L11/sofia_university.jpg')
+```
+::: {.photo-credit style="position: static; text-align: left;"}
+Sofia University, Bulgaria. *Photo:* [Deensel](https://commons.wikimedia.org/wiki/File:Sofia_University_%22St._Kliment_Ohridski%22_(37849719131).jpg).
+:::
+:::
+:::
+
+::: {.notes}
+Two university buildings, both with a green dome: their own campus at CSS and Sofia University. The question for today is whether going through buildings like these does the same thing to people's views of immigrants in both countries. Most of them will assume it does. Keep that assumption alive for a few slides; the data will challenge it.
 :::
 
 ## The research question of the day {.inverse background-color="#901A1E"}
@@ -128,8 +151,12 @@ Both **Denmark** and **Bulgaria** have seen fierce debates over immigration. In 
 Our outcome: agreement that *"immigrants make Denmark/Bulgaria a worse place to live"* — reversed so **higher = more xenophobic**, on a 0–10 scale.
 :::
 
+```{r, echo = FALSE, out.width='100%'}
+knitr::include_graphics('img/L11/xeno_quest.png')
+```
+
 ::: {.backgrnote}
-Data: European Social Survey round 9 (2018), Danish and Bulgarian respondents.
+The ESS question behind our outcome, as respondents saw it (before we reverse it). Data: European Social Survey round 9 (2018), Danish and Bulgarian respondents.
 :::
 :::
 
@@ -193,16 +220,21 @@ modelsummary(
 ```
 
 ### The table
+::: {.push-left}
+::: {.small}
 ```{r add-tab, ref.label = "add-mods", echo = FALSE, results = 'asis'}
 ```
+:::
+:::
 
+::: {.push-right}
 ::: {.content-box-green}
 Bulgarians are markedly **more** xenophobic on average, and each year of education goes with **`r round(abs(coef(lm_robust(imwbcnt ~ cntry + eduyrs, data = ESS, weights = pspwght))["eduyrs"]), 3)`** points *less* xenophobia. But this forces **one education slope on both countries**.
-
+:::
 :::
 
 ### The additive plane
-```{r add-plane, echo = FALSE, out.width='52%', fig.height = 5, fig.width = 5.5}
+```{r add-plane, echo = FALSE, out.width='42%', fig.height = 5, fig.width = 5.5}
 m <- lm(imwbcnt ~ eduyrs + agea, data = ESS, weights = pspwght)
 plane(m, "eduyrs", "agea", ESS,
       xlab = "Education", ylab = "Age", zlab = "Xenophobia")
@@ -216,6 +248,46 @@ Additive = a **flat, tilted plane**: the education slope is the same at every ag
 
 ::: {.notes}
 Two things. First, the additive model already tells a story — Bulgarians more xenophobic, education associated with less. Second, and this is the setup for everything: this model *forces a single education slope on both countries*. Point at the plane and say it is flat and rigid — tilt it however you like, the slope in one direction never changes as you move along the other. An interaction is what lets the plane bend.
+:::
+
+## Additive means parallel lines
+
+```{r par-nums, include = FALSE}
+ba <- coef(ols_add)
+pred_dk <- ba["(Intercept)"] + 12 * ba["eduyrs"]
+pred_bg <- ba["(Intercept)"] + ba["cntryBulgaria"] + 12 * ba["eduyrs"]
+```
+
+::: {.push-left}
+```{r par-plot, echo = FALSE, out.width='92%', fig.height = 4.2, fig.width = 6}
+tibble(eduyrs = rep(9:21, 2),
+       cntry = rep(c("Denmark", "Bulgaria"), each = 13)) %>%
+  mutate(fit = ba["(Intercept)"] + ba["eduyrs"] * eduyrs +
+           ba["cntryBulgaria"] * (cntry == "Bulgaria")) %>%
+  ggplot(aes(x = eduyrs, y = fit, color = cntry)) +
+  geom_line(linewidth = 1.3) +
+  scale_color_manual(values = c("Denmark" = "#901A1E", "Bulgaria" = "#425570")) +
+  labs(y = "Predicted xenophobia (0-10)", x = "Years of education", color = NULL,
+       title = "What the additive model predicts") +
+  theme_minimal(base_size = 14) + theme(legend.position = "bottom")
+```
+:::
+
+::: {.push-right}
+Plug in **12 years** of education:
+
+$$\text{Dane: } `r sprintf("%.2f", ba["(Intercept)"])` + 12 \times (`r sprintf("%.3f", ba["eduyrs"])`) = `r sprintf("%.2f", pred_dk)`$$
+$$\text{Bulgarian: } `r sprintf("%.2f", ba["(Intercept)"])` + `r sprintf("%.2f", ba["cntryBulgaria"])` + 12 \times (`r sprintf("%.3f", ba["eduyrs"])`) = `r sprintf("%.2f", pred_bg)`$$
+
+The gap is **`r sprintf("%.2f", ba["cntryBulgaria"])`** at 12 years, and at *every* other level of education. Each predictor adds its own fixed slice.
+
+::: {.content-box-blue}
+**Discuss:** the parallel lines from Lecture 8 are back. Why might one education slope for both countries be too simple?
+:::
+:::
+
+::: {.notes}
+Recovered from the old deck, which worked a prediction through by hand to show what "additive" means. Do the arithmetic for one Dane and one Bulgarian with the same schooling: the country coefficient is simply added on top. Because the education slope is shared, the two predicted lines are parallel, exactly the picture from Lecture 8. Then ask the blue box. The next slide shows the data disagree.
 :::
 
 ## But what if the relationship is conditional?
@@ -288,9 +360,55 @@ OLS handles a *multiplicative* idea by *adding one column* — the product of th
 The mechanics are trivial and worth saying so: an interaction is just one more predictor, the two variables multiplied together. `*` is R's shorthand that also remembers to include the main terms. The deeper point is the green box — regression is fundamentally additive, and it accommodates a "depends on" relationship by literally adding a product column. Do not interpret the coefficients yet; that is the next, harder slide.
 :::
 
+## The interaction term is just a new column
+
+::: {.push-left}
+```{r by-hand}
+ESS <- ESS %>%
+  mutate(
+    cntry_num = case_when(      # Country as a 0/1 number
+      cntry == "Denmark"  ~ 0,
+      cntry == "Bulgaria" ~ 1),
+    intr_trm = cntry_num * eduyrs) # The product, by hand
+
+ESS %>%
+  select(cntry, cntry_num, eduyrs, intr_trm) %>%
+  group_by(cntry) %>% slice_head(n = 2)
+```
+:::
+
+::: {.push-right}
+```{r by-hand-mod}
+ols_hand <- lm_robust(imwbcnt ~ cntry + eduyrs + intr_trm,
+                      data = ESS, weights = pspwght)
+```
+
+::: {.small}
+```{r by-hand-tab, echo = FALSE, results = 'asis'}
+modelsummary(
+  list("cntry * eduyrs" = ols_int, "By hand" = ols_hand),
+  coef_rename = c("cntryBulgaria" = "Bulgaria", "eduyrs" = "Education",
+                  "cntryBulgaria:eduyrs" = "Bulgaria × Education",
+                  "intr_trm" = "Bulgaria × Education"),
+  coef_omit = "(Intercept)",
+  stars = TRUE, gof_map = c("nobs"), output = "kableExtra"
+)
+```
+:::
+
+::: {.content-box-green}
+Same numbers. That is all `*` does.
+:::
+:::
+
+::: {.notes}
+Recovered from the old deck: build the product by hand, once, so `*` stops being magic. For Danes the new column is zero whatever their education; for Bulgarians it repeats their years of schooling. So its coefficient can only change the education slope for Bulgarians. Show that the two columns of the table are identical, then never do it by hand again.
+:::
+
 ## The trap: what do the main terms mean now?
 
 ::: {.push-left}
+::: {.small}
 ```{r trap-tab, echo = FALSE, results = 'asis'}
 modelsummary(
   list("Interaction" = ols_int),
@@ -301,19 +419,32 @@ modelsummary(
 ```
 :::
 
-::: {.push-right}
-Once you add the product, each **main term is conditional** — it holds only where the *other* variable is **zero**:
+Once you add the product, each **main term is conditional**: it holds only where the *other* variable is **zero**.
+:::
 
+::: {.push-right}
 $$\beta_{\text{Education}} \;\big|\; \text{Bulgaria} = 0 \quad(\text{i.e. in Denmark})$$
 $$\beta_{\text{Bulgaria}} \;\big|\; \text{Education} = 0$$
 
+```{r trap-plot, echo = FALSE, out.width='68%', fig.height = 3.2, fig.width = 6}
+ggplot(ESS, aes(y = imwbcnt, x = eduyrs, color = cntry)) +
+  geom_jitter(aes(size = pspwght), alpha = 1/12) +
+  geom_smooth(method = "lm", fullrange = TRUE) +
+  geom_vline(xintercept = 0, colour = "#901A1E", linewidth = 1) +
+  scale_x_continuous(limits = c(0, 21)) +
+  scale_color_manual(values = c("Denmark" = "#901A1E", "Bulgaria" = "#425570")) +
+  labs(y = "Xenophobia (0-10)", x = "Years of education", color = NULL) +
+  guides(size = "none") +
+  theme_minimal(base_size = 14) + theme(legend.position = "bottom")
+```
+
 ::: {.content-box-red}
-**Beware:** the "Bulgaria" coefficient is now the country gap **at zero years of education** — a person who does not exist. No wonder it looks strange.
+**Beware:** the "Bulgaria" coefficient is the gap between the two lines at the red line: **zero years of education**, far from any real person in the data.
 :::
 :::
 
 ::: {.notes}
-This is where students fall off, so slow right down. The moment you add the product, the two main terms stop being averages and become *conditional* — each is the effect of one variable at the point where the other equals zero. The education coefficient is the Danish slope, because Bulgaria = 0 means Denmark. The country coefficient is the gap at zero years of education — nobody in the sample. That absurdity is not a bug; it is a signal that we should move zero somewhere meaningful.
+This is where students fall off, so slow right down. The moment you add the product, the two main terms stop being averages and become *conditional*: each is the effect of one variable at the point where the other equals zero. The education coefficient is the Danish slope, because Bulgaria = 0 means Denmark. The country coefficient is the gap at zero years of education. The plot, recovered from the old deck, makes the problem visible: extend both lines to the red vertical line at zero and read the gap there, far to the left of every real data point. That absurdity is not a bug; it is a signal that we should move zero somewhere meaningful.
 :::
 
 ## The fix: mean-centre
@@ -381,7 +512,8 @@ The interaction term (**`r round(b["cntryBulgaria:mc_eduyrs"], 3)`**) reads **tw
 1. It is how much the **education slope changes** from Denmark to Bulgaria:
 $$\underbrace{`r round(dk, 3)`}_{\text{DK slope}} + \underbrace{`r round(b["cntryBulgaria:mc_eduyrs"], 3)`}_{\text{interaction}} = \underbrace{`r round(bg, 3)`}_{\text{BG slope}}$$
 
-2. It is how much the **country gap changes** with each year of education.
+2. It is how much the **country gap changes** with each year of education. At 4 years above average:
+$$\underbrace{`r round(b["cntryBulgaria"], 2)`}_{\text{gap at average}} + 4 \times (`r round(b["cntryBulgaria:mc_eduyrs"], 3)`) = `r round(b["cntryBulgaria"] + 4 * b["cntryBulgaria:mc_eduyrs"], 2)`$$
 
 ::: {.content-box-green}
 Education fights xenophobia in **Denmark** (slope `r round(dk, 3)`) but is essentially **flat in Bulgaria** (slope `r round(bg, 3)`).
@@ -419,17 +551,106 @@ modelsummary(list("Xenophobia" = ols_eg),
 ```
 
 ### Read it
+::: {.push-left}
+::: {.small}
 ```{r eg-tab, ref.label = "eg-mod", echo = FALSE, results = 'asis'}
 ```
+:::
+:::
 
+::: {.push-right}
 ::: {.content-box-blue}
-**Discuss:** interpret the **Female** coefficient. At what value of education does it hold — and is that why it may look small?
+**Discuss:** interpret the **Female** coefficient. At what value of education does it hold, and is that why it may look small?
+:::
 :::
 
 :::
 
 ::: {.notes}
 A second worked case cements the pattern, now with two continuous-looking main terms plus their product. Push them to state the conditions out loud: the education slope is "among men", the gender gap is "at average education". Whether the slopes differ significantly matters less here than that they can *say what each number is conditional on*. That is the transferable skill.
+:::
+
+## Add controls, then draw it
+
+```{r ctrl-print, include = FALSE}
+options(tibble.print_min = 4, tibble.print_max = 4) # Print only 4 rows below
+```
+
+::: {.panel-tabset}
+
+### The model
+::: {.push-left}
+```{r ctrl-mod, results = 'hide'}
+ols_ctrl <- lm_robust(
+  imwbcnt ~ cntry * mc_eduyrs + gndr + agea, # + controls
+  data = ESS, weights = pspwght)
+
+modelsummary(
+  list("Xenophobia" = ols_intc, "Xenophobia" = ols_ctrl),
+  coef_rename = c(
+    "cntryBulgaria" = "Bulgaria",
+    "mc_eduyrs" = "Education (centred)",
+    "cntryBulgaria:mc_eduyrs" = "Bulgaria × Educ",
+    "gndrFemale" = "Female", "agea" = "Age"),
+  coef_omit = "(Intercept)",
+  stars = TRUE, gof_map = c("nobs"), output = "kableExtra"
+)
+```
+:::
+
+::: {.push-right}
+::: {.small}
+```{r ctrl-tab, ref.label = "ctrl-mod", echo = FALSE, results = 'asis'}
+```
+:::
+:::
+
+### Step 1: fictional data
+```{r ctrl-fict}
+(fict_dat <- tibble(
+  mc_eduyrs = rep(-4:8, each = 2),          # Education, each value twice
+  cntry = rep(c("Denmark", "Bulgaria"), 13), # Both countries
+  gndr = "Female",                           # Controls at constant values
+  agea = mean(ESS$agea)))
+```
+
+### Step 2: predict
+```{r ctrl-pred}
+(fict_dat <- predict(
+  ols_ctrl, newdata = fict_dat,   # Apply the model to the fictional data
+  interval = "confidence", level = 0.95)$fit %>%
+  as_tibble() %>%                 # Turn into a tibble
+  bind_cols(fict_dat, .))         # next to the fictional data
+```
+
+### Step 3: the picture
+::: {.push-left}
+```{r ctrl-plot, fig.show = 'hide'}
+ggplot(data = fict_dat, aes(x = mc_eduyrs, y = fit)) +
+  geom_ribbon(aes(ymin = lwr, ymax = upr, fill = cntry),
+              alpha = 0.3) +
+  geom_line(aes(color = cntry), linewidth = 1) +
+  labs(x = "Education (centred)",
+       y = "Predicted xenophobia",
+       fill = NULL, color = NULL) +
+  theme_minimal(base_size = 14) +
+  theme(legend.position = "bottom")
+```
+:::
+
+::: {.push-right}
+```{r ref.label = "ctrl-plot", echo = FALSE, out.width='86%', fig.height = 4, fig.width = 6}
+```
+
+::: {.backgrnote .center}
+Predictions for women of average age.
+:::
+:::
+
+:::
+
+::: {.notes}
+Recovered from the old deck. Controls work exactly as before: add them with a plus, and they are held constant while the interaction does its work. The coefficients barely move here. Then the same three prediction steps as in Lecture 9: make up the people you want predictions for, let the model predict, and plot. The one new trick is `rep()`, which gives every education value once for each country. The picture is how to report an interaction: two lines that are visibly not parallel.
 :::
 
 ## Break {.inverse background-color="#901A1E"}
@@ -492,6 +713,9 @@ Tie this explicitly to Lecture 9 so it reads as one continuing story, not a new 
 
 ## Build the triangle data
 
+::: {.panel-tabset}
+
+### V-Dem data
 ```{r vdem-data}
 pacman::p_load(tidyverse, estimatr, vdemdata, wbstats, modelsummary)
 
@@ -502,10 +726,14 @@ Dat_vdem <- vdem %>%
          civ_liberties = v2xcl_rol,
          state_own_raw = v2clstown) %>%
   mutate(state_ownership = -state_own_raw)
+```
 
+### World Bank data & join
+```{r wb-data}
 # World Bank: extreme poverty (< $3.00 a day). Naming the indicator
 # (poverty = ...) makes wbstats name the column for us.
-Dat_pov <- wb_data(c(poverty = "SI.POV.DDAY"), start_date = 1972, end_date = 2025) %>%
+Dat_pov <- wb_data(c(poverty = "SI.POV.DDAY"),
+                   start_date = 1972, end_date = 2025) %>%
   rename(year = date, country_text_id = iso3c) %>%
   select(country_text_id, year, country, poverty) %>%
   drop_na(poverty) %>%
@@ -513,11 +741,13 @@ Dat_pov <- wb_data(c(poverty = "SI.POV.DDAY"), start_date = 1972, end_date = 202
 
 Dat <- inner_join(Dat_pov, Dat_vdem, by = c("country_text_id", "year")) %>%
   drop_na(poverty, state_ownership, civ_liberties) %>%
-  mutate(                                # Mean-centre BOTH, ready for the interaction
+  mutate(                    # Mean-centre BOTH for the interaction
     mc_state = state_ownership - mean(state_ownership),
     mc_civ   = civ_liberties  - mean(civ_liberties)
   )
 ```
+
+:::
 
 ::: {.notes}
 This is the exact L2/L9 pipeline — live World Bank data with a cached fallback so the render never dies on an API outage, the reversed V-Dem state-ownership measure, and the $3.00 poverty line. The new step is at the bottom: mean-centre *both* continuous predictors before interacting them, for the same reason as in Part 1 — so the main terms read at the average, not at an impossible zero.
@@ -566,7 +796,7 @@ modelsummary(
   list("Additive" = ols_add2, "Interaction" = ols_int2),
   coef_rename = c("mc_state" = "State ownership",
                   "mc_civ" = "Civil liberties",
-                  "mc_state:mc_civ" = "State own. × Civ. lib."),
+                  "mc_state:mc_civ" = "State × Civ. lib."),
   stars = TRUE, gof_map = c("nobs", "r.squared"),
   output = "kableExtra"
 )
@@ -616,11 +846,12 @@ ggplot(grid, aes(x = mc_state, y = poverty, color = Liberties)) +
 ```
 
 ### R code
+::: {.small}
 ```{r p2-lines-code, eval = FALSE}
 # 1. One standard deviation of the moderator (civil liberties)
 sd_c <- sd(Dat$mc_civ)
 
-# 2. A grid: many state-ownership values, at THREE civil-liberties levels
+# 2. A grid: state ownership values at 3 civil-liberties levels
 grid <- expand.grid(
   mc_state = seq(min(Dat$mc_state), max(Dat$mc_state), length.out = 50),
   mc_civ   = c(-sd_c, 0, sd_c)             # low, average, high
@@ -640,6 +871,7 @@ ggplot(grid, aes(x = mc_state, y = poverty, color = Liberties)) +
        color = "Civil liberties") +
   theme_minimal(base_size = 14) + theme(legend.position = "bottom")
 ```
+:::
 
 :::
 :::

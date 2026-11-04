@@ -19,43 +19,46 @@ num_fitb <- function(x, digits = 2, width = 6) {
 }
 
 pacman::p_load(
-  tidyverse, wbstats, estimatr, modelsummary
+  tidyverse, wbstats, vdemdata, estimatr, modelsummary
 )
 
-# Same pipeline as Exercise 1 (see its "Stuck?" box if the API is down)
-wb_raw <- wb_data(c(co2 = "EN.GHG.CO2.PC.CE.AR5",
-                    gdp = "NY.GDP.PCAP.PP.KD"),
-                  start_date = 2000, end_date = 2026)
-wb_meta <- wb_countries()
-
-Dat <- wb_raw %>%
+# Same joined pipeline as Exercise 1 (see its "Stuck?" box if the API is down)
+Dat_co2 <- wb_data(c(co2 = "EN.GHG.CO2.PC.CE.AR5",
+                     gdp = "NY.GDP.PCAP.PP.KD"),
+                   start_date = 2000, end_date = 2026) %>%
+  rename(country_text_id = iso3c, year = date) %>%
+  select(country_text_id, country, year, co2, gdp) %>%
   drop_na(co2, gdp) %>%
-  group_by(country) %>%
-  filter(date == max(date)) %>%
-  ungroup() %>%
-  left_join(wb_meta %>% select(iso3c, region, income_level), by = "iso3c") %>%
-  select(iso3c, country, date, co2, gdp, region, income_level) %>%
-  mutate(gdp_k = gdp / 1000,
-         income_level = fct_relevel(income_level, "Low income"))
+  group_by(country) %>% filter(year == max(year)) %>% ungroup() %>%
+  mutate(gdp_k = gdp / 1000)
+
+Dat_vdem <- vdem %>%
+  as_tibble() %>%
+  select(country_text_id, year, state_own_raw = v2clstown) %>%
+  mutate(state_ownership = -state_own_raw)
+
+Dat_meta <- wb_countries() %>%
+  select(country_text_id = iso3c, region, income_level)
+
+Dat <- Dat_co2 %>%
+  inner_join(Dat_vdem, by = c("country_text_id", "year")) %>%
+  inner_join(Dat_meta, by = "country_text_id") %>%
+  mutate(income_level = fct_relevel(income_level, "Low income"))
 ```
 
 *(Keep working in the R script from Exercise 1 — you already have `Dat` with `income_level`
 releveled. If not, the starter code and the "Stuck?" box are in Exercise 1.)*
 
-1. First, drop the artefact **Palau**, exactly as in the lecture:
-
-```{r drop}
-Dat <- Dat %>%
-  filter(country != "Palau")
-```
-
 ```{r fitmodels, include = FALSE}
-ols_inc <- lm_robust(co2 ~ income_level, data = Dat)
-b_upper <- coef(ols_inc)["income_levelUpper middle income"]
-ols_gdp <- lm_robust(co2 ~ gdp_k, data = Dat)
+ols_inc   <- lm_robust(co2 ~ income_level, data = Dat)
+b_upper   <- coef(ols_inc)["income_levelUpper middle income"]
+ols_state <- lm_robust(co2 ~ state_ownership, data = Dat)
+pr <- predict(ols_state, newdata = tibble(state_ownership = c(-1, 1)),
+              interval = "confidence", level = 0.95)$fit
+p_market <- pr[1, "fit"]; p_state <- pr[2, "fit"]
 ```
 
-2. **Write it yourself: a coefficient plot.** Fit `co2 ~ income_level`, `tidy()` it into a
+1. **Write it yourself: a coefficient plot.** Fit `co2 ~ income_level`, `tidy()` it into a
    tibble, drop the intercept, and plot each coefficient with its 95% confidence interval
    (`geom_pointrange()` + `coord_flip()`).
 
@@ -81,66 +84,109 @@ ggplot(data = plotdata,
 ```
 `r unhide()`
 
-3. Read your plot: compared with low-income countries, **upper-middle-income** countries emit
+2. Read your plot: compared with low-income countries, **upper-middle-income** countries emit
    about `r num_fitb(b_upper)` tonnes more CO₂ per person (two digits).
 
-4. Which statement matches your coefficient plot?
+3. Which statement matches your coefficient plot?
 `r mcq(c("All income groups overlap zero — none differs from low income", answer = "Every group emits more than low income, and the gap widens with income", "Only high-income countries differ from the reference"))`
 
-5. **Write it yourself: a prediction plot.** Fit `co2 ~ gdp_k`, predict across a synthetic GDP
-   range, and plot the fitted line with its confidence ribbon. Add a dashed red line at a rich
-   benchmark (`gdp_k = 60`).
+4. **Write it yourself: a prediction plot.** Fit the **bivariate** model
+   `co2 ~ state_ownership`, predict across a synthetic range of the socialism index, and plot
+   the fitted line with its confidence ribbon. Mark two benchmarks with dashed red lines: a
+   market-based economy (`-1`) and a state-run one (`+1`).
 
 `r hide("Hint")`
-Build `fict_dat <- tibble(gdp_k = 1:120)`, then `predict(ols_gdp, newdata = fict_dat, interval = "confidence")$fit`, turn it into a tibble and `bind_cols()` it back. Plot with `geom_ribbon()` + `geom_line()`.
+The index runs from about −3 to +2, so build `fict_dat <- tibble(state_ownership = seq(-3, 2, by = 0.1))`, then `predict(ols_state, newdata = fict_dat, interval = "confidence")$fit`, turn it into a tibble and `bind_cols()` it back. Plot with `geom_ribbon()` + `geom_line()`.
 `r unhide()`
 
 `r hide("R solution -> don't peek too early ;) !")`
 ```{r out.width='80%', fig.height = 4, fig.width = 6.5, results = FALSE}
-ols_gdp <- lm_robust(co2 ~ gdp_k, data = Dat)
+ols_state <- lm_robust(co2 ~ state_ownership, data = Dat)
 
-fict_dat <- tibble(gdp_k = 1:120)
-fict_dat <- predict(ols_gdp, newdata = fict_dat,
+# Fictional countries spanning the observed range of the index
+fict_dat <- tibble(state_ownership = seq(-3, 2, by = 0.1)) #<<
+fict_dat <- predict(ols_state, newdata = fict_dat,
                     interval = "confidence", level = 0.95)$fit %>%
   as_tibble() %>%
   bind_cols(fict_dat, .)
 
-ggplot(data = fict_dat, aes(y = fit, x = gdp_k)) +
-  geom_vline(xintercept = 60, color = "#901A1E", lty = "dashed") +
+ggplot(data = fict_dat, aes(y = fit, x = state_ownership)) +
+  geom_vline(xintercept = c(-1, 1), color = "#901A1E", lty = "dashed") + #<<
   geom_ribbon(aes(ymin = lwr, ymax = upr), alpha = 0.3) +
   geom_line(linewidth = 1) +
-  labs(x = "GDP per person (thousands of $, PPP)",
+  labs(x = "State ownership of the economy (V-Dem, higher = more)",
        y = "Predicted tonnes of CO2 per person") +
   theme_minimal()
 ```
 `r unhide()`
 
-6. **Write one sentence** (as a `# comment`) that a reader of your term paper could follow,
+5. **A prediction does not have to be a plot.** You can also ask the model for a *single
+   number*. Using the **bivariate** model `co2 ~ state_ownership` from Exercise 1, predict CO₂
+   for a strongly market-based economy (`state_ownership = -1`, about where Denmark and
+   Finland sit) and for a strongly state-run one (`state_ownership = +1`, about Russia and
+   Angola). Build a `tibble()` with those two values and hand it to `predict()`.
+
+`r hide("Hint")`
+Same three steps as the plot, just with two rows instead of 120:
+`tibble(state_ownership = c(-1, 1))`, then `predict(ols_state, newdata = ..., interval = "confidence")$fit`.
+`r unhide()`
+
+`r hide("R solution -> don't peek too early ;) !")`
+```{r}
+ols_state <- lm_robust(co2 ~ state_ownership, data = Dat)
+
+fict_two <- tibble(state_ownership = c(-1, 1)) # market-based vs state-run #<<
+
+predict(ols_state, newdata = fict_two,
+        interval = "confidence", level = 0.95)$fit %>%
+  as_tibble() %>%
+  bind_cols(fict_two, .)
+```
+`r unhide()`
+
+   The market-based country is predicted at `r num_fitb(p_market)` tonnes per person, the
+   state-run one at `r num_fitb(p_state)` (two digits each).
+
+6. Look at the two **confidence intervals** you just produced. Which is wider, and why?
+`r mcq(c("They are the same width - the model is equally sure everywhere", answer = "The state-run one, because far fewer countries sit at that end of the scale", "The market-based one, because rich countries vary more"))`
+
+`r hide("Why this matters")`
+A prediction is only as good as the data behind it. Most countries in `Dat` sit on the
+market-based side, so the model has seen plenty of them and its interval there is narrow.
+Very few countries score high on state ownership, so out there the same model is guessing
+from a handful of cases — and says so, honestly, with a much wider interval. This is exactly
+the widening ribbon you drew in the prediction plot, read as numbers instead.
+`r unhide()`
+
+7. **Write one sentence** (as a `# comment`) that a reader of your term paper could follow,
    describing what the prediction plot shows. Then compare:
 
 `r hide("Model answer")`
-*Predicted CO₂ emissions rise steadily with national wealth: a country at \$60,000 GDP per
-person is predicted to emit roughly `r round(coef(ols_gdp)[1] + coef(ols_gdp)[2] * 60, 1)`
-tonnes per person, several times more than a poor country — with the confidence ribbon
-widening where we have fewer rich countries to learn from.*
+*Predicted CO₂ emissions rise with state ownership of the economy: a strongly market-based
+country is predicted to emit about `r round(p_market, 1)` tonnes per person, a strongly
+state-run one about `r round(p_state, 1)` — but the confidence ribbon fans out sharply on the
+right, where very few countries actually sit, so the model is far less sure about that end.*
 `r unhide()`
 
 ------------------------------------------------------------------------------
 
-7. **Discuss with your neighbour** — three steps toward the *carbon divide*:
+8. **Discuss with your neighbour** — three steps toward the *carbon divide*:
 
    a. Your two figures tell the same story two ways. Which is clearer for a reader who has
       *never seen a regression table* — the coefficient plot or the prediction plot?
-   b. Both show that richer places emit more. Does that make wealth the *cause* of emissions?
-      Name one thing that differs between rich and poor countries besides GDP.
+   b. The prediction plot looks clean and confident. But in Exercise 1 that same slope
+      **reversed** once the petro economies were dropped. Could you honestly publish this
+      figure on its own?
    c. The countries emitting the **least** are often the most exposed to climate damage. What
       does that mean for reading a "positive slope" as *good* or *bad* news?
 
 `r hide("Talking points")`
 **(a)** The prediction plot needs no statistics vocabulary — it reads like a line on a graph;
 the coefficient plot is compact but assumes the reader knows what a reference category is.
-**(b)** No — these are *descriptive* cross-country comparisons; rich and poor countries differ
-in industry mix, energy sources, climate, history … all potential confounders. **(c)** A
+**(b)** No. The figure is perfectly *correct* and still misleading on its own: it is drawn from
+a slope Exercise 1 showed is not robust, because the high-state-ownership end is populated by
+petro economies. A plot cannot show you what it excluded — which is why the robustness check
+belongs in the paper, not just in your script. **(c)** A
 positive slope is neither good nor bad by itself — it is the *injustice* that the low emitters
 bear the highest costs that turns the description into a research (and policy) agenda.
 `r unhide()`

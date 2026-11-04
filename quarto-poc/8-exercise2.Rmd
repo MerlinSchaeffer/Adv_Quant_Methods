@@ -27,40 +27,45 @@ In exercise 1 you adjusted a real estimate — but you could never check whether
 was *right*, because nobody knows the true effect of the Bali attack. Here you do know it,
 **because you set it yourself.**
 
-1. Copy in this simulator. It is the lecture's toy example, wrapped in a function so you can turn
-   three knobs: the **true effect**, how strongly the confounder affects the **outcome**
-   ($\beta_{C \rightarrow Y}$), and how strongly it drives **selection into treatment**
-   ($\beta_{D \rightarrow C}$).
+1. Copy in this simulation. It is the lecture's toy example, all three steps in one chunk. Three
+   numbers in it are the knobs you will turn: the **true effect** (`1 * bali`), how strongly the
+   confounder affects the **outcome** (`0.3 * age`, $\beta_{C \rightarrow Y}$), and how strongly it
+   drives **selection into treatment** (`-0.1 * age`, $\beta_{D \rightarrow C}$).
 
 ```{r sim-fn}
 pacman::p_load(tidyverse, estimatr, modelsummary)
 
-simulate_toy <- function(b_bali    = 1,     # THE TRUTH: causal effect of Bali
-                         b_age     = 0.3,   # C -> Y : how much age drives xenophobia
-                         selection = -0.1,  # C -> D : how age drives interview timing
-                         seed      = 831983) {
-  set.seed(seed)
-  tibble(age = rnorm(n = 500, mean = 40, sd = 5)) %>%
-    mutate(
-      int_day = (selection * age) + rnorm(n = 500, mean = 0, sd = 1),
-      bali    = if_else(int_day >= mean(int_day), 1, 0),
-      xeno    = (b_bali * bali) + (b_age * age) + rnorm(n = 500, mean = 0, sd = 1)
-    )
-}
-
-toydat <- simulate_toy() # The lecture's settings
+set.seed(831983) # So everyone gets the SAME "random" numbers
+toydat <- tibble(
+  age = rnorm(n = 500, mean = 40, sd = 5)) %>%     # Step 1: age
+  mutate(
+    # Step 2: who gets treated (older people are interviewed earlier)
+    int_day = (-0.1 * age) + rnorm(n = 500, mean = 0, sd = 1),
+    bali = case_when(
+      int_day < mean(int_day) ~ 0,   # interviewed before the attack
+      int_day >= mean(int_day) ~ 1), # interviewed after the attack
+    # Step 3: the outcome. THE TRUTH: the Bali effect is 1
+    xeno = (1 * bali) + (0.3 * age) + rnorm(n = 500, mean = 0, sd = 1))
 ```
 
 `r hide("Stuck?")`
 - Did `pacman::p_load(...)` run without red errors? Fix that first.
-- Getting *different* numbers from the ones below? Check you kept `seed = 831983` and did not
-  re-run `rnorm()` in between — the seed is what makes everyone's "random" data identical.
+- Getting *different* numbers from the ones below? Check you kept `set.seed(831983)` and re-ran
+  the *whole* chunk, from `set.seed()` down — never just a part of it — the seed is what makes everyone's "random" data identical.
 - Odd results? *Session → Restart R*, then rerun from the top.
 - Still stuck? Ask in the [t-R-ouble forum](https://absalon.ku.dk/courses/70545/discussion_topics/563046?module_item_id=2037268) on Absalon.
 
 `r unhide()`
 
 ```{r solutions, include = FALSE}
+# Hidden helper for the answer key only: the same simulation as the visible chunk
+simulate_toy <- function(b_age = 0.3, selection = -0.1, seed = 831983) {
+  set.seed(seed)
+  tibble(age = rnorm(n = 500, mean = 40, sd = 5)) %>%
+    mutate(int_day = (selection * age) + rnorm(n = 500, mean = 0, sd = 1),
+           bali = case_when(int_day < mean(int_day) ~ 0, int_day >= mean(int_day) ~ 1),
+           xeno = (1 * bali) + (b_age * age) + rnorm(n = 500, mean = 0, sd = 1))
+}
 fit3 <- function(d) {
   bi <- coef(lm_robust(xeno ~ bali, data = d))["bali"]
   m  <- lm_robust(xeno ~ bali + age, data = d)
@@ -107,13 +112,23 @@ c(bivariate = b_bi, adjusted_plus_OVB = b_mu + (b_cy * b_dc))
    `r mcq(c(answer = "The adjusted one — the bivariate estimate is badly biased downwards", "The bivariate one", "Both are equally close", "Neither is close"))`
 
 3. **Predict before you compute.** Now make the confounder *three times stronger* on the outcome —
-   `simulate_toy(b_age = 0.9)` — but change nothing else. What happens to the **bivariate**
+   change `0.3 * age` to `0.9 * age` — but change nothing else. What happens to the **bivariate**
    estimate?
    `r mcq(c("It gets closer to the truth of 1", "It stays about the same", answer = "It becomes even more biased — so much that it turns negative", "It doubles to about 2"))`
 
 `r hide("R solution — check your prediction")`
 ```{r sol3, eval = FALSE}
-toy_strong <- simulate_toy(b_age = 0.9)
+set.seed(831983) # So everyone gets the SAME "random" numbers
+toy_strong <- tibble(
+  age = rnorm(n = 500, mean = 40, sd = 5)) %>%     # Step 1: age
+  mutate(
+    # Step 2: who gets treated (older people are interviewed earlier)
+    int_day = (-0.1 * age) + rnorm(n = 500, mean = 0, sd = 1),
+    bali = case_when(
+      int_day < mean(int_day) ~ 0,   # interviewed before the attack
+      int_day >= mean(int_day) ~ 1), # interviewed after the attack
+    # Step 3: the outcome. THE TRUTH: the Bali effect is 1
+    xeno = (1 * bali) + (0.9 * age) + rnorm(n = 500, mean = 0, sd = 1)) #<< 0.9 instead of 0.3
 
 lm_robust(xeno ~ bali, data = toy_strong)        # bivariate
 lm_robust(xeno ~ bali + age, data = toy_strong)  # adjusted
@@ -124,11 +139,11 @@ enough confounder does not merely shrink an effect; it can make a genuinely posi
 negative. The adjusted estimate still lands near **`r round(B$adj, 2)`**.
 `r unhide()`
 
-4. **Now break one arrow.** Set `b_age = 0` — age no longer affects xenophobia at all — but leave
-   `selection = -0.1`, so the two groups are *still* badly imbalanced on age.
+4. **Now break one arrow.** Change `0.3 * age` to `0 * age` — age no longer affects xenophobia at
+   all — but leave `-0.1 * age` in Step 2, so the two groups are *still* badly imbalanced on age.
    What is the omitted variable bias now?
 
-   With `b_age = 0`, the bivariate estimate is `r num_fitb(C$bi, digits = 2)` and the
+   With `0 * age`, the bivariate estimate is `r num_fitb(C$bi, digits = 2)` and the
    imbalance $\beta_{D \rightarrow C}$ is still about `r num_fitb(C$dc, digits = 1, width = 5)` years.
    The bias is `r mcq(c(answer = "essentially zero", "still large and negative", "larger than before", "impossible to compute"))`.
 
@@ -139,15 +154,25 @@ if it also affects the outcome.** This is why "the groups differ on X" is not, b
 argument that your estimate is biased — you have to make the case for *both* arrows.
 `r unhide()`
 
-5. **Flip the selection.** Go back to `b_age = 0.3`, but set `selection = 0.1` — now *older*
-   people are more likely to end up in the treatment group. Predict the direction first, then run it.
+5. **Flip the selection.** Go back to `0.3 * age`, but change `-0.1 * age` in Step 2 to
+   `0.1 * age` — now *older* people are more likely to end up in the treatment group. Predict the direction first, then run it.
 
    The bivariate estimate becomes `r num_fitb(D$bi, digits = 2)`, which is
    `r mcq(c(answer = "too large — the bias is now positive", "too small — the bias is still negative", "exactly right", "unchanged"))`
 
 `r hide("R solution")`
 ```{r sol5, eval = FALSE}
-toy_flip <- simulate_toy(selection = 0.1)
+set.seed(831983) # So everyone gets the SAME "random" numbers
+toy_flip <- tibble(
+  age = rnorm(n = 500, mean = 40, sd = 5)) %>%     # Step 1: age
+  mutate(
+    # Step 2: who gets treated (older people are interviewed earlier)
+    int_day = (0.1 * age) + rnorm(n = 500, mean = 0, sd = 1),
+    bali = case_when(
+      int_day < mean(int_day) ~ 0,   # interviewed before the attack
+      int_day >= mean(int_day) ~ 1), # interviewed after the attack
+    # Step 3: the outcome. THE TRUTH: the Bali effect is 1
+    xeno = (1 * bali) + (0.3 * age) + rnorm(n = 500, mean = 0, sd = 1)) #<< Step 2 now uses 0.1
 
 lm_robust(xeno ~ bali, data = toy_flip)
 lm_robust(xeno ~ bali + age, data = toy_flip)
@@ -158,12 +183,22 @@ Both arrows are now positive ($+ \times + = +$), so the bias is positive and the
 error changes direction — exactly as the sign table on the slides predicted.
 `r unhide()`
 
-6. **The last knob is the interesting one.** Set `selection = 0`: interview timing no longer
-   depends on age at all. Fit *both* models and compare them.
+6. **The last knob is the interesting one.** Change Step 2 to `0 * age`: interview timing no
+   longer depends on age at all. Fit *both* models and compare them.
 
 `r hide("R solution — don't peek too early ;) !")`
 ```{r sol6}
-toy_rand <- simulate_toy(selection = 0)
+set.seed(831983) # So everyone gets the SAME "random" numbers
+toy_rand <- tibble(
+  age = rnorm(n = 500, mean = 40, sd = 5)) %>%     # Step 1: age
+  mutate(
+    # Step 2: who gets treated (older people are interviewed earlier)
+    int_day = (0 * age) + rnorm(n = 500, mean = 0, sd = 1),
+    bali = case_when(
+      int_day < mean(int_day) ~ 0,   # interviewed before the attack
+      int_day >= mean(int_day) ~ 1), # interviewed after the attack
+    # Step 3: the outcome. THE TRUTH: the Bali effect is 1
+    xeno = (1 * bali) + (0.3 * age) + rnorm(n = 500, mean = 0, sd = 1)) #<< Step 2 now uses 0
 
 modelsummary(
   list("Bivariate" = lm_robust(xeno ~ bali, data = toy_rand),
@@ -178,7 +213,7 @@ modelsummary(
    **Write one sentence** as a `# comment` saying what is special about this case — then compare:
 
 `r hide("Model answer")`
-With `selection = 0` the two models give essentially the **same** treatment estimate
+With `0 * age` in Step 2 the two models give essentially the **same** treatment estimate
 (≈ `r round(E$bi, 2)`), and both are close to the true effect of 1. Nothing is confounded, because
 age no longer predicts who gets treated — the imbalance term $\beta_{D \rightarrow C}$ is
 approximately zero, so the bias is zero no matter how strongly age affects xenophobia.
@@ -188,15 +223,21 @@ $\beta_{D \rightarrow C}$ to zero *for every confounder at once* — measured or
 an RCT needs no controls, and why it outranks anything you can do with a regression.
 `r unhide()`
 
-7. **Bonus, for the fast.** Everything above kept `seed = 831983`. Re-run the default simulation
+7. **Bonus, for the fast.** Everything above kept `set.seed(831983)`. Re-run the default simulation
    with three or four different seeds and collect the adjusted estimate each time. How close to
    the true value of 1 does it get, and why is it never *exactly* 1?
 
 `r hide("R solution")`
 ```{r sol7, eval = FALSE}
-map_dbl(c(1, 42, 2024, 831983), function(s) {
-  coef(lm_robust(xeno ~ bali + age, data = simulate_toy(seed = s)))["bali"]
-})
+for (seed in c(1, 42, 2024, 831983)) { # Repeat the lecture's simulation with four seeds
+  set.seed(seed)
+  toy <- tibble(age = rnorm(n = 500, mean = 40, sd = 5)) %>%
+    mutate(int_day = (-0.1 * age) + rnorm(n = 500, mean = 0, sd = 1),
+           bali = case_when(int_day < mean(int_day) ~ 0,
+                            int_day >= mean(int_day) ~ 1),
+           xeno = (1 * bali) + (0.3 * age) + rnorm(n = 500, mean = 0, sd = 1))
+  print(coef(lm_robust(xeno ~ bali + age, data = toy))["bali"]) # The adjusted estimate
+}
 ```
 
 The adjusted estimate scatters *around* 1 without ever landing exactly on it — that is

@@ -41,8 +41,8 @@ reduced_form <- lm_robust(lnw ~ qob, data = ak91)  # instrument -> outcome
 ```
 
 `r hide("Stuck?")`
-- Did `pacman::p_load(...)` run without red errors? `ivreg` is new this week — if it is missing,
-  run `install.packages("ivreg")` once.
+- Did `pacman::p_load(...)` run without red errors? `ivreg` is new this week — `pacman::p_load()`
+  installs it automatically the first time (this needs internet).
 - `data()` can't find `ak91`? It ships inside **`masteringmetrics`** — see **About & setup**.
 - Odd results? *Session → Restart R*, then rerun from the top.
 - Still stuck? Ask in the [t-R-ouble forum](https://absalon.ku.dk/courses/70545/discussion_topics/563046?module_item_id=2037268) on Absalon.
@@ -58,7 +58,9 @@ days <- phi * 365
 bias_small <- 0.001 / phi
 share_small <- bias_small / wald
 
-ak91 <- ak91 %>% mutate(q4 = if_else(qob == 4, 1, 0))
+ak91 <- ak91 %>%
+  mutate(q4 = case_when(qob < 4 ~ 0,    # born in quarters 1-3
+                        qob == 4 ~ 1))  # born in the 4th quarter
 wald_q4 <- coef(lm_robust(lnw ~ q4, data = ak91))["q4"] /
            coef(lm_robust(s ~ q4, data = ak91))["q4"]
 ```
@@ -121,12 +123,14 @@ roughly twentyfold. A violation far too small to detect can still dominate the a
    build a **dummy** for being born in the fourth quarter and redo the Wald ratio.
 
 `r hide("Hint")`
-`ak91 %>% mutate(q4 = if_else(qob == 4, 1, 0))`, then a first stage and reduced form on `q4`.
+`ak91 %>% mutate(q4 = case_when(qob < 4 ~ 0, qob == 4 ~ 1))`, then a first stage and reduced form on `q4`.
 `r unhide()`
 
 `r hide("R solution — don't peek too early ;) !")`
 ```{r sol6, eval = FALSE}
-ak91 <- ak91 %>% mutate(q4 = if_else(qob == 4, 1, 0))
+ak91 <- ak91 %>%
+  mutate(q4 = case_when(qob < 4 ~ 0,    # born in quarters 1-3
+                        qob == 4 ~ 1))  # born in the 4th quarter
 
 phi_q4 <- coef(lm_robust(s ~ q4, data = ak91))["q4"]
 rho_q4 <- coef(lm_robust(lnw ~ q4, data = ak91))["q4"]
@@ -141,11 +145,11 @@ rho_q4 / phi_q4
    `r mcq(c(answer = "The result depends on arbitrary-looking choices about how the instrument is coded", "One of the two is simply calculated wrongly", "Nothing — they are close enough to ignore"))`
 
 7. **Bonus, for the fast.** Use `ivreg()` to run 2SLS with year-of-birth controls
-   (`factor(yob)` on both sides of the `|`). Does controlling for birth cohort change the estimate?
+   (`as_factor(yob)` on both sides of the `|`). Does controlling for birth cohort change the estimate?
 
 `r hide("R solution")`
 ```{r sol7, eval = FALSE}
-ak91 <- ak91 %>% mutate(yob_f = factor(yob))
+ak91 <- ak91 %>% mutate(yob_f = as_factor(yob))
 
 iv_controls <- ivreg(lnw ~ s + yob_f | qob + yob_f, data = ak91)
 
