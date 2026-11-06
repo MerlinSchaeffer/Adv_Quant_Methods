@@ -1,6 +1,6 @@
 ---
 title: "Two-Stage Least Squares"
-subtitle: "From the Wald ratio to 2SLS — and what an instrument must never do"
+subtitle: "From Wald ratio to 2SLS"
 author: "Merlin Schaeffer · Department of Sociology"
 date: today
 format:
@@ -56,15 +56,9 @@ local({
 
 ## By the end of today you can … {.inverse background-color="#901A1E"}
 
-1. read a **first stage** and a **reduced form**, and recover the causal effect as the **Wald ratio** — on a new study;
+1. explain **two-stage least squares (2-SLS)**: how it isolates the *predicted* part of the treatment, why that is the mirror image of controlling, and why it generalises Wald;
 
-2. explain **two-stage least squares**: how it isolates the *predicted* part of the treatment, why that is the **mirror image of controlling**, and why it generalises Wald;
-
-3. interrogate an instrument's **exclusion restriction** — and say what happens to your estimate when it fails.
-
-::: {.backgrnote}
-One part per goal. Our running question: **does education actually pay off?**
-:::
+2. interrogate an instrument's **exclusion restriction** and say what happens to your estimate when it fails.
 
 ::: {.notes}
 Two weeks ago they met IV and the Wald ratio; last week they learned what controlling does. Today those two threads meet. Be explicit that goal 2 is the technical core and goal 3 is the one that matters when they read a paper — most published IV work lives or dies on the exclusion restriction, and it is the assumption nobody can test.
@@ -101,19 +95,19 @@ Two weeks ago they met IV and the Wald ratio; last week they learned what contro
 ```
 
 ::: {.content-box-green}
-2SLS does **not** replace Wald. With a single instrument and no controls the two give **exactly the same number**, and we will see that on screen. 2SLS is what you need the moment you want controls or more than one instrument.
+2SLS does not replace Wald. With a single instrument and no controls the two give the same result. 2SLS is what you need the moment you want controls or more than one instrument.
 :::
 
 ::: {.notes}
 The same map as in Lecture 8, now with the instrument branch in red. Locate the day precisely, because they will otherwise think 2SLS is a new and unrelated tool. Say the punchline now rather than saving it: 2SLS *contains* Wald as a special case, and we will verify that to four decimal places later. What it buys you is the ability to add controls and extra instruments, which is why every published IV paper uses it. And it borrows the Frisch–Waugh idea from Lecture 8, which is why we did that first.
 :::
 
-## Does education pay off? {.inverse background-color="#901A1E"}
+## First Research Question: Does education pay off? {.inverse background-color="#901A1E"}
 
 [Part 1 of 3]{.part-pill}
 
 ::: {.lead}
-An old question with an obvious-looking answer — and a confounder problem that has defeated sociologists for decades.
+A selective university doesn't pay off; but does education itsel?
 :::
 
 ```{r, echo = FALSE, out.width='46%'}
@@ -121,17 +115,17 @@ knitr::include_graphics('img/L10/studenterkoersel.jpg')
 ```
 
 ::: {.backgrnote .center}
-Studenterkørsel, 2017. Was it worth it? *Photo:* Thomas Dahlstrøm Nielsen, [CC BY-SA 4.0](https://commons.wikimedia.org/wiki/File:2017_Studenterfejring_-_6.jpg).
+Studenterkørsel; was it worth it? *Photo:* [Thomas Dahlstrøm Nielsen](https://commons.wikimedia.org/wiki/File:2017_Studenterfejring_-_6.jpg).
 :::
 
 ::: {.notes}
 Most of them were on a truck like this three or four years ago. Ask it straight: did those extra years of school make you more productive, or did they mostly sort people who were going to do well anyway? Keep the question hanging; the whole lecture is about how you could possibly tell.
 :::
 
-## The research question of the day {.inverse background-color="#901A1E"}
+## A question rife with confounders
 
 ::: {.push-left}
-People with more education earn more. Every data set in the world agrees, Danish registers included:
+People with more education earn more.
 
 ```{r, echo = FALSE, out.width='100%'}
 knitr::include_graphics('img/L10/Karlson_1.png')
@@ -140,45 +134,36 @@ knitr::include_graphics('img/L10/Karlson_1.png')
 ::: {.backgrnote}
 Denmark: correlation of years of schooling with earnings rank at age 34–36, by birth year. *Source:* `r Citet(myBib, "karlson_making_2021")`
 :::
-
-::: {.content-box-blue}
-**Research question of the day:** does an **extra year of schooling** actually *cause* higher earnings — or do the people who get more schooling simply differ?
-:::
 :::
 
 ::: {.push-right}
-```{tikz dag-naive, echo = FALSE, out.width='58%'}
+```{tikz dag-naive, echo = FALSE, out.width='95%'}
 \usetikzlibrary{shapes.geometric, arrows.meta, positioning}
 \definecolor{kured}{HTML}{901A1E}
 \begin{tikzpicture}[>=Latex, semithick]
 \sffamily
 \node[ellipse, draw] (D) at (0,0) {Education};
 \node[ellipse, draw] (Y) at (3.6,0) {Earnings};
+\node[ellipse, draw=kured, thick, dashed, align=center] (C1) at (1.8,2.3) {C};
 \draw[->, kured, very thick] (D) -- node[above]{?} (Y);
+\draw[->, kured, dashed] (C1) -- (D);
+\draw[->, kured, dashed] (C1) -- (Y);
 \end{tikzpicture}
 ```
-
-::: {.backgrnote .center}
-The policy stakes are large: nearly every government funds education partly on the belief that this arrow is real and big.
-:::
 :::
 
 ::: {.notes}
 Start with the correlation everybody already believes, then make the causal question sharp: is it the schooling, or the kind of person who stays in school? Note the stakes — this is not an academic puzzle, it is the justification for a large share of public spending. Ask them to predict which way the bias runs before the next slide.
 :::
 
-## No — there are confounders
+## A question rife with confounders
 
 ::: {.push-left}
 The people who stay in school longer differ *systematically*:
 
-- **Cognitive ability** — raises schooling *and* earnings.
-- **Parental education and money** — raises both.
-- **Ambition, health, networks** — the list does not end.
-
-::: {.content-box-red}
-**Beware:** this is textbook **ability bias**. Both confounders push the same way, so the naïve OLS estimate should be **too large**.
-:::
+- Cognitive ability,  
+- Parental education and money
+- Ambition, health, networks ...
 :::
 
 ::: {.push-right}
@@ -207,18 +192,16 @@ Use last week's sign rule out loud: both arrows into education are positive, bot
 ## Why not just control for ability?
 
 ::: {.push-left}
-Last week's answer would be: **measure the confounders and control for them.**
-
 ::: {.content-box-blue}
-**Discuss:** what goes wrong if we try that here?
+**Discuss:** what will likely go wrong if we try that here?
 :::
 :::
 
 ::: {.push-right}
 ::: {.content-box-red .fragment}
-"Ability" is not in the data — and no test score fully captures it. **Ambition, family connections, health** are worse still. Multiple OLS can only close the backdoors you **measured**, and here the important ones are invisible.
+"Ability" is not in the data and no test score fully captures it. Ambition, family connections, health are worse still. Multiple OLS can only close the backdoors you measured.
 
-$\rightarrow$ We need variation in schooling that has **nothing to do with** who the person is.
+$\rightarrow$ We need as-if random variation in schooling that has nothing to do with who the person is.
 :::
 :::
 
@@ -229,32 +212,12 @@ This is the hinge between L8 and today, so let them try the obvious answer first
 ## `r Citet(myBib, "angrist_does_1991")` had an idea
 
 ::: {.push-left}
-In the US at the time:
+In the US (at the time):
 
-- The school year starts in **September**; children enter in the calendar year they turn **6**.
-- School is compulsory **until the 16th birthday**.
+- The school year starts in September; children enter in the calendar year they turn 6.
+- School is compulsory until the 16th birthday.
 
 $\rightarrow$ Children born **late** in the year start school **younger**, so they have completed **more** schooling by the time they may legally drop out.
-
-::: {style="display: flex; gap: 1.2rem; align-items: flex-start; margin-top: 0.6em;"}
-::: {style="flex: 0 0 20%;"}
-```{r, echo = FALSE, out.width='100%'}
-knitr::include_graphics('img/L10/angrist.jpg')
-```
-:::
-::: {style="flex: 0 0 20%;"}
-```{r, echo = FALSE, out.width='100%'}
-knitr::include_graphics('img/L10/krueger.jpg')
-```
-:::
-::: {.small style="flex: 1;"}
-**Joshua Angrist**, co-author of your *Mastering 'Metrics*, shared the 2021 Nobel Prize for methods like this one. **Alan Krueger** (1960–2019) worked with him on this design.
-
-::: {.backgrnote}
-*Photos:* [MeJudice](https://commons.wikimedia.org/wiki/File:Joshua_Angrist_-_2011_(cropped).jpg); [US Treasury](https://commons.wikimedia.org/wiki/File:Alan_Krueger_official_portrait_(cropped).jpg).
-:::
-:::
-:::
 :::
 
 ::: {.push-right}
@@ -323,14 +286,14 @@ Tell the Carl and Luis story properly. It is what makes the design click, and st
 ## Would it work in Denmark?
 
 ::: {.push-left}
-In Denmark, children also start school in the **calendar year they turn six**. So the December children are the youngest in their class.
+In Denmark, children also start school in the calendar year they turn six. So the December children are the youngest in their class.
 
 ::: {.content-box-blue}
-**Discuss:** would quarter of birth be a useful instrument for schooling in Denmark? Which of the three requirements is at risk?
+**Discuss:** would quarter of birth be a useful instrument for schooling in Denmark?
 :::
 
 ::: {.content-box-red .fragment}
-**The first stage.** Danish compulsory schooling lasts **ten school years**, not until a birthday. A December child leaves after the same ten years as a January child, just younger. Quarter of birth would barely move schooling: $\phi \approx 0$.
+The first stage: Danish compulsory schooling lasts ten school years, not until a birthday. $\rightarrow \phi \approx 0$.
 :::
 :::
 
@@ -340,7 +303,7 @@ knitr::include_graphics('img/L10/prince_christian_school.jpg')
 ```
 
 ::: {.backgrnote .center}
-Prince Christian, born in October 2005, on his first school day in August 2011, aged five.<br> *Photo:* [VisitCopenhagen](https://commons.wikimedia.org/wiki/File:Prince_Christian_of_Denmark_on_his_first_day_of_school.jpg).
+Prince Christian on his first school day.<br> *Photo:* [VisitCopenhagen](https://commons.wikimedia.org/wiki/File:Prince_Christian_of_Denmark_on_his_first_day_of_school.jpg).
 :::
 :::
 
@@ -381,10 +344,7 @@ ak91 %>%
 ### Why logged wages?
 ::: {.small}
 The outcome is the **log** of the wage, so a coefficient reads as an approximate **percentage** change:
-a coefficient of $0.07$ means an extra year of schooling goes with about **7% higher** earnings.
-
-This is the standard convention in the returns-to-education literature — you will meet it in every
-paper on the topic.
+a coefficient of $0.07$ means an extra year of schooling goes with about **7% higher** earnings. This is the standard convention in the returns-to-education literature.
 :::
 
 :::
@@ -408,19 +368,12 @@ modelsummary(
 )
 ```
 
-::: {.content-box-blue}
-**Discuss:** we predicted ability bias makes this **too large**. Hold that thought.
-:::
 :::
 
 ::: {.push-right}
 ::: {.small}
 ```{r ols-tab, ref.label = "ols-naive", echo = FALSE, results = 'asis'}
 ```
-:::
-
-::: {.content-box-green}
-An extra year of schooling goes with about **`r round(coef(lm_robust(lnw ~ s, data = ak91))["s"] * 100, 1)`%** higher weekly wages. Descriptively solid — causally, contaminated by every confounder we just listed.
 :::
 :::
 
@@ -447,14 +400,14 @@ ak91 %>%
 ```
 
 ::: {.content-box-blue}
-**Discuss:** the line saw-tooths. What is systematically different about the **red** points — and is that a pattern a confounder could produce?
+**Discuss:** What is systematically different about the **red** points and is that a pattern a confounder could produce?
 :::
 
 ::: {.notes}
 This is the single most persuasive slide in the lecture, so let them look before you talk. Within almost every birth year the Q4 men have *more* schooling than the Q1 men born a few months later — a regular sawtooth, repeated across a decade. Then the rhetorical move: what confounder could possibly generate a pattern that resets every January? That regularity is the argument for as-if randomness. Also flag how *small* the steps are on the y-axis; that comes back in Part 3.
 :::
 
-## The reduced form, drawn
+## The reduced form (ITT), drawn
 
 ```{r sawtooth-wage, echo = FALSE, out.width='74%', fig.height = 4.2, fig.width = 12}
 ak91 %>%
@@ -472,38 +425,50 @@ ak91 %>%
   theme(legend.position = "top")
 ```
 
-::: {.push-left}
-The same men, now their **wages**. The pattern is noisier, but within most birth years the men born **later** earn a little **more**.
-:::
-
-::: {.push-right}
-::: {.content-box-green}
-If birth quarter moves wages *only* through schooling, the wage steps divided by the schooling steps is the return to a year of school. That ratio is the **Wald estimator**.
-:::
-:::
 
 ::: {.notes}
 The partner of the previous slide, recovered from the old deck, which plotted both the first stage and the reduced form. Let them compare the two pictures: the schooling sawtooth is clean, the wage sawtooth is noisier, but within most years the later-born men earn a little more. Do not compute anything yet. Just plant the idea that IV compares the size of two sets of steps; the next slide puts numbers on both.
 :::
 
-## Recap: first stage, reduced form, Wald
+## Recap: first stage, reduced form (ITT), & Wald
 
 ::: {.panel-tabset}
 
 ### The three quantities
+::: {.push-left}
 ::: {.small}
-**First stage** — does the instrument move the treatment?
+**First stage:** does the instrument move the treatment?
 $$\phi = \text{Avg}[D \mid Z = 1] - \text{Avg}[D \mid Z = 0]$$
 
-**Reduced form** — does the instrument move the outcome?
+**Reduced form:** does the instrument move the outcome?
 $$\rho = \text{Avg}[Y \mid Z = 1] - \text{Avg}[Y \mid Z = 0]$$
 
-**Wald IV estimator** — the effect of the treatment itself:
+**Wald IV estimator:** the effect of the treatment itself:
 $$\lambda = \frac{\rho}{\phi}$$
 :::
+:::
 
-::: {.content-box-green}
-Exactly the logic from Lecture 7's Moving to Opportunity study — only the application is new.
+::: {.push-right}
+```{tikz dag-recap, echo = FALSE, out.width='88%'}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning}
+\definecolor{kured}{HTML}{901A1E}
+\begin{tikzpicture}[>=Latex, semithick]
+\sffamily
+\node[ellipse, draw, align=center] (Z) at (0,0) {$Z$};
+\node[ellipse, draw, align=center] (D) at (3.4,0) {$D$};
+\node[ellipse, draw=gray, dashed, align=center] (C) at (5.1,2.4) {$C$};
+\node[ellipse, draw, align=center] (Y) at (6.8,0) {$Y$};
+\draw[->] (Z) -- node[above]{$\phi$} (D);
+\draw[->] (D) -- node[above]{$\lambda$} (Y);
+\draw[->, gray, dashed] (C) -- (D);
+\draw[->, gray, dashed] (C) -- (Y);
+\draw[->, dashed] (Z) to[bend right=35] node[below]{$\rho$} (Y);
+\end{tikzpicture}
+```
+:::
+
+::: {.content-box-green style="clear: both;"}
+The same logic from Lecture 7's Moving to Opportunity study; only the application is different.
 :::
 
 ### First stage in R
@@ -516,8 +481,29 @@ modelsummary(list("Years of schooling" = first_stage),
              stars = TRUE, gof_map = c("nobs"), output = "kableExtra")
 ```
 
+::: {.push-left}
 ::: {.small}
 ```{r fs-tab, ref.label = "fs", echo = FALSE, results = 'asis'}
+```
+:::
+:::
+
+::: {.push-right}
+```{tikz dag-recap-fs, echo = FALSE, out.width='92%'}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning}
+\definecolor{kured}{HTML}{901A1E}
+\begin{tikzpicture}[>=Latex, semithick]
+\sffamily
+\node[ellipse, draw=kured, very thick, align=center] (Z) at (0,0) {Quarter\\of birth};
+\node[ellipse, draw=kured, very thick, align=center] (D) at (3.4,0) {Years of\\schooling};
+\node[ellipse, draw=gray, dashed, align=center] (C) at (5.1,2.4) {Ability};
+\node[ellipse, draw=gray, align=center] (Y) at (6.8,0) {Log\\wage};
+\draw[->, kured, very thick] (Z) -- node[above]{\textcolor{kured}{$\phi$}} (D);
+\draw[->, gray] (D) -- node[above]{\textcolor{gray}{$\lambda$}} (Y);
+\draw[->, gray, dashed] (C) -- (D);
+\draw[->, gray, dashed] (C) -- (Y);
+\draw[->, gray!60, dashed] (Z) to[bend right=35] node[below]{\textcolor{gray!60}{$\rho$}} (Y);
+\end{tikzpicture}
 ```
 :::
 
@@ -531,10 +517,30 @@ modelsummary(list("log wage" = reduced_form),
              stars = TRUE, gof_map = c("nobs"), output = "kableExtra")
 ```
 
+::: {.push-left}
 ::: {.small}
 ```{r rf-tab, ref.label = "rf", echo = FALSE, results = 'asis'}
 ```
+:::
+:::
 
+::: {.push-right}
+```{tikz dag-recap-rf, echo = FALSE, out.width='92%'}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning}
+\definecolor{kured}{HTML}{901A1E}
+\begin{tikzpicture}[>=Latex, semithick]
+\sffamily
+\node[ellipse, draw=kured, very thick, align=center] (Z) at (0,0) {Quarter\\of birth};
+\node[ellipse, draw=kured, very thick, align=center] (D) at (3.4,0) {Years of\\schooling};
+\node[ellipse, draw=gray, dashed, align=center] (C) at (5.1,2.4) {Ability};
+\node[ellipse, draw=kured, very thick, align=center] (Y) at (6.8,0) {Log\\wage};
+\draw[->, kured, very thick] (Z) -- node[above]{\textcolor{kured}{$\phi$}} (D);
+\draw[->, kured, very thick] (D) -- node[above]{\textcolor{kured}{$\lambda$}} (Y);
+\draw[->, gray, dashed] (C) -- (D);
+\draw[->, gray, dashed] (C) -- (Y);
+\draw[->, kured, very thick, dashed] (Z) to[bend right=35] node[below]{\textcolor{kured}{$\rho$}} (Y);
+\end{tikzpicture}
+```
 :::
 
 :::
@@ -555,7 +561,7 @@ b_ols <- coef(lm_robust(lnw ~ s, data = ak91))["s"]
 ::: {.push-left}
 $$\lambda = \frac{\rho}{\phi} = \frac{`r sprintf("%.5f", rho)`}{`r sprintf("%.4f", phi)`} = \mathbf{`r sprintf("%.4f", wald)`}$$
 
-So the causal return to a year of schooling is about **`r round(wald * 100, 1)`%**.
+The return to a year of schooling is about **`r round(wald * 100, 1)`%**.
 
 ::: {.content-box-blue}
 **Discuss:** we predicted ability bias would make OLS **too large**. OLS gave `r round(b_ols * 100, 1)`%, IV gives `r round(wald * 100, 1)`%. That is the **wrong way round**. What could explain it?
@@ -564,13 +570,11 @@ So the causal return to a year of schooling is about **`r round(wald * 100, 1)`%
 
 ::: {.push-right}
 ::: {.content-box-red .fragment}
-Three honest possibilities:
+Two possibilities:
 
-1. **LATE, not ATE** (L7) — IV identifies the effect among **compliers**: men who left school the moment they legally could. Returns may genuinely be higher for them.
+1. **LATE, not ATE** (L7) — IV identifies the effect among **compliers**: men who left school the moment they legally could. Returns may be higher for them.
 
-2. **Measurement error** in self-reported schooling biases OLS *toward zero*; IV is immune to it.
-
-3. The instrument is **weak** — which we come back to in Part 3.
+2. The instrument is **weak**, which we come back to in Part 3.
 :::
 :::
 
@@ -578,35 +582,23 @@ Three honest possibilities:
 The surprise, and it is a gift — do not smooth it over. Their sign prediction was reasonable and the data contradicted it, which is exactly what a real research finding feels like. Give them a minute on the blue box before revealing. All three explanations are live in the literature; the complier story is the one they can already reason about from Lecture 7, so lead with it.
 :::
 
-## Two-stage least squares {.inverse background-color="#901A1E"}
+## Two-stage least squares (2-SLS) {.inverse background-color="#901A1E"}
 
 [Part 2 of 3]{.part-pill}
 
-::: {.lead}
-The Wald ratio is a dead end the moment you want to add a control. **2SLS** is the same idea, rebuilt to scale — and it is Frisch–Waugh in mirror image.
-:::
-
-## What Wald cannot do
-
 ::: {.push-left}
-The Wald ratio is two group means divided by two group means. That is all it can ever be.
-
 ::: {.content-box-red}
-**It breaks down as soon as you want to:**
+Wald breaks down as soon as you want to:
 
-- **control** for something (year of birth, state of birth);
-- use **more than one** instrument;
-- instrument a **continuous** treatment properly.
+- control for something (year of birth, state of birth);
+- use more than one instrument;
+- instrument a continuous treatment properly.
 :::
 :::
 
 ::: {.push-right}
 ::: {.content-box-green}
-2SLS gets all three — and, with a single instrument and no controls, returns **precisely the Wald number**. Nothing is lost by switching.
-:::
-
-::: {.backgrnote}
-This is why every IV paper you will ever read reports 2SLS, and why `ivreg()` is the function to learn.
+2SLS can do all three. With a single instrument and no controls, 2-SLS returns the Wald number.
 :::
 :::
 
@@ -617,7 +609,7 @@ Motivate the new tool by the limitation, not by novelty. Ask why controls might 
 ## Stage one: keep the *predicted* part
 
 ::: {.push-left}
-Regress the treatment on the instrument — then keep the **predictions**, not the residuals:
+Regress the treatment on the instrument, then keep the **predictions** (not the residuals):
 
 ```{r stage1}
 first_stage <- lm_robust(s ~ qob, data = ak91)
@@ -630,30 +622,44 @@ ak91 %>% select(s, qob, pred_s, e_s) %>% head(4)
 ```
 
 ::: {.content-box-blue}
-**Discuss:** in Lecture 8 we kept the **residuals**. Today we keep the **predictions**. Which of the two is unconfounded here, and why is it the opposite?
+**Discuss:** in Lecture 8 we kept the **residuals**, now the **predictions**. Why? Which of the two is unconfounded here?
 :::
 :::
 
 ::: {.push-right}
-```{r stage1-plot, echo = FALSE, out.width='62%', fig.height = 3.2, fig.width = 6}
-ak91 %>%
+```{r stage1-plot, echo = FALSE, out.width='92%', fig.height = 4, fig.width = 6.4}
+set.seed(10)
+some_men <- ak91 %>%
+  slice_sample(n = 300) %>%
+  mutate(qob_jit = qob + runif(n(), min = -0.3, max = 0.3))
+
+# A few men whose residual we draw explicitly
+shown <- some_men %>%
   group_by(qob) %>%
-  summarise(s = mean(s), pred_s = mean(pred_s)) %>%
-  ggplot(aes(x = qob)) +
-  geom_line(aes(y = pred_s), colour = "#901A1E", linewidth = 1.2) +
-  geom_point(aes(y = pred_s), colour = "#901A1E", size = 5, shape = 18) +
-  geom_point(aes(y = s), colour = "grey45", size = 3) +
-  annotate("text", x = 1.1, y = 12.86, hjust = 0, colour = "#901A1E", size = 5,
-           label = "pred_s: only four values") +
+  slice_head(n = 3) %>%
+  ungroup()
+
+preds <- ak91 %>%
+  group_by(qob) %>%
+  summarise(pred_s = mean(pred_s))
+
+ggplot() +
+  geom_point(data = some_men, aes(x = qob_jit, y = s),
+             colour = "grey60", alpha = 0.4, size = 1.6) +
+  geom_segment(data = shown, aes(x = qob_jit, xend = qob_jit, y = pred_s, yend = s),
+               colour = "grey20", linewidth = 0.6) +
+  geom_point(data = shown, aes(x = qob_jit, y = s), colour = "grey20", size = 2.4) +
+  geom_segment(data = preds, aes(x = qob - 0.3, xend = qob + 0.3, y = pred_s, yend = pred_s),
+               colour = "#901A1E", linewidth = 0.8) +
+  geom_line(data = preds, aes(x = qob, y = pred_s), colour = "#901A1E", linewidth = 1.2) +
+  geom_point(data = preds, aes(x = qob, y = pred_s), colour = "#901A1E", size = 5, shape = 18) +
   labs(x = "Quarter of birth", y = "Years of schooling",
-       caption = "Grey: average schooling per quarter. Red: the first-stage prediction.") +
+       caption = "Grey dots: 300 random men (s). Black lines: some of their residuals (e_s).\nRed: the first-stage prediction (pred_s), only four values.") +
   theme_minimal(base_size = 16)
 ```
 
 ::: {.content-box-red .fragment}
-`pred_s` — the part of schooling **driven by quarter of birth**, and therefore by nothing else. `e_s` is everything else about a person's schooling, ability and family included.
-
-Last week the confounder was the *nuisance*, so we threw its part away. Today the instrument is the *only trustworthy part*, so we throw everything **else** away.
+`pred_s` is the part of schooling driven by quarter of birth. `e_s` is everything else about a person's schooling, ability and family included. Last week the confounder was the *nuisance*, so we threw its part away. Today the instrument is the *only trustworthy part*, so we throw everything **else** away.
 :::
 :::
 
@@ -672,10 +678,6 @@ $$\text{Stage 2:}\quad Y_i = \alpha_2 + \lambda_{\text{2SLS}} \widehat{D}_i + e_
 ```{r stage2, results = 'hide'}
 second_stage <- lm_robust(lnw ~ pred_s, data = ak91)
 ```
-
-::: {.backgrnote}
-**Beware:** never do this by hand in real work — the standard errors from a manual second stage are wrong, because they ignore that $\widehat{D}$ was itself estimated. We do it here only to see the machinery.
-:::
 :::
 
 ::: {.push-right}
@@ -721,15 +723,7 @@ ggplot(q_means, aes(x = pred_s, y = lnw)) +
   theme_minimal(base_size = 15)
 ```
 
-::: {.push-left}
-The second stage only ever sees **four** values of predicted schooling, one per birth quarter. So 2SLS fits a line through the four quarter averages of wages.
-:::
-
-::: {.push-right}
-::: {.content-box-green}
 The slope of the red line is the IV estimate: **`r sprintf("%.4f", s2[2])`**, about `r round(s2[2] * 100)`% per year of school.
-:::
-:::
 
 ::: {.notes}
 A picture of what the second stage does, and a good way to demystify 2SLS. Each dot is one birth quarter: how much schooling the first stage predicts for it, and how much those men actually earn. The red line is the second-stage regression. Its slope is the IV estimate. All the information IV uses is in these four dots, which is also why the estimate is so sensitive to anything else that differs between birth quarters. That thought leads straight into Part 3.
@@ -740,10 +734,6 @@ A picture of what the second stage does, and a good way to demystify 2SLS. Each 
 ::: {.push-left}
 ::: {.lead}
 $$\underbrace{`r sprintf("%.4f", wald)`}_{\text{Wald: } \rho/\phi} \;=\; \underbrace{`r sprintf("%.4f", coef(ivreg::ivreg(lnw ~ s | qob, data = ak91))["s"])`}_{\texttt{ivreg()}}$$
-:::
-
-::: {.content-box-green}
-To four decimal places. **2SLS does not replace the Wald estimator — it contains it**, and generalises it to controls and multiple instruments.
 :::
 :::
 
@@ -763,10 +753,6 @@ To four decimal places. **2SLS does not replace the Wald estimator — it contai
 \draw[->, gray, dashed] (C) -- (Y);
 \end{tikzpicture}
 ```
-
-::: {.backgrnote .center}
-One instrument, no controls $\rightarrow$ the two routes coincide exactly.
-:::
 :::
 
 ::: {.notes}
@@ -777,7 +763,7 @@ Put the two numbers side by side and let the identity land — this is the slide
 
 ::: {.push-left}
 ::: {.content-box-red}
-**A control** $C$ is a *confounder* — contamination.
+**A control** $C$ is a *confounder*.
 
 ```{tikz dag-control, echo = FALSE, out.width='42%'}
 \usetikzlibrary{shapes.geometric, arrows.meta, positioning}
@@ -793,13 +779,13 @@ Put the two numbers side by side and let the identity land — this is the slide
 \end{tikzpicture}
 ```
 
-Controlling keeps the **residuals** of $D$ — the part that does **not** correlate with $C$.
+Controlling keeps the **residuals** of $D$, the part that does **not** correlate with $C$.
 :::
 :::
 
 ::: {.push-right}
 ::: {.content-box-blue}
-**An instrument** $Z$ is a *source of random variation* — the good stuff.
+**An instrument** $Z$ is a *source of random variation* (the good stuff).
 
 ```{tikz dag-instr, echo = FALSE, out.width='52%'}
 \usetikzlibrary{shapes.geometric, arrows.meta, positioning}
@@ -817,7 +803,7 @@ Controlling keeps the **residuals** of $D$ — the part that does **not** correl
 \end{tikzpicture}
 ```
 
-Instrumenting keeps the **predicted values** of $D$ — the part that **does** correlate with $Z$.
+Instrumenting keeps the **predicted values** of $D$, the part that **does** correlate with $Z$.
 :::
 :::
 
@@ -848,19 +834,13 @@ You replicate **Acemoglu & Angrist**: US child-labour laws as an instrument for 
 [Part 3 of 3]{.part-pill}
 
 ::: {.lead}
-The requirement you cannot test — and the one that has been used to demolish this very study.
+The requirement you cannot test, and that has been used to demolish this very study.
 :::
 
 ## Is being born in December really random?
 
 ::: {.push-left}
-The exclusion restriction says quarter of birth may affect earnings **only** through schooling.
-
-`r Citet(myBib, "buckles_season_2013")` checked who actually gives birth when — and found that **season of birth is not random at all**.
-
-::: {.content-box-red}
-**Beware:** mothers giving birth in winter are, on average, **younger, less educated and less likely to be married**. Birth timing is partly a *choice*, and the kind of family that makes it differs.
-:::
+The exclusion restriction says quarter of birth may affect earnings **only** through schooling. `r Citet(myBib, "buckles_season_2013")` checked who actually gives birth when and found that **season of birth is not random at all**.
 :::
 
 ::: {.push-right}
@@ -891,24 +871,12 @@ The best critique in the course, and worth teaching as a model of how scholarshi
 
 ## Who is born in winter?
 
-::: {.push-left}
-```{r, echo = FALSE, out.width='100%'}
+```{r, echo = FALSE, out.width='70%'}
 knitr::include_graphics('img/L10/Buckles1.png')
 ```
 
 ::: {.backgrnote .center}
-All 52 million US births, 1989–2001, month by month. *Source:* `r Citet(myBib, "buckles_season_2013")`
-:::
-:::
-
-::: {.push-right}
-Every **January** (labelled), the share of **teenage** mothers peaks, while the shares who are **married**, **white**, and have a **high-school diploma** dip.
-
-The pattern repeats every single year: it is not noise.
-
-::: {.content-box-red}
-So quarter of birth is correlated with **family background** — and family background shapes earnings **directly**, not only through schooling.
-:::
+All 52 million US births, 1989–2001, month by month.<br> *Source:* `r Citet(myBib, "buckles_season_2013")`
 :::
 
 ::: {.notes}
@@ -922,24 +890,20 @@ amp <- 1 / phi
 ```
 
 ::: {.push-left}
-An instrument that violates the exclusion restriction is **not a weak instrument — it is a confounder**.
-
-And IV makes it **worse**, because the Wald ratio divides by $\phi$:
+An instrument that violates the exclusion restriction is not only a weak instrument, **it is a confounder**. And IV makes it worse, as you understand thanks to knowing Wald:
 
 $$\text{bias} \;\propto\; \frac{1}{\phi}$$
 
 ::: {.content-box-red}
-Here $\phi = `r sprintf("%.4f", phi)`$ — quarter of birth shifts schooling by about **`r round(phi * 365)` days**. So $1/\phi \approx `r round(amp)`$: **any** direct effect of birth timing on earnings is magnified roughly **`r round(amp)`-fold** in the IV estimate.
+Here $\phi = `r sprintf("%.4f", phi)`$ quarter of birth shifts schooling by about **`r round(phi * 365)` days**. So $1/\phi \approx `r round(amp)`$: **any** path of birth timing on earnings is magnified roughly **`r round(amp)`-fold** in the IV estimate.
 :::
 :::
 
 ::: {.push-right}
-::: {.content-box-blue}
-**Discuss:** with such a tiny first stage, would you rather have this instrument — or no instrument at all?
-:::
+This is the **weak instrument** problem. A small $\phi$ means a large $1/\phi$, and a large $1/\phi$ means even a trivial violation of the exclusion restriction can swamp your estimate. Weak instruments are not merely imprecise, they are *fragile*.
 
-::: {.backgrnote}
-This is the **weak instrument** problem. A small $\phi$ means a large $1/\phi$, and a large $1/\phi$ means even a trivial violation of the exclusion restriction can swamp your estimate. Weak instruments are not merely imprecise — they are *fragile*.
+::: {.content-box-blue}
+**Discuss:** with such a tiny first stage, would you rather have this instrument, or no instrument at all?
 :::
 :::
 
@@ -965,7 +929,7 @@ You put a number on the fragility: measure the first stage, compute the amplific
 
 1. **2SLS** runs IV in two steps: regress the treatment on the instrument, keep the **predicted values**, then use those to predict the outcome. `ivreg(y ~ d | z)` does both properly.
 
-2. With **one instrument and no controls, 2SLS equals the Wald ratio exactly**. 2SLS earns its place by handling **controls** and **several instruments**.
+2. With **one instrument and no controls, 2SLS equals the Wald ratio**. But 2SLS can handle **controls** and **several instruments**.
 
 3. **Instrument vs. control** — the mirror image: a control is contamination, so you keep the **residuals**; an instrument is the trustworthy variation, so you keep the **predictions**.
 
